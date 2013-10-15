@@ -1,0 +1,105 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model StackExchange.Opserver.Views.SQL.DashboardModel
+@{
+    Layout = null;
+}
+<div class="summary-dashboard">
+<table class="node-dashboard sub-dashboard no-update">
+@foreach (var ag in Model.AvailabilityGroups.OrderBy(p => p.MonitorStatus == MonitorStatus.Good))
+{
+    if (Model.AvailabilityGroups != null && !Model.AvailabilityGroups.Contains(ag)) { continue; }
+    var props = ag.Node.ServerProperties.SafeData();
+    foreach (var agr in ag.Replicas.Where(r => r.IsLocal.GetValueOrDefault()))
+    {
+        var dbs = agr.Databases.OrderBy(p => p.MonitorStatus == MonitorStatus.Good).ThenBy(ldb => ldb.DatabaseName).ToList();
+        <tbody class="node-header" data-name="header-@Model.CurrentCluster.Name-@ag.Node.Name-@ag.Name">        
+        <tr class="category-row sub-category-row">
+            <th colspan="9">
+                <h3 class="header">@agr.IconSpan() @ag.Node.Name: @ag.Name <span class="add-info">(@agr.Role.ToSpan()) @props.Version (@props.MajorVersion @props.Level) <span class="note">(@dbs.Count.Pluralize("database"))</span></span></h3>
+            </th>
+        </tr>
+        <tr>
+            <th></th>
+            <th>Database</th>
+            <th>State</th>
+            <th>Sync State</th>
+            <th>Last Sent</th>
+            <th>Last Commit</th>
+            <th>Log Size</th>
+            <th>Send Rate</th>
+            <th>ETA</th>
+        </tr>
+    </tbody>
+    <tbody class="node-group" data-name="@Model.CurrentCluster.Name-@ag.Node.Name-@ag.Name">
+    @foreach (var db in dbs)
+    {
+        <tr class="@db.RowClass()">
+            <td>@db.IconSpan()</td>
+            <td>@db.DatabaseName</td>
+            <td>@db.DatabaseStateDescription</td>
+            <td>@db.SynchronizationState.ToSpan(@db.SuspendReasonDescription)</td>
+            <td>@if (agr.Role == ReplicaRoles.Primary)
+                {
+                    <span class="note">n/a</span>
+                }
+                else
+                {
+                    @db.LastSentTime.ToRelativeTimeSpan()
+                }</td>
+            <td>@db.LastCommitTime.ToRelativeTimeSpan()</td>
+            <td>@if (db.LogSendQueueSize.HasValue)
+                {
+                    @db.LogSendQueueSize.ToComma() <span class="note">kB</span>
+                } else if (db.LogKBytesUsed.HasValue)
+                {
+                    @db.LogKBytesUsed.ToComma() <span class="note">kB</span>
+                }
+                else
+                {
+                    <span class="note">n/a</span>
+                }</td>
+            <td>@(db.LogSendRateReal.ToComma()) @if (db.LogSendRateReal.HasValue){<span class="note">kB/s</span>}else if(db.LogSendQueueSize.HasValue){<span class="note">idle</span>}else{<span class="note">n/a</span>}</td>
+            <td>@db.LogSendETA.ToRelativeTimeSpan()</td>
+        </tr>
+        if(db.MonitorStatus != MonitorStatus.Good)
+        {
+            <tr class="reason-row">
+                <td colspan="9" style="text-align: center; font-size: 12px; padding: 4px 0;">
+                    @if(db.IsSuspended.GetValueOrDefault())
+                    {
+                        @:Database @db.DatabaseName is @db.SynchronizationState.ToSpan(), was suspended by <b>@db.SuspendReason.GetDescription()</b>
+                    }
+                </td>
+            </tr>
+        }
+    }
+    @{
+        var logLocalTotal = dbs.Sum(db => db.LogKBytesUsed);
+    }
+        <tr class="total-row">
+            <td></td>
+            <td><b>Total</b></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td>@if (dbs.Any(db => db.LogSendQueueSize.HasValue))
+                {
+                    @dbs.Sum(db => db.LogSendQueueSize).ToComma() <span class="note">kB</span>
+                }
+                else if (logLocalTotal > 0)
+                {
+                    @logLocalTotal.ToComma() <span class="note">kB</span>
+                }
+                else
+                {
+                    <span class="note">n/a</span>
+                }</td>
+            <td>@(dbs.Sum(db => db.LogSendRateReal).GetValueOrDefault().ToComma()) <span class="note">kB/s</span></td>
+            <td>@dbs.Max(db => db.LogSendETA).ToRelativeTimeSpan()</td>
+        </tr>
+    </tbody>
+    }
+}
+</table>
+</div>

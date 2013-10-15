@@ -1,0 +1,70 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = @"~/Views/SQL/Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var tables = s.GetTableInfo(Model.Database);
+}
+<div class="sql-tables">
+    @if (tables.LastPollStatus == FetchStatus.Fail || tables.Data == null)
+    {
+        <div class="sql-server sql-error">
+            <span class="error-label">There was an error fetching table info from status from @s.Name for @Model.Database</span>
+            @tables.ErrorMessage
+        </div>
+    } else {
+        <div>
+            <table class="node-dashboard cluster-dashboard">
+                <thead>
+                    <tr>
+                        <th>Table</th>
+                        <th>Rows</th>
+                        <th>Indexes</th>
+                        <th>Data Size</th>
+                        <th>Index Size</th>
+                        <th>Total Size</th>
+                    </tr>
+                </thead>
+                <tbody class="node-group">
+                    @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
+                    {
+                        <tr data-id="@t.Id" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
+                            <td>
+                                <span class="note">@(t.SchemaName).</span><span>@t.TableName</span>
+                                @if (t.TableType == TableTypes.Heap)
+                                {
+                                    <span class="note"> (Heap)</span>
+                                }
+                            </td>
+                            <td>@t.RowCount.ToComma()</td>
+                            <td>@t.IndexCount.ToComma()</td>
+                            <td>@((t.DataTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((t.IndexTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((t.TotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                        </tr>
+                    }
+                </tbody>
+                <tfoot>
+                    @if (tables.Data.Any())
+                    {
+                        <tr class="total-row">
+                            <td><b>Total</b> <span class="note">(@tables.Data.Count().Pluralize("table"))</span></td>
+                            <td>@(tables.Data.Sum(t => t.RowCount).ToComma())</td>
+                            <td>@(tables.Data.Sum(t => t.IndexCount).ToComma())</td>
+                            <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((tables.Data.Sum(t => t.IndexTotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((tables.Data.Sum(t => t.TotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6"><div class="none-active">There aren't any tables in this database.</div></td>
+                        </tr>
+                    }
+                </tfoot>
+            </table>
+        </div>
+    }
+</div>

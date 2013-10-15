@@ -1,0 +1,176 @@
+﻿@using StackExchange.Profiling
+@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DashboardModel
+@{
+    var s = Model.CurrentInstance;
+}
+@helper SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label) {
+    var val = (int) option;
+    <label><input type="radio" name="sleeping" value="@val" @(option ==  Model.ActiveSearchOptions.IncludeSleepingSessions ? "checked " : "")/> @label</label>
+}
+<div class="bottom-sub-section">
+    @if (!s.ServerFeatures.SafeData(true).HasSPWhoIsActive)
+    {
+        <div class="no-content">Uh oh! <code>sp_WhoIsActive</code> was not found or was not accessible on this SQL instance.<br/>
+            <a href="http://sqlblog.com/blogs/adam_machanic/archive/tags/sp_5F00_whoisactive/default.aspx">Please visit the Adam Machanic's site to grab the latest copy.</a></div>
+    }
+    else
+    {
+        Cache<List<SQLInstance.ActiveOperation>> activeOps;
+        using (MiniProfiler.Current.Step("GetActiveOperations"))
+        {
+            activeOps = s.GetActiveOperations(Model.ActiveSearchOptions);
+        }
+        var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
+        <div class="node-summary redis-summary">
+        @if (activeOps.LastPollStatus == FetchStatus.Fail)
+        {
+            <div class="sql-server sql-error">
+                <span class="error-label">There was an error fetching server status from @s.Name:</span>
+                @activeOps.ErrorMessage
+            </div>
+        } else
+        {
+            var data = activeOps.SafeData(true);
+            <div class="sql-server">
+                <h3 class="page-header">Current active queries on @s.Name:
+                    <div class="filters-wrap">
+                        <div class="filters-current">
+                            <span class="filter-label">Sleeping: </span><span class="filter-value">@Model.ActiveSearchOptions.IncludeSleepingSessions.GetDescription()</span>
+                        @if (Model.ActiveSearchOptions.GetAdditionalInfo)
+                        {
+                            <span class="filter-label">Details: </span><span class="filter-value">Yes</span>
+                        }
+                        @if (Model.ActiveSearchOptions.IncludeSystemSessions)
+                        {
+                            <span class="filter-label">System: </span><span class="filter-value">Yes</span>
+                        }
+                        @if (Model.ActiveSearchOptions.FilterValue.HasValue())
+                        {
+                            <span class="filter-label">@Model.ActiveSearchOptions.FilterField.GetDescription(): </span><span class="filter-value">@Model.ActiveSearchOptions.FilterValue</span>
+                        }
+                        </div>
+                        <div class="filters">
+                            <form class="filter-form" action="" method="GET">
+                                <input type="hidden" name="node" value="@Model.CurrentInstance.Name" />
+                                <div class="filters-header">Filters</div>
+                                <div class="filter">
+                                    <label>Include Details: <input type="checkbox" @(Model.ActiveSearchOptions.GetAdditionalInfo ? "checked " : "") name="details" value="true" /></label>
+                                </div>
+                                <div class="filter">
+                                    <label>Include System Sessions: <input type="checkbox" @(Model.ActiveSearchOptions.IncludeSystemSessions ? "checked " : "") name="system" value="true" /></label>
+                                </div>
+                                <div class="filter">
+                                    Include Sleeping:
+                                    @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.None, "No")
+                                    @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.OpenTransaction, "Only Open Transctions")
+                                    @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.All, "Yes")
+                                </div>
+                                <div class="filter">
+                                    Search: 
+                                    <select name="filterField">
+                                    @foreach (SQLInstance.ActiveSearchOptions.FilterFields e in Enum.GetValues(typeof(SQLInstance.ActiveSearchOptions.FilterFields)))
+                                    {
+                                        <option value="@e.ToString()" @(e == Model.ActiveSearchOptions.FilterField ? "selected " : "")>@e.GetDescription()</option>
+                                    }
+                                    </select>
+                                    <input style="width: 240px;" type="text" value="@Model.ActiveSearchOptions.FilterValue" name="filterValue" placeholder="Search Text" />
+                                </div>
+                                <button class="submit-button" type="submit">Apply</button>
+                            </form>
+                        </div>
+                    </div>
+                    @*<a href="#" class="reload-link">Refresh</a>*@
+                </h3>
+                <table class="node-dashboard table-active-operations" style="table-layout: fixed;">
+                    <thead>
+                        <tr>
+                            <th style="width: 75px;">Session</th>
+                            <th style="width: 100px;" title="Operation Duration">Time</th>
+                            <th style="width: 150px;">Stats</th>
+                            <th style="width: 150px;"></th>
+                            <th style="width: 150px;"></th>
+                            <th style="width: 75px;">Status</th>
+                            <th style="width: 150px;">Details</th>
+                            <th>SQL Text</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var w in data)
+                        {
+                            <tr>
+                                <td>@w.SessionId
+                                </td>
+                                <td title="@w.Duration.ToReadableString()">@w.Duration.ToTimeStringMini()</td>
+                                <td>
+                                    <div><span class="note">CPU:</span> @w.CPU.ToComma()</div>
+                                    <div><span class="note">Reads:</span> @w.Reads.ToComma()</div>
+                                    @if (w.PhysicalReads > 0)
+                                    {
+                                        <div><span class="note">PhysReads:</span> @w.PhysicalReads.ToComma()</div>
+                                    }
+                                    <div><span class="note">Writes:</span> @w.Writes.ToComma()</div>
+                                </td>
+                                <td colspan="2">
+                                    @if (w.TempDBCurrent > 0)
+                                    {
+                                        <div><span class="note">Temp (Pages):</span> @w.TempDBCurrent.ToComma()</div>
+                                    }
+                                    @if (w.TempDBAllocations > 0)
+                                    {
+                                        <div><span class="note">Temp (Writes):</span> @w.TempDBAllocations.ToComma()</div>
+                                    }
+                                    @if (w.WaitInfo.HasValue())
+                                    {
+                                        <div>
+                                            <span class="note">Waits:</span><br/> @w.WaitInfo
+                                        </div>
+                                    }
+                                    @if (w.BlockingSessionId.HasValue)
+                                    {
+                                        <div><span class="note">Blcoked By:</span> @w.BlockingSessionId</div>
+                                    }
+                                </td>
+                                <td title="@w.WaitInfo
+% Complete: @(w.PercentComplete.HasValue ? w.PercentComplete.ToString() : "Unknown")">@w.Status
+                                    @if (w.PercentComplete.HasValue)
+                                    {
+                                        <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="note">% done</span></div>
+                                    }
+                                </td>
+                                <td title="Program: @w.ProgramName">
+                                    <div><span class="note">Host:</span> 
+                                        @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
+                                        {
+                                            <a href="/dashboard/node?node=@w.HostName.UrlEncode()" class="node-name-link">@w.HostName</a>
+                                        }
+                                        else
+                                        {
+                                            @w.HostName
+                                        }</div>
+                                    <div><span class="note">DB:</span> @w.DatabaseName</div>
+                                    <div><span class="note">Login:</span> @w.LoginName</div>
+                                </td>
+                                <td><div class="sql-block-wrap"><pre class="sql-block prettyprint lang-sql">@w.SqlText</pre></div></td>
+                            </tr>
+                        }
+                        @if (!data.Any())
+                        {
+                            <tr>
+                                <td colspan="11"><div class="none-active">There are no active operations at the moment.</div></td>
+                            </tr>
+                        }    
+                    </tbody>
+                </table>
+            </div>
+            if (data.Count < 25)
+            {
+            <script>prettyPrint();</script>
+            }
+        }
+    </div>
+    }
+</div>

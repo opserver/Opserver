@@ -1,0 +1,157 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DashboardModel
+@{
+    var s = Model.CurrentInstance;
+    var dbCache = s.Databases;
+    var dbs = s.Databases.SafeData();
+    var backupInfo = s.DatabaseBackups
+                      .SafeData(true)
+                      .ToDictionary(b => b.Id);
+    var n = s as SQLNode;
+    var replicationInfo = n != null ? n.AvailabilityGroups
+                                       .SafeData(true)
+                                       .Select(ag => ag.LocalReplica)
+                                       .Where(r => r != null)
+                                       .SelectMany(ag => ag.Databases)
+                                       .ToDictionary(db => db.DatabaseName)
+                              : new Dictionary<string, SQLNode.DatabaseReplicaState>();
+    var vlfInfo = s.DatabaseVLFs
+                   .SafeData(true)
+                   .ToDictionary(db => db.DatabaseId);
+}
+<script>
+    $(function() {
+        $('#content').on('click', '.database-row', function () {
+            var dbName = $(this).data('dbname');
+            if (dbName) {
+                window.location.hash = '#/db/' + dbName + '/tables';
+            }
+        });
+    })
+</script>
+<div class="bottom-sub-section">
+    @if (s.DatabaseBackups.ErrorMessage.HasValue())
+    {
+        <div class="critical">Error fetching backup Info: @s.DatabaseBackups.ErrorMessage</div>
+    }
+    @if (s.DatabaseVLFs.ErrorMessage.HasValue())
+    {
+        <div class="critical">Error fetching VLF Info: @s.DatabaseVLFs.ErrorMessage</div>
+    }
+    <div class="node-summary redis-summary">
+        @if (dbCache.LastPollStatus == FetchStatus.Fail)
+        {
+            <div class="sql-server sql-error">
+                <span class="error-label">There was an error fetching server status from @s.Name:</span>
+                @dbCache.ErrorMessage
+            </div>
+        } else {
+            <div>
+                <table class="node-dashboard cluster-dashboard" id="databases-table">
+                    <thead>
+                        <tr class="category-row">
+                            <th colspan="7">
+                                <h3>@dbs.GetWorstStatus().IconSpan() @dbs.Count().Pluralize("Database") on @s.Name:</h3>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>Name</th>
+                            <th>State</th>
+                            <th>Recovery</th>
+                            <th>Log Wait</th>
+                            <th>Size <span class="note">/ Log</span></th>
+                            <th>Last Backup</th>
+                            <th>Last Full</th>
+                        </tr>
+                    </thead>
+                    <tbody class="node-group">
+                        @foreach (var db in dbs.OrderBy(b => b.IsSystemDatabase).ThenBy(b => b.Name))
+                        {
+                            SQLInstance.SQLDatabaseBackupInfo bkup;
+                            SQLNode.DatabaseReplicaState replicaState;
+                            SQLInstance.SQLDatabaseVLFInfo vlf;
+                            var hasReplica = replicationInfo.TryGetValue(db.Name, out replicaState);
+                            var hasVLFs = vlfInfo.TryGetValue(db.Id, out vlf);
+                            <tr class="database-row" data-dbname="@db.Name" title="
+Name: @db.Name
+VLF Count: @(hasVLFs ? vlf.VLFCount.ToComma() : "unknown")">
+                                <td>
+                                    <span class="icon database @DatabasesModel.GetDatabaseClass(db)"></span>  <span class="@(db.IsSystemDatabase ? "system-database" : "")">@db.Name</span>
+                                    @if(db.IsReadOnly) {<text><span class="warning">(read-only)</span></text>}
+                                </td>
+                                <td class="@db.MonitorStatus.Class()">@db.State.GetDescription()
+                                    @if (hasReplica)
+                                    {<text> <span class="@(replicaState.SynchronizationState == SynchronizationStates.Synchronizing || replicaState.SynchronizationState == SynchronizationStates.Synchronized ? "good" : "critical")">(@replicaState.SynchronizationState.GetDescription())</span></text>}                                                                                                                                                                                                                                                                                                     
+                                </td>
+                                <td>@db.RecoveryModel.GetDescription()</td>
+                                <td>@if (db.LogReuseWait == LogReuseWaits.Nothing)
+                                    {<span class="note">None</span>}
+                                    else
+                                    {@db.LogReuseWait.GetDescription()}</td>
+                                @if (db.LogSizeMB.HasValue && db.LogSizeUsedMB.HasValue)
+                                {
+                                    <td data-val="@(db.TotalSizeMB*1024*1024)" title="Log Size: @((db.LogSizeMB.Value * 1024 * 1024).ToSize())
+Used: @((db.LogSizeUsedMB.Value * 1024 * 1024).ToSize())
+(@db.LogPercentUsed.GetValueOrDefault(0).ToString("#,##0.###")% full)">@((db.TotalSizeMB * 1024 * 1024).ToSize()) <span class="note">/ @((db.LogSizeMB.Value * 1024 * 1024).ToSize())</span></td>
+                                }
+                                else
+                                {
+                                    <td data-val="@(db.TotalSizeMB*1024*1024)">@((db.TotalSizeMB * 1024 * 1024).ToSize())</td>
+                                }
+                                @if (backupInfo.TryGetValue(db.Id, out bkup) && bkup.LastBackupSizeBytes.HasValue)
+                                {
+                                    <td data-val="@bkup.LastBackupStartDate.ToEpochTime()">@bkup.LastBackupStartDate.ToRelativeTimeSpan()</td>
+                                    <td data-val="@bkup.LastFullBackupStartDate.ToEpochTime()" title="Backed up to: @bkup.LastFullBackupPhysicalDeviceName">
+                                        @if (bkup.LastFullBackupCompressedSizeBytes.HasValue)
+                                        {
+                                            @bkup.LastFullBackupStartDate.ToRelativeTimeSpan()
+                                            <span class="note">(@(((double)bkup.LastFullBackupCompressedSizeBytes.Value).ToSize()))</span>
+                                        }
+                                    </td>
+                                }
+                                else
+                                {
+                                    <td colspan="2" class="spark-no-data">No backup info found</td>
+                                }
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        @if (dbs.Any())
+                        {
+                            <tr class="total-row">
+                                <td><b>Total</b> <span class="note">(@dbs.Count().Pluralize("database"))</span></td>
+                                <td></td>
+                                <td></td>
+                                <td></td>
+                                <td>@((dbs.Sum(db => db.TotalSizeMB) * 1024 * 1024).ToSize())</td>
+                                <td></td>
+                                <td></td>
+                            </tr>
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7"><div class="none-active">There seem to be no databases, even master, this doesn't seem right.</div></td>
+                            </tr>
+                        }
+                    </tfoot>
+                </table>
+            </div>
+            <script>
+                $(function() {
+                    $('#databases-table').tablesorter({
+                        headers: {
+                            1: { sorter: 'cellText' },
+                            3: { sorter: 'cellText' },
+                            4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            6: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                        }
+                    });
+                });
+            </script>
+        }
+    </div>
+</div>

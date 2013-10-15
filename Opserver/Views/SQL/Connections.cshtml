@@ -1,0 +1,85 @@
+﻿@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Views.SQL
+@using ServerInfo = StackExchange.Opserver.Data.Dashboard.Node
+@model DashboardModel
+@{
+    var s = Model.CurrentInstance;
+    var connections = s.Connections;
+    var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
+    var monitoredList = enableDashboardLinks ? DashboardData.AllNodes.ToDictionary(si => si.Name.ToLower()) : new Dictionary<string, ServerInfo>();
+}
+<div class="bottom-sub-section">
+    <div class="node-summary redis-summary">
+        @if (connections.LastPollStatus == FetchStatus.Fail)
+        {
+            <div class="sql-server sql-error">
+                <span class="error-label">There was an error fetching server status from @s.Name:</span>
+                @connections.ErrorMessage
+            </div>
+        } else {
+            <div class="sql-server">
+                <h3 class="page-header">@connections.Data.Count.Pluralize("Current active connection") on @s.Name:
+                    
+                    <a href="?node=@s.Name.UrlEncode()&refresh=true" class="reload-link">Refresh</a>
+                </h3>
+                <table class="node-dashboard" id="connections-table">
+                    <thead>
+                        <tr>
+                            <th>Login</th>
+                            <th>Host</th>
+                            <th>Connected</th>
+                            <th>Login</th>
+                            <th>Reads</th>
+                            <th>Writes</th>
+                            <th>Status</th>
+                            <th>Query</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var c in connections.Data)
+                        {
+                            <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(c.PlanHandle)">
+                                <td>@c.LoginName</td>
+                                <td title="Program: @c.ProgramName (@c.HostProcessId)">
+                                    @if (enableDashboardLinks && monitoredList.ContainsKey(c.HostName.IsNullOrEmptyReturn("").ToLower()))
+                                    {
+                                        <a href="/dashboard/node?node=@c.HostName.UrlEncode()">@c.HostName</a>
+                                    }
+                                    else
+                                    {
+                                        @c.HostName
+                                    }
+                                </td>
+                                <td data-val="@c.ConnectTime.ToEpochTime()">@c.ConnectTime.ToRelativeTimeSpan()</td>
+                                <td data-val="@c.LoginTime.ToEpochTime()">@c.LoginTime.ToRelativeTimeSpan()</td>
+                                <td>@c.NumReads.ToComma()</td>
+                                <td>@c.NumWrites.ToComma()</td>
+                                <td>@c.SessionStatus</td>
+                                <td class="query-col">@c.QueryText.TruncateWithEllipsis(80)</td>
+                            </tr>
+                        }
+                        @if (!connections.Data.Any())
+                        {
+                            <tr>
+                                <td colspan="11"><div class="none-active">There are no active operations at the moment.</div></td>
+                            </tr>
+                        }    
+                    </tbody>
+                </table>
+            </div>
+            <script>
+                $(function() {
+                    $('#connections-table').tablesorter({
+                        headers: {
+                            1: { sorter: 'cellText' },
+                            2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            4: { sorter: 'commas', sortInitialOrder: 'desc' },
+                            5: { sorter: 'commas', sortInitialOrder: 'desc' },
+                        }
+                    });
+                });
+            </script>
+        }
+    </div>
+</div>

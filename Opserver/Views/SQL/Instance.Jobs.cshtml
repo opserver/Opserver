@@ -1,0 +1,85 @@
+﻿@using Roles = StackExchange.Opserver.Models.Roles
+@model StackExchange.Opserver.Data.SQL.SQLInstance
+@{
+    Layout = null;
+    var jobs = Model.JobSummary;
+    var data = jobs.SafeData(true);
+}
+    <div class="summary-dashboard">
+        <h3><a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Agent Jobs
+            <span class="top-right-info">Updated @jobs.ToPollSpan()</span>
+        </h3>
+        @if (data.Any())
+        {
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Name</th>
+                        <th>Last Run</th>
+                        <th>Start</th>
+                        <th>End</th>
+                        <th>Duration</th>
+                        <th>Enabled</th>
+                        @if (Current.User.IsInRole(Roles.SQLAdmin))
+                        {
+                            <th>Actions</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var j in data.OrderByDescending(j => j.LastRunRequestedDate))
+                    {
+                        <tr class="@j.RowClass()@(j.IsRunning ? " active-row" : "")" title="@if(!j.IsEnabled){<text>(DISABLED) 
+</text>}Job: @j.Name
+@j.Description
+@if(j.IsRunning) {<text>Currently Running
+</text>}
+
+Category: @j.Category
+Created: @j.DateCreated (@j.DateCreated.ToRelativeTime())
+                            
+Last Run Initiated by: @j.LastRunRequestedSource.GetDescription()
+Last Run Message: @j.LastRunMessage">
+                            <td>@j.IconSpan()</td>
+                            <td>@j.Name
+                                @if (j.IsRunning)
+                                {
+                                    <span class="good">(Running)</span>
+                                }
+                            </td>
+                            @if (j.IsRunning)
+                            {
+                                <td>Running (@j.LastRunRequestedSource.GetDescription())</td>
+                                <td>@j.LastStartDate.ToRelativeTimeSpan()</td>
+                                <td></td>
+                                <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
+                            }
+                            else if (j.LastRunStatus.HasValue)
+                            {
+                                <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.GetDescription().IsNullOrEmptyReturn("Unknown")) (@j.LastRunRequestedSource.GetDescription())</td>
+                                <td>@j.LastStartDate.ToRelativeTimeSpan()</td>
+                                <td>@j.LastStopDate.ToRelativeTimeSpan()</td>
+                                <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
+                            }
+                            else
+                            {
+                                <td colspan="4" class="spark-no-data">no run history found</td>   
+                            }
+                            <td class="@(j.IsEnabled ? "good" : "note")">@(j.IsEnabled ? "Yes" : "No")</td>
+                            @if (Current.User.IsInRole(Roles.SQLAdmin))
+                            {
+                                <td><a href="#" class="sql-toggle-agent-job" data-guid="@j.JobId" data-enable="@(j.IsEnabled ? "false" : "true")">@(j.IsEnabled ? "disable" : "enable")</a></td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        }
+        else
+        {
+            <div class="no-content">No memory clerk information available</div>
+        }
+    </div>

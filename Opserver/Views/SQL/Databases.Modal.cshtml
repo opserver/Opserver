@@ -1,0 +1,85 @@
+﻿@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    var db = Model.Database;
+}
+<style>
+    .with-left-toolbar {
+        overflow: auto;
+    }
+    .left-side-bar {
+        width: 250px;
+        float: left;
+        height: 100%;
+        position: fixed;
+    }
+    .right-side {
+        width: 1050px;
+        float: right;
+        overflow: auto;
+    }
+    .db-name {
+        text-align: center;
+        color: #444;
+        font-weight: bold;
+        margin-top: 40px;
+        line-height: 24px;
+        font-size: 14px;
+        border-bottom: solid 1px #f4f4f4;
+        margin-bottom: 10px;
+    }
+    .left-links > a {
+        display: block;
+        line-height: 32px;
+        border-bottom: solid 1px #eee;
+        text-align: center;
+        font-size: 14px;
+    }
+    .left-links > a:hover {
+        background-color: #3d85b0;
+        color: #fff;
+        text-decoration: none;
+    }
+    .left-links > a.disabled:hover
+    {
+        background-color: #CCC;
+    }
+    .left-links > a:first-child {
+        border-top: solid 1px #eee;
+    }
+    .left-links > a.current {
+        background-color: #3d85b0;
+        color: #fff;
+    }
+    .left-links > a.current:hover {
+        text-decoration: none;
+    }
+</style>
+@helper RenderLink(DatabasesModel.Views view, string text, bool disabled = false) {
+    if (disabled)
+    {
+    <a href="javascript:void()" class="disabled">@text</a>
+    }
+    else
+    {
+    <a href="#/db/@Model.Database/@view.ToString().ToLower()" class="@(view == Model.View ? "current" : "")">@text</a>   
+    }
+}
+<div class="summary-dashboard with-left-toolbar">
+    <div class="left-side-bar">
+        <div class="db-name"><span class="icon database status-up"></span>
+            @db
+        </div>
+        <div class="left-links">
+            @RenderLink(DatabasesModel.Views.Tables, "Tables")
+            @RenderLink(DatabasesModel.Views.Views, "Views", true)
+            @RenderLink(DatabasesModel.Views.Storage, "Storage", true)
+            @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", true)
+            @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", true)
+            @RenderLink(DatabasesModel.Views.BlitzIndex, "Blitz Index", true)
+        </div>
+    </div>
+    <div class="right-side">
+        @RenderBody()
+    </div>
+</div>

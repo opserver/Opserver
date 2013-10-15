@@ -1,0 +1,60 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DashboardModel
+@{
+    this.SetMainTab(MainTab.SQL);
+    this.SetPageTitle("SQL Dashboard");
+    this.SetTopNodes(SQLInstance.AllInstances, "SQL", Model.CurrentInstance, Model.View == DashboardModel.Views.Servers ? "/sql/instance" : null);
+}
+@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+{
+    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? "?node=" + Model.CurrentInstance.Name : "")">@name</a>
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh) });
+            Status.SQL.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Name : "")' });
+        });
+    </script>
+}
+    <div class="tabs sub-tabs">
+        <div class="tabs-links">
+            @TabLink(DashboardModel.Views.Servers, "/sql/servers", "all servers", false)
+            @TabLink(DashboardModel.Views.Instance, "/sql/instance", "instance")
+            @TabLink(DashboardModel.Views.Top, "/sql/top", "top")
+            @TabLink(DashboardModel.Views.Active, "/sql/active", "active")
+            @TabLink(DashboardModel.Views.Connections, "/sql/connections", "connections")
+            @TabLink(DashboardModel.Views.Databases, "/sql/databases", "databases")
+        </div>
+    </div>
+<div class="dashboard-list">
+    @if (Model.IsInstanceFilterable && Model.CurrentInstance == null)
+    {
+        @Html.Partial("Instance.Selector")
+    }
+    else
+    {
+        switch (Model.View)
+        {
+            case DashboardModel.Views.Servers:
+                @Html.Partial("Servers", Model)
+                break;
+            case DashboardModel.Views.Instance:
+                @Html.Partial("Instance", Model)
+                break;
+            case DashboardModel.Views.Active:
+                @Html.Partial("Operations.Active", Model)
+                break;
+            case DashboardModel.Views.Top:
+                @Html.Partial("Operations.Top", Model)
+                break;
+            case DashboardModel.Views.Connections:
+                @Html.Partial("Connections", Model)
+                break;
+            case DashboardModel.Views.Databases:
+                @Html.Partial("Databases", Model)
+                break;
+        }
+    }
+</div>

@@ -1,0 +1,444 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model StackExchange.Opserver.Views.SQL.DashboardModel
+@{ 
+    Layout = null;
+    var i = Model.CurrentInstance;
+    var ci = i as SQLNode;
+    var props = i.ServerProperties;
+    var services = i.Services.SafeData(true);
+    var dbs = i.Databases.SafeData(true);
+    var volumes = i.Volumes.SafeData(true);
+    var enabledTraceFlags = i.TraceFlags.SafeData(true).Where(tf => tf.Enabled);
+    var counters = Model.PerfCounters = i.PerfCounters.SafeData(true);
+    var jobs = i.JobSummary.SafeData(true);
+    Func<decimal, string> kbToSize = d => "(" + ((long)d * 1024).ToSize() + ")";
+}
+<script>
+    $(function() {
+        $('.availability-group').on('click', function () {
+            $(this).toggleClass('collapsed');
+        });
+    });
+</script>
+<div class="bottom-sub-section">
+<div class="summary-dashboard">
+    <h3 class="header"><a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.Name</h3>
+@if (i.LastFetch == null)
+{
+    <div class="no-content">No data fetched for @i.Name</div>
+}
+else if (i.LastFetch.LastSuccess == null)
+{
+    <div class="no-content">No data successfully fetched for @i.Name</div>
+    if (i.LastFetch.ErrorMessage.HasValue())
+    {
+        <div class="no-content critical" style="white-space:pre;">@i.LastFetch.ErrorMessage</div>
+    }
+}
+    <div class="left-col">
+        @if (props.HasData())
+        {
+            var pd = props.Data;
+        <div class="section-wrap refresh-group" data-name="instance-summary">
+            <table>
+                @Helpers.SectionHeader("Summary")
+                <tbody>
+                    <tr>
+                        <td>Machine / Server Name</td>
+                        <td>@pd.MachineName@if (pd.ServerName != pd.MachineName)
+                                           {<text> / @pd.ServerName</text>}</td>
+                    </tr>
+                    <tr>
+                        <td title="@pd.FullVersion">Version</td>
+                        <td>SQL @pd.MajorVersion @pd.Level (<a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>)</td>
+                    </tr>
+                    <tr>
+                        <td>Edition</td>
+                        <td>@pd.Edition</td>
+                    </tr>
+                    <tr title="Started on @pd.SQLServerStartTime.ToRelativeTime() (@pd.SQLServerStartTime)">
+                        <td>Running since</td>
+                        <td>@pd.SQLServerStartTime.ToRelativeTimeSpan() <span class="note">(@((DateTime.UtcNow - pd.SQLServerStartTime).ToTimeStringMini()))</span></td>
+                    </tr>
+                    <tr>
+                        <td>Databases</td>
+                        <td>@SQLHelpers.HealthDescription(i, dbs)</td>
+                    </tr>
+                    @if (jobs.Any())
+                    {
+                        <tr>
+                            <td>Jobs</td>
+                            <td><a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a></td>
+                        </tr>
+                    }
+                    @if (enabledTraceFlags.Any())
+                    {
+                        <tr>
+                            <td><a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">Trace Flags</a></td>
+                            <td>@string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table> 
+        </div>
+        <div class="section-wrap refresh-group" data-name="instance-stats">
+            <table>
+                @Helpers.SectionHeader("Stats")
+                <tbody>
+                    <tr title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
+                        <td>CPU</td>
+                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
+                    </tr>
+                    @if (pd.VirtualMachineType != VirtualMachineTypes.None)
+                    {
+                        <tr>
+                            <td>Machine Type</td>
+                            <td>@pd.VirtualMachineType.GetDescription()</td>
+                        </tr>
+                    }
+                    @if (pd.PhysicalMemoryBytes > 0)
+                    {
+                        var clerks = i.MemoryClerkSummary.SafeData(true);
+                        <tr title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
+Virtual: @pd.VirtualMemoryBytes.ToComma() (@pd.VirtualMemoryBytes.ToSize())
+SQL Server Used: @pd.CommittedBytes.ToComma() (@pd.CommittedBytes.ToSize())
+SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToSize())
+
+Top Users:
+@foreach (var mc in clerks.OrderByDescending(mc => mc.UsedBytes).Take(5)) {<text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)
+</text>}">
+                            <td>Memory</td>
+                            <td>
+                                <a href="#/sql/summary/memory">
+                                    @(decimal.Round(i.CurrentMemoryPercent.Value, 2) + "%") (@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())
+                                </a>
+                                <a href="#/sql/summary/memory">
+                                    <div class="memory-bar">
+                                        <div class="space-used">
+                                            @if (clerks.Any())
+                                            {
+                                                var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
+                                                var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
+                                                decimal other = 100;
+                                                long otherBytes = clerks.Sum(c => c.UsedBytes);
+                                                if (buffer != null) {
+                                                    other -= buffer.UsedPercent;
+                                                    otherBytes -= buffer.UsedBytes;
+                                                    <div class="used buffer" title="Buffer Pool: @buffer.UsedBytes.ToSize()" style="width: @buffer.UsedPercent%"></div>
+                                                }
+                                                if (plans != null) {
+                                                    other -= plans.UsedPercent;
+                                                    otherBytes -= plans.UsedBytes;
+                                                    <div class="used plans" title="Plan Cache: @plans.UsedBytes.ToSize()" style="width: @plans.UsedPercent%"></div>
+                                                }
+                                                <div class="used good" title="Other: @otherBytes.ToSize() (click for more detail)" style="width: @other%"></div>
+                                            }
+                                            else
+                                            {
+                                                <div class="used good" style="width: @i.CurrentMemoryPercent%"></div>
+                                            }
+                                            @*<div class="used bad" style="width:5%"></div>*@
+                                        </div>
+                                    </div>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Connections</td>
+                        <td><a href="#/sql/summary/connections">@pd.ConnectionCount.ToComma()</a></td>
+                    </tr>
+                    <tr>
+                        <td>Sessions</td>
+                        <td>@pd.SessionCount.ToComma()</td>
+                    </tr>
+                    <tr>
+                        <td>Max Workers</td>
+                        <td>@pd.MaxWorkersCount.ToComma() <span class="note">(@pd.CurrentWorkerCount.ToComma() in use)</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        }
+        @if (volumes.Any())
+        {
+            <div class="section-wrap refresh-group" data-name="instance-volumes">
+                <div class="summary-section-header">Volumes</div>
+                @foreach (var v in volumes)
+                {
+                    var percentUsed = 100 * (v.TotalBytes - v.AvailableBytes) / (float)v.TotalBytes;
+                    <div class="section-wrap half-wrap volume" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
+Total: @v.TotalBytes.ToComma() bytes (@v.TotalBytes.ToSize())
+Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
+Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
+Avgerage Read Stall: @v.AvgReadStallMS ms
+Avgerage Write Stall: @v.AvgWriteStallMS ms">
+                        <div class="volume-label">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</div>
+                        <div class="volume-usage">@(v.UsedBytes.ToSize()) / @v.TotalBytes.ToSize() <span class="note">(@v.AvailableBytes.ToSize() free)</span></div>
+                        <div class="volume-bar">
+                            <div class="space-used" style="width: auto;"><div class="used good" style="width:@percentUsed%"></div></div>
+                        </div>
+                    </div>
+                }
+            </div>         
+        }
+        @if (ci != null)
+        {
+            var ags = ci.AvailabilityGroups.SafeData(true);
+            var networks = ci.ClusterNetworks.SafeData(true);
+            var iter = 0;
+            <div class="cluster-info section-wrap">
+                <div class="summary-section-header">Cluster Info</div>
+                <div class="cluster-members">
+                    @foreach (var cn in ci.Cluster.Nodes)
+                    {
+                        if (iter > 0)
+                        {
+                            @:,
+                        }
+                        <span title="@cn.ClusterStatus">@cn.IconSpan() <a href="/sql/instance?node=@cn.Name" class="node-name-link @(cn.IsAnAGPrimary ? "bold" : "")">@cn.Name</a></span>
+                        iter++;
+                    }
+                </div>
+                @foreach (var ag in ags)
+                {
+                    <div class="availability-group section-wrap collapsed">
+                        <div class="availability-group-header">
+                            @ag.IconSpan() <a href="/sql/servers#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a> <span class="nite light">(@(ag.LocalReplica != null ? ag.LocalReplica.Role.ToSpan() : null))</span>
+                            <span class="expander">click to expand</span>
+                            <span class="availability-group-databases">
+                                <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(ci, ag.LocalReplica != null ? ag.LocalReplica.Databases : null, minimal: true)
+                            </span>
+                        </div>
+                        
+                        @if (ci.Cluster.Nodes.Any())
+                        {
+                            <div class="availability-group-nodes">
+                                @foreach (var cn in ci.Cluster.Nodes.OrderByDescending(n => n.Name == ag.PrimaryReplica).ThenBy(n => n.Name))
+                                {
+                                    var cnag = cn.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == ag.Name);
+                                    if (cnag == null) { continue; }
+                                    <div class="availability-group-node@(cn == ci ? " current" : "")">
+                                        <span class="icon node @(cn.Name == ag.PrimaryReplica ? "master" : "slave")"></span>
+                                        @cn.MonitorStatus.Span("<a href=\"/sql/instance?node=" + cn.Name + "\">" + cn.Name + "</a>", cn.ClusterMember.State.GetDescription())
+                                        <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(cn, cnag.LocalReplica != null ? cnag.LocalReplica.Databases : null, minimal: true)
+                                    </div>
+                                }
+                            </div>
+                        }
+                        <div class="availability-group-listeners">
+                            @foreach (var l in ag.Listeners)
+                            {
+                                <div class="availability-group-listener" title="@l.IPConfigurationString">
+                                    <span class="note">(Listener)</span>@l.DnsName: @string.Join(", ", l.Addresses.OrderByDescending(a => a.State).Select(a => "<span class=\"listener " + a.State.GetDescription() + "\">" + a.IPAddress + "</span>")).AsHtml()
+                                </div>
+                            }                        
+                        </div>
+                    </div>
+                }
+                @if (counters.Any())
+                {
+                    <table class="performance-counters">
+                        <thead>
+                            <tr>
+                                <th>AlwaysOn Replication</th>
+                                <th>Bytes</th>
+                                <th title="Total since last restart" class="note">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Received from Replica/sec", "_Total")
+                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Sent to Replica/sec", "_Total")
+                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Sent to Transport/sec", "_Total")
+                        </tbody>
+                    </table>
+                }
+                @if (networks.Any())
+                {
+                    var groups = networks.GroupBy(n => new { n.NetworkSubnetIP, n.NetworkSubnetPrefixLength });
+                    foreach (var g in groups)
+                    {
+                        <div class="section-wrap third-wrap">
+                            <div class="network-range">@g.Key.NetworkSubnetIP/@g.Key.NetworkSubnetPrefixLength</div>
+                            <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName))).AsHtml()</div>
+                        </div>
+                    }
+                }
+            </div>
+        }
+        </div>
+@helper RenderCounter(string category, string name, string instance, string title = null,
+                      Func<decimal, string> tooltip = null,
+                      Func<decimal, string> toValue = null,
+                      Func<decimal, string> toSuffix = null)
+{
+    toValue = toValue ?? (v => v.ToString("#,##0.###"));
+    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+    if (counter != null)
+    {
+        <tr title="@if (tooltip != null)
+                   {@tooltip(counter.CalculatedValue)}">
+            <td>@(title ?? name)</td>
+            <td>@toValue(counter.CalculatedValue)@if (toSuffix != null)
+                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</td>
+        </tr>
+    }
+}
+@helper RenderPerSecCounter(string category, string name, string instance, string title = null, 
+                      string nameUrl = null, 
+                      string valueUrl = null,
+                          Func<decimal, string> toValue = null,
+                          Func<decimal, string> toSuffix = null)
+{
+    toValue = toValue ?? (v => v.ToString("#,##0.###"));
+    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+    if (counter != null)
+    {
+        <tr>
+            @if (nameUrl.HasValue())
+            {
+                <td><a href="@nameUrl">@(title ?? name)</a></td>
+            } else {
+                <td>@(title ?? name)</td>
+            }
+            @if (valueUrl.HasValue())
+            {
+                <td><a href="@valueUrl">@toValue(counter.CalculatedValue)@if (toSuffix != null)
+                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</a></td>
+            } else {
+                <td>@toValue(counter.CalculatedValue)@if (toSuffix != null)
+                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</td>
+            }
+            <td class="note">@counter.CurrentValue.ToString("#,##0.###")</td>
+        </tr>
+    }
+}
+    <div class="right-col">
+        @if (counters.Any())
+        {
+            var batchCounter = i.GetPerfCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
+            var compCounter = i.GetPerfCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "");
+            var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? ((decimal)compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
+            <div class="section-wrap refresh-group" data-name="instance-performance">
+                <div class="summary-section-header">Performance</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>/sec</th>
+                            <th title="Total since last restart" class="note">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @RenderPerSecCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
+                    @RenderPerSecCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
+                    @RenderPerSecCounter("SQLServer:Databases", "Transactions/sec", "_Total")
+                        
+                    @RenderPerSecCounter("SQLServer:Access Methods", "Index Searches/sec", "")
+                    @RenderPerSecCounter("SQLServer:Locks", "Lock Requests/sec", "_Total")
+                    @RenderPerSecCounter("SQLServer:SQL Errors", "Errors/sec", "_Total", valueUrl: "#/sql/summary/errors") 
+                    </tbody>
+                </table>
+            </div>
+            <div class="section-wrap refresh-group" data-name="instance-sizes">
+                <table>
+                    @Helpers.SectionHeader("Sizes")
+                    <tbody>
+                        @RenderCounter("SQLServer:Memory Manager", "Total Server Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Memory Manager", "Target Server Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Memory Manager", "Database Cache Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Memory Manager", "Free Memory (KB)", "", toSuffix: kbToSize)
+                        
+                        @RenderCounter("SQLServer:Databases", "Data File(s) Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Databases", "Log File(s) Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Databases", "Log File(s) Used Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("SQLServer:Transactions", "Free Space in tempdb (KB)", "", toSuffix: kbToSize)
+                    </tbody>
+                </table>
+            </div>
+            @*<div class="section-wrap">
+                <div class="summary-section-header">Waits</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>/sec</th>
+                            <th title="Total since last restart" class="note">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Lock waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Log buffer waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Log write waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Network IO waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Non-Page latch waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Page IO latch waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Page latch waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Thread-safe memory objects waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Transaction ownership waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Wait for the worker", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Workspace synchronization waits", "Waits started per second")
+                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second")
+                    </tbody>
+                </table>
+            </div>*@
+            <div class="section-wrap refresh-group" data-name="instance-cache">
+                <table>
+                    @Helpers.SectionHeader("Cache")
+                    <tbody>
+                        @RenderCounter("SQLServer:Buffer Manager", "Page life expectancy", "", toSuffix: d => "seconds", tooltip: d => TimeSpan.FromSeconds((double)d).ToReadableString())
+                        @RenderCounter("SQLServer:Buffer Manager", "Page lookups/sec", "")
+                        @RenderCounter("SQLServer:Buffer Manager", "Database pages", "")
+
+                        @RenderCounter("SQLServer:Plan Cache", "Cache Object Counts", "_Total", "Objects in Cache")
+                        @RenderCounter("SQLServer:Plan Cache", "Cache Object Counts", "SQL Plans", "Plans in Cache")
+                        @RenderCounter("SQLServer:Plan Cache", "Cache Hit Ratio", "_Total")
+                    </tbody>
+                </table>
+            </div>
+            
+            @*<div class="section-wrap">
+                <table>
+                    @SectionHeader("Performance")
+                    <tbody>
+                        @RenderCounter("SQLServer:General Statistics", "User Connections", "")
+                        @RenderCounter("SQLServer:General Statistics", "Connection Reset/sec", "")
+
+            
+                        @RenderCounter("SQLServer:Latches", "Average Latch Wait Time (ms)", "")
+                        @RenderCounter("SQLServer:Latches", "Latch Waits/sec", "")
+                    
+                        @RenderCounter("SQLServer:Workload Group Stats", "Requests completed/sec", "default")
+                    </tbody>
+                </table>
+            </div>*@
+        }
+        @if (services.Any())
+        {
+            <div class="section-wrap refresh-group" data-name="instance-services">
+                <div class="summary-section-header">Services</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Service</th>
+                            <th>Status <span class="note">(Startup)</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in services)
+                        {
+                            <tr title="Name: @s.ServiceName
+Status: @s.Status.GetDescription()
+Account: @s.ServiceAccount
+Clustered: @(s.IsClusteredBool ? "Yes" : "No")">
+                            <td>@s.ServiceName.Replace(" (MSSQLSERVER)", "")</td>
+                            <td>@s.IconSpan() @s.Status.GetDescription() <span class="note">(@s.StartupType.GetDescription())</span></td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+</div>

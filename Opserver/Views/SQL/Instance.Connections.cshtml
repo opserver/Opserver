@@ -1,0 +1,54 @@
+﻿@model StackExchange.Opserver.Data.SQL.SQLInstance
+@{
+    Layout = null;
+    var connections = Model.ConnectionsSummary.SafeData(true);
+    var groups = connections.GroupBy(c => c.LoginName).OrderByDescending(c => c.Sum(g => g.ConnectionCount));
+}
+@if (connections.Any())
+{
+    <div class="summary-dashboard">
+        <h3>
+            <a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Connections
+            <a href="/sql/connections?node=@Model.Name" class="top-right-nav">View Detail</a>
+        </h3>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Login</th>
+                        <th>Count</th>
+                        <th>Total Reads</th>
+                        <th>Total Writes</th>
+                        <th>Last Login</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in groups)
+                    {
+                        <tr>
+                            <td>@c.Key</td>
+                            <td>@c.Sum(s => s.ConnectionCount).ToComma()</td>
+                            <td>@c.Sum(s => s.TotalReads).ToComma()</td>
+                            <td>@c.Sum(s => s.TotalWrites).ToComma()</td>
+                            <td>@c.Max(s => s.LastConnectTime).ToRelativeTimeSpan()</td>
+                        </tr>
+                    }
+                    @if (groups.Count() > 2)
+                    {
+                        <tr class="total-row">
+                            <td><b>Total</b></td>
+                            <td>@connections.Sum(c => c.ConnectionCount).ToComma()</td>
+                            <td>@connections.Sum(c => c.TotalReads).ToComma()</td>
+                            <td>@connections.Sum(c => c.TotalWrites).ToComma()</td>
+                            <td></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="no-content">No Acitve Connections</div>
+}

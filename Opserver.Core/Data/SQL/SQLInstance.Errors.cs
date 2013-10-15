@@ -1,0 +1,45 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Dapper;
+
+namespace StackExchange.Opserver.Data.SQL
+{
+    public partial class SQLInstance
+    {
+        public Cache<List<SQLErrorLogInfo>> GetErrorLog(int minutesAgo)
+        {
+            return new Cache<List<SQLErrorLogInfo>>
+                {
+                    CacheKey = GetCacheKey("ErrorInfo-" + minutesAgo),
+                    CacheForSeconds = 60,
+                    CacheStaleForSeconds = 5*60,
+                    UpdateCache = UpdateFromSql("Error Log last " + minutesAgo + " minutes", conn =>
+                        {
+                            var sql = GetFetchSQL<SQLErrorLogInfo>();
+                            return conn.Query<SQLErrorLogInfo>(sql, new {minutesAgo}).ToList();
+                        })
+                };
+        }
+
+        public class SQLErrorLogInfo : ISQLVersionedObject
+        {
+            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+
+            public DateTime LogDate { get; internal set; }
+            public string ProcessInfo { get; internal set; }
+            public string Text { get; internal set; }
+
+            internal const string FetchSQL = @"
+Declare @Time_Start varchar(30) = DATEADD(mi, -@minutesAgo, GETUTCDATE());
+Declare @ErrorLog Table (LogDate datetime, ProcessInfo varchar(255), Text varchar(max));
+Insert Into @ErrorLog Exec master.dbo.xp_readerrorlog 0, 1, NULL, NULL, @Time_Start, NULL;
+Select * From @ErrorLog;";
+
+            public string GetFetchSQL(Version v)
+            {
+                return FetchSQL;
+            }
+        }
+    }
+}

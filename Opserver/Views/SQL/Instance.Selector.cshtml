@@ -1,0 +1,15 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@{
+    var instances = SQLInstance.AllInstances;
+}
+<div class="node-selector">
+    <div class="no-content">Please select a SQL server.</div>
+    @foreach (var i in instances)
+    {
+        var props = i.ServerProperties.SafeData(true);
+        <a class="instance" href="?node=@i.Name.UrlEncode()">
+            @i.IconSpan() @i.Name
+            <span class="version" title="@props.FullVersion">@props.MajorVersion</span>
+        </a>
+    }
+</div>

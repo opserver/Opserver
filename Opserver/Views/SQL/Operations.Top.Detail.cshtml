@@ -1,0 +1,235 @@
+﻿@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Data.SQL.QueryPlans
+@model StackExchange.Opserver.Views.SQL.OpsTopDetailModel
+@{
+    Layout = null;
+    var s = Model.Instance;
+    var op = Model.Op;
+}
+@helper ReadableTime(long ms)
+{
+    @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
+}
+<div class="sql-plan-wrap">
+    @if (op == null)
+    {
+        <div class="sql-server sql-error">
+            <span class="error-label">Could not find the requested operation.</span>
+        </div>
+    }
+    else
+    {
+        var plan = op.GetShowPlanXML();
+        <div class="sql-plan-detail">
+            <table>
+                <thead>
+                    <tr class="category-row">
+                        <th colspan="10">
+                            <h3>Details for operation on @s.Name:</h3>
+                        </th>
+                    </tr>
+                    <tr class="section-head-row">
+                        <th colspan="2">CPU</th>
+                        <th colspan="2">Reads</th>
+                        <th colspan="2">Executions</th>
+                        <th colspan="2">Time</th>
+                        <th colspan="2">Rows</th>
+                    </tr>
+                </thead>
+                <tbody class="stats-body">
+                    <tr>
+                        <td class="key">Total:</td>
+                        <td class="value">@ReadableTime(op.TotalCPU/1000)</td>
+                        <td class="key">Total:</td>
+                        <td class="value">@op.TotalReads.ToComma()</td>
+                        <td class="key">Total:</td>
+                        <td class="value">@op.ExecutionCount.ToComma()</td>
+                        <td class="key">Total:</td>
+                        <td class="value">@ReadableTime(op.TotalDuration)</td>
+                        <td class="key">Total:</td>
+                        <td class="value">@op.TotalReturnedRows.ToComma()</td>
+                    </tr>
+                    <tr>
+                        <td class="key">Avg:</td>
+                        <td class="value">@op.AvgCPU.ToComma() µs</td>
+                        <td class="key">Avg:</td>
+                        <td class="value">@op.AvgReads.ToComma()</td>
+                        <td class="key">Per Min:</td>
+                        <td class="value">@op.ExecutionsPerMinute.ToString("0.00")</td>
+                        <td class="key">Avg:</td>
+                        <td class="value">@ReadableTime(op.AvgDuration)</td>
+                        <td class="key">Avg:</td>
+                        <td class="value">@op.AvgReturnedRows (@op.MinReturnedRows - @op.MaxReturnedRows)</td>
+                    </tr>
+                    <tr>
+                        <td class="key" title="percent of total">%:</td>
+                        <td class="value">@op.PercentCPU.ToString("0.00")</td>
+                        <td class="key" title="percent of total">%:</td>
+                        <td class="value">@op.PercentReads.ToString("0.00")</td>
+                        <td class="key" title="percent of total">%:</td>
+                        <td class="value">@op.PercentExecutions.ToString("0.00")</td>
+                        <td class="key" title="percent of total">%:</td>
+                        <td class="value">@op.PercentDuration.ToString("0.00")</td>
+                        <td class="key" title="rows returned by last run">Last:</td>
+                        <td class="value">@op.LastReturnedRows</td>
+                    </tr>
+                </tbody>
+                <tbody>
+                    <tr>
+                        <td colspan="2" class="key">Created:</td>
+                        <td colspan="6" class="value">@op.PlanCreationTime.ToRelativeTimeSpan() <span class="note">on</span> @op.CompiledOnDatabase</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="key">Last Execution:</td>
+                        <td colspan="6" class="value">@op.LastExecutionTime.ToRelativeTimeSpan()</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="key">Plan Handle:</td>
+                        <td colspan="6" class="value">0x@(op.ReadablePlanHandle) 
+                            @if(Current.User.IsSQLAdmin)
+                            {
+                                <span class="handle-link">(<a href="/sql/remove-plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)">remove plan</a>)</span>
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="key">Query Plan:</td>
+                        <td colspan="6" class="value"><a href="/sql/top/plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">download</a> - <a href="#" class="blue-dotted" onclick="javascript:alert('soon');">view similar</a> - <a href="#/plan/@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">link</a></td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="sql-query-section">
+                <div class="tabs">
+                    <div class="tabs-links">
+                        <a class="selected" data-div="sql-query" href="#">query text</a>
+                        <a data-div="sql-query-details" href="#">query details</a>
+                        <a data-div="sql-query-plan" href="#">query plan</a>
+                    </div>
+                </div>
+                <div class="sql-bottom-active" style="overflow-x: auto;">
+                    <div class="sql-query">
+                        <div>
+    @foreach (var statement in plan.Statements)
+    {
+        <pre class="sql-block sql-preview-block prettyprint lang-sql">@statement.ParameterDeclareStatement
+    @statement.StatementTextWithoutInitialParams</pre>
+    }
+                        </div>
+                    </div>
+                    <div class="sql-query-details">
+                        <div>
+                            @foreach (var statement in plan.Statements)
+                            {
+                                var ss = statement as StmtSimpleType;
+                                if (statement.IsMinor) {continue;}
+                                var excerpt = statement.StatementTextWithoutInitialParamsTrimmed;
+                                <div class="sql-statement">
+                                    <div class="sql-query-header" title="Type: @statement.StatementType">Statement
+                                        @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
+                                        {
+                                            <span class="note">
+                                                @(statement.StatementSubTreeCostSpecified ? "cost: " + statement.StatementSubTreeCost : "")
+                                                @(statement.StatementSubTreeCostSpecified && statement.StatementOptmLevel.HasValue() ? " - " : "")
+                                                @(statement.StatementOptmLevel.HasValue() ? "optimization: " + statement.StatementOptmLevel : "")
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="sql-query-excerpt">
+                                        <pre class="sql-block sql-preview-block prettyprint lang-sql"><span title="@statement.StatementText.Trim()">@excerpt</span></pre>
+                                    </div>
+                                    @if (excerpt.LineCount() > 3)
+                                    {
+                                        <div class="hide-gradient">
+                                            <a href="#" class="show-toggle">(show more)</a>
+                                        </div>
+                                    }
+                                    <div class="sql-query-attributes">
+                                        @if (statement.QueryPlanHash.HasValue() || statement.QueryHash.HasValue())
+                                        {
+                                            <div>
+                                                <div class="key">Hashes</div>
+                                                <div class="value">
+                                                    @if (statement.QueryPlanHash.HasValue())
+                                                    {
+                                                        @statement.QueryPlanHash
+                                                        <span class="note">(plan)</span>
+                                                    }
+                                                    @if (statement.QueryHash.HasValue())
+                                                    {
+                                                        @statement.QueryHash
+                                                        <span class="note">(query)</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (ss.QueryPlan != null)
+                                        {
+                                            if (ss.QueryPlan.NonParallelPlanReason.HasValue())
+                                            {
+                                            <div>
+                                                <div class="key">Non-Parallel Because:</div>
+                                                <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
+                                            </div>
+                                            }
+                                            if (ss.QueryPlan.DegreeOfParallelismSpecified) 
+                                            {
+                                            <div>
+                                                <div class="key">Parallelism:</div>
+                                                <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
+                                            </div>
+                                            }
+                                        }
+                                        @if (statement.StatementEstRowsSpecified)
+                                        {
+                                            <div>
+                                                <div class="key">Estimated Rows</div>
+                                                <div class="value">@statement.StatementEstRows</div>
+                                            </div>
+                                        }
+    @*                                    @if (ss != null && ss.QueryPlan != null)
+                                        {
+                                            <div>
+                                                <div class="key">Plan Size</div>
+                                                <div class="value">@ss.QueryPlan.CachedPlanSize B <span class="note">(@(statement.RetrievedFromCache == "true" ? "from cache" : "not cached"))</span></div>
+                                            </div>
+                                        }*@
+                                    </div>
+                                    @if (ss != null && ss.QueryPlan != null)
+                                    {
+                                        if (ss.QueryPlan.MissingIndexes != null)
+                                        {
+                                            <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Count().Pluralize("Missing Index", "Missing Indexes") <span class="note">(according to SQL Server, don't blindly apply these)</span></div>
+                                            foreach (var mi in ss.QueryPlan.MissingIndexes)
+                                            {
+                                                <div class="index-details">
+                                                    <span class="note">(Impact: @mi.Impact)</span>
+                                                    @foreach (var index in mi.MissingIndex)
+                                                    {
+                                                        var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
+                                                        var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
+                                                        <span>
+                                                            @string.Format("{0}.{1}.{2}", index.Database, index.Schema, index.Table) (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                            @if (include.Any())
+                                                            {
+                                                                @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                            }
+                                                        </span>
+                                                    }
+                                                </div>
+                                            }
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="sql-query-plan">
+                        <div>
+                            @op.QueryPlanHtml()
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
