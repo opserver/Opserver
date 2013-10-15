@@ -1,0 +1,49 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@using StackExchange.Opserver.Views.Redis
+@model DashboardModel
+@{
+    this.SetMainTab(MainTab.Redis);
+    this.SetPageTitle("Redis Dashboard");
+    this.SetTopNodes(RedisInstance.AllInstances, "Redis Servers", Model.CurrentInstance);
+}
+@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+{
+    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? string.Format("?node={0}:{1}", Model.CurrentInstance.Host, Model.CurrentInstance.Port) : "")">@name</a>
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh ? 5 : 0) });
+            Status.Redis.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Host : "")', port: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Port.ToString() : "")' });
+        });
+    </script>
+}
+    <div class="tabs sub-tabs">
+        <div class="tabs-links">
+            @TabLink(DashboardModel.Views.All, "/redis", "all servers", false)
+            @TabLink(DashboardModel.Views.Instance, "/redis/instance", "instance")
+        </div>
+    </div>
+<div class="dashboard-list">
+    @if (Model.View == DashboardModel.Views.Instance && Model.CurrentInstance == null)
+    {
+        @Html.Partial("Instance.Selector")
+    }
+    else
+    {
+        switch (Model.View)
+        {
+            case DashboardModel.Views.All:
+                @Html.Partial("Dashboard.All", Model)
+                break;
+            case DashboardModel.Views.Server:
+                @Html.Partial("Server", Model)
+                break;
+            case DashboardModel.Views.Instance:
+                @Html.Partial("Instance", Model)
+                break;
+            default:
+                throw new IndexOutOfRangeException("WHAT THE HELL VIEW DO YOU WANT MAN?");
+        }
+    }
+</div>

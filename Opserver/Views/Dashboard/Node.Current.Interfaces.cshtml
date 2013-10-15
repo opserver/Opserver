@@ -1,0 +1,59 @@
+﻿@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Models
+@model Node
+@helper Graph(Interface i, string type)
+{
+    if (i.IsUnwatched)
+    {
+        <div class="spark-no-data">No Data Available</div>
+        return;
+    }
+    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@i.Id" data-name="@i.PrettyName" />
+}
+<table class="node-dashboard main-dashboard interface-dashboard">
+    <thead>        
+        <tr class="category-row">
+            <th colspan="8"><div>@Model.Interfaces.Count().Pluralize("Interface") on @Model.PrettyName</div></th>
+        </tr>
+        <tr class="sort-row">
+            <th></th>
+            <th>Interface</th>
+            <th>Speed</th>
+            <th>In</th>
+            <th></th>
+            <th>Out</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody class="node-group">
+        @foreach (var i in Model.Interfaces.OrderBy(i => i.Index))
+        {
+            <tr class="@i.MonitorStatus.RowClass()">
+                <td>@i.IconSpan()</td>
+                <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
+Last Updated: @i.LastSync.ToRelativeTime()" data-val="@i.Index">@i.PrettyName</td>
+                <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@string.Format("{0:F0}", i.Speed)">@i.PrettySpeed</td>
+                <td data-val="@string.Format("{0:F0}", i.InBps)">@i.PrettyIn()</td>
+                <td data-val="@string.Format("{0:F0}", i.InBps)">@Graph(i, "in")</td>
+                <td data-val="@string.Format("{0:F0}", i.OutBps)">@i.PrettyOut()</td>
+                <td data-val="@string.Format("{0:F0}", i.OutBps)">@Graph(i, "out")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+<script>
+    $('.node-group').on('click', '.dashboard-spark', function () {
+        $('#dashboard-chart').empty().networkGraph({ id: $(this).data('nid'), title: 'Network Utilization', subtitle: $(this).data('name') });
+
+        $('#spark-detail').modal({
+            overlayClose: true,
+            onClose: function (dialog) {
+                dialog.data.fadeOut('fast', function () {
+                    dialog.container.hide('fast', function () {
+                        $.modal.close();
+                    });
+                });
+            }
+        });
+    })
+</script>

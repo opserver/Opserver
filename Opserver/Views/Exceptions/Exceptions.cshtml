@@ -1,0 +1,55 @@
+﻿@using StackExchange.Opserver.Data.Exceptions
+@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@{
+    var log = Model.SelectedLog;
+    var exceptions = Model.Errors;
+    
+    this.SetPageTitle(Model.Title);
+    this.SetMainTab(MainTab.Exceptions);
+    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
+                      Model.Search,
+                      "/exceptions/search",
+                      log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
+
+    var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
+    
+    if (Current.IsMobile) {
+        distinctApps = distinctApps.Where(a => a.ExceptionCount > 0); // filter out 0s for mobile
+    }
+}
+@section head {
+    <script>
+        $(function () { Status.Exceptions.init({ refresh: 120, log: '@log', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+    </script>
+}
+<div class="node-cagtegory-list top-section">
+    <ul class="top-server-list">
+        <li>Exception Logs: </li>
+        @{ var ac = Model.ShowAll ? @" class=""selected""" : ""; }
+        <li@(ac.AsHtml())><a href="/exceptions"><span>All</span></a></li>
+        @foreach (var a in distinctApps)
+        {
+            var cl = a.Name == log ? "selected" : null;
+            <li class="@cl.AsHtml()"><a href="/exceptions?log=@a.Name.UrlEncode()" title="@a.ExceptionCount.Pluralize("Exception")@(a.MostRecent.HasValue ? ", Last: " + a.MostRecent.ToRelativeTime() : "")"><span>@a.Name</span></a><span class="count">@(a.ExceptionCount > 0 ? " (" + a.ExceptionCount.ToComma() + ")" : "")</span></li>
+        }
+    </ul>
+</div>
+@if (ExceptionStores.Stores.Any(s => s.MonitorStatus == MonitorStatus.Good))
+{
+    <div class="bottom-section">
+        @Html.Partial("Exceptions.Table", Model)
+        <div class="no-content good@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
+        @if (log.HasValue() && exceptions.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin)
+        {
+            <div class="clear-all-div">
+                <a class="delete-link clear-all-link" href="/exceptions/delete-all">&nbsp;X&nbsp;- Clear all non-protected errors</a>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="bottom-section">
+        <div class="no-content critical">Nothing to display, there was an error fetching from all exception stores</div>
+    </div>
+}

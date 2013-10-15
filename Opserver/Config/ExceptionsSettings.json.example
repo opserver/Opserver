@@ -1,0 +1,28 @@
+﻿{
+    "warningRecentCount": "100",
+    "criticalRecentCount": "200",
+    "viewGroups": "StatusExceptionsRO",
+    "applications": [
+        "Core",
+        "Chat",
+        "Stack Auth",
+        "StackExchange.com",
+        "API",
+        "API v2",
+        "Area 51",
+        "Status",
+        "Push Server",
+        "Sockets",
+        "Careers",
+        "BackOffice",
+        "Control Panel"
+    ],
+    "stores": [
+        {
+            "name": "New York",
+            "queryTimeoutMs": 2000,
+            "pollIntervalSeconds": 10,
+            "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;"
+        }
+    ]
+}

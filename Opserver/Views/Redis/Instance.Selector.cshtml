@@ -1,0 +1,15 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@{
+    var instances = RedisInstance.AllInstances;
+}
+<div class="node-selector">
+    <div class="no-content">Please select a Redis Instance.</div>
+    @foreach (var i in instances)
+    {
+        var info = i.Info.SafeData(true);
+        <a class="instance @i.MonitorStatus.Class()" href="?node=@i.Host.UrlEncode():@i.Port">
+            @i.IconSpan() @i.Host:@i.Port - @i.Name
+            <span class="version">@(info.Server.Version.Major > 0 ? info.Server.Version.ToString() : null)</span>
+        </a>
+    }
+</div>

@@ -1,0 +1,5 @@
+﻿@model StackExchange.Opserver.Views.Shared.PageNotFoundModel
+<div class="center-container">
+    <h1>@Model.Title.IsNullOrEmptyReturn("404 - Not Found")</h1>
+    <div class="desc">@Model.Message.IsNullOrEmptyReturn("The page you were looking for could not be found.")</div>
+</div>

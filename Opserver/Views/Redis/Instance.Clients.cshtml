@@ -1,0 +1,72 @@
+﻿@using BookSleeve
+@model StackExchange.Opserver.Data.Redis.RedisInstance
+@{
+    Layout = null;
+    var clients = Model.Clients.SafeData(true);
+}
+@if (clients.Any())
+{
+    <div class="summary-dashboard">
+        <h3>
+            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> Clients
+        </h3>
+        <div>
+            <table id="clients-table">
+                <thead>
+                    <tr>
+                        <th>Address</th>
+                        <th>Server</th>
+                        <th>Name</th>
+                        <th>DB</th>
+                        <th>Flags</th>
+                        <th>Subs</th>
+                        <th>Connected</th>
+                        <th>Idle</th>
+                        <th>Last Command</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in clients)
+                    {
+                        var ip = c.Address.Split(StringSplits.Colon).First();
+                        var server = Model.GetServerName(ip);
+                        <tr>
+                            <td>@c.Address</td>
+                            <td>@(server.HasValue() ? server : "unknown")</td>
+                            <td>@c.Name</td>
+                            <td>@c.Database</td>
+                            @if (c.Flags != ClientFlags.None)
+                            {
+                                <td>@c.Flags.ToString()</td>
+                            }
+                            else
+                            {
+                                <td class="note">none</td>
+                            }
+                            <td data-val="@(c.SubscriptionCount + c.PatternSubscriptionCount)">@c.SubscriptionCount.ToComma() <span class="note">(@c.PatternSubscriptionCount.ToComma())</span></td>
+                            <td data-val="@c.AgeSeconds">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
+                            <td data-val="@c.IdleSeconds">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
+                            <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <script>
+            $(function() {
+                $('#clients-table').tablesorter({
+                    headers: {
+                        3: { sorter: 'number' },
+                        5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                        6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                        7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                    }
+                });
+            });
+        </script>
+    </div>
+}
+else
+{
+    <div class="no-content">No Clients Found</div>
+}

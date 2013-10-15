@@ -1,0 +1,66 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    this.SetMainTab(MainTab.Elastic);
+    this.SetPageTitle("elasticsearch Dashboard");
+    this.SetTopNodes(ElasticCluster.AllClusters,
+        "elastic clusters",
+        Model.Current != null ? Model.Current.Cluster : null);
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh ? (Model.View == DashboardModel.Views.Shards ? 60 : 5) : 0) });
+            @if (Model.Current != null)
+            {
+            @:Status.Elastic.init({ cluster: '@Model.Current.ClusterName', node: '@Model.Current.NodeName' });
+            }
+        });
+    </script>
+}
+@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+{
+    var cc = Model.Current != null ? Model.Current.ClusterName : null;
+    var cs = Model.Current != null ? Model.Current.NodeName : null;
+    if (includeParams && cc != null && cs != null)
+    {
+        <a class="@(Model.View == view ? "selected" : "")" href="@href?cluster=@cc.UrlEncode()&node=@cs.UrlEncode()">@name</a>
+    }
+    else
+    {
+        <a class="@(Model.View == view ? "selected" : "")" href="@href">@name</a>
+    }
+}
+    <div class="tabs sub-tabs">
+        <div class="tabs-links">
+            @TabLink(DashboardModel.Views.Cluster, "/elastic", "clusters", false)
+            @TabLink(DashboardModel.Views.Node, "/elastic/node", "node")
+            @TabLink(DashboardModel.Views.Indices, "/elastic/indices", "indices")
+        </div>
+    </div>
+<div class="dashboard-list">
+    @if (Model.View == DashboardModel.Views.Node && (Model.Current == null || Model.Current.Node == null))
+    {
+        @Html.Partial("Node.Selector")
+    }
+    else if (Model.View == DashboardModel.Views.Indices && (Model.Current == null || Model.Current.Cluster == null))
+    {
+        @Html.Partial("Cluster.Selector")
+    }
+    else
+    {
+        switch (Model.View)
+        {
+            case DashboardModel.Views.Node:
+                @Html.Partial("Node", Model)
+                break;
+            case DashboardModel.Views.Indices:
+                @Html.Partial("Indices", Model.Current)
+                break;
+            case DashboardModel.Views.Cluster:
+                @Html.Partial("Dashboard.Cluster", Model)
+                break;
+        }
+    }
+</div>

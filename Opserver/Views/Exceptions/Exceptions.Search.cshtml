@@ -1,0 +1,49 @@
+﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@{
+    var log = Model.SelectedLog;
+    var exceptions = Model.Errors;
+
+    this.SetPageTitle(Model.Title);
+    this.SetMainTab(MainTab.Exceptions);
+    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
+                      Model.Search,
+                      "/exceptions/search",
+                      log.HasValue() ? new Dictionary<string, string> { { "log", log } } : null);
+}
+@section head {
+    <script>
+        $(function () { Status.Exceptions.init({ log: '@log', search: '@Model.Search', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: @(Model.ShowDeleted ? "true" : "false") }); });
+    </script>
+}
+<div class="top-section error-bread-top">
+    <div class="error-header">
+        <a href="/exceptions">Exceptions</a> > @if(Model.SelectedLog.HasValue()){<text><a href="/exceptions?log=@Model.SelectedLog.UrlEncode()">@Model.SelectedLog</a> > </text>}Search results for '@Model.Search'
+        @if (!Model.ShowDeleted)
+        {
+        <span class="top-link">(<a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">Include Deleted</a>)</span>
+        }
+        @if (log.HasValue() && exceptions.Any(er => !er.IsProtected && !er.DeletionDate.HasValue) && Current.User.IsExceptionAdmin)
+        {
+        <span class="top-link top-delete-link">(<a class="delete-link clear-visible-link" href="#">Clear visible</a>)</span>
+        }
+    </div>
+</div>
+<div class="bottom-section">
+    @Html.Partial("Exceptions.Table", Model)
+    <div class="no-content@(exceptions.Any() ? " hidden" : "")">
+    @if (Model.ShowDeleted)
+    {
+        @:No current or deleted exceptions found
+    } 
+    else 
+    {                
+        @:No current exceptions found, <a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">would you like to search deleted errors?</a>
+    }
+    </div>
+    @if (log.HasValue() && exceptions.Any(er => !er.IsProtected && !er.DeletionDate.HasValue) && Current.User.IsExceptionAdmin)
+    {
+    <div class="clear-all-div">
+        <a class="delete-link clear-visible-link" href="#">&nbsp;X&nbsp;- Clear visible errors</a>
+    </div>
+    }
+</div>

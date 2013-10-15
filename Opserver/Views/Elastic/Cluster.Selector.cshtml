@@ -1,0 +1,24 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@{
+    var clusters = ElasticCluster.AllClusters;
+}
+<div class="node-selector">
+    @if (clusters.Any())
+    {
+        <div class="no-content">Please select an Elastic Cluster.</div>
+        foreach (var c in clusters)
+        {
+            var nodeInfos = c.Nodes.SafeData(true).Nodes;
+            if (nodeInfos == null) { continue; }
+            var info = nodeInfos != null ? nodeInfos.FirstOrDefault() : null;
+            <a class="instance" href="?cluster=@c.Name.UrlEncode()&guid=@c.Nodes.Data.Nodes.First().GUID">
+                @c.IconSpan() @c.Name
+                <span class="version">@(info != null ? info.Version.ToString() : "")</span>
+            </a>
+        }
+    }
+    else
+    {
+        <div class="no-content">No nodes available</div>
+    }
+</div>

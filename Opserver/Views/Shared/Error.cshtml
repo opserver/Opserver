@@ -1,0 +1,12 @@
+﻿<div class="center-container">
+    <h1>Error!</h1>
+    <div class="desc">Sorry, an error occurred while processing your request.</div>
+</div>
+<!-- Actual error:
+@{
+    var o = HttpContext.Current.ApplicationInstance.Application["LastError"] as Exception;
+    if (o != null) { 
+        @o.GetBaseException().Message
+    }
+}
+-->

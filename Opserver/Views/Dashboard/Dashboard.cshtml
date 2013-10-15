@@ -1,0 +1,28 @@
+﻿@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Views.Dashboard
+@model DashboardModel
+@{
+    this.SetPageTitle("Dashboard");
+    this.SetMainTab(MainTab.Dashboard);
+    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: "/dashboard/node");
+    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
+    var end = DateTime.UtcNow.ToEpochTime(true);
+}
+@section head {
+    <script>
+    $(function() {
+        Status.Dashboard.init({ refresh: 0, filter: '@(Model.Filter)' });
+        Status.Graphs.init({ start: @start, end: @end });
+    });
+    </script>}
+@*<div class="top-filter" style="margin-top: 10px;">
+    <label class="filter-box-float">Filter: 
+        <input class="" type="text" value="@Model.Filter" name="filter" title="Filter nodes by name, type, service tag or status" placeholder="by type, name, tag, etc." autocomplete="off" />
+    </label>
+</div>*@
+<div class="dashboard-list">
+    @Html.Partial("Dashboard.Table", Model)
+    <div id="spark-detail">
+        <div id="dashboard-chart" style="width: 960px; height: 330px;"></div>
+    </div>
+</div>

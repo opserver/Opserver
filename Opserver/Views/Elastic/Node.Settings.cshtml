@@ -1,0 +1,36 @@
+﻿@using Nest
+@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
+@{
+    Layout = null;
+    var settings = Model.Node != null && Model.Node.Info != null ? Model.Node.Info.Settings : new FluentDictionary<string, string>();
+}
+@if (settings.Any())
+{
+    <div class="summary-dashboard">
+        <h3>
+            <a href="/elastic/node?cluster=@Model.ClusterName&node=@Model.NodeName">@Model.ClusterName: @Model.NodeName</a><span class="note">:</span> Settings</h3>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Setting</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in settings.OrderBy(s => s.Key))
+                    {
+                        <tr>
+                            <td>@s.Key</td>
+                            <td>@s.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="no-content">No settings found</div>
+}

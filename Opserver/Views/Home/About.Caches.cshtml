@@ -1,0 +1,167 @@
+﻿@using System.Collections
+@model StackExchange.Opserver.Views.Home.AboutModel
+@{
+    this.SetPageTitle("About - Caches");
+    this.SetMainTab(MainTab.None);
+    var pollingInfo = PollingEngine.GetPollingStatus();
+    var pollerNodes = pollingInfo.Nodes
+        .OrderByDescending(n => n.IsPolling)
+        .ThenByWorst(n => n.DataPollers.GetWorstStatus())
+        .ThenBy(n => n.GetType().Name)
+        .ThenBy(n => n.UniqueKey).ToList();
+}
+@helper GetTypeDescription(Type t) {
+    if (t.IsGenericType && (t.GetGenericTypeDefinition() == typeof (List<>)))
+    {
+        var lt = t.GetGenericArguments()[0];
+        @:List&lt;<b>@lt.Name</b>&gt;
+    }
+    else
+    {
+        <b>@t.Name</b>
+    }
+}
+@helper GetItemsDescription(Cache c) {
+    var t = c.Type;
+    var data = c.GetData();
+    var list = data as IList;
+    if (list != null)
+    {
+        <span class="value">@list.Count.ToComma()</span> @list.Count.Pluralize("item", includeNumber: false)
+    } else if (data == null)
+    {
+        @:(empty)
+    }
+    else
+    {
+        @:<span class="value">1</span> Item
+    }
+}
+<style>
+    table {
+        margin: 0 auto;
+    }
+    table td, table th {
+        padding: 2px 4px;
+    }
+    table th {
+        font-weight: bold;
+        border-bottom: solid 1px #f4f4f4;
+    }
+    table tr.poller-row {
+        background-color: #f8f8f8;
+    }
+    table tr.poller-row td {
+        border-top: solid 1px #888;
+        border-bottom: solid 1px #888;
+    }
+</style>
+<section class="properties">
+    <table>
+        <thead>
+            <tr>
+                <th colspan="7">
+                    <h3>Pollers
+                        @if (Model.AutoRefresh)
+                        {
+                            <a href="?refresh=false" class="top-right-nav">Disable Auto Refresh</a>
+                        }
+                        else
+                        {
+                            <a href="?refresh=true" class="top-right-nav">Enable Auto Refresh</a>
+                        }
+                    </h3>
+                </th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Summary</th>
+                <th>Last</th>
+                <th>Thread</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var pn in pollerNodes)
+            {
+                var pnType = pn.GetType();
+                var pollers = pn.DataPollers.ToList();
+                <tr class="poller-row @pn.RowClass()">
+                    <td>@pn.IconSpan()</td>
+                    <td title="@pnType.FullName">@pnType.Name</td>
+                    <td>@pn.UniqueKey</td>
+                    <td>@pn</td>
+                    <td>@pn.LastPoll.ToRelativeTimeSpanMini() <span class="note">(@pn.LastPollDuration.ToTimeStringMini())</span></td>
+                    <td>@pn.PollTaskStatus</td>
+                    <td>
+                        <a href="/json/@pn.NodeType/@pn.UniqueKey">JSON</a>
+                        <a href="#" class="poll-all-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey">Poll All</a>
+                    </td>
+                </tr>
+                foreach (var p in pollers.OrderByDescending(p => p.IsPolling).ThenBy(p => p.ParentMemberName))
+                {
+                    <tr class="@(p.IsPolling ? "active" : "idle")-row @p.RowClass()">
+                        <td title="@p.ErrorMessage">@p.IconSpan()</td>
+                    <td title="Type: @pn.NodeType
+Key: @pn.UniqueKey
+Property: @p.ParentMemberName
+Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">@GetTypeDescription(p.Type)</td>
+                        <td title="@p.ParentMemberName
+@p.SourceFilePath @("@") line @p.SourceLineNumber">@p.ParentMemberName</td>
+                        <td>
+                            @GetItemsDescription(p)
+                            @if (p.CacheKey.HasValue())
+                            {
+                                @:CacheKey: @p.CacheKey
+                            }
+                            @if(!p.ContainsData){<span class="warning"> (No Data)</span>}
+                            @if(p.IsStale){<span class="warning"> (Stale)</span>}
+                            @if(p.CacheStaleForSeconds > 0 && p.IsExpired){<span class="critical light"> (Expired)</span>}
+                            (@p.PollsTotal.Pluralize("poll"), @p.PollsSuccessful.ToComma() successful)
+                        </td>
+                        <td>
+                            @if (p.LastPoll == DateTime.MinValue)
+                            {
+                                <span class="critical light">Never</span>
+                            }
+                            else
+                            {
+                                @:@p.ToPollSpan() <span class="note">(@p.LastPollDuration.ToTimeStringMini())</span>
+                            } 
+                        </td>
+                        <td class="@(p.IsPolling ? "good" : "note")">(@(p.IsPolling ? "active" : "idle"))</td>
+                        <td>
+                            <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a> 
+                            <a href="#" class="poll-now" data-id="@p.UniqueId">Poll Now</a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>    
+</section>
+<script>
+    function pollAndReload(node, url, options) {
+        polling = true;
+        $(node).parent().addClass('loading');
+        $.ajax(url, { data: options }).done(function() { window.location.reload(true); });
+        return false;
+    }
+    var polling = false;
+    $(document).on('click', '.poll-now', function () {
+        var id = $(this).data('id');
+        if (!id) return false;
+        return pollAndReload(this, '/cache/poll', { id: id });
+    }).on('click', '.poll-all-now', function () {
+        var type = $(this).data('type'),
+            key = $(this).data('key');
+        if (!type || !key) return false;
+        return pollAndReload(this, '/cache/poll/all', { type: type, key: key });
+    });
+    @if (Model.AutoRefresh)
+{
+    @:setTimeout(function () { if(!polling) window.location.reload(true); }, 5000);
+}
+</script>

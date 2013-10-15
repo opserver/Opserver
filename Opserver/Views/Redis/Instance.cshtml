@@ -1,0 +1,337 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@using Roles = StackExchange.Opserver.Models.Roles
+@model StackExchange.Opserver.Views.Redis.DashboardModel
+@{
+    Layout = null;
+    var i = Model.CurrentInstance;
+}
+<style>
+    .sub-header {
+        border-bottom: solid 1px #eee;
+        text-align: center;
+        margin-bottom: 4px;
+        padding-top: 8px;
+        padding-bottom: 2px;
+        font-weight: bold;
+    }
+    .summary-links {
+        padding: 4px;
+        border-bottom: solid 1px #eee;
+        margin-bottom: 4px;
+    }
+    .section-wrap .warning-row td {
+        text-align: center;
+    }
+    .replication-tree .redis-instance:nth-child(2) {
+        padding-left: 16px;
+    }
+    .replication-tree .redis-instance:nth-child(3) {
+        padding-left: 32px;
+    }
+</style>
+<div class="bottom-sub-section">
+    @if (i == null)
+    {
+    <div class="no-content">Instance not found.</div>
+    }
+    else
+    {
+    <div class="summary-dashboard">
+        <h3 class="header"><a href="/redis">Redis</a><span class="note">:</span> @i.Host<span class="note">: </span> @i.Port (@i.Name)
+            <a class="top-right-nav" href="/redis/server?node=@i.Host">View Raw</a>
+        </h3>
+        <div class="left-col">
+            <div class="section-wrap refresh-group" data-name="instance-summary">
+                <table>
+                    @Helpers.SectionHeader("Summary")
+                    @{
+                        var info = i.Info.SafeData(true);
+                        var uptime = TimeSpan.FromSeconds(info.Server.UptimeInSeconds);
+                        var master = i.Master;
+                    }
+                    <tbody>
+                        <tr>
+                            <td>Server</td>
+                            <td class="value">@i.Host:@i.Port</td>
+                        </tr>
+                        <tr>
+                            <td>Name</td>
+                            <td class="value">@i.Name</td>
+                        </tr>
+                        <tr>
+                            <td>Version</td>
+                            <td>@info.Server.Version</td>
+                        </tr>
+                        <tr>
+                            <td>Uptime</td>
+                            <td title="@uptime.ToReadableString()">@uptime.ToTimeStringMini(4)</td>
+                        </tr>
+                        <tr>
+                            <td>Role</td>
+                            <td>@i.Role.GetDescription()</td>
+                        </tr>
+                        <tr>
+                            <td>Slaves</td>
+                            <td>@i.SlaveCount</td>
+                        </tr>
+                        <tr>
+                            <td>Replication</td>
+                            <td class="replication-tree">
+                                @if (master == null && i.SlaveCount == 0)
+                                {
+                                    <span class="note">No slaves or masters</span>
+                                }
+                                else
+                                {
+                                    if (master != null)
+                                    {
+                                        <div class="redis-instance">
+                                            @master.IconSpan() <a href="?node=@master.Host:@master.Port">@master.Host:@master.Port</a> <span class="note">(Master)</span>
+                                        </div>
+                                    }
+                                    <div class="redis-instance">
+                                        @i.IconSpan() <a href="?node=@i.Host&port=:@i.Port">@i.Host:@i.Port</a> <span class="note">(Current)</span>
+                                    </div>
+                                    var slaves = i.SlaveInstances;
+                                    if (slaves.Count > 0)
+                                    {
+                                        foreach (var s in slaves)
+                                        {
+                                            <div class="redis-instance">
+                                                @s.IconSpan() <a href="?node=@s.Host:@s.Port">@s.Host:@s.Port</a> <span class="note">(Slave)</span>
+                                            </div>
+                                        }
+                                    }
+                                } 
+                            </td>
+                        </tr>
+                        @if (i.Role == RedisInfo.RedisInstanceRole.Slave)
+                        {
+                            <tr>
+                                <td>Master</td>
+                                @if (master != null)
+                                {
+                                    <td>@master.Host:@master.Port</td>
+                                }
+                                else
+                                {
+                                    <td>Unknown</td>   
+                                }
+                            </tr>
+                        }
+                        <tr>
+                            <td>Clients</td>
+                            <td><a href="#/redis/summary/clients">@i.Clients.SafeData(true).Count.ToComma()</a></td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="section-wrap refresh-group" data-name="instance-memory">
+                <table>
+                    @Helpers.SectionHeader("Memory")
+                    <tbody>
+                        <tr>
+                            <td>Used</td>
+                            <td>@info.Memory.UsedMemory.ToSize() <span class="note">(@info.Memory.UsedMemory.ToComma())</span></td>
+                        </tr>
+                        <tr>
+                            <td>Used (Peak)</td>
+                            <td>@info.Memory.UsedMemoryPeak.ToSize() <span class="note">(@info.Memory.UsedMemoryPeak.ToComma())</span></td>
+                        </tr>
+                        <tr>
+                            <td>Used (RSS)</td>
+                            <td>@info.Memory.UsedMemoryRSS.ToSize() <span class="note">(@info.Memory.UsedMemoryRSS.ToComma())</span></td>
+                        </tr>
+                        <tr>
+                            <td>Used (Lua)</td>
+                            <td>@info.Memory.UsedMemoryLua.ToSize() <span class="note">(@info.Memory.UsedMemoryLua.ToComma())</span></td>
+                        </tr>
+                        <tr>
+                            <td>Fragmentation Ratio</td>
+                            <td>@info.Memory.MemoryFragmentationRatio</td>
+                        </tr>
+                        <tr>
+                            <td>Allocator</td>
+                            <td>@info.Memory.MemoryAllocator</td>
+                        </tr>
+                    </tbody>
+                </table> 
+            </div>
+            <div class="section-wrap refresh-group" data-name="instance-persistence">
+                <table>
+                    @Helpers.SectionHeader("Persistence")
+                    @{
+                        var lastSave = info.Persistence.RDBLastSaveTime.ToDateTime();
+                    }
+                    <tbody>
+                        @if (info.Persistence.Loading)
+                        {
+                            <tr class="warning-row">
+                                <td colspan="2">Load in progress</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>Change since last save</td>
+                            <td>@info.Persistence.RDBChangesSinceLastSave.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Last Save</td>
+                            <td>@lastSave.ToRelativeTimeSpan() <span class="note">(result: @info.Persistence.RDBLastBGSaveStatus - @TimeSpan.FromSeconds(info.Persistence.RDBLastBGSaveTimeSeconds).ToTimeStringMini())</span></td>
+                        </tr>
+                        @if (info.Persistence.RDBBGSaveInProgress)
+                        {
+                            <tr class="warning-row">
+                                <td colspan="2">Background save in progress (@TimeSpan.FromSeconds(info.Persistence.RDBCurrentBGSaveTimeSeconds).ToTimeStringMini())</td>
+                            </tr>
+                        }
+                        <tr>
+                            <td>AOF</td>
+                            <td class="@(info.Persistence.AOFEnabled ? "good" : "note")">@(info.Persistence.AOFEnabled ? "enabled" : "disabled")</td>
+                        </tr>
+                        @if (info.Persistence.AOFEnabled)
+                        {
+                            <tr>
+                                <td>Last AOF Rewrite</td>
+                                <td>@info.Persistence.AOFLastBGRewriteStatus - @TimeSpan.FromSeconds(info.Persistence.AOFLastRewriteTimeSeconds).ToTimeStringMini()</td>
+                            </tr>
+                            if (info.Persistence.AOFRewriteInProgress)
+                            {
+                                <tr class="warning-row">
+                                    <td colspan="2">AOF rewrite in progress (@TimeSpan.FromSeconds(info.Persistence.AOFCurrentRewriteTimeSeconds).ToTimeStringMini())</td>
+                                </tr>
+                            }
+                            <tr>
+                                <td>AOF Base Size</td>
+                                <td>@info.Persistence.AOFBaseSize.ToSize() <span class="note">(@info.Persistence.AOFBaseSize.ToComma())</span></td>
+                            </tr>
+                            <tr>
+                                <td>AOF Current Size</td>
+                                <td>@info.Persistence.AOFCurrentSize.ToSize() <span class="note">(@info.Persistence.AOFCurrentSize.ToComma())</span></td>
+                            </tr>
+                            if (info.Persistence.AOFDelayedFSync > 0)
+                            {
+                                <tr>
+                                    <td>AOF Delayed fsyncs</td>
+                                    <td>@info.Persistence.AOFDelayedFSync.ToComma()</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table> 
+            </div>
+            <div class="section-wrap refresh-group" data-name="instance-keyspace">
+                <div class="summary-section-header">Keyspace</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>DB</th>
+                            <th>Keys</th>
+                            <th>Expires</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kd in info.Keyspace.KeyData)
+                        {
+                            <tr>
+                                <td>@kd.Key@if (Current.User.IsInRole(Roles.RedisAdmin)) { <span class="note">(<a href="/redis/analyze/memory?node=@i.Host:@i.Port&db=@kd.Key" class="node-name-link">analyze</a>)</span>}</td>
+                                <td>@kd.Value.Keys.ToComma()</td>
+                                <td>@kd.Value.Expires.ToComma()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="right-col">
+            <div class="section-wrap refresh-group" data-name="instance-stats">
+                <table>
+                    @Helpers.SectionHeader("Stats")
+                    <tbody>
+                        <tr>
+                            <td>Total Connections Received</td>
+                            <td>@info.Stats.TotalConnectionsReceived.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Total Commands Processed</td>
+                            <td>@info.Stats.TotalCommandsProcessed.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Current Operations per second</td>
+                            <td>@info.Stats.InstantaneousOpsPerSec.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Key Hits</td>
+                            <td>@info.Stats.KeyspaceHits.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Key Misses</td>
+                            <td>@info.Stats.KeyspaceMisses.ToComma()</td>
+                        </tr>
+                        <tr>
+                            <td>Key Expirations</td>
+                            <td>@info.Stats.ExpiredKeys.ToComma()</td>
+                        </tr>
+                        @if (info.Stats.EvictedKeys > 0)
+                        {
+                            <tr>
+                                <td>Key Evictions</td>
+                                <td>@info.Stats.EvictedKeys.ToComma()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table> 
+            </div>
+            
+            @if (i.Clients.Data == null)
+            {
+                <div class="section-wrap refresh-group" data-name="instance-clients">
+                    <div class="summary-section-header">Clients</div>
+                    <div class="no-content">No Client Connection Data</div>
+                </div>
+            }
+            else
+            {
+                var clients = i.Clients.Data;
+                <div class="section-wrap refresh-group" data-name="instance-clients">
+                    <div class="summary-section-header">Clients <a class="top-right-nav" href="#/redis/summary/clients">View All</a></div>
+                    <table>
+                        <tbody>
+                            @{ 
+                                var ips = clients.Select(c => c.Address.Split(StringSplits.Colon).First()).GroupBy(ip => ip).ToList(); 
+                                if (ips.Any())
+                                {
+                                    <tr>
+                                        <th colspan="2" class="sub-header">Summary <span class="note">(by IP)</span></th>
+                                    </tr>
+                                    foreach (var ip in ips.OrderBy(ipg => ipg.Key))
+                                    {
+                                        var name = i.GetServerName(ip.Key);
+                                        <tr>
+                                            <td>@ip.Key@(name.HasValue() ? " (" + name + ")" : "")</td>
+                                            <td>@ip.Count().ToComma() <span class="note">@ip.Count().Pluralize("connection", includeNumber: false)</span></td>
+                                        </tr>
+                                    }
+                                }
+                                var names = clients.GroupBy(c => c.Name).ToList();
+                                if (names.Any())
+                                {
+                                    <tr>
+                                        <th colspan="2" class="sub-header">Summary <span class="note">(by name)</span></th>
+                                    </tr>
+                                    foreach (var name in names.OrderByDescending(n => n.Count()).ThenBy(n => n.Key))
+                                    {
+                                        <tr>
+                                            <td>@name.Key.IsNullOrEmptyReturn("Unknown")</td>
+                                            <td>@name.Count().ToComma() <span class="note">@name.Count().Pluralize("connection", includeNumber: false)</span></td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+    }
+</div>   

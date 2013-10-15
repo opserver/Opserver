@@ -1,0 +1,43 @@
+﻿using System.Web.Mvc;
+using System.Web.Security;
+using StackExchange.Opserver.Helpers;
+using StackExchange.Opserver.Views.Login;
+using Roles = StackExchange.Opserver.Models.Roles;
+
+namespace StackExchange.Opserver.Controllers
+{
+    public class LoginController : StatusController
+    {
+        [Route("login", HttpVerbs.Get), AlsoAllow(Roles.Anonymous)]
+        public ActionResult Login(string returnUrl)
+        {
+            if (returnUrl == "/")
+                return Redirect("/login");
+
+            var vd = new LoginModel();
+            return View(vd);
+        }
+
+        [ValidateInput(false)]
+        [Route("login", HttpVerbs.Post, RoutePriority.High), AlsoAllow(Roles.Anonymous)]
+        public ActionResult Login(string user, string pass, string url)
+        {
+            var vd = new LoginModel();
+            if (Current.Security.ValidateUser(user, pass))
+            {
+                FormsAuthentication.SetAuthCookie(user, true);
+                return Redirect(url.HasValue() ? url : "/");
+            }
+            vd.ErrorMessage = "Login failed";
+
+            return View("~/Views/Login/Login.cshtml", vd);
+        }
+
+        [Route("logout"), AlsoAllow(Roles.Anonymous)]
+        public ActionResult Logout()
+        {
+            FormsAuthentication.SignOut();
+            return RedirectToAction("Login");
+        }
+    }
+}

@@ -1,0 +1,52 @@
+﻿@model StackExchange.Opserver.Views.Login.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@SiteSettings.SiteNameLong</title>
+        <link href="@Url.CacheBreaker("/Content/Login.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.CacheBreaker("/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
+        <script src="@Url.CacheBreaker("/Content/Plugins.js")"></script>
+        <script src="@Url.CacheBreaker("/Content/Login.js")"></script>
+    </head>
+    <body>
+        <div class="intro">
+            <div class="wrapper">
+                <a href="~/" class="logo">@SiteSettings.SiteNameLong</a>
+            </div>
+        </div>
+        <div class="content">
+            <div class="wrapper">
+                <div class="center-container">
+                    <div id="login">
+                        <h2>@SiteSettings.SiteNameLong Login</h2>
+                        <div>
+                            <form action="/login" method="POST">
+                                <div class="inputs">
+                                    <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
+                                    <input type="text" name="user" placeholder="Username" autofocus="autofocus" /> <br />
+                                    <input type="password" name="pass" placeholder="Password" /> <br />
+                                    <input type="submit" value="Log in" class="orange-submit" />
+                                </div>
+                            </form>
+                            @if (Model.ErrorMessage.HasValue())
+                            {
+                                <div class="error">
+                                    Error: @Model.ErrorMessage
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="footer">
+            <div class="wrapper">
+                <p>This site is for monitoring status of the Stack Exchange network.</p>
+                <p style="margin-bottom: 0;">site design / logo &copy; @DateTime.UtcNow.Year stack exchange, inc</p>
+            </div>
+        </div>
+    </body>
+</html>

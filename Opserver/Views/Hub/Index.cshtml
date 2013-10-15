@@ -1,0 +1,60 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@using StackExchange.Opserver.Data.HAProxy
+@using StackExchange.Opserver.Data.SQL
+@model StackExchange.Opserver.Views.Hub.HubModel
+@{
+    // TODO: Cache check for poll fail -> toastr
+    this.SetPageTitle("Hub");
+    var displayItems = Model.Items.OrderByWorst(i => i.MonitorStatus).ThenByDescending(i => i is IMonitedService);
+    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
+    var end = DateTime.UtcNow.ToEpochTime(true);
+}
+@section head {
+    <meta http-equiv="refresh" content="@(15*60)">
+    <script>
+        $(function() {
+            function layout() {
+                $('.node-group').isotope({
+                    masonry: {
+                        columnWidth: 175,
+                        gutterWidth: 10
+                    }
+                });
+            }
+            Status.Dashboard.init({ refresh: 60, afterRefresh: layout });
+            Status.Graphs.init({ start: @start, end: @end });
+            layout();
+        });
+    </script>}
+<div class="dashboard-list">
+    <div class="node-dashboard main-dashboard heads-up">
+        <div class="node-group" data-name="all-servers">
+            @foreach (var i in displayItems)
+            {
+                var s = i as StackExchange.Opserver.Data.Dashboard.Node;
+                if (s != null)
+                {
+                    @Html.Partial("Dashboard.Node", s)
+                }
+                var ag = i as SQLNode.AvailabilityGroupInfo;
+                if (ag != null)
+                {
+                    @Html.Partial("SQL.AvailabilityGroup", ag)
+                }
+                var ec = i as ElasticCluster;
+                if (ec != null)
+                {
+                    @Html.Partial("Elastic.Cluster", ec)
+                }
+                var hag = i as HAProxyGroup;
+                if (hag != null)
+                {
+                    @Html.Partial("HAProxy.Group", hag)
+                }
+            }
+        </div>
+    </div>
+    <div id="spark-detail">
+        <div id="dashboard-chart" style="width: 960px; height: 330px;"></div>
+    </div>
+</div>
