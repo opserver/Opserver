@@ -141,6 +141,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\Readme.txt" />
     <Content Include="Content\Common.css">
       <DependentUpon>Common.less</DependentUpon>
     </Content>
@@ -163,15 +164,16 @@
     <Content Include="Content\_Styles.About.less">
       <DependentUpon>Styles.less</DependentUpon>
     </Content>
-    <Content Include="Config\SQLSettings.json" />
     <Content Include="App_Code\Helpers.cshtml" />
-    <Content Include="Config\DashboardSettings.json" />
-    <Content Include="Config\ElasticSettings.json" />
-    <Content Include="Config\ExceptionsSettings.json" />
-    <Content Include="Config\HAProxySettings.json" />
-    <Content Include="Config\PollingSettings.json" />
-    <Content Include="Config\RedisSettings.json" />
-    <Content Include="Config\TeamCitySettings.json" />
+    <Content Include="Config\DashboardSettings.json.example" />
+    <Content Include="Config\ElasticSettings.json.example" />
+    <Content Include="Config\ExceptionsSettings.json.example" />
+    <Content Include="Config\HAProxySettings.json.example" />
+    <Content Include="Config\PollingSettings.json.example" />
+    <Content Include="Config\RedisSettings.json.example" />
+    <Content Include="Config\SecuritySettings.config.example" />
+    <Content Include="Config\SQLSettings.json.example" />
+    <Content Include="Config\TeamCitySettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -231,9 +233,6 @@
     <Compile Include="Views\SQL\Ops.Top.Detail.Model.cs">
       <DependentUpon>Operations.Top.Detail.cshtml</DependentUpon>
     </Compile>
-    <Content Include="Config\SecuritySettings.config">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="App_Code\SQLHelpers.cshtml" />
     <None Include="Content\Styles.less">
       <Compile>False</Compile>
