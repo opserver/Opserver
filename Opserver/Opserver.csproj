@@ -148,9 +148,37 @@
     <Content Include="Content\Common.min.css">
       <DependentUpon>Common.less</DependentUpon>
     </Content>
-    <Content Include="Content\img\arrow-045-small.png" />
-    <Content Include="Content\img\arrow-circle-225.png" />
-    <Content Include="Content\img\logo-text.png" />
+    <Content Include="Content\img\arrow-small.png" />
+    <Content Include="Content\img\database\blue.png" />
+    <Content Include="Content\img\database\grey.png" />
+    <Content Include="Content\img\database\red.png" />
+    <Content Include="Content\img\database\yellow.png" />
+    <Content Include="Content\img\lock-off.png" />
+    <Content Include="Content\img\lock-on.png" />
+    <Content Include="Content\img\logo\icon-128.png" />
+    <Content Include="Content\img\logo\icon-152.png" />
+    <Content Include="Content\img\logo\icon-16.png" />
+    <Content Include="Content\img\logo\icon-256.png" />
+    <Content Include="Content\img\logo\icon-316.png" />
+    <Content Include="Content\img\logo\icon-32.png" />
+    <Content Include="Content\img\logo\icon-64.png" />
+    <Content Include="Content\img\logo\icon-76.png" />
+    <Content Include="Content\img\logo\logo-big.png" />
+    <Content Include="Content\img\logo\logo-login.png" />
+    <Content Include="Content\img\logo\logo-text.png" />
+    <Content Include="Content\img\node\node-select-all.png" />
+    <Content Include="Content\img\node\node-select-child.png" />
+    <Content Include="Content\img\node\node-select-next.png" />
+    <Content Include="Content\img\node\node-select-previous.png" />
+    <Content Include="Content\img\node\node-select.png" />
+    <Content Include="Content\img\node\node.png" />
+    <Content Include="Content\img\refresh.png" />
+    <Content Include="Content\img\square-minus-disabled.png" />
+    <Content Include="Content\img\square-minus.png" />
+    <Content Include="Content\img\square-plus-disabled.png" />
+    <Content Include="Content\img\square-plus.png" />
+    <Content Include="Content\img\x.png" />
+    <Content Include="Content\js\plugins\colorbrewer.js" />
     <Content Include="Content\_Styles.Exceptions.less">
       <DependentUpon>Styles.less</DependentUpon>
     </Content>
@@ -174,6 +202,7 @@
     <Content Include="Config\SecuritySettings.config.example" />
     <Content Include="Config\SQLSettings.json.example" />
     <Content Include="Config\TeamCitySettings.json.example" />
+    <Content Include="Content\img\logo\logo.eps" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -305,18 +334,6 @@
       <DependentUpon>Login.cshtml</DependentUpon>
     </Compile>
     <EmbeddedResource Include="Content\img\loading.gif" />
-    <Content Include="Content\img\arrow-000-medium.png" />
-    <Content Include="Content\img\arrow-090-medium.png" />
-    <Content Include="Content\img\arrow-180-medium.png" />
-    <Content Include="Content\img\arrow-270-medium.png" />
-    <Content Include="Content\img\database--exclamation.png" />
-    <Content Include="Content\img\database--minus.png" />
-    <Content Include="Content\img\database-import.png" />
-    <Content Include="Content\img\database-medium.png" />
-    <Content Include="Content\img\databases.png" />
-    <Content Include="Content\img\Logo-32.png" />
-    <Content Include="Content\img\minus-button.png" />
-    <Content Include="Content\img\plus-button.png" />
     <Content Include="Content\img\query-plan\arithmetic_expression.gif" />
     <Content Include="Content\img\query-plan\assert.gif" />
     <Content Include="Content\img\query-plan\assign.gif" />
@@ -385,8 +402,6 @@
     <Content Include="Content\img\query-plan\top.gif" />
     <Content Include="Content\img\query-plan\udx.gif" />
     <Content Include="Content\img\query-plan\while.gif" />
-    <Content Include="Content\img\table-medium.png" />
-    <Content Include="Content\img\table-select-all.png" />
     <Content Include="Content\js\plugins\autocomplete.js" />
     <Content Include="Content\js\plugins\cookie.js" />
     <Content Include="Content\js\plugins\d3.v3.js" />
@@ -394,7 +409,6 @@
     <Content Include="Content\js\plugins\qp.js" />
     <Content Include="Content\js\plugins\simplemodal.js" />
     <Content Include="Content\js\plugins\tablesorter.js" />
-    <Content Include="Content\js\Scripts.StackOverflow.js" />
     <Content Include="Content\Login.js" />
     <Content Include="Content\img\search-icon.png" />
     <Content Include="Content\img\apple-touch-icon.png" />
@@ -513,25 +527,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />
-    <Content Include="Content\img\bg-hatchlines.png" />
-    <Content Include="Content\img\bg-site.png" />
-    <Content Include="Content\img\big-logo.png" />
-    <Content Include="Content\img\cross-small-circle.png" />
-    <Content Include="Content\img\cross-small.png" />
-    <Content Include="Content\img\lock-exclamation.png" />
-    <Content Include="Content\img\lock-small.png" />
-    <Content Include="Content\img\network-status-warning.png" />
-    <Content Include="Content\img\network-status-down.png" />
-    <Content Include="Content\img\network-status-unknown.png" />
-    <Content Include="Content\img\network-status-up.png" />
-    <Content Include="Content\img\se-gear.png" />
     <Content Include="Content\img\se-stats.png" />
-    <Content Include="Content\img\status-red-large.png" />
-    <Content Include="Content\img\status-red.png" />
-    <Content Include="Content\img\status-warning.png" />
-    <Content Include="Content\img\status-warning-large.png" />
-    <Content Include="Content\img\status-green.png" />
-    <Content Include="Content\img\status-green-large.png" />
     <Content Include="Content\Login.css" />
     <Content Include="Content\js\Scripts.js" />
     <Content Include="favicon.ico" />

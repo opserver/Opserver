@@ -44,6 +44,7 @@ Open Source Projects in Use
 
 JavaScript:  
 [d3.js](http://d3js.org/) by Michael Bostock  
+[ColorBrewer](http://colorbrewer2.org/) by Cynthia Brewer and Mark Harrower  
 [HTML Query Plan](https://code.google.com/p/html-query-plan/) by Justin Pealing  
 [isotope](http://isotope.metafizzy.co) by Metafizzy  
 [jQuery](http://jquery.com) by The jQuery Foundation  
