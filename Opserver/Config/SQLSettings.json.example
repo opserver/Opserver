@@ -12,7 +12,6 @@
         },
         {
         	"name": "NY-SQLCL04",
-            "connectionString": "Data Source=$ServerName$;Initial Catalog=master;Integrated Security=SSPI;",
         	"refreshIntervalSeconds": 20,
         	"nodes": [
         		{ "name": "NY-SQL03" },
@@ -22,7 +21,10 @@
         }
     ],
     "instances": [
-        { "name": "NY-DB05" },
+        { 
+            "name": "NY-DB05"
+            "connectionString": "Data Source=NY-DB05;Initial Catalog=bob;Integrated Security=SSPI;", 
+        },
         { "name": "NY-DESQL01" },
         { "name": "NY-RESTORESQL01" },
         { "name": "NY-UTILSQL01" },
