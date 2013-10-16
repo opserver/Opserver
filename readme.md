@@ -9,7 +9,7 @@ Opserver is a monitoring system by the team at [Stack Exchange](http://stackexch
 * haproxy
 * ... and more as we go   
 
-Known as “status” internally, Opserver provides a fast overall view of all our major systems that also allows drilling in for more detail.
+Known as “status” internally, Opserver provides a fast overall view of all our major systems that also allows drilling in for more detail.  For an idea of the UI, you can see some [screenshots from our Velocity 2013 talk](http://imgur.com/a/dawwf).
 
 Installation
 -----------
