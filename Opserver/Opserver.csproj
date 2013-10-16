@@ -523,7 +523,7 @@
     <Content Include="Views\Hub\HAProxy.Group.cshtml" />
     <Content Include="Views\Shared\TopRefresh.cshtml" />
     <Content Include="Views\Shared\NoConfiguration.cshtml" />
-    <None Include="Views\SQL\Servers.cshtml" />
+    <Content Include="Views\SQL\Servers.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />
