@@ -51,7 +51,7 @@
                     <td colspan="5">Error: @Model.ErrorMessage</td>
                 </tr>
             }
-            @if (serverInfo.IsMaster && serverInfo.SlaveCount > 0 && Model.KeyStats.Count == 0)
+            @if (serverInfo.IsMaster && serverInfo.SlaveCount > 0 && Model.KeyStats.Count == 1)
             {
                 <tr class="option-row">
                     <td colspan="5">

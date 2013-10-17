@@ -102,6 +102,7 @@ namespace StackExchange.Opserver
             {
                 // Defaults
                 Port = 6379;
+                AnalysisRegexes = new Dictionary<string, string>();
             }
 
             /// <summary>

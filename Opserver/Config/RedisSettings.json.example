@@ -5,7 +5,7 @@
             {
                 "name": "Core (Q&A)",
                 "port": "6379",
-                "Regexes": {
+                "analysisRegexes": {
                     "**local**": "^local-",
                     "**dev**": "^dev-",
                     "**local**": "^local:",
@@ -27,7 +27,7 @@
             {
                 "name": "CoreML (Q&A)",
                 "port": "6383",
-                "Regexes": {
+                "analysisRegexes": {
                     "ltah-home-pred": "^ltah-home-pred-",
                     "ltal-home-pred": "^ltal-home-pred-",
                     "ml-ltap-cache": "^ml-ltap-cache-",

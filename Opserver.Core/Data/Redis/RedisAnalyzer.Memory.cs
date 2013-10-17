@@ -39,23 +39,11 @@ namespace StackExchange.Opserver.Data.Redis
             return string.Format("redis-memory-analysis-{0}:{1}:{2}", connectionInfo.Host, connectionInfo.Port, database);
         }
 
-        public static RedisMemoryAnalysis AnalyzerDatabaseMemory(RedisConnectionInfo connectionInfo, int database, bool runOnMaster = false)
+        public static RedisMemoryAnalysis AnalyzeDatabaseMemory(RedisConnectionInfo connectionInfo, int database)
         {
-            if (!runOnMaster) // in bad situations, we may have to do this
-            {
-                var serverInfo = RedisInstance.GetInstance(connectionInfo);
-                if (serverInfo.IsMaster)
-                {
-                    return new RedisMemoryAnalysis(connectionInfo, database)
-                    {
-                        ErrorMessage = "Cannot run memory analysis on a master - it hurts."
-                    };
-                }
-            }
-
             using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database))
             {
-                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (old, ctx) => GetDatabaseMemoryAnalysis(connectionInfo, database, runOnMaster), 24 * 60 * 60, 24 * 60 * 60);
+                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (old, ctx) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24 * 60 * 60, 24 * 60 * 60);
             }
         }
 
@@ -64,7 +52,7 @@ namespace StackExchange.Opserver.Data.Redis
             Current.LocalCache.Remove(GetMemoryAnalysisKey(connectionInfo, database));
         }
 
-        private static RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database, bool runOnMaster = false)
+        private static RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
             using (var rc = new RedisConnection(connectionInfo.Host, connectionInfo.Port, syncTimeout: 10 * 60 * 1000, allowAdmin: true))
             {
@@ -81,16 +69,6 @@ namespace StackExchange.Opserver.Data.Redis
 
                 rc.Name = "Status-MemoryAnalyzer";
                 rc.Wait(rc.Open());
-
-                if (!runOnMaster)
-                {
-                    var role = rc.Wait(rc.Server.GetInfo("replication"))["role"];
-                    if (string.Equals(role, "master", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        ma.ErrorMessage = "Cannot be run on a master";
-                        return ma;
-                    }
-                }
 
                 ma.Analyze(rc);
 

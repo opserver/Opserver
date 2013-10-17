@@ -7,7 +7,7 @@ using StackExchange.Opserver.Views.Redis;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Redis)]
-    public partial class RedisController : StatusController
+    public class RedisController : StatusController
     {
         protected override ISecurableSection SettingsSection
         {
@@ -66,10 +66,10 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/instance/summary/{type}")]
-        public ActionResult InstanceSummary(string node, int port, string type)
+        public ActionResult InstanceSummary(string node, string type)
         {
-            var i = RedisInstance.GetInstance(node, port);
-            if (i == null) return ContentNotFound("Could not find instance " + node + ":" + port);
+            var i = RedisInstance.GetInstance(node);
+            if (i == null) return ContentNotFound("Could not find instance " + node);
 
             switch (type)
             {
@@ -81,25 +81,25 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/analyze/memory")]
-        public ActionResult Analysis(string node, int port, int db, bool runOnMaster = false)
+        public ActionResult Analysis(string node, int db, bool runOnMaster = false)
         {
-            var rci = RedisConnectionInfo.FromCache(node, port);
-            if (rci == null)
-                return TextPlain("Connection not found");
-            var analysis = RedisAnalyzer.AnalyzerDatabaseMemory(rci, db, runOnMaster);
+            var instance = RedisInstance.GetInstance(node);
+            if (instance == null)
+                return TextPlain("Instance not found");
+            var analysis = instance.GetDatabaseMemoryAnalysis(db, runOnMaster);
 
             return View("Server.Analysis.Memory", analysis);
         }
 
         [Route("redis/analyze/memory/clear")]
-        public ActionResult ClearAnalysis(string node, int port, int db)
+        public ActionResult ClearAnalysis(string node, int db)
         {
-            var rci = RedisConnectionInfo.FromCache(node, port);
-            if (rci == null)
-                return TextPlain("Connection not found");
-            RedisAnalyzer.ClearDatabaseMemoryAnalysisCache(rci, db);
+            var instance = RedisInstance.GetInstance(node);
+            if (instance == null)
+                return TextPlain("Instance not found");
+            instance.ClearDatabaseMemoryAnalysisCache(db);
 
-            return RedirectToAction("Analysis", new { node, port, db });
+            return RedirectToAction("Analysis", new { node, db });
         }
     }
 }

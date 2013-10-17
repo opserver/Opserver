@@ -93,6 +93,24 @@ namespace StackExchange.Opserver.Data.Redis
             return string.Concat(Host, ": ", Port);
         }
 
+        public RedisMemoryAnalysis GetDatabaseMemoryAnalysis(int database, bool runIfMaster = false)
+        {
+            if (IsMaster && !runIfMaster)
+            {
+                return new RedisMemoryAnalysis(ConnectionInfo, database)
+                    {
+                        ErrorMessage = "Cannot run memory analysis on a master - it hurts."
+                    };
+            }
+
+            return RedisAnalyzer.AnalyzeDatabaseMemory(ConnectionInfo, database);
+        }
+
+        public void ClearDatabaseMemoryAnalysisCache(int database)
+        {
+            RedisAnalyzer.ClearDatabaseMemoryAnalysisCache(ConnectionInfo, database);
+        }
+
         //static RedisInstance()
         //{
         // Cache all the things! - need ClientFlags first though
