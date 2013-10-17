@@ -76,7 +76,7 @@
         <li>Redis: @EnabledSpan(s.Redis.Enabled)</li>
         <li>Elastic: @EnabledSpan(s.Elastic.Enabled)</li>
         <li>HAProxy: @EnabledSpan(s.HAProxy.Enabled)</li>
-        <li>HAProxy Traffic: @EnabledSpan(s.HAProxy.Traffic.Enabled)</li>
+        @if (s.HAProxy.Enabled) { <li>HAProxy Traffic: @EnabledSpan(s.HAProxy.Traffic.Enabled)</li> }
         <li>TeamCity: @EnabledSpan(s.TeamCity.Enabled)</li>
     </ul>
 </section>
