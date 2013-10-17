@@ -781,10 +781,11 @@ namespace StackExchange.Opserver
         /// <param name="bytes">This value.</param>
         /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
         /// <param name="precision">How much precision to show, defaults to 2</param>
+        /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this int bytes, string unit = "B", int precision = _precision)
+        public static string ToSize(this int bytes, string unit = "B", int precision = _precision, string zero = "n/a")
         {
-            return ToSize((double)bytes, unit, precision);
+            return ToSize((double)bytes, unit, precision, zero: zero);
         }
 
         /// <summary>
@@ -793,10 +794,11 @@ namespace StackExchange.Opserver
         /// <param name="bytes">This value.</param>
         /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
         /// <param name="precision">How much precision to show, defaults to 2</param>
+        /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this long bytes, string unit = "B", int precision = _precision)
+        public static string ToSize(this long bytes, string unit = "B", int precision = _precision, string zero = "n/a")
         {
-            return ToSize((double)bytes, unit, precision);
+            return ToSize((double)bytes, unit, precision, zero: zero);
         }
 
         /// <summary>
@@ -805,10 +807,11 @@ namespace StackExchange.Opserver
         /// <param name="bytes">This value.</param>
         /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
         /// <param name="precision">How much precision to show, defaults to 2</param>
+        /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this float bytes, string unit = "B", int precision = _precision)
+        public static string ToSize(this float bytes, string unit = "B", int precision = _precision, string zero = "n/a")
         {
-            return ToSize((double)bytes, unit, precision);
+            return ToSize((double)bytes, unit, precision, zero: zero);
         }
 
         /// <summary>
@@ -818,10 +821,11 @@ namespace StackExchange.Opserver
         /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="kiloSize">1k size, usually 1024 or 1000 depending on context</param>
+        /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this double bytes, string unit = "B", int precision = _precision, int kiloSize = 1024)
+        public static string ToSize(this double bytes, string unit = "B", int precision = _precision, int kiloSize = 1024, string zero = "n/a")
         {
-            if (bytes < 1) return "n/a";
+            if (bytes < 1) return zero;
             var pow = Math.Floor((bytes > 0 ? Math.Log(bytes) : 0) / Math.Log(kiloSize));
             pow = Math.Min(pow, _units.Count - 1);
             var value = bytes / Math.Pow(kiloSize, pow);

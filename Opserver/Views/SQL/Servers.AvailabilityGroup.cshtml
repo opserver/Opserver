@@ -36,8 +36,8 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
                         </div>
                         @RenderDBIssues(ag.LocalReplica)
                         <div class="ag-transfer">
-                            <span class="icon arrow up"></span>@(((long)ag.RemoteReplicas.Sum(r => r.BytesSentPerSecond)).ToSize()) <span class="note">/sec</span>
-                            <span class="icon arrow down"></span>@(((long)ag.RemoteReplicas.Sum(r => r.BytesReceivedPerSecond)).ToSize()) <span class="note">/sec</span>
+                            <span class="icon arrow up"></span>@(((long)ag.RemoteReplicas.Sum(r => r.BytesSentPerSecond)).ToSize(zero: "0")) <span class="note">/sec</span>
+                            <span class="icon arrow down"></span>@(((long)ag.RemoteReplicas.Sum(r => r.BytesReceivedPerSecond)).ToSize(zero: "0")) <span class="note">/sec</span>
                         </div>
                         <div class="ag-queue">
                             <span class="label">Log Size:</span> @ag.LocalReplica.Databases.Sum(db => db.LogKBytesUsed).ToComma() <span class="note">kB</span>
@@ -83,8 +83,8 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
                             </div>
                             @RenderDBIssues(r)
                             <div class="ag-transfer">
-                                <span class="icon arrow up"></span> @(((long)r.BytesReceivedPerSecond).ToSize()) <span class="note">/sec</span>
-                                <span class="icon arrow down"></span> @(((long)r.BytesSentPerSecond).ToSize()) <span class="note">/sec</span>
+                                <span class="icon arrow up"></span> @(((long)r.BytesReceivedPerSecond).ToSize(zero: "0")) <span class="note">/sec</span>
+                                <span class="icon arrow down"></span> @(((long)r.BytesSentPerSecond).ToSize(zero: "0")) <span class="note">/sec</span>
                             </div>
                             <div class="ag-queue">
                                 <span class="label">Queue:</span> @r.Databases.Sum(db => db.LogSendQueueSize).ToComma() <span class="note">kB</span>
