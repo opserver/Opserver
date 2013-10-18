@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Data.SQL
             private const string _fetchSQL = @"
 Declare @ms_ticks bigint = (Select ms_ticks From sys.dm_os_sys_info);
 
-Select Top (@maxEvents) DateAdd(ms, -1 * (@ms_ticks - timestamp_ms), GetDate()) as EventTime, 
+Select Top (@maxEvents) DateAdd(ms, -1 * (@ms_ticks - timestamp_ms), GetUTCDate()) as EventTime, 
 	   ProcessUtilization,
 	   SystemIdle
 From (Select Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,
