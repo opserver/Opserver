@@ -22,7 +22,7 @@
     ],
     "instances": [
         { 
-            "name": "NY-DB05"
+            "name": "NY-DB05",
             "connectionString": "Data Source=NY-DB05;Initial Catalog=bob;Integrated Security=SSPI;", 
         },
         { "name": "NY-DESQL01" },
