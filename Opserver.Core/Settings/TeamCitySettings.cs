@@ -28,6 +28,7 @@ namespace StackExchange.Opserver
         {
             // Defaults
             BuildFetchIntervalSeconds = 30;
+            UseSsl = true;
         }
 
         /// <summary>
@@ -44,6 +45,11 @@ namespace StackExchange.Opserver
         /// Password to use when hitting the TeamCity API
         /// </summary>
         public string Password { get; set; }
+
+        /// <summary>
+        /// Should the dashboard connect to the TeamCity API via SSL
+        /// </summary>
+        public bool UseSsl { get; set; }
 
         /// <summary>
         /// How many seconds to cache builds for before fetching for new ones, defaults to 30

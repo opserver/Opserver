@@ -1,5 +1,6 @@
 ﻿{
     "url": "my.teamcity.server.url",
+    "useSsl": true,
     "user": "teamcityuser",
     "password": "teamcitypass",
     "buildFetchIntervalSeconds": 30,
