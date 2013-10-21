@@ -52,11 +52,8 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Instance(string node, bool ajax = false)
         {
             var instance = SQLInstance.Get(node);
-            if (instance == null)
-            {
-                if (ajax) return ContentNotFound("Instance " + node + " was not found.");
-                return PageNotFound("Instance not found", "Count not find SQL Instance: " + node);
-            }
+            if (instance == null && ajax)
+                return ContentNotFound("Instance " + node + " was not found.");
 
             var vd = new DashboardModel
             {
