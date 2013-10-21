@@ -129,7 +129,13 @@ namespace StackExchange.Opserver.Data
 
         public static TeamCityClient GetClient()
         {
-            var client = new TeamCityClient(Current.Settings.TeamCity.Url, useSsl: true);
+            TeamCityClient client;
+            Uri uri;
+            if (Uri.TryCreate(Current.Settings.TeamCity.Url, UriKind.Absolute, out uri))
+                client = new TeamCityClient(uri.Host, useSsl: uri.Scheme == Uri.UriSchemeHttps);
+            else
+                client = new TeamCityClient(Current.Settings.TeamCity.Url, useSsl: false);
+
             client.Connect(Current.Settings.TeamCity.User, Current.Settings.TeamCity.Password);
             return client;
         }

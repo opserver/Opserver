@@ -31,7 +31,7 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Semilcolon delimited list of AD groups that can see the exceptions dashboard, but perform actions
+        /// Url for the TeamCity Server
         /// </summary>
         public string Url { get; set; }
 
