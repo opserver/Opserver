@@ -126,7 +126,7 @@ namespace StackExchange.Opserver.Data
                 {
                     Thread.Sleep(2000);
                 }
-                catch (ThreadAbortException e)
+                catch (ThreadAbortException)
                 {
                     // application is cycling, AND THAT'S OKAY
                 }

@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public Dictionary<string, Stats> GetIndexStats()
             {
-                return Indices ?? GlobalStats.Indices;
+                return Indices ?? new Dictionary<string, Stats>();
             }
         }
     }
