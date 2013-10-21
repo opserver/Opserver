@@ -25,6 +25,7 @@ namespace StackExchange.Opserver.Data
 
         public class MonitorStatusArgs : EventArgs
         {
+            public MonitorStatus OldMonitorStatus { get; internal set; }
             public MonitorStatus NewMonitorStatus { get; internal set; }
         }
     }

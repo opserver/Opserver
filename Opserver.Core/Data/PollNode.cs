@@ -52,6 +52,7 @@ namespace StackExchange.Opserver.Data
         }
         
         private readonly object _monitorStatusLock = new object();
+        protected MonitorStatus? PreviousMonitorStatus;
         protected MonitorStatus? CachedMonitorStatus;
         public virtual MonitorStatus MonitorStatus
         {
@@ -82,6 +83,19 @@ namespace StackExchange.Opserver.Data
                         {
                             CachedMonitorStatus = GetMonitorStatus().ToList().GetWorstStatus();
                             MonitorStatusReason = CachedMonitorStatus == MonitorStatus.Good ? null : GetMonitorStatusReason();
+                        }
+                        if (!PreviousMonitorStatus.HasValue || PreviousMonitorStatus != CachedMonitorStatus)
+                        {
+                            var handler = MonitorStatusChanged;
+                            if (handler != null)
+                            {
+                                handler(this, new MonitorStatusArgs
+                                {
+                                    OldMonitorStatus = PreviousMonitorStatus.Value,
+                                    NewMonitorStatus = CachedMonitorStatus.Value
+                                });
+                            }
+                            PreviousMonitorStatus = CachedMonitorStatus;
                         }
                     }
                 }
