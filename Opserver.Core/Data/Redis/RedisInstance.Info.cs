@@ -17,14 +17,16 @@ namespace StackExchange.Opserver.Data.Redis
                     {
                         CacheForSeconds = 5,
                         UpdateCache = GetFromRedis("INFO", rc =>
-                            {
-                                var infoStr = rc.Wait(rc.GetInfo());
-                                if (ConnectionInfo.Features == null)
-                                    ConnectionInfo.Features = rc.Features;
-                                var ri = RedisInfo.FromInfoString(infoStr);
-                                if (ri != null) Replication = ri.Replication;
-                                return ri;
-                            })
+                        {
+#pragma warning disable 618
+                            var infoStr = rc.Wait(rc.GetInfo());
+#pragma warning restore 618
+                            if (ConnectionInfo.Features == null)
+                                ConnectionInfo.Features = rc.Features;
+                            var ri = RedisInfo.FromInfoString(infoStr);
+                            if (ri != null) Replication = ri.Replication;
+                            return ri;
+                        })
                     });
             }
         }
