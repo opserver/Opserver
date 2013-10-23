@@ -247,9 +247,9 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                             </tr>
                         </thead>
                         <tbody>
-                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Received from Replica/sec", "_Total")
-                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Sent to Replica/sec", "_Total")
-                        @RenderPerSecCounter("SQLServer:Availability Replica", "Bytes Sent to Transport/sec", "_Total")
+                        @RenderPerSecCounter("Availability Replica", "Bytes Received from Replica/sec", "_Total")
+                        @RenderPerSecCounter("Availability Replica", "Bytes Sent to Replica/sec", "_Total")
+                        @RenderPerSecCounter("Availability Replica", "Bytes Sent to Transport/sec", "_Total")
                         </tbody>
                     </table>
                 }
@@ -316,8 +316,8 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
     <div class="right-col">
         @if (counters.Any())
         {
-            var batchCounter = i.GetPerfCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
-            var compCounter = i.GetPerfCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "");
+            var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
+            var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
             var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? ((decimal)compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
             <div class="section-wrap refresh-group" data-name="instance-performance">
                 <div class="summary-section-header">Performance</div>
@@ -330,13 +330,13 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         </tr>
                     </thead>
                     <tbody>
-                    @RenderPerSecCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
-                    @RenderPerSecCounter("SQLServer:SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
-                    @RenderPerSecCounter("SQLServer:Databases", "Transactions/sec", "_Total")
+                    @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
+                    @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
+                    @RenderPerSecCounter("Databases", "Transactions/sec", "_Total")
                         
-                    @RenderPerSecCounter("SQLServer:Access Methods", "Index Searches/sec", "")
-                    @RenderPerSecCounter("SQLServer:Locks", "Lock Requests/sec", "_Total")
-                    @RenderPerSecCounter("SQLServer:SQL Errors", "Errors/sec", "_Total", valueUrl: "#/sql/summary/errors") 
+                    @RenderPerSecCounter("Access Methods", "Index Searches/sec", "")
+                    @RenderPerSecCounter("Locks", "Lock Requests/sec", "_Total")
+                    @RenderPerSecCounter("SQL Errors", "Errors/sec", "_Total", valueUrl: "#/sql/summary/errors") 
                     </tbody>
                 </table>
             </div>
@@ -344,15 +344,15 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                 <table>
                     @Helpers.SectionHeader("Sizes")
                     <tbody>
-                        @RenderCounter("SQLServer:Memory Manager", "Total Server Memory (KB)", "", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Memory Manager", "Target Server Memory (KB)", "", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Memory Manager", "Database Cache Memory (KB)", "", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Memory Manager", "Free Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("Memory Manager", "Total Server Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("Memory Manager", "Target Server Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("Memory Manager", "Database Cache Memory (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("Memory Manager", "Free Memory (KB)", "", toSuffix: kbToSize)
                         
-                        @RenderCounter("SQLServer:Databases", "Data File(s) Size (KB)", "_Total", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Databases", "Log File(s) Size (KB)", "_Total", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Databases", "Log File(s) Used Size (KB)", "_Total", toSuffix: kbToSize)
-                        @RenderCounter("SQLServer:Transactions", "Free Space in tempdb (KB)", "", toSuffix: kbToSize)
+                        @RenderCounter("Databases", "Data File(s) Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("Databases", "Log File(s) Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("Databases", "Log File(s) Used Size (KB)", "_Total", toSuffix: kbToSize)
+                        @RenderCounter("Transactions", "Free Space in tempdb (KB)", "", toSuffix: kbToSize)
                     </tbody>
                 </table>
             </div>
@@ -367,18 +367,18 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         </tr>
                     </thead>
                     <tbody>
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Lock waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Log buffer waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Log write waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Network IO waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Non-Page latch waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Page IO latch waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Page latch waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Thread-safe memory objects waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Transaction ownership waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Wait for the worker", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Workspace synchronization waits", "Waits started per second")
-                    @RenderPerSecCounter("SQLServer:Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second")
+                    @RenderPerSecCounter("Wait Statistics", "Lock waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Log buffer waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Log write waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Network IO waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Non-Page latch waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Page IO latch waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Page latch waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Thread-safe memory objects waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Transaction ownership waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Wait for the worker", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Workspace synchronization waits", "Waits started per second")
+                    @RenderPerSecCounter("Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second")
                     </tbody>
                 </table>
             </div>*@
@@ -386,13 +386,13 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                 <table>
                     @Helpers.SectionHeader("Cache")
                     <tbody>
-                        @RenderCounter("SQLServer:Buffer Manager", "Page life expectancy", "", toSuffix: d => "seconds", tooltip: d => TimeSpan.FromSeconds((double)d).ToReadableString())
-                        @RenderCounter("SQLServer:Buffer Manager", "Page lookups/sec", "")
-                        @RenderCounter("SQLServer:Buffer Manager", "Database pages", "")
+                        @RenderCounter("Buffer Manager", "Page life expectancy", "", toSuffix: d => "seconds", tooltip: d => TimeSpan.FromSeconds((double)d).ToReadableString())
+                        @RenderCounter("Buffer Manager", "Page lookups/sec", "")
+                        @RenderCounter("Buffer Manager", "Database pages", "")
 
-                        @RenderCounter("SQLServer:Plan Cache", "Cache Object Counts", "_Total", "Objects in Cache")
-                        @RenderCounter("SQLServer:Plan Cache", "Cache Object Counts", "SQL Plans", "Plans in Cache")
-                        @RenderCounter("SQLServer:Plan Cache", "Cache Hit Ratio", "_Total")
+                        @RenderCounter("Plan Cache", "Cache Object Counts", "_Total", "Objects in Cache")
+                        @RenderCounter("Plan Cache", "Cache Object Counts", "SQL Plans", "Plans in Cache")
+                        @RenderCounter("Plan Cache", "Cache Hit Ratio", "_Total")
                     </tbody>
                 </table>
             </div>
@@ -401,14 +401,14 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                 <table>
                     @SectionHeader("Performance")
                     <tbody>
-                        @RenderCounter("SQLServer:General Statistics", "User Connections", "")
-                        @RenderCounter("SQLServer:General Statistics", "Connection Reset/sec", "")
+                        @RenderCounter("General Statistics", "User Connections", "")
+                        @RenderCounter("General Statistics", "Connection Reset/sec", "")
 
             
-                        @RenderCounter("SQLServer:Latches", "Average Latch Wait Time (ms)", "")
-                        @RenderCounter("SQLServer:Latches", "Latch Waits/sec", "")
+                        @RenderCounter("Latches", "Average Latch Wait Time (ms)", "")
+                        @RenderCounter("Latches", "Latch Waits/sec", "")
                     
-                        @RenderCounter("SQLServer:Workload Group Stats", "Requests completed/sec", "default")
+                        @RenderCounter("Workload Group Stats", "Requests completed/sec", "default")
                     </tbody>
                 </table>
             </div>*@

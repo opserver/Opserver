@@ -13,6 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance : PollNode, ISearchableNode
     {
         public string Name { get; internal set; }
+        public string ObjectName { get; internal set; }
         public string CategoryName { get { return "SQL"; } }
         string ISearchableNode.DisplayName { get { return Name; } }
         protected string ConnectionString { get; set; }
@@ -36,10 +37,11 @@ namespace StackExchange.Opserver.Data.SQL
             }
         }
 
-        public SQLInstance(string name, string connectionString) : base(name)
+        public SQLInstance(string name, string connectionString, string objectName) : base(name)
         {
             Version = new Version(); // default to 0.0
             Name = name;
+            ObjectName = objectName.IsNullOrEmptyReturn(objectName, "SQLServer");
             ConnectionString = connectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", name));
         }
 

@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.SQL
     {
         public SQLCluster Cluster { get; internal set; }
 
-        public SQLNode(SQLCluster sqlCluster, SQLSettings.Instance node) : base(node.Name, node.ConnectionString)
+        public SQLNode(SQLCluster sqlCluster, SQLSettings.Instance node) : base(node.Name, node.ConnectionString, node.ObjectName)
         {
             Cluster = sqlCluster;
         }

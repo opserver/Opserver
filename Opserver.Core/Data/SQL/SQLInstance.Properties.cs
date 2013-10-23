@@ -91,8 +91,8 @@ namespace StackExchange.Opserver.Data.SQL
                 }
             }
 
-            internal const string FetchSQL = @"
-Declare @sql nvarchar(4000) = '
+            internal const string FetchSQL = @"Declare @sql nvarchar(4000);
+Set @sql = '
 Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        @@VERSION FullVersion,
        Cast(SERVERPROPERTY(''ProductLevel'') as nvarchar(128)) Level,
@@ -115,18 +115,22 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        stack_size_in_bytes StackSizeBytes,
        max_workers_count MaxWorkersCount,
        scheduler_count SchedulerCount,
-       scheduler_total_count SchedulerTotalCount,
-       sqlserver_start_time SQLServerStartTime,
-       virtual_machine_type VirtualMachineType,';
+       scheduler_total_count SchedulerTotalCount,'
+       
+If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
+	Set @sql = @sql + '
+       sqlserver_start_time SQLServerStartTime,';
 
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 11
     Set @sql = @sql + '
+	   virtual_machine_type VirtualMachineType,	  
        Cast(physical_memory_kb as bigint) * 1024 PhysicalMemoryBytes,
        Cast(virtual_memory_kb as bigint) * 1024 VirtualMemoryBytes,
        Cast(committed_kb as bigint) * 1024 CommittedBytes,
        Cast(committed_target_kb as bigint) * 1024 CommittedTargetBytes';
 Else 
     Set @sql = @sql + '
+       null VirtualMachineType,
        physical_memory_in_bytes PhysicalMemoryBytes,
        virtual_memory_in_bytes VirtualMemoryBytes,
        Cast(bpool_committed as bigint) * 8 * 1024 CommittedBytes,

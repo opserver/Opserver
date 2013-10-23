@@ -413,7 +413,8 @@ Create Table #vlfTemp (
     CreateLSN nvarchar(255)
 );
 
-Declare @sql nvarchar(max) = '';
+Declare @sql nvarchar(max);
+Set @sql = '';
 Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
   Insert #VLFCounts Select ' + Cast(database_id as nvarchar(10)) + ',''' + name + ''', Count(*) From #vlfTemp;
   Truncate Table #vlfTemp;'
