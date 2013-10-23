@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations", conn =>
                         {
-                            var sql = TopOperation.FetchSQL + (options != null ? options.ToSQLWhere() + options.ToSQLOrder() : "");
+                            var sql = GetFetchSQL<TopOperation>() + (options != null ? options.ToSQLWhere() + options.ToSQLOrder() : "");
                             return conn.Query<TopOperation>(sql, options).ToList();
                         })
                 };
@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Cache<TopOperation> GetTopOperation(byte[] planHandle)
         {
-            const string sql = TopOperation.FetchSQL + "WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
+            string sql = GetFetchSQL<TopOperation>() + " WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
             return new Cache<TopOperation>
                 {
                     CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode()),
@@ -40,9 +40,11 @@ namespace StackExchange.Opserver.Data.SQL
                 };
         }
 
-        public class TopOperation
+        public class TopOperation : ISQLVersionedObject
         {
             // ReSharper disable UnusedAutoPropertyAccessor.Local
+            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+
             public long AvgCPU { get; private set; }
             public long TotalCPU { get; private set; }
             public long AvgCPUPerMinute { get; private set; }
@@ -125,6 +127,18 @@ SELECT TOP (@MaxResultCount) total_worker_time / execution_count AS AvgCPU,
                             SUM(total_logical_reads) TotalReads
                        FROM sys.dm_exec_query_stats) AS t
 ";
+            public string GetFetchSQL(Version v)
+            {
+                // Row info added in 2008 R2 SP2
+                if (v < SQLServerVersions.SQL2008R2.SP2)
+                {
+                    return FetchSQL.Replace("qs.min_rows", "0")
+                                   .Replace("qs.max_rows","0")
+                                   .Replace("qs.total_rows","0")
+                                   .Replace("qs.last_rows","0");
+                }
+                return FetchSQL;
+            }
         }
 
         public enum TopSorts
@@ -193,7 +207,7 @@ SELECT TOP (@MaxResultCount) total_worker_time / execution_count AS AvgCPU,
                 if (Search.HasValue()) clauses.Add("SUBSTRING(st.text, ( qs.statement_start_offset / 2 ) + 1, ( ( CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(st.text) ELSE qs.statement_end_offset END - qs.statement_start_offset ) / 2 ) + 1) Like '%' + @Search + '%'");
                 if (MinLastRunDate.HasValue) clauses.Add("qs.last_execution_time >= @MinLastRunDate");
 
-                return clauses.Any() ? "Where " + string.Join("\n  AND ", clauses) : "";
+                return clauses.Any() ? " WHERE " + string.Join("\n  AND ", clauses) : "";
             }
 
             public string ToSQLOrder()

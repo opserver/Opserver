@@ -27,8 +27,9 @@ namespace StackExchange.Opserver.Data.SQL
         public PerfCounterRecord GetPerfCounter(string category, string name, string instance)
         {
             var counters = PerfCounters.SafeData();
+            var objectName = this.ObjectName + ":" + category;
             return counters != null
-                       ? counters.FirstOrDefault(c => c.ObjectName == category && c.CounterName == name && c.InstanceName == instance)
+                       ? counters.FirstOrDefault(c => c.ObjectName == objectName && c.CounterName == name && c.InstanceName == instance)
                        : null;
         }
 
