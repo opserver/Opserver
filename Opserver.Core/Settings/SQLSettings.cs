@@ -124,11 +124,16 @@ namespace StackExchange.Opserver
             /// </summary>
             public string ConnectionString { get; set; }
 
+            /// <summary>
+            /// Object Name for this instance
+            /// </summary>
+            public string ObjectName { get; set; }
+
             public bool Equals(Instance other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name) && string.Equals(ConnectionString, other.ConnectionString);
+                return string.Equals(Name, other.Name) && string.Equals(ConnectionString, other.ConnectionString) && string.Equals(ObjectName, other.ObjectName);
             }
 
             public override bool Equals(object obj)

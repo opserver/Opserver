@@ -40,7 +40,8 @@ namespace StackExchange.Opserver.Data.SQL
             public int ExternalProcessUtilization { get { return 100 - SystemIdle - ProcessUtilization; } }
 
             private const string _fetchSQL = @"
-Declare @ms_ticks bigint = (Select ms_ticks From sys.dm_os_sys_info);
+Declare @ms_ticks bigint;
+Set @ms_ticks = (Select ms_ticks From sys.dm_os_sys_info);
 
 Select Top (@maxEvents) DateAdd(ms, -1 * (@ms_ticks - timestamp_ms), GetUTCDate()) as EventTime, 
 	   ProcessUtilization,

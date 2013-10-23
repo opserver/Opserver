@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Data.SQL
                 if (_standaloneInstances != null) return _standaloneInstances;
                 return Current.Settings.SQL.Enabled
                            ? Current.Settings.SQL.Instances
-                                    .Select(i => new SQLInstance(i.Name, i.ConnectionString))
+                                    .Select(i => new SQLInstance(i.Name, i.ConnectionString, i.ObjectName))
                                     .Where(i => i.TryAddToGlobalPollers())
                                     .ToList()
                            : new List<SQLInstance>();
