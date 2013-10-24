@@ -16,7 +16,8 @@ namespace StackExchange.Opserver.Data.Elastic
             {
                 var uri = new Uri(string.Format("http://{0}", n));
                 var cs = new ConnectionSettings(uri).SetTimeout(2000);
-                var cli = new ElasticClient(cs);
+                var profiledConn = new ProfiledElasticConnection(cs);
+                var cli = new ElasticClient(cs, profiledConn);
                 IResponse response = RefreshFromConnection(cli);
 
                 // Some implementations are raw

@@ -132,6 +132,7 @@
     </Compile>
     <Compile Include="Data\Elastic\ElasticDataObject.cs" />
     <Compile Include="Data\Elastic\ElasticIssues.cs" />
+    <Compile Include="Data\Elastic\ProfiledElasticConnection.cs" />
     <Compile Include="Data\HAProxy\HAProxyGroup.Cache.cs">
       <DependentUpon>HAProxyGroup.cs</DependentUpon>
     </Compile>
