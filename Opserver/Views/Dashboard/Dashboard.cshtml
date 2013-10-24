@@ -11,7 +11,7 @@
 @section head {
     <script>
     $(function() {
-        Status.Dashboard.init({ refresh: 0, filter: '@(Model.Filter)' });
+        Status.Dashboard.init({ refresh: 60, filter: '@(Model.Filter)' });
         Status.Graphs.init({ start: @start, end: @end });
     });
     </script>}
