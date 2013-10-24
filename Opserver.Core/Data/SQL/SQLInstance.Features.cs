@@ -17,6 +17,7 @@ namespace StackExchange.Opserver.Data.SQL
             public bool HasSPWhoIsActive { get; private set; }
             public bool HasSPBlitz { get; private set; }
             public bool HasSPBlitzIndex { get; private set; }
+            public bool HasSPAskBrent { get; private set; }
 
             internal const string FetchSQL = @"
 With Procs (name) as (
@@ -26,7 +27,8 @@ Select name COLLATE Latin1_General_CI_AS From master.sys.objects Where type = 'P
 
 Select (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_whoIsActive') as HasSPWhoIsActive,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_Blitz') as HasSPBlitz,
-       (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_Blitz') as HasSPBlitzIndex";
+       (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_BlitzIndex') as HasSPBlitzIndex,
+       (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_AskBrent') as HasSPAskBrent";
 
             internal const string BatchFetchSQL = @"
 Declare @Supported Table (name sysname, header varchar(200));
