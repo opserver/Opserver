@@ -95,12 +95,15 @@
 
     private string Linkify(string s)
     {
+        if (string.IsNullOrEmpty(s))
+            return s;
+        
         if (Regex.IsMatch(s, @"%[A-Z0-9][A-Z0-9]"))
         {
             s = Server.UrlDecode(s);
         }
 
-        if (s != null && Regex.IsMatch(s, "^(https?|ftp|file)://"))
+        if (Regex.IsMatch(s, "^(https?|ftp|file)://"))
         {
             //@* || (Regex.IsMatch(s, "/[^ /,]+/") && !s.Contains("/LM"))*@ // block special case of "/LM/W3SVC/1"
             var sane = SanitizeUrl(s);
