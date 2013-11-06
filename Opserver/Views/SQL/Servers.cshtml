@@ -29,7 +29,7 @@
     <td><a href="/sql/connections?node=@i.Name.UrlEncode()">@props.ConnectionCount.ToComma()</a> <span class="note">/ @props.SessionCount.ToComma()</span></td>
 }
 @helper BatchesCell(SQLInstance i) {
-    var batches = i.GetPerfCounter("SQLServer:SQL Statistics", "Batch Requests/sec", "");
+    var batches = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
     <td>@(batches != null ? ((long) batches.CalculatedValue).ToComma() : "")</td>
 }
 @if (Model.Clusters.Any())
