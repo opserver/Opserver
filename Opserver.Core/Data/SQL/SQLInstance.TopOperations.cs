@@ -193,7 +193,7 @@ SELECT TOP (@MaxResultCount) total_worker_time / execution_count AS AvgCPU,
             {
                 Sort = Sort ?? TopSorts.AvgCPUPerMinute;
                 MinExecs = MinExecs ?? 25;
-                LastRunSeconds = 24 * 60 * 60;
+                LastRunSeconds = LastRunSeconds ?? 24*60*60;
                 MinLastRunDate = MinLastRunDate ?? DateTime.UtcNow.AddDays(-1);
                 MaxResultCount = MaxResultCount ?? 100;
                 return this;
