@@ -90,7 +90,7 @@
                                         </div>
                                     }
                                     <div class="redis-instance">
-                                        @i.IconSpan() <a href="?node=@i.Host&port=:@i.Port">@i.Host:@i.Port</a> <span class="note">(Current)</span>
+                                        @i.IconSpan() <a href="?node=@i.Host:@i.Port">@i.Host:@i.Port</a> <span class="note">(Current)</span>
                                     </div>
                                     var slaves = i.SlaveInstances;
                                     if (slaves.Count > 0)
