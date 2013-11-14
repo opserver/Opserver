@@ -109,10 +109,12 @@
                 <div class="sql-bottom-active" style="overflow-x: auto;">
                     <div class="sql-query">
                         <div>
+                            @{ var textPos = 0; }
     @foreach (var statement in plan.Statements)
     {
-        <pre class="sql-block sql-preview-block prettyprint lang-sql">@statement.ParameterDeclareStatement
+        <pre class="sql-block sql-preview-block prettyprint lang-sql@(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
     @statement.StatementTextWithoutInitialParams</pre>
+        textPos += statement.StatementText.Length * 2;
     }
                         </div>
                     </div>
@@ -162,7 +164,7 @@
                                                 </div>
                                             </div>
                                         }
-                                        @if (ss.QueryPlan != null)
+                                        @if (ss != null && ss.QueryPlan != null)
                                         {
                                             if (ss.QueryPlan.NonParallelPlanReason.HasValue())
                                             {

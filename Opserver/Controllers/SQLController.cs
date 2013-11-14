@@ -103,7 +103,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/top/detail")]
-        public ActionResult TopDetail(string node, string handle)
+        public ActionResult TopDetail(string node, string handle, int? offset = null)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
             var instance = SQLInstance.Get(node);
@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Controllers
             var vd = new OpsTopDetailModel
                 {
                     Instance = instance,
-                    Op = instance.GetTopOperation(planHandle).Data
+                    Op = instance.GetTopOperation(planHandle, offset).Data
                 };
             return View("Operations.Top.Detail", vd);
         }

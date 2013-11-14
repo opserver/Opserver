@@ -11,7 +11,13 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
         [XmlIgnore]
         public List<BaseStmtInfoType> Statements
         {
-            get { return BatchSequence.SelectMany(bs => bs.SelectMany(b => b.Items.SelectMany(bst => bst.Statements))).ToList(); }
+            get
+            {
+                if (BatchSequence == null) return new List<BaseStmtInfoType>();
+                return BatchSequence.SelectMany(bs =>
+                        bs.SelectMany(b => b.Items != null ? b.Items.SelectMany(bst => bst.Statements) : null)
+                    ).ToList();
+            }
         }
     }
 

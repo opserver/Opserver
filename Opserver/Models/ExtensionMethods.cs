@@ -201,6 +201,8 @@ namespace StackExchange.Opserver.Models
         //XNamespace ns = "http://schemas.microsoft.com/sqlserver/2004/07/showplan";
         public static IHtmlString QueryPlanHtml(this SQLInstance.TopOperation op)
         {
+            if (op.QueryPlan == null) return null;
+
             using(var sr = new StringReader(op.QueryPlan))
             using (var xmlr = XmlReader.Create(sr))
             {

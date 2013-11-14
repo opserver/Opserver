@@ -26,17 +26,18 @@ namespace StackExchange.Opserver.Data.SQL
                 };
         }
 
-        public Cache<TopOperation> GetTopOperation(byte[] planHandle)
+        public Cache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
         {
             string sql = GetFetchSQL<TopOperation>() + " WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
+            if (statementStartOffset.HasValue) sql += " And qs.statement_start_offset = @statementStartOffset";
             return new Cache<TopOperation>
                 {
-                    CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode()),
+                    CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode() + "-" + statementStartOffset),
                     CacheForSeconds = 60,
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations",
                                                 conn =>
-                                                conn.Query<TopOperation>(sql, new {planHandle, MaxResultCount = 1}).FirstOrDefault())
+                                                conn.Query<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1}).FirstOrDefault())
                 };
         }
 

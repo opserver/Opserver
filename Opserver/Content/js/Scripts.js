@@ -518,10 +518,13 @@ Status.SQL = (function () {
         });
     }
 
-    function loadPlan(handle) {
+    function loadPlan(val) {
+        var parts = val.split('/'),
+            handle = parts[0],
+            offset = parts.length > 1 ? parts[1] : null;
         $('.sql-server .plan-row[data-plan-handle="' + handle + '"]').addClass('selected');
         var wrap = Status.getPopup();
-        wrap.load('/sql/top/detail', { node: Status.SQL.options.node, handle: handle }, function() {
+        wrap.load('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
             $('.query-col').removeClass('loading');
             Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
             prettyPrint();
@@ -594,11 +597,13 @@ Status.SQL = (function () {
         });        
         
         $('.sql-server').on('click', '.plan-row', function() {
-            var handle = $(this).data('plan-handle');
+            var $this = $(this),
+                handle = $this.data('plan-handle'),
+                offset = $this.data('offset');
             if (!handle) return;
-            window.location.hash = '#/plan/' + handle;
+            window.location.hash = '#/plan/' + handle + (offset ? '/' + offset : '');
             $('.plan-row.selected').removeClass('selected');
-            $(this).addClass('selected').find('.query-col').addClass('loading');
+            $this.addClass('selected').find('.query-col').addClass('loading');
         }).on('click', '.filters-current', function () {
             $('.filters').fadeToggle();
         }).on('keyup', '.filter-form', function (e) {
