@@ -658,7 +658,7 @@ Status.Redis = (function () {
 
         $.extend(Status.ajaxLoaders, {
             '#/redis/summary/': function (val) {
-                Status.summaryPopup('/redis/instance/summary/' + val, { node: Status.Redis.options.node, port: Status.Redis.options.port });
+                Status.summaryPopup('/redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
             }
         });
         
@@ -871,8 +871,8 @@ Status.Exceptions = (function () {
                     lastSelected = row.first();
                 }
             });
-            $(document).keyup(function(e) {
-                if (e.keyCode == 46) {
+            $(document).keydown(function(e) {
+                if (e.keyCode == 46 || e.keyCode == 8) {
                     var selected = $('.error.selected').not('.protected');
                     if (selected.length > 0) {
                         var ids = selected.map(function () { return $(this).data('id'); }).get();
@@ -895,6 +895,7 @@ Status.Exceptions = (function () {
                                 selected.last().children().first().errorPopupFromJSON(xhr, 'An error occurred clearing selected exceptions');
                             }
                         });
+                        return false;
                     }
                 }
             });

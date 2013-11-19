@@ -29,6 +29,8 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 yield return Info;
                 yield return Clients;
+                yield return Config;
+                yield return SlowLog;
             }
         }
 
@@ -64,14 +66,21 @@ namespace StackExchange.Opserver.Data.Redis
             return AppCache.GetHostName(hostOrIp);
         }
 
+        private RedisConnection GetConnection(int ioTimeout = 5000, int syncTimeout = 5000, bool allowAdmin = false)
+        {
+            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin)
+            {
+                Name = "Opserver"
+            };
+        }
+
         public Action<Cache<T>> GetFromRedis<T>(string opName, Func<RedisConnection, T> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "Redis Fetch: " + Name + ":" + opName,
                                    getData: () =>
                                        {
-                                           using (var rc = new RedisConnection(Host, Port, ioTimeout: 5000, syncTimeout: 5000, allowAdmin: true))
+                                           using (var rc = GetConnection(allowAdmin: true))
                                            {
-                                               rc.Name = "Status";
                                                rc.Wait(rc.Open());
                                                return getFromConnection(rc);
                                            }

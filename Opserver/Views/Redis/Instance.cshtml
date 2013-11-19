@@ -60,7 +60,10 @@
                         </tr>
                         <tr>
                             <td>Version</td>
-                            <td>@info.Server.Version</td>
+                            <td>
+                                @info.Server.Version
+                                <a href="#/redis/summary/config">(view config)</a>
+                            </td>
                         </tr>
                         <tr>
                             <td>Uptime</td>
@@ -282,22 +285,20 @@
                 </table> 
             </div>
             
-            @if (i.Clients.Data == null)
-            {
-                <div class="section-wrap refresh-group" data-name="instance-clients">
+            <div class="section-wrap refresh-group" data-name="instance-clients">
+                @if (i.Clients.Data == null)
+                {
                     <div class="summary-section-header">Clients</div>
                     <div class="no-content">No Client Connection Data</div>
-                </div>
-            }
-            else
-            {
-                var clients = i.Clients.Data;
-                <div class="section-wrap refresh-group" data-name="instance-clients">
+                }
+                else
+                {
+                    var clients = i.Clients.Data;
                     <div class="summary-section-header">Clients <a class="top-right-nav" href="#/redis/summary/clients">View All</a></div>
                     <table>
                         <tbody>
-                            @{ 
-                                var ips = clients.Select(c => c.Address.Split(StringSplits.Colon).First()).GroupBy(ip => ip).ToList(); 
+                            @{
+                                var ips = clients.Select(c => c.Address.Split(StringSplits.Colon).First()).GroupBy(ip => ip).ToList();
                                 if (ips.Any())
                                 {
                                     <tr>
@@ -329,8 +330,46 @@
                             }
                         </tbody>
                     </table>
-                </div>
-            }
+                }
+            </div>
+            <div class="section-wrap refresh-group" data-name="instance-slow-log">
+                @if (i.SlowLog.HasData() && i.SlowLog.Data.Any())
+                {
+                    <div class="summary-section-header">Slow Command Log <a class="top-right-nav" href="#/redis/summary/slow-log">View All</a></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Command</th>
+                                <th>Duration</th>
+                                <th>When</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in i.SlowLog.Data.Take(40))
+                            {
+                                <tr data-id="@entry.UniqueId">
+                                    <td>
+                                        <a href="@entry.GetHelpUrl()" target="_blank">@string.Join(" ", entry.Arguments)</a>
+                                    </td>
+                                    <td>@entry.Duration.ToTimeStringMini(3)</td>
+                                    <td>@entry.Time.ToRelativeTimeSpan()</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <div class="summary-section-header">Slow Command Log</div>
+                    <div class="no-content">
+                        No slow commands in the log
+                        @if (!i.IsSlowLogEnabled)
+                        {
+                            <div>Slow log is not enabled</div>
+                        }
+                    </div>
+                }
+            </div>
         </div>
     </div>
     }
