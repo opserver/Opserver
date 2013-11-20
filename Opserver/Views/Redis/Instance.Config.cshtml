@@ -1,0 +1,36 @@
+﻿@model StackExchange.Opserver.Data.Redis.RedisInstance
+@{
+    Layout = null;
+    var config = Model.Config.SafeData(true);
+}
+@if (config.Any())
+{
+    <div class="summary-dashboard">
+        <h3>
+            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> Config
+        </h3>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Config Param</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var entry in config.OrderBy(e => e.Key))
+                    {
+                        <tr>
+                            <td>@entry.Key</td>
+                            <td>@entry.Value</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="no-content">No configuration available</div>
+}

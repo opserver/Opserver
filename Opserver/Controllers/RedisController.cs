@@ -73,8 +73,12 @@ namespace StackExchange.Opserver.Controllers
 
             switch (type)
             {
+                case "config":
+                    return View("Instance.Config", i);
                 case "clients":
                     return View("Instance.Clients", i);
+                case "slow-log":
+                    return View("Instance.SlowLog", i);
                 default:
                     return ContentNotFound("Unknown summary view requested");
             }
