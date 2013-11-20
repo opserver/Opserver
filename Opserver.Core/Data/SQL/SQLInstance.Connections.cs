@@ -24,6 +24,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             public string LoginName { get; private set; }
             public string HostName { get; private set; }
+            public TransactionIsolationLevel TransactionIsolationLevel { get; private set; }
             public DateTime LastConnectTime { get; private set; }
             public int ConnectionCount { get; private set; }
             public long TotalReads { get; private set; }
@@ -32,6 +33,7 @@ namespace StackExchange.Opserver.Data.SQL
             internal const string FetchSQL = @"
 Select s.login_name LoginName,
        s.host_name HostName,
+       s.transaction_isolation_level TransactionIsolationLevel,
        Max(c.connect_time) LastConnectTime, 
        Count(*) ConnectionCount,
        Sum(Cast(c.num_reads as BigInt)) TotalReads, 
@@ -39,7 +41,7 @@ Select s.login_name LoginName,
   From sys.dm_exec_connections c
        Join sys.dm_exec_sessions s
          On c.most_recent_session_id = s.session_id
- Group By s.login_name, s.host_name";
+ Group By s.login_name, s.host_name, s.transaction_isolation_level";
 
             public string GetFetchSQL(Version v)
             {
@@ -62,6 +64,7 @@ Select s.login_name LoginName,
             public int SessionId { get; private set; }
             public DateTime LoginTime { get; private set; }
             public string SessionStatus { get; private set; }
+            public TransactionIsolationLevel TransactionIsolationLevel { get; private set; }
 
             // SQL 2005 SP2+ columns
             public int HostProcessId { get; private set; }
@@ -91,6 +94,7 @@ Select c.connection_id Id,
        c.local_tcp_port LocalTCPPort,
        c.num_reads NumReads, 
        c.num_writes NumWrites,
+       s.transaction_isolation_level TransactionIsolationLevel,
        s.session_id SessionId, 
        s.login_time LoginTime, {0}       
        s.status SessionStatus

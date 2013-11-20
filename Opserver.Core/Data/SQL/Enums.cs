@@ -303,4 +303,14 @@ namespace StackExchange.Opserver.Data.SQL
         Heap = 0,
         Clustered = 1
     }
+
+    public enum TransactionIsolationLevel : short
+    {
+        Unspecified = 0,
+        [Description("Uncommited")] ReadUncomitted = 1,
+        [Description("Commited")] ReadCommitted = 2,
+        Repeatable = 3,
+        Serializable = 4,
+        Snapshot = 5
+    }
 }

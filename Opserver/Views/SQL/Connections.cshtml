@@ -32,6 +32,7 @@
                             <th>Reads</th>
                             <th>Writes</th>
                             <th>Status</th>
+                            <th>Isolation</th>
                             <th>Query</th>
                         </tr>
                     </thead>
@@ -55,6 +56,7 @@
                                 <td>@c.NumReads.ToComma()</td>
                                 <td>@c.NumWrites.ToComma()</td>
                                 <td>@c.SessionStatus</td>
+                                <td>@c.TransactionIsolationLevel.GetDescription()</td>
                                 <td class="query-col">@c.QueryText.TruncateWithEllipsis(80)</td>
                             </tr>
                         }

@@ -2,7 +2,7 @@
 @{
     Layout = null;
     var connections = Model.ConnectionsSummary.SafeData(true);
-    var groups = connections.GroupBy(c => c.LoginName).OrderByDescending(c => c.Sum(g => g.ConnectionCount));
+    var groups = connections.GroupBy(c => new { c.LoginName, c.TransactionIsolationLevel }).OrderByDescending(c => c.Sum(g => g.ConnectionCount));
 }
 @if (connections.Any())
 {
@@ -16,6 +16,7 @@
                 <thead>
                     <tr>
                         <th>Login</th>
+                        <th>Isolation</th>
                         <th>Count</th>
                         <th>Total Reads</th>
                         <th>Total Writes</th>
@@ -26,7 +27,8 @@
                     @foreach (var c in groups)
                     {
                         <tr>
-                            <td>@c.Key</td>
+                            <td>@c.Key.LoginName</td>
+                            <td>@c.Key.TransactionIsolationLevel.GetDescription()</td>
                             <td>@c.Sum(s => s.ConnectionCount).ToComma()</td>
                             <td>@c.Sum(s => s.TotalReads).ToComma()</td>
                             <td>@c.Sum(s => s.TotalWrites).ToComma()</td>
@@ -37,6 +39,7 @@
                     {
                         <tr class="total-row">
                             <td><b>Total</b></td>
+                            <td></td>
                             <td>@connections.Sum(c => c.ConnectionCount).ToComma()</td>
                             <td>@connections.Sum(c => c.TotalReads).ToComma()</td>
                             <td>@connections.Sum(c => c.TotalWrites).ToComma()</td>
