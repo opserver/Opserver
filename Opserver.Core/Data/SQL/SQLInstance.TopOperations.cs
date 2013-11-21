@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Xml.Serialization;
 using Dapper;
 using StackExchange.Opserver.Data.SQL.QueryPlans;
@@ -20,7 +21,8 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations", conn =>
                         {
-                            var sql = GetFetchSQL<TopOperation>() + (options != null ? options.ToSQLWhere() + options.ToSQLOrder() : "");
+                            var sql = string.Format(GetFetchSQL<TopOperation>(), (options != null ? options.ToSQLWhere() + options.ToSQLOrder() : ""));
+                            sql = sql.Replace("query_plan AS QueryPlan,", "");
                             return conn.Query<TopOperation>(sql, options).ToList();
                         })
                 };
@@ -28,8 +30,9 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Cache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
         {
-            string sql = GetFetchSQL<TopOperation>() + " WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
-            if (statementStartOffset.HasValue) sql += " And qs.statement_start_offset = @statementStartOffset";
+            var clause = " WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
+            if (statementStartOffset.HasValue) clause += " And qs.statement_start_offset = @statementStartOffset";
+            string sql = string.Format(GetFetchSQL<TopOperation>(), clause);
             return new Cache<TopOperation>
                 {
                     CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode() + "-" + statementStartOffset),
@@ -90,43 +93,64 @@ namespace StackExchange.Opserver.Data.SQL
             }
 
             internal const string FetchSQL = @"
-SELECT TOP (@MaxResultCount) total_worker_time / execution_count AS AvgCPU,
-		total_elapsed_time / execution_count AS AvgDuration,
-		total_logical_reads / execution_count AS AvgReads,
-        CAST(total_worker_time / execution_count * (Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) Else Null End) AS BIGINT) AS AvgCPUPerMinute,
-		(Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) Else Null End) AS ExecutionsPerMinute,
-        total_worker_time AS TotalCPU,
-        total_elapsed_time AS TotalDuration,
-        total_logical_reads AS TotalReads,
-		execution_count ExecutionCount,
-		CAST(ROUND(100.00 * total_worker_time / t.TotalWorker, 2) AS MONEY) AS PercentCPU,
-        CAST(ROUND(100.00 * total_elapsed_time / t.TotalElapsed, 2) AS MONEY) AS PercentDuration,
-        CAST(ROUND(100.00 * total_logical_reads / t.TotalReads, 2) AS MONEY) AS PercentReads,
-        CAST(ROUND(100.00 * execution_count / t.TotalExecs, 2) AS MONEY) AS PercentExecutions,
-        qs.creation_time AS PlanCreationTime,
-        qs.last_execution_time AS LastExecutionTime,
-        SUBSTRING(st.text, ( qs.statement_start_offset / 2 ) + 1, ( ( CASE qs.statement_end_offset
-                                                                      WHEN -1 THEN DATALENGTH(st.text)
-                                                                      ELSE qs.statement_end_offset
-                                                                      END - qs.statement_start_offset ) / 2 ) + 1) AS QueryText,
+SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
+       TotalCPU, TotalDuration, TotalReads,
+       PercentCPU, PercentDuration, PercentReads, PercentExecutions,
+       ExecutionCount,
+	   ExecutionsPerMinute,
+       PlanCreationTime, LastExecutionTime,
+       SUBSTRING(st.text,
+                 (StatementStartOffset / 2) + 1,
+                 ((CASE StatementEndOffset
+                   WHEN -1 THEN DATALENGTH(st.text)
+                   ELSE StatementEndOffset
+                   END - StatementStartOffset) / 2) + 1) AS QueryText,
         query_plan AS QueryPlan,
-        qs.plan_handle AS PlanHandle,
-        qs.statement_start_offset AS StatementStartOffset,
-        qs.statement_end_offset AS StatementEndOffset,
-        qs.min_rows AS MinReturnedRows,
-        qs.max_rows AS MaxReturnedRows,
-        CAST(qs.total_rows as MONEY) / execution_count AS AvgReturnedRows,
-        qs.total_rows AS TotalReturnedRows,
-        qs.last_rows AS LastReturnedRows,
+        PlanHandle,
+        StatementStartOffset,
+        StatementEndOffset,
+        MinReturnedRows,
+        MaxReturnedRows,
+        AvgReturnedRows,
+        TotalReturnedRows,
+        LastReturnedRows,
         DB_NAME(qp.dbid) AS CompiledOnDatabase
-    FROM sys.dm_exec_query_stats AS qs
-         CROSS APPLY sys.dm_exec_sql_text(qs.sql_handle) AS st 
-         CROSS APPLY sys.dm_exec_query_plan(qs.plan_handle) AS qp 
-         CROSS JOIN (SELECT SUM(execution_count) TotalExecs,
-                            SUM(total_elapsed_time) TotalElapsed,
-                            SUM(total_worker_time) TotalWorker,
-                            SUM(total_logical_reads) TotalReads
-                       FROM sys.dm_exec_query_stats) AS t
+FROM (SELECT TOP (@MaxResultCount) 
+             total_worker_time / execution_count AS AvgCPU,
+             total_elapsed_time / execution_count AS AvgDuration,
+             total_logical_reads / execution_count AS AvgReads,
+             CAST(total_worker_time / execution_count *(Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) Else Null End) AS BIGINT) AS AvgCPUPerMinute,
+             (Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 
+                   Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) 
+                   Else Null End) AS ExecutionsPerMinute,
+             total_worker_time AS TotalCPU,
+             total_elapsed_time AS TotalDuration,
+             total_logical_reads AS TotalReads,
+             execution_count ExecutionCount,
+             CAST(ROUND(100.00 * total_worker_time / t.TotalWorker, 2) AS MONEY) AS PercentCPU,
+             CAST(ROUND(100.00 * total_elapsed_time / t.TotalElapsed, 2) AS MONEY) AS PercentDuration,
+             CAST(ROUND(100.00 * total_logical_reads / t.TotalReads, 2) AS MONEY) AS PercentReads,
+             CAST(ROUND(100.00 * execution_count / t.TotalExecs, 2) AS MONEY) AS PercentExecutions,
+             qs.creation_time AS PlanCreationTime,
+             qs.last_execution_time AS LastExecutionTime,
+             qs.plan_handle AS PlanHandle,
+             qs.statement_start_offset AS StatementStartOffset,
+             qs.statement_end_offset AS StatementEndOffset,
+             qs.min_rows AS MinReturnedRows,
+             qs.max_rows AS MaxReturnedRows,
+             CAST(qs.total_rows as MONEY) / execution_count AS AvgReturnedRows,
+             qs.total_rows AS TotalReturnedRows,
+             qs.last_rows AS LastReturnedRows,
+             qs.sql_handle AS SqlHandle
+        FROM sys.dm_exec_query_stats AS qs
+             CROSS JOIN(SELECT SUM(execution_count) TotalExecs,
+                               SUM(total_elapsed_time) TotalElapsed,
+                               SUM(total_worker_time) TotalWorker,
+                               SUM(total_logical_reads) TotalReads
+                          FROM sys.dm_exec_query_stats) AS t
+       {0}) sq
+    CROSS APPLY sys.dm_exec_sql_text(SqlHandle) AS st
+    CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp
 ";
             public string GetFetchSQL(Version v)
             {
