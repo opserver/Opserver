@@ -66,6 +66,7 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return CPUHistoryLastHour;
                 yield return JobSummary;
                 yield return PerfCounters;
+                yield return MemoryClerkSummary;
             }
         }
 
