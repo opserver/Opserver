@@ -43,6 +43,7 @@ window.Status = (function () {
     function summaryPopup(url, options, noClose, onClose) {
         var wrap = getPopup(noClose);
         wrap.load(url, options, function () {
+            // TODO: refresh intervals via header
             showSummaryPopup(onClose, 50);
         });
     }

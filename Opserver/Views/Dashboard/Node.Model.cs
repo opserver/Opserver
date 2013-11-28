@@ -34,6 +34,7 @@ namespace StackExchange.Opserver.Views.Dashboard
                 //TODO: Redis, SQL, etc node recognition - pluggable?
                 if (SQLInstance.IsSQLServer(CurrentNode.PrettyName))
                 {
+                    yield return CurrentStatusTypes.SQLInstance;
                     yield return CurrentStatusTypes.SQLTop;
                     yield return CurrentStatusTypes.SQLActive;
                 }

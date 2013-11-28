@@ -330,13 +330,16 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         </tr>
                     </thead>
                     <tbody>
-                    @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
-                    @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
-                    @RenderPerSecCounter("Databases", "Transactions/sec", "_Total")
-                        
-                    @RenderPerSecCounter("Access Methods", "Index Searches/sec", "")
-                    @RenderPerSecCounter("Locks", "Lock Requests/sec", "_Total")
-                    @RenderPerSecCounter("SQL Errors", "Errors/sec", "_Total", valueUrl: "#/sql/summary/errors") 
+                        @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
+                        @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
+                        @RenderPerSecCounter("SQL Statistics", "SQL Re-Compilations/sec", "")
+                        @RenderPerSecCounter("SQL Statistics", "Guided plan executions/sec", "")
+
+                        @RenderPerSecCounter("Databases", "Transactions/sec", "_Total")
+
+                        @RenderPerSecCounter("Access Methods", "Index Searches/sec", "")
+                        @RenderPerSecCounter("Locks", "Lock Requests/sec", "_Total")
+                        @RenderPerSecCounter("SQL Errors", "Errors/sec", "_Total", valueUrl: "#/sql/summary/errors")
                     </tbody>
                 </table>
             </div>
@@ -382,19 +385,32 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                     </tbody>
                 </table>
             </div>*@
+            
             <div class="section-wrap refresh-group" data-name="instance-cache">
                 <table>
+                    @{
+                        Func<string, string, string, Func<decimal, string>> GetCacheSize = (o, c, j) =>
+                        {
+                            var counter = i.GetPerfCounter(o, c, j);
+                            var bytes = counter != null ? counter.CurrentValue * 8 * 1024 : (long?)null;
+                            return v => bytes.HasValue ? string.Format("({0})", bytes.Value.ToSize()) : null;
+                        };
+                        var dbCacheBytes = GetCacheSize("Buffer Manager", "Database pages", "");
+                        var planCacheBytes = GetCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
+                        var objectCacheBytes = GetCacheSize("Plan Cache", "Cache Pages", "_Total");
+                    }
                     @Helpers.SectionHeader("Cache")
                     <tbody>
                         @RenderCounter("Buffer Manager", "Page life expectancy", "", toSuffix: d => "seconds", tooltip: d => TimeSpan.FromSeconds((double)d).ToReadableString())
                         @RenderCounter("Buffer Manager", "Page lookups/sec", "")
-                        @RenderCounter("Buffer Manager", "Database pages", "")
+                        @RenderCounter("Buffer Manager", "Database pages", "", toSuffix: dbCacheBytes)
 
-                        @RenderCounter("Plan Cache", "Cache Object Counts", "_Total", "Objects in Cache")
-                        @RenderCounter("Plan Cache", "Cache Object Counts", "SQL Plans", "Plans in Cache")
+                        @RenderCounter("Plan Cache", "Cache Object Counts", "_Total", "Objects in Cache", toSuffix: objectCacheBytes)
+                        @RenderCounter("Plan Cache", "Cache Object Counts", "SQL Plans", "Plans in Cache", toSuffix: planCacheBytes)
                         @RenderCounter("Plan Cache", "Cache Hit Ratio", "_Total")
                     </tbody>
                 </table>
+
             </div>
             
             @*<div class="section-wrap">

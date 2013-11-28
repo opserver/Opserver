@@ -13,11 +13,13 @@ namespace StackExchange.Opserver.Views.Dashboard
         [Description("Active SQL")]
         Elastic = 4,
         HAProxy = 5,
+        [Description("SQL Instance")]
+        SQLInstance = 6,
         [Description("Active SQL")]
-        SQLActive = 6,
+        SQLActive = 7,
         [Description("Top SQL")]
-        SQLTop = 7,
+        SQLTop = 8,
         [Description("Redis Info")]
-        Redis = 8
+        Redis = 9
     }
 }

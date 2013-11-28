@@ -113,10 +113,13 @@ else
     </div>
     <div class="tabs sub-tabs">
         <div class="tabs-links">
-            @foreach(var st in Model.StatusTypes.OrderBy(i => i))
+            @foreach (var st in Model.StatusTypes.OrderBy(i => i))
             {
                 switch (st)
                 {
+                    case CurrentStatusTypes.SQLInstance:
+                        <a class="@(currentStatusType == st ? " selected" : "") exit-link" href="/sql/instance?node=@s.PrettyName">@st.GetDescription()<span class="icon arrow up-right-small"></span></a>
+                        break;
                     case CurrentStatusTypes.SQLActive:
                         <a class="@(currentStatusType == st ? " selected" : "") exit-link" href="/sql/active?node=@s.PrettyName">@st.GetDescription()<span class="icon arrow up-right-small"></span></a>
                         break;

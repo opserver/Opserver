@@ -292,7 +292,7 @@ Drop Table #dbs;
                     databases = multi.Read<DatabaseReplicaState>().ToList();
                 }
 
-                Func<string, string, PerfCounterRecord> getCounter = (cn, n) => node.GetPerfCounter("SQLServer:Availability Replica", cn, n);
+                Func<string, string, PerfCounterRecord> getCounter = (cn, n) => node.GetPerfCounter("Availability Replica", cn, n);
                 groups.ForEach(r =>
                 {
                     r.Databases = databases.Where(gdb => r.GroupId == gdb.GroupId && r.ReplicaId == gdb.ReplicaId).ToList();

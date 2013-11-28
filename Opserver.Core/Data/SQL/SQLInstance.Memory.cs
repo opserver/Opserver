@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.SQL
         private Cache<List<SQLMemoryClerkSummaryInfo>> _memoryClerkSummary;
         public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary
         {
-            get { return _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(10*60)); }
+            get { return _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(30)); }
         }
 
         public class SQLMemoryClerkSummaryInfo : ISQLVersionedObject

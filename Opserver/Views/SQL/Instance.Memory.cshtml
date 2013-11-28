@@ -16,6 +16,7 @@
                 <thead>
                     <tr>
                         <th>Memory Clerk Type</th>
+                        <th>Description</th>
                         <th colspan="2">Memory Used</th>
                         <th colspan="2">% Used</th>
                     </tr>
@@ -23,9 +24,8 @@
                 <tbody>
                     @foreach (var t in data)
                     {
-                        <tr title="Clerk: @t.Name
-Type: @t.ClerkType
-Used Bytes: @t.UsedBytes.ToComma()">
+                        <tr>
+                            <td class="note">@t.ClerkType</td>
                             <td>@t.Name</td>
                             <td>@t.UsedBytes.ToSize()</td>
                             <td class="note">@t.UsedBytes.Pluralize("byte")</td>
