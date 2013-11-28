@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
   <metadata>
     <id>BookSleeve</id>
-    <version>1.3.40</version>
+    <version>1.3.41</version>
     <authors>Marc Gravell</authors>
     <owners>Marc Gravell</owners>
     <licenseUrl>http://booksleeve.googlecode.com/hg/license.txt</licenseUrl>
@@ -10,7 +10,8 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>Fully asynchronous Redis client, capable of pipelined operations; this acts as a multiplexer, allowing high-performance parallel usage of a single connection (or few connections) without being blocked on each separate request. All core redis opeations are supported. This library can also be used from C# 5.0/async very effectively.</description>
     <summary>Efficient, fully asynchronous Redis client</summary>
-    <releaseNotes>* 1.3.40  - Add: slowlog support; save/bgsave/lastsave support
+    <releaseNotes>* 1.3.41  - Add: SCAN support (2.8+)
+      * 1.3.40  - Add: slowlog support; save/bgsave/lastsave support
       * 1.3.39  - Add: ExtendLock / ReleaseLock (now has overload that checks value)
       * 1.3.38  - Add: DEBUG OBJECT... yess, I know this is not recommended for general usage
       * 1.3.37  - Fix: Client name not being sent on recent redis-server versions (due to "info" detection)
