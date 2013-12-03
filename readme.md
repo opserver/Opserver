@@ -26,11 +26,19 @@ Security Configuration
 
 There is a `SecuritySettings.config.example` as a reference.  You can optionally add networks that can see the main dashboard without any authentication when using any provider.  This is useful for fully automated screens like a TV in an office or data center.
 
+If you are using Active Directory authentication, you should edit the ViewGroups and AdminGroups in the Web.Config. You can also edit the ViewGroups and AdminGroups on a per monitor basis by adding `"AdminGroups": "GroupName",` or `"ViewGRoups": "GroupName",` to the json config file.
+
+One cause of the 'No Configuration' message being displayed is if you do not have any permissions to any of your configured monitors. You can see what you were authenticated as, and what roles you were granted by browsing to /about. 
+
 Monitoring Configuration
 -----------
 The basic configuration implementation is via `.json` files, for which `.json.example` files are included in the `/config` directory of the Opserver project.  These `.example` files are exactly what’s running in the Stack Exchange production environment, minus any passwords or internal-only URLs.  You are also welcome to implement your own settings provider that has a completely different source, for example JSON from MongoDB, or SQL, or…whatever you can come up with.  Settings changes will be hooked up to events but that isn’t complete just yet, since we build every change and Opserver restarts, this isn’t a priority.
 
-We recommend using a service account with the necessary permissions for monitoring, this elimiates any passwords in your configuration files and makes management easier, that's the practice in place at Stack Exchange.
+We recommend using a service account with the necessary permissions for monitoring, this eliminates any passwords in your configuration files and makes management easier, that's the practice in place at Stack Exchange.
+
+Even if you have correctly configured your monitors, you still may not see any data. Each monitor configuration has an enabled flag which must return true for a monitor section to appear in OpServer. 
+
+You can browse to /about to review which monitors have been enabled. 
 
 Open Source Projects in Use
 ---------
