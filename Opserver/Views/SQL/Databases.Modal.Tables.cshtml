@@ -15,7 +15,7 @@
         </div>
     } else {
         <div>
-            <table class="node-dashboard cluster-dashboard">
+            <table class="node-dashboard cluster-dashboard" id="database-table">
                 <thead>
                     <tr>
                         <th>Table</th>
@@ -37,11 +37,11 @@
                                     <span class="note"> (Heap)</span>
                                 }
                             </td>
-                            <td>@t.RowCount.ToComma()</td>
-                            <td>@t.IndexCount.ToComma()</td>
-                            <td>@((t.DataTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
-                            <td>@((t.IndexTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
-                            <td>@((t.TotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.RowCount">@t.RowCount.ToComma()</td>
+                            <td data-val="@t.IndexCount">@t.IndexCount.ToComma()</td>
+                            <td data-val="@t.DataTotalSpaceKB">@((t.DataTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.IndexTotalSpaceKB">@((t.IndexTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.TotalSpaceKB">@((t.TotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
                         </tr>
                     }
                 </tbody>
@@ -65,6 +65,20 @@
                     }
                 </tfoot>
             </table>
+            <script>
+                $(function () {
+                    $('#database-table').tablesorter({
+                        headers: {
+                            1: { sorter: 'cellText' },
+                            2: { sorter: 'dataVal' },
+                            3: { sorter: 'dataVal' },
+                            4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                            6: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                        }
+                    });
+                });
+            </script>
         </div>
     }
 </div>
