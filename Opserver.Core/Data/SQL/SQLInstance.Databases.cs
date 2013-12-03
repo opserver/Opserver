@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     CacheKey = GetCacheKey("TableInfo-" + databaseName),
                     CacheForSeconds = 60,
-                    CacheStaleForSeconds = 5*60,
+                    CacheStaleForSeconds = 5 * 60,
                     UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
                         {
                             var sql = string.Format("Use [{0}]; {1}", databaseName, GetFetchSQL<SQLDatabaseTableInfo>());
@@ -147,7 +147,7 @@ namespace StackExchange.Opserver.Data.SQL
             public double? LogSizeMB { get; internal set; }
             public double? LogSizeUsedMB { get; internal set; }
 
-            public double? LogPercentUsed { get { return LogSizeMB > 0 ? 100*LogSizeUsedMB/LogSizeMB : null; } }
+            public double? LogPercentUsed { get { return LogSizeMB > 0 ? 100 * LogSizeUsedMB / LogSizeMB : null; } }
 
             internal const string FetchSQL2012Columns = @"
        db.replica_id ReplicaId,
@@ -208,7 +208,7 @@ From sys.databases db
                 return string.Format(FetchSQL, "", "");
             }
         }
-        
+
         public class SQLDatabaseBackupInfo : ISQLVersionedObject
         {
             public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
@@ -350,7 +350,7 @@ Group By t.object_id, t.Name, t.create_date, s.name";
                 return FetchSQL;
             }
         }
-        
+
         public class SQLDatabaseColumnInfo : ISQLVersionedObject
         {
             public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
@@ -418,7 +418,8 @@ Set @sql = '';
 Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
   Insert #VLFCounts Select ' + Cast(database_id as nvarchar(10)) + ',''' + name + ''', Count(*) From #vlfTemp;
   Truncate Table #vlfTemp;'
-  From sys.databases;
+  From sys.databases
+  Where state <> 6; -- Skip OFFLINE databases as they cause errors
 
 Exec sp_executesql @sql;
 Select * From #VLFCounts;
