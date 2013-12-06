@@ -518,6 +518,11 @@
             Filters on form values *not * to log, because they contain sensitive data
             </summary>
         </member>
+        <member name="P:StackExchange.Exceptional.Error.CookieLogFilters">
+            <summary>
+            Filters on form values *not * to log, because they contain sensitive data
+            </summary>
+        </member>
         <member name="P:StackExchange.Exceptional.Error.Id">
             <summary>
             The Id on this error, strictly for primary keying on persistent stores
@@ -603,6 +608,11 @@
             Gets a collection representing the client cookies of the request
             </summary>
         </member>
+        <member name="P:StackExchange.Exceptional.Error.RequestHeaders">
+            <summary>
+            Gets a collection representing the headers sent with the request
+            </summary>
+        </member>
         <member name="P:StackExchange.Exceptional.Error.CustomData">
             <summary>
             Gets a collection of custom data added at log time
@@ -670,6 +680,11 @@
             </summary>
         </member>
         <member name="P:StackExchange.Exceptional.Error.CookiesSerialzable">
+            <summary>
+            Caribles strictly for JSON serialziation, to maintain non-dictonary behavior
+            </summary>
+        </member>
+        <member name="P:StackExchange.Exceptional.Error.RequestHeadersSerialzable">
             <summary>
             Caribles strictly for JSON serialziation, to maintain non-dictonary behavior
             </summary>
@@ -1271,7 +1286,12 @@
         </member>
         <member name="P:StackExchange.Exceptional.Settings.LogFilterSettings.FormFilters">
             <summary>
-            Regular expressions collection for errors to ignore.  Any errors with a .ToString() matching any regex here will not be logged
+            Form submitted values to replace on save - this prevents logging passwords, etc.
+            </summary>
+        </member>
+        <member name="P:StackExchange.Exceptional.Settings.LogFilterSettings.CookieFilters">
+            <summary>
+            Cookie values to replace on save - this prevents logging auth tokens, etc.
             </summary>
         </member>
         <member name="T:StackExchange.Exceptional.EmailSettings">

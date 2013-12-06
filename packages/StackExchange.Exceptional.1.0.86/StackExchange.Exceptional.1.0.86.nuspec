@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
   <metadata>
     <id>StackExchange.Exceptional</id>
-    <version>1.0.78</version>
+    <version>1.0.86</version>
     <title>StackExchange.Exceptional</title>
     <authors>Nick Craver</authors>
     <owners>Nick Craver</owners>

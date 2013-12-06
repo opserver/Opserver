@@ -84,9 +84,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SnmpSharpNet.0.9.3\lib\SnmpSharpNet.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Exceptional, Version=1.0.0.78, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="StackExchange.Exceptional, Version=1.0.0.86, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Exceptional.1.0.78\lib\StackExchange.Exceptional.dll</HintPath>
+      <HintPath>..\packages\StackExchange.Exceptional.1.0.86\lib\StackExchange.Exceptional.dll</HintPath>
     </Reference>
     <Reference Include="Svg">
       <HintPath>lib\Svg.dll</HintPath>
