@@ -60,8 +60,8 @@ namespace StackExchange.Opserver.Data
 
         private bool Contains(TinyIPAddress tip)
         {
-            return tip != null
-                && AddressFamily == tip.AddressFamily
+            return 
+                AddressFamily == tip.AddressFamily
                 && (TSubnet & TIPAddress) == (TSubnet & tip);
         }
 

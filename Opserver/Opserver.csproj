@@ -231,6 +231,7 @@
       <DependentUpon>SQLController.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\PerfCounters.cs" />
+    <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />
     <Compile Include="SecuritySettings.cs" />
     <Compile Include="SiteSettings.cs" />

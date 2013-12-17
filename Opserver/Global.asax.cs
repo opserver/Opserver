@@ -53,6 +53,9 @@ namespace StackExchange.Opserver
             ErrorStore.GetCustomData = GetCustomErrorData;
 
             TaskScheduler.UnobservedTaskException += (sender, args) => Current.LogException(args.Exception);
+
+            // enable custom model binder
+            ModelBinders.Binders.DefaultBinder = new ProfiledModelBinder();
         }
 
         private static void SetupMiniProfiler()
