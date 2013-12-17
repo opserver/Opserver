@@ -86,6 +86,21 @@ namespace StackExchange.Opserver.Data.Redis
             [RedisInfoProperty("connected_slaves")]
             public int ConnectedSlaves { get; internal set; }
 
+            [RedisInfoProperty("master_repl_offset")]
+            public long MasterReplicationOffset { get; internal set; }
+            [RedisInfoProperty("slave_repl_offset")]
+            public long SlaveReplicationOffset { get; internal set; }      
+
+            [RedisInfoProperty("repl_backlog_active")]
+            public bool BacklogActive { get; internal set; }
+            [RedisInfoProperty("repl_backlog_size")]
+            public long BacklogSize { get; internal set; }
+            [RedisInfoProperty("repl_backlog_first_byte_offset")]
+            public long BacklogFirstByteOffset { get; internal set; }
+            [RedisInfoProperty("repl_backlog_histlen")]
+            public long BacklogHistoryLength { get; internal set; }
+            
+
             public List<RedisSlaveInfo> SlaveConnections = new List<RedisSlaveInfo>();
             private static readonly Regex _slaveRegex = new Regex(@"slave\d+", RegexOptions.Compiled);
 
@@ -104,6 +119,37 @@ namespace StackExchange.Opserver.Data.Redis
                                 Status = parts[2]
                             });
                     }
+                    // redis 2.8+
+                    if (parts.Length > 3)
+                    {
+                        try
+                        {
+                            var si = new RedisSlaveInfo { Index = int.Parse(key.Replace("slave", "")) };
+                            foreach(var p in parts) {
+                                var pair = p.Split(StringSplits.Equal);
+                                if (pair.Length != 2) continue;
+                                var val = pair[1];
+                                
+                                switch(pair[0]) {
+                                    case "ip":
+                                        si.IP = val;
+                                        break;
+                                    case "port":
+                                        si.Port = int.Parse(val);
+                                        break;
+                                    case "state":
+                                        si.Status = val;
+                                        break;
+                                    case "offset":
+                                        si.Offset = long.Parse(val);
+                                        break;
+                                }
+                            }
+                            SlaveConnections.Add(si);
+                        } catch (Exception e) {
+                            Current.LogException("Redis error: couldn't parse slave string: " + value, e);
+                        }
+                    }
                 }
             }
         }
@@ -114,6 +160,7 @@ namespace StackExchange.Opserver.Data.Redis
             public string IP { get; internal set; }
             public int Port { get; internal set; }
             public string Status { get; internal set; }
+            public long Offset { get; internal set; }
 
             private IPAddress _ipAddress;
             public IPAddress IPAddress { get { return _ipAddress ?? (_ipAddress = IPAddress.Parse(IP)); } }

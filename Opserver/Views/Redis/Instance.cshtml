@@ -98,12 +98,14 @@
                                     var slaves = i.SlaveInstances;
                                     if (slaves.Count > 0)
                                     {
-                                        foreach (var s in slaves)
+                                        <div class="redis-instance">
+                                        @foreach (var s in slaves)
                                         {
-                                            <div class="redis-instance">
+                                            <div>
                                                 @s.IconSpan() <a href="?node=@s.Host:@s.Port">@s.Host:@s.Port</a> <span class="note">(Slave)</span>
                                             </div>
                                         }
+                                        </div>
                                     }
                                 } 
                             </td>
@@ -223,7 +225,7 @@
                 </table> 
             </div>
             <div class="section-wrap refresh-group" data-name="instance-keyspace">
-                <div class="summary-section-header">Keyspace</div>
+                <div class="summary-section-header">Keyspace <span class="note">(@info.Keyspace.KeyData.Sum(k => k.Value.Keys).ToComma() keys)</span></div>
                 <table>
                     <thead>
                         <tr>

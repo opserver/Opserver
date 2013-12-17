@@ -18,17 +18,19 @@
             break;
     }
 }
-@helper ServerRow (RedisInstance server, int nest = 0) {
+@helper ServerRow (RedisInstance server, int nest = 0, long? toSync = null) {
     var info = server.Info.SafeData();
     var clients = server.Clients.SafeData();
     <tr class="@(nest == 0 ? "first-of-group" : "")@(server.SlaveCount == 0 ? (nest == 0 ? " " : "") + "last-of-group" : "")">
         <td class="redis-connection-name">@server.ConnectionInfo.Name</td>
-        <td style="padding-left: @(20 * nest)px">@server.IconSpan() <a href="/redis/instance?node=@server.Host:@server.Port" class="node-name-link">@server.Host</a> <span class="note">(@server.Port)</span></td>
+        <td style="padding-left: @(20 * nest)px">@server.IconSpan() <a href="/redis/instance?node=@server.Host:@server.Port" class="node-name-link">@server.Host</a> <span class="note">(@server.Port@if (toSync > 0)
+{<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
+        </td>
         <td>@ServerRole(server.Role)</td>
         <td title="@server.SlaveCount.Pluralize("direct slave"), @server.TotalSlaveCount.ToComma() total
 @if (server.SlaveConnections != null) {
 foreach (var s in server.SlaveConnections) {
-  @:@s.IP:@s.Port (@AppCache.GetHostName(s.IP)) - @s.Status   
+  @:@s.IP:@s.Port (@AppCache.GetHostName(s.IP)) - @s.Status - Offset: @s.Offset.ToComma()
 }
 }">@server.SlaveCount @if(server.TotalSlaveCount > server.SlaveCount){<text> <span class="note">(@(server.TotalSlaveCount - server.SlaveCount))</span></text>}</td>
         @if (info != null)
@@ -37,7 +39,7 @@ foreach (var s in server.SlaveConnections) {
             <td title="Operations
 @stats.TotalCommandsProcessed.Pluralize("command") total
 @stats.InstantaneousOpsPerSec.Pluralize("operation") per second">@stats.TotalCommandsProcessed.ToComma() <span class="note">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
-            <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize()</td>
+            <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="note">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
             <td title="@info.Clients.Connected.Pluralize("client") connected 
 @if (clients != null)
 {
@@ -48,7 +50,6 @@ foreach (var s in server.SlaveConnections) {
   @:@ip.Key@(name.HasValue() ? " (" + name + ")" : "") - @ip.Count().Pluralize("connection")
     }                                                                         
 }">@info.Clients.Connected</td>
-            <td>@info.Server.Version</td>
         } 
         else
         {
@@ -60,7 +61,7 @@ foreach (var s in server.SlaveConnections) {
     foreach (var s in server.SlaveInstances)
     {
         if (s == null) { continue; }
-        @ServerRow(s, nest + 1)
+        @ServerRow(s, nest + 1, server.Replication.MasterReplicationOffset - s.Replication.SlaveReplicationOffset)
     }
 }
 <style>
@@ -193,13 +194,12 @@ foreach (var s in server.SlaveConnections) {
                 </tr>
                 <tr>
                     <th>Name</th>
-                    <th>Host</th>
+                    <th>Host <span class="note">(port - behind)</span></th>
                     <th>Role</th>
                     <th>Slaves</th>
                     <th title="Operations">Ops <span class="note">(/sec)</span></th>
-                    <th>Memory</th>
+                    <th>Memory <span class="note">(used)</span></th>
                     <th>Clients</th>
-                    <th>Version</th>
                     <th>As of</th>
                 </tr>
             </thead>
@@ -226,9 +226,8 @@ foreach (var s in server.SlaveConnections) {
                     <th>Role</th>
                     <th>Slaves</th>
                     <th title="Operations">Ops <span class="note">(/sec)</span></th>
-                    <th>Memory</th>
+                    <th>Memory <span class="note">(used)</span></th>
                     <th>Clients</th>
-                    <th>Version</th>
                     <th>As of</th>
                 </tr>
             </tbody>
