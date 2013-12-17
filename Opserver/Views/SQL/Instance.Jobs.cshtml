@@ -31,7 +31,7 @@
                 <tbody>
                     @foreach (var j in data.OrderByDescending(j => j.LastRunRequestedDate))
                     {
-                        <tr class="@j.RowClass()@(j.IsRunning ? " active-row" : "")" title="@if(!j.IsEnabled){<text>(DISABLED) 
+                        <tr class="@j.RowClass()@(j.IsRunning ? " active-row" : "")@(j.IsEnabled ? "" : " disabled")" title="@if(!j.IsEnabled){<text>(DISABLED) 
 </text>}Job: @j.Name
 @j.Description
 @if(j.IsRunning) {<text>Currently Running
@@ -67,7 +67,7 @@ Last Run Message: @j.LastRunMessage">
                             {
                                 <td colspan="4" class="spark-no-data">no run history found</td>   
                             }
-                            <td class="@(j.IsEnabled ? "good" : "note")">@(j.IsEnabled ? "Yes" : "No")</td>
+                            <td class="@(j.IsEnabled ? "good" : "warning")">@(j.IsEnabled ? "Yes" : "No")</td>
                             @if (Current.User.IsInRole(Roles.SQLAdmin))
                             {
                                 <td><a href="#" class="sql-toggle-agent-job" data-guid="@j.JobId" data-enable="@(j.IsEnabled ? "false" : "true")">@(j.IsEnabled ? "disable" : "enable")</a></td>
