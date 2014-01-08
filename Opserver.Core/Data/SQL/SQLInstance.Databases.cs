@@ -184,18 +184,18 @@ Select db.database_id Id,
 From sys.databases db
      Left Join sys.dm_os_performance_counters logu On db.name = logu.instance_name And logu.counter_name LIKE N'Log File(s) Used Size (KB)%' 
      Left Join sys.dm_os_performance_counters logs On db.name = logs.instance_name And logs.counter_name LIKE N'Log File(s) Size (KB)%' 
-     Left Join (Select database_id, Sum(size) TotalSize 
+     Left Join (Select database_id, Sum(Cast(size As Bigint)) TotalSize 
                   From sys.master_files 
               Group By database_id) st On db.database_id = st.database_id
-     Left Join (Select database_id, Sum(size) RowSize 
+     Left Join (Select database_id, Sum(Cast(size As Bigint)) RowSize 
                   From sys.master_files 
                  Where type = 0 
               Group By database_id) sr On db.database_id = sr.database_id
-     Left Join (Select database_id, Sum(size) StreamSize 
+     Left Join (Select database_id, Sum(Cast(size As Bigint)) StreamSize 
                   From sys.master_files 
                  Where type = 2
               Group By database_id) ss On db.database_id = ss.database_id
-     Left Join (Select database_id, Sum(size) TextIndexSize 
+     Left Join (Select database_id, Sum(Cast(size As Bigint)) TextIndexSize 
                   From sys.master_files 
                  Where type = 4
               Group By database_id) sti On db.database_id = sti.database_id {1}";
