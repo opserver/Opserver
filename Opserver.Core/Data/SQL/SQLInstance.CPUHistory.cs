@@ -40,21 +40,17 @@ namespace StackExchange.Opserver.Data.SQL
             public int ExternalProcessUtilization { get { return 100 - SystemIdle - ProcessUtilization; } }
 
             private const string _fetchSQL = @"
-Declare @ms_ticks bigint;
-Set @ms_ticks = (Select ms_ticks From sys.dm_os_sys_info);
-
-Select Top (@maxEvents) DateAdd(ms, -1 * (@ms_ticks - timestamp_ms), GetUTCDate()) as EventTime, 
-	   ProcessUtilization,
-	   SystemIdle
-From (Select Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,
-		     Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') as ProcessUtilization,
-		     timestamp as timestamp_ms
-	    From (Select timestamp, 
-                     convert(xml, record) As Record 
-		        From sys.dm_os_ring_buffers 
-		       Where ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'
-		         And record Like '%<SystemHealth>%') x) y 
-Order By timestamp_ms Desc";
+Select Top (@maxEvents) 
+	   DateAdd(s, (timestamp - (osi.cpu_ticks / Convert(Float, (osi.cpu_ticks / osi.ms_ticks)))) / 1000, GETUTCDATE()) AS EventTime,
+	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,
+	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') as ProcessUtilization
+  From (Select timestamp, 
+               convert(xml, record) As Record 
+	      From sys.dm_os_ring_buffers 
+		 Where ring_buffer_type = N'RING_BUFFER_SCHEDULER_MONITOR'
+		   And record Like '%<SystemHealth>%') x
+	    Cross Join sys.dm_os_sys_info osi
+Order By timestamp Desc";
 
             public string GetFetchSQL(Version v)
             {
