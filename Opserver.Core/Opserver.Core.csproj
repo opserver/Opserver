@@ -160,6 +160,9 @@
     <Compile Include="Data\SQL\SQLInstance.Cache.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\SQL\SQLInstance.Configuration.cs">
+      <DependentUpon>SQLInstance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\SQL\SQLIssues.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers\AppCache.cs" />

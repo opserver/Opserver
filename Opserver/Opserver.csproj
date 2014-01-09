@@ -261,6 +261,9 @@
     <Compile Include="Views\SQL\Databases.Model.cs">
       <DependentUpon>Databases.cshtml</DependentUpon>
     </Compile>
+    <None Include="Views\SQL\Instance.Configuration.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </None>
     <Compile Include="Views\SQL\Ops.Top.Detail.Model.cs">
       <DependentUpon>Operations.Top.Detail.cshtml</DependentUpon>
     </Compile>

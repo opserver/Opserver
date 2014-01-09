@@ -1,0 +1,70 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model SQLInstance
+@{
+    Layout = null;
+    var configs = Model.Configuration;
+    var data = configs.SafeData(true);
+}
+@helper DisplayValue(int val)
+{
+    switch (val)
+    {
+        case int.MaxValue:<span title="@int.MaxValue.ToComma()">Int.Max</span>break;
+        case int.MinValue:<span title="@int.MinValue.ToComma()">Int.Min</span>break;
+        default:@val.ToComma()break;
+    }
+}
+@helper ConfigSection(string title, IEnumerable<SQLInstance.SQLConfigurationOption> options)
+{
+    if (options.Any()) {
+            <tbody>
+                <tr class="section-label-row">
+                    <td colspan="5">@title</td>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>Description</th>
+                    <th>Value</th>
+                    <th>Active</th>
+                    <th class="note">Default (Min - Max)</th>
+                </tr>
+            </tbody>
+            <tbody>
+                @foreach (var c in options)
+                {
+                    @ConfigRow(c)
+                }
+            </tbody>
+    }
+}
+@helper ConfigRow(SQLInstance.SQLConfigurationOption c)
+{
+                <tr>
+                    <td>@c.Name @if(c.IsDyanmic){<span class="good"> (Dynamic)</span>}</td>
+                    <td>@c.Description</td>
+                    <td class="@(c.Value != c.ValueInUse ? "warning" : null)">@DisplayValue(c.Value)</td>
+                    <td class="@(!c.IsDefault ? "warning" : null)">@DisplayValue(c.ValueInUse)</td>
+                    <td class="note">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
+                </tr>
+}
+<div class="summary-dashboard">
+    <h3>
+        <a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Configuration
+
+        <span class="top-right-info">Updated @configs.ToPollSpan()</span>
+    </h3>
+    @if (data.Any())
+    {
+    <div>
+        <table>
+            @ConfigSection("Non-Default", data.Where(c => !c.IsDefault))
+            @ConfigSection("Defaults", data.Where(c => c.IsDefault && !c.IsAdvanced))
+            @ConfigSection("Defaults (Advanced)", data.Where(c => c.IsDefault && c.IsAdvanced))
+        </table>
+    </div>
+    }
+    else
+    {
+    <div class="no-content">No configuration information available</div>
+    }
+</div>

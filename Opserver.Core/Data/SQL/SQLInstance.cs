@@ -60,6 +60,7 @@ namespace StackExchange.Opserver.Data.SQL
             get
             {
                 yield return ServerProperties;
+                yield return Configuration;
                 yield return Databases;
                 yield return DatabaseBackups;
                 yield return DatabaseVLFs;
@@ -67,6 +68,7 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return JobSummary;
                 yield return PerfCounters;
                 yield return MemoryClerkSummary;
+                yield return ServerFeatures;
             }
         }
 

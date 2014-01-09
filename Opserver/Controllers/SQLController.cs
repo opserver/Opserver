@@ -73,6 +73,8 @@ namespace StackExchange.Opserver.Controllers
 
             switch (type)
             {
+                case "configuration":
+                    return View("Instance.Configuration", i);
                 case "connections":
                     return View("Instance.Connections", i);
                 case "errors":
