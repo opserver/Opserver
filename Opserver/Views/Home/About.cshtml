@@ -2,6 +2,7 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.Exceptions
 @using StackExchange.Opserver.Data.HAProxy
+@using StackExchange.Opserver.Data.SQL
 @{
     this.SetPageTitle("About");
     this.SetMainTab(MainTab.None);
@@ -112,6 +113,63 @@
                     </ul>
                 </li>
                 }
+            </ul>
+        </section>
+    }
+    @helper SQLInstanceList(SQLInstance instance)
+    {
+        var props = instance.ServerProperties.SafeData(true);
+        var features = instance.ServerFeatures.SafeData();
+        <li>@instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
+            <ul class="sub-list">
+                <li>
+                    Features:
+                    @if (features == null)
+                    {
+                        <span class="warning">Error Fetching Features</span>
+                    }
+                    else
+                    {
+                        <ul class="sub-list">
+                            <li>sp_WhoIsActive: <span class="value">@features.HasSPWhoIsActive</span></li>
+                            <li>sp_Blitz: <span class="value">@features.HasSPBlitz</span></li>
+                            <li>sp_BlitzIndex: <span class="value">@features.HasSPBlitzIndex</span></li>
+                            <li>sp_AskBrent: <span class="value">@features.HasSPAskBrent</span></li>
+                        </ul>
+                    }
+                </li>
+            </ul>
+        </li>
+    }
+    @if(s.SQL.Enabled) {
+        var clusters = SQLCluster.AllClusters;
+        var instances = SQLInstance.AllStandalone;
+        <header class="properties">@instances.GetWorstStatus().IconSpan() SQL Instances</header>
+        <section class="properties">
+            <ul>
+                <li>Clusters:
+                    <ul class="sub-list">
+                        @foreach (var cluster in clusters)
+                        {
+                            <li>@cluster.IconSpan() <span class="value">@cluster.Name</span>
+                                <ul class="sub-list">
+                                    @foreach (var node in cluster.Nodes)
+                                    {
+                                        @SQLInstanceList(node)
+                                    }
+                                </ul>
+                            </li>
+                        }
+                    </ul>
+                </li>
+                <li>Standalone nodes:
+                    <ul class="sub-list">
+                        @foreach (var instance in instances)
+                        {
+                            @SQLInstanceList(instance)
+                        }
+                    </ul>
+                </li>
             </ul>
         </section>
     }
