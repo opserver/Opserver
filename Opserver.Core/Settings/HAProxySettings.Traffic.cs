@@ -9,7 +9,7 @@ namespace StackExchange.Opserver
         private HAProxyTrafficSettings _traffic;
         public HAProxyTrafficSettings Traffic
         {
-            get { return _traffic; }
+            get { return _traffic ?? (_traffic = new HAProxyTrafficSettings()); }
             set
             {
                 _traffic = value;
@@ -25,6 +25,11 @@ namespace StackExchange.Opserver
             /// Connections for
             /// </summary>
             public List<Connection> Connections { get; set; }
+
+            public HAProxyTrafficSettings()
+            {
+                Connections = new List<Connection>();
+            }
         }
 
         public class Connection : ISettingsCollectionItem<Connection>
