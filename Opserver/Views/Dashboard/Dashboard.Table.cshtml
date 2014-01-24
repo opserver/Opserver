@@ -38,7 +38,7 @@
     {
         var c = g.Key;
         var nodes = g;
-        if (!nodes.Any())
+        if (!nodes.Any() || (c == DashboardCategory.Unknown && !Current.Settings.Dashboard.ShowOther))
         {
             continue;
         }

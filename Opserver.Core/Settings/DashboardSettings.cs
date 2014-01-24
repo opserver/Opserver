@@ -25,11 +25,14 @@ namespace StackExchange.Opserver
         public event EventHandler<List<NodeSettings>> PerNodeSettingsChanged = delegate { };
         public event EventHandler<NodeSettings> PerNodeSettingRemoved = delegate { };
 
+        public bool ShowOther { get; set; }
+
         public DashboardSettings()
         {
             Categories = new ObservableCollection<Category>();
             Providers = new ObservableCollection<Provider>();
             PerNodeSettings = new ObservableCollection<NodeSettings>();
+            ShowOther = true;
         }
 
         public void AfterLoad()
