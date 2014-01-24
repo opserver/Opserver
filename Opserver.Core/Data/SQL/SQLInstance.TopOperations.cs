@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Xml.Serialization;
 using Dapper;
 using StackExchange.Opserver.Data.SQL.QueryPlans;
@@ -15,24 +14,27 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<TopOperation>> GetTopOperations(TopSearchOptions options = null)
         {
             return new Cache<List<TopOperation>>
+            {
+                CacheKey = GetCacheKey("TopOperations-" + (options == null ? 0 : options.GetHashCode())),
+                CacheForSeconds = 15,
+                CacheStaleForSeconds = 5*60,
+                UpdateCache = UpdateFromSql("Top Operations", conn =>
                 {
-                    CacheKey = GetCacheKey("TopOperations-" + (options == null ? 0 : options.GetHashCode())),
-                    CacheForSeconds = 15,
-                    CacheStaleForSeconds = 5*60,
-                    UpdateCache = UpdateFromSql("Top Operations", conn =>
-                        {
-                            var sql = string.Format(GetFetchSQL<TopOperation>(), (options != null ? options.ToSQLWhere() + options.ToSQLOrder() : ""));
-                            sql = sql.Replace("query_plan AS QueryPlan,", "");
-                            return conn.Query<TopOperation>(sql, options).ToList();
-                        })
-                };
+                    var hasOptions = options != null;
+                    var sql = string.Format(GetFetchSQL<TopOperation>(),
+                        (hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : ""),
+                        (hasOptions ? options.ToSQLSearch() : ""));
+                    sql = sql.Replace("query_plan AS QueryPlan,", "");
+                    return conn.Query<TopOperation>(sql, options).ToList();
+                })
+            };
         }
 
         public Cache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
         {
             var clause = " WHERE (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
             if (statementStartOffset.HasValue) clause += " And qs.statement_start_offset = @statementStartOffset";
-            string sql = string.Format(GetFetchSQL<TopOperation>(), clause);
+            string sql = string.Format(GetFetchSQL<TopOperation>(), clause, "");
             return new Cache<TopOperation>
                 {
                     CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode() + "-" + statementStartOffset),
@@ -52,6 +54,7 @@ namespace StackExchange.Opserver.Data.SQL
             public long AvgCPU { get; private set; }
             public long TotalCPU { get; private set; }
             public long AvgCPUPerMinute { get; private set; }
+            public long AvgCPUPerMinuteLifetime { get; private set; }
             public decimal PercentCPU { get; private set; }
             public long AvgDuration { get; private set; }
             public long TotalDuration { get; private set; }
@@ -62,6 +65,7 @@ namespace StackExchange.Opserver.Data.SQL
             public long ExecutionCount { get; private set; }
             public decimal PercentExecutions { get; private set; }
             public decimal ExecutionsPerMinute { get; private set; }
+            public decimal ExecutionsPerMinuteLifetime { get; private set; }
             public DateTime PlanCreationTime { get; private set; }
             public DateTime LastExecutionTime { get; private set; }
             public string QueryText { get; private set; }
@@ -97,7 +101,7 @@ SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
        TotalCPU, TotalDuration, TotalReads,
        PercentCPU, PercentDuration, PercentReads, PercentExecutions,
        ExecutionCount,
-	   ExecutionsPerMinute,
+       ExecutionsPerMinute,
        PlanCreationTime, LastExecutionTime,
        SUBSTRING(st.text,
                  (StatementStartOffset / 2) + 1,
@@ -119,10 +123,10 @@ FROM (SELECT TOP (@MaxResultCount)
              total_worker_time / execution_count AS AvgCPU,
              total_elapsed_time / execution_count AS AvgDuration,
              total_logical_reads / execution_count AS AvgReads,
-             CAST(total_worker_time / execution_count *(Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) Else Null End) AS BIGINT) AS AvgCPUPerMinute,
-             (Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 
-                   Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS MONEY) 
-                   Else Null End) AS ExecutionsPerMinute,
+             Cast(total_worker_time / age_minutes As BigInt) AS AvgCPUPerMinute,
+             execution_count / age_minutes AS ExecutionsPerMinute,
+             Cast(total_worker_time / age_minutes_lifetime As BigInt) AS AvgCPUPerMinuteLifetime,
+             execution_count / age_minutes_lifetime AS ExecutionsPerMinuteLifetime,
              total_worker_time AS TotalCPU,
              total_elapsed_time AS TotalDuration,
              total_logical_reads AS TotalReads,
@@ -142,7 +146,14 @@ FROM (SELECT TOP (@MaxResultCount)
              qs.total_rows AS TotalReturnedRows,
              qs.last_rows AS LastReturnedRows,
              qs.sql_handle AS SqlHandle
-        FROM sys.dm_exec_query_stats AS qs
+        FROM (SELECT *, 
+                     CAST((CASE WHEN DATEDIFF(second, creation_time, GETDATE()) > 0 And execution_count > 1
+                                THEN DATEDIFF(second, creation_time, GETDATE()) / 60.0
+                                ELSE Null END) as MONEY) as age_minutes, 
+                     CAST((CASE WHEN DATEDIFF(second, creation_time, last_execution_time) > 0 And execution_count > 1
+                                THEN DATEDIFF(second, creation_time, last_execution_time) / 60.0
+                                ELSE Null END) as MONEY) as age_minutes_lifetime
+                FROM sys.dm_exec_query_stats) AS qs
              CROSS JOIN(SELECT SUM(execution_count) TotalExecs,
                                SUM(total_elapsed_time) TotalElapsed,
                                SUM(total_worker_time) TotalWorker,
@@ -151,6 +162,7 @@ FROM (SELECT TOP (@MaxResultCount)
        {0}) sq
     CROSS APPLY sys.dm_exec_sql_text(SqlHandle) AS st
     CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp
+{1}
 ";
             public string GetFetchSQL(Version v)
             {
@@ -229,10 +241,19 @@ FROM (SELECT TOP (@MaxResultCount)
                 var clauses = new List<string>();
                 if (MinExecs.GetValueOrDefault(0) > 0) clauses.Add("execution_count >= @MinExecs");
                 if (MinExecsPerMin.GetValueOrDefault(0) > 0) clauses.Add("(Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS money) Else Null End) >= @MinExecsPerMin");
-                if (Search.HasValue()) clauses.Add("SUBSTRING(st.text, ( qs.statement_start_offset / 2 ) + 1, ( ( CASE qs.statement_end_offset WHEN -1 THEN DATALENGTH(st.text) ELSE qs.statement_end_offset END - qs.statement_start_offset ) / 2 ) + 1) Like '%' + @Search + '%'");
                 if (MinLastRunDate.HasValue) clauses.Add("qs.last_execution_time >= @MinLastRunDate");
 
                 return clauses.Any() ? " WHERE " + string.Join("\n  AND ", clauses) : "";
+            }
+
+            public string ToSQLSearch()
+            {
+                return Search.HasValue() ? @"Where SUBSTRING(st.text,
+                 (StatementStartOffset / 2) + 1,
+                 ((CASE StatementEndOffset
+                   WHEN -1 THEN DATALENGTH(st.text)
+                   ELSE StatementEndOffset
+                   END - StatementStartOffset) / 2) + 1) Like '%' + @Search + '%'" : "";
             }
 
             public string ToSQLOrder()

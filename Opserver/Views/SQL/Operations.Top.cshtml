@@ -128,8 +128,8 @@
                     @foreach (var o in data)
                     {
                         <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset">
-                            <td class="number-col">@o.AvgCPU.ToComma() µs</td>
-                            <td class="number-col">@o.AvgCPUPerMinute.ToComma() µs</td>
+                            <td class="number-col">@o.AvgCPU.ToComma()µs</td>
+                            <td class="number-col">@o.AvgCPUPerMinute.ToComma()µs</td>
                             <td class="number-col">@ReadableTime(o.TotalCPU/1000)</td>
                             @if(Model.Detailed){<td>@o.PercentCPU.ToString("0.00")</td>}
                             <td class="number-col">@ReadableTime(o.AvgDuration)</td>
