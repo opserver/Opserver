@@ -1,5 +1,4 @@
 ﻿@using System.Collections.Specialized
-@using System.Text
 @using System.Text.RegularExpressions
 @using StackExchange.Exceptional
 @using StackExchange.Opserver
@@ -13,8 +12,8 @@
 @section head {
     @if(error != null) 
     {
-    <script>var Exception = @error.ToDetailedJson().AsHtml();</script>
     <script>
+        var Exception = @error.ToDetailedJson().AsHtml();
         $(function () {
             Status.Exceptions.init({ log: '@error.ApplicationName', id: '@error.GUID' });
         });
@@ -57,69 +56,83 @@
                                                          "SERVER_PROTOCOL",
                                                          "SERVER_SOFTWARE"
                                                      };
-                                                     
-    public IHtmlString RenderVariableTable(string title, string className, NameValueCollection vars)
-    {
-        if (vars == null || vars.Count == 0) return "".AsHtml();
-        
-        var result = new StringBuilder();
-        var hiddenRows = new StringBuilder();
-        
-        result.AppendFormat("    <div class=\"{0}\">", className);
-        result.AppendFormat("      <h3 class=\"kv-title\">{0}</h3>", title);
-        result.AppendFormat("      <div class=\"side-scroll\">");
-        result.AppendFormat("        <table class=\"kv-table\">");
-        
-        foreach (var k in vars.AllKeys.Where(key => !hiddenHttpKeys.Contains(key)).OrderBy(k => k))
-        {
-            // If this has no value, skip it
-            if (vars[k].IsNullOrEmpty()) { continue; }
-            // If this is a hidden row, buffer it up, since CSS has no clean mechanism for :visible:nth-row(odd) type styling behavior
-            var hidden = defaultHttpKeys.Contains(k);
-            var sb = hidden ? hiddenRows : result;
-            sb.AppendFormat("          <tr{2}><td class=\"key\">{0}</td><td class=\"value\">{1}</td></tr>", k, Linkify(vars[k]), hidden ? " class=\"hidden\"" : "");
-        }
-        if (vars["HTTP_HOST"].HasValue() && vars["URL"].HasValue())
-        {
-            var ssl = vars["HTTP_X_FORWARDED_PROTO"] == "https" || vars["HTTP_X_SSL"].HasValue() || vars["HTTPS"] == "on";
-            var url = string.Format("http{3}://{0}{1}{2}", vars["HTTP_HOST"], vars["URL"], vars["QUERY_STRING"].HasValue() ? "?" + vars["QUERY_STRING"] : "", ssl ? "s" : "");
-            result.AppendFormat("          <tr><td class=\"key\">URL and Query</td><td class=\"value\">{0}</td></tr>", vars["REQUEST_METHOD"] == "GET" ? Linkify(url) : url.HtmlEncode());
-        }
-        result.Append(hiddenRows);
-        result.AppendFormat("        </table>");
-        result.AppendFormat("      </div>");
-        result.AppendFormat("    </div>");
-        return result.ToString().AsHtml();
-    }
-
-
-    private string Linkify(string s)
-    {
-        if (string.IsNullOrEmpty(s))
-            return s;
-        
-        if (Regex.IsMatch(s, @"%[A-Z0-9][A-Z0-9]"))
-        {
-            s = Server.UrlDecode(s);
-        }
-
-        if (Regex.IsMatch(s, "^(https?|ftp|file)://"))
-        {
-            //@* || (Regex.IsMatch(s, "/[^ /,]+/") && !s.Contains("/LM"))*@ // block special case of "/LM/W3SVC/1"
-            var sane = SanitizeUrl(s);
-            if (sane == s) // only link if it's not suspicious
-                return string.Format(@"<a href=""{0}"">{1}</a>", sane, Server.HtmlEncode(s));
-        }
-
-        return Server.HtmlEncode(s);
-    }
 
     private static readonly Regex _sanitizeUrl = new Regex(@"[^-a-z0-9+&@#/%?=~_|!:,.;\*\(\)\{\}]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static string SanitizeUrl(string url)
     {
         return url.IsNullOrEmpty() ? url : _sanitizeUrl.Replace(url, "");
     }
+}
+@helper Linkify(string possibleLink) {
+    if (string.IsNullOrEmpty(possibleLink)) {
+        @possibleLink;
+    }
 
+    if (Regex.IsMatch(possibleLink, @"%[A-Z0-9][A-Z0-9]"))
+    {
+        possibleLink = Server.UrlDecode(possibleLink);
+    }
+
+    if (Regex.IsMatch(possibleLink, "^(https?|ftp|file)://"))
+    {
+        //@* || (Regex.IsMatch(s, "/[^ /,]+/") && !s.Contains("/LM"))*@ // block special case of "/LM/W3SVC/1"
+        var sane = SanitizeUrl(possibleLink);
+        if (sane == possibleLink) // only link if it's not suspicious
+        {
+            <a href="@sane">@possibleLink</a>
+            return;
+        }
+    }
+
+    @possibleLink
+}
+@helper RenderVariableTable(string title, string className, NameValueCollection vars) {
+    if (vars == null || vars.Count == 0) {
+        return;
+    }
+    // If this is a hidden row, buffer it up, since CSS has no clean mechanism for :visible:nth-row(odd) type styling behavior
+    Func<string, bool> isHidden = k => defaultHttpKeys.Contains(k);
+    var allKeys = vars.AllKeys.Where(key => !hiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
+    
+    <div class="@className">
+        <h3 class="kv-title">@title</h3>
+        <div class="side-scroll">
+            <table class="kv-table">
+                @foreach (var k in allKeys.Where(k => !isHidden(k)))
+                {
+                <tr class="hidden">
+                    <td class="key">@k</td>
+                    <td class="value">@Linkify(vars[k])</td>
+                </tr>
+                }
+                @if (vars["HTTP_HOST"].HasValue() && vars["URL"].HasValue())
+                {
+                var ssl = vars["HTTP_X_FORWARDED_PROTO"] == "https" || vars["HTTP_X_SSL"].HasValue() || vars["HTTPS"] == "on";
+                var url = string.Format("http{3}://{0}{1}{2}", vars["HTTP_HOST"], vars["URL"], vars["QUERY_STRING"].HasValue() ? "?" + vars["QUERY_STRING"] : "", ssl ? "s" : "");
+                <tr>
+                    <td class="key">URL and Query</td>
+                    <td class="value">
+                        @if (vars["REQUEST_METHOD"] == "GET")
+                        {
+                            @Linkify(url)
+                        }
+                        else
+                        {
+                            @url.HtmlEncode()
+                        }
+                    </td>
+                </tr>
+                }
+                @foreach (var k in allKeys.Where(k => isHidden(k)))
+                {
+                <tr class="hidden">
+                    <td class="key">@k</td>
+                    <td class="value">@Linkify(vars[k])</td>
+                </tr>
+                }
+            </table>
+        </div>
+    </div>
 }
 <div id="ErrorInfo">
 @if (error == null)
