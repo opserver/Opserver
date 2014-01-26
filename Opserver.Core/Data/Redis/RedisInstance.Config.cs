@@ -24,11 +24,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// <param name="value">Value to set</param>
         public void SetConfigValue(string parameter, string value)
         {
-            using (var rc = GetConnection(allowAdmin: true))
-            {
-                rc.Open();
-                rc.Server.SetConfig(parameter, value);
-            }
+            Connection.Server.SetConfig(parameter, value);
         }
     }
 }

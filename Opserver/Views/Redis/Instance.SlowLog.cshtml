@@ -37,10 +37,13 @@
 else
 {
     <div class="no-content">
-        No slow commands in the log
         @if (!Model.IsSlowLogEnabled)
         {
-            <div>Slow log is not enabled</div>
+            @:Slow log is not enabled
+        }
+        else
+        {
+            @:No slow commands in the log
         }
     </div>
 }

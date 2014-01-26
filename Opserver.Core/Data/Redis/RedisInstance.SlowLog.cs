@@ -67,11 +67,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// </remarks>
         public void ClearSlowLog()
         {
-            using (var rc = GetConnection(allowAdmin: true))
-            {
-                rc.Open();
-                rc.Server.ResetSlowCommands();
-            }
+            Connection.Server.ResetSlowCommands();
         }
     }
 }

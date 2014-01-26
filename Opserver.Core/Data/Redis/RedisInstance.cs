@@ -23,13 +23,30 @@ namespace StackExchange.Opserver.Data.Redis
         public override string NodeType { get { return "Redis"; } }
         public override int MinSecondsBetweenPolls { get { return 5; } }
 
+        private RedisConnection _connection;
+        public RedisConnection Connection
+        {
+            get
+            {
+                if (_connection == null)
+                {
+                    _connection = GetConnection(allowAdmin: true);
+                }
+                if (_connection.State != RedisConnectionBase.ConnectionState.Open)
+                {
+                    _connection.Wait(_connection.Open());
+                }
+                return _connection;
+            }
+        }
+
         public override IEnumerable<Cache> DataPollers
         {
             get
             {
+                yield return Config;
                 yield return Info;
                 yield return Clients;
-                yield return Config;
                 yield return SlowLog;
             }
         }
@@ -77,14 +94,7 @@ namespace StackExchange.Opserver.Data.Redis
         public Action<Cache<T>> GetFromRedis<T>(string opName, Func<RedisConnection, T> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "Redis Fetch: " + Name + ":" + opName,
-                                   getData: () =>
-                                       {
-                                           using (var rc = GetConnection(allowAdmin: true))
-                                           {
-                                               rc.Wait(rc.Open());
-                                               return getFromConnection(rc);
-                                           }
-                                       },
+                                   getData: () => getFromConnection(Connection),
                                    logExceptions: false,
                                    addExceptionData: e => e.AddLoggedData("Server", Name)
                                                            .AddLoggedData("Host", Host)
@@ -104,15 +114,21 @@ namespace StackExchange.Opserver.Data.Redis
 
         public RedisMemoryAnalysis GetDatabaseMemoryAnalysis(int database, bool runIfMaster = false)
         {
+            var ci = ConnectionInfo;
             if (IsMaster && !runIfMaster)
             {
-                return new RedisMemoryAnalysis(ConnectionInfo, database)
+                // no slaves, and a master - boom
+                if (SlaveCount == 0)
+                    return new RedisMemoryAnalysis(ConnectionInfo, database)
                     {
                         ErrorMessage = "Cannot run memory analysis on a master - it hurts."
                     };
+
+                // Go to the first slave, automagically
+                ci = SlaveInstances.First().ConnectionInfo;
             }
 
-            return RedisAnalyzer.AnalyzeDatabaseMemory(ConnectionInfo, database);
+            return RedisAnalyzer.AnalyzeDatabaseMemory(ci, database);
         }
 
         public void ClearDatabaseMemoryAnalysisCache(int database)
