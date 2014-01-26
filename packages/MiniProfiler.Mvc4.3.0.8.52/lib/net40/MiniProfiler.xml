@@ -22,6 +22,7 @@
             Starts a new MiniProfiler and sets it to be current.  By the end of this method
             <see cref="M:StackExchange.Profiling.IProfilerProvider.GetCurrentProfiler"/> should return the new MiniProfiler.
             </summary>
+            <param name="level">The <see cref="T:StackExchange.Profiling.ProfileLevel"/> to use.</param>
             <param name="sessionName">
             Allows explicit naming of the new profiling session; when null, an appropriate default will be used, e.g. for
             a web request, the url will be used for the overall session name.
@@ -118,6 +119,18 @@
             <summary>
             Gets or sets the duration.
             </summary>
+        </member>
+        <member name="P:StackExchange.Profiling.ClientTimings.ClientTiming.Id">
+            <summary>
+            Unique Identifier used for sql storage. 
+            </summary>
+            <remarks>Not set unless storing in Sql</remarks>
+        </member>
+        <member name="P:StackExchange.Profiling.ClientTimings.ClientTiming.MiniProfilerId">
+            <summary>
+            Used for sql storage
+            </summary>
+            <remarks>Not set unless storing in Sql</remarks>
         </member>
         <member name="T:StackExchange.Profiling.CustomTiming">
             <summary>
@@ -308,7 +321,7 @@
         </member>
         <member name="M:StackExchange.Profiling.SqlTimingParameter.Equals(System.Object)">
             <summary>
-            Returns true if this has the same parent <see cref="!:SqlTiming.Id"/>, 
+            Returns true if this has the same parent  
             <see cref="P:StackExchange.Profiling.SqlTimingParameter.Name"/> and <see cref="P:StackExchange.Profiling.SqlTimingParameter.Value"/> as <paramref name="obj"/>.
             </summary>
         </member>
@@ -341,6 +354,228 @@
             <summary>
             How large the type is, e.g. for string, size could be 4000
             </summary>
+        </member>
+        <member name="T:StackExchange.Profiling.Storage.DatabaseStorageBase">
+            <summary>
+            Understands how to save MiniProfiler results to a MSSQL database, allowing more permanent storage and querying of slow results.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Profiling.Storage.IStorage">
+            <summary>
+            Provides saving and loading <see cref="T:StackExchange.Profiling.MiniProfiler"/>s to a storage medium.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.List(System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},StackExchange.Profiling.Storage.ListResultsOrder)">
+            <summary>
+            List the latest profiling results.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.Save(StackExchange.Profiling.MiniProfiler)">
+            <summary>
+            Stores <paramref name="profiler"/> under its <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>.
+            </summary>
+            <param name="profiler">The results of a profiling session.</param>
+            <remarks>
+            Should also ensure the profiler is stored as being un-viewed by its profiling <see cref="P:StackExchange.Profiling.MiniProfiler.User"/>.
+            </remarks>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.Load(System.Guid)">
+            <summary>
+            Returns a <see cref="T:StackExchange.Profiling.MiniProfiler"/> from storage based on <paramref name="id"/>, 
+            which should map to <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>.
+            </summary>
+            <remarks>
+            Should also update that the resulting profiler has been marked as viewed by its 
+            profiling <see cref="P:StackExchange.Profiling.MiniProfiler.User"/>.
+            </remarks>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.SetUnviewed(System.String,System.Guid)">
+            <summary>
+            Sets a particular profiler session so it is considered "un-viewed"  
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.SetViewed(System.String,System.Guid)">
+            <summary>
+            Sets a particular profiler session to "viewed"
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.IStorage.GetUnviewedIds(System.String)">
+            <summary>
+            Returns a list of <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>s that haven't been seen by <paramref name="user"/>.
+            </summary>
+            <param name="user">
+            User identified by the current <c>MiniProfiler.Settings.UserProvider</c>
+            </param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.#ctor(System.String)">
+            <summary>
+            Initialises a new instance of the <see cref="T:StackExchange.Profiling.Storage.DatabaseStorageBase"/> class. 
+            Returns a new <c>SqlServerDatabaseStorage</c> object that will insert into the database identified by connectionString.
+            </summary>
+            <param name="connectionString">The connection String.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.Save(StackExchange.Profiling.MiniProfiler)">
+            <summary>
+            Saves 'profiler' to a database under its <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>.
+            </summary>
+            <param name="profiler">The profiler.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.Load(System.Guid)">
+            <summary>
+            Returns the MiniProfiler identified by 'id' from the database or null when no MiniProfiler exists under that 'id'.
+            </summary>
+            <param name="id">
+            The id.
+            </param>
+            <returns>the mini profiler</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.SetUnviewed(System.String,System.Guid)">
+            <summary>
+            Sets a particular profiler session so it is considered "un-viewed"  
+            </summary>
+            <param name="user">The user.</param>
+            <param name="id">The id.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.SetViewed(System.String,System.Guid)">
+            <summary>
+            Sets a particular profiler session to "viewed"
+            </summary>
+            <param name="user">The user.</param>
+            <param name="id">The id.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.GetUnviewedIds(System.String)">
+            <summary>
+            Returns a list of <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>s that haven't been seen by <paramref name="user"/>.
+            </summary>
+            <param name="user">
+            User identified by the current <c>MiniProfiler.Settings.UserProvider</c>.
+            </param>
+            <returns>the list of keys for the supplied user</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.List(System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},StackExchange.Profiling.Storage.ListResultsOrder)">
+            <summary>
+            Implement a basic list search here
+            </summary>
+            <param name="maxResults">The max number of results.</param>
+            <param name="start">The start.</param>
+            <param name="finish">The finish.</param>
+            <param name="orderBy">order By.</param>
+            <returns>the list of GUID keys</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.DatabaseStorageBase.MapTimings(StackExchange.Profiling.MiniProfiler,StackExchange.Profiling.Storage.DatabaseStorageBase.DbTimingsWrapper)">
+            <summary>
+            Giving freshly selected collections, this method puts them in the correct
+            hierarchy under the 'result' MiniProfiler.
+            </summary>
+            <param name="result">The result.</param>
+            <param name="timingsWrapper">The timings to map</param>
+        </member>
+        <member name="P:StackExchange.Profiling.Storage.DatabaseStorageBase.ConnectionString">
+            <summary>
+            Gets or sets how we connect to the database used to save/load MiniProfiler results.
+            </summary>
+        </member>
+        <member name="T:StackExchange.Profiling.Storage.DatabaseStorageBase.DbTimingsWrapper">
+            <summary>
+            Stores the different timings related to a MiniProfiler that is to be inserted into a DbStorage
+            </summary>
+            <remarks>Is to be stored in </remarks>
+        </member>
+        <member name="T:StackExchange.Profiling.Storage.SqlServerStorage">
+            <summary>
+            Understands how to store a <see cref="T:StackExchange.Profiling.MiniProfiler"/> to a MSSQL database.
+            </summary>
+        </member>
+        <member name="F:StackExchange.Profiling.Storage.SqlServerStorage.SqlStatements">
+            <summary>
+            Load the SQL statements (using Dapper Multiple Results)
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.#ctor(System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:StackExchange.Profiling.Storage.SqlServerStorage"/> class. 
+            </summary>
+            <param name="connectionString">
+            The connection String.
+            </param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.Save(StackExchange.Profiling.MiniProfiler)">
+            <summary>
+            Stores to <c>dbo.MiniProfilers</c> under its <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>;
+            </summary>
+            <param name="profiler">The Mini Profiler</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.Load(System.Guid)">
+            <summary>
+            Loads the <c>MiniProfiler</c> identified by 'id' from the database.
+            </summary>
+            <param name="id">The id.</param>
+            <returns>the mini profiler.</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.SetUnviewed(System.String,System.Guid)">
+            <summary>
+            Sets the session to un-viewed 
+            </summary>
+            <param name="user">The user.</param>
+            <param name="id">The id.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.SetViewed(System.String,System.Guid)">
+            <summary>
+            sets the session to viewed
+            </summary>
+            <param name="user">The user.</param>
+            <param name="id">The id.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.GetUnviewedIds(System.String)">
+            <summary>
+            Returns a list of <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>s that haven't been seen by <paramref name="user"/>.
+            </summary>
+            <param name="user">User identified by the current UserProvider"/&gt;.</param>
+            <returns>the list of keys.</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.List(System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},StackExchange.Profiling.Storage.ListResultsOrder)">
+            <summary>
+            List the Results.
+            </summary>
+            <param name="maxResults">The max results.</param>
+            <param name="start">The start.</param>
+            <param name="finish">The finish.</param>
+            <param name="orderBy">order by.</param>
+            <returns>the list of key values.</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.LoadProfilerRecord(System.Data.Common.DbConnection,System.Object)">
+            <summary>
+            Load individual MiniProfiler
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="keyParameter">The id Parameter.</param>
+            <returns>Related MiniProfiler object</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.PopulateChildTimings(StackExchange.Profiling.Timing,System.Linq.ILookup{System.Guid,StackExchange.Profiling.Timing})">
+            <summary>
+            Build the subtree of <see cref="T:StackExchange.Profiling.Timing"/> objects with <paramref name="parent"/> at the top.
+            Used recursively.
+            </summary>
+            <param name="parent">Parent <see cref="T:StackExchange.Profiling.Timing"/> to be evaluated.</param>
+            <param name="timingsLookupByParent">Key: parent timing Id; Value: collection of all <see cref="T:StackExchange.Profiling.Timing"/> objects under the given parent.</param>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.GetConnection">
+            <summary>
+            Returns a connection to Sql Server.
+            </summary>
+        </member>
+        <member name="M:StackExchange.Profiling.Storage.SqlServerStorage.GetOpenConnection">
+            <summary>
+            Returns a DbConnection already opened for execution.
+            </summary>
+        </member>
+        <member name="F:StackExchange.Profiling.Storage.SqlServerStorage.TableCreationScript">
+            <summary>
+            Creates needed tables. Run this once on your database.
+            </summary>
+            <remarks>
+            Works in SQL server and <c>sqlite</c> (with documented removals).
+            </remarks>
         </member>
         <member name="T:StackExchange.Profiling.Suppression">
             <summary>
@@ -515,7 +750,6 @@
             <param name="type">The type of execution.</param>
             <param name="func">a function to execute against against the profile result</param>
             <typeparam name="TResult">the type of result to return.</typeparam>
-            <returns>The <see cref="!:TResult"/>return the profiled result.</returns>
         </member>
         <member name="M:StackExchange.Profiling.Data.SimpleProfiledCommand.Dispose">
             <summary>
@@ -1284,6 +1518,14 @@
             Answers true if this String is neither null or empty.
             </summary>
         </member>
+        <member name="M:StackExchange.Profiling.Helpers.ExtensionMethods.Truncate(System.String,System.Int32)">
+            <summary>
+            Chops off a string at the specified length and accounts for smaller length
+            </summary>
+            <param name="s"></param>
+            <param name="maxLength"></param>
+            <returns></returns>
+        </member>
         <member name="M:StackExchange.Profiling.Helpers.ExtensionMethods.EnsureTrailingSlash(System.String)">
             <summary>
             Removes trailing / characters from a path and leaves just one
@@ -1305,6 +1547,13 @@
             </summary>
             <param name="o">the instance to serialise</param>
             <returns>the resulting JSON object as a string</returns>
+        </member>
+        <member name="M:StackExchange.Profiling.Helpers.ExtensionMethods.FromJson``1(System.String)">
+            <summary>
+            Deserializes <paramref name="s"/> to an object of type <typeparamref name="T"/>.
+            </summary>
+            <param name="s">The string to deserialize</param>
+            <returns>The object resulting from the given string</returns>
         </member>
         <member name="M:StackExchange.Profiling.Helpers.ExtensionMethods.ToJs(System.Boolean)">
             <summary>
@@ -2748,6 +2997,7 @@
             Starts a new MiniProfiler based on the current <see cref="T:StackExchange.Profiling.IProfilerProvider"/>. This new profiler can be accessed by
             <see cref="P:StackExchange.Profiling.MiniProfiler.Current"/>.
             </summary>
+            <param name="level">Profiling level. Default to Info.</param>
             <param name="sessionName">
             Allows explicit naming of the new profiling session; when null, an appropriate default will be used, e.g. for
             a web request, the url will be used for the overall session name.
@@ -2799,6 +3049,7 @@
             Should MiniProfiler attempt to load its own version of jQuery, or rely on a version previously loaded on the page?
             </param>
             <param name="samplingOnly">The sampling Only.</param>
+            <param name="startHidden">Should the profiler start as hidden. Default to null.</param>
             <returns>Script and link elements normally; an empty string when there is no active profiling session.</returns>
         </member>
         <member name="M:StackExchange.Profiling.MiniProfiler.ToString">
@@ -2882,6 +3133,11 @@
             Use <see cref="M:StackExchange.Profiling.MiniProfilerExtensions.AddCustomLink(StackExchange.Profiling.MiniProfiler,System.String,System.String)"/> to easily add a name/url pair to this dictionary.
             </remarks>
         </member>
+        <member name="P:StackExchange.Profiling.MiniProfiler.CustomLinksJson">
+            <summary>
+            Json used to store Custom Links
+            </summary>
+        </member>
         <member name="P:StackExchange.Profiling.MiniProfiler.Root">
             <summary>
             Gets or sets the root timing.
@@ -2889,9 +3145,19 @@
             All other <see cref="T:StackExchange.Profiling.Timing"/>s will be children of this one.
             </summary>
         </member>
+        <member name="P:StackExchange.Profiling.MiniProfiler.RootTimingId">
+            <summary>
+            Id of Root Timing. Used for Sql Storage purposes.
+            </summary>
+        </member>
         <member name="P:StackExchange.Profiling.MiniProfiler.ClientTimings">
             <summary>
             Gets or sets timings collected from the client
+            </summary>
+        </member>
+        <member name="P:StackExchange.Profiling.MiniProfiler.ClientTimingsRedirectCount">
+            <summary>
+            RedirectCount in ClientTimings. Used for sql storage.
             </summary>
         </member>
         <member name="P:StackExchange.Profiling.MiniProfiler.User">
@@ -3339,53 +3605,6 @@
             with absolute expiration.
             </summary>
         </member>
-        <member name="T:StackExchange.Profiling.Storage.IStorage">
-            <summary>
-            Provides saving and loading <see cref="T:StackExchange.Profiling.MiniProfiler"/>s to a storage medium.
-            </summary>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.List(System.Int32,System.Nullable{System.DateTime},System.Nullable{System.DateTime},StackExchange.Profiling.Storage.ListResultsOrder)">
-            <summary>
-            List the latest profiling results.
-            </summary>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.Save(StackExchange.Profiling.MiniProfiler)">
-            <summary>
-            Stores <paramref name="profiler"/> under its <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>.
-            </summary>
-            <param name="profiler">The results of a profiling session.</param>
-            <remarks>
-            Should also ensure the profiler is stored as being un-viewed by its profiling <see cref="P:StackExchange.Profiling.MiniProfiler.User"/>.
-            </remarks>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.Load(System.Guid)">
-            <summary>
-            Returns a <see cref="T:StackExchange.Profiling.MiniProfiler"/> from storage based on <paramref name="id"/>, 
-            which should map to <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>.
-            </summary>
-            <remarks>
-            Should also update that the resulting profiler has been marked as viewed by its 
-            profiling <see cref="P:StackExchange.Profiling.MiniProfiler.User"/>.
-            </remarks>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.SetUnviewed(System.String,System.Guid)">
-            <summary>
-            Sets a particular profiler session so it is considered "un-viewed"  
-            </summary>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.SetViewed(System.String,System.Guid)">
-            <summary>
-            Sets a particular profiler session to "viewed"
-            </summary>
-        </member>
-        <member name="M:StackExchange.Profiling.Storage.IStorage.GetUnviewedIds(System.String)">
-            <summary>
-            Returns a list of <see cref="P:StackExchange.Profiling.MiniProfiler.Id"/>s that haven't been seen by <paramref name="user"/>.
-            </summary>
-            <param name="user">
-            User identified by the current <c>MiniProfiler.Settings.UserProvider</c>
-            </param>
-        </member>
         <member name="F:StackExchange.Profiling.Storage.HttpRuntimeCacheStorage.CacheKeyPrefix">
             <summary>
             The string that prefixes all keys that MiniProfilers are saved under, e.g.
@@ -3618,6 +3837,11 @@
             <see cref="T:StackExchange.Profiling.CustomTiming"/> lists keyed by their type, e.g. "sql", "memcache", "redis", "http".
             </summary>
         </member>
+        <member name="P:StackExchange.Profiling.Timing.CustomTimingsJson">
+            <summary>
+            JSON representing the Custom Timings associated with this timing.
+            </summary>
+        </member>
         <member name="P:StackExchange.Profiling.Timing.HasCustomTimings">
             <summary>
             Returns true when there exists any <see cref="T:StackExchange.Profiling.CustomTiming"/> objects in this <see cref="P:StackExchange.Profiling.Timing.CustomTimings"/>.
@@ -3628,6 +3852,11 @@
             Gets or sets Which Timing this Timing is under - the duration that this step takes will be added to its parent's duration.
             </summary>
             <remarks>This will be null for the root (initial) Timing.</remarks>
+        </member>
+        <member name="P:StackExchange.Profiling.Timing.ParentTimingId">
+            <summary>
+            The Unique Identifier identifying the parent timing of this Timing. Used for sql server storage.
+            </summary>
         </member>
         <member name="P:StackExchange.Profiling.Timing.DurationWithoutChildrenMilliseconds">
             <summary>
@@ -3658,6 +3887,11 @@
         <member name="P:StackExchange.Profiling.Timing.Profiler">
             <summary>
             Gets a reference to the containing profiler, allowing this Timing to affect the Head and get Stopwatch readings.
+            </summary>
+        </member>
+        <member name="P:StackExchange.Profiling.Timing.MiniProfilerId">
+            <summary>
+            The unique identifier used to identify the Profiler with which this Timing is associated. Used for sql storage.
             </summary>
         </member>
         <member name="T:StackExchange.Profiling.WebRequestProfilerProvider">
