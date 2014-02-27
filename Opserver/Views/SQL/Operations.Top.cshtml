@@ -79,7 +79,17 @@
                                 @RunInLast(DashboardModel.LastRunInterval.FiveMinutes, "5 Minutes")
                             </div>
                             <div class="filter">
-                                Search: <input style="width: 240px;" type="text" value="@Model.TopSearchOptions.Search" name="search" title="string to search for in the query text" placeholder="Search Text (warning: may be slow)" />
+                                Search: <input style="width: 250px;" type="text" value="@Model.TopSearchOptions.Search" name="search" title="string to search for in the query text" placeholder="Search Text (warning: may be slow)" />
+                            </div>
+                            <div class="filter">
+                                Database: 
+                                <select style="width: 240px;" name="database">
+                                    <option value="" @(Model.TopSearchOptions.Database.HasValue ? "" : "selected ")>All Databases</option>
+                                    @foreach (var db in Model.CurrentInstance.Databases.SafeData(true).OrderBy(db => !db.IsSystemDatabase).ThenBy(db => db.Name))
+                                    {
+                                        <option value="@db.Id" @(Model.TopSearchOptions.Database == db.Id ? "selected " : "")>@db.Name</option>
+                                    }
+                                </select>
                             </div>
                             <button class="submit-button" type="submit">Apply</button>
                         </form>

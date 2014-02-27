@@ -92,7 +92,7 @@ window.Status = (function () {
         }
 
         container.css('height', 'auto');
-        active.css({ 'overflow-y': 'none', 'height': 'auto' });
+        active.css({ 'overflow-y': 'visible', 'height': 'auto' });
 
         var maxHeight = $(window).height() * 0.90;
         if (container.height() > maxHeight) {
@@ -103,7 +103,7 @@ window.Status = (function () {
         if (active[0].scrollHeight > visibleHeight) {
             active.css({ 'overflow-y': 'scroll', 'height': visibleHeight - 5 + 'px' });
         } else {
-            active.css({ 'overflow-y': 'none', 'height': visibleHeight + 'px' });
+            active.css({ 'overflow-y': 'visible', 'height': visibleHeight + 'px' });
         }
         $.modal.setPosition();
 
@@ -183,8 +183,35 @@ window.Status = (function () {
             }, 100);
         });
         $(document).on('click', '.reload-link', function (e) {
-            if ((this.href || '#') != '#') return;
-            window.location.reload(true);
+            var data = {
+                type: $(this).data('type'),
+                uniqueKey: $(this).data('uk'),
+                guid: $(this).data('guid')
+            };
+            if (!data.type && (this.href || '#') != '#') return;
+            if (data.type && data.uniqueKey) {
+                // Node to refresh, do it
+                $(this).addClass('reloading')
+                    .find('.js-text')
+                    .text('Polling now...');
+                // TODO: Loading indicator...
+                $.post('/poll', data)
+                    .success(function (result) {
+                        window.location.reload(true);
+                    })
+                    .fail(function () {
+                    $(this).removeClass('reloading')
+                        .find('.js-text')
+                        .text('Poll Now');
+                        toastr.error('There was an error polling this node.', 'Polling',
+                        {
+                            positionClass: 'toast-top-right-spaced',
+                            timeOut: 5 * 1000
+                        });
+                    });
+            } else {
+                window.location.reload(true);
+            }
             e.preventDefault();
         }).on('click', '.issues-button', function (e) {
             $(this).parent('.issues-list').toggleClass('active');

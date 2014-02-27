@@ -1,8 +1,14 @@
-﻿@helper SectionHeader(string title, IHtmlString icon = null)
+﻿@using StackExchange.Opserver
+@using StackExchange.Opserver.Data
+@helper SectionHeader(string title, IHtmlString icon = null)
 {
     <thead>
         <tr class="summary-section-header">
             <th colspan="2" class="summary-section-header">@icon @title</th>
         </tr>
     </thead>
+}
+@helper PollNow(PollNode n, Cache c = null)
+{
+    <a href="#" class="reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c != null ? c.UniqueId : (Guid?)null)" title="Updated @n.LastPoll.ToUniversalTime()"><span class="image"></span><span class="js-text">Poll Now</span></a>
 }

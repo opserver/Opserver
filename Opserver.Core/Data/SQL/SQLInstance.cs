@@ -69,6 +69,7 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return PerfCounters;
                 yield return MemoryClerkSummary;
                 yield return ServerFeatures;
+                yield return TraceFlags;
             }
         }
 

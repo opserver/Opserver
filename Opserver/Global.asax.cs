@@ -8,6 +8,7 @@ using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using StackExchange.Exceptional;
+using StackExchange.Opserver.Data;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling.Mvc;
@@ -56,6 +57,11 @@ namespace StackExchange.Opserver
 
             // enable custom model binder
             ModelBinders.Binders.DefaultBinder = new ProfiledModelBinder();
+        }
+
+        protected void Application_End()
+        {
+            PollingEngine.StopPolling();
         }
 
         private static void SetupMiniProfiler()

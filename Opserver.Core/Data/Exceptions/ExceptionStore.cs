@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 {
     public class ExceptionStore : PollNode
     {
-        public const int PerAppSummaryCount = 1000;
+        public const int PerAppSummaryCount = 250;
 
         private int? QueryTimeout { get { return Settings.QueryTimeoutMs; } }
         public string Name { get { return Settings.Name; } }

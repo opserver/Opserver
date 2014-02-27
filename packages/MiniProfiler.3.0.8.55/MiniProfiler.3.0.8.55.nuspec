@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>MiniProfiler</id>
+    <version>3.0.8.55</version>
+    <title>MiniProfiler</title>
+    <authors>Marc Gravell, Jarrod Dixon, Yaakov Ellis, Nick Craver</authors>
+    <owners>Marc Gravell, Jarrod Dixon, Yaakov Ellis, Nick Craver</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://miniprofiler.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lightweight mini-profiler, in particular designed for ASP.NET MVC sites</description>
+    <summary>Lightweight mini-profiler, in particular designed for ASP.NET MVC sites</summary>
+    <tags>profiler sql mvc asp.net performance profiling timing</tags>
+  </metadata>
+</package>

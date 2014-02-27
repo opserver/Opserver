@@ -37,8 +37,10 @@
     else
     {
     <div class="summary-dashboard">
-        <h3 class="header"><a href="/redis">Redis</a><span class="note">:</span> @i.Host<span class="note">: </span> @i.Port (@i.Name)
-            <a class="top-right-nav" href="/redis/server?node=@i.Host">View Raw</a>
+        <h3 class="header">
+            <a href="/redis">Redis</a><span class="note">:</span> @i.Host<span class="note">: </span> @i.Port (@i.Name)
+            <span class="note smaller">(<a href="/redis/server?node=@i.Host">View Raw</a>)</span>
+            @Helpers.PollNow(i)
         </h3>
         <div class="left-col">
             <div class="section-wrap refresh-group" data-name="instance-summary">

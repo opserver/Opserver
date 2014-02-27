@@ -57,10 +57,10 @@ foreach (var s in server.SlaveConnections) {
         }
         <td>@server.Info.ToPollSpan()</td>
     </tr>
-    if (server.SlaveCount <= 0) { return; }
+    if (server.SlaveCount <= 0 || server.Replication == null) { return; }
     foreach (var s in server.SlaveInstances)
     {
-        if (s == null) { continue; }
+        if (s == null || s.Replication == null) { continue; }
         @ServerRow(s, nest + 1, server.Replication.MasterReplicationOffset - s.Replication.SlaveReplicationOffset)
     }
 }

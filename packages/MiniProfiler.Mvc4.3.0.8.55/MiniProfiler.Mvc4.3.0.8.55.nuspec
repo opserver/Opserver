@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+  <metadata>
+    <id>MiniProfiler.Mvc4</id>
+    <version>3.0.8.55</version>
+    <title>MiniProfiler.Mvc4</title>
+    <authors>Marc Gravell, Jarrod Dixon, Yaakov Ellis, Nick Craver</authors>
+    <owners>Marc Gravell, Jarrod Dixon, Yaakov Ellis, Nick Craver</owners>
+    <licenseUrl>http://www.apache.org/licenses/LICENSE-2.0</licenseUrl>
+    <projectUrl>http://miniprofiler.com</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>MiniProfiler extensions and helpers for ASP.NET MVC 4+</description>
+    <summary>MiniProfiler extensions and helpers for ASP.NET MVC 4+</summary>
+    <tags>profiler sql mvc asp.net performance profiling timing</tags>
+    <dependencies>
+      <dependency id="MiniProfiler" version="3.0.8" />
+      <dependency id="Microsoft.AspNet.Mvc" version="4.0.30506.0" />
+    </dependencies>
+  </metadata>
+</package>

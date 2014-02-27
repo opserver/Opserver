@@ -116,7 +116,8 @@ namespace StackExchange.Opserver.Data
                 }
                 catch (ThreadAbortException e)
                 {
-                    Current.LogException("Global polling loop shutting down", e);
+                    if (!_shuttingDown)
+                        Current.LogException("Global polling loop shutting down", e);
                 }
                 catch (Exception ex)
                 {
@@ -163,28 +164,26 @@ namespace StackExchange.Opserver.Data
         }
 
         /// <summary>
-        /// Polls a specific cache
-        /// </summary>
-        /// <param name="id">The GUID of the cache to poll</param>
-        /// <returns>Whether the poll was successful</returns>
-        public static bool Poll(Guid id)
-        {
-            var cache = AllPollNodes.SelectMany(pn => pn.DataPollers).FirstOrDefault(p => p.UniqueId == id);
-            if (cache == null || cache.IsPolling) return false;
-            return cache.Poll(true) > 0;
-        }
-
-        /// <summary>
         /// Polls all caches on a specific PollNode
         /// </summary>
         /// <param name="nodeType">Type of node to poll</param>
         /// <param name="key">Unique key of the node to poll</param>
+        /// <param name="cacheGuid">If included, the specific cache to poll</param>
+        /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
         /// <returns>Whether the poll was successful</returns>
-        public static void Poll(string nodeType, string key)
+        public static bool Poll(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
         {
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
-            if (node == null) return;
-            node.Poll(true);
+            if (node == null) return false;
+
+            if (cacheGuid.HasValue)
+            {
+                var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
+                return cache != null && cache.Poll(true) > 0;
+            }
+            // Polling an entire server
+            node.Poll(true, sync: sync);
+            return true;
         }
         
         public static List<PollNode> GetNodes(string type)

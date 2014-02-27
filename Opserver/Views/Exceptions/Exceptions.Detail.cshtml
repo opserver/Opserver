@@ -100,7 +100,7 @@
             <table class="kv-table">
                 @foreach (var k in allKeys.Where(k => !isHidden(k)))
                 {
-                <tr class="hidden">
+                <tr>
                     <td class="key">@k</td>
                     <td class="value">@Linkify(vars[k])</td>
                 </tr>

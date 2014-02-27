@@ -12,7 +12,10 @@
 }
 <div class="bottom-sub-section">
     <div class="summary-dashboard">
-        <h3 class="header"><a href="/elastic">Elastic</a><span class="note">:</span> @c.Name<span class="note">: </span> @n.Name</h3>
+        <h3 class="header">
+            <a href="/elastic">Elastic</a><span class="note">:</span> @c.Name<span class="note">: </span> @n.Name
+            @Helpers.PollNow(c)
+        </h3>
         <div class="left-col">
             <div class="section-wrap refresh-group" data-name="instance-summary">
                 <table>

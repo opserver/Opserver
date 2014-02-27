@@ -22,7 +22,10 @@
 </script>
 <div class="bottom-sub-section">
 <div class="summary-dashboard">
-    <h3 class="header"><a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.Name</h3>
+    <h3 class="header">
+        <a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.Name
+        @Helpers.PollNow(i)
+    </h3>
 @if (i.LastFetch == null)
 {
     <div class="no-content">No data fetched for @i.Name</div>

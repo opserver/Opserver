@@ -122,23 +122,26 @@ namespace StackExchange.Opserver.Data
             get { return _pollTask != null ? _pollTask.Status.ToString() : "Not running"; }
         }
 
-        public virtual void Poll(bool force = false)
+        public virtual void Poll(bool force = false, bool sync = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
             {
                 // Don't poll more than once every n seconds, that's just rude
-                if (DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls)) 
+                if (!force && DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls)) 
                     return;
                  
                 // If we're seeing a lot of poll failures in a row, back the hell off
-                if (PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
+                if (!force && PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
                     return;
                 
                 // Prevent multiple poll threads for this node from running at once
                 if (_isPolling) return;
                 _isPolling = true;
 
-                _pollTask = Task.Factory.StartNew(() => InnerPoll(force));
+                if (sync)
+                    InnerPoll(force);
+                else
+                    _pollTask = Task.Factory.StartNew(() => InnerPoll(force));
             }
         }
 

@@ -10,12 +10,12 @@ namespace StackExchange.Opserver.Controllers
     public class CacheController : StatusController
     {
         [Route("cache/poll")]
-        public ActionResult Poll(Guid? id)
+        public ActionResult Poll(string type, string key, Guid? id)
         {
-            if (!id.HasValue)
+            if (!type.HasValue() || !key.HasValue())
                 return ContentNotFound();
 
-            var success = PollingEngine.Poll(id.Value);
+            var success = PollingEngine.Poll(type, key, id);
 
             return Json(new { success });
         }

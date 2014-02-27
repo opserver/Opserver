@@ -24,6 +24,7 @@ namespace StackExchange.Opserver.Data.Redis
         public override int MinSecondsBetweenPolls { get { return 5; } }
 
         private RedisConnection _connection;
+        private bool _connectionInitialized;
         public RedisConnection Connection
         {
             get
@@ -34,7 +35,14 @@ namespace StackExchange.Opserver.Data.Redis
                 }
                 if (_connection.State != RedisConnectionBase.ConnectionState.Open)
                 {
+                    if (_connectionInitialized)
+                    {
+                        // broken connection, recreate and reconnect
+                        _connection = GetConnection(allowAdmin: true);
+                        _connectionInitialized = false;
+                    }
                     _connection.Wait(_connection.Open());
+                    _connectionInitialized = true;
                 }
                 return _connection;
             }
