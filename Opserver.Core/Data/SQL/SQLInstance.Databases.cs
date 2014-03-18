@@ -233,18 +233,21 @@ From sys.databases db
             public string LastFullBackupPhysicalDeviceName { get; internal set; }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset int
+SET @UTCOffset = (SELECT DATEDIFF(MI, GETDATE(), GETUTCDATE()))
+
 Select db.database_id Id,
        db.name Name, 
        lb.type LastBackupType,
-       lb.backup_start_date LastBackupStartDate,
-       lb.backup_finish_date LastBackupFinishDate,
+       DATEADD(MI, @UTCOffset,lb.backup_start_date) LastBackupStartDate,
+       DATEADD(MI, @UTCOffset, lb.backup_finish_date) LastBackupFinishDate,
        lb.backup_size LastBackupSizeBytes,
        lb.compressed_backup_size LastBackupCompressedSizeBytes,
        lbmf.device_type LastBackupMediaDeviceType,
        lbmf.logical_device_name LastBackupLogicalDeviceName,
        lbmf.physical_device_name LastBackupPhysicalDeviceName,
-       fb.backup_start_date LastFullBackupStartDate,
-       fb.backup_finish_date LastFullBackupFinishDate,
+       DATEADD(MI, @UTCOffset, fb.backup_start_date) LastFullBackupStartDate,
+       DATEADD(MI, @UTCOffset, fb.backup_finish_date) LastFullBackupFinishDate,
        fb.backup_size LastFullBackupSizeBytes,
        fb.compressed_backup_size LastFullBackupCompressedSizeBytes,
        fbmf.device_type LastFullBackupMediaDeviceType,

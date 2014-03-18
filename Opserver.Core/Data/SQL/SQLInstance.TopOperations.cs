@@ -149,8 +149,8 @@ FROM (SELECT TOP (@MaxResultCount)
              qs.sql_handle AS SqlHandle,
 			 Cast(pa.value as Int) DatabaseId
         FROM (SELECT *, 
-                     CAST((CASE WHEN DATEDIFF(second, creation_time, GETDATE()) > 0 And execution_count > 1
-                                THEN DATEDIFF(second, creation_time, GETDATE()) / 60.0
+                     CAST((CASE WHEN DATEDIFF(second, creation_time, GETUTCDATE()) > 0 And execution_count > 1
+                                THEN DATEDIFF(second, creation_time, GETUTCDATE()) / 60.0
                                 ELSE Null END) as MONEY) as age_minutes, 
                      CAST((CASE WHEN DATEDIFF(second, creation_time, last_execution_time) > 0 And execution_count > 1
                                 THEN DATEDIFF(second, creation_time, last_execution_time) / 60.0
