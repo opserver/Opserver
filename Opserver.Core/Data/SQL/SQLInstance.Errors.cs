@@ -31,11 +31,12 @@ namespace StackExchange.Opserver.Data.SQL
             public string Text { get; internal set; }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 Declare @Time_Start varchar(30);
-Set @Time_Start = DATEADD(mi, -@minutesAgo, GETUTCDATE());
+Set @Time_Start = DATEADD(mi, -@minutesAgo, GETDATE());
 Declare @ErrorLog Table (LogDate datetime, ProcessInfo varchar(255), Text varchar(max));
 Insert Into @ErrorLog Exec master.dbo.xp_readerrorlog 0, 1, NULL, NULL, @Time_Start, NULL;
-Select * From @ErrorLog Order By LogDate Desc;";
+Select DATEADD(mi, -@UTCOffset, LogDate) AS LogDate, ProcessInfo, Text From @ErrorLog Order By LogDate Desc;";
 
             public string GetFetchSQL(Version v)
             {
