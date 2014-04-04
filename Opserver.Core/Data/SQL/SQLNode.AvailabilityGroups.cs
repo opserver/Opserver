@@ -216,6 +216,7 @@ Select ag.name Name,
             // Why? Because MS doesn't consider DMV perf important, and it's 3-4x faster to temp table 
             // the results then join when many DBs are in an availability group
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 Select * Into #ar From sys.availability_replicas;
 Select * Into #ars From sys.dm_hadr_availability_replica_states;
 Select * Into #arcs From sys.dm_hadr_availability_replica_cluster_states;
@@ -243,8 +244,8 @@ Select ag.name AvailabilityGroupName,
        ar.session_timeout SessionTimeout,
        ar.primary_role_allow_connections PrimaryRoleAllowConnections,
        ar.secondary_role_allow_connections SecondaryRoleAllowConnections,
-       ar.create_date CreationDate,
-       ar.modify_date ModifiedDate,
+       DATEADD(mi, -@UTCOffset, ar.create_date) CreationDate,
+       DATEADD(mi, -@UTCOffset, ar.modify_date) ModifiedDate,
        ar.backup_priority BackupPriority,
        ar.read_only_routing_url ReadOnlyRoutingUrl,
        ars.is_local IsLocal,
@@ -255,7 +256,7 @@ Select ag.name AvailabilityGroupName,
        ars.synchronization_health SynchronizationHealth,
        ars.last_connect_error_number LastConnectErrorNumber,
        ars.last_connect_error_description LastConnectErrorDescription,
-       ars.last_connect_error_timestamp LastConnectErrorTimestamp,
+       DATEADD(mi, -@UTCOffset, ars.last_connect_error_timestamp) LastConnectErrorTimestamp,
        arcs.join_state JoinState,
        dbs.DBCount,
        dbs.TotalLogSendQueueSize,
@@ -429,6 +430,7 @@ Drop Table #dbs;
             }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 Select dbrs.database_id DatabaseId,
        dbrs.group_id GroupId,
        dbrs.replica_id ReplicaId,
@@ -443,14 +445,14 @@ Select dbrs.database_id DatabaseId,
        dbrs.recovery_lsn RecoveryLSN,
        dbrs.truncation_lsn TruncationLSN,
        dbrs.last_sent_lsn LastSentLSN,
-       dbrs.last_sent_time LastSentTime,
+       DATEADD(mi, -@UTCOffset, dbrs.last_sent_time) LastSentTime,
        dbrs.last_received_lsn LastReceivedLSN,
-       dbrs.last_received_time LastReceivedTime,
+       DATEADD(mi, -@UTCOffset, dbrs.last_received_time) LastReceivedTime,
        dbrs.last_hardened_lsn LastHardenedLSN,
        dbrs.last_redone_lsn LastRedoneLSN,
-       dbrs.last_redone_time LastRedoneTime,
+       DATEADD(mi, -@UTCOffset, dbrs.last_redone_time) LastRedoneTime,
        dbrs.last_commit_lsn LastCommitLSN,
-       dbrs.last_commit_time LastCommitTime,
+       DATEADD(mi, -@UTCOffset, dbrs.last_commit_time) LastCommitTime,
        dbrs.end_of_log_lsn EndOfLogLSN,
        dbrs.log_send_queue_size LogSendQueueSize,
        dbrs.log_send_rate LogSendRate,
