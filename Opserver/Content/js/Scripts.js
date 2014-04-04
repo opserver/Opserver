@@ -529,7 +529,7 @@ Status.NodeSearch = (function () {
 Status.SQL = (function () {
     
     function loadCluster(val) {
-        var pieces = val.split('/');
+        var pieces = $.map(val.split('/'), function(s) { return decodeURIComponent(s.replace(/\+/g, '%20')); });
         Status.Dashboard.options.refreshData = {
             cluster: pieces.length > 0 ? pieces[0] : null,
             ag: pieces.length > 1 ? pieces[1] : null,

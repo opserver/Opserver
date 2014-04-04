@@ -8,13 +8,13 @@
 }
 @helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
 {
-    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? "?node=" + Model.CurrentInstance.Name : "")">@name</a>
+    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? "?node=" + Model.CurrentInstance.Name.UrlEncode() : "")">@name</a>
 }
 @section head {
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh) });
-            Status.SQL.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Name : "")' });
+            Status.SQL.init({ node: @(Json.Encode(Model.CurrentInstance != null ? Model.CurrentInstance.Name : "").AsHtml()) });
         });
     </script>
 }

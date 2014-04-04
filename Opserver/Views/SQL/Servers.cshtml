@@ -39,7 +39,7 @@
         {
             <tbody class="node-header" data-name="header-@c.Name">    
                 <tr class="category-row">
-                    <th colspan="12"><h3><a href="~/sql/servers#/cluster/@c.Name" class="node-name-link" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="quorum-info">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span></h3></th>
+                    <th colspan="12"><h3><a href="~/sql/servers#/cluster/@c.Name.UrlEncode()" class="node-name-link" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="quorum-info">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span></h3></th>
                 </tr>
                 <tr>
                     <th></th>
@@ -65,7 +65,7 @@
                         <td><a href="~/sql/instance?node=@n.Name.UrlEncode()" class="node-name-link">@n.Name</a></td>
                         <td title="Votes: @n.ClusterVotes">@n.ClusterMember.State.GetDescription()</td>
                         <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.ServerInfo != null ? n.ServerInfo.CPUStatusSpan() : null)</a></td>
-                        <td class="sql-cpu-spark"><img alt="CPU in the last hour for @n.Name" src="~/graph/sql/cpu/spark?node=@n.Name" /></td>
+                        <td class="sql-cpu-spark"><img alt="CPU in the last hour for @n.Name" src="~/graph/sql/cpu/spark?node=@n.Name.UrlEncode()" /></td>
                         @MemoryCell(n)
                         <td>@SQLHelpers.HealthDescriptionAGs(n, cAgs)</td>
                         <td>@SQLHelpers.HealthDescription(n, cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</td>
@@ -106,7 +106,7 @@
                     <td>@i.IconSpan()</td>
                     <td><a href="~/sql/instance?node=@i.Name.UrlEncode()" class="node-name-link">@i.Name</a></td>
                     <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent + "%" : "")</a></td>
-                    <td class="sql-cpu-spark"><img alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" /></td>
+                    <td class="sql-cpu-spark"><img alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name.UrlEncode()&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" /></td>
                     @MemoryCell(i)
                     <td title="@dbs.Count Databases:
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => string.Format("  {0}: {1}\n", g.Key, g.Count().Pluralize("Database"))))">

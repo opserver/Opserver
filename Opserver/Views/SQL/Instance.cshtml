@@ -93,7 +93,7 @@ else if (i.LastFetch.LastSuccess == null)
                 <tbody>
                     <tr title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
                         <td>CPU</td>
-                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
+                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name.UrlEncode()&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
                     </tr>
                     @if (pd.VirtualMachineType != VirtualMachineTypes.None)
                     {
@@ -202,7 +202,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         {
                             @:,
                         }
-                        <span title="@cn.ClusterStatus">@cn.IconSpan() <a href="/sql/instance?node=@cn.Name" class="node-name-link @(cn.IsAnAGPrimary ? "bold" : "")">@cn.Name</a></span>
+                        <span title="@cn.ClusterStatus">@cn.IconSpan() <a href="/sql/instance?node=@cn.Name.UrlEncode()" class="node-name-link @(cn.IsAnAGPrimary ? "bold" : "")">@cn.Name</a></span>
                         iter++;
                     }
                 </div>
@@ -266,7 +266,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                     {
                         <div class="section-wrap third-wrap">
                             <div class="network-range">@g.Key.NetworkSubnetIP/@g.Key.NetworkSubnetPrefixLength</div>
-                            <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName))).AsHtml()</div>
+                            <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName.UrlEncode()))).AsHtml()</div>
                         </div>
                     }
                 }
@@ -336,7 +336,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         </tr>
                     </thead>
                     <tbody>
-                        @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
+                        @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name.UrlEncode()))
                         @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
                         @RenderPerSecCounter("SQL Statistics", "SQL Re-Compilations/sec", "")
                         @RenderPerSecCounter("SQL Statistics", "Guided plan executions/sec", "")
