@@ -88,13 +88,13 @@
                         <td colspan="6" class="value">0x@(op.ReadablePlanHandle) 
                             @if(Current.User.IsSQLAdmin)
                             {
-                                <span class="handle-link">(<a href="/sql/remove-plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)">remove plan</a>)</span>
+                                <span class="handle-link">(<a href="/sql/remove-plan?node=@s.Name.UrlEncode()&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)">remove plan</a>)</span>
                             }
                         </td>
                     </tr>
                     <tr>
                         <td colspan="2" class="key">Query Plan:</td>
-                        <td colspan="6" class="value"><a href="/sql/top/plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">download</a> - <a href="#" class="blue-dotted" onclick="javascript:alert('soon');">view similar</a> - <a href="#/plan/@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">link</a></td>
+                        <td colspan="6" class="value"><a href="/sql/top/plan?node=@s.Name.UrlEncode()&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">download</a> - <a href="#" class="blue-dotted" onclick="javascript:alert('soon');">view similar</a> - <a href="#/plan/@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">link</a></td>
                     </tr>
                 </tbody>
             </table>
