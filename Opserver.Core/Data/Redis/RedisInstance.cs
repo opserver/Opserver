@@ -93,7 +93,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private RedisConnection GetConnection(int ioTimeout = 5000, int syncTimeout = 5000, bool allowAdmin = false)
         {
-            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin)
+            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin, password: ConnectionInfo.Settings.Password)
             {
                 Name = "Opserver"
             };
