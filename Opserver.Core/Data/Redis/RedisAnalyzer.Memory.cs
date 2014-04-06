@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private static RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
-            using (var rc = new RedisConnection(connectionInfo.Host, connectionInfo.Port, syncTimeout: 10 * 60 * 1000, allowAdmin: true))
+            using (var rc = new RedisConnection(connectionInfo.Host, connectionInfo.Port, syncTimeout: 10 * 60 * 1000, allowAdmin: true, password: connectionInfo.Password))
             {
                 var ma = new RedisMemoryAnalysis(connectionInfo, database);
                 if (ma.ErrorMessage.HasValue())

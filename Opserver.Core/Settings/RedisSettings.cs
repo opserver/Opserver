@@ -116,6 +116,11 @@ namespace StackExchange.Opserver
             public int Port { get; set; }
 
             /// <summary>
+            /// Password for this node
+            /// </summary>
+            public string Password { get; set; }
+
+            /// <summary>
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage
             /// </summary>
             public Dictionary<string, string> AnalysisRegexes { get; set; }
