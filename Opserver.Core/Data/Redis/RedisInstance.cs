@@ -19,6 +19,7 @@ namespace StackExchange.Opserver.Data.Redis
         public string Name { get { return ConnectionInfo.Name; } }
         public string Host { get { return ConnectionInfo.Host; } }
         public int Port { get { return ConnectionInfo.Port; } }
+        public string Password { get { return ConnectionInfo.Password; } }
 
         public override string NodeType { get { return "Redis"; } }
         public override int MinSecondsBetweenPolls { get { return 5; } }
@@ -93,7 +94,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private RedisConnection GetConnection(int ioTimeout = 5000, int syncTimeout = 5000, bool allowAdmin = false)
         {
-            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin, password: ConnectionInfo.Settings.Password)
+            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin, password: Password)
             {
                 Name = "Opserver"
             };

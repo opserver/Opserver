@@ -10,6 +10,7 @@ namespace StackExchange.Opserver.Data.Redis
         public string Name { get { return Settings.Name; } }
         public string Host { get; internal set; }
         public int Port { get { return Settings.Port; } }
+        public string Password { get { return Settings.Password; } }
         public RedisFeatures Features { get; internal set; }
         internal RedisSettings.Instance Settings { get; set; }
 
