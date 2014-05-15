@@ -80,8 +80,8 @@ namespace StackExchange.Opserver.Controllers
                 {
                     maximums = new
                         {
-                            main_in = traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)),
-                            main_out = traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0))
+                            main_in = traffic.Any() ? traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)) : 0,
+                            main_out = traffic.Any() ? traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0)) : 0
                         },
                     points = traffic.Select(i => new 
                         {
