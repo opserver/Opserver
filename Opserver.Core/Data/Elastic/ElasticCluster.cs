@@ -37,6 +37,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         Current.LogException(new ConfigurationErrorsException(string.Format("Invalid port specified for {0}: '{1}'", parts[0], parts[1])));
                         Port = 9200;
                     }
+                    Port = port;
                 }
                 else
                 {
