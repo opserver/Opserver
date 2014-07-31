@@ -53,10 +53,6 @@ From APM_Application app
        On com.ID = ccs.ComponentID
      Inner Join APM_ProcessEvidence pe
        On ccs.ComponentStatusID = pe.ComponentStatusID
-Where pe.ID In (Select Max(ID)
-                  From APM_ProcessEvidence
-                 Where ComponentStatusID In (Select ComponentStatusID From APM_CurrentComponentStatus)
-              Group By ComponentStatusID)
 Order By NodeID";
 
                     var results = conn.Query<Application>(sql, commandTimeout: QueryTimeoutMs).ToList();
