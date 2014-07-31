@@ -2,8 +2,8 @@
 @using Roles = StackExchange.Opserver.Models.Roles
 @model StackExchange.Opserver.Views.Redis.DashboardModel
 @{
-    Layout = null;
     var i = Model.CurrentInstance;
+    if (i == null) { return; }
 }
 <style>
     .sub-header {
@@ -38,7 +38,7 @@
     {
     <div class="summary-dashboard">
         <h3 class="header">
-            <a href="/redis">Redis</a><span class="note">:</span> @i.Host<span class="note">: </span> @i.Port (@i.Name)
+            <a href="/redis">Redis</a><span class="note">:</span> @i.IconSpan() @i.Host<span class="note">: </span> @i.Port (@i.Name)
             <span class="note smaller">(<a href="/redis/server?node=@i.Host">View Raw</a>)</span>
             @Helpers.PollNow(i)
         </h3>
@@ -64,7 +64,8 @@
                             <td>Version</td>
                             <td>
                                 @info.Server.Version
-                                <a href="#/redis/summary/config">(view config)</a>
+                                <span class="note">(</span><a href="#/redis/summary/config">view config</a><span class="note">)</span>
+                                <span class="note">(</span><a href="/redis/instance/get-config/@i.Host-@i.Port-config.zip">download</a><span class="note">)</span>
                             </td>
                         </tr>
                         <tr>
@@ -73,7 +74,18 @@
                         </tr>
                         <tr>
                             <td>Role</td>
-                            <td>@i.Role.GetDescription()</td>
+                            <td>
+                                @i.Role.GetDescription()
+                                @if (i.IsSlave)
+                                {
+                                    var offset = i.Master.Replication.MasterReplicationOffset - i.Replication.SlaveReplicationOffset;
+                                    if (offset > 0)
+                                    {
+                                        <span class="note">(@offset.ToSize() behind)</span>
+                                    }
+                                }
+                            </td>
+
                         </tr>
                         <tr>
                             <td>Slaves</td>
@@ -101,17 +113,24 @@
                                     if (slaves.Count > 0)
                                     {
                                         <div class="redis-instance">
-                                        @foreach (var s in slaves)
-                                        {
-                                            <div>
-                                                @s.IconSpan() <a href="?node=@s.Host:@s.Port">@s.Host:@s.Port</a> <span class="note">(Slave)</span>
-                                            </div>
-                                        }
+                                            @foreach (var s in slaves)
+                                            {
+                                                <div>
+                                                    @s.IconSpan() <a href="?node=@s.Host:@s.Port">@s.Host:@s.Port</a> <span class="note">(Slave)</span>
+                                                </div>
+                                            }
                                         </div>
                                     }
                                 } 
                             </td>
                         </tr>
+                        @if (i.Replication != null && i.Replication.BacklogActive)
+                        {
+                            <tr>
+                                <td>Backlog</td>
+                                <td>@i.Replication.BacklogHistoryLength.ToHumanReadableSize() / @i.Replication.BacklogSize.ToHumanReadableSize()</td>
+                            </tr>
+                        }
                         @if (i.Role == RedisInfo.RedisInstanceRole.Slave)
                         {
                             <tr>
@@ -302,7 +321,7 @@
                     <table>
                         <tbody>
                             @{
-                                var ips = clients.Select(c => c.Address.Split(StringSplits.Colon).First()).GroupBy(ip => ip).ToList();
+                                var ips = clients.Select(c => c.Host).GroupBy(ip => ip).ToList();
                                 if (ips.Any())
                                 {
                                     <tr>
@@ -353,7 +372,7 @@
                             {
                                 <tr data-id="@entry.UniqueId">
                                     <td>
-                                        <a href="@entry.GetHelpUrl()" target="_blank">@string.Join(" ", entry.Arguments)</a>
+                                        <a href="@entry.GetHelpUrl()" target="_blank">@entry.TraceDescription(60)</a>
                                     </td>
                                     <td>@entry.Duration.ToTimeStringMini(3)</td>
                                     <td>@entry.Time.ToRelativeTimeSpan()</td>

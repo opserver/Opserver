@@ -4,6 +4,16 @@ using StackExchange.Opserver.Data.SQL;
 
 namespace StackExchange.Opserver.Views.SQL
 {
+    public enum SQLViews
+    {
+        Servers,
+        Instance,
+        Active,
+        Top,
+        Connections,
+        Databases
+    }
+
     public class DashboardModel
     {
         public List<SQLCluster> Clusters { get; set; }
@@ -22,16 +32,7 @@ namespace StackExchange.Opserver.Views.SQL
         public List<SQLInstance.PerfCounterRecord> PerfCounters { get; set; }
 
         public int Refresh { get; set; }
-        public enum Views
-        {
-            Servers,
-            Instance,
-            Active,
-            Top,
-            Connections,
-            Databases
-        }
-        public Views View { get; set; }
+        public SQLViews View { get; set; }
 
         public enum LastRunInterval
         {
@@ -54,24 +55,6 @@ namespace StackExchange.Opserver.Views.SQL
                     return 5*60;
                 default:
                     throw new ArgumentOutOfRangeException("interval", "WHAT ARE YOU THINKING?!?!?");
-            }
-        }
-
-        public bool IsInstanceFilterable
-        {
-            get
-            {
-                switch (View)
-                {
-                    case Views.Instance:
-                    case Views.Active:
-                    case Views.Top:
-                    case Views.Connections:
-                    case Views.Databases:
-                        return true;
-                    default:
-                        return false;
-                }
             }
         }
     }

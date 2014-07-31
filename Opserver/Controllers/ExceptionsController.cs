@@ -9,7 +9,7 @@ using StackExchange.Opserver.Views.Exceptions;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.Exceptions)]
+    [OnlyAllow(Roles.Exceptions)] 
     public class ExceptionsController : StatusController
     {
         protected override ISecurableSection SettingsSection
@@ -25,47 +25,80 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions")]
-        public ActionResult Exceptions(string log, bool truncate = true)
+        public ActionResult Exceptions(string log, ExceptionSorts? sort = null, int? count = null)
         {
-            var errors = ExceptionStores.GetAllErrors(log, log.HasValue() ? 1000 : 200);
-            var vd = new ExceptionsModel
-            {
-                SelectedLog = log,
-                TruncateErrors = truncate,
-                Applications = ExceptionStores.Applications,
-                Errors = errors
-            };
+            // Defaults
+            count = count ?? 250;
+            sort = sort ?? ExceptionSorts.TimeDesc;
+
+            var vd = GetExceptionsModel(log, sort.Value, count.Value, loadAsync: 500);
             return View(vd);
         }
 
-        [Route("exceptions/similar")]
-        public ActionResult ExceptionsSimilar(string app, Guid id, bool truncate = true, bool byTime = false)
+        [Route("exceptions/load-more")]
+        public ActionResult ExceptionsLoadMore(string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
         {
+            var vd = GetExceptionsModel(log, sort, count, prevLast);
+            return View("Exceptions.Table.Rows", vd);
+        }
+
+        public ExceptionsModel GetExceptionsModel(string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null, int? loadAsync = null)
+        {
+            var errors = ExceptionStores.GetAllErrors(log, sort: sort);
+
+            var startIndex = 0;
+            if (prevLast.HasValue)
+            {
+                startIndex = errors.FindIndex(e => e.GUID == prevLast.Value);
+                if (startIndex > 0 && startIndex < errors.Count) startIndex++;
+            }
+            errors = errors.Skip(startIndex).Take(count ?? 500).ToList();
+            var vd = new ExceptionsModel
+            {
+                Sort = sort,
+                SelectedLog = log,
+                LoadAsyncSize = loadAsync.GetValueOrDefault(),
+                Applications = ExceptionStores.Applications,
+                Errors = errors.ToList()
+            };
+            return vd;
+        }
+
+        [Route("exceptions/similar")]
+        public ActionResult ExceptionsSimilar(string app, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
+        {
+            // Defaults
+            sort = sort ?? ExceptionSorts.TimeDesc;
+
             var e = ExceptionStores.GetError(app, id);
             if (e == null)
                 return View("Exceptions.Detail", null);
 
-            var errors = ExceptionStores.GetSimilarErrors(e, byTime);
+            var errors = ExceptionStores.GetSimilarErrors(e, byTime, sort: sort.Value);
             var vd = new ExceptionsModel
             {
+                Sort = sort.Value,
                 Exception = e,
                 SelectedLog = app,
-                TruncateErrors = truncate,
                 ShowingWindow = byTime,
                 Applications = ExceptionStores.Applications,
+                ClearLinkForVisibleOnly = true,
                 Errors = errors
             };
             return View("Exceptions.Similar", vd);
         }
 
         [Route("exceptions/search")]
-        public ActionResult ExceptionsSearch(string q, string log, bool showDeleted = false)
+        public ActionResult ExceptionsSearch(string q, string log, ExceptionSorts? sort = null, bool showDeleted = false)
         {
+            // Defaults
+            sort = sort ?? ExceptionSorts.TimeDesc;
+
             // empty searches go back to the main log
             if (q.IsNullOrEmpty())
                 return RedirectToAction("Exceptions", new { log });
 
-            var errors = ExceptionStores.FindErrors(q, log, includeDeleted: showDeleted, max: 2000);
+            var errors = ExceptionStores.FindErrors(q, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value);
             if (!errors.Any() && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
@@ -74,11 +107,12 @@ namespace StackExchange.Opserver.Controllers
 
             var vd = new ExceptionsModel
             {
+                Sort = sort.Value,
                 Search = q,
                 SelectedLog = log,
                 ShowDeleted = showDeleted,
-                TruncateErrors = true,
                 Applications = ExceptionStores.Applications,
+                ClearLinkForVisibleOnly = true,
                 Errors = errors
             };
             return View("Exceptions.Search", vd);
@@ -124,14 +158,14 @@ namespace StackExchange.Opserver.Controllers
                        : JsonNotFound();
         }
 
-        [Route("exceptions/protect", HttpVerbs.Post), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/protect"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public ActionResult ExceptionsProtect(string log, Guid id)
         {
             var success = ExceptionStores.Action(log, s => s.ProtectError(id));
             return success ? ExceptionCounts() : JsonError("Unable to protect, error was not found in the log");
         }
 
-        [Route("exceptions/delete", HttpVerbs.Post), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/delete"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public ActionResult ExceptionsDelete(string log, Guid id, bool redirect = false)
         {
             // we don't care about success...if it's *already* deleted, that's fine
@@ -141,7 +175,7 @@ namespace StackExchange.Opserver.Controllers
             return redirect ? Json(new { url = Url.Action("Exceptions", new { log }) }) : ExceptionCounts();
         }
 
-        [Route("exceptions/delete-all", HttpVerbs.Post), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public ActionResult ExceptionsDeleteAll(string log)
         {
             ExceptionStores.Action(log, s => s.DeleteAllErrors(log));

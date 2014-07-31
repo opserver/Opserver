@@ -8,6 +8,7 @@
         SQL,
         Redis,
         Elastic,
+        CloudFlare,
         HAProxy,
         None
     }

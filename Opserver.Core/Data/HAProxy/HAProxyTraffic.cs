@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                     @"
 Select Host
 From Logs_Summary
-Where CreationDate > GETUTCDATE() - 30
+Where CreationDate > GETUTCDATE() - 15
 Group By Host
 Having Sum(Hits) > 5000
 Order By 1";

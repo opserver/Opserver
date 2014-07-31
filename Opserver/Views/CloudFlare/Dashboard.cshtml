@@ -1,0 +1,31 @@
+﻿@using StackExchange.Opserver.Data.CloudFlare
+@using StackExchange.Opserver.Views.CloudFlare
+@model DashboardModel
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+    this.SetMainTab(MainTab.CloudFlare);
+    this.SetPageTitle("CloudFlare Dashboard");
+    this.SetTopNodes(RailgunInstance.AllInstances,
+        "Railguns",
+        null);
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: 30 });
+        });
+    </script>
+}
+@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+{
+    <a class="@(Model.View == view ? "selected" : "")" href="@href">@name</a>
+}
+<div class="tabs sub-tabs">
+    <div class="tabs-links">
+        @TabLink(DashboardModel.Views.DNS, "/cloudflare/dns", "dns", false)
+        @TabLink(DashboardModel.Views.Railgun, "/cloudflare/railgun", "railgun", false)
+    </div>
+</div>
+<div class="dashboard-list">
+    @RenderBody()
+</div>

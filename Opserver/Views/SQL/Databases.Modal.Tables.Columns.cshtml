@@ -1,0 +1,119 @@
+﻿@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = null;
+    var s = Model.Instance;
+ 
+    var columns = s.GetColumnInfo(Model.Database);
+}
+<style>
+    .table-columns {
+        background-color: #3d85b0;
+        padding: 0 5px;
+    }
+     .table-columns p {
+         background-color: white;
+         line-height: 18px;
+         padding-left: 24px;
+         position: relative;
+     }
+    .table-columns p .data-type {
+        font-size: 12px;
+    }
+    .normal {
+        color: #232323;
+    }
+    .status-pimary-key, .status-foreign-key {
+        position: absolute;
+        left: 10px;
+        top: -1px;
+    }
+    .status-pimary-key {
+        color: #fac38d !important;
+    }
+    .status-foreign-key {
+        color: #bbb !important;
+    }
+    .foreign-key-info {
+        position: absolute;
+        left: 300px;
+    }
+</style>
+<div class="table-columns">
+    @if (columns.LastPollStatus == FetchStatus.Fail || columns.Data == null)
+    {
+        <div class="sql-server sql-error">
+            <span class="error-label">There was an error fetching column info from @s.Name for @Model.Database</span>
+            @columns.ErrorMessage
+        </div>
+    } else
+    {
+        var tableColumns = columns.Data.Where(c => c.Schema + "." + c.TableName == Model.ObjectName).OrderBy(c => c.Position);
+        foreach (var c in tableColumns)
+        {
+            <p class="@(c.PrimaryKeyConstraint.HasValue() ? "primary-key" : "") @(c.ForeignKeyConstraint.HasValue() ? "foreign-key" : "")">
+                @if (c.PrimaryKeyConstraint.HasValue())
+                {
+                    <span class="status-icon status-pimary-key icon" title="@c.PrimaryKeyConstraint">●</span>
+                }
+                else if (c.ForeignKeyConstraint.HasValue())
+                {
+                    <span class="status-icon status-foreign-key icon" title="@c.ForeignKeyConstraint">●</span>
+                }
+                @c.ColumnName <span class="note data-type">(@c.DataTypeDescription)</span>
+                @if (c.ForeignKeyConstraint.HasValue())
+                {
+                    <span class="foreign-key-info">
+                        <span class="note">
+                            @c.ForeignKeyConstraint to
+                            <a href="#/db/@Model.Database/tables/@(c.ForeignKeyTargetSchema).@(c.ForeignKeyTargetTable)">
+                                @(c.ForeignKeyTargetSchema).<span class="normal">@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)</span>
+                            </a>
+                        </span>
+                    </span>
+                }
+            </p>
+        }
+
+        @*<table>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Column</th>
+                    <th>Type</th>
+                    <th>Constraint</th>
+                    <th>Constraint To</th>
+                </tr>
+            </thead>
+            <tbody class="node-group">
+                @foreach (var c in tableColumns)
+                {
+                    <tr data-id="@c.Id">
+                        <td>
+                            @if (c.PrimaryKeyConstraint.HasValue())
+                            {
+                                <span title="@c.PrimaryKeyConstraint">PK</span>
+                            }
+                            @if (c.PrimaryKeyConstraint.HasValue() && c.ForeignKeyConstraint.HasValue())
+                            {
+                                @:, 
+                            }
+                            @if (c.ForeignKeyConstraint.HasValue())
+                            {
+                                <span title="@c.ForeignKeyConstraint to @(c.ForeignKeyTargetSchema).@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)">FK</span>
+                            }
+                        </td>
+                        <td>@c.ColumnName <span class="note">(@c.DataTypeDescription)</span></td>
+                        <td>@(c.PrimaryKeyConstraint ?? c.ForeignKeyConstraint)</td>
+                        <td>
+                            @if (c.ForeignKeyConstraint.HasValue())
+                            {
+                                @:<span class="note">@c.ForeignKeyTargetSchema.</span>@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>*@
+    }
+</div>

@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Views.Dashboard
         Interfaces = 2,
         [Description("VM Info")]
         VMHost = 3,
-        [Description("Active SQL")]
+        [Description("Elastic")]
         Elastic = 4,
         HAProxy = 5,
         [Description("SQL Instance")]

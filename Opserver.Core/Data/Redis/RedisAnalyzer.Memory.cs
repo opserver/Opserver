@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using BookSleeve;
 using StackExchange.Profiling;
+using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
@@ -54,7 +55,18 @@ namespace StackExchange.Opserver.Data.Redis
 
         private static RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
-            using (var rc = new RedisConnection(connectionInfo.Host, connectionInfo.Port, syncTimeout: 10 * 60 * 1000, allowAdmin: true))
+            var config = new ConfigurationOptions
+            {
+                SyncTimeout = 10 * 60 * 1000,
+                AllowAdmin = true,
+                ClientName = "Status-MemoryAnalyzer",
+                Password = connectionInfo.Password,
+                EndPoints =
+                {
+                    { connectionInfo.Host, connectionInfo.Port }
+                }
+            };
+            using (var muxer = ConnectionMultiplexer.Connect(config))
             {
                 var ma = new RedisMemoryAnalysis(connectionInfo, database);
                 if (ma.ErrorMessage.HasValue())
@@ -67,10 +79,7 @@ namespace StackExchange.Opserver.Data.Redis
                     ma.KeyStats[km] = new KeyStats();
                 }
 
-                rc.Name = "Status-MemoryAnalyzer";
-                rc.Wait(rc.Open());
-
-                ma.Analyze(rc);
+                ma.Analyze(muxer);
 
                 return ma;
             }
@@ -141,18 +150,17 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string ErrorMessage { get; internal set; }
 
-        public void Analyze(RedisConnection rc)
+        public void Analyze(ConnectionMultiplexer muxer)
         {
             // Get the keys
             var sw = Stopwatch.StartNew();
-            var features = rc.Features;
-            var keys = (features != null && features.Scan)
-                ? rc.Keys.Scan(Database, "*")
-                : rc.Wait(rc.Keys.Find(Database, "*"));
+
+            var db = muxer.GetDatabase(Database);
+            var server = muxer.GetSingleServer();
+            var keys = server.Keys(Database, pageSize: 1000);
             KeyTime = sw.Elapsed;
 
-            rc.CompletionMode = ResultCompletionMode.PreserveOrder;
-
+            muxer.PreserveAsyncOrder = true;
             // Analyze each key
             sw.Restart();
             using (MiniProfiler.Current.Step("Key analysis"))
@@ -161,7 +169,7 @@ namespace StackExchange.Opserver.Data.Redis
                 foreach (var tmpKey in keys)
                 {
                     var key = tmpKey;
-                    last = rc.Keys.DebugObject(Database, key).ContinueWith(x =>
+                    last = db.DebugObjectAsync(key).ContinueWith(x =>
                         {
                             try
                             {
@@ -173,7 +181,7 @@ namespace StackExchange.Opserver.Data.Redis
                             }
                         });
                 }
-                if (last != null) rc.Wait(last);
+                if (last != null) server.Wait(last);
             }
             AnalysisTime = sw.Elapsed;
             sw.Stop();

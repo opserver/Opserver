@@ -1,8 +1,9 @@
 ﻿@using StackExchange.Opserver.Data.SQL
-@model StackExchange.Opserver.Views.SQL.DashboardModel
+@using StackExchange.Opserver.Views.SQL
+@model DashboardModel
 @{ 
-    Layout = null;
-    var i = Model.CurrentInstance;
+    var i = Model.CurrentInstance; 
+    if (i == null) { return; }
     var ci = i as SQLNode;
     var props = i.ServerProperties;
     var services = i.Services.SafeData(true);
@@ -23,7 +24,7 @@
 <div class="bottom-sub-section">
 <div class="summary-dashboard">
     <h3 class="header">
-        <a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.Name
+        <a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.IconSpan() @i.Name
         @Helpers.PollNow(i)
     </h3>
 @if (i.LastFetch == null)
@@ -51,8 +52,8 @@ else if (i.LastFetch.LastSuccess == null)
                         <td>@pd.MachineName@if (pd.ServerName != pd.MachineName)
                                            {<text> / @pd.ServerName</text>}</td>
                     </tr>
-                    <tr>
-                        <td title="@pd.FullVersion">Version</td>
+                    <tr title="@pd.FullVersion">
+                        <td>Version</td>
                         <td>SQL @pd.MajorVersion @pd.Level (<a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>)</td>
                     </tr>
                     <tr>
@@ -93,7 +94,7 @@ else if (i.LastFetch.LastSuccess == null)
                 <tbody>
                     <tr title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
                         <td>CPU</td>
-                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
+                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" width="100" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
                     </tr>
                     @if (pd.VirtualMachineType != VirtualMachineTypes.None)
                     {

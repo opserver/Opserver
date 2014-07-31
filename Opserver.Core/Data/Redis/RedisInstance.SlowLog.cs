@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BookSleeve;
+using StackExchange.Profiling;
+using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisInstance
     {
+        private const int SlowLogCountToFetch = 200;
         private const string ConfigParamSlowLogThreshold = "slowlog-log-slower-than";
         private const string ConfigParamSlowLogMaxLength = "slowlog-max-len";
 
@@ -36,7 +38,14 @@ namespace StackExchange.Opserver.Data.Redis
                 return _slowLog ?? (_slowLog = new Cache<List<CommandTrace>>
                 {
                     CacheForSeconds = 60,
-                    UpdateCache = GetFromRedis("SlowLog", rc => rc.Wait(rc.Server.GetSlowCommands(200)).ToList())
+                    UpdateCache = GetFromRedis("SlowLog", rc =>
+                    {
+                        //TODO: Remove when StackExchange.Redis gets profiling
+                        using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch))
+                        {
+                            return rc.GetSingleServer().SlowlogGet(SlowLogCountToFetch).ToList();
+                        }
+                    })
                 });
             }
         }
@@ -67,7 +76,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// </remarks>
         public void ClearSlowLog()
         {
-            Connection.Server.ResetSlowCommands();
+            Connection.GetSingleServer().SlowlogReset();
         }
     }
 }

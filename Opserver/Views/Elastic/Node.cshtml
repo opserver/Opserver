@@ -2,9 +2,9 @@
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
-    Layout = null;
     var c = Model.Current.Cluster;
     var n = Model.Current.Node;
+    if (n == null) { return; }
     var os = n.Stats.OS;
     var jvm = n.Stats.JVM;
     var fs = n.Stats.FileSystem;
@@ -13,7 +13,7 @@
 <div class="bottom-sub-section">
     <div class="summary-dashboard">
         <h3 class="header">
-            <a href="/elastic">Elastic</a><span class="note">:</span> @c.Name<span class="note">: </span> @n.Name
+            <a href="/elastic">Elastic</a><span class="note">:</span> @c.IconSpan() @c.Name<span class="note">: </span> @n.Name
             @Helpers.PollNow(c)
         </h3>
         <div class="left-col">
@@ -229,36 +229,51 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Searches</td>
-                                <td title="Query time: @TimeSpan.FromMilliseconds(gs.Primaries.Search.QueryTimeInMilliseconds).ToReadableString()">@gs.Primaries.Search.QueryTotal.ToComma()</td>
-                                <td title="Query time: @TimeSpan.FromMilliseconds(gs.Total.Search.QueryTimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Search.QueryTotal.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Documents</td>
-                                <td>@gs.Primaries.Documents.Count.ToComma()</td>
-                                <td class="note">@gs.Total.Documents.Count.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Documents (Deleted)</td>
-                                <td>@gs.Primaries.Documents.Deleted.ToComma()</td>
-                                <td class="note">@gs.Total.Documents.Deleted.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Size</td>
-                                <td>@gs.Primaries.Store.SizeInBytes.ToSize()</td>
-                                <td class="note">@gs.Total.Store.SizeInBytes.ToSize()</td>
-                            </tr>
-                            <tr>
-                                <td>Indexed</td>
-                                <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Primaries.Indexing.TimeInMilliseconds).ToReadableString()">@gs.Primaries.Indexing.Total.ToComma()</td>
-                                <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Total.Indexing.TimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Indexing.Total.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Gets</td>
-                                <td>@gs.Primaries.Get.Total.ToComma()</td>
-                                <td class="note">@gs.Total.Get.Total.ToComma()</td>
-                            </tr>
+                            @if (gs.Primaries.Search != null)
+                            {
+                                <tr>
+                                    <td>Searches</td>
+                                    <td title="Query time: @TimeSpan.FromMilliseconds(gs.Primaries.Search.QueryTimeInMilliseconds).ToReadableString()">@gs.Primaries.Search.QueryTotal.ToComma()</td>
+                                    <td title="Query time: @TimeSpan.FromMilliseconds(gs.Total.Search.QueryTimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Search.QueryTotal.ToComma()</td>
+                                </tr>
+                            }
+                            @if (gs.Primaries.Documents != null)
+                            {
+                                <tr>
+                                    <td>Documents</td>
+                                    <td>@gs.Primaries.Documents.Count.ToComma()</td>
+                                    <td class="note">@gs.Total.Documents.Count.ToComma()</td>
+                                </tr>
+                                <tr>
+                                    <td>Documents (Deleted)</td>
+                                    <td>@gs.Primaries.Documents.Deleted.ToComma()</td>
+                                    <td class="note">@gs.Total.Documents.Deleted.ToComma()</td>
+                                </tr>
+                            }
+                            @if (gs.Primaries.Store != null)
+                            {
+                                <tr>
+                                    <td>Size</td>
+                                    <td>@gs.Primaries.Store.SizeInBytes.ToSize()</td>
+                                    <td class="note">@gs.Total.Store.SizeInBytes.ToSize()</td>
+                                </tr>
+                            }
+                            @if (gs.Primaries.Indexing != null)
+                            {
+                                <tr>
+                                    <td>Indexed</td>
+                                    <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Primaries.Indexing.TimeInMilliseconds).ToReadableString()">@gs.Primaries.Indexing.Total.ToComma()</td>
+                                    <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Total.Indexing.TimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Indexing.Total.ToComma()</td>
+                                </tr>
+                            }
+                            @if (gs.Primaries.Get != null)
+                            {
+                                <tr>
+                                    <td>Gets</td>
+                                    <td>@gs.Primaries.Get.Total.ToComma()</td>
+                                    <td class="note">@gs.Total.Get.Total.ToComma()</td>
+                                </tr>
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -266,7 +281,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                     <div class="summary-section-header">Cluster Indexes
                         <a href="#/elastic/summary/indices" class="top-right-nav">View Detail</a></div>
 
-                    @if (indexStats.Count > 0) 
+                    @if (indexStats.Count > 0 && indexes != null && indexes.Any()) 
                     {
                         <table>
                             <thead>

@@ -1,7 +1,7 @@
 ﻿@model StackExchange.Opserver.Data.SQL.SQLInstance
 @{
     Layout = null;
-    const int errorMinutesToGet = 30;
+    const int errorMinutesToGet = 6 * 60;
     var errors = Model.GetErrorLog(errorMinutesToGet);
     var data = errors.SafeData(true);
 }
@@ -28,13 +28,22 @@
                         <tr>
                             <td style="white-space: nowrap;">@e.LogDate.ToRelativeTimeSpan()</td>
                             <td style="white-space: nowrap;">@e.ProcessInfo</td>
-                            <td>@e.Text</td>
+                            <td>@e.Text
+                            @if (e.ProcessInfo.StartsWith("spid"))
+                            {
+                                while ( i < data.Count && data[i].LogDate == e.LogDate && data[i].ProcessInfo == e.ProcessInfo)
+                                {
+                                    <br/>@data[i].Text
+                                    i++;
+                                }
+                            }
+                            </td>
                         </tr>
-                        if (i > 50 && data.Count > 100)
+                        if (i > 500 && data.Count > 501)
                         {
                             <tr class="total-row">
                                 <td colspan="3" class="no-content">
-                                    There are @(data.Count.ToComma()) errors in the last @errorMinutesToGet.Pluralize("minute"), showing the most recent 50.
+                                    There are @(data.Count.ToComma()) errors in the last @errorMinutesToGet.Pluralize("minute"), showing the most recent 500.
                                 </td>
                             </tr>
                             break;

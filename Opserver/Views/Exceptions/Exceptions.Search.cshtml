@@ -22,10 +22,6 @@
         {
         <span class="top-link">(<a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">Include Deleted</a>)</span>
         }
-        @if (log.HasValue() && exceptions.Any(er => !er.IsProtected && !er.DeletionDate.HasValue) && Current.User.IsExceptionAdmin)
-        {
-        <span class="top-link top-delete-link">(<a class="delete-link clear-visible-link" href="#">Clear visible</a>)</span>
-        }
     </div>
 </div>
 <div class="bottom-section">
@@ -40,10 +36,4 @@
         @:No current exceptions found, <a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">would you like to search deleted errors?</a>
     }
     </div>
-    @if (log.HasValue() && exceptions.Any(er => !er.IsProtected && !er.DeletionDate.HasValue) && Current.User.IsExceptionAdmin)
-    {
-    <div class="clear-all-div">
-        <a class="delete-link clear-visible-link" href="#">&nbsp;X&nbsp;- Clear visible errors</a>
-    </div>
-    }
 </div>

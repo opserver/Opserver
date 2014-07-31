@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using BookSleeve;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
+using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
@@ -18,14 +18,20 @@ namespace StackExchange.Opserver.Data.Redis
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
         public string Name { get { return ConnectionInfo.Name; } }
         public string Host { get { return ConnectionInfo.Host; } }
+
+        public Version Version { get { return Info.HasData() ? Info.Data.Server.Version : null; } }
+
+        public string Password { get { return ConnectionInfo.Password; } }
         public int Port { get { return ConnectionInfo.Port; } }
+        
+        // Redis is spanish for WE LOVE DANGER, I think.
+        protected override TimeSpan BackoffDuration { get { return TimeSpan.FromSeconds(5); } }
 
         public override string NodeType { get { return "Redis"; } }
         public override int MinSecondsBetweenPolls { get { return 5; } }
 
-        private RedisConnection _connection;
-        private bool _connectionInitialized;
-        public RedisConnection Connection
+        private ConnectionMultiplexer _connection;
+        public ConnectionMultiplexer Connection
         {
             get
             {
@@ -33,16 +39,9 @@ namespace StackExchange.Opserver.Data.Redis
                 {
                     _connection = GetConnection(allowAdmin: true);
                 }
-                if (_connection.State != RedisConnectionBase.ConnectionState.Open)
+                if (!_connection.IsConnected)
                 {
-                    if (_connectionInitialized)
-                    {
-                        // broken connection, recreate and reconnect
-                        _connection = GetConnection(allowAdmin: true);
-                        _connectionInitialized = false;
-                    }
-                    _connection.Wait(_connection.Open());
-                    _connectionInitialized = true;
+                    _connection.Configure();
                 }
                 return _connection;
             }
@@ -91,15 +90,27 @@ namespace StackExchange.Opserver.Data.Redis
             return AppCache.GetHostName(hostOrIp);
         }
 
-        private RedisConnection GetConnection(int ioTimeout = 5000, int syncTimeout = 5000, bool allowAdmin = false)
+        // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
+        public static SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
+
+        private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 5000)
         {
-            return new RedisConnection(Host, Port, ioTimeout: ioTimeout, syncTimeout: syncTimeout, allowAdmin: allowAdmin)
+            var config = new ConfigurationOptions
             {
-                Name = "Opserver"
+                SyncTimeout = syncTimeout,
+                AllowAdmin = allowAdmin,
+                Password = Password,
+                EndPoints =
+                {
+                    { Host, Port }
+                },
+                ClientName = "Opserver",
+                SocketManager = SharedSocketManager
             };
+            return ConnectionMultiplexer.Connect(config);
         }
 
-        public Action<Cache<T>> GetFromRedis<T>(string opName, Func<RedisConnection, T> getFromConnection) where T : class
+        public Action<Cache<T>> GetFromRedis<T>(string opName, Func<ConnectionMultiplexer, T> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "Redis Fetch: " + Name + ":" + opName,
                                    getData: () => getFromConnection(Connection),

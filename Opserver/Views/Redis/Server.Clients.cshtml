@@ -1,4 +1,4 @@
-﻿@using BookSleeve
+﻿@using StackExchange.Redis
 @model StackExchange.Opserver.Data.Redis.RedisInstance
 @{
     Layout = null;
@@ -32,7 +32,7 @@
             @Html.Partial("~/Views/Redis/Server.Clients.ByIP.cshtml", info)
             @Html.Partial("~/Views/Redis/Server.Clients.ByName.cshtml", info)
             <div class="info-title">Client Details</div>
-            foreach (var ci in cache.Data.OrderByDescending(c => c.Flags).ThenBy(c => c.Address))
+            foreach (var ci in cache.Data.OrderByDescending(c => c.Flags).ThenBy(c => c.Host).ThenBy(c => c.AgeSeconds))
             {
                 var subCount = ci.SubscriptionCount + ci.PatternSubscriptionCount;
                 <div class="info-line" title="@(ci.LastCommand), DB @(ci.Database)"><span class="label">@ci.Address</span> <span class="value">@(string.IsNullOrEmpty(ci.Name) ? "" : ci.Name) @(ci.Flags != ClientFlags.None ? ci.Flags.ToString() : "")</span>

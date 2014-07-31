@@ -8,7 +8,7 @@
     </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}</ProjectGuid>
-    <ProjectTypeGuids>{E53F8FEA-EAE0-44A6-8774-FFD645390401};{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StackExchange.Opserver</RootNamespace>
@@ -48,17 +48,17 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Antlr3.Runtime, Version=3.3.1.7705, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WebGrease.1.3.0\lib\Antlr3.Runtime.dll</HintPath>
-    </Reference>
-    <Reference Include="BookSleeve, Version=1.3.41.0, Culture=neutral, PublicKeyToken=9056fda458ff61cf, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\BookSleeve.1.3.41\lib\BookSleeve.dll</HintPath>
+      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="EasyHttp, Version=1.6.58.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
+    </Reference>
+    <Reference Include="Jil, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Jil.1.5.0\lib\net45\Jil.dll</HintPath>
     </Reference>
     <Reference Include="JsonFx, Version=2.0.1209.2802, Culture=neutral, PublicKeyToken=315052dd637f8a52, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -69,25 +69,41 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="MiniProfiler, Version=3.0.8.55, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+    <Reference Include="MiniProfiler, Version=3.1.1.139, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.3.0.8.55\lib\net40\MiniProfiler.dll</HintPath>
+      <HintPath>..\packages\MiniProfiler.3.1.1.139\lib\net40\MiniProfiler.dll</HintPath>
     </Reference>
-    <Reference Include="MiniProfiler.Mvc, Version=3.0.8.55, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+    <Reference Include="MiniProfiler.Mvc, Version=3.0.11.121, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.Mvc4.3.0.8.55\lib\net40\MiniProfiler.Mvc.dll</HintPath>
+      <HintPath>..\packages\MiniProfiler.MVC4.3.0.11.121\lib\net40\MiniProfiler.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Sigil, Version=4.2.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sigil.4.2.1\lib\net45\Sigil.dll</HintPath>
     </Reference>
     <Reference Include="SnmpSharpNet, Version=0.9.3.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SnmpSharpNet.0.9.3\lib\SnmpSharpNet.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Exceptional, Version=1.0.0.86, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Exceptional.1.0.86\lib\StackExchange.Exceptional.dll</HintPath>
+      <HintPath>..\packages\StackExchange.Elastic.0.1.25\lib\StackExchange.Elastic.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Exceptional, Version=1.0.0.110, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\StackExchange.Exceptional.1.0.110\lib\StackExchange.Exceptional.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Opserver.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>Bin\StackExchange.Opserver.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\StackExchange.Redis.1.0.322\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="Svg">
       <HintPath>lib\Svg.dll</HintPath>
@@ -98,38 +114,39 @@
     <Reference Include="System.DirectoryServices.AccountManagement" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web.DataVisualization" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.Helpers.dll</HintPath>
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.Helpers.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Mvc.4.0.30506.0\lib\net40\System.Web.Mvc.dll</HintPath>
+    <Reference Include="System.Web.Mvc, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.0\lib\net45\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.0\lib\net40\System.Web.Optimization.dll</HintPath>
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
     </Reference>
-    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.Razor.2.0.30506.0\lib\net40\System.Web.Razor.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.Deployment.dll</HintPath>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.0\lib\net45\System.Web.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Abstractions" />
     <Reference Include="System.Web.Routing" />
-    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <Private>True</Private>
-      <HintPath>..\packages\Microsoft.AspNet.WebPages.2.0.30506.0\lib\net40\System.Web.WebPages.Razor.dll</HintPath>
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -137,9 +154,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\TeamCitySharp.0.3.5\lib\net40\TeamCitySharp.dll</HintPath>
     </Reference>
-    <Reference Include="WebGrease, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\WebGrease.1.3.0\lib\WebGrease.dll</HintPath>
+      <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -166,7 +183,9 @@
     <Content Include="Content\img\logo\icon-64.png" />
     <Content Include="Content\img\logo\icon-76.png" />
     <Content Include="Content\img\logo\logo-big.png" />
+    <Content Include="Content\img\logo\logo-login%402x.png" />
     <Content Include="Content\img\logo\logo-login.png" />
+    <Content Include="Content\img\logo\logo-text%402x.png" />
     <Content Include="Content\img\logo\logo-text.png" />
     <Content Include="Content\img\node\node-select-all.png" />
     <Content Include="Content\img\node\node-select-child.png" />
@@ -226,8 +245,12 @@
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Controllers\CacheController.cs" />
     <Compile Include="Controllers\DataController.cs" />
+    <Compile Include="Controllers\CloudFlareController.cs" />
     <Compile Include="Controllers\HubController.cs" />
     <Compile Include="Controllers\PollController.cs" />
+    <Compile Include="Controllers\RedisController.Admin.cs">
+      <DependentUpon>RedisController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controllers\RedisController.cs" />
     <Compile Include="Controllers\DashboardController.Polling.cs">
       <DependentUpon>DashboardController.cs</DependentUpon>
@@ -241,6 +264,7 @@
     <Compile Include="Models\ExtensionMethods.cs" />
     <Compile Include="SecuritySettings.cs" />
     <Compile Include="SiteSettings.cs" />
+    <Compile Include="Views\CloudFlare\Dashboard.Model.cs" />
     <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
     <Compile Include="Views\Dashboard\Ranges.cs" />
     <Compile Include="Views\Dashboard\Node.Model.cs">
@@ -267,6 +291,16 @@
     <Compile Include="Views\SQL\Databases.Model.cs">
       <DependentUpon>Databases.cshtml</DependentUpon>
     </Compile>
+    <None Include="Help\SQL\WaitStats.md" />
+    <Content Include="Views\CloudFlare\Railguns.cshtml" />
+    <Content Include="Views\CloudFlare\Dashboard.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml" />
+    <Content Include="Views\Redis\Dashboard.RoleActions.cshtml" />
+    <Content Include="Views\Elastic\_ViewStart.cshtml" />
+    <Content Include="Views\Redis\_ViewStart.cshtml" />
+    <Content Include="Views\CloudFlare\_ViewStart.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml" />
+    <Content Include="Views\CloudFlare\DNS.cshtml" />
     <None Include="Views\SQL\Instance.Configuration.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </None>
@@ -329,7 +363,6 @@
     </Compile>
     <Compile Include="Helpers\HtmlUtilities.cs" />
     <Compile Include="Helpers\MainTab.cs" />
-    <Compile Include="Helpers\RouteAttribute.cs" />
     <Compile Include="Helpers\Status.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Exceptions\Exceptions.Model.cs">
@@ -473,13 +506,13 @@
     <Content Include="Views\Home\Test.cshtml" />
     <Content Include="Views\Dashboard\Node.Current.Interfaces.cshtml" />
     <Content Include="Views\Elastic\Dashboard.cshtml" />
-    <Content Include="Views\Elastic\Dashboard.Cluster.cshtml" />
-    <Content Include="Views\Elastic\Dashboard.Cluster.Shards.cshtml" />
-    <Content Include="Views\Elastic\Dashboard.Cluster.Indices.cshtml" />
+    <Content Include="Views\Elastic\Cluster.cshtml" />
+    <Content Include="Views\Elastic\Cluster.Shards.cshtml" />
+    <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
     <Content Include="Views\Hub\Index.cshtml" />
     <Content Include="Views\Dashboard\Node.Current.Stats.cshtml" />
     <Content Include="Views\Redis\Dashboard.cshtml" />
-    <Content Include="Views\Redis\Dashboard.All.cshtml" />
+    <Content Include="Views\Redis\AllServers.cshtml" />
     <Content Include="Views\Redis\Server.Info.cshtml" />
     <Content Include="Views\Redis\Server.Clients.cshtml" />
     <Content Include="Views\Redis\Server.Clients.ByIP.cshtml" />
@@ -537,6 +570,7 @@
     <Content Include="Views\SQL\Servers.cshtml" />
     <Content Include="Views\Redis\Instance.SlowLog.cshtml" />
     <Content Include="Views\Redis\Instance.Config.cshtml" />
+    <Content Include="Views\SQL\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />

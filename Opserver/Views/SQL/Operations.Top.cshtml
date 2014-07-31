@@ -4,11 +4,12 @@
 @using StackExchange.Opserver.Views.SQL
 @model DashboardModel
 @{
-    var s = Model.CurrentInstance;
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
     Cache<List<SQLInstance.TopOperation>> topOps;
     using (MiniProfiler.Current.Step("GetTopOperations"))
     {
-        topOps = s.GetTopOperations(Model.TopSearchOptions);
+        topOps = i.GetTopOperations(Model.TopSearchOptions);
     }
 }
 @helper ReadableTime(long ms)
@@ -36,14 +37,14 @@
     @if (topOps.ErrorMessage.HasValue())
     {
         <div class="sql-server sql-error">
-            <span class="error-label">There was an error fetching server status from @s.Name:</span>
+            <span class="error-label">There was an error fetching server status from @i.Name:</span>
             @topOps.ErrorMessage
         </div>
     } else
     {
         var data = topOps.SafeData(true);
         <div class="sql-server">
-            <h3 class="page-header">Top queries on @s.Name by @Model.TopSearchOptions.Sort.GetDescription():
+            <h3 class="page-header">Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
                 <div class="filters-wrap">
                     <div class="filters-current">
                         <span class="filter-label">Min Execs: </span><span class="filter-value">@Model.TopSearchOptions.MinExecs</span>
@@ -96,7 +97,7 @@
                     </div>
                 </div>
             </h3>
-            <table class="node-dashboard">
+            <table class="striped-dashboard">
                 <thead>
                     <tr class="sort-row sort-category">
                         <th colspan="@(Model.Detailed ? 4 : 3)">CPU</th>

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Nest;
+using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -27,19 +27,21 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             public Dictionary<string, List<string>> Aliases { get; private set; }
 
-            public override IResponse RefreshFromConnection(ElasticClient cli)
+            public override ElasticResponse RefreshFromConnection(SearchClient cli)
             {
-                var result = new Dictionary<string, List<string>>();
-                var aliases = cli.GetAllIndexAliases();
-                foreach (var a in aliases)
+                var rawAliases = cli.GetAliases();
+                if (rawAliases.HasData)
                 {
-                    if (a.Value != null && a.Value.Count > 0)
-                        result.Add(a.Key, a.Value);
+                    var result = new Dictionary<string, List<string>>();
+                    foreach (var a in rawAliases.Data)
+                    {
+                        if (a.Value != null && a.Value.Aliases != null && a.Value.Aliases.Count > 0)
+                            result.Add(a.Key, a.Value.Aliases.Keys.ToList());
+                    }
+                    Aliases = result;
                 }
-                Aliases = result;
-                IsValid = true;
 
-                return null;
+                return rawAliases;
             }
         }
     }

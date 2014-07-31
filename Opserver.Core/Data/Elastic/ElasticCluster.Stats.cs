@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Nest;
+using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -13,35 +13,31 @@ namespace StackExchange.Opserver.Data.Elastic
 
         public class ClusterStatsInfo : ElasticDataObject
         {
-            public GlobalStats GlobalStats { get; internal set; }
-            public ShardsMetaData ShardsMetaData { get; internal set; }
-            public Dictionary<string, Stats> Indices { get; internal set; }
-
-            public override IResponse RefreshFromConnection(ElasticClient cli)
+            public IndexStats GlobalStats { get; internal set; }
+            public ShardCountStats Shards { get; internal set; }
+            public Dictionary<string, IndexStats> Indices { get; internal set; }
+            
+            public override ElasticResponse RefreshFromConnection(SearchClient cli)
             {
-                var health = cli.Stats();
-                if (health.IsValid && health.OK)
+                var health = cli.GetIndexStats();
+                if (health.HasData)
                 {
-                    GlobalStats = health.Stats;
-                    ShardsMetaData = health.Shards;
-                    Indices = health.Indices;
+                    GlobalStats = health.Data.All;
+                    Shards = health.Data.Shards;
+                    Indices = health.Data.Indices;
+                }
+                else
+                {
+                    GlobalStats = new IndexStats();
+                    Shards = new ShardCountStats();
+                    Indices = new Dictionary<string, IndexStats>();
                 }
                 return health;
             }
 
-            public Stats GetIndexStats(string index)
+            public Dictionary<string, IndexStats> GetIndexStats()
             {
-                Stats stats;
-                // Elastic 0.90 changes behavior here, temporarily coping with it until 0.20 is pretty rare
-                var dict = GetIndexStats();
-                if (dict == null) return null;
-                dict.TryGetValue(index, out stats);
-                return stats;
-            }
-
-            public Dictionary<string, Stats> GetIndexStats()
-            {
-                return Indices ?? new Dictionary<string, Stats>();
+                return Indices ?? new Dictionary<string, IndexStats>();
             }
         }
     }

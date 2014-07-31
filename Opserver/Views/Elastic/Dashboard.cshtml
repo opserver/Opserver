@@ -2,6 +2,7 @@
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
+    Layout = "~/Views/Shared/Master.cshtml";
     this.SetMainTab(MainTab.Elastic);
     this.SetPageTitle("elasticsearch Dashboard");
     this.SetTopNodes(ElasticCluster.AllClusters,
@@ -48,19 +49,5 @@
     {
         @Html.Partial("Cluster.Selector")
     }
-    else
-    {
-        switch (Model.View)
-        {
-            case DashboardModel.Views.Node:
-                @Html.Partial("Node", Model)
-                break;
-            case DashboardModel.Views.Indices:
-                @Html.Partial("Indices", Model.Current)
-                break;
-            case DashboardModel.Views.Cluster:
-                @Html.Partial("Dashboard.Cluster", Model)
-                break;
-        }
-    }
+    @RenderBody()
 </div>

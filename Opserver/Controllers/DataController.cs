@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Controllers
             return JsonCacheInner(type, key, cacheData);
         }
 
-        [Route("json/{type}/{key}/_all", RoutePriority.High)]
+        [Route("json/{type}/{key}/_all", Order = 1)]
         public ActionResult JsonCacheAll(string type, string key)
         {
             return JsonCacheInner(type, key, true);
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        [Route("json/{type}/{key}/{property}")]
+        [Route("json/{type}/{key}/{property}", Order = 2)]
         public ActionResult JsonCache(string type, string key, string property)
         {
             if (type.IsNullOrEmpty()) return JsonNullParam("Type");

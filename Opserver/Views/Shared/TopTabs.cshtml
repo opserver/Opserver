@@ -1,4 +1,5 @@
 ﻿@using StackExchange.Profiling
+@using StackExchange.Opserver.Data.CloudFlare
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Data.Exceptions
 @using StackExchange.Opserver.Data.HAProxy
@@ -42,6 +43,11 @@
             {
                 var status = ElasticCluster.AllClusters.GetWorstStatus();
                 <a class="@GetClass(MainTab.Elastic, status.GetDescription())" href="/elastic">Elastic</a>
+            }
+            @if (s.CloudFlare.Enabled && s.CloudFlare.HasAccess())
+            {
+                var status = RailgunInstance.AllInstances.GetWorstStatus();
+                <a class="@GetClass(MainTab.CloudFlare, status.GetDescription())" href="/cloudflare">CloudFlare</a>
             }
             @if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
             {

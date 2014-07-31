@@ -10,8 +10,8 @@
     }
     <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@i.Id" data-name="@i.PrettyName" />
 }
-<table class="node-dashboard main-dashboard interface-dashboard">
-    <thead>        
+<table class="node-dashboard main-dashboard interface-dashboard striped-dashboard">
+    <thead>
         <tr class="category-row">
             <th colspan="8"><div>@Model.Interfaces.Count().Pluralize("Interface") on @Model.PrettyName</div></th>
         </tr>
@@ -31,7 +31,9 @@
             <tr class="@i.MonitorStatus.RowClass()">
                 <td>@i.IconSpan()</td>
                 <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-Last Updated: @i.LastSync.ToRelativeTime()" data-val="@i.Index">@i.PrettyName</td>
+                    last updated @i.LastSync.ToRelativeTime() " data-val=" @i.Index ">
+                    @i.PrettyName
+                </td>
                 <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@string.Format("{0:F0}", i.Speed)">@i.PrettySpeed</td>
                 <td data-val="@string.Format("{0:F0}", i.InBps)">@i.PrettyIn()</td>
                 <td data-val="@string.Format("{0:F0}", i.InBps)">@Graph(i, "in")</td>

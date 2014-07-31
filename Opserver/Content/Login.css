@@ -66,10 +66,20 @@ ul li {
     display: block;
     width: 401px;
     height: 118px;
-    background: transparent url('/Content/img/logo/logo-login.png') no-repeat;	
+    background: transparent url("/Content/img/logo/logo-login.png") no-repeat;	
     clear: left;
     margin: 0 auto;
 }
+
+/* Todo: Sprite all logos */
+@media only screen and (-moz-min-device-pixel-ratio: 1.5), only screen and (-o-min-device-pixel-ratio: 3/2), only screen and (-webkit-min-device-pixel-ratio: 1.5), only screen and (min-device-pixel-ratio: 1.5)
+{
+    .logo {
+        background-image: url("/Content/img/logo/logo-login@2x.png");
+        background-size: 401px 118px;
+    }
+}
+
 
 .intro {
     text-align: center;

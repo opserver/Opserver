@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Web.UI.WebControls;
 using Dapper;
+using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -39,7 +42,7 @@ namespace StackExchange.Opserver.Data.SQL
             return new Cache<List<SQLDatabaseColumnInfo>>
             {
                 CacheKey = GetCacheKey("ColumnInfo-" + databaseName),
-                CacheForSeconds = 60,
+                CacheForSeconds = 5 * 60,
                 CacheStaleForSeconds = 30 * 60,
                 UpdateCache = UpdateFromSql("Column Info for " + databaseName, conn =>
                 {
@@ -355,36 +358,138 @@ Group By t.object_id, t.Name, t.create_date, s.name";
         {
             public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
 
-            public int Position { get; internal set; }
+            public string Id { get { return Schema + "." + TableName + "." + ColumnName; } }
+
             public string Schema { get; internal set; }
             public string TableName { get; internal set; }
+            public int Position { get; internal set; }
             public string ColumnName { get; internal set; }
-            public string ColumnDefault { get; internal set; }
-            public bool IsNullable { get; internal set; }
             public string DataType { get; internal set; }
-            public int CharacterMaxLength { get; internal set; }
-            public byte NumericPrecision { get; internal set; }
-            public short NumericPrecisionRadix { get; internal set; }
-            public int NumericScale { get; internal set; }
-            public short DatetimePrecision { get; internal set; }
+            public bool IsNullable { get; internal set; }
+            public int MaxLength { get; internal set; }
+            public byte Scale { get; internal set; }
+            public byte Precision { get; internal set; }
+            public string ColumnDefault { get; internal set; }
             public string CollationName { get; internal set; }
+            public bool IsIdentity { get; internal set; }
+            public bool IsComputed { get; internal set; }
+            public bool IsFileStream { get; internal set; }
+            public bool IsSparse { get; internal set; }
+            public bool IsColumnSet { get; internal set; }
+            public string PrimaryKeyConstraint { get; internal set; }
+            public string ForeignKeyConstraint { get; internal set; }
+            public string ForeignKeyTargetSchema { get; internal set; }
+            public string ForeignKeyTargetTable { get; internal set; }
+            public string ForeignKeyTargetColumn { get; internal set; }
+
+            public string DataTypeDescription
+            {
+                get
+                {
+                    var props = new List<string>();
+                    if (IsSparse) props.Add("sparse");
+                    switch (DataType)
+                    {
+                        case "varchar":
+                        case "nvarchar":
+                        case "varbinary":
+                            props.Add(string.Format("{0}({1})", DataType, MaxLength == -1 ? "max" : MaxLength.ToString()));
+                            break;
+                        case "decimal":
+                        case "numeric":
+                            props.Add(string.Format("{0}({1},{2})", DataType, Scale, Precision));
+                            break;
+                        default:
+                            props.Add(DataType);
+                            break;
+                    }
+                    props.Add(IsNullable ? "null" : "not null");
+                    return string.Join(", ", props);
+                }
+            }
 
             internal const string FetchSQL = @"
-Select TABLE_SCHEMA [Schema],
-       TABLE_NAME TableName,
-       ORDINAL_POSITION Position,
-       COLUMN_NAME ColumnName,
-       COLUMN_DEFAULT ColumnDefault,
-       Cast(Case IS_NULLABLE When 'YES' Then 1 Else 0 End as BIT) IsNullable,
-       DATA_TYPE DataType,
-       CHARACTER_MAXIMUM_LENGTH CharMaxLength,
-       NUMERIC_PRECISION NumericPrecision,
-       NUMERIC_PRECISION_RADIX NumericPrecisionRadix,
-       NUMERIC_SCALE NumericScale,
-       DATETIME_PRECISION DatetimePrecision,
-       COLLATION_NAME CollationName
-  From INFORMATION_SCHEMA.COLUMNS
-Order By TABLE_SCHEMA, TABLE_NAME, ORDINAL_POSITION";
+Select s.name [Schema],
+       t.name TableName,
+       c.column_id Position,
+       c.name ColumnName,
+       ty.name DataType,
+       c.is_nullable IsNullable,
+       (Case When ty.name In ('nchar', 'ntext','nvarchar') And c.max_length <> -1 Then c.max_length / 2 Else c.max_length End) MaxLength,
+       c.scale Scale,
+       c.precision Precision,
+       object_definition(c.default_object_id) ColumnDefault,
+       c.collation_name CollationName,
+       c.is_identity IsIdentity,
+       c.is_computed IsComputed,
+       c.is_filestream IsFileStream,
+       c.is_sparse IsSparse,
+       c.is_column_set IsColumnSet,
+       (Select Top 1 i.name
+          From sys.indexes i 
+               Join sys.index_columns ic On i.object_id = ic.object_id And i.index_id = ic.index_id
+         Where i.object_id = t.object_id
+           And ic.column_id = c.column_id
+           And i.is_primary_key = 1) PrimaryKeyConstraint,
+       object_name(fkc.constraint_object_id) ForeignKeyConstraint,
+       fs.name ForeignKeyTargetSchema,
+       ft.name ForeignKeyTargetTable,
+       fc.name ForeignKeyTargetColumn
+  From sys.columns c
+       Join sys.tables t On c.object_id = t.object_id
+       Join sys.schemas s On t.schema_id = s.schema_id
+       Join sys.types ty On c.user_type_id = ty.user_type_id
+       Left Join sys.foreign_key_columns fkc On fkc.parent_object_id = t.object_id And fkc.parent_column_id = c.column_id
+       Left Join sys.tables ft On fkc.referenced_object_id = ft.object_id
+       Left Join sys.schemas fs On ft.schema_id = fs.schema_id
+       Left Join sys.columns fc On fkc.referenced_object_id = fc.object_id And fkc.referenced_column_id = fc.column_id
+Order By 1, 2, 3";
+
+// For non-SQL later
+//            internal const string FetchSQL = @"
+//Select c.TABLE_SCHEMA [Schema],
+//       c.TABLE_NAME TableName,
+//       c.ORDINAL_POSITION Position,
+//       c.COLUMN_NAME ColumnName,
+//       c.COLUMN_DEFAULT ColumnDefault,
+//       Cast(Case c.IS_NULLABLE When 'YES' Then 1 Else 0 End as BIT) IsNullable,
+//       c.DATA_TYPE DataType,
+//       c.CHARACTER_MAXIMUM_LENGTH MaxLength,
+//       c.NUMERIC_PRECISION Precision,
+//       c.NUMERIC_PRECISION_RADIX NumericPrecisionRadix,
+//       c.NUMERIC_SCALE NumericScale,
+//       c.DATETIME_PRECISION DatetimePrecision,
+//       c.COLLATION_NAME CollationName,
+//       kcu.PrimaryKeyConstraint,
+//       kcu.ForeignKeyConstraint,
+//       kcu.ForeignKeyTargetSchema,
+//       kcu.ForeignKeyTargetTable,
+//       kcu.ForeignKeyTargetColumn
+//  From INFORMATION_SCHEMA.COLUMNS c
+//       Left Join (Select cu.TABLE_SCHEMA, 
+//                         cu.TABLE_NAME, 
+//                         cu.COLUMN_NAME,
+//                         (Case When OBJECTPROPERTY(OBJECT_ID(cu.CONSTRAINT_NAME), 'IsPrimaryKey') = 1
+//                               Then cu.CONSTRAINT_NAME
+//                               Else Null
+//                          End) as PrimaryKeyConstraint,
+//                          rc.CONSTRAINT_NAME ForeignKeyConstraint,
+//                          cut.TABLE_SCHEMA ForeignKeyTargetSchema,
+//                          cut.TABLE_NAME ForeignKeyTargetTable,
+//                          cut.COLUMN_NAME ForeignKeyTargetColumn
+//                    From INFORMATION_SCHEMA.KEY_COLUMN_USAGE cu
+//                         Left Join INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc
+//                           On cu.CONSTRAINT_CATALOG = rc.CONSTRAINT_CATALOG
+//                          And cu.CONSTRAINT_SCHEMA = rc.CONSTRAINT_SCHEMA
+//                          And cu.CONSTRAINT_NAME = rc.CONSTRAINT_NAME
+//                         Left Join INFORMATION_SCHEMA.KEY_COLUMN_USAGE cut
+//                          On rc.UNIQUE_CONSTRAINT_CATALOG = cut.CONSTRAINT_CATALOG
+//                          And rc.UNIQUE_CONSTRAINT_SCHEMA = cut.CONSTRAINT_SCHEMA
+//                          And rc.UNIQUE_CONSTRAINT_NAME = cut.CONSTRAINT_NAME) kcu
+//         On c.TABLE_SCHEMA = kcu.TABLE_SCHEMA
+//         And c.TABLE_NAME = kcu.TABLE_NAME
+//         And c.COLUMN_NAME = kcu.COLUMN_NAME
+//Order By c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION";
 
             public string GetFetchSQL(Version v)
             {

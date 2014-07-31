@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Net.Configuration;
 using Dapper;
 using Newtonsoft.Json;
 
@@ -66,6 +67,21 @@ namespace StackExchange.Opserver.Data.SQL
             public RecoveryHealths? PrimaryRecoveryHealth { get; internal set; }
             public RecoveryHealths? SecondaryRecoveryHealth { get; internal set; }
             public SynchronizationHealths? GroupSynchronizationHealth { get; internal set; }
+
+            private bool? _hasDatabases;
+            public bool HasDatabases
+            {
+                get
+                {
+                    if (!_hasDatabases.HasValue)
+                    {
+                        _hasDatabases = LocalReplica != null && RemoteReplicas != null
+                                        && (LocalReplica.Databases.Count > 0
+                                            || RemoteReplicas.Sum(r => r.Databases != null ? r.Databases.Count : 0) > 0);
+                    }
+                    return _hasDatabases.Value;
+                }
+            }
 
             [JsonIgnore]
             public SQLNode Node { get; internal set; }
@@ -183,7 +199,12 @@ Select ag.name Name,
             {
                 get
                 {
-                    if(!Databases.Any() && SynchronizationHealth.HasValue)
+                    // Don't alert on empty AGs
+                    if (!Databases.Any())
+                    {
+                        return MonitorStatus.Good;
+                    }
+                    if(SynchronizationHealth.HasValue)
                     {
                         switch (SynchronizationHealth.Value)
                         {
@@ -203,7 +224,7 @@ Select ag.name Name,
             {
                 get
                 {
-                    if (!Databases.Any() && SynchronizationHealth.HasValue)
+                    if (Databases.Any() && SynchronizationHealth.HasValue)
                     {
                         if (SynchronizationHealth == SynchronizationHealths.Healthy)
                             return null;

@@ -7,7 +7,7 @@ using StackExchange.Opserver.Views.Redis;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Redis)]
-    public class RedisController : StatusController
+    public partial class RedisController : StatusController
     {
         protected override ISecurableSection SettingsSection
         {
@@ -20,21 +20,19 @@ namespace StackExchange.Opserver.Controllers
             var instance = RedisInstance.GetInstance(node);
             if (instance != null)
                 return RedirectToAction("Instance", new {node});
-            if (node.HasValue())
-                return ServerView(node);
 
             var vd = new DashboardModel
             {
                 Instances = RedisInstance.AllInstances,
-                View = node.HasValue() ? DashboardModel.Views.Server : DashboardModel.Views.All,
+                View = node.HasValue() ? RedisViews.Server : RedisViews.All,
                 CurrentRedisServer = node,
                 Refresh = true
             };
-            return View("Dashboard", vd);
+            return View("AllServers", vd);
         }
 
         [Route("redis/server")]
-        public ActionResult ServerView(string node)
+        public ActionResult Server(string node)
         {
             if (node == null)
                 return RedirectToAction("Dashboard");
@@ -42,15 +40,15 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
             {
                 Instances = RedisInstance.AllInstances,
-                View = node.HasValue() ? DashboardModel.Views.Server : DashboardModel.Views.All,
+                View = node.HasValue() ? RedisViews.Server : RedisViews.All,
                 CurrentRedisServer = node,
                 Refresh = true
             };
-            return View("Dashboard", vd);
+            return View(vd);
         }
 
         [Route("redis/instance")]
-        public ActionResult Instance(string node, bool ajax = false)
+        public ActionResult Instance(string node)
         {
             var instance = RedisInstance.GetInstance(node);
 
@@ -58,11 +56,20 @@ namespace StackExchange.Opserver.Controllers
             {
                 Instances = RedisInstance.AllInstances,
                 CurrentInstance = instance,
-                View = DashboardModel.Views.Instance,
+                View = RedisViews.Instance,
                 CurrentRedisServer = node,
                 Refresh = true
             };
-            return View(ajax ? "Instance" : "Dashboard", vd);
+            return View(vd);
+        }
+
+
+        [Route("redis/instance/get-config/{host}-{port}-config.zip")]
+        public ActionResult DownloadConfiguration(string host, int port)
+        {
+            var instance = RedisInstance.GetInstance(host, port);
+            var configZip = instance.GetConfigZip();
+            return new FileContentResult(configZip, "application/zip");
         }
 
         [Route("redis/instance/summary/{type}")]

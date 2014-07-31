@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("dashboard")]
-        public ActionResult Dashboard(string filter, bool ajax = false)
+        public ActionResult Dashboard(string filter)
         {
             SetMainTab(MainTab.Dashboard);
 
@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Controllers
                     ErrorMessages = DashboardData.ProviderExceptions,
                     Filter = filter
                 };
-            return View(ajax ? "Dashboard.Table" : "Dashboard", vd);
+            return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }
 
         [Route("dashboard/node")]

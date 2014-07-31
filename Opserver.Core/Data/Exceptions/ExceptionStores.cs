@@ -100,28 +100,72 @@ namespace StackExchange.Opserver.Data.Exceptions
             return stores.Any() ? stores : Applications.Where(a => a.Store != null).Select(a => a.Store).Distinct();
         }
 
-        public static List<Error> GetAllErrors(string appName = null, int maxPerApp = 1000)
+        private static IEnumerable<Error> GetSorted(IEnumerable<Error> source, ExceptionSorts? sort = ExceptionSorts.TimeDesc)
         {
-            using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
+            switch (sort)
             {
-                return
-                    Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, appName))
-                          .OrderByDescending(e => e.CreationDate)
-                          .ToList();
+                case ExceptionSorts.AppAsc:
+                    return source.OrderBy(e => e.ApplicationName);
+                case ExceptionSorts.AppDesc:
+                    return source.OrderByDescending(e => e.ApplicationName);
+                case ExceptionSorts.TypeAsc:
+                    return source.OrderBy(e => e.Type.Split(StringSplits.Period_Plus).Last());
+                case ExceptionSorts.TypeDesc:
+                    return source.OrderByDescending(e => e.Type.Split(StringSplits.Period_Plus).Last());
+                case ExceptionSorts.MessageAsc:
+                    return source.OrderBy(e => e.Message);
+                case ExceptionSorts.MessageDesc:
+                    return source.OrderByDescending(e => e.Message);
+                case ExceptionSorts.UrlAsc:
+                    return source.OrderBy(e => e.Url);
+                case ExceptionSorts.UrlDesc:
+                    return source.OrderByDescending(e => e.Url);
+                case ExceptionSorts.IPAddressAsc:
+                    return source.OrderBy(e => e.IPAddress);
+                case ExceptionSorts.IPAddressDesc:
+                    return source.OrderByDescending(e => e.IPAddress);
+                case ExceptionSorts.HostAsc:
+                    return source.OrderBy(e => e.Host);
+                case ExceptionSorts.HostDesc:
+                    return source.OrderByDescending(e => e.Host);
+                case ExceptionSorts.MachineNameAsc:
+                    return source.OrderBy(e => e.MachineName);
+                case ExceptionSorts.MachineNameDesc:
+                    return source.OrderByDescending(e => e.MachineName);
+                case ExceptionSorts.CountAsc:
+                    return source.OrderBy(e => e.DuplicateCount.GetValueOrDefault(1));
+                case ExceptionSorts.CountDesc:
+                    return source.OrderByDescending(e => e.DuplicateCount.GetValueOrDefault(1));
+                case ExceptionSorts.TimeAsc:
+                    return source.OrderBy(e => e.CreationDate);
+                //case ExceptionSorts.TimeDesc:
+                default:
+                    return source.OrderByDescending(e => e.CreationDate);
             }
         }
 
-        public static List<Error> GetSimilarErrors(Error error, bool byTime = false, int max = 200)
+        public static List<Error> GetAllErrors(string appName = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
-            if (error == null) return new List<Error>();
-            return GetStores(error.ApplicationName).SelectMany(s => byTime ? s.GetSimilarErrorsInTime(error, max) : s.GetSimilarErrors(error, max)).OrderByDescending(e => e.CreationDate).ToList();
+            using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
+            {
+                var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, appName));
+                return GetSorted(allErrors, sort).ToList();
+            }
         }
 
-        public static List<Error> FindErrors(string searchText, string appName = null, int max = 200, bool includeDeleted = false)
+        public static List<Error> GetSimilarErrors(Error error, bool byTime = false, int max = 200, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        {
+            if (error == null) return new List<Error>();
+            var similarErrors = GetStores(error.ApplicationName).SelectMany(s => byTime ? s.GetSimilarErrorsInTime(error, max) : s.GetSimilarErrors(error, max));
+            return GetSorted(similarErrors, sort).ToList();
+        }
+
+        public static List<Error> FindErrors(string searchText, string appName = null, int max = 200, bool includeDeleted = false, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             if (searchText.IsNullOrEmpty()) return new List<Error>();
             var stores = appName.HasValue() ? GetStores(appName) : Stores;
-            return stores.SelectMany(s => s.FindErrors(searchText, appName, max, includeDeleted)).OrderByDescending(e => e.CreationDate).ToList();
+            var results = stores.SelectMany(s => s.FindErrors(searchText, appName, max, includeDeleted));
+            return GetSorted(results, sort).ToList();
         }
         
         private static List<Application> GetApplications()

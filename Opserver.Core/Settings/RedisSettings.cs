@@ -25,11 +25,14 @@ namespace StackExchange.Opserver
             }
         }
         public event EventHandler<Server> AllServersChanged = delegate { };
+        
+        public Server Defaults { get; set; }
 
         public RedisSettings()
         {
             Servers = new ObservableCollection<Server>();
             AllServers = new Server();
+            Defaults = new Server();
         }
 
         public void AfterLoad()
@@ -111,9 +114,14 @@ namespace StackExchange.Opserver
             public string Name { get; set; }
 
             /// <summary>
-            /// Connection por for this node
+            /// Connection for for this node
             /// </summary>
             public int Port { get; set; }
+
+            /// <summary>
+            /// The password for this node
+            /// </summary>
+            public string Password { get; set; }
 
             /// <summary>
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage

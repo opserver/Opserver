@@ -1,19 +1,20 @@
-﻿@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
+﻿@model StackExchange.Opserver.Views.Elastic.DashboardModel
 @{
-    Layout = null;
-    var c = Model.Cluster;
+    var c = Model.Current.Cluster;
+    if (c == null) { return; }
     var hs = c.HealthStatus.SafeData(true);
-    var indices = (Model.WarningsOnly ? c.TroubledIndexes : c.HealthStatus.Data.Indices).ToList();
+    var warningsOnly = Model.WarningsOnly || Model.Current.WarningsOnly;
+    var indices = (warningsOnly ? c.TroubledIndexes : c.HealthStatus.Data.Indices).ToList();
     var stats = c.Stats.SafeData(true);
 }
 @if (indices.Any())
 {
-    <table class="node-dashboard cluster-dashboard">
+    <table class="node-dashboard cluster-dashboard striped-dashboard">
         <tbody class="node-header" data-name="header-indexes-@c.UniqueKey-@hs.Name">
             <tr class="category-row">
                 <th colspan="10">
                     <h3>
-                        @c.IconSpan() @indices.Count().ToComma() Indexes @(Model.WarningsOnly ? "in trouble" : "") on @hs.TotalNodeCount.Pluralize("node") (@hs.Name)
+                        @c.IconSpan() @indices.Count().ToComma() Indexes @(warningsOnly ? "in trouble" : "") on @hs.TotalNodeCount.Pluralize("node") (@hs.Name)
                         <span class="top-right-info">Updated @c.Stats.ToPollSpan()</span>
                     </h3>
                 </th>
@@ -38,7 +39,7 @@
                     return int.TryParse(i.Name, out j) ? j : 0;
                 }).ThenBy(i => i.Name))
             {
-                var iStats = stats.GetIndexStats(i.Name);
+                var iStats = stats.Indices[i.Name];
                 <tr class="@i.RowClass()">
                     <td>@i.IconSpan()</td>
                     <td>@c.GetIndexAliasedName(i.Name)</td>
@@ -59,7 +60,7 @@
                     <td>@i.UnassignedShards.ToComma()</td>
                 </tr>
             }
-            @if (!Model.WarningsOnly)
+            @if (!warningsOnly)
             {
                 var indexDict = stats.GetIndexStats();
                 var indexStats = indexDict != null ? indexDict.Values : null;
@@ -86,7 +87,7 @@
         </tbody>
     </table>
 }
-else if(!Model.WarningsOnly)
+else if (!warningsOnly)
 {
     <div class="no-content">No indexes found</div>
 }

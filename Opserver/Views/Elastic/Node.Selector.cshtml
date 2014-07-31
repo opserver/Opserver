@@ -14,7 +14,7 @@
     }
 </style>
 <div class="node-selector">
-    <div class="no-content">Please select an Elastic Cluster.</div>
+    <div class="no-content">Please select an Elastic Node.</div>
     @foreach (var c in clusters)
     {
         var nodes = c.Nodes.SafeData(true).Nodes;

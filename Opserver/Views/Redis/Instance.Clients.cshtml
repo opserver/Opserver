@@ -1,4 +1,4 @@
-﻿@using BookSleeve
+﻿@using StackExchange.Redis
 @model StackExchange.Opserver.Data.Redis.RedisInstance
 @{
     Layout = null;
@@ -8,10 +8,10 @@
 {
     <div class="summary-dashboard">
         <h3>
-            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> Clients
+            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> @clients.Count Clients
         </h3>
         <div>
-            <table id="clients-table">
+            <table id="clients-table" data-node="@Model.Host:@Model.Port">
                 <thead>
                     <tr>
                         <th>Address</th>
@@ -28,10 +28,13 @@
                 <tbody>
                     @foreach (var c in clients)
                     {
-                        var ip = c.Address.Split(StringSplits.Colon).First();
+                        var ip = c.Host;
                         var server = Model.GetServerName(ip);
-                        <tr>
-                            <td>@c.Address</td>
+                        <tr title="@c.Raw">
+                            <td>@(c.Address)@if ((c.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)
+                                {
+                                    <a class="kill-client" href="#" data-addr="@c.Address">&times;</a>
+                                }</td>
                             <td>@(server.HasValue() ? server : "unknown")</td>
                             <td>@c.Name</td>
                             <td>@c.Database</td>
@@ -62,6 +65,29 @@
                         7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                     }
                 });
+                $('.kill-client').click(function (e) {
+
+                    var anchor = $(this);
+                    var node = anchor.closest('#clients-table').data('node');
+                    var address = anchor.data('addr');
+                    if (node && address && confirm('Kill the connection ' + address + ' ?'))
+                    {
+                        $.ajax('/redis/instance/kill-client', {
+                            type: 'POST',
+                            data: {
+                                node: node,
+                                address: address
+                            },
+                            success: function (data) {
+                                if (data && data.success) {
+                                    anchor.closest('tr').find('td').css('text-decoration', 'line-through');
+                                    anchor.remove();
+                                }
+                            }   
+                        });
+                    }
+                    e.preventDefault();
+                })
             });
         </script>
     </div>

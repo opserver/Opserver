@@ -74,6 +74,9 @@
     }
     .icon {
         vertical-align: text-bottom;
+        &.status-icon {
+            vertical-align: inherit;
+        }
     }
     .cpu-graph {
         vertical-align: text-bottom;
@@ -115,6 +118,7 @@
         background: #fff;
         -moz-transition: background .4s ease-in-out .2s;
         -webkit-transition: background .4s ease-in-out .2s;
+        -o-transition: background .4s ease-in-out .2s;
         transition: background .4s ease-in-out .2s;
         
         .expander {
@@ -171,6 +175,7 @@
         opacity: 0;
         -moz-transition: opacity .4s ease-in-out;
         -webkit-transition: opacity .4s ease-in-out;
+        -o-transition: opacity .4s ease-in-out;
         transition: opacity .4s ease-in-out;
     }
     .network-range {
@@ -309,6 +314,7 @@
                 
         -moz-transition: border-color .4s ease-in-out;
         -webkit-transition: border-color .4s ease-in-out;
+        -o-transition: border-color .4s ease-in-out;
         transition: border-color .4s ease-in-out;
         background: #fff;
         &:hover {
@@ -348,6 +354,9 @@
     }
 }
 .ag-node {
+    -moz-transition: border-color .4s ease-in-out;
+    -o-transition: border-color .4s ease-in-out;
+    -webkit-transition: border-color .4s ease-in-out;
     transition: border-color .4s ease-in-out;
     background: #fff;
     border: solid 1px #eee;
@@ -356,17 +365,21 @@
     margin: 5px;
     overflow: hidden;
     cursor: pointer;
+
     &:hover {
         border-color: #3d85b0;
     }
+
     .icon {
         vertical-align: sub;
     }
+
     &.ag-replica {
         width: 250px;
         font-size: 14px;
         margin-left: 38px;
     }
+
     &.ag-problem {
         border-color: #990000;
         background-color: #fff8f8;
@@ -742,15 +755,3 @@
     overflow-x: hidden;
     overflow-y: auto;
 }
-
-/*.table-active-operations {
-    table-layout: fixed;
-
-    th:nth-child(1), td:nth-child(1) { width: 50px; }
-    th:nth-child(2) { width: 150px; }
-    th:nth-child(3) { width: 150px; }
-    th:nth-child(4) { width: 150px; }
-    th:nth-child(5) { width: 75px; }
-    th:nth-child(6) { width: 75px; }
-    th:nth-child(7) { width: 160px; }
-}*/

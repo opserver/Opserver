@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using StackExchange.Elastic;
+using StackExchange.Opserver.Monitoring;
+using StackExchange.Profiling;
+using IProfilerProvider = StackExchange.Elastic.IProfilerProvider;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -13,36 +17,65 @@ namespace StackExchange.Opserver.Data.Elastic
         string ISearchableNode.CategoryName { get { return "elastic"; } }
         private string SettingsName { get; set; }
         public List<ElasticNode> SettingsNodes { get; set; }
+        public ConnectionManager ConnectionManager { get; set; }
 
         public ElasticCluster(ElasticSettings.Cluster cluster) : base(cluster.Name)
         {
             SettingsName = cluster.Name;
             SettingsNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();
+            // TODO: Profiler
+            ConnectionManager = new ConnectionManager(SettingsNodes.Select(n => n.Url), new ElasticProfilerProvider());
+        }
+
+        private sealed class ElasticProfilerProvider : IProfilerProvider
+        {
+            public IProfiler GetProfiler()
+            {
+                return new LightweightProfiler(MiniProfiler.Current, "elastic");
+            }
         }
 
         public class ElasticNode
         {
+            private const int DefaultElasticPort = 9200;
+
             public string Host { get; set; }
             public int Port { get; set; }
 
+            public string Url { get; set; }
+
             public ElasticNode(string hostAndPort)
             {
+                Uri uri;
+                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out uri))
+                {
+                    Url = uri.ToString();
+                    Host = uri.Host;
+                    Port = uri.Port;
+                    return;
+                }
+
                 var parts = hostAndPort.Split(StringSplits.Colon);
                 if (parts.Length == 2)
                 {
                     Host = parts[0];
                     int port;
-                    if (!int.TryParse(parts[1], out port))
+                    if (int.TryParse(parts[1], out port))
+                    {
+                        Port = port;
+                    }
+                    else
                     {
                         Current.LogException(new ConfigurationErrorsException(string.Format("Invalid port specified for {0}: '{1}'", parts[0], parts[1])));
-                        Port = 9200;
+                        Port = DefaultElasticPort;
                     }
                 }
                 else
                 {
                     Host = hostAndPort;
-                    Port = 9200;
+                    Port = DefaultElasticPort;
                 }
+                Url = string.Format("http://{0}:{1}/", Host, Port);
             }
         }
 
@@ -64,6 +97,7 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             if (HealthStatus.Data != null && HealthStatus.Data.Indices != null)
                 yield return HealthStatus.Data.Indices.GetWorstStatus();
+            yield return DataPollers.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()
         {
@@ -99,7 +133,7 @@ namespace StackExchange.Opserver.Data.Elastic
                                    getData: () =>
                                        {
                                            var result = new T();
-                                           result.PopulateFromConnections(SettingsNodes.Select(n => n.Host + ":" + n.Port));
+                                           result.PopulateFromConnections(ConnectionManager.GetClient());
                                            return result;
                                        },
                                    addExceptionData:

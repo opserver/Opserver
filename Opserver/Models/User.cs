@@ -60,20 +60,13 @@ namespace StackExchange.Opserver.Models
 
                         if (Current.Security.IsAdmin) result |= Roles.GlobalAdmin;
 
-                        if (Current.Settings.Dashboard.HasAccess()) result |= Roles.Dashboard;
-                        if (Current.Settings.Dashboard.IsAdmin()) result |= Roles.DashboardAdmin | Roles.Dashboard;
-
-                        if (Current.Settings.Exceptions.HasAccess()) result |= Roles.Exceptions;
-                        if (Current.Settings.Exceptions.IsAdmin()) result |= Roles.ExceptionsAdmin | Roles.Exceptions;
-
-                        if (Current.Settings.HAProxy.HasAccess()) result |= Roles.HAProxy;
-                        if (Current.Settings.HAProxy.IsAdmin()) result |= Roles.HAProxyAdmin | Roles.HAProxy;
-
-                        if (Current.Settings.SQL.HasAccess()) result |= Roles.SQL;
-                        if (Current.Settings.SQL.IsAdmin()) result |= Roles.SQLAdmin | Roles.SQL;
-
-                        if (Current.Settings.Elastic.HasAccess()) result |= Roles.Elastic;
-                        if (Current.Settings.Elastic.IsAdmin()) result |= Roles.ElasticAdmin | Roles.Elastic;
+                        result |= GetRoles(Current.Settings.CloudFlare, Roles.CloudFlare, Roles.CloudFlareAdmin);
+                        result |= GetRoles(Current.Settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);
+                        result |= GetRoles(Current.Settings.Elastic, Roles.Elastic, Roles.ElasticAdmin);
+                        result |= GetRoles(Current.Settings.Exceptions, Roles.Exceptions, Roles.ExceptionsAdmin);
+                        result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
+                        result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
+                        result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
 
                         _role = result;
                     }
@@ -84,9 +77,17 @@ namespace StackExchange.Opserver.Models
             }
         }
 
+        public Roles GetRoles(ISecurableSection section, Roles user, Roles admin)
+        {
+            if (section.IsAdmin()) return admin | user;
+            if (section.HasAccess()) return user;
+            return Roles.None;
+        }
+
         public bool IsGlobalAdmin { get { return IsInRole(Roles.GlobalAdmin); } }
         public bool IsExceptionAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
         public bool IsHAProxyAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
+        public bool IsRedisAdmin { get { return IsInRole(Roles.RedisAdmin); } }
         public bool IsSQLAdmin { get { return IsInRole(Roles.SQLAdmin); } }
     }
 }

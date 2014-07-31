@@ -1,0 +1,144 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@model RedisInstance
+@{
+    Layout = null;
+    var i = Model;
+    var slaveOptions = i.RecommendedMasterTargets.Select(s => new
+    {
+        sClass = s.MonitorStatus.Class(),
+        name = s.Host + ":" + s.Port,
+        category = s.Name
+    }).ToList();
+}
+<style>
+    .current-status, .current-options {
+        padding: 8px;
+        color: #232323;
+    }
+    .current-options button {
+        float: none;
+    }
+    .no-option {
+        margin-top: 10px;
+    }
+    .options-title {
+        margin-top: 15px;
+        font-size: 16px;
+        border-bottom: solid 1px #eee;
+        margin-bottom: 2px;
+        padding-left: 5px;
+    }
+    .option p.note {
+        padding-left: 10px;
+    }
+
+    .slave-list {
+        padding-left: 10px;
+    }
+</style>
+<div class="js-redis-role-actions" data-node="@i.Host:@i.Port">
+    <h4>@i.Host<span class="note">: </span> @i.Port <span class="note">(@i.Name)</span></h4>
+    <div>
+        <div class="current-status">
+            <span class="note">Currently:</span>
+            @if (i.IsSlave)
+            {
+                <b>Slave</b><span class="note"> of </span><b>@i.Master.Host:@i.Master.Port</b>
+            }
+            else
+            {
+                if (i.SlaveCount == 0)
+                {
+                    <b>Standalone Master</b>
+                }
+                else
+                {
+                    <b>Master</b>@: with @i.SlaveCount.Pluralize("slave"):
+                    <ul class="slave-list">
+                        @foreach (var s in i.SlaveInstances)
+                        {
+                            <li>@s.IconSpan() @s.Host:@s.Port <span class="note">(@s.Name)</span></li>
+                        }
+                    </ul>
+                }
+            }
+        </div>
+        @if (!i.IsSlave && !slaveOptions.Any())
+        {
+            <div class="no-option"><span class="note">There are no available options for this instance.</span></div>
+        }
+        else
+        {
+            <div class="options-title">Available Actions</div>
+            <div class="current-options">
+                @if (i.IsSlave)
+                {
+                    <div class="option">
+                        Promote to Master: <a href="#" class="js-promote-to-master">Promote / Deslave</a>
+                        <p class="note">Note: this will deslave the instance</p>
+                    </div>
+                }
+                @if (slaveOptions.Any())
+                {
+                    <div class="option">
+                        Slave to: <input type="text" name="newMaster" class="js-redis-role-new-master" /> <button class="js-redis-role-slave" disabled>Slave</button>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>
+<script>
+    @if (slaveOptions.Any()) {
+    <text>
+    var nodes = @Json.Encode(slaveOptions).AsHtml();
+    $('.js-redis-role-new-master').autocomplete(nodes, {
+        max: 500,
+        minChars: 0,
+        matchContains: true,
+        delay: 50,
+        formatItem: function(row) {
+            return '<span class="status-icon ' + row.sClass + ' icon">●</span> <span class="server-category-label">' + row.category + ':</span> <span class="' + row.sClass + '">' + row.name + '</span>';
+        },
+        formatResult: function(row) { return row.name; },
+        formatMatch: function(row) { return row.name; }
+    }).result(function(e, data) {
+        $(this).addClass('left-icon ' + data.sClass);
+        $('button.js-redis-role-slave').prop('disabled', false);
+        //.closest('form').submit();
+    }).keydown(function(e) {
+        return e.keyCode != 13;
+    }).on('change', function() {
+        $('button.js-redis-role-slave').prop('disabled', this.value.length > 0);
+    }).click();
+    $('button.js-redis-role-slave').on('click', function() {
+        var node = '@i.Host:@i.Port',
+            newMaster = $('.js-redis-role-new-master').val();
+        if (!confirm('Are you sure you want make ' + node + ' a slave of ' + newMaster + '?')) return;
+
+        $.ajax('redis/instance/actions/slave-to?node=' + node + '&newMaster=' + newMaster, {
+            type: 'POST'
+        }).done(function() {
+            Status.refresh.resume();
+        });
+        $(this).closest('.actions-popup').remove();
+    });
+    </text>
+    }
+    @if (i.IsSlave)
+    {
+    <text>
+    $('.js-promote-to-master').on('click', function() {
+        var node = '@i.Host:@i.Port';
+        if (!confirm('Are you sure you deslave ' + node + ' and make it a master?')) return;
+
+        $.ajax('redis/instance/actions/make-master?node=' + node, {
+            type: 'POST'
+        }).done(function() {
+            Status.refresh.resume();
+        });
+        $(this).closest('.actions-popup').remove();
+    });
+    </text>
+    }
+</script>

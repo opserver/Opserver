@@ -11,63 +11,63 @@
         return ("color:" + ColorTranslator.ToHtml(color) + ";").AsHtml();
     }
 }
-    <table class="exceptions-dashboard" data-total-count="@Model.TotalCount" data-title="@Model.Title">
-        <thead>
-            <tr class="category-row">
-                <th colspan="9">
-                    <div>
-                        <span class="exception-title">@Model.Title</span>
-                        <form class="exception-search-form" action="/exceptions/search" method="GET">
-                            <div class="search-box">
-                                <input class="search-submit" type="submit" value="" title="Search for the given text" />
-                                <input class="search-input" type="text" name="q" value="@Model.Search" placeholder="Search..." />
-                                @if (Model.SelectedLog.HasValue())
-                                {
-                                    <input type="hidden" name="log" value="@Model.SelectedLog"/>
-                                }
-                            </div>
-                        </form>
-                    </div>
-                </th>
-            </tr>
-            <tr>
-                <th class="@(showActions ? "" : "hidden")"></th>
-                <th>Time</th>
-                @if (Model.ShowAll)
-                {
-                    <th>App</th>
-                }
-                <th>Error</th>
-                <th>Remote IP</th>
-                <th>Host</th>
-                <th>Server</th>
-                <th></th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var e in exceptions)
+    <table class="exceptions-dashboard striped-dashboard" data-total-count="@Model.TotalCount" data-title="@Model.Title">
+    <thead>
+        <tr class="category-row">
+            <th colspan="9">
+                <div>
+                    <span class="exception-title">@Model.Title</span>
+                    <form class="exception-search-form" action="/exceptions/search" method="GET">
+                        <div class="search-box">
+                            <input class="search-submit" type="submit" value="" title="Search for the given text" />
+                            <input class="search-input" type="text" name="q" value="@Model.Search" placeholder="Search..." />
+                            @if (Model.SelectedLog.HasValue())
+                            {
+                                <input type="hidden" name="log" value="@Model.SelectedLog" />
+                            }
+                        </div>
+                    </form>
+                </div>
+            </th>
+        </tr>
+        <tr>
+            <th class="@(showActions ? "" : "hidden")"></th>
+            <th>Time</th>
+            @if (Model.ShowAll)
             {
-                var errorStyle = ErrorStyle(e);
+                <th>App</th>
+            }
+            <th>Error</th>
+            <th>Remote IP</th>
+            <th>Host</th>
+            <th>Server</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in exceptions)
+        {
+            var errorStyle = ErrorStyle(e);
             <tr class="error@(e.IsProtected ? " protected" : "")@(e.DeletionDate.HasValue ? " deleted" : "")" data-id="@e.GUID" data-log="@e.ApplicationName">
                 <td class="actions@(showActions ? "" : " hidden")">
                     <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="delete-link" href="/exceptions/delete">&nbsp;X&nbsp;</a>
                     @if (e.DeletionDate.HasValue)
                     {
-                    <a title="Undelete and protect this error" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
+                        <a title="Undelete and protect this error" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
                     }
                     else if (!e.IsProtected)
                     {
-                    <a title="Protect this error from automatic deletion" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
+                        <a title="Protect this error from automatic deletion" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
                     }
                     else
                     {
-                    <span title="This error is protected" class="protected"></span>
+                        <span title="This error is protected" class="protected"></span>
                     }
                 </td>
                 <td style="@errorStyle">@e.CreationDate.ToRelativeTimeSpanMini(includeTimeForOldDates: false)</td>
                 @if (Model.ShowAll)
                 {
-                <td><a href="/exceptions?log=@e.ApplicationName.UrlEncode()" style="@errorStyle">@e.ApplicationName</a></td>
+                    <td><a href="/exceptions?log=@e.ApplicationName.UrlEncode()" style="@errorStyle">@e.ApplicationName</a></td>
                 }
                 <td class="text-cell exception-cell"><a class="exception-link@(e.Message.StartsWith("Failed to retrieve error log:") ? " bad-error" : "")" href="/exceptions/detail?id=@e.GUID&app=@e.ApplicationName.UrlEncode()">@e.Message.TruncateWithEllipsis(60)</a></td>
                 <td>@e.IPAddress</td>
@@ -75,6 +75,6 @@
                 <td style="@errorStyle">@e.MachineName.ToLower()</td>
                 <td style="@errorStyle" data-count="@e.DuplicateCount">@Html.Raw(e.DuplicateCount > 1 ? "(" + (e.DuplicateCount) + "&times;)" : "")</td>
             </tr>
-            }                
-        </tbody>
-    </table>
+        }
+    </tbody>
+</table>

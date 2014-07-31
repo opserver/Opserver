@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using BookSleeve;
+using StackExchange.Profiling;
+using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
@@ -14,7 +15,14 @@ namespace StackExchange.Opserver.Data.Redis
                 return _clients ?? (_clients = new Cache<List<ClientInfo>>
                 {
                     CacheForSeconds = 60,
-                    UpdateCache = GetFromRedis("Clients", rc => rc.Wait(rc.Server.ListClients()).ToList())
+                    UpdateCache = GetFromRedis("Clients", rc =>
+                    {
+                        //TODO: Remove when StackExchange.Redis gets profiling
+                        using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))
+                        {
+                            return rc.GetSingleServer().ClientList().ToList();
+                        }
+                    })
                 });
             }
         }

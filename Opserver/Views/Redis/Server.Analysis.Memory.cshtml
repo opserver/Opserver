@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.Redis
 @model RedisMemoryAnalysis
 @{
+    Layout = "~/Views/Shared/Master.cshtml";
     var serverInfo = RedisInstance.GetInstance(Model.ConnectionInfo);
 }
 @helper TopKeys(KeyStats ks) {
@@ -22,11 +23,12 @@
 }
 
 <div class="node-summary redis-summary redis-infos-wrap">
-    <table class="node-dashboard cluster-dashboard">
+    <table class="cluster-dashboard striped-dashboard">
         <thead class="node-header" data-name="header-missing">
             <tr class="category-row">
                 <th colspan="5">
-                    <h3>@Model.IconSpan() Memory Analysis of @Model.ConnectionInfo.Name 
+                    <h3>
+                        @Model.IconSpan() Memory Analysis of @Model.ConnectionInfo.Name
                         <span class="cluster-info">
                             (@Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port - Database @Model.Database)
                             - <span title="@(((int)Model.TotalTime.TotalMilliseconds).ToComma()) ms">Runtime: @Model.TotalTime.ToReadableString()</span>
@@ -55,7 +57,8 @@
             {
                 <tr class="option-row">
                     <td colspan="5">
-                        <div class="alternative-masters">Run on one of these slaves instead?
+                        <div class="alternative-masters">
+                            Run on one of these slaves instead?
                             <ul>
                                 @RenderSlaves(serverInfo)
                             </ul>
@@ -72,7 +75,9 @@
                 }
                 <tr>
                     <td title="Regex: @s.Key.Regex.ToString()
-@TopKeys(s.Value)">@s.Key.Name</td>
+                        @TopKeys(s.Value) ">
+                        @s.Key.Name
+                    </td>
                     <td>@ks.Count.ToComma()</td>
                     <td>@ks.KeyByteSize.ToComma()</td>
                     <td>@ks.ValueByteSize.ToComma()</td>
@@ -82,7 +87,7 @@
         </tbody>
         <tfoot>
             <tr class="total-row">
-                <td><b>Total</b></td>   
+                <td><b>Total</b></td>
                 <td>@Model.Count.ToComma()</td>
                 <td>@Model.KeyByteSize.ToHumanReadableSize()</td>
                 <td>@Model.ValueByteSize.ToHumanReadableSize()</td>
@@ -92,7 +97,7 @@
     </table>
 @if (Model.TopKeys.Any())
 {
-    <table class="node-dashboard cluster-dashboard">
+    <table class="cluster-dashboard striped-dashboard">
         <thead class="node-header" data-name="header-missing">
             <tr class="category-row">
                 <th colspan="5">

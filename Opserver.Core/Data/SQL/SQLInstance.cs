@@ -41,6 +41,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             Version = new Version(); // default to 0.0
             Name = name;
+            // TODO: Object Name regex for not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
             ObjectName = objectName.IsNullOrEmptyReturn(objectName, "SQLServer");
             ConnectionString = connectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", name));
         }

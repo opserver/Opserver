@@ -25,12 +25,12 @@
             matchContains: true,
             delay: 100,
             formatItem: function (row) {
-                    return '<img src="http://' + getHost(row.host) + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
+                    return '<img src="//' + getHost(row.host) + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
             },
             formatResult: function (row) { return htmlEncode(row.host); },
             formatMatch: function (row) { return row.host; }
         }).result(function (e, data) {
-            $(this).css("background", 'url("http://' + getHost(data.host) + '/favicon.ico") no-repeat')
+            $(this).css("background", 'url("//' + getHost(data.host) + '/favicon.ico") no-repeat')
                     .closest("form").submit();
         }).keydown(function(e) {
             return e.keyCode != 13;
@@ -40,7 +40,7 @@
 @if (Model.Host.HasValue())
 {
 <style type="text/css">
-    #host { background: url('http://@Model.Host.Replace("api.","")/favicon.ico') 2px 2px no-repeat; }
+    #host { background: url('//@Model.Host.Replace("api.","")/favicon.ico') 2px 2px no-repeat; background-size: 16px 16px; }
 </style>
 }
 <div style="padding: 4px; width: 1200px; margin: 0 auto;">

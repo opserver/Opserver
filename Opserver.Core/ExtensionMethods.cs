@@ -7,12 +7,13 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Linq;
 
 using System.Reflection;
 using System.Threading;
-using Nest;
+using StackExchange.Elastic;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data;
@@ -98,6 +99,14 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
+        /// If this string ends in "toTrim", this will trim it once off the end
+        /// </summary>
+        public static string TrimEnd(this string s, string toTrim)
+        {
+            return s != null && toTrim != null && s.EndsWith(toTrim) ? s.Substring(0, s.Length - toTrim.Length) : s;
+        }
+
+        /// <summary>
         /// Returns the default value if given a default(T)
         /// </summary>
         public static T IfDefaultReturn<T>(this T val, T dDefault) where T: struct
@@ -158,7 +167,12 @@ namespace StackExchange.Opserver
             if (s.IsNullOrEmpty()) return s;
             if (s.Length <= maxLength) return s;
 
-            return string.Format("{0}...", Truncate(s, maxLength - 3));
+            return string.Format("{0}...", Truncate(s, Math.Max(maxLength, 3) - 3));
+        }
+
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> items)
+        {
+            return new HashSet<T>(items);
         }
 
         public static bool HasData(this Cache cache)
@@ -705,7 +719,7 @@ namespace StackExchange.Opserver
             public const string Relocating = "RELOCATING";
         }
 
-        public static MonitorStatus GetMonitorStatus(this RoutingShard shard)
+        public static MonitorStatus GetMonitorStatus(this ShardState shard)
         {
             if (shard != null)
             {
@@ -724,7 +738,7 @@ namespace StackExchange.Opserver
             return MonitorStatus.Unknown;
         }
 
-        public static string GetPrettyState(this RoutingShard shard)
+        public static string GetPrettyState(this ShardState shard)
         {
             if (shard != null)
             {
@@ -744,7 +758,7 @@ namespace StackExchange.Opserver
             
         }
 
-        public static string GetStateDescription(this RoutingShard shard)
+        public static string GetStateDescription(this ShardState shard)
         {
             if (shard != null)
             {
@@ -761,6 +775,28 @@ namespace StackExchange.Opserver
                 }
             }
             return "Unknown";
+        }
+
+        private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
+        public static string TraceDescription(this Redis.CommandTrace trace, int? truncateTo = null)
+        {
+            if (truncateTo != null && trace.Arguments.Length >= 4)
+            {
+                var match = _traceRegex.Match(trace.Arguments[3]);
+                if (match.Success)
+                {
+                    var startStr = string.Join(" ", trace.Arguments.Take(2));
+                    var message = match.Groups[1].Value.TruncateWithEllipsis(truncateTo.Value);
+                    var bytesTotal = int.Parse(match.Groups[2].Value) + message.Length;
+                    int bytesLeft = truncateTo.Value - startStr.Length;
+                    
+                    return startStr + (bytesLeft > 3
+                        ? string.Format(" {0} ({1} total)", message.TruncateWithEllipsis(bytesLeft), bytesTotal.Pluralize("byte"))
+                        : string.Format(" ({0} total)", bytesTotal.Pluralize("byte")));
+                }
+            }
+
+            return string.Join(" ", trace.Arguments);
         }
     }
 

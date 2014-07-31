@@ -26,14 +26,13 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/servers")]
-        public ActionResult Servers(string cluster, string node, string ag, bool ajax = false, bool detailOnly = false)
+        public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
         {
             var vd = new DashboardModel
                 {
                     StandaloneInstances = SQLInstance.AllStandalone,
                     Clusters = SQLCluster.AllClusters,
-                    Refresh = node.HasValue() ? 10 : 5,
-                    View = DashboardModel.Views.Servers
+                    Refresh = node.HasValue() ? 10 : 5
                 };
 
             if (cluster.HasValue())
@@ -44,32 +43,29 @@ namespace StackExchange.Opserver.Controllers
             if (detailOnly && vd.CurrentCluster != null)
                 return View("Servers.ClusterDetail", vd);
 
-            return View(ajax ? "Servers" : "Dashboard", vd);
+            return View("Servers", vd);
         }
 
-
         [Route("sql/instance")]
-        public ActionResult Instance(string node, bool ajax = false)
+        public ActionResult Instance(string node)
         {
-            var instance = SQLInstance.Get(node);
-            if (instance == null && ajax)
-                return ContentNotFound("Instance " + node + " was not found.");
+            var i = SQLInstance.Get(node);
 
             var vd = new DashboardModel
             {
+                View = SQLViews.Instance,
                 StandaloneInstances = SQLInstance.AllStandalone,
                 Refresh = node.HasValue() ? 10 : 5,
-                View = DashboardModel.Views.Instance,
-                CurrentInstance = instance
+                CurrentInstance = i
             };
-            return View(ajax ? "Instance" : "Dashboard", vd);
+            return View("Instance", vd);
         }
 
         [Route("sql/instance/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
             var i = SQLInstance.Get(node);
-            if (i == null) return ContentNotFound("Could not find instance " + node);
+            if (i == null) return NoInstanceRedirect(node);
 
             switch (type)
             {
@@ -92,29 +88,30 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/top")]
         public ActionResult Top(string node, SQLInstance.TopSearchOptions options, bool? detailed = false)
         {
+            var i = SQLInstance.Get(node);
             options.SetDefaults();
 
             var vd = new DashboardModel
-                {
-                    View = DashboardModel.Views.Top,
-                    Detailed = detailed.GetValueOrDefault(),
-                    CurrentInstance = SQLInstance.Get(node),
-                    TopSearchOptions = options
-                };
-            return View("Dashboard", vd);
+            {
+                View = SQLViews.Top,
+                Detailed = detailed.GetValueOrDefault(),
+                CurrentInstance = i,
+                TopSearchOptions = options
+            };
+            return View("Operations.Top", vd);
         }
 
         [Route("sql/top/detail")]
         public ActionResult TopDetail(string node, string handle, int? offset = null)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
-            var instance = SQLInstance.Get(node);
-            if (instance == null) return ContentNotFound("Server " + node + " not found.");
+
+            var i = SQLInstance.Get(node);
 
             var vd = new OpsTopDetailModel
                 {
-                    Instance = instance,
-                    Op = instance.GetTopOperation(planHandle, offset).Data
+                    Instance = i,
+                    Op = i.GetTopOperation(planHandle, offset).Data
                 };
             return View("Operations.Top.Detail", vd);
         }
@@ -123,8 +120,8 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult TopPlan(string node, string handle)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
-            var instance = SQLInstance.Get(node);
-            var op = instance.GetTopOperation(planHandle);
+            var i = SQLInstance.Get(node);
+            var op = i.GetTopOperation(planHandle);
             if (op.Data == null) return ContentNotFound("Plan was not found.");
 
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.Data.QueryPlan));
@@ -142,50 +139,55 @@ namespace StackExchange.Opserver.Controllers
             if (system.HasValue) options.IncludeSystemSessions = system.Value;
             if (details.HasValue) options.GetAdditionalInfo = details.Value;
 
+            var i = SQLInstance.Get(node);
+
             var vd = new DashboardModel
-                {
-                    View = DashboardModel.Views.Active,
-                    CurrentInstance = SQLInstance.Get(node),
-                    ActiveSearchOptions = options
-                };
-            return View("Dashboard", vd);
+            {
+                View = SQLViews.Active,
+                CurrentInstance = i,
+                ActiveSearchOptions = options
+            };
+            return View("Operations.Active", vd);
         }
 
         [Route("sql/connections")]
-        public ActionResult Connections(string node, bool refresh = false)
+        public ActionResult Connections(string node)
         {
-            var instance = SQLInstance.Get(node);
-            if (refresh && instance != null)
-            {
-                instance.Connections.Purge();
-            }
+            var i = SQLInstance.Get(node);
 
             var vd = new DashboardModel
             {
-                View = DashboardModel.Views.Connections,
-                CurrentInstance = instance
+                View = SQLViews.Connections,
+                CurrentInstance = i
             };
-            return View("Dashboard", vd);
+            return View(vd);
         }
 
         [Route("sql/databases")]
         public ActionResult Databases(string node)
         {
+            var i = SQLInstance.Get(node);
+
             var vd = new DashboardModel
             {
-                View = DashboardModel.Views.Databases,
-                CurrentInstance = SQLInstance.Get(node)
+                View = SQLViews.Databases,
+                CurrentInstance = i,
+                Refresh = 10*60
             };
-            return View("Dashboard", vd);
+            return View(vd);
         }
 
         [Route("sql/db/{database}/{view}")]
-        public ActionResult DatabaseDetail(string node, string database, string view)
+        [Route("sql/db/{database}/{view}/{objectName}")]
+        public ActionResult DatabaseDetail(string node, string database, string view, string objectName)
         {
+            var i = SQLInstance.Get(node);
+
             var vd = new DatabasesModel
             {
-                Instance = SQLInstance.Get(node),
-                Database = database
+                Instance = i,
+                Database = database,
+                ObjectName = objectName
             };
             switch (view)
             {
@@ -202,12 +204,21 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/databases/tables")]
         public ActionResult DatabaseTables(string node, string database)
         {
+            var i = SQLInstance.Get(node);
+
             var vd = new DatabasesModel
             {
-                Instance = SQLInstance.Get(node),
+                Instance = i,
                 Database = database
             };
             return View("Databases.Modal.Tables", vd);
+        }
+        
+        private ActionResult NoInstanceRedirect(string node)
+        {
+            if (Current.IsAjaxRequest)
+                return ContentNotFound("Instance " + node + " was not found.");
+            return View("Instance.Selector", new DashboardModel());
         }
     }
 }

@@ -27,6 +27,9 @@ namespace StackExchange.Opserver.Models
         Dashboard = 1 << 13,
         DashboardAdmin = 1 << 14,
 
+        CloudFlare = 1 << 15,
+        CloudFlareAdmin = 1 << 16,
+
         InternalRequest = 1 << 19,
 
         GlobalAdmin = 1 << 20

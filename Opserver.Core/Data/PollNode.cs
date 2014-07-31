@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using System.Threading.Tasks;
+using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data
@@ -26,7 +28,7 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Length of time to backoff once <see cref="FailsBeforeBackoff"/> is hit
         /// </summary>
-        protected TimeSpan BackoffDuration { get { return TimeSpan.FromMinutes(2); } }
+        protected virtual TimeSpan BackoffDuration { get { return TimeSpan.FromSeconds(30); } }
         
         /// <summary>
         /// Indicates if this was added to the global poller list, if false that means this is a duplicate
@@ -197,34 +199,49 @@ namespace StackExchange.Opserver.Data
                                                       Action<Exception> addExceptionData = null) where T : class
         {
             return cache =>
+            {
+                if (OpserverProfileProvider.EnablePollerProfiling)
                 {
-                    using (MiniProfiler.Current.Step(description))
+                    cache.Profiler = OpserverProfileProvider.CreateContextProfiler("Poll: " + description, cache.UniqueId);
+                }
+                using (MiniProfiler.Current.Step(description))
+                {
+                    if (CacheItemFetching != null) CacheItemFetching(this, EventArgs.Empty);
+                    try
                     {
-                        if (CacheItemFetching != null) CacheItemFetching(this, EventArgs.Empty);
-                        try
+                        using (MiniProfiler.Current.Step("Data Fetch"))
                         {
                             cache.Data = getData();
-                            cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
-                            cache.ErrorMessage = "";
-                            PollFailsInaRow = 0;
                         }
-                        catch (Exception e)
-                        {
-                            if (logExceptions)
-                            {
-                                if (addExceptionData != null)
-                                    addExceptionData(e);
-                                Current.LogException(e);
-                            }
-                            cache.LastPoll = DateTime.UtcNow;
-                            PollFailsInaRow++;
-                            cache.ErrorMessage = "Unable to fetch from " + NodeType + ": " + e.Message;
-                            if (e.InnerException != null) cache.ErrorMessage += "\n" + e.InnerException.Message;
-                        }
-                        if (CacheItemFetched != null) CacheItemFetched(this, EventArgs.Empty);
-                        CachedMonitorStatus = null;
+                        cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
+                        cache.ErrorMessage = "";
+                        PollFailsInaRow = 0;
                     }
-                };
+                    catch (Exception e)
+                    {
+                        if (logExceptions)
+                        {
+                            if (addExceptionData != null)
+                                addExceptionData(e);
+                            Current.LogException(e);
+                        }
+                        cache.LastPoll = DateTime.UtcNow;
+                        PollFailsInaRow++;
+                        cache.ErrorMessage = "Unable to fetch from " + NodeType + ": " + e.Message;
+#if DEBUG
+                        cache.ErrorMessage += " @ " + e.StackTrace;
+#endif
+
+                        if (e.InnerException != null) cache.ErrorMessage += "\n" + e.InnerException.Message;
+                    }
+                    if (CacheItemFetched != null) CacheItemFetched(this, EventArgs.Empty);
+                    CachedMonitorStatus = null;
+                }
+                if (OpserverProfileProvider.EnablePollerProfiling)
+                {
+                    OpserverProfileProvider.StopContextProfiler();
+                }
+            };
         }
 
         public void Dispose()

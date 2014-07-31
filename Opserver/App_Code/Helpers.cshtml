@@ -12,3 +12,7 @@
 {
     <a href="#" class="reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c != null ? c.UniqueId : (Guid?)null)" title="Updated @n.LastPoll.ToUniversalTime()"><span class="image"></span><span class="js-text">Poll Now</span></a>
 }
+@helper PollNow(string nodeType)
+{
+    <a href="#" class="reload-link" data-type="@nodeType" data-uk="all"><span class="image"></span><span class="js-text">Poll Now</span></a>
+}

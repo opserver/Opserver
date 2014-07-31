@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class SQLController
     {
-        [Route("sql/remove-plan", HttpVerbs.Post), OnlyAllow(Roles.SQLAdmin)]
+        [Route("sql/remove-plan"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
         public ActionResult SQLRemovePlan(string node, string handle)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Controllers
             return result != 0 ? Json(true) : JsonError("There was an error removing the plan from cache");
         }
 
-        [Route("sql/toggle-agent-job", HttpVerbs.Post), OnlyAllow(Roles.SQLAdmin)]
+        [Route("sql/toggle-agent-job"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
         public ActionResult ToggleAgentJob(string node, Guid guid, bool enable)
         {
             var instance = SQLInstance.Get(node);

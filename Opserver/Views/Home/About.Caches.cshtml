@@ -9,6 +9,10 @@
         .ThenByDescending(n => n.IsPolling)
         .ThenBy(n => n.GetType().Name)
         .ThenBy(n => n.UniqueKey).ToList();
+    if (Model.Filter.HasValue())
+    {
+        pollerNodes = pollerNodes.Where(p => p.UniqueKey.IndexOf(Model.Filter, StringComparison.InvariantCultureIgnoreCase) != -1).ToList();
+    }
 }
 @helper GetTypeDescription(Type t) {
     if (t.IsGenericType && (t.GetGenericTypeDefinition() == typeof (List<>)))
@@ -134,6 +138,7 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">@GetTypeDescri
                         <td class="@(p.IsPolling ? "good" : "note")">(@(p.IsPolling ? "active" : "idle"))</td>
                         <td>
                             <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a> 
+                            <a href="/profiler/results?id=@p.UniqueId" target="_blank">Profile</a>
                             <a href="#" class="poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey" data-id="@p.UniqueId">Poll Now</a>
                         </td>
                     </tr>

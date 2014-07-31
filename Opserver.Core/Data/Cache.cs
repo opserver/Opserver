@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data
 {
@@ -30,6 +31,11 @@ namespace StackExchange.Opserver.Data
             internal set { DataBacker = value; }
         }
         public Action<Cache<T>> UpdateCache { get; set; }
+
+        /// <summary>
+        /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
+        /// </summary>
+        public MiniProfiler Profiler { get; set; }
 
         public override int Poll(bool force = false)
         {

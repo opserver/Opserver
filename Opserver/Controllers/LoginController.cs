@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Controllers
 {
     public class LoginController : StatusController
     {
-        [Route("login", HttpVerbs.Get), AlsoAllow(Roles.Anonymous)]
+        [Route("login"), HttpGet, AlsoAllow(Roles.Anonymous)]
         public ActionResult Login(string returnUrl)
         {
             if (returnUrl == "/")
@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [ValidateInput(false)]
-        [Route("login", HttpVerbs.Post, RoutePriority.High), AlsoAllow(Roles.Anonymous)]
+        [Route("login"), HttpPost, AlsoAllow(Roles.Anonymous)]
         public ActionResult Login(string user, string pass, string url)
         {
             var vd = new LoginModel();

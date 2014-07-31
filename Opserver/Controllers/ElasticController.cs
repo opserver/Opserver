@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic")]
-        public ActionResult Dashboard(string cluster, string node, bool ajax = false)
+        public ActionResult Dashboard(string cluster, string node)
         {
             var vd = new DashboardModel
             {
@@ -26,11 +26,11 @@ namespace StackExchange.Opserver.Controllers
                 View = DashboardModel.Views.Cluster,
                 WarningsOnly = true
             };
-            return View(ajax ? "Dashboard.Cluster" : "Dashboard", vd);
+            return View("Cluster", vd);
         }
 
         [Route("elastic/node")]
-        public ActionResult Node(string cluster, string node, DashboardModel.Popups popup = DashboardModel.Popups.None, bool ajax = false)
+        public ActionResult Node(string cluster, string node, DashboardModel.Popups popup = DashboardModel.Popups.None)
         {
             var cn = GetNode(cluster, node);
             var vd = new DashboardModel
@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Controllers
                     Current = cn,
                     Popup = popup
                 };
-            return View(ajax ? "Node" : "Dashboard", vd);
+            return View("Node", vd);
         }
 
 
@@ -96,14 +96,9 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic/indices")]
-        public ActionResult Indices(string cluster, string node, string guid, bool ajax = false)
+        public ActionResult Indices(string cluster, string node, string guid)
         {
             var current = GetNode(cluster, node ?? guid);
-            if (ajax)
-            {
-                return View("Indices", current);
-            }
-
             var vd = new DashboardModel
                 {
                     Clusters = ElasticCluster.AllClusters,
@@ -111,11 +106,11 @@ namespace StackExchange.Opserver.Controllers
                     View = DashboardModel.Views.Indices,
                     Current = current
                 };
-            return View("Dashboard", vd);
+            return View("Indices", vd);
         }
 
         [Route("elastic/shards")]
-        public ActionResult Shards(string cluster, string server, bool ajax = false)
+        public ActionResult Shards(string cluster, string server)
         {
             var vd = new DashboardModel
             {
@@ -123,7 +118,7 @@ namespace StackExchange.Opserver.Controllers
                 Refresh = true,
                 View = DashboardModel.Views.Shards
             };
-            return View(ajax ? "Dashboard.Cluster.Shards" : "Dashboard", vd);
+            return View("Cluster.Shards", vd);
         }
 
         [Route("elastic/reroute/{type}")]

@@ -3,26 +3,28 @@
 @using ServerInfo = StackExchange.Opserver.Data.Dashboard.Node
 @model DashboardModel
 @{
-    var s = Model.CurrentInstance;
-    var connections = s.Connections;
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
+    var connections = i.Connections;
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
-    var monitoredList = enableDashboardLinks ? DashboardData.AllNodes.ToDictionary(si => si.Name.ToLower()) : new Dictionary<string, ServerInfo>();
+    var monitoredList = DashboardData.AllNodes.Select(si => si.Name.ToLower()).ToHashSet();
 }
 <div class="bottom-sub-section">
     <div class="node-summary redis-summary">
         @if (connections.LastPollStatus == FetchStatus.Fail)
         {
             <div class="sql-server sql-error">
-                <span class="error-label">There was an error fetching server status from @s.Name:</span>
+                <span class="error-label">There was an error fetching server status from @i.Name:</span>
                 @connections.ErrorMessage
+                @Helpers.PollNow(i, i.Connections)
             </div>
         } else {
             <div class="sql-server">
-                <h3 class="page-header">@connections.Data.Count.Pluralize("Current active connection") on @s.Name:
+                <h3 class="page-header">@connections.Data.Count.Pluralize("Current active connection") on @i.Name:
                     
-                    <a href="?node=@s.Name.UrlEncode()&refresh=true" class="reload-link">Refresh</a>
+                    <a href="?node=@i.Name.UrlEncode()&refresh=true" class="reload-link">Refresh</a>
                 </h3>
-                <table class="node-dashboard" id="connections-table">
+                <table class="striped-dashboard" id="connections-table">
                     <thead>
                         <tr>
                             <th>Login</th>
@@ -42,7 +44,7 @@
                             <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(c.PlanHandle)">
                                 <td>@c.LoginName</td>
                                 <td title="Program: @c.ProgramName (@c.HostProcessId)">
-                                    @if (enableDashboardLinks && monitoredList.ContainsKey(c.HostName.IsNullOrEmptyReturn("").ToLower()))
+                                    @if (enableDashboardLinks && monitoredList.Contains(c.HostName.IsNullOrEmptyReturn("").ToLower()))
                                     {
                                         <a href="/dashboard/node?node=@c.HostName.UrlEncode()">@c.HostName</a>
                                     }
@@ -65,21 +67,21 @@
                             <tr>
                                 <td colspan="11"><div class="none-active">There are no active operations at the moment.</div></td>
                             </tr>
-                        }    
+                        }
                     </tbody>
                 </table>
             </div>
             <script>
                 $(function() {
-                    $('#connections-table').tablesorter({
-                        headers: {
-                            1: { sorter: 'cellText' },
-                            2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                            3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                            4: { sorter: 'commas', sortInitialOrder: 'desc' },
-                            5: { sorter: 'commas', sortInitialOrder: 'desc' },
-                        }
-                    });
+                    //$('#connections-table').tablesorter({
+                    //    headers: {
+                    //        1: { sorter: 'cellText' },
+                    //        2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    //        3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    //        4: { sorter: 'commas', sortInitialOrder: 'desc' },
+                    //        5: { sorter: 'commas', sortInitialOrder: 'desc' },
+                    //    }
+                    //});
                 });
             </script>
         }

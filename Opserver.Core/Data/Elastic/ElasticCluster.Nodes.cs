@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Nest;
 using Newtonsoft.Json;
+using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -21,10 +21,9 @@ namespace StackExchange.Opserver.Data.Elastic
             public string Name { get; internal set; }
             public List<NodeInfoWrap> Nodes { get; internal set; }
 
-            public override IResponse RefreshFromConnection(ElasticClient cli)
+            public override ElasticResponse RefreshFromConnection(SearchClient cli)
             {
-                var infos = cli.NodeInfo(NodesInfo.All);
-
+                var infos = cli.GetClusterNodeInfo().Data;
                 Name = infos.ClusterName;
                 if (infos.Nodes != null)
                 {
@@ -38,31 +37,35 @@ namespace StackExchange.Opserver.Data.Elastic
                         }).OrderBy(node => node.Name).ToList();
                 }
 
-                var stats = cli.NodeStats(NodeInfoStats.All);
-                Name = stats.ClusterName;
-                if (stats.Nodes != null)
+                var rawStats = cli.GetClusterNodeStats();
+                var stats = rawStats.Data;
+                if (stats != null)
                 {
-                    foreach (var ns in stats.Nodes)
+                    Name = stats.ClusterName;
+                    if (stats.Nodes != null)
                     {
-                        var ni = Nodes.FirstOrDefault(n => n.GUID == ns.Key);
-                        if (ni != null)
+                        foreach (var ns in stats.Nodes)
                         {
-                            ni.Stats = ns.Value;
-                        }
-                        else
-                        {
-                            Nodes.Add(new NodeInfoWrap
+                            var ni = Nodes.FirstOrDefault(n => n.GUID == ns.Key);
+                            if (ni != null)
+                            {
+                                ni.Stats = ns.Value;
+                            }
+                            else
+                            {
+                                Nodes.Add(new NodeInfoWrap
                                 {
                                     GUID = ns.Key,
                                     Name = ns.Value.Name,
                                     Hostname = ns.Value.Hostname,
                                     Stats = ns.Value
                                 });
+                            }
                         }
+                        Nodes = Nodes.OrderBy(n => n.Name).ToList();
                     }
-                    Nodes = Nodes.OrderBy(n => n.Name).ToList();
                 }
-                return stats;
+                return rawStats;
             }
 
             public NodeInfoWrap Get(string nameOrGuid)

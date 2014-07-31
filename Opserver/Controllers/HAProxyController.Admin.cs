@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Controllers
             return View("HAProxy.Dashboard", vd);
         }
 
-        [Route("haproxy/admin/proxy", HttpVerbs.Post), OnlyAllow(Roles.HAProxyAdmin)]
+        [Route("haproxy/admin/proxy"), HttpPost, OnlyAllow(Roles.HAProxyAdmin)]
         public ActionResult HAProxyAdminProxy(string group, string proxy, string server, HAProxyAdmin.Action act)
         {
             var haGroup = HAProxyGroup.GetGroup(group);
@@ -38,13 +38,13 @@ namespace StackExchange.Opserver.Controllers
             return Json(HAProxyAdmin.PerformProxyAction(proxies, server, act));
         }
 
-        [Route("haproxy/admin/server", HttpVerbs.Post), OnlyAllow(Roles.HAProxyAdmin)]
+        [Route("haproxy/admin/server"), HttpPost, OnlyAllow(Roles.HAProxyAdmin)]
         public ActionResult HAProxyAdminServer(string server, HAProxyAdmin.Action act)
         {
             return Json(HAProxyAdmin.PerformServerAction(server, act));
         }
 
-        [Route("haproxy/admin/group", HttpVerbs.Post), OnlyAllow(Roles.HAProxyAdmin)]
+        [Route("haproxy/admin/group"), HttpPost, OnlyAllow(Roles.HAProxyAdmin)]
         public ActionResult HAProxyAdminGroup(string group, HAProxyAdmin.Action act)
         {
             return Json(HAProxyAdmin.PerformGroupAction(group, act));

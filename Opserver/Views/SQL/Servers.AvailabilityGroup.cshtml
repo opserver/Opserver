@@ -2,6 +2,11 @@
 @model SQLNode.AvailabilityGroupInfo
 @{
     var ag = Model;
+    if (!ag.HasDatabases)
+    {
+        // don't render empty AGs
+        return;
+    }
 }
 @helper RenderDBIssues(SQLNode.AvailabilityGroupReplicaInfo r) {
     if (r.SynchronizationHealth != SynchronizationHealths.Healthy)

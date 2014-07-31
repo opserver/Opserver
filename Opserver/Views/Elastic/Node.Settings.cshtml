@@ -1,8 +1,7 @@
-﻿@using Nest
-@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
+﻿@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
 @{
     Layout = null;
-    var settings = Model.Node != null && Model.Node.Info != null ? Model.Node.Info.Settings : new FluentDictionary<string, string>();
+    var settings = Model.Node != null && Model.Node.Info != null ? Model.Node.Info.Settings : new Dictionary<string, dynamic>();
 }
 @if (settings.Any())
 {
@@ -22,7 +21,7 @@
                     {
                         <tr>
                             <td>@s.Key</td>
-                            <td>@s.Value</td>
+                            <td>@Jil.JSON.Serialize(s.Value)</td>
                         </tr>
                     }
                 </tbody>

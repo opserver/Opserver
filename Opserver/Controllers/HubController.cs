@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("hub"), Route("headsup"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult Index(bool ajax = false)
+        public ActionResult Index()
         {
             SetMainTab(MainTab.Dashboard);
 

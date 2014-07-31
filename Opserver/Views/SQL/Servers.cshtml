@@ -3,7 +3,6 @@
 @using StackExchange.Opserver.Views.SQL
 @model DashboardModel
 @{
-    Layout = null;
     var standalone = Model.StandaloneInstances;
 }
 @helper MemoryCell(SQLInstance i) {
@@ -34,10 +33,10 @@
 }
 @if (Model.Clusters.Any())
 {
-    <table class="node-dashboard cluster-dashboard">
+    <table class="cluster-dashboard striped-dashboard">
         @foreach (var c in Model.Clusters.Where(clu => clu.Nodes.Any()))
         {
-            <tbody class="node-header" data-name="header-@c.Name">    
+            <tbody class="node-header" data-name="header-@c.Name">
                 <tr class="category-row">
                     <th colspan="12"><h3><a href="~/sql/servers#/cluster/@c.Name" class="node-name-link" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="quorum-info">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span></h3></th>
                 </tr>
@@ -60,7 +59,8 @@
                 @foreach (var n in c.Nodes)
                 {
                     var cAgs = n.AvailabilityGroups.SafeData(true);
-                    <tr class="@n.RowClass()">
+                    var isPrimary = n.IsAllAGsPrimary;
+                    <tr class="@n.RowClass()@(isPrimary ? " primary-row" : "")">
                         <td>@n.IconSpan()</td>
                         <td><a href="~/sql/instance?node=@n.Name.UrlEncode()" class="node-name-link">@n.Name</a></td>
                         <td title="Votes: @n.ClusterVotes">@n.ClusterMember.State.GetDescription()</td>
@@ -81,7 +81,7 @@
 }
 @if (standalone.Any())
 {
-    <table class="node-dashboard cluster-dashboard">
+    <table class="cluster-dashboard striped-dashboard">
         <tbody class="node-header" data-name="header-standalone">
             <tr class="category-row">
                 <th colspan="11"><h3>@standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone</h3></th>

@@ -1,87 +1,54 @@
-﻿@using System.Drawing
+﻿@using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
-    var exceptions = Model.Errors;
     var showActions = Current.User.IsExceptionAdmin;
+    var displayed = Model.Errors.Sum(e => e.DuplicateCount.GetValueOrDefault(1));
 }
-@functions {
-    public IHtmlString ErrorStyle(StackExchange.Exceptional.Error e)
-    {
-        var ageHours = (DateTime.UtcNow - e.CreationDate).TotalHours;
-        if (ageHours >= 1) return null;
-        var uncapped = Math.Sqrt(e.DuplicateCount ?? 1) / Math.Pow((ageHours + 1), 2);
-        var color = Color.FromArgb((int)(255 * Math.Min(1, uncapped)), 0, 0);
-        return ("color:" + ColorTranslator.ToHtml(color) + ";").AsHtml();
-    }
+@helper HeaderLink(string text, ExceptionSorts sort)
+{
+    var sortStr = sort.ToString();
+    var linkSort = Model.Sort != sort
+        ? sortStr
+        : (sortStr.Contains("Asc")
+            ? sortStr.Replace("Asc", "Desc")
+            : sortStr.Replace("Desc", "Asc"));
+    var qs = Model.RequestQueryString;
+    qs.Set("sort", linkSort);
+    <a href="?@(qs.ToString())">@text</a>
 }
-    <table class="exceptions-dashboard" data-total-count="@Model.TotalCount" data-title="@Model.Title">
+<table class="exceptions-dashboard striped-dashboard" data-total-count="@Model.TotalCount" data-title="@Model.Title" data-displayed="@displayed">
         <thead>
             <tr class="category-row">
                 <th colspan="9">
-                    <h3><span class="exception-title">@Model.Title</span></h3>
+                    <h3>
+                        <span class="exception-title">@Model.Title</span>
+                        @if (Model.ShowClearLink)
+                        {
+                            if (Model.ClearLinkForVisibleOnly)
+                            {
+                                <a class="delete-link clear-visible-link" href="#">&nbsp;X&nbsp;- Clear visible errors</a>
+                            }
+                            else
+                            {
+                                <a class="clear-all-link" href="/exceptions/delete-all">&nbsp;X&nbsp;- Clear all non-protected errors</a>
+                            }
+                        }
+                    </h3>
                 </th>
             </tr>
-            <tr>
+            <tr class="sort-row">
                 <th class="@(showActions ? "" : "hidden")"></th>
-                <th>Time</th>
-                @if (Model.ShowAll)
-                {
-                    <th>App</th>
-                }
-                else
-                {
-                    <th>Type</th>
-                }
-                <th>Error</th>
-                <th>Url</th>
-                <th>Remote IP</th>
-                <th>Host</th>
-                <th>Server</th>
-                <th></th>
+                <th>@HeaderLink("Time", ExceptionSorts.TimeDesc)</th>
+                <th>@(Model.ShowAll ? HeaderLink("App", ExceptionSorts.AppAsc) : HeaderLink("Type", ExceptionSorts.TypeAsc))</th>
+                <th>@HeaderLink("Error", ExceptionSorts.MessageAsc)</th>
+                <th>@HeaderLink("Url", ExceptionSorts.UrlAsc)</th>
+                <th>@HeaderLink("Remote IP", ExceptionSorts.IPAddressAsc)</th>
+                <th>@HeaderLink("Host", ExceptionSorts.HostAsc)</th>
+                <th>@HeaderLink("Server", ExceptionSorts.MachineNameAsc)</th>
+                <th>@HeaderLink("Count", ExceptionSorts.CountDesc)</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var e in exceptions)
-            {
-                var errorStyle = ErrorStyle(e);
-            <tr class="error@(e.IsProtected ? " protected" : "")@(e.DeletionDate.HasValue ? " deleted" : "")" data-id="@e.GUID" data-log="@e.ApplicationName">
-                <td class="actions@(showActions ? "" : " hidden")">
-                    <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="delete-link" href="/exceptions/delete">&nbsp;X&nbsp;</a>
-                    @if (e.DeletionDate.HasValue)
-                    {
-                    <a title="Undelete and protect this error" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
-                    }
-                    else if (!e.IsProtected)
-                    {
-                    <a title="Protect this error from automatic deletion" class="protect-link" href="/exceptions/protect">&nbsp;P&nbsp;</a>
-                    }
-                    else
-                    {
-                    <span title="This error is protected" class="protected">&nbsp;O&nbsp;</span>
-                    }
-                </td>
-                <td style="@errorStyle" data-val="@e.CreationDate.ToEpochTime()">@e.CreationDate.ToRelativeTimeSpan()</td>
-                @if (Model.ShowAll)
-                {
-                    <td title="@e.Type"><a class="note" href="/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a></td>
-                }
-                else
-                {
-                    <td class="note" title="@e.Type">@e.Type.Split(StringSplits.Period_Plus).Last()</td>
-                }
-                <td class="text-cell exception-cell">
-                    <div class="overflow-cap-500">
-                        <a class="exception-link@(e.Message.StartsWith("Failed to retrieve error log:") ? " bad-error" : "")" href="/exceptions/detail?id=@e.GUID&app=@e.ApplicationName.UrlEncode()">@(Model.TruncateErrors ? e.Message.TruncateWithEllipsis(110) : e.Message)</a>
-                    </div>
-                </td>
-                <td class="text-cell" title="@e.Url">
-                    <div class="overflow-cap-150">@e.Url.TruncateWithEllipsis(40)</div>
-                </td>
-                <td>@e.IPAddress</td>
-                <td>@e.Host</td>
-                <td style="@errorStyle">@e.MachineName.ToLower()</td>
-                <td style="@errorStyle" data-count="@e.DuplicateCount">@Html.Raw(e.DuplicateCount > 1 ? "(" + (e.DuplicateCount) + "&times;)" : "")</td>
-            </tr>
-            }                
+            @Html.Partial("Exceptions.Table.Rows", Model)
         </tbody>
     </table>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -92,21 +93,25 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         private List<Proxy> FetchHAProxyStats()
         {
-            string csv;
-            var req = (HttpWebRequest)WebRequest.Create(Url + ";csv");
-            req.Credentials = new NetworkCredential(User, Password);
-            if (QueryTimeoutMs.HasValue)
-                req.Timeout = QueryTimeoutMs.Value;
-            using (var resp = req.GetResponse())
-            using (var rs = resp.GetResponseStream())
+            var fetchUrl = Url + ";csv";
+            using (MiniProfiler.Current.CustomTiming("http", fetchUrl, "GET"))
             {
-                if (rs == null) return null;
-                using (var sr = new StreamReader(rs))
+                string csv;
+                var req = (HttpWebRequest) WebRequest.Create(fetchUrl);
+                req.Credentials = new NetworkCredential(User, Password);
+                if (QueryTimeoutMs.HasValue)
+                    req.Timeout = QueryTimeoutMs.Value;
+                using (var resp = req.GetResponse())
+                using (var rs = resp.GetResponseStream())
                 {
-                    csv = sr.ReadToEnd();
+                    if (rs == null) return null;
+                    using (var sr = new StreamReader(rs))
+                    {
+                        csv = sr.ReadToEnd();
+                    }
                 }
+                return ParseHAProxyStats(csv);
             }
-            return ParseHAProxyStats(csv);
         }
 
         private List<Proxy> ParseHAProxyStats(string input)

@@ -34,6 +34,14 @@ namespace StackExchange.Opserver
         {
             get { return Context.Request; }
         }
+        
+        /// <summary>
+        /// Is the current request ajax? Determined by checking the X-Requested-With header
+        /// </summary>
+        public static bool IsAjaxRequest
+        {
+            get { return Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest"; }
+        }
 
         /// <summary>
         /// Whether to render chart images at double resolution or not

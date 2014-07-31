@@ -6,6 +6,7 @@ namespace StackExchange.Opserver.Views.SQL
     {
         public SQLInstance Instance { get; set; }
         public string Database { get; set; }
+        public string ObjectName { get; set; }
         public Views View { get; set; }
 
         // TODO: Remove for extensibility

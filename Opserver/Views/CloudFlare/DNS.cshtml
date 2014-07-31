@@ -1,0 +1,118 @@
+﻿@using StackExchange.Opserver.Data.CloudFlare
+@using StackExchange.Opserver.Views.CloudFlare
+@model DashboardModel
+@{
+    var zCache = API.Instance.Zones;
+    var records = API.Instance.DNSRecords.SafeData(true);
+    var zones = zCache.SafeData(true);
+    var dcs = DataCenters.All;
+    var showDCs = dcs.Any();
+    var hiddenRecordTypes = new List<string> {"TXT"};
+}
+<style>
+     .cloudflare-tabular table {
+         width: 1024px;
+         margin: 10px auto;
+     }
+</style>
+<div class="cloudflare-tabular">
+    <table class="striped-dashboard">
+        <thead>
+            <tr>
+                <th colspan="@(@dcs.Count + 3)">
+                    <div>
+                        <h3>
+                            CloudFlare DNS
+                            @Helpers.PollNow(API.Instance)
+                        </h3>
+                    </div>
+                </th>
+            </tr>
+            <tr>
+                <th>Zone</th>
+                <th>DNS Servers</th>
+                @if (showDCs)
+                {
+                    foreach (var dc in dcs)
+                    {
+                        <th>@dc.Key</th>
+                    }
+                }
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var z in zones)
+            {
+                <tr>
+                    <td>@(z.IsGood ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan()) <b>@z.ZoneName</b></td>
+                    <td>
+                        @if (z.NameServerVanityMap != null && z.NameServerVanityMap.Count > 0)
+                        {
+                            @:@string.Join(", ", z.NameServerVanityMap.Keys)
+                        }
+                        else if (z.DNSServers != null)
+                        {
+                            @:@string.Join(", ", z.DNSServers)
+                        }
+                    </td>
+                    @if (showDCs)
+                    {
+                        foreach (var dc in dcs)
+                        {
+                            var count = z.DNSRecords.Where(r => r.IPAddress != IPAddress.None).Count(r => dc.Value.Any(ipnet => ipnet.Contains(r.IPAddress)));
+                            <td>@count.ToComma()</td>
+                        }
+                    }
+                    <td>@z.DNSRecords.Count</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <table class="striped-dashboard">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Value</th>
+                <th>TTL</th>
+                <th title="Is this domain being provied through CloudFlare?">CF</th>
+                <th>Data Centers</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var r in records.OrderBy(r => r.Type).ThenBy(r => r.ZoneName).ThenBy(r => r.FullyQualified))
+            {
+                if (hiddenRecordTypes.Contains(r.Type))
+                {
+                    continue;
+                }
+                var rootIPs = r.RootIPAddresses;
+                var servedDCs = rootIPs != null ? dcs.Where(dc => dc.Value.Any(range => rootIPs.Any(range.Contains))).ToList() : null;
+                var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
+                <tr>
+                    <td class="@(r.Type == "CNAME" ? "warning" : "bold")">@r.Type</td>
+                    <td><b>@r.DisplayName</b>@if (r.DisplayName != r.ZoneName){<span class="note">.@r.ZoneName</span>}</td>
+                    <td>
+                        @r.Content
+                        @if (r.Type == "CNAME" && rootIPs != null && rootIPs.Any())
+                        {
+                            <span class="note">(@string.Join(", ", rootIPs))</span>
+                        }
+                    </td>
+                    <td>@(r.AutoTTL ? "Auto" : r.TTL)</td>
+                    <td>@(r.IsCloudOn ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan())</td>
+                    <td class="@(r.IsCloudOn ? "all-good" : "")">
+                        @recordDCs
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script>
+        $(function() {
+            $('.striped-dashboard').tablesorter();
+        });
+    </script>
+</div>

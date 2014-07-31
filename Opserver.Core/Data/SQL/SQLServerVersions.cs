@@ -63,6 +63,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             public static readonly Version RTM = new Version(11, 0, 2100);
             public static readonly Version SP1 = new Version(11, 0, 3000);
+            public static readonly Version SP2 = new Version(11, 0, 5058);
         }
         /// <summary>
         /// Hekaton

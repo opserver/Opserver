@@ -41,17 +41,17 @@ namespace StackExchange.Opserver.Helpers
             }
 
             string suffix;
-            if (size > OneGigaByte)
+            if (size >= OneGigaByte)
             {
                 size /= OneGigaByte;
                 suffix = "GB";
             }
-            else if (size > OneMegaByte)
+            else if (size >= OneMegaByte)
             {
                 size /= OneMegaByte;
                 suffix = "MB";
             }
-            else if (size > OneKiloByte)
+            else if (size >= OneKiloByte)
             {
                 size /= OneKiloByte;
                 suffix = "kB";

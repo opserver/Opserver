@@ -1,0 +1,15 @@
+﻿@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    Layout = null;
+    var clusters = Model.Clusters.Where(c => c.HealthStatus.Data != null && c.HealthStatus.Data.Indices.Any()).ToList();
+}
+@foreach (var c in clusters.OrderByWorst())
+{
+    @Html.Partial("Indices", new DashboardModel {
+        Current = new DashboardModel.CurrentData {
+            Cluster = c,
+            WarningsOnly = Model.WarningsOnly
+        }
+    })
+}

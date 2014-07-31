@@ -75,13 +75,14 @@ namespace StackExchange.Opserver.Controllers
             if (ni == null) return JsonNotFound();
 
             var traffic = ni.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000).ToList();
+            var anyTraffic = traffic.Any();
 
             return Json(new
                 {
                     maximums = new
                         {
-                            main_in = traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)),
-                            main_out = traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0))
+                            main_in = anyTraffic ? traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)) : 0,
+                            main_out = anyTraffic ? traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0)) : 0
                         },
                     points = traffic.Select(i => new 
                         {

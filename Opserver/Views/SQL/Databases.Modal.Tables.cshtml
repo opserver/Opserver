@@ -2,7 +2,7 @@
 @using StackExchange.Opserver.Views.SQL
 @model DatabasesModel
 @{
-    Layout = @"~/Views/SQL/Databases.Modal.cshtml";
+    Layout = "Databases.Modal.cshtml";
     var s = Model.Instance;
     var tables = s.GetTableInfo(Model.Database);
 }
@@ -15,7 +15,7 @@
         </div>
     } else {
         <div>
-            <table class="node-dashboard cluster-dashboard" id="database-table">
+            <table class="cluster-dashboard striped-dashboard" id="database-table">
                 <thead>
                     <tr>
                         <th>Table</th>
@@ -29,7 +29,7 @@
                 <tbody class="node-group">
                     @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
                     {
-                        <tr data-id="@t.Id" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
+                        <tr data-id="@t.Id" data-table="@(t.SchemaName).@(t.TableName)" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
                             <td>
                                 <span class="note">@(t.SchemaName).</span><span>@t.TableName</span>
                                 @if (t.TableType == TableTypes.Heap)
@@ -39,10 +39,18 @@
                             </td>
                             <td data-val="@t.RowCount">@t.RowCount.ToComma()</td>
                             <td data-val="@t.IndexCount">@t.IndexCount.ToComma()</td>
-                            <td data-val="@t.DataTotalSpaceKB">@((t.DataTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
-                            <td data-val="@t.IndexTotalSpaceKB">@((t.IndexTotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
-                            <td data-val="@t.TotalSpaceKB">@((t.TotalSpaceKB*1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.DataTotalSpaceKB">@((t.DataTotalSpaceKB * 1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.IndexTotalSpaceKB">@((t.IndexTotalSpaceKB * 1024).ToSize().ToNoteIfNA())</td>
+                            <td data-val="@t.TotalSpaceKB">@((t.TotalSpaceKB * 1024).ToSize().ToNoteIfNA())</td>
                         </tr>
+                        if (t.SchemaName + "." + t.TableName == Model.ObjectName)
+                        {
+                            <tr class="tablesorter-childRow">
+                                <td colspan="6">
+                                    @Html.Partial("Databases.Modal.Tables.Columns", Model)
+                                </td>
+                            </tr>
+                        }
                     }
                 </tbody>
                 <tfoot>
@@ -52,9 +60,9 @@
                             <td><b>Total</b> <span class="note">(@tables.Data.Count().Pluralize("table"))</span></td>
                             <td>@(tables.Data.Sum(t => t.RowCount).ToComma())</td>
                             <td>@(tables.Data.Sum(t => t.IndexCount).ToComma())</td>
-                            <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
-                            <td>@((tables.Data.Sum(t => t.IndexTotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
-                            <td>@((tables.Data.Sum(t => t.TotalSpaceKB)*1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB) * 1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((tables.Data.Sum(t => t.IndexTotalSpaceKB) * 1024).ToSize().ToNoteIfNA())</td>
+                            <td>@((tables.Data.Sum(t => t.TotalSpaceKB) * 1024).ToSize().ToNoteIfNA())</td>
                         </tr>
                     }
                     else
@@ -67,6 +75,12 @@
             </table>
             <script>
                 $(function () {
+                    $('#database-table').on('click', 'tr', function() {
+                        var tableName = $(this).data('table');
+                        if (tableName) {
+                            window.location = '#/db/@(Model.Database)/tables/' + tableName;
+                        }
+                    });
                     $('#database-table').tablesorter({
                         headers: {
                             1: { sorter: 'dataVal', sortInitialOrder: 'desc' },

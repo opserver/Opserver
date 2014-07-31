@@ -24,10 +24,4 @@
 <div class="bottom-section">
     @Html.Partial("Exceptions.Table", Model)
     <div class="no-content@(exceptions.Any() ? " hidden" : "")">No similar exceptions in @Model.SelectedLog</div>
-    @if (log.HasValue() && exceptions.Any(er => !er.IsProtected && !er.DeletionDate.HasValue) && Current.User.IsExceptionAdmin)
-    {
-    <div class="clear-all-div">
-        <a class="delete-link clear-all-link" href="/exceptions/delete-similar">&nbsp;X&nbsp;- Clear all visible errors</a>
-    </div>
-    }
 </div>

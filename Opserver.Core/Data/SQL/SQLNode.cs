@@ -36,6 +36,11 @@ namespace StackExchange.Opserver.Data.SQL
             get { return AvailabilityGroups.HasData() && AvailabilityGroups.Data.Any(ag => ag.IsPrimaryReplica); }
         }
 
+        public bool IsAllAGsPrimary
+        {
+            get { return AvailabilityGroups.HasData() && AvailabilityGroups.Data.Where(ag => ag.HasDatabases).All(ag => ag.IsPrimaryReplica); }
+        }
+
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
             foreach (var ms in base.GetMonitorStatus())

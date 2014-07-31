@@ -51,6 +51,10 @@
         cursor: pointer;
     }
 
+    tr.sort-row th a {
+        text-align: left;
+    }
+
     th
     {
         font-weight: bold;
@@ -117,16 +121,22 @@
             .overflow-cap-150 {
                 max-width: 150px;
                 overflow: hidden;
+                -ms-text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
                 text-overflow: ellipsis;
             }
             .overflow-cap-200 {
                 max-width: 200px;
                 overflow: hidden;
+                -ms-text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
                 text-overflow: ellipsis;
             }
             .overflow-cap-500 {
                 max-width: 500px;
                 overflow: hidden;
+                -ms-text-overflow: ellipsis;
+                -o-text-overflow: ellipsis;
                 text-overflow: ellipsis;
             }
         }
@@ -234,6 +244,10 @@
     .clear-all-link, .clear-visible-link {
         color: @red;
     }
+}
+h3 .clear-all-link, h3 .clear-visible-link {
+    float: right;
+    font-size: 12px;
 }
 .clear-all-link, .clear-visible-link {
     color: @red;
