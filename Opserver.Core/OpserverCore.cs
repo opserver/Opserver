@@ -9,7 +9,7 @@ namespace StackExchange.Opserver
         {
             try
             {
-                // TODO: Move to Opserver.Core
+                ElasticException.ExceptionDataPrefix = ExtensionMethods.ExceptionLogPrefix;
                 ElasticException.ExceptionOccurred += e => Current.LogException(e);
             }
             catch { }
