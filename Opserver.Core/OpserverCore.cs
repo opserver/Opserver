@@ -10,7 +10,9 @@ namespace StackExchange.Opserver
             try
             {
                 ElasticException.ExceptionDataPrefix = ExtensionMethods.ExceptionLogPrefix;
-                ElasticException.ExceptionOccurred += e => Current.LogException(e);
+                // We're going to get errors - that's kinda the point of monitoring
+                // No need to log every one here unless for crazy debugging
+                //ElasticException.ExceptionOccurred += e => Current.LogException(e);
             }
             catch { }
         }
