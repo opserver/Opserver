@@ -43,9 +43,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
     </Reference>
-    <Reference Include="Jil, Version=1.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Jil, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Jil.1.5.0\lib\net45\Jil.dll</HintPath>
+      <HintPath>..\packages\Jil.1.7.0\lib\net45\Jil.dll</HintPath>
     </Reference>
     <Reference Include="JsonFx">
       <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
@@ -68,7 +68,7 @@
     </Reference>
     <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Elastic.0.1.25\lib\StackExchange.Elastic.dll</HintPath>
+      <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
     </Reference>
     <Reference Include="StackExchange.Exceptional, Version=1.0.0.110, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

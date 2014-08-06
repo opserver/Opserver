@@ -88,6 +88,43 @@
             before it is thrown depends on the configuration and version of Jil, as well as the object being serialized.
             </summary>
         </member>
+        <member name="T:Jil.JilDirectiveAttribute">
+            <summary>
+            Alternative to using [DataMember] and [IgnoreDataMember], for 
+            when their use isn't possible.
+            
+            When applied to an property or field, allows configuration
+            of the name (de)serialized and whether to (de)serialize at all.
+            
+            Takes precedence over [DataMember] and [IgnoreDataMember].
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor">
+            <summary>
+            Create a new JilDirectiveAttribute
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor(System.String)">
+            <summary>
+            Create a new JilDirectiveAttribute, with a name override.
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor(System.Boolean)">
+            <summary>
+            Create a new JilDirectiveAttribute, optionally ignoring the decorated member.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.Ignore">
+            <summary>
+            If true, the decorated member will not be serialized.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.Name">
+            <summary>
+            If non-null, the decorated member's name in serialization will match
+            the value of Name.
+            </summary>
+        </member>
         <member name="T:Jil.JSON">
             <summary>
             Fast JSON serializer.
