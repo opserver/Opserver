@@ -126,7 +126,7 @@ namespace StackExchange.Opserver.Data.Elastic
                     UpdateCache = UpdateFromElastic<T>()
                 };
         }
-
+        
         public Action<Cache<T>> UpdateFromElastic<T>() where T : ElasticDataObject, new()
         {
             return UpdateCacheItem(description: "Elastic Fetch: " + SettingsName + ":" + typeof(T).Name,

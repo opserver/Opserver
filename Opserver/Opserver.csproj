@@ -596,12 +596,6 @@
     <Content Include="Views\Shared\PageNotFound.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj">
-      <Project>{c58aff99-f4d9-4a83-866e-18da0a633f6b}</Project>
-      <Name>Opserver.Core</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="Views\Dashboard\Node.cshtml" />
   </ItemGroup>
   <ItemGroup>
