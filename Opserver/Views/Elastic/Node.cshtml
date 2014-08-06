@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Elastic
+﻿@using StackExchange.Elastic
+@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -293,21 +294,27 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                             </thead>
                             <tbody>
                                     @foreach (var i in indexes.OrderByWorst().ThenBy(i => { int j; return int.TryParse(i.Name, out j) ? j : 0; }).ThenBy(i => i.Name))
-                                    {                                
-                                        var indexStat = indexStats[i.Name];
+                                    {
+                                        IndexStats indexStat;
+                                        indexStats.TryGetValue(i.Name, out indexStat);
                                         <tr title="Status: @i.StringStatus
-        Shards: @i.NumberOfShards.ToComma()
-        Replicas: @i.NumberOfReplicas.ToComma()
-
-        Active: @i.ActiveShards.ToComma()
-        Active (Primary): @i.ActivePrimaryShards.ToComma()
-        Initializing: @i.InitializingShards.ToComma()
-        Relocating: @i.RelocatingShards.ToComma()
-        Unassigned: @i.UnassignedShards.ToComma()">
-                                            <td>@i.IconSpan() 
-                                                <a href="#/elastic/index/@i.Name/shards">@c.GetIndexAliasedName(i.Name)</a></td>
-                                            <td>@indexStat.Total.Search.QueryTotal.ToComma()</td>
-                                            <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="note">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas+1)</span></span></td>
+                                            shards @i.NumberOfShards.ToComma()
+                                            replicas @i.NumberOfReplicas.ToComma()
+                                            active @i.ActiveShards.ToComma()
+                                            active (primary) @i.ActivePrimaryShards.ToComma()
+                                            initializing @i.InitializingShards.ToComma()
+                                            relocating @i.RelocatingShards.ToComma()
+                                            unassigned @i.UnassignedShards.ToComma() ">
+                                            <td>@i.IconSpan() <a href="#/elastic/index/@i.Name/shards">@c.GetIndexAliasedName(i.Name)</a></td>
+                                            @if (indexStat != null)
+                                            {
+                                                <td>@indexStat.Total.Search.QueryTotal.ToComma()</td>
+                                                <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="note">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas + 1)</span></span></td>
+                                            }
+                                            else
+                                            {
+                                                <td colspan="2" class="note">(no stats)</td>
+                                            }
                                         </tr>
                                     }
                             </tbody>
