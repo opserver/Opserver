@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using Newtonsoft.Json;
 using StackExchange.Elastic;
 
@@ -33,6 +34,8 @@ namespace StackExchange.Opserver.Data.Elastic
                             Name = node.Value.Name,
                             Hostname = node.Value.Hostname,
                             VersionString = node.Value.Version,
+                            BuildString = node.Value.Build,
+                            Attributes = node.Value.Attributes,
                             Info = node.Value,
                         }).OrderBy(node => node.Name).ToList();
                 }
@@ -78,12 +81,15 @@ namespace StackExchange.Opserver.Data.Elastic
             }
         }
 
+        // TODO: Remove this wrapper now that we control the lib
         public class NodeInfoWrap : IMonitorStatus
         {
             public string GUID { get; internal set; }
             public string Name { get; internal set; }
             public string Hostname { get; internal set; }
             public string VersionString { get; internal set; }
+            public string BuildString { get; internal set; }
+            public Dictionary<string, string> Attributes { get; internal set; } 
             public NodeInfo Info { get; internal set; }
             public NodeStats Stats { get; internal set; }
             public bool IsMaster { get; internal set; }
@@ -94,6 +100,15 @@ namespace StackExchange.Opserver.Data.Elastic
             private Version _version;
             [JsonIgnore]
             public Version Version { get { return _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0")); } }
+
+            public bool IsClient { get { return GetAttribute("client") == "true"; } }
+            public bool IsDataNode { get { return GetAttribute("data") == "true"; } }
+
+            private string GetAttribute(string key)
+            {
+                string val;
+                return Attributes != null && Attributes.TryGetValue(key, out val) ? val : null;
+            }
         }
     }
 }

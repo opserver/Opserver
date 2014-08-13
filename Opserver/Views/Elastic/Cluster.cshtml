@@ -91,18 +91,20 @@
             <tbody>
                 @foreach (var n in ns.Nodes)
                 {
+                    // Don't show client nodes such as logstash inserters in this view
+                    if (n.IsClient) { continue; }
                     var shards = ss.Where(sh => sh.Node == n.GUID);
                     var upTime = DateTime.UtcNow.AddMilliseconds(-n.Stats.JVM.UptimeInMilliseconds);
                     <tr class="@n.RowClass()">
                         <td>@n.IconSpan()</td>
                         <td title="Up since @upTime.ToUniversalTime() (@upTime.ToRelativeTime())">
-                            <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-"+c.Name)</a>
+                            <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                         </td>
                         <td>@shards.Count().ToComma() (@shards.Count(s => s.Primary) primary)</td>
                         @if (n.Stats != null && n.Stats.Process != null && n.Stats.Process.CPU != null)
                         {
                             <td title="Process CPU: @n.Stats.Process.CPU.Percent.ToComma()%
-                                @if (n.Stats.OS.LoadAverage != null) { <text> load average @(string.Join(",", n.Stats.OS.LoadAverage)) </text>   } ">
+                                @if (n.Stats.OS.LoadAverage != null) { <text> load average @(string.Join(",", n.Stats.OS.LoadAverage)) </text>    } ">
                                 @((n.Stats.OS.CPU.User + n.Stats.OS.CPU.System).ToComma())%
                             </td>
                         }
