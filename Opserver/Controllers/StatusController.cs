@@ -183,15 +183,15 @@ namespace StackExchange.Opserver.Controllers
             return Json(toSerialize);
         }
 
-        protected JsonNetResult JsonError(string message)
+        protected JsonNetResult JsonError(string message, HttpStatusCode? status = null)
         {
-            Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            Response.StatusCode = (int)(status ?? HttpStatusCode.InternalServerError);
             return Json(new { ErrorMessage = message });
         }
 
-        protected JsonNetResult JsonError(object toSerialize)
+        protected JsonNetResult JsonError(object toSerialize, HttpStatusCode? status = null)
         {
-            Response.StatusCode = (int)HttpStatusCode.BadRequest;
+            Response.StatusCode = (int)(status ?? HttpStatusCode.InternalServerError);
             return Json(toSerialize);
         }
 
