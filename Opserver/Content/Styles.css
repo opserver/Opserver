@@ -1552,6 +1552,10 @@ h3 .clear-visible-link {
   padding: 0.5em;
   margin-top: 4px;
 }
+#ErrorInfo .custom-data .kv-table .value,
+.error-preview .custom-data .kv-table .value {
+  white-space: pre;
+}
 #ErrorInfo .info-delete-link,
 .error-preview .info-delete-link {
   color: #ddd;
