@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Models.Security
             return groups.Any(g =>
                                   {
                                       var members = GetGroupMembers(g);
-                                      return members != null && members.Contains(accountName);
+                                      return members != null && members.Contains(accountName, StringComparer.InvariantCultureIgnoreCase);
                                   });
         }
         
