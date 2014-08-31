@@ -70,6 +70,7 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime PlanCreationTime { get; private set; }
             public DateTime LastExecutionTime { get; private set; }
             public string QueryText { get; private set; }
+            public string FullText { get; private set; }
             public string QueryPlan { get; private set; }
             public byte[] PlanHandle { get; private set; }
             public int StatementStartOffset { get; private set; }
@@ -110,6 +111,7 @@ SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
                    WHEN -1 THEN DATALENGTH(st.text)
                    ELSE StatementEndOffset
                    END - StatementStartOffset) / 2) + 1) AS QueryText,
+        st.Text FullText,
         query_plan AS QueryPlan,
         PlanHandle,
         StatementStartOffset,

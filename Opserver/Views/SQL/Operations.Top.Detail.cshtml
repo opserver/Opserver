@@ -39,7 +39,7 @@
                 <tbody class="stats-body">
                     <tr>
                         <td class="key">Total:</td>
-                        <td class="value">@ReadableTime(op.TotalCPU/1000)</td>
+                        <td class="value">@ReadableTime(op.TotalCPU / 1000)</td>
                         <td class="key">Total:</td>
                         <td class="value">@op.TotalReads.ToComma()</td>
                         <td class="key">Total:</td>
@@ -85,8 +85,9 @@
                     </tr>
                     <tr>
                         <td colspan="2" class="key">Plan Handle:</td>
-                        <td colspan="6" class="value">0x@(op.ReadablePlanHandle) 
-                            @if(Current.User.IsSQLAdmin)
+                        <td colspan="6" class="value">
+                            0x@(op.ReadablePlanHandle)
+                            @if (Current.User.IsSQLAdmin)
                             {
                                 <span class="handle-link">(<a href="/sql/remove-plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)">remove plan</a>)</span>
                             }
@@ -109,13 +110,20 @@
                 <div class="sql-bottom-active" style="overflow-x: auto;">
                     <div class="sql-query">
                         <div>
-                            @{ var textPos = 0; }
-    @foreach (var statement in plan.Statements)
-    {
-        <pre class="sql-block sql-preview-block prettyprint lang-sql@(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
-    @statement.StatementTextWithoutInitialParams</pre>
-        textPos += statement.StatementText.Length * 2;
-    }
+                            @{
+                                var truncated = plan.Statements.Any(st => st.StatementText != null && st.StatementText.Length > 3998);
+                                var textPos = 0;
+                            }
+                            @foreach (var statement in plan.Statements)
+                            {
+                                <pre class="sql-block sql-preview-block prettyprint lang-sql@(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
+@if(!truncated){@statement.StatementTextWithoutInitialParams}</pre>
+                                textPos += statement.StatementText.Length * 2;
+                            }
+                            @if (truncated)
+                            {
+                                <pre class="sql-block sql-preview-block prettyprint lang-sql">@op.FullText</pre>
+                            }
                         </div>
                     </div>
                     <div class="sql-query-details">
@@ -123,10 +131,11 @@
                             @foreach (var statement in plan.Statements)
                             {
                                 var ss = statement as StmtSimpleType;
-                                if (statement.IsMinor) {continue;}
+                                if (statement.IsMinor) { continue; }
                                 var excerpt = statement.StatementTextWithoutInitialParamsTrimmed;
                                 <div class="sql-statement">
-                                    <div class="sql-query-header" title="Type: @statement.StatementType">Statement
+                                    <div class="sql-query-header" title="Type: @statement.StatementType">
+                                        Statement
                                         @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
                                         {
                                             <span class="note">
@@ -168,17 +177,17 @@
                                         {
                                             if (ss.QueryPlan.NonParallelPlanReason.HasValue())
                                             {
-                                            <div>
-                                                <div class="key">Non-Parallel Because:</div>
-                                                <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
-                                            </div>
+                                                <div>
+                                                    <div class="key">Non-Parallel Because:</div>
+                                                    <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
+                                                </div>
                                             }
-                                            if (ss.QueryPlan.DegreeOfParallelismSpecified) 
+                                            if (ss.QueryPlan.DegreeOfParallelismSpecified)
                                             {
-                                            <div>
-                                                <div class="key">Parallelism:</div>
-                                                <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
-                                            </div>
+                                                <div>
+                                                    <div class="key">Parallelism:</div>
+                                                    <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
+                                                </div>
                                             }
                                         }
                                         @if (statement.StatementEstRowsSpecified)
@@ -188,13 +197,13 @@
                                                 <div class="value">@statement.StatementEstRows</div>
                                             </div>
                                         }
-    @*                                    @if (ss != null && ss.QueryPlan != null)
-                                        {
-                                            <div>
-                                                <div class="key">Plan Size</div>
-                                                <div class="value">@ss.QueryPlan.CachedPlanSize B <span class="note">(@(statement.RetrievedFromCache == "true" ? "from cache" : "not cached"))</span></div>
-                                            </div>
-                                        }*@
+                                        @*                                    @if (ss != null && ss.QueryPlan != null)
+                                            {
+                                                <div>
+                                                    <div class="key">Plan Size</div>
+                                                    <div class="value">@ss.QueryPlan.CachedPlanSize B <span class="note">(@(statement.RetrievedFromCache == "true" ? "from cache" : "not cached"))</span></div>
+                                                </div>
+                                            }*@
                                     </div>
                                     @if (ss != null && ss.QueryPlan != null)
                                     {
