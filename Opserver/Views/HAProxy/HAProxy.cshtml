@@ -32,7 +32,7 @@
 @if (Model.IsInstanceFilterable)
 {
     var allProxies = HAProxyGroup.GetAllProxies();
-    <div class="node-cagtegory-list top-section" style="padding-top: 8px;">
+    <div class="node-category-list top-section" style="padding-top: 8px;">
         <ul class="top-server-list">
             <li>Instances: </li>
             @{ var ac = Model.SelectedGroup == null ? @" class=""selected""" : ""; }

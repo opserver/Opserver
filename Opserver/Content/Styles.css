@@ -1,4 +1,4 @@
-﻿/* Resets */
+/* Resets */
 html,
 body,
 div,
@@ -759,38 +759,38 @@ tr.primary-row td .node-name-link {
   padding: 0;
   margin: 0;
 }
-.node-cagtegory-list .filters-wrap {
+.node-category-list .filters-wrap {
   margin-top: -19px;
   margin-right: 8px;
 }
-.node-cagtegory-list .search-text {
+.node-category-list .search-text {
   color: #DDD;
 }
-.node-cagtegory-list ul {
+.node-category-list ul {
   overflow: hidden;
   list-style: none;
 }
-.node-cagtegory-list ul li {
+.node-category-list ul li {
   float: left;
   border-right: solid 1px #dddddd;
   padding: 0 5px;
 }
-.node-cagtegory-list ul li:first-child,
-.node-cagtegory-list ul li:last-child,
-.node-cagtegory-list ul li.last-child,
-.node-cagtegory-list ul li.ddl,
-.node-cagtegory-list ul li.down {
+.node-category-list ul li:first-child,
+.node-category-list ul li:last-child,
+.node-category-list ul li.last-child,
+.node-category-list ul li.ddl,
+.node-category-list ul li.down {
   border-right: 0;
 }
-.node-cagtegory-list ul li a {
+.node-category-list ul li a {
   color: #3d85b0;
   text-decoration: none;
 }
-.node-cagtegory-list ul li a:hover {
+.node-category-list ul li a:hover {
   text-decoration: underline;
 }
-.node-cagtegory-list .refresh-link,
-.node-cagtegory-list .refresh-link:visited {
+.node-category-list .refresh-link,
+.node-category-list .refresh-link:visited {
   float: right;
   color: #444;
   position: absolute;
@@ -3670,4 +3670,3 @@ li.L9 {
   top: 92px;
   right: 12px;
 }
-/*# sourceMappingURL=Styles.css.map */
