@@ -189,13 +189,19 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
         {
             try
             {
+                var excludeSearchText = searchText.StartsWith("-");
+                if (excludeSearchText)
+                {
+                    searchText = searchText.Substring(1);
+                }
+
                 using (MiniProfiler.Current.Step("FindErrors() for " + Name))
                 using (var c = GetConnection())
                 {
                     var result = c.Query<Error>(@"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
-     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
+     Where (" + (excludeSearchText ? @"Message Not Like @search And Detail Not Like @search And Url Not Like @search" : @"Message Like @search Or Detail Like @search Or Url Like @search") + @")" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
      Order By CreationDate Desc", new { search = '%' + searchText + '%', appName, max }, commandTimeout: QueryTimeout).ToList();
                     return result;
                 }
