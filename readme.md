@@ -43,7 +43,7 @@ You can browse to /about to review which monitors have been enabled.
 Open Source Projects in Use
 ---------
 [BookSleeve](https://code.google.com/p/booksleeve/) by Marc Gravell  
-[Dapper](https://github.com/SamSaffron/dapper-dot-net) by Stack Exchange  
+[Dapper](https://github.com/StackExchange/dapper-dot-net/) by Stack Exchange  
 [JSON.Net](http://james.newtonking.com/json) by James Newton-King     
 [MiniProfiler](http://miniprofiler.com/) by Stack Exchange  
 [NEST](https://github.com/Mpdreamz/NEST) by Martijn Laarman  
