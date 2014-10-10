@@ -134,6 +134,13 @@
     <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Volumes.cs">
       <DependentUpon>OrionDataProvider.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.cs" />
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Data.cs">
+      <DependentUpon>WmiDataProvider.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Polling.cs">
+      <DependentUpon>WmiDataProvider.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\DataProvider.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
@@ -325,6 +332,7 @@
     <Compile Include="Data\SQL\SQLNode.TCPListeners.cs">
       <DependentUpon>SQLNode.cs</DependentUpon>
     </Compile>
+    <Compile Include="Monitoring\Wmi.cs" />
     <Compile Include="OpserverCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\DashboardSettings.cs" />
@@ -342,6 +350,7 @@
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
+    <Compile Include="Settings\WmiProviderSettings.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>
   <ItemGroup>
