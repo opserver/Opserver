@@ -22,7 +22,7 @@
         $(function () { Status.Exceptions.init({ refresh: 120, log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
-<div class="node-cagtegory-list top-section">
+<div class="node-category-list top-section">
     <ul class="top-server-list">
         <li>Exception Logs: </li>
         @{ var ac = Model.ShowAll ? @" class=""selected""" : ""; }

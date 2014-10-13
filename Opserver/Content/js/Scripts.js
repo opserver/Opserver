@@ -420,7 +420,7 @@ Status.Dashboard = (function () {
             applyFilter(this.value);
         });
         if (Status.Dashboard.options.filter)
-            $('.node-cagtegory-list .filter-box input').keyup();
+            $('.node-category-list .filter-box input').keyup();
     }
 
     return {
@@ -591,7 +591,7 @@ Status.NodeSearch = (function () {
         $('.server-search').on('click', '.js-show-all-down', function () {
             $(this).siblings('.hidden').removeClass('hidden').end().remove();
         });
-        $('.node-cagtegory-list').on('click', '.filters-current', function (e) {
+        $('.node-category-list').on('click', '.filters-current', function (e) {
             if (e.target.tagName != 'INPUT') $('.filters, .filters-toggle').toggle();
         }).on('keyup', '.filter-form', function (e) {
             if (e.keyCode === 13) {
@@ -1173,8 +1173,8 @@ Status.HAProxy = (function () {
                     var proxies = $('.proxies-wrap, .dashboard-wrap', html);
                     $('.proxies-wrap, .dashboard-wrap').replaceWith(proxies);
                     refreshLink.detach();
-                    var header = $('.node-cagtegory-list.top-section', html);
-                    $('.node-cagtegory-list.top-section').replaceWith(header);
+                    var header = $('.node-category-list.top-section', html);
+                    $('.node-category-list.top-section').replaceWith(header);
                     $('.refresh-link').replaceWith(refreshLink);
                 }).fail(function (xhr) {
                     toastr.error((xhr.responseText ? 'There was an error loading: ' + xhr.responseText : 'Unknwon error refreshing') + ' at ' + new Date(),
