@@ -298,6 +298,7 @@
     <Content Include="Views\CloudFlare\_ViewStart.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml" />
     <Content Include="Views\CloudFlare\DNS.cshtml" />
+    <Content Include="Views\SQL\Instance.DBFiles.cshtml" />
     <None Include="Views\SQL\Instance.Configuration.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </None>

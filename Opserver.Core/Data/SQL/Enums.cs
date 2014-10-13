@@ -313,4 +313,25 @@ namespace StackExchange.Opserver.Data.SQL
         Serializable = 4,
         Snapshot = 5
     }
+
+    public enum DatabaseFileTypes : byte
+    {
+        Rows = 0,
+        Log = 1,
+        Reserved2 = 2,
+        Reserved3 = 3,
+        [Description("Full-text")] FullText = 4
+    }
+
+    public enum DatabaseFileStates : byte
+    {
+        Online = 0,
+        Restoring = 1,
+        Recovering = 2,
+        [Description("Recovery Pending")] RecoveryPending = 3,
+        Suspect = 4,
+        Reserved5 = 5,
+        Offline = 6,
+        Defunct = 7
+    }
 }

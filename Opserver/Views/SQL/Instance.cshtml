@@ -180,7 +180,7 @@ Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
 Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
 Avgerage Read Stall: @v.AvgReadStallMS ms
 Avgerage Write Stall: @v.AvgWriteStallMS ms">
-                        <div class="volume-label">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</div>
+                        <div class="volume-label"><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></div>
                         <div class="volume-usage">@(v.UsedBytes.ToSize()) / @v.TotalBytes.ToSize() <span class="note">(@v.AvailableBytes.ToSize() free)</span></div>
                         <div class="volume-bar">
                             <div class="space-used" style="width: auto;"><div class="used good" style="width:@percentUsed%"></div></div>

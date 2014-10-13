@@ -79,6 +79,8 @@ namespace StackExchange.Opserver.Controllers
                     return View("Instance.Memory", i);
                 case "jobs":
                     return View("Instance.Jobs", i);
+                case "db-files":
+                    return View("Instance.DBFiles", i);
                 default:
                     return ContentNotFound("Unknown summary view requested");
             }

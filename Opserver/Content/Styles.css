@@ -1,4 +1,4 @@
-/* Resets */
+﻿/* Resets */
 html,
 body,
 div,
@@ -2732,6 +2732,12 @@ h3 .clear-visible-link {
 .cluster-dashboard .tables-row .sql-tables {
   background-color: white;
 }
+.cluster-dashboard#databases-table tr th,
+.cluster-dashboard#database-table tr th,
+.cluster-dashboard#databases-table tr td,
+.cluster-dashboard#database-table tr td {
+  cursor: pointer;
+}
 .node-selector .instance {
   display: block;
   padding: 2px 4px;
@@ -3674,3 +3680,4 @@ li.L9 {
   top: 92px;
   right: 12px;
 }
+/*# sourceMappingURL=Styles.css.map */

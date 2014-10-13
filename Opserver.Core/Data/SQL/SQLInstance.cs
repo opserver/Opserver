@@ -64,6 +64,7 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return Configuration;
                 yield return Databases;
                 yield return DatabaseBackups;
+                yield return DatabaseFiles;
                 yield return DatabaseVLFs;
                 yield return CPUHistoryLastHour;
                 yield return JobSummary;
@@ -71,6 +72,7 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return MemoryClerkSummary;
                 yield return ServerFeatures;
                 yield return TraceFlags;
+                yield return Volumes;
             }
         }
 

@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Web.UI.WebControls;
 using Dapper;
-using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -20,6 +17,12 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<SQLDatabaseBackupInfo>> DatabaseBackups
         {
             get { return _databaseBackups ?? (_databaseBackups = SqlCacheList<SQLDatabaseBackupInfo>(5 * 60)); }
+        }
+
+        private Cache<List<SQLDatabaseFileInfo>> _databaseFiles;
+        public Cache<List<SQLDatabaseFileInfo>> DatabaseFiles
+        {
+            get { return _databaseFiles ?? (_databaseFiles = SqlCacheList<SQLDatabaseFileInfo>(5 * 60)); }
         }
 
         public Cache<List<SQLDatabaseTableInfo>> GetTableInfo(string databaseName)
@@ -297,6 +300,99 @@ Select db.database_id Id,
             }
         }
 
+        public class SQLDatabaseFileInfo : ISQLVersionedObject
+        {
+            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+
+            public string VolumeId { get; internal set; }
+            public string VolumeMountPoint { get; internal set; }
+            public string LogicalVolumeName { get; internal set; }
+            public int DatabaseId { get; internal set; }
+            public string DatabaseName { get; internal set; }
+            public int FileId { get; internal set; }
+            public string FileName { get; internal set; }
+            public string PhysicalName { get; internal set; }
+            public int DataSpaceId { get; internal set; }
+            public DatabaseFileTypes FileType { get; internal set; }
+            public DatabaseFileStates FileState { get; internal set; }
+            public long FileSizePages { get; internal set; }
+            public long FileMaxSizePages { get; internal set; }
+            public long FileGrowthRaw { get; internal set; }
+            public bool FileIsPercentGrowth { get; internal set; }
+            public bool FileIsReadOnly { get; internal set; }
+            public long StallReadMs { get; internal set; }
+            public long NumReads { get; internal set; }
+            public long StallWriteMs { get; internal set; }
+            public long NumWrites { get; internal set; }
+
+            public double AvgReadStallMs { get { return StallReadMs / NumReads; } }
+            public double AvgWriteStallMs { get { return StallWriteMs / NumWrites; } }
+            public long FileSizeBytes { get { return FileSizePages*8*1024; } }
+
+            public string GrowthDescription
+            {
+                get
+                {
+                    if (FileGrowthRaw == 0) return "None";
+
+                    if (FileIsPercentGrowth) return FileGrowthRaw + "%";
+
+                    // Growth that's not percent-based is 8KB pages rounded to the nearest 64KB
+                    return (FileGrowthRaw*8*1024).ToHumanReadableSize();
+                }
+            }
+
+            public string MaxSizeDescription
+            {
+                get
+                {
+                    switch (FileMaxSizePages)
+                    {
+                        case 0:
+                            return "At Max - No Growth";
+                        case -1:
+                            return "No Limit - Disk Capacity";
+                        case 268435456:
+                            return "2 TB";
+                        default:
+                            return (FileMaxSizePages*8*1024).ToHumanReadableSize();
+                    }
+                }
+            }
+
+            internal const string FetchSQL = @"
+Select vs.volume_id VolumeId,
+       vs.volume_mount_point VolumeMountPoint, 
+       vs.logical_volume_name LogicalVolumeName,
+       mf.database_id DatabaseId,
+       DB_Name(mf.database_id) DatabaseName,
+       mf.file_id FileId,
+       mf.name FileName,
+       mf.physical_name PhysicalName,
+       mf.data_space_id DataSpaceId,
+       mf.type FileType,
+       mf.state FileState,
+       mf.size FileSizePages,
+       mf.max_size FileMaxSizePages,
+       mf.growth FileGrowthRaw,
+       mf.is_percent_growth FileIsPercentGrowth,
+       mf.is_read_only FileIsReadOnly,
+       fs.io_stall_read_ms StallReadMs,
+       fs.num_of_reads NumReads,
+       fs.io_stall_write_ms StallWriteMs,
+       fs.num_of_writes NumWrites
+  From sys.dm_io_virtual_file_stats(null, null) fs
+       Join sys.master_files mf 
+         On fs.database_id = mf.database_id
+         And fs.file_id = mf.file_id
+       Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs";
+
+            public string GetFetchSQL(Version v)
+            {
+                return FetchSQL;
+            }
+        }
+
         public class SQLDatabaseTableInfo : ISQLVersionedObject
         {
             public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
@@ -538,5 +634,6 @@ Drop Table #vlfTemp;";
                 return FetchSQL;
             }
         }
+        
     }
 }
