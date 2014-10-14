@@ -260,7 +260,7 @@
                             @CombinedStat(s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") ">
                             @(!stat.IsFrontend && stat.IsChecked ? s.Max(si => si.LastStatusChange).ToRelativeTimeMiniAll() : "") @latestStat.ToStatusSpan()
                         </td>
-                        <td title="Poll Stauts:
+                        <td title="Poll Status:
                             @CombinedStat(s, si => string.Format("{0} - {1} ({2}ms)", si.CheckStatusString, si.CheckCode, si.CheckDurationMiliseconds)) ">
                             @latestStat.CheckStatusString@(latestStat.CheckCode > 0 && latestStat.CheckCode != 200 ? " (" + latestStat.CheckCode + ")" : "")
                         </td>
