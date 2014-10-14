@@ -399,8 +399,10 @@ namespace StackExchange.Opserver.Data.HAProxy
                     return new Backend();
                 case StatusType.Server:
                     return new Server();
+                case StatusType.Socket:
+                    return new Socket();
                 default:
-                    throw new NotImplementedException("What the hell are you using sockets for?");
+                    throw new NotImplementedException("Unrecognized StatusType " + typeNum);
             }
         }
 
