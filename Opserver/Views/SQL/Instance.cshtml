@@ -70,9 +70,16 @@ else if (i.LastFetch.LastSuccess == null)
                     </tr>
                     @if (jobs.Any())
                     {
+                        var running = jobs.Count(j => j.IsRunning);
                         <tr>
                             <td>Jobs</td>
-                            <td><a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a></td>
+                            <td>
+                                <a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a>
+                                @if (running > 0)
+                                {
+                                    <span class="note">(@running running)</span>
+                                }
+                            </td>
                         </tr>
                     }
                     @if (enabledTraceFlags.Any())
