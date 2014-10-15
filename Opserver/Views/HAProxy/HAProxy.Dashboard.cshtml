@@ -237,32 +237,32 @@
                                 }
                         </td>
                         <td title="Current sessions:
-                            @CombinedStat(s, si => si.CurrentSessions.ToComma()) "><span class=" db-label">
-                            Cur:</span> @s.Sum(si => si.CurrentSessions).ToComma()
+@CombinedStat(s, si => si.CurrentSessions.ToComma()) "><span class=" db-label">
+Cur:</span> @s.Sum(si => si.CurrentSessions).ToComma()
                         </td>
                         <td title="New Sessions per second (current):
-                            @CombinedStat(s, si => si.CurrentNewSessionsPerSecond.ToComma()) "><span class=" db-label">
-                            Cur:</span> @s.Sum(si => si.CurrentNewSessionsPerSecond).ToComma()
+@CombinedStat(s, si => si.CurrentNewSessionsPerSecond.ToComma()) "><span class=" db-label">
+Cur:</span> @s.Sum(si => si.CurrentNewSessionsPerSecond).ToComma()
                         </td>
                         <td title="Max Sessions per second:
-                            @CombinedStat(s, si => si.MaxNewSessionPerSecond.ToComma()) "><span class=" db-label">
-                            Max:</span> @s.Sum(si => si.MaxNewSessionPerSecond).ToComma()
+@CombinedStat(s, si => si.MaxNewSessionPerSecond.ToComma()) "><span class=" db-label">
+Max:</span> @s.Sum(si => si.MaxNewSessionPerSecond).ToComma()
                         </td>
                         <td title="Bytes transferred in:
-                            @CombinedStat(s, si => string.Format("{0} bytes ({1})", si.BytesIn.ToComma(), si.BytesIn.ToHumanReadableSize())) "><span class=" db-label">
-                            In:</span> @s.Sum(si => si.BytesIn).ToHumanReadableSize()
+@CombinedStat(s, si => string.Format("{0} bytes ({1})", si.BytesIn.ToComma(), si.BytesIn.ToHumanReadableSize())) "><span class=" db-label">
+In:</span> @s.Sum(si => si.BytesIn).ToHumanReadableSize()
                         </td>
                         <td title="Bytes transferred out:
-                            @CombinedStat(s, si => string.Format("{0} bytes ({1})", si.BytesOut.ToComma(), si.BytesOut.ToHumanReadableSize())) "><span class=" db-label">
-                            Out:</span> @s.Sum(si => si.BytesOut).ToHumanReadableSize()
+@CombinedStat(s, si => string.Format("{0} bytes ({1})", si.BytesOut.ToComma(), si.BytesOut.ToHumanReadableSize())) "><span class=" db-label">
+Out:</span> @s.Sum(si => si.BytesOut).ToHumanReadableSize()
                         </td>
                         <td title="Status:
-                            @CombinedStat(s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") ">
-                            @(!stat.IsFrontend && stat.IsChecked ? s.Max(si => si.LastStatusChange).ToRelativeTimeMiniAll() : "") @latestStat.ToStatusSpan()
+@CombinedStat(s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") ">
+@(!stat.IsFrontend && stat.IsChecked ? s.Max(si => si.LastStatusChange).ToRelativeTimeMiniAll() : "") @latestStat.ToStatusSpan()
                         </td>
                         <td title="Poll Status:
-                            @CombinedStat(s, si => string.Format("{0} - {1} ({2}ms)", si.CheckStatusString, si.CheckCode, si.CheckDurationMiliseconds)) ">
-                            @latestStat.CheckStatusString@(latestStat.CheckCode > 0 && latestStat.CheckCode != 200 ? " (" + latestStat.CheckCode + ")" : "")
+@CombinedStat(s, si => string.Format("{0} - {1} ({2}ms)", si.CheckStatusString, si.CheckCode, si.CheckDurationMiliseconds)) ">
+@latestStat.CheckStatusString@(latestStat.CheckCode > 0 && latestStat.CheckCode != 200 ? " (" + latestStat.CheckCode + ")" : "")
                         </td>
                         <td>@g.PollDate.ToRelativeTimeSpanMini()</td>
                     </tr>
