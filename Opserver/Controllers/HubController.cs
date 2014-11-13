@@ -32,8 +32,8 @@ namespace StackExchange.Opserver.Controllers
 
             var items = new List<IMonitorStatus>();
 
-            var nodes = DashboardData.AllNodes
-                                        .Where(s => !s.IsUnwatched)
+            var nodes = DashboardData.Current.AllNodes
+                                        .Where(s => !s.IsSilenced)
                                         .Where(s => s.CPULoad >= 0 || s.MemoryUsed >= 0)
                                         .OrderByWorst(s => s.CPUMonitorStatus())
                                         .ThenByWorst(s => s.MemoryMonitorStatus())

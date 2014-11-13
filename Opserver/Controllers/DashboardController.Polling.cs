@@ -9,9 +9,9 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 1, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
         [Route("dashboard/node/poll/cpu")]
-        public ActionResult PollCPU(int? id = null, string node = null, string range = null)
+        public ActionResult PollCPU(string host = null, string range = null)
         {
-            var n = id.HasValue ? DashboardData.GetNodeById(id.Value) : DashboardData.GetNodeByName(node);
+            var n = DashboardData.Current.GetNode(host);
             if (n == null)
                 return JsonNotFound();
 

@@ -8,10 +8,10 @@
     
     this.SetPageTitle((s != null ? s.PrettyName + " " : "") + "Status");
     this.SetMainTab(MainTab.Dashboard);
-    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", Model.CurrentNode);
+    this.SetTopNodes(DashboardData.Current.AllNodes, "Dashboard", Model.CurrentNode);
     var currentRange = Range.DefaultRanges.FirstOrDefault(r => r.Text == Request.QueryString["request"]) ?? Range.DefaultRanges.First();    
-    var start = currentRange.Start.ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
+    var start = currentRange.Start.ToEpochTime(true) / 1000;
+    var end = DateTime.UtcNow.ToEpochTime(true) / 1000;
 }
 @section head {
     <script> 
@@ -30,18 +30,14 @@ else
     <div class="server-list" style="padding-top: 10px;">
         <div class="node-summary">
             <div class="server-name">
-                <span title="Status: @s.Status.GetDescription()@if(s.IsUnwatched && s.UnwatchedUntil > DateTime.UtcNow) {<text> until @s.UnwatchedUntil.ToUniversalTime()</text> }">@s.IconSpan()</span>
+                <span title="Status: @s.MonitorStatus.GetDescription()@if(s.IsSilenced) {<text> currently silenced</text> }">@s.IconSpan()</span>
                 <b>
                     @s.PrettyName
                     @if(s.IsVM)
                     {
-                        @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
+                        @:(Virtual - <a href="/dashboard/node?node=@s.VMHost&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost</a>)
                     }
                 </b>
-                @if (s.ManagementUrl.HasValue())
-                {
-                    <span class="other-link-wrap">(<a href="@s.ManagementUrl" target="_blank" class="other-link">View in @s.DataProvider.Name</a>)</span>
-                }
             </div>
             <div class="server-stats">
                 <ul class="stats-left">
@@ -54,11 +50,11 @@ else
                     }
                     <li>
                         <span class="label">Type:</span>
-                        <span class="value"><span>@s.MachineType</span></span>
+                        <span class="value"><span>@s.OS.Caption</span></span>
                     </li>
                     <li title="@s.ApplicationCPUTextSummary()">
                         <span class="label">CPU:</span> 
-                        <span class="value"><span class="total-cpu-percent">@s.CPUStatusSpan()</span> @if (s.MachineType.Contains("Windows")) { <span class="other-link-wrap">(<a href="#" class="other-link realtime-cpu">realtime</a>)</span> }</span>
+                        <span class="value"><span class="total-cpu-percent">@s.CPUStatusSpan()</span> @if (s.IsWindows) { <span class="other-link-wrap">(<a href="#" class="other-link realtime-cpu">realtime</a>)</span> }</span>
                     </li>
                     <li title="@s.ApplicationMemoryTextSummary()">
                         <span class="label">Memory:</span> 
@@ -72,42 +68,38 @@ else
                 <ul class="stats-left">
                     <li>
                         <span class="label">Last Reboot:</span> 
-                        @if (s.LastBoot == DateTime.MinValue)
+                        @if (!s.LastBoot.HasValue || s.LastBoot == DateTime.MinValue)
                         {
-                        <span class="value warning">Unknown</span>
+                            <span class="value warning">Unknown</span>
                         }
                         else
                         {
-                        <span class="value">@s.LastBoot.ToRelativeTimeSpan() 
-                            <span>(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
-                        </span>
+                            <span class="value">@s.LastBoot.ToRelativeTimeSpan() 
+                                <span>(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
+                            </span>
                         }
                     </li>
                     <li>
-                        <span class="label">Last Polled:</span>
+                        <span class="label">Last Updated:</span>
                         <span class="value">@s.LastUpdatedSpan()</span>
                     </li>
-                    @if (s.PollIntervalSeconds.HasValue)
-                    {
-                        <li>
-                            <span class="label">Poll Interval:</span> 
-                            <span class="value"><span>@s.PollInterval.Value.ToReadableString()</span></span>
-                        </li>
-                    }
                     <li>
                         <span class="label">Monitor IP:</span> 
                         <span class="value"><span title="All IPs:
-@string.Join("\n",s.IPs)">@s.Ip</span></span>
+@string.Join("\n",s.IPAddresses)">@s.IPAddresses.FirstOrDefault()</span></span>
                     </li>
                 </ul>
+                @if (s.Disks != null)
+                {
                 <ul class="stats-right volume-list">
-                    @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
+                    @foreach (var v in s.Disks.Where(d => d.Total > 0))
                     {
-                        <li title="@v.Description @string.Format("\n{0:n0}", v.Used) of @string.Format("{0:n0}", v.Size) bytes used">@v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatusClass">@v.FreeSpaceSpan()</span>
+                        <li title="@v.Description @string.Format("\n{0:n0}", v.Used) of @string.Format("{0:n0}", v.Total) bytes used">@v.PrettyDescription - (@v.PrettyUsed / @v.PrettyTotal) - <span class="@v.SpaceStatusClass">@v.FreeSpaceSpan()</span>
                             <div class="space-used"><div class="used @v.SpaceStatusClass" style="width: @(v.PercentUsed)%;"></div></div>
                         </li>
                     }
                 </ul>
+                }
             </div>
         </div>
     </div>

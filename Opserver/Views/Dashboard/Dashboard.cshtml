@@ -4,9 +4,9 @@
 @{
     this.SetPageTitle("Dashboard");
     this.SetMainTab(MainTab.Dashboard);
-    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: "/dashboard/node");
-    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
+    this.SetTopNodes(DashboardData.Current.AllNodes, "Dashboard", url: "/dashboard/node");
+    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true)/1000;
+    var end = DateTime.UtcNow.ToEpochTime(true) / 1000;
 }
 @section head {
     <script>

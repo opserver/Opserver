@@ -82,7 +82,7 @@ namespace StackExchange.Opserver.Data.Redis
             IPAddress addr;
             if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out addr))
             {
-                var nodes = DashboardData.GetNodesByIP(addr).ToList();
+                var nodes = DashboardData.Current.GetNodesByIP(addr).ToList();
                 if (nodes.Count == 1) return nodes[0].PrettyName;
             }
             //System.Net.Dns.GetHostEntry("10.7.0.46").HostName.Split(StringSplits.Period).First()

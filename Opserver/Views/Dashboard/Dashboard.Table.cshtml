@@ -17,7 +17,7 @@
         <div class="spark-no-data">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" />
+    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?host=@s.Host"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-host="@s.Host" data-title="@type" />
 }
 <div class="node-group" data-name="redis-overview">
     @if (!Model.Nodes.Any())
@@ -63,9 +63,9 @@
                 <tbody class="node-group">
                     @foreach (var n in nodes.OrderBy(n => n.PrettyName))
                     {
-                        <tr class="@n.RowClass() server-row@(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-info="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                        <tr class="@n.RowClass() server-row@(n.IsVM ? " virtual-machine" : "")@(n.IsSilenced ? " unwatched-row" : "")" data-info="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
                             <td>@n.IconSpan()</td>
-                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @n.LastSync.ToRelativeTime()"><a href="/dashboard/node?node=@n.PrettyName" class="node-name-link">@n.PrettyName</a></td>
+                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost + " " : "")Last Updated: @n.LastUpdated.ToRelativeTime()"><a href="/dashboard/node?node=@n.PrettyName" class="node-name-link">@n.PrettyName</a></td>
                             <td class="nowrap" title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
                             <td>@Graph(n, "CPU")</td>
                             <td title="@n.ApplicationMemoryTextSummary()">

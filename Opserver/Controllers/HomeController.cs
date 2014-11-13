@@ -72,7 +72,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("test")]
         public ActionResult Test(string node = null)
         {
-            var n = DashboardData.GetNodeByName(node);
+            var n = DashboardData.Current.GetNode(node);
             return View(n);
         }
     }

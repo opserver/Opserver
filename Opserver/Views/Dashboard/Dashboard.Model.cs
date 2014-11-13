@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Views.Dashboard
         private List<Node> _nodes;
         public List<Node> Nodes
         {
-            get { return _nodes ?? DashboardData.AllNodes; }
+            get { return _nodes ?? DashboardData.Current.AllNodes; }
             set { _nodes = value; }
         }
     }

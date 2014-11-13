@@ -54,8 +54,8 @@ namespace StackExchange.Opserver.Controllers
             var area = GetRouteChartArea(alt);
             if (dataPoints.Count >= 2)
             {
-                area.AxisX.Minimum= dataPoints.First().CreationDate.ToOADate();
-                area.AxisX.Maximum = dataPoints.Last().CreationDate.ToOADate();
+                area.AxisX.Minimum = dataPoints.First().CreationDate.ToEpochTime();
+                area.AxisX.Maximum = dataPoints.Last().CreationDate.ToEpochTime();
             }
 
             var hits = new Series("Total Hits")
@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var rt in dataPoints)
             {
-                hits.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), rt.Hits.GetValueOrDefault(0)));
+                hits.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), rt.Hits.GetValueOrDefault(0)));
             }
 
             chart.ChartAreas.Add(area);
@@ -86,8 +86,8 @@ namespace StackExchange.Opserver.Controllers
             var area = GetRouteChartArea(alt);
             if (dataPoints.Count >= 2)
             {
-                area.AxisX.Minimum = dataPoints.First().CreationDate.ToOADate();
-                area.AxisX.Maximum = dataPoints.Last().CreationDate.ToOADate();
+                area.AxisX.Minimum = dataPoints.First().CreationDate.ToEpochTime();
+                area.AxisX.Maximum = dataPoints.Last().CreationDate.ToEpochTime();
             }
 
             area.AxisY.StripLines.Add(new StripLine
@@ -123,12 +123,12 @@ namespace StackExchange.Opserver.Controllers
             
             foreach (var rt in dataPoints)
             {
-                tAsp.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)rt.AvgCalculatedAspNetDurationMs.GetValueOrDefault(0)));
-                tSql.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)rt.AvgSqlDurationMs.GetValueOrDefault(0)));
-                tRedis.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)rt.AvgRedisDurationMs.GetValueOrDefault(0)));
-                tHTTP.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)rt.AvgHttpDurationMs.GetValueOrDefault(0)));
-                tTagEngine.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)rt.AvgTagEngineDurationMs.GetValueOrDefault(0)));
-                tOther.Points.Add(new DataPoint(rt.CreationDate.ToOADate(), (double)(rt.AvgCalculatedOtherDurationMs.GetValueOrDefault(0))));
+                tAsp.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)rt.AvgCalculatedAspNetDurationMs.GetValueOrDefault(0)));
+                tSql.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)rt.AvgSqlDurationMs.GetValueOrDefault(0)));
+                tRedis.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)rt.AvgRedisDurationMs.GetValueOrDefault(0)));
+                tHTTP.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)rt.AvgHttpDurationMs.GetValueOrDefault(0)));
+                tTagEngine.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)rt.AvgTagEngineDurationMs.GetValueOrDefault(0)));
+                tOther.Points.Add(new DataPoint(rt.CreationDate.ToEpochTime(), (double)(rt.AvgCalculatedOtherDurationMs.GetValueOrDefault(0))));
             }
 
             chart.ChartAreas.Add(area);
@@ -192,8 +192,8 @@ namespace StackExchange.Opserver.Controllers
                     LabelStyle = { Enabled = false },
                     LineWidth = 0,
                     MajorTickMark = { Enabled = false },
-                    //Maximum = DateTime.UtcNow.ToOADate(),
-                    //Minimum = DateTime.UtcNow.AddDays(-NodeStatus.GetDaysFromView(ViewRange.Summary)).ToOADate(),
+                    //Maximum = DateTime.UtcNow.ToEpochTime(),
+                    //Minimum = DateTime.UtcNow.AddDays(-NodeStatus.GetDaysFromView(ViewRange.Summary)).ToEpochTime(),
                     MajorGrid = { Enabled = false }
                 }
             };
