@@ -136,8 +136,8 @@ namespace StackExchange.Opserver.Controllers
 
             var area = GetSparkChartArea(noLine: true);
             area.AxisY.Maximum = 100;
-            area.AxisX.Minimum = DateTime.UtcNow.AddHours(-1).ToEpochTime();
-            area.AxisX.Maximum = DateTime.UtcNow.ToEpochTime();
+            area.AxisX.Minimum = DateTime.UtcNow.AddHours(-1).ToOADate();
+            area.AxisX.Maximum = DateTime.UtcNow.ToOADate();
             var series = GetSparkSeries("PercentCPU");
             chart.Series.Add(series);
 
@@ -145,7 +145,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 foreach (var cpu in dataPoints.Data)
                 {
-                    series.Points.Add(new DataPoint(cpu.EventTime.ToEpochTime(), cpu.ProcessUtilization));
+                    series.Points.Add(new DataPoint(cpu.EventTime.ToOADate(), cpu.ProcessUtilization));
                 }
             }
             chart.ChartAreas.Add(area);
