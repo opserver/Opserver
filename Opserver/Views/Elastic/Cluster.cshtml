@@ -94,10 +94,10 @@
                     // Don't show client nodes such as logstash inserters in this view
                     if (n.IsClient) { continue; }
                     var shards = ss.Where(sh => sh.Node == n.GUID);
-                    var upTime = DateTime.UtcNow.AddMilliseconds(-n.Stats.JVM.UptimeInMilliseconds);
+                    var upTime = n.Stats != null && n.Stats.JVM != null && n.Stats.JVM.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-n.Stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
                     <tr class="@n.RowClass()">
                         <td>@n.IconSpan()</td>
-                        <td title="Up since @upTime.ToUniversalTime() (@upTime.ToRelativeTime())">
+                        <td title="Up since @(upTime.HasValue ? upTime.ToUniversalTime() + " (" + upTime.ToRelativeTime() + ")" : "(unknown)")">
                             <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                         </td>
                         <td>@shards.Count().ToComma() (@shards.Count(s => s.Primary) primary)</td>
