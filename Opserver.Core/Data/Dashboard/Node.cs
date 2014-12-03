@@ -21,6 +21,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Model { get; internal set; }
         public string ServiceTag { get; internal set; }
         public string Manufacturer { get; internal set; }
+        public string SerialNumber { get; internal set; }
 
         public DateTime? LastBoot { get; set; }
         public DateTime? LastUpdated { get; internal set; }
