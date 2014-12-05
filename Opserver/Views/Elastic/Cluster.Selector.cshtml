@@ -12,7 +12,7 @@
             if (nodeInfos == null) { continue; }
             var info = nodeInfos != null ? nodeInfos.FirstOrDefault() : null;
             <a class="instance" href="?cluster=@c.Name.UrlEncode()&guid=@c.Nodes.Data.Nodes.First().GUID">
-                @c.IconSpan() @c.Name
+                @c.IconSpan() @c.Name <span class="note">(@nodeInfos.Count())</span>
                 <span class="version">@(info != null ? info.Version.ToString() : "")</span>
             </a>
         }

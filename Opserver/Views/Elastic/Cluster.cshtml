@@ -64,7 +64,7 @@
                 <tr class="category-row">
                     <th colspan="12">
                         <h3>
-                            @hs.IconSpan() @ns.Name @c.Name
+                            @hs.IconSpan() @c.Name
                             <span class="cluster-info">
                                 (@ns.Nodes.Count.Pluralize("node"), @ss.Count().ToComma() @ss.Count().Pluralize("shard", includeNumber: false)@if (hs.InitializingShards > 0)
                                                                                                                                               {<text>, <b>@hs.InitializingShards.ToComma() initializing</b></text>}@if (hs.RelocatingShards > 0)
