@@ -14,7 +14,7 @@
         var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy);
         if (r.Databases.Count > unhealthy.Count())
         {
-            foreach (var db in unhealthy)
+            foreach (var db in unhealthy.OrderBy(u => u.DatabaseName))
             {
                 <div class="ag-db-error" title="@db.DatabaseName
 Sync: @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.GetDescription() : "Unknown")
