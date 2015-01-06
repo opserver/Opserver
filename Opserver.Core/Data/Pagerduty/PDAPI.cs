@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,16 +28,44 @@ namespace StackExchange.Opserver.Data.Pagerduty
         public override int MinSecondsBetweenPolls { get { return 3600; } }
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
+        public string APIKey 
+        {
+            get { return Settings.PDAPI; }
+        }
 
 
         public override IEnumerable<Cache> DataPollers
         {
-            get { return null; }
+            get
+            {
+                yield return OnCall;
+                yield return Incedents;
+            }
+        }
+
+        public Action<Cache<T>> GetFromPagerduty<T>(string opName, Func<PDAPI, T> getFromConnection) where T : class
+        {
+            return UpdateCacheItem("Pagerduty - API: " + opName, () => getFromConnection(this));
         }
 
         public PDAPI(PagerdutySettings settings) : base ("Pagerduty API: ")
         {
             Settings = settings;
+        }
+
+        public T GetFromPagerduty<T>(string route, NameValueCollection queryString , Func<string, T> getFromJson)
+        {
+            const string url = "https://stackoverflow.pagerduty.com/api/v1/";
+            using (var wb = new WebClient())
+            {
+                var data = new NameValueCollection();
+                data["token"] = APIKey;
+                wb.Headers.Add("Token token:", APIKey);
+                wb.QueryString = queryString;
+                var response = wb.DownloadString(url + route);
+                return getFromJson(response);
+            }
+
         }
     }
 }

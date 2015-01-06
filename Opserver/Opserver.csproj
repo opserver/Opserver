@@ -639,12 +639,12 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>56259</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://status.local</IISUrl>
+          <IISUrl>http://localstatus.com</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
-          <IISAppRootUrl>http://status.local/</IISAppRootUrl>
+          <IISAppRootUrl>http://localstatus.com/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
-          <CustomServerUrl>http://local.status.se.com</CustomServerUrl>
+          <CustomServerUrl>http://localstatus.com</CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
