@@ -12,6 +12,7 @@ namespace StackExchange.Opserver.SettingsProviders
         public string ConnectionString { get; set; }
 
         // Accessors for built-in types
+        public PagerdutySettings Pagerduty { get { return GetSettings<PagerdutySettings>(); } }
         public CloudFlareSettings CloudFlare { get { return GetSettings<CloudFlareSettings>(); } }
         public DashboardSettings Dashboard { get { return GetSettings<DashboardSettings>(); } }
         public ElasticSettings Elastic { get { return GetSettings<ElasticSettings>(); } }
