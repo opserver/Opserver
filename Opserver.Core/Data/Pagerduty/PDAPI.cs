@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Data.Pagerduty
         protected override string GetMonitorStatusReason() { return ""; }
         public string APIKey 
         {
-            get { return Settings.PDAPI; }
+            get { return Settings.APIKey; }
         }
 
 

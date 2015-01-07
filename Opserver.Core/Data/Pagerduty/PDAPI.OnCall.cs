@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Data.Pagerduty
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache =
-                        GetFromPagerduty("users/", new NameValueCollection() {{"include", "contact_methods"}},
+                        api => GetFromPagerduty("users/", new NameValueCollection() {{"include", "contact_methods"}},
                             getFromJson:
                                 response =>
                                 {
