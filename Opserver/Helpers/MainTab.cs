@@ -9,6 +9,7 @@
         Redis,
         Elastic,
         CloudFlare,
+        PagerDuty,
         HAProxy,
         None
     }

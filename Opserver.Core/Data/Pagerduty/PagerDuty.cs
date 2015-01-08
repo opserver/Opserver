@@ -8,17 +8,17 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Pagerduty
 {
-    public partial class PDAPI : PollNode
+    public partial class PagerDutyApi : PollNode
     {
-        private static PDAPI _instance;
-        public static PDAPI Instance
+        private static PagerDutyApi _instance;
+        public static PagerDutyApi Instance
         {
             get { return _instance ?? (_instance = GetInstance()); }
         }
 
-        public static PDAPI GetInstance()
+        public static PagerDutyApi GetInstance()
         {
-            var api = new PDAPI(Current.Settings.Pagerduty);
+            var api = new PagerDutyApi(Current.Settings.Pagerduty);
             api.TryAddToGlobalPollers();
             return api;
         }
@@ -38,17 +38,17 @@ namespace StackExchange.Opserver.Data.Pagerduty
         {
             get
             {
-                yield return OnCall;
-                yield return Incedents;
+                yield return PrimaryOnCall;
+                // yield return Incedents;
             }
         }
 
-        public Action<Cache<T>> GetFromPagerduty<T>(string opName, Func<PDAPI, T> getFromConnection) where T : class
+        public Action<Cache<T>> GetFromPagerduty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
         {
             return UpdateCacheItem("Pagerduty - API: " + opName, () => getFromConnection(this));
         }
 
-        public PDAPI(PagerdutySettings settings) : base ("Pagerduty API: ")
+        public PagerDutyApi(PagerdutySettings settings) : base ("Pagerduty API: ")
         {
             Settings = settings;
         }
@@ -58,8 +58,6 @@ namespace StackExchange.Opserver.Data.Pagerduty
             const string url = "https://stackoverflow.pagerduty.com/api/v1/";
             using (var wb = new WebClient())
             {
-                var data = new NameValueCollection();
-                data["token"] = APIKey;
                 wb.Headers.Add("Token token:", APIKey);
                 wb.QueryString = queryString;
                 var response = wb.DownloadString(url + route);
