@@ -3,7 +3,6 @@
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.Redis);
     this.SetPageTitle("Redis Dashboard");
     this.SetTopNodes(RedisInstance.AllInstances, "Redis Servers", Model.CurrentInstance);
 }

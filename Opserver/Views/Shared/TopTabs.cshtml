@@ -1,31 +1,18 @@
-﻿@using StackExchange.Profiling
-@using StackExchange.Opserver.Data.CloudFlare
-@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Data.Exceptions
-@using StackExchange.Opserver.Data.HAProxy
-@using StackExchange.Opserver.Data.Redis
-@using StackExchange.Opserver.Data.SQL
-@using StackExchange.Opserver.Models.Security
-@model MainTab?
+﻿@using StackExchange.Opserver.Models
+@using StackExchange.Profiling
 @{
     Layout = null;
-    var t = Model;
-    var s = Current.Settings;
-} 
-@functions{
-    string GetClass(MainTab tab, params string[] additional)
-    {
-        var result = additional.ToList();
-        if (tab == Model) result.Add("selected");
-        return result.Any() ? string.Join(" ", result) : null;
-    }
 }
-@if (t != MainTab.None)
+@if (!TopTabs.HideAll)
 {
     using (MiniProfiler.Current.Step("TopTabs"))
     {
-        <div class="top-tabs">  
-            @if (s.Dashboard.Enabled)
+        <div class="top-tabs">
+            @foreach (var tab in TopTabs.Tabs.Values)
+            {
+                @tab.Render()
+            }
+            @*@if (s.Dashboard.Enabled)
             {
                 <a class="@GetClass(MainTab.Dashboard)" href="/dashboard">Dashboard</a>
             }
@@ -58,7 +45,7 @@
             @if (s.HAProxy.Enabled && s.HAProxy.HasAccess())
             {
                 <a class="@GetClass(MainTab.HAProxy, HAProxyGroup.AllGroups.GetWorstStatus().GetDescription())" href="/haproxy">HAProxy</a>
-            }
+            }*@
         </div>
     }
 }    

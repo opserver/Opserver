@@ -5,7 +5,6 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("HAProxy");
-    this.SetMainTab(MainTab.HAProxy);
     var allGroups = HAProxyGroup.AllGroups;
     this.SetTopNodes(HAProxyGroup.AllGroups, "HAProxy Groups", Model.SelectedGroup);
 }

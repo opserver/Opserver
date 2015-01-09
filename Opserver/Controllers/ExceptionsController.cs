@@ -16,6 +16,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.Exceptions; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.Exceptions; }
+        }
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {

@@ -15,6 +15,7 @@ namespace StackExchange.Opserver.Controllers
     public partial class StatusController : Controller
     {
         protected virtual ISecurableSection SettingsSection { get { return null; } }
+        protected virtual string TopTab { get { return null; } }
 
         private IDisposable _betweenInitializeAndActionExecuting,
                             _betweenActionExecutingAndExecuted,
@@ -36,6 +37,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 _stopStep(_betweenInitializeAndActionExecuting);
                 _betweenActionExecutingAndExecuted = _startStep("OnActionExecuting");
+                TopTabs.CurrentTab = TopTab;
             }
 
             var iSettings = SettingsSection as Settings;
@@ -134,11 +136,6 @@ namespace StackExchange.Opserver.Controllers
             title = HtmlUtilities.Encode(title);
             var pageTitle = string.IsNullOrEmpty(title) ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
             ViewData[ViewDataKeys.PageTitle] = pageTitle;
-        }
-
-        public void SetMainTab(MainTab tab)
-        {
-            ViewData[ViewDataKeys.MainTab] = tab;
         }
         
         /// <summary>

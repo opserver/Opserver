@@ -5,7 +5,6 @@
 @using StackExchange.Opserver.Data.SQL
 @{
     this.SetPageTitle("About");
-    this.SetMainTab(MainTab.None);
 
     var asm = Assembly.GetAssembly(typeof(GlobalApplication));
     var rev = asm.GetName().Version.ToString(4);

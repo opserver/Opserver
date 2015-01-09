@@ -3,7 +3,6 @@
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.SQL);
     this.SetPageTitle("SQL Dashboard");
     this.SetTopNodes(SQLInstance.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? "/sql/instance" : null);
 }

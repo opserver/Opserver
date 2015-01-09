@@ -13,6 +13,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.Redis; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.Redis; }
+        }
 
         [Route("redis")]
         public ActionResult Dashboard(string node)

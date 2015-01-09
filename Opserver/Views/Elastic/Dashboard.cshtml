@@ -3,7 +3,6 @@
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.Elastic);
     this.SetPageTitle("elasticsearch Dashboard");
     this.SetTopNodes(ElasticCluster.AllClusters,
         "elastic clusters",
