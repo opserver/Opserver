@@ -6,7 +6,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.Pagerduty
+namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi : PollNode
     {
@@ -18,13 +18,13 @@ namespace StackExchange.Opserver.Data.Pagerduty
 
         public static PagerDutyApi GetInstance()
         {
-            var api = new PagerDutyApi(Current.Settings.Pagerduty);
+            var api = new PagerDutyApi(Current.Settings.PagerDuty);
             api.TryAddToGlobalPollers();
             return api;
         }
 
-        public PagerdutySettings Settings { get; internal set; }
-        public override string NodeType { get { return "PagerdutyAPI"; } }
+        public PagerDutySettings Settings { get; internal set; }
+        public override string NodeType { get { return "PagerDutyAPI"; } }
         public override int MinSecondsBetweenPolls { get { return 3600; } }
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
@@ -43,17 +43,17 @@ namespace StackExchange.Opserver.Data.Pagerduty
             }
         }
 
-        public Action<Cache<T>> GetFromPagerduty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
+        public Action<Cache<T>> GetFromPagerDuty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
         {
-            return UpdateCacheItem("Pagerduty - API: " + opName, () => getFromConnection(this));
+            return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromConnection(this));
         }
 
-        public PagerDutyApi(PagerdutySettings settings) : base ("Pagerduty API: ")
+        public PagerDutyApi(PagerDutySettings settings) : base ("PagerDuty API: ")
         {
             Settings = settings;
         }
 
-        public T GetFromPagerduty<T>(string route, NameValueCollection queryString , Func<string, T> getFromJson)
+        public T GetFromPagerDuty<T>(string route, NameValueCollection queryString , Func<string, T> getFromJson)
         {
             const string url = "https://stackoverflow.pagerduty.com/api/v1/";
             using (var wb = new WebClient())

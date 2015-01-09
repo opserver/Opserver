@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
-using StackExchange.Opserver.Data.Pagerduty;
+using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
+using StackExchange.Opserver.Views.PagerDuty;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -14,12 +15,15 @@ namespace StackExchange.Opserver.Controllers
     {
         protected override ISecurableSection SettingsSection
         {
-            get { return Current.Settings.Pagerduty; }
+            get { return Current.Settings.PagerDuty; }
         }
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
-            return View("PagerDuty");
+            var vd = new PagerDutyModel();
+            var data = PagerDutyApi.GetInstance();
+            vd.PrimaryOnCall = data.PrimaryOnCall.Data;
+            return View("PagerDuty", vd);
         }
     }
 }

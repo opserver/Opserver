@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver
 {
-    public class PagerdutySettings : Settings<PagerdutySettings>, IAfterLoadActions
+    public class PagerDutySettings : Settings<PagerDutySettings>, IAfterLoadActions
     {
         public override bool Enabled { get { return APIKey.HasValue(); } }
         public string APIKey { get; set; }

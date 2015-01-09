@@ -29,6 +29,10 @@
             {
                 <a class="@GetClass(MainTab.Dashboard)" href="/dashboard">Dashboard</a>
             }
+            @if (s.PagerDuty.Enabled)
+            {
+                <a class="@GetClass(MainTab.PagerDuty)" href="/pagerduty">PagerDuty</a>
+            }
             @if (s.SQL.Enabled && s.SQL.HasAccess())
             {
                 var status = SQLInstance.AllInstances.GetWorstStatus();

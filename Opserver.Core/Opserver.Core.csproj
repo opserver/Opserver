@@ -335,7 +335,7 @@
     <Compile Include="Settings\HAProxySettings.cs" />
     <Compile Include="Settings\HAProxySettings.Traffic.cs" />
     <Compile Include="Settings\CloudFlareSettings.cs" />
-    <Compile Include="Settings\PagerdutySettings.cs" />
+    <Compile Include="Settings\PagerDutySettings.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\PollingSettings.cs" />
     <Compile Include="Settings\SettingsProviders\SettingsProvider.cs" />
