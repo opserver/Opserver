@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache =
-                        api => GetFromPagerDuty("users/", new NameValueCollection() {{"include", "contact_methods"}},
+                        api => GetFromPagerDuty("users/on_call/", "include[]=contact_methods",
                             getFromJson:
                                 response =>
                                 {
@@ -56,6 +56,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PdPerson GetOnCall()
         {
             const string primaryScheduleId = "P7I0G4O";
+            var test = AllUsers;
             foreach (var p in AllUsers.Data)
             {
                 if (p.OnCallSchedule.Any(oc => oc.EscalationLevel == 1 && oc.Policy["id"] == primaryScheduleId))

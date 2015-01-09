@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
@@ -53,17 +55,25 @@ namespace StackExchange.Opserver.Data.PagerDuty
             Settings = settings;
         }
 
-        public T GetFromPagerDuty<T>(string route, NameValueCollection queryString , Func<string, T> getFromJson)
+        public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)
         {
             const string url = "https://stackoverflow.pagerduty.com/api/v1/";
-            using (var wb = new WebClient())
+            var fullUri = url + route + "?" + qs;
+            using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {
-                wb.Headers.Add("Token token:", APIKey);
-                wb.QueryString = queryString;
-                var response = wb.DownloadString(url + route);
-                return getFromJson(response);
+                var req = (HttpWebRequest)WebRequest.Create(fullUri);
+                req.Headers.Add("Token token: ", APIKey);
+                var test = "test";
+                using (var resp = req.GetResponse())
+                using (var rs = resp.GetResponseStream())
+                {
+                    if (rs == null) return getFromJson(null);
+                    using (var sr = new StreamReader(rs))
+                    {
+                        return getFromJson(sr.ReadToEnd());
+                    }
+                }
             }
-
         }
     }
 }
