@@ -168,7 +168,7 @@ a {
   text-decoration: none;
 }
 a.error-link {
-  color: #800000;
+  color: maroon;
 }
 a:hover {
   text-decoration: underline;
@@ -367,6 +367,11 @@ a.blue-dotted:visited:hover {
   font-size: 18px;
   color: #253849;
 }
+.summary-header {
+  padding: 4px;
+  border-bottom: solid 1px #eee;
+  margin-bottom: 4px;
+}
 .action-popup {
   display: none;
   z-index: 1;
@@ -381,12 +386,12 @@ a.blue-dotted:visited:hover {
   border-radius: 4px;
 }
 .error-label {
-  color: #800000;
+  color: maroon;
   font-weight: bold;
 }
 .error-popup {
   display: none;
-  color: #800000;
+  color: maroon;
   z-index: 1;
   cursor: pointer;
   position: absolute;
@@ -417,7 +422,7 @@ a.blue-dotted:visited:hover {
   color: #008800;
 }
 .all-bad {
-  color: #800000;
+  color: maroon;
 }
 .note,
 .disabled {
@@ -842,6 +847,10 @@ tr.primary-row td .node-name-link {
 .loading-more-spacer {
   height: 20px;
 }
+th.tablesorter-header div {
+  font-weight: bold;
+  cursor: pointer;
+}
 /* Dashboard */
 .node-dashboard,
 .striped-dashboard {
@@ -950,7 +959,7 @@ tr.primary-row td .node-name-link {
 }
 .node-dashboard .error-link,
 .striped-dashboard .error-link {
-  color: #800000;
+  color: maroon;
 }
 .node-dashboard tr.virtual-machine .node-name-link,
 .striped-dashboard tr.virtual-machine .node-name-link {
@@ -1387,7 +1396,7 @@ button[disabled]:hover {
 }
 .exceptions-dashboard .actions a,
 .exceptions-dashboard .actions span {
-  color: #800000;
+  color: maroon;
   text-decoration: none;
   display: inline-block;
   text-indent: -9999em;
@@ -1430,11 +1439,11 @@ button[disabled]:hover {
 }
 .error-bread-top .error-title {
   font-weight: bold;
-  color: #800000;
+  color: maroon;
 }
 .error-bread-top .clear-all-link,
 .error-bread-top .clear-visible-link {
-  color: #800000;
+  color: maroon;
 }
 h3 .clear-all-link,
 h3 .clear-visible-link {
@@ -1443,7 +1452,7 @@ h3 .clear-visible-link {
 }
 .clear-all-link,
 .clear-visible-link {
-  color: #800000;
+  color: maroon;
   text-decoration: none;
 }
 .clear-all-link:hover,
@@ -1534,7 +1543,7 @@ h3 .clear-visible-link {
 #ErrorInfo .error-title,
 .error-preview .error-title {
   font-weight: bold;
-  color: #800000;
+  color: maroon;
 }
 #ErrorInfo .sql-detail,
 .error-preview .sql-detail {
@@ -1543,7 +1552,7 @@ h3 .clear-visible-link {
 }
 #ErrorInfo .custom-error-label,
 .error-preview .custom-error-label {
-  color: #800000;
+  color: maroon;
   font-weight: bold;
   padding-left: 4px;
 }
@@ -1577,7 +1586,7 @@ h3 .clear-visible-link {
 }
 #ErrorInfo .error-time .similar-link .clear-all-link,
 .error-preview .error-time .similar-link .clear-all-link {
-  color: #800000;
+  color: maroon;
 }
 #ErrorInfo .side-scroll,
 .error-preview .side-scroll {
@@ -1595,7 +1604,7 @@ h3 .clear-visible-link {
 }
 #ErrorInfo .kv-title.title-error,
 .error-preview .kv-title.title-error {
-  color: #800000;
+  color: maroon;
 }
 #ErrorInfo .kv-title .hidden,
 .error-preview .kv-title .hidden {
@@ -2050,7 +2059,7 @@ h3 .clear-visible-link {
   background: #E8E8D0;
 }
 .haproxy-dashboard tr.critical-row th > div {
-  color: #800000;
+  color: maroon;
 }
 .haproxy-dashboard tr.critical-row + tr.critical-row td {
   border-top: solid 1px transparent;
@@ -2667,8 +2676,8 @@ h3 .clear-visible-link {
   padding: 1px 4px;
 }
 .sql-server .plan-row.selected td {
-  border-top: solid 1px #800000;
-  border-bottom: solid 1px #800000;
+  border-top: solid 1px maroon;
+  border-bottom: solid 1px maroon;
 }
 .sql-server .plan-row td {
   cursor: pointer;
@@ -2713,7 +2722,7 @@ h3 .clear-visible-link {
 }
 .sql-server.sql-error {
   padding: 5px;
-  color: #800000;
+  color: maroon;
 }
 .cluster-dashboard {
   width: 960px;
@@ -2905,7 +2914,7 @@ h3 .clear-visible-link {
   color: #888;
 }
 .sql-plan-detail .handle-link a {
-  color: #800000;
+  color: maroon;
 }
 .sql-plan-detail .handle-link a .loading {
   display: inline-block;
@@ -3614,7 +3623,7 @@ button.toast-close-button {
     color: #660066;
   }
   .fun {
-    color: #ff0000;
+    color: red;
   }
 }
 @media print, projection {
