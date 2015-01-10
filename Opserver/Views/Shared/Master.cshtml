@@ -1,8 +1,7 @@
 ﻿@using System.Web.Optimization
+@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Shared
 @{
-    var mt = ViewData[ViewDataKeys.MainTab];
-    var tab = mt != null ? (MainTab)mt : MainTab.None;
     var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
 }
 <!DOCTYPE html>
@@ -15,7 +14,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     @Scripts.Render("~/scripts/plugins.js")    @Scripts.Render("~/scripts/scripts.js")    <script>
         $(function() {
-            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@tab', HeaderRefresh: 10 });
+            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', HeaderRefresh: 10 });
             @if (topNodes != null && topNodes.AllNodes != null && topNodes.AllNodes.Any())
             {
                 var serverJson = topNodes.AllNodes.Select(n => new
@@ -32,7 +31,7 @@
 </head>
     <body class="@(Current.IsMobile ? "mobile" : "")">
         <div class="top-bar">
-            @Html.Partial("~/Views/Shared/TopTabs.cshtml", tab)
+            @Html.Partial("~/Views/Shared/TopTabs.cshtml")
             <a href="/hub" class="logo"></a>
             <div class="top-nodes">
                 @if (topNodes != null)

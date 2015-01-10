@@ -2,7 +2,6 @@
 @model StackExchange.Opserver.Views.Home.AboutModel
 @{
     this.SetPageTitle("About - Caches");
-    this.SetMainTab(MainTab.None);
     var pollingInfo = PollingEngine.GetPollingStatus();
     var pollerNodes = pollingInfo.Nodes
         .OrderByWorst(n => n.DataPollers.GetWorstStatus())

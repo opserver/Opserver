@@ -18,6 +18,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.Dashboard; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.Dashboard; }
+        }
 
         [Route("headsup"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult HeadsUp()
@@ -28,8 +32,6 @@ namespace StackExchange.Opserver.Controllers
         [Route("hub"), Route("headsup"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult Index()
         {
-            SetMainTab(MainTab.Dashboard);
-
             var items = new List<IMonitorStatus>();
 
             var nodes = DashboardData.AllNodes

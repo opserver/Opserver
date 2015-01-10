@@ -3,7 +3,6 @@
 @model DashboardModel
 @{
     this.SetPageTitle("Dashboard");
-    this.SetMainTab(MainTab.Dashboard);
     this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: "/dashboard/node");
     var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
     var end = DateTime.UtcNow.ToEpochTime(true);

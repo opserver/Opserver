@@ -259,6 +259,7 @@
     <Compile Include="Helpers\PerfCounters.cs" />
     <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />
+    <Compile Include="Models\TopTabs.cs" />
     <Compile Include="SecuritySettings.cs" />
     <Compile Include="SiteSettings.cs" />
     <Compile Include="Views\CloudFlare\Dashboard.Model.cs" />
@@ -360,7 +361,6 @@
       <DependentUpon>HtmlUtilities.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\HtmlUtilities.cs" />
-    <Compile Include="Helpers\MainTab.cs" />
     <Compile Include="Helpers\Status.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\Exceptions\Exceptions.Model.cs">

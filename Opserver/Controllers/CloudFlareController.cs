@@ -13,6 +13,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.CloudFlare; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.CloudFlare; }
+        }
 
         [Route("cloudflare")]
         public ActionResult Dashboard()

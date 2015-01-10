@@ -3,7 +3,6 @@
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.CloudFlare);
     this.SetPageTitle("CloudFlare Dashboard");
     this.SetTopNodes(RailgunInstance.AllInstances,
         "Railguns",
