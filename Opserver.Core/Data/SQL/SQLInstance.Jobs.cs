@@ -121,7 +121,7 @@ Select j.job_id JobId,
        ja.run_requested_date LastRunRequestedDate,
        Coalesce(ja.start_execution_date, msdb.dbo.agent_datetime(jh.run_date, jh.run_time)) LastStartDate,
        (Case When ja.run_requested_date Is Not Null and ja.stop_execution_date Is Null 
-             Then DateDiff(Second, ja.run_requested_date, GETUTCDATE())
+             Then DateDiff(Second, ja.run_requested_date, GETDATE())
              Else jh.run_duration % 100 + ROUND((jh.run_duration % 10000)/100,0,0)*60 + ROUND((jh.run_duration%1000000)/10000,0,0)*3600
         End) LastRunDurationSeconds,
        ja.stop_execution_date LastStopDate,

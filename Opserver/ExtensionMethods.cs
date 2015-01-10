@@ -230,6 +230,8 @@ namespace StackExchange.Opserver
         }
         public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssclass, bool asPlusMinus = false, DateTime? compareTo = null)
         {
+            // TODO: Make this a setting?
+            // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo = compareTo ?? DateTime.UtcNow;
             if (string.IsNullOrEmpty(cssclass))
                 return string.Format(@"<span title=""{0:u}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)).AsHtml();
