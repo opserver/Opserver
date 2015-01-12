@@ -20,9 +20,11 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
-            var vd = new PagerDutyModel();
-            var data = PagerDutyApi.GetInstance();
-            vd.PrimaryOnCall = data.PrimaryOnCall.Data;
+            var vd = new PagerDutyModel()
+            {
+                
+                //PrimaryOnCall = tmp.PrimaryOnCall.Data
+            };
             return View("PagerDuty", vd);
         }
     }

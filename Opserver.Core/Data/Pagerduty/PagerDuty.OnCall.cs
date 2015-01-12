@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -26,7 +27,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     CacheForSeconds = 60*60,
                     UpdateCache = UpdateCacheItem(
                         description: "Pager Duty Primary On Call",
-                        getData: GetOnCall
+                        getData: GetOnCall,
+                        logExceptions: true
                         )
                 });
             }
@@ -40,14 +42,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return _allusers ?? (_allusers = new Cache<List<PdPerson>>()
                 {
                     CacheForSeconds = 60*60,
-                    UpdateCache =
-                        api => GetFromPagerDuty("users/on_call/", "include[]=contact_methods",
-                            getFromJson:
-                                response =>
-                                {
-                                    return JSON.Deserialize<PdUserResponse>(response).Users;
-
-                                })
+                    UpdateCache = UpdateCacheItem(
+                        description: "On Call info",
+                        getData: GetAllUsers,
+                        logExceptions: true
+                        )
                 });
 
             }
@@ -65,6 +64,19 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             }
             return null;
+        }
+
+        private List<PdPerson> GetAllUsers()
+        {
+            var users = GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
+                response =>
+                {
+                    Debug.WriteLine(response);
+                    var myResp = JSON.Deserialize<PdUserResponse>(response.ToString(), Options.ISO8601).Users;
+                    return myResp;
+
+                });
+            return users;
         }
 
     }
@@ -119,9 +131,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "level")]
         public int EscalationLevel { get; set; }
         [DataMember(Name = "start")]
-        public DateTime OnCallStart { get; set; }
+        public DateTime? OnCallStart { get; set; }
         [DataMember(Name = "end")]
-        public DateTime OnCallend { get; set; }
+        public DateTime? OnCallend { get; set; }
         [DataMember(Name = "escalation_policy")]
         public Dictionary<string,string> Policy { get; set; } 
     }

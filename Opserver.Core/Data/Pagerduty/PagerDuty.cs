@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -47,7 +48,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         public Action<Cache<T>> GetFromPagerDuty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
         {
-            return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromConnection(this));
+            return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromConnection(this), logExceptions:true);
         }
 
         public PagerDutyApi(PagerDutySettings settings) : base ("PagerDuty API: ")
@@ -62,8 +63,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {
                 var req = (HttpWebRequest)WebRequest.Create(fullUri);
-                req.Headers.Add("Token token: ", APIKey);
-                var test = "test";
+                req.Headers.Add("Authorization: Token token=" + APIKey);
                 using (var resp = req.GetResponse())
                 using (var rs = resp.GetResponseStream())
                 {

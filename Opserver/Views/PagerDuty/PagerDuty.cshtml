@@ -14,8 +14,7 @@
 
 
 <div class="dashboard-list">
-    @{
-        @PagerDutyApi.GetInstance().PrimaryOnCall.Data;
-    }
+   The person currently on call is: @Model.PrimaryOnCall.FullName;
+    
 </div>
 
