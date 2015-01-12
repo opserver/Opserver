@@ -15,6 +15,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.Elastic; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.Elastic; }
+        }
 
         [Route("elastic")]
         public ActionResult Dashboard(string cluster, string node)

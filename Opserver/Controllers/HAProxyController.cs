@@ -16,7 +16,12 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.HAProxy; }
         }
-        
+
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.HAProxy; }
+        }
+
         [Route("haproxy")]
         [Route("haproxy/dashboard")]
         public ActionResult HAProxyDashboard(string group, string node, string watch = null, bool norefresh = false)

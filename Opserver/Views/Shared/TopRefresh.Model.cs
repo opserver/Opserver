@@ -4,6 +4,6 @@ namespace StackExchange.Opserver.Views.Shared
 {
     public class TopRefreshModel
     {
-        public MainTab? Tab { get; set; }
+        public string Tab { get; set; }
     }
 }

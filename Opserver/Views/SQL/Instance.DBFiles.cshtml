@@ -26,18 +26,18 @@
 {
     <div class="summary-dashboard">
         <h3>
-            <a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Datanase Files
+            <a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Database Files
             <a href="/sql/db-files?node=@Model.Name" class="top-right-nav">View Detail</a>
         </h3>
         <div>
-            <div class="summary-links">
+            <div class="summary-header">
                 @foreach (var v in volumes)
                 {
                     <div class="section-wrap half-wrap volume">
                         <div class="volume-label" style="float: left;">@v.Key</div>
                         <div class="volume-usage" style="clear: none; float: right;">
-                            <div>Read: <span class="important">@(v.Sum(f => f.StallReadMs) / @v.Sum(f => f.NumReads))</span><span class="note"> ms</span></div>
-                            <div>Write: <span class="important">@(v.Sum(f => f.StallWriteMs) / @v.Sum(f => f.NumWrites))</span><span class="note"> ms</span></div>
+                            <div>Read: <span class="important">@((v.Sum(f => f.StallReadMs) / (decimal)v.Sum(f => f.NumReads)).ToString("F"))</span><span class="note"> ms</span></div>
+                            <div>Write: <span class="important">@((v.Sum(f => f.StallWriteMs) / (decimal)v.Sum(f => f.NumWrites)).ToString("F"))</span><span class="note"> ms</span></div>
                         </div>
                     </div>
                 }

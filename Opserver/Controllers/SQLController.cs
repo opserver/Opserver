@@ -18,6 +18,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.SQL; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.SQL; }
+        }
 
         [Route("sql")]
         public ActionResult Dashboard()

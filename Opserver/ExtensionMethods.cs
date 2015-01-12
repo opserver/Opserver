@@ -165,9 +165,10 @@ namespace StackExchange.Opserver
             if (lf == DateTime.MinValue)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
+            var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (cache.LastPollStatus == FetchStatus.Fail)
-                return MonitorStatus.Warning.Span(mini ? lf.ToRelativeTime() : lf.ToRelativeTimeMini(),
-                                                  string.Format("Last Poll: {0}\nError: {1}", lf.ToUniversalTime(), cache.ErrorMessage));
+                return MonitorStatus.Warning.Span(mini ? dateToUse.ToRelativeTime() : dateToUse.ToRelativeTimeMini(),
+                                                  string.Format("Last Poll: {0} ({1})\nError: {2}", lf.ToUniversalTime(), lf.ToRelativeTime(), cache.ErrorMessage));
 
             return mini ? lf.ToRelativeTimeSpanMini() : lf.ToRelativeTimeSpan();
         }
@@ -230,6 +231,8 @@ namespace StackExchange.Opserver
         }
         public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssclass, bool asPlusMinus = false, DateTime? compareTo = null)
         {
+            // TODO: Make this a setting?
+            // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo = compareTo ?? DateTime.UtcNow;
             if (string.IsNullOrEmpty(cssclass))
                 return string.Format(@"<span title=""{0:u}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)).AsHtml();
@@ -495,11 +498,6 @@ namespace StackExchange.Opserver
         public static string GetPageTitle(this WebViewPage page, string title)
         {
             return title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
-        }
-
-        public static void SetMainTab(this WebViewPage page, MainTab tab)
-        {
-            page.ViewData[ViewDataKeys.MainTab] = tab;
         }
 
         public static void SetTopSearch(this WebViewPage page,

@@ -3,6 +3,7 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Helpers;
+using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
 
 namespace StackExchange.Opserver.Controllers
@@ -14,11 +15,14 @@ namespace StackExchange.Opserver.Controllers
             get { return Current.Settings.Dashboard; }
         }
 
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.Dashboard; }
+        }
+
         [Route("dashboard")]
         public ActionResult Dashboard(string filter)
         {
-            SetMainTab(MainTab.Dashboard);
-
             var vd = new DashboardModel
                 {
                     Nodes = DashboardData.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
