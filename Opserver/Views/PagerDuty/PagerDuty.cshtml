@@ -6,8 +6,6 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
-    //this.SetTopNodes();
-    //this.SetMainTab(MainTab.PagerDuty);
 
 }
 
@@ -47,22 +45,21 @@
         <tbody class="node-header">
             <tr class="category-row">
                 <th colspan="8">
-                    <h1>All Incidents</h1>
+                    <h1>Incedents: Last 30 Days</h1>
                 </th>
             </tr>
         <tr>
+            <th>Incident Id</th>
             <th>Incident Date</th>
             <th>Status</th>
-            <th>Incident Id</th>
-
         </tr>
         @{
             foreach (var i in Model.AllIncidents)
             {
                 <tr>
+                    <td><a href="@i.IncidentUri">@i.IncidentNumber</a></td>
                     <td>@i.CreationDate</td>
                     <td>@i.IncidentStatus</td>
-                    <td><a href="@i.IncidentUri">@i.IncidentNumber</a></td>
                 </tr>
             }
         }

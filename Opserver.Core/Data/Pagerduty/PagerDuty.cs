@@ -11,20 +11,8 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi : PollNode
+    public partial class PagerDutyApi : SinglePollNode<PagerDutyApi>
     {
-        private static PagerDutyApi _instance;
-        public static PagerDutyApi Instance
-        {
-            get { return _instance ?? (_instance = GetInstance()); }
-        }
-
-        public static PagerDutyApi GetInstance()
-        {
-            var api = new PagerDutyApi(Current.Settings.PagerDuty);
-            api.TryAddToGlobalPollers();
-            return api;
-        }
 
         public PagerDutySettings Settings { get; internal set; }
         public override string NodeType { get { return "PagerDutyAPI"; } }
@@ -52,9 +40,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromConnection(this), logExceptions:true);
         }
 
-        public PagerDutyApi(PagerDutySettings settings) : base ("PagerDuty API: ")
+        public PagerDutyApi()
         {
-            Settings = settings;
+            Settings = Current.Settings.PagerDuty;
         }
 
         public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)

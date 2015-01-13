@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
-            var tmp = PagerDutyApi.GetInstance();
+            var tmp = PagerDutyApi.Instance;
             var vd = new PagerDutyModel()
             {
 

@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using StackExchange.Opserver.Data.PagerDuty;
+
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -35,25 +32,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
             var i = GetFromPagerDuty("incidents","", getFromJson:
                 response =>
                 {
-                    try
-                    {
-                        var myResp =
-                            JSON.Deserialize<PDIncidentResponce>(response.ToString(), Options.ISO8601)
-                                .PDI.OrderBy(ic => ic.CreationDate)
-                                .ToList();
-                        return myResp;
-                    }
-                    catch (DeserializationException e)
-                    {
-                        e.AddLoggedData("Jil", e.SnippetAfterError);
-                        e.AddLoggedData("Json", response);
-                        Current.LogException(e);
-                        
-                        return null;
-                    }
-                    
-                    
-
+                    var myResp =
+                        JSON.Deserialize<PDIncidentResponce>(response.ToString(), Options.ISO8601)
+                            .PDI.OrderBy(ic => ic.CreationDate)
+                            .ToList();
+                    return myResp;
                 });
             return i;
         }

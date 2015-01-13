@@ -224,6 +224,7 @@
     <Content Include="Content\Styles.css.map">
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
+    <None Include="Config\PagerDutySettings.json.example" />
     <None Include="Config\PagerDutySettings.json" />
     <None Include="Config\DashboardSettings.json" />
     <None Include="Config\SecuritySettings.config" />

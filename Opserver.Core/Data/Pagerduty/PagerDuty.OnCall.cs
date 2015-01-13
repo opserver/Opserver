@@ -1,14 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Jil;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
@@ -17,7 +11,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         
         private Cache<PdPerson> _primaryoncall;
-
         public Cache<PdPerson> PrimaryOnCall
         {
             get
@@ -35,7 +28,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         private Cache<PdPerson> _secondaryoncall;
-
         public Cache<PdPerson> SecondaryOnCall
         {
             get
@@ -70,6 +62,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
+        // TODO: We need to able able to handle when people have more than one on call schedule
         public PdPerson GetOnCall()
         {
             return AllUsers.Data.FirstOrDefault(p => p.OnCallSchedule[0].EscalationLevel == 1);
