@@ -28,6 +28,13 @@ namespace StackExchange.Opserver.Controllers
             base.OnActionExecuting(filterContext); 
         }
 
+        private string GetLogName(string log)
+        {
+            var apps = ExceptionStores.Applications.ToList();
+            var app = apps.FirstOrDefault(a => a.Name == log) ?? apps.FirstOrDefault(a => a.ShortName == log);
+            return app != null ? app.Name : log;
+        }
+
         [Route("exceptions")]
         public ActionResult Exceptions(string log, ExceptionSorts? sort = null, int? count = null)
         {
@@ -48,6 +55,8 @@ namespace StackExchange.Opserver.Controllers
 
         public ExceptionsModel GetExceptionsModel(string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null, int? loadAsync = null)
         {
+            log = GetLogName(log);
+
             var errors = ExceptionStores.GetAllErrors(log, sort: sort);
 
             var startIndex = 0;
@@ -69,12 +78,12 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/similar")]
-        public ActionResult ExceptionsSimilar(string app, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
+        public ActionResult ExceptionsSimilar(string log, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
         {
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
-
-            var e = ExceptionStores.GetError(app, id);
+            log = GetLogName(log);
+            var e = ExceptionStores.GetError(log, id);
             if (e == null)
                 return View("Exceptions.Detail", null);
 
@@ -83,7 +92,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 Sort = sort.Value,
                 Exception = e,
-                SelectedLog = app,
+                SelectedLog = log,
                 ShowingWindow = byTime,
                 Applications = ExceptionStores.Applications,
                 ClearLinkForVisibleOnly = true,
@@ -97,6 +106,7 @@ namespace StackExchange.Opserver.Controllers
         {
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
+            log = GetLogName(log);
 
             // empty searches go back to the main log
             if (q.IsNullOrEmpty())
