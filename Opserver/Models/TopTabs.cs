@@ -24,6 +24,7 @@ namespace StackExchange.Opserver.Models
             public const string Elastic = "Elastic";
             public const string CloudFlare = "CloudFlare";
             public const string HAProxy = "HAProxy";
+            public const string PagerDuty = "PagerDuty";
         }
 
         public static SortedList<int, TopTab> Tabs { get; set; }
@@ -69,6 +70,7 @@ namespace StackExchange.Opserver.Models
                 GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
             });
             AddTab(new TopTab("HAProxy", "/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
+            AddTab(new TopTab("PagerDuty","/pagerduty",70,s.PagerDuty));
         }
 
         public static TopTab AddTab(string name, string url, int order = 0)

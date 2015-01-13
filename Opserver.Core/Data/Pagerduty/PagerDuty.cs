@@ -41,6 +41,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
+                
                 yield return PrimaryOnCall;
                 // yield return Incedents;
             }

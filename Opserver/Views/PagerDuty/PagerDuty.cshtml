@@ -6,7 +6,8 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
-    this.SetMainTab(MainTab.PagerDuty);
+    //this.SetTopNodes();
+    //this.SetMainTab(MainTab.PagerDuty);
 
 }
 
@@ -14,7 +15,7 @@
 
 
 <div class="dashboard-list">
-   The person currently on call is: @Model.PrimaryOnCall.FullName;
+   The person currently on call is: <img src="@Model.PrimaryOnCall.Avatar"/> @Model.PrimaryOnCall.FullName, you can bug him at: @Model.PrimaryOnCall.Email 
     
 </div>
 

@@ -17,13 +17,19 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return Current.Settings.PagerDuty; }
         }
+        protected override string TopTab
+        {
+            get { return TopTabs.BuiltIn.PagerDuty; }
+        }
+        
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
+            var tmp = new PagerDutyApi(Current.Settings.PagerDuty);
             var vd = new PagerDutyModel()
             {
-                
-                //PrimaryOnCall = tmp.PrimaryOnCall.Data
+
+                PrimaryOnCall = tmp.PrimaryOnCall.Data
             };
             return View("PagerDuty", vd);
         }

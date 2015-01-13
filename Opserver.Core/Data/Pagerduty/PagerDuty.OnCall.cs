@@ -58,10 +58,17 @@ namespace StackExchange.Opserver.Data.PagerDuty
             var test = AllUsers;
             foreach (var p in AllUsers.Data)
             {
+                if (p.OnCallSchedule[0].EscalationLevel == 1)
+                {
+                    Debug.WriteLine("Escalation Level:" + p.OnCallSchedule[0].EscalationLevel);
+                    return p;
+                }
+                /*
                 if (p.OnCallSchedule.Any(oc => oc.EscalationLevel == 1 && oc.Policy["id"] == primaryScheduleId))
                 {
                     return p;
                 }
+                */
             }
             return null;
         }
