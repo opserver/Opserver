@@ -1,28 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
 using System.Net;
 using System.Text;
 using Newtonsoft.Json.Linq;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public partial class API : PollNode
+    public partial class API : SinglePollNode<API>
     {
-        private static API _instance;
-        public static API Instance
-        {
-            get { return _instance ?? (_instance = GetInstance()); }
-        }
-
-        public static API GetInstance()
-        {
-            var api = new API(Current.Settings.CloudFlare);
-            api.TryAddToGlobalPollers();
-            return api;
-        }
-
         public CloudFlareSettings Settings { get; internal set; }
         public string Email { get { return Settings.Email; } }
         public string APIKey { get { return Settings.APIKey; } }
@@ -42,9 +28,9 @@ namespace StackExchange.Opserver.Data.CloudFlare
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
 
-        public API(CloudFlareSettings settings) : base("CloudFlareAPI:" + settings.Email)
+        public API()
         {
-            Settings = settings;
+            Settings = Current.Settings.CloudFlare;
         }
 
         public Action<Cache<T>> GetFromCloudFlare<T>(string opName, Func<API, T> getFromConnection) where T : class

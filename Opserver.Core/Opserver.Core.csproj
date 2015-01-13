@@ -185,6 +185,7 @@
     </Compile>
     <Compile Include="Data\Redis\RedisIssues.cs" />
     <Compile Include="Data\SearchResult.cs" />
+    <Compile Include="Data\SinglePollNode.cs" />
     <Compile Include="Data\SQL\SQLCluster.Cache.cs">
       <DependentUpon>SQLCluster.cs</DependentUpon>
     </Compile>
