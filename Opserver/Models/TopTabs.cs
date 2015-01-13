@@ -101,7 +101,11 @@ namespace StackExchange.Opserver.Models
         {
             get
             {
-                if (SecurableSection != null && !SecurableSection.HasAccess()) return false;
+                if (SecurableSection != null)
+                {
+                    if (!SecurableSection.Enabled) return false;
+                    if (!SecurableSection.HasAccess()) return false;
+                }
                 return GetIsEnabled == null || GetIsEnabled();
             }
         }

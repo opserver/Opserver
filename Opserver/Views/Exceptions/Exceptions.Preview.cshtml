@@ -12,7 +12,7 @@
 }
 else
 {
-    <div class="error-header"><span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()" title="view exceptions with the same message in the same log">view similar</a>)</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()&byTime=true" title="view exceptions within 5 minutes of this one">view nearby</a>)</span></div>
+    <div class="error-header"><span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&log=@error.ApplicationName.UrlEncode()" title="view exceptions with the same message in the same log">view similar</a>)</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()&byTime=true" title="view exceptions within 5 minutes of this one">view nearby</a>)</span></div>
     <div class="error-info">
         <div class="error-type">@error.Type</div>
         <pre class="error-detail">@error.Detail
