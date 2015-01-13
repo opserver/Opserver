@@ -72,30 +72,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         public PdPerson GetOnCall()
         {
-
-            foreach (var p in AllUsers.Data)
-            {
-                if (p.OnCallSchedule[0].EscalationLevel == 1)
-                {
-                    Debug.WriteLine("Escalation Level:" + p.OnCallSchedule[0].EscalationLevel);
-                    return p;
-                }
-            }
-            return null;
+            return AllUsers.Data.FirstOrDefault(p => p.OnCallSchedule[0].EscalationLevel == 1);
         }
 
         public PdPerson GetEscOnCall()
         {
-
-            foreach (var p in AllUsers.Data)
-            {
-                if (p.OnCallSchedule[0].EscalationLevel == 2)
-                {
-                    Debug.WriteLine("Escalation Level:" + p.OnCallSchedule[0].EscalationLevel);
-                    return p;
-                }
-            }
-            return null;
+            return AllUsers.Data.FirstOrDefault(p => p.OnCallSchedule[0].EscalationLevel == 2);
         }
 
         private List<PdPerson> GetAllUsers()
@@ -103,7 +85,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
             var users = GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
                 response =>
                 {
-                    Debug.WriteLine(response);
                     var myResp = JSON.Deserialize<PdUserResponse>(response.ToString(), Options.ISO8601).Users;
                     return myResp;
 

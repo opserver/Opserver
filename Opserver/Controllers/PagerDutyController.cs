@@ -30,7 +30,8 @@ namespace StackExchange.Opserver.Controllers
             {
 
                 PrimaryOnCall = tmp.PrimaryOnCall.Data,
-                EscalationOnCall = tmp.SecondaryOnCall.Data
+                EscalationOnCall = tmp.SecondaryOnCall.Data,
+                AllIncidents = tmp.Incidents.Data
                 
             };
             return View("PagerDuty", vd);

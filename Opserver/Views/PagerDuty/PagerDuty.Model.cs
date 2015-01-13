@@ -10,5 +10,6 @@ namespace StackExchange.Opserver.Views.PagerDuty
     {
         public PdPerson PrimaryOnCall { get; set; }
         public PdPerson EscalationOnCall { get; set; }
+        public List<PDIncident> AllIncidents { get; set; }
     }
 }

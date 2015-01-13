@@ -162,6 +162,7 @@
     <Compile Include="Data\HAProxy\HAProxyIssues.cs" />
     <Compile Include="Data\IssuesProvider.cs" />
     <Compile Include="Data\Pagerduty\PagerDuty.cs" />
+    <Compile Include="Data\Pagerduty\PagerDuty.Incidents.cs" />
     <Compile Include="Data\Pagerduty\PagerDuty.OnCall.cs" />
     <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
       <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
