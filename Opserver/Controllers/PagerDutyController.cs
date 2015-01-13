@@ -29,7 +29,9 @@ namespace StackExchange.Opserver.Controllers
             var vd = new PagerDutyModel()
             {
 
-                PrimaryOnCall = tmp.PrimaryOnCall.Data
+                PrimaryOnCall = tmp.PrimaryOnCall.Data,
+                EscalationOnCall = tmp.SecondaryOnCall.Data
+                
             };
             return View("PagerDuty", vd);
         }

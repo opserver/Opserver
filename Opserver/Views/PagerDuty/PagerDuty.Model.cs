@@ -9,5 +9,6 @@ namespace StackExchange.Opserver.Views.PagerDuty
     public class PagerDutyModel
     {
         public PdPerson PrimaryOnCall { get; set; }
+        public PdPerson EscalationOnCall { get; set; }
     }
 }

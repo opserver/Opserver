@@ -34,6 +34,24 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
+        private Cache<PdPerson> _secondaryoncall;
+
+        public Cache<PdPerson> SecondaryOnCall
+        {
+            get
+            {
+                return _secondaryoncall ?? (_secondaryoncall = new Cache<PdPerson>()
+                {
+                    CacheForSeconds = 60*60,
+                    UpdateCache = UpdateCacheItem(
+                        description: "Pager Duty Backup On Call",
+                        getData: GetEscOnCall,
+                        logExceptions: true
+                        )
+                });
+            }
+        }
+
         private Cache<List<PdPerson>> _allusers;
         public Cache<List<PdPerson>> AllUsers
         {
@@ -54,8 +72,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         public PdPerson GetOnCall()
         {
-            const string primaryScheduleId = "P7I0G4O";
-            var test = AllUsers;
+
             foreach (var p in AllUsers.Data)
             {
                 if (p.OnCallSchedule[0].EscalationLevel == 1)
@@ -63,12 +80,20 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     Debug.WriteLine("Escalation Level:" + p.OnCallSchedule[0].EscalationLevel);
                     return p;
                 }
-                /*
-                if (p.OnCallSchedule.Any(oc => oc.EscalationLevel == 1 && oc.Policy["id"] == primaryScheduleId))
+            }
+            return null;
+        }
+
+        public PdPerson GetEscOnCall()
+        {
+
+            foreach (var p in AllUsers.Data)
+            {
+                if (p.OnCallSchedule[0].EscalationLevel == 2)
                 {
+                    Debug.WriteLine("Escalation Level:" + p.OnCallSchedule[0].EscalationLevel);
                     return p;
                 }
-                */
             }
             return null;
         }

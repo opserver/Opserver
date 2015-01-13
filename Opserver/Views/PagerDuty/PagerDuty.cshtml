@@ -15,7 +15,34 @@
 
 
 <div class="dashboard-list">
-   The person currently on call is: <img src="@Model.PrimaryOnCall.Avatar"/> @Model.PrimaryOnCall.FullName, you can bug him at: @Model.PrimaryOnCall.Email 
-    
+    <table class="node-dashboard main-dashboard">
+        <tbody class="node-header">
+        <tr class="category-row">
+            <th colspan="8">
+                <h1>On Call</h1>
+            </th>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+        <tr>
+            <td>@Model.PrimaryOnCall.FullName</td>
+            <td>Primary</td>
+            <td>@Model.PrimaryOnCall.Email</td>
+            <td>@Model.PrimaryOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
+        </tr>
+        <tr>
+            <td>@Model.EscalationOnCall.FullName</td>
+            <td>Escalation</td>
+            <td>@Model.EscalationOnCall.Email</td>
+            <td>@Model.EscalationOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
+        </tr>
+        </tbody>
+
+    </table>
+
 </div>
 
