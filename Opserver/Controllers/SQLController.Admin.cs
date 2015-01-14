@@ -29,5 +29,19 @@ namespace StackExchange.Opserver.Controllers
             var instance = SQLInstance.Get(node);
             return Json(instance.ToggleJob(guid, enable));
         }
+
+        [Route("sql/start-agent-job"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
+        public ActionResult StartAgentJob(string node, Guid guid)
+        {
+            var instance = SQLInstance.Get(node);
+            return Json(instance.StartJob(guid));
+        }
+
+        [Route("sql/stop-agent-job"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
+        public ActionResult StopAgentJob(string node, Guid guid)
+        {
+            var instance = SQLInstance.Get(node);
+            return Json(instance.StopJob(guid));
+        }
     }
 }
