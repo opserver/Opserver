@@ -45,9 +45,17 @@ namespace StackExchange.Opserver.Data.PagerDuty
             Settings = Current.Settings.PagerDuty;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="route"></param>
+        /// <param name="qs"></param>
+        /// <param name="getFromJson"></param>
+        /// <returns></returns>
         public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)
         {
-            const string url = "https://stackoverflow.pagerduty.com/api/v1/";
+            string url = Settings.APIBaseURL;
             var fullUri = url + route + "?" + qs;
             using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {

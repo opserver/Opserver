@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-
+using System.Text.RegularExpressions;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -64,6 +64,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PdPerson LastChangedBy { get; set; }
         [DataMember(Name = "acknowledgers")]
         public List<PDAcknowledgement> AckdBy { get; set; }
+        [DataMember(Name="trigger_summary_data")]
+        public Dictionary<string, string> SummaryData { get; set; }
+        [DataMember(Name = "service")]
+        public PDService AffectedService { get; set; }
     }
 
     public class PDAcknowledgement
@@ -72,6 +76,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public DateTime? AckTime { get; set; }
         [DataMember(Name = "object")]
         public PdPerson AckperPerson { get; set; }
+    }
+
+    public class PDService
+    {
+        [DataMember(Name = "id")]
+        public string Id { get; set; }
+        [DataMember(Name = "name")]
+        public string Name { get; set; }
+        [DataMember(Name = "html_url")]
+        public string ServiceUri { get; set; }
     }
 
 }

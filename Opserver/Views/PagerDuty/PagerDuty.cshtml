@@ -33,7 +33,7 @@
                 <td>@Model.PrimaryOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
             </tr>
             <tr>
-                <td>@Model.EscalationOnCall.FullName</td>
+                <td class="good-row server-row">@Model.EscalationOnCall.FullName</td>
                 <td>Escalation</td>
                 <td>@Model.EscalationOnCall.Email</td>
                 <td>@Model.EscalationOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
@@ -45,24 +45,41 @@
         <tbody class="node-header">
             <tr class="category-row">
                 <th colspan="8">
-                    <h1>Incedents: Last 30 Days</h1>
+                    <h1>Incidents: Last 30 Days</h1>
                 </th>
             </tr>
-        <tr>
-            <th>Incident Id</th>
-            <th>Incident Date</th>
-            <th>Status</th>
-        </tr>
+
+            <tr class="node-group">
+                <th>Incident Id</th>
+                <th>Incident Date</th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Summary Data</th>
+            </tr>
+        </tbody>
+        <tbody class="node-group">
+        
         @{
             foreach (var i in Model.AllIncidents)
             {
-                <tr>
+                <tr class="server-row">
                     <td><a href="@i.IncidentUri">@i.IncidentNumber</a></td>
                     <td>@i.CreationDate</td>
+                    <td>@i.AffectedService.Name</td>
                     <td>@i.IncidentStatus</td>
+                    <td>
+                        @{
+                            if (i.SummaryData.Keys.Contains("subject"))
+                            {
+                                @i.SummaryData["subject"]
+                            }
+                        }
+                    </td>
                 </tr>
             }
         }
+        </tbody>
+
         </table>
 </div>
 

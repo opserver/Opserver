@@ -10,6 +10,7 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled { get { return APIKey.HasValue(); } }
         public string APIKey { get; set; }
+        public string APIBaseURL { get; set; }
 
         public void AfterLoad() 
         { 
