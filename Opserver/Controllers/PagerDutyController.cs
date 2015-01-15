@@ -47,8 +47,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty/escalation/full")]
         public ActionResult PagerDutyFullEscalation()
         {
-            var all = PagerDutyApi.Instance.AllUsers.Data.OrderBy(o => o.OnCallSchedule[0].EscalationLevel).ToList();
-            return View("PagerDuty.EscFull", all);
+            return View("PagerDuty.EscFull");
         }
     }
 }
