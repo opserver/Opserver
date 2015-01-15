@@ -224,6 +224,7 @@
     <Content Include="Content\Styles.css.map">
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
+    <None Include="Config\ElasticSettings.json" />
     <None Include="Config\PagerDutySettings.json.example" />
     <None Include="Config\PagerDutySettings.json" />
     <None Include="Config\DashboardSettings.json" />
@@ -307,6 +308,8 @@
     <Content Include="Views\CloudFlare\DNS.cshtml" />
     <Content Include="Views\SQL\Instance.DBFiles.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.cshtml" />
+    <Content Include="Views\PagerDuty\PagerDuty.Incident.cshtml" />
+    <Content Include="Views\PagerDuty\PagerDuty.EscFull.cshtml" />
     <None Include="Views\SQL\Instance.Configuration.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </None>

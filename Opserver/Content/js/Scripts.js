@@ -529,7 +529,9 @@ Status.Elastic = (function () {
         Status.Elastic.options = options;
 
         $.extend(Status.ajaxLoaders, {
-            '#/elastic/summary/': function(val) {
+            '#/elastic/summary/': function (val) {
+                console.log(val);
+                console.log(options);
                 Status.Dashboard.options.refreshData = { popup: val };
                 Status.summaryPopup('/elastic/node/summary/' + val, options, false, function() {
                     Status.Dashboard.options.refreshData = {};

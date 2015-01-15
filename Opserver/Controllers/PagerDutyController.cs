@@ -36,5 +36,19 @@ namespace StackExchange.Opserver.Controllers
             };
             return View("PagerDuty", vd);
         }
+
+        [Route("pagerduty/incident/detail/{id}")]
+        public ActionResult PagerDutyIncidentDetail(int id)
+        {
+            var incident = PagerDutyApi.Instance.Incidents.Data.First(i => i.IncidentNumber == id);
+            return View("PagerDuty.Incident", incident);
+        }
+
+        [Route("pagerduty/escalation/full")]
+        public ActionResult PagerDutyFullEscalation()
+        {
+            var all = PagerDutyApi.Instance.AllUsers.Data.OrderBy(o => o.OnCallSchedule[0].EscalationLevel).ToList();
+            return View("PagerDuty.EscFull", all);
+        }
     }
 }

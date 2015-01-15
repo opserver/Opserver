@@ -17,7 +17,7 @@
         <tbody class="node-header">
         <tr class="category-row">
             <th colspan="8">
-                <h1>On Call</h1>
+                <h1>On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)</h1>
             </th>
         </tr>
         <tr>
@@ -63,7 +63,7 @@
             foreach (var i in Model.AllIncidents)
             {
                 <tr class="server-row">
-                    <td><a href="@i.IncidentUri">@i.IncidentNumber</a></td>
+                    <td><a href="#/pagerduty/incident/detail/@i.IncidentNumber">@i.IncidentNumber</a></td>
                     <td>@i.CreationDate</td>
                     <td>@i.AffectedService.Name</td>
                     <td>@i.IncidentStatus</td>
@@ -83,14 +83,20 @@
     </table>
 </div>
 
-@section script
-{
+
     <script type="text/javascript">
         $.extend(Status.ajaxLoaders, {
-            '#/pagerduty/incident/': function(val) {
+            '#/pagerduty/incident/': function (val) {
+                console.log(val);
                 Status.summaryPopup('/pagerduty/incident/' + val);
             }
         });
+        $.extend(Status.ajaxLoaders, {
+            '#/pagerduty/escalation/': function (val) {
+                console.log(val);
+                Status.summaryPopup('/pagerduty/escalation/' + val);
+            }
+        });
     </script>
-}
+
 

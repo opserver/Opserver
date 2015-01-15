@@ -1,0 +1,38 @@
+﻿@using System.Text
+@using StackExchange.Opserver.Data.PagerDuty
+@using StackExchange.Opserver.Views.PagerDuty
+
+@model PDIncident
+@{
+    Layout = null;
+    this.SetPageTitle("PagerDuty Incident Email");
+
+}
+
+<h2>Incident Detail: @Model.IncidentNumber</h2>
+<hr/>
+PagerDuty Link: <a href="@Model.IncidentUri">@Model.IncidentUri</a>
+<br/>
+Incident Status: @Model.IncidentStatus
+<br/>
+
+@{
+    if (@Model.AckdBy != null)
+    {
+        @("Acknoledged By: " + Model.AckdBy);
+    }
+    else
+    {
+        @("Acknoledge By: Nobody");
+    }
+}
+
+<br/>
+Summary Data:
+<br/>
+@{
+    foreach(var s in @Model.SummaryData)
+    {
+        @(s.Key + ": " + @s.Value);   
+    }
+}
