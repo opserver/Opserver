@@ -15,50 +15,50 @@
 <div class="dashboard-list">
     <table class="node-dashboard main-dashboard">
         <tbody class="node-header">
-            <tr class="category-row">
-                <th colspan="8">
-                    <h1>On Call</h1>
-                </th>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <th>Level</th>
-                <th>Email</th>
-                <th>Phone</th>
-            </tr>
-            <tr>
-                <td>@Model.PrimaryOnCall.FullName</td>
-                <td>Primary</td>
-                <td>@Model.PrimaryOnCall.Email</td>
-                <td>@Model.PrimaryOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
-            </tr>
-            <tr>
-                <td class="good-row server-row">@Model.EscalationOnCall.FullName</td>
-                <td>Escalation</td>
-                <td>@Model.EscalationOnCall.Email</td>
-                <td>@Model.EscalationOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
-            </tr>
+        <tr class="category-row">
+            <th colspan="8">
+                <h1>On Call</h1>
+            </th>
+        </tr>
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+        <tr>
+            <td>@Model.PrimaryOnCall.FullName</td>
+            <td>Primary</td>
+            <td>@Model.PrimaryOnCall.Email</td>
+            <td>@Model.PrimaryOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
+        </tr>
+        <tr>
+            <td class="good-row server-row">@Model.EscalationOnCall.FullName</td>
+            <td>Escalation</td>
+            <td>@Model.EscalationOnCall.Email</td>
+            <td>@Model.EscalationOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
+        </tr>
         </tbody>
 
     </table>
     <table class="node-dashboard main-dashboard">
         <tbody class="node-header">
-            <tr class="category-row">
-                <th colspan="8">
-                    <h1>Incidents: Last 30 Days</h1>
-                </th>
-            </tr>
+        <tr class="category-row">
+            <th colspan="8">
+                <h1>Incidents: Last 30 Days</h1>
+            </th>
+        </tr>
 
-            <tr class="node-group">
-                <th>Incident Id</th>
-                <th>Incident Date</th>
-                <th>Service</th>
-                <th>Status</th>
-                <th>Summary Data</th>
-            </tr>
+        <tr class="node-group">
+            <th>Incident Id</th>
+            <th>Incident Date</th>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Summary Data</th>
+        </tr>
         </tbody>
         <tbody class="node-group">
-        
+
         @{
             foreach (var i in Model.AllIncidents)
             {
@@ -80,6 +80,17 @@
         }
         </tbody>
 
-        </table>
+    </table>
 </div>
+
+@section script
+{
+    <script type="text/javascript">
+        $.extend(Status.ajaxLoaders, {
+            '#/pagerduty/incident/': function(val) {
+                Status.summaryPopup('/pagerduty/incident/' + val);
+            }
+        });
+    </script>
+}
 

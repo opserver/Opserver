@@ -75,7 +75,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "at")]
         public DateTime? AckTime { get; set; }
         [DataMember(Name = "object")]
-        public PdPerson AckperPerson { get; set; }
+        public PdPerson AckPerson { get; set; }
     }
 
     public class PDService

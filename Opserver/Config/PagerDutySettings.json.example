@@ -1,3 +1,4 @@
-﻿{ 
-    "APIKey": "ABC123"
+﻿{
+    "APIKey": "ABC123",
+    "APIBaseURL":  "https://path.pagerduty.com"
 }

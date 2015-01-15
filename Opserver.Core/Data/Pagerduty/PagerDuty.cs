@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <returns></returns>
         public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)
         {
-            string url = Settings.APIBaseURL;
+            var url = Settings.APIBaseURL;
             var fullUri = url + route + "?" + qs;
             using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {
