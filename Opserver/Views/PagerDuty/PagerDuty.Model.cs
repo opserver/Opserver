@@ -8,8 +8,8 @@ namespace StackExchange.Opserver.Views.PagerDuty
 {
     public class PagerDutyModel
     {
-        public PdPerson PrimaryOnCall { get; set; }
-        public PdPerson EscalationOnCall { get; set; }
-        public List<PdIncident> AllIncidents { get; set; }
+        public PagerDutyPerson PrimaryOnCall { get; set; }
+        public PagerDutyPerson EscalationOnCall { get; set; }
+        public List<PagerDutyIncident> AllIncidents { get; set; }
     }
 }

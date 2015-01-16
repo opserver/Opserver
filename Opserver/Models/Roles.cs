@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Models
         CloudFlareAdmin = 1 << 16,
 
         PagerDuty = 1 << 17,
-        PagerDutyAdmin = 1 << 17,
+        PagerDutyAdmin = 1 << 18,
 
         InternalRequest = 1 << 19,
 

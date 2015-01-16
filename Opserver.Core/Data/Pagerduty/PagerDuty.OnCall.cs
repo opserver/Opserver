@@ -10,12 +10,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
 
         
-        private Cache<PdPerson> _primaryoncall;
-        public Cache<PdPerson> PrimaryOnCall
+        private Cache<PagerDutyPerson> _primaryoncall;
+        public Cache<PagerDutyPerson> PrimaryOnCall
         {
             get
             {
-                return _primaryoncall ?? (_primaryoncall = new Cache<PdPerson>()
+                return _primaryoncall ?? (_primaryoncall = new Cache<PagerDutyPerson>()
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache = UpdateCacheItem(
@@ -27,12 +27,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        private Cache<PdPerson> _secondaryoncall;
-        public Cache<PdPerson> SecondaryOnCall
+        private Cache<PagerDutyPerson> _secondaryoncall;
+        public Cache<PagerDutyPerson> SecondaryOnCall
         {
             get
             {
-                return _secondaryoncall ?? (_secondaryoncall = new Cache<PdPerson>()
+                return _secondaryoncall ?? (_secondaryoncall = new Cache<PagerDutyPerson>()
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache = UpdateCacheItem(
@@ -44,12 +44,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        private Cache<List<PdPerson>> _allusers;
-        public Cache<List<PdPerson>> AllUsers
+        private Cache<List<PagerDutyPerson>> _allusers;
+        public Cache<List<PagerDutyPerson>> AllUsers
         {
             get
             {
-                return _allusers ?? (_allusers = new Cache<List<PdPerson>>()
+                return _allusers ?? (_allusers = new Cache<List<PagerDutyPerson>>()
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache = UpdateCacheItem(
@@ -63,22 +63,22 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         // TODO: We need to able able to handle when people have more than one on call schedule
-        public PdPerson GetOnCall()
+        public PagerDutyPerson GetOnCall()
         {
             return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 1);
         }
 
-        public PdPerson GetEscOnCall()
+        public PagerDutyPerson GetEscOnCall()
         {
             return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 2);
         }
 
-        private List<PdPerson> GetAllUsers()
+        private List<PagerDutyPerson> GetAllUsers()
         {
             var users = GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
                 response =>
                 {
-                    var myResp = JSON.Deserialize<PdUserResponse>(response.ToString(), Options.ISO8601).Users;
+                    var myResp = JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users;
                     return myResp;
 
                 });
@@ -88,13 +88,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
     }
 
 
-    public class PdUserResponse
+    public class PagerDutyUserResponse
     {
         [DataMember(Name = "users")]
-        public List<PdPerson> Users;
+        public List<PagerDutyPerson> Users;
     }
 
-    public class PdPerson
+    public class PagerDutyPerson
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -113,14 +113,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "user_url")]
         public string UserUrl { get; set; }
         [DataMember(Name = "contact_methods")]
-        public List<Contact> ContactMethods { get; set; }
+        public List<PagerDutyContact> ContactMethods { get; set; }
         [DataMember(Name = "on_call")]
-        public List<OnCall> Schedule { get; set; } 
+        public List<PagerDutyOnCall> Schedule { get; set; } 
 
 
     }
 
-    public class Contact
+    public class PagerDutyContact
     {
         [DataMember(Name = "id")]
         public string Id {get; set; }
@@ -132,7 +132,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Type { get; set; }
     }
 
-    public class OnCall
+    public class PagerDutyOnCall
     {
         [DataMember(Name = "level")]
         public int EscalationLevel { get; set; }
