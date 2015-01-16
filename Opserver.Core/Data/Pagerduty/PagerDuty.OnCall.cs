@@ -65,12 +65,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
         // TODO: We need to able able to handle when people have more than one on call schedule
         public PdPerson GetOnCall()
         {
-            return AllUsers.Data.FirstOrDefault(p => p.OnCallSchedule[0].EscalationLevel == 1);
+            return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 1);
         }
 
         public PdPerson GetEscOnCall()
         {
-            return AllUsers.Data.FirstOrDefault(p => p.OnCallSchedule[0].EscalationLevel == 2);
+            return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 2);
         }
 
         private List<PdPerson> GetAllUsers()
@@ -115,7 +115,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "contact_methods")]
         public List<Contact> ContactMethods { get; set; }
         [DataMember(Name = "on_call")]
-        public List<OnCall> OnCallSchedule { get; set; } 
+        public List<OnCall> Schedule { get; set; } 
 
 
     }

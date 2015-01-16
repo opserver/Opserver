@@ -25,11 +25,11 @@
     <th>Phone</th>
 </tr>
 @{
-    foreach (var p in PagerDutyApi.Instance.AllUsers.Data.OrderBy(u => u.OnCallSchedule[0].EscalationLevel))
+    foreach (var p in PagerDutyApi.Instance.AllUsers.Data.OrderBy(u => u.Schedule[0].EscalationLevel))
     {
         <tr>
             <td>@p.FullName</td>
-            <td>@p.OnCallSchedule[0].EscalationLevel</td>
+            <td>@p.Schedule[0].EscalationLevel</td>
             <td>@p.Email</td>
             <td>@p.ContactMethods.First(c => c.Type == "phone").Address</td>
         </tr>
