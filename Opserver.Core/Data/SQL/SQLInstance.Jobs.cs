@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -13,13 +14,31 @@ namespace StackExchange.Opserver.Data.SQL
             get { return _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2*60)); }
         }
 
+        /// <summary>
+        /// Enables or disables an agent job
+        /// </summary>
         public bool ToggleJob(Guid jobId, bool enabled)
+        {
+            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
+        }
+
+        public bool StartJob(Guid jobId)
+        {
+            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
+        }
+
+        public bool StopJob(Guid jobId)
+        {
+            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
+        }
+
+        private bool ExecJobAction(Action<DbConnection> action)
         {
             try
             {
                 using (var conn = GetConnection())
                 {
-                    conn.Execute("msdb.dbo.sp_update_job", new {job_id = jobId, enabled = enabled ? 1 : 0}, commandType: CommandType.StoredProcedure);
+                    action(conn);
                     JobSummary.Purge();
                     return true;
                 }
@@ -29,6 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
                 Current.LogException(e);
                 return false;
             }
+            
         }
 
         public class SQLJobInfo : ISQLVersionedObject, IMonitorStatus
