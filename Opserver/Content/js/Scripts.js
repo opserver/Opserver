@@ -84,9 +84,7 @@ window.Status = (function () {
         }
 
         for (var key in registeredRefreshes) {
-            console.log(key);
             if (registeredRefreshes.hasOwnProperty(key)) {
-                console.log(key, 'ran');
                 resumeSingleRefresh(registeredRefreshes[key]);
             }
         }
@@ -530,8 +528,6 @@ Status.Elastic = (function () {
 
         $.extend(Status.ajaxLoaders, {
             '#/elastic/summary/': function (val) {
-                console.log(val);
-                console.log(options);
                 Status.Dashboard.options.refreshData = { popup: val };
                 Status.summaryPopup('/elastic/node/summary/' + val, options, false, function() {
                     Status.Dashboard.options.refreshData = {};
