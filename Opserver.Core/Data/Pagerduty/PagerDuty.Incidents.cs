@@ -9,13 +9,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi
     {
-        private Cache<List<PDIncident>> _incidents;
+        private Cache<List<PdIncident>> _incidents;
 
-        public Cache<List<PDIncident>> Incidents
+        public Cache<List<PdIncident>> Incidents
         {
             get
             {
-                return _incidents ?? (_incidents = new Cache<List<PDIncident>>()
+                return _incidents ?? (_incidents = new Cache<List<PdIncident>>()
                 {
                     CacheForSeconds = 60 * 60,
                     UpdateCache = UpdateCacheItem(
@@ -27,13 +27,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        private List<PDIncident> GetIncidents()
+        private List<PdIncident> GetIncidents()
         {
             var i = GetFromPagerDuty("incidents","", getFromJson:
                 response =>
                 {
                     var myResp =
-                        JSON.Deserialize<PDIncidentResponce>(response.ToString(), Options.ISO8601)
+                        JSON.Deserialize<PdIncidentResponce>(response.ToString(), Options.ISO8601)
                             .PDI.OrderBy(ic => ic.CreationDate)
                             .ToList();
                     return myResp;
@@ -42,13 +42,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
     }
 
-    public class PDIncidentResponce
+    public class PdIncidentResponce
     {
         [DataMember(Name = "incidents")]
-        public List<PDIncident> PDI { get; set; }
+        public List<PdIncident> PDI { get; set; }
     }
 
-    public class PDIncident
+    public class PdIncident
     {
         [DataMember(Name = "incident_number")]
         public int IncidentNumber { get; set; }
@@ -63,14 +63,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "last_status_change_by")]
         public PdPerson LastChangedBy { get; set; }
         [DataMember(Name = "acknowledgers")]
-        public List<PDAcknowledgement> AckdBy { get; set; }
+        public List<PdAcknowledgement> AckdBy { get; set; }
         [DataMember(Name="trigger_summary_data")]
         public Dictionary<string, string> SummaryData { get; set; }
         [DataMember(Name = "service")]
-        public PDService AffectedService { get; set; }
+        public PdService AffectedService { get; set; }
     }
 
-    public class PDAcknowledgement
+    public class PdAcknowledgement
     {
         [DataMember(Name = "at")]
         public DateTime? AckTime { get; set; }
@@ -78,7 +78,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PdPerson AckPerson { get; set; }
     }
 
-    public class PDService
+    public class PdService
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }

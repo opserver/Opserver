@@ -137,9 +137,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "level")]
         public int EscalationLevel { get; set; }
         [DataMember(Name = "start")]
-        public DateTime? OnCallStart { get; set; }
+        public DateTime? StartDate { get; set; }
         [DataMember(Name = "end")]
-        public DateTime? OnCallend { get; set; }
+        public DateTime? EndDate { get; set; }
         [DataMember(Name = "escalation_policy")]
         public Dictionary<string,string> Policy { get; set; } 
     }
