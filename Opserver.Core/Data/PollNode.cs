@@ -118,6 +118,8 @@ namespace StackExchange.Opserver.Data
         protected volatile bool _isPolling;
         public bool IsPolling { get { return _isPolling; } }
 
+        public AutoResetEvent FirstPollRun = new AutoResetEvent(false);
+
         protected Task _pollTask;
         public virtual string PollTaskStatus
         {
@@ -147,6 +149,12 @@ namespace StackExchange.Opserver.Data
             }
         }
 
+        public bool WaitForFirstPoll(int timeoutMs)
+        {
+            var fr = FirstPollRun;
+            return fr == null || fr.WaitOne(timeoutMs);
+        }
+
         /// <summary>
         /// Called on a background thread for when this node is ACTUALLY polling
         /// This is not called if we're not due for a poll when the pass runs
@@ -171,6 +179,11 @@ namespace StackExchange.Opserver.Data
                     });
                 LastPoll = DateTime.UtcNow;
                 if (Polled != null) Polled(this, new PollResultArgs {Polled = polled});
+                if (FirstPollRun != null)
+                {
+                    FirstPollRun.Set();
+                    FirstPollRun = null;
+                }
 
                 Interlocked.Add(ref _totalCachePolls, polled);
                 Interlocked.Increment(ref _totalPolls);

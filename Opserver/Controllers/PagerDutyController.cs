@@ -23,12 +23,13 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult PagerDutyDashboard()
         {
             var i = PagerDutyApi.Instance;
+            i.WaitForFirstPoll(5000);
             var vd = new PagerDutyModel
             {
                 AllOnCall = i.AllUsers.SafeData(true),
                 OnCallToShow = i.Settings.OnCalllToShow,
                 CachedDays = i.Settings.DaysToCache,
-                AllIncidents = i.Incidents.Data
+                AllIncidents = i.Incidents.SafeData(true)
             };
             return View("PagerDuty", vd);
         }

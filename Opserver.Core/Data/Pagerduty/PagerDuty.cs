@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         /// <summary>
-        /// 
+        /// Gets content from the PagerDuty API
         /// </summary>
         /// <typeparam name="T">Type to return</typeparam>
         /// <param name="path">The path to return, including any query string</param>
