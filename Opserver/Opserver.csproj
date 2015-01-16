@@ -15,7 +15,7 @@
     <AssemblyName>StackExchange.Opserver</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>true</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -224,11 +224,7 @@
     <Content Include="Content\Styles.css.map">
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
-    <None Include="Config\ElasticSettings.json" />
     <None Include="Config\PagerDutySettings.json.example" />
-    <None Include="Config\PagerDutySettings.json" />
-    <None Include="Config\DashboardSettings.json" />
-    <None Include="Config\SecuritySettings.config" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -650,7 +646,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>56259</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localstatus.com</IISUrl>
+          <IISUrl>http://localhost:56259/</IISUrl>
           <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
           <IISAppRootUrl>http://localstatus.com/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
