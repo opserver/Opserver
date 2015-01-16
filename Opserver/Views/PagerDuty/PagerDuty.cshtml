@@ -1,4 +1,5 @@
-﻿@model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
+﻿@using StackExchange.Opserver.Data.PagerDuty
+@model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
@@ -59,7 +60,10 @@
         <tbody class="node-header">
             <tr class="category-row">
                 <th colspan="8">
-                    <h3>Incidents: Last 30 Days</h3>
+                    <h3>
+                        Incidents: Last @Model.CachedDays Days
+                        @Helpers.PollNow(PagerDutyApi.Instance, PagerDutyApi.Instance.Incidents)
+                    </h3>
                 </th>
             </tr>
             <tr class="node-group">
@@ -78,7 +82,11 @@
                 <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
                 <td>@i.CreationDate.ToRelativeTimeSpan()</td>
                 <td>@i.AffectedService.Name</td>
-                <td class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</td>
+                <td><span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span> 
+                @if (i.LastChangedBy != null)
+                {
+                    <span class="note">(@i.LastChangedBy.FullName)</span>
+                }</td>
                 <td>
                     @if (i.SummaryData.Keys.Contains("subject"))
                     {

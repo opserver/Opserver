@@ -3,21 +3,35 @@
     Layout = null;
     this.SetPageTitle("PagerDuty Incident Email");
     var acked = Model.AcknowledgedBy != null && Model.AcknowledgedBy.Any() ? "List" : "Nobody";
+    var isSubjectOnly = Model.SummaryData != null && Model.SummaryData.Count == 1 && Model.SummaryData.ContainsKey("subject");
 }
 <div class="incident-details">
     <h3>Incident Detail: @Model.Number</h3>
     <ul>
+         @if (isSubjectOnly)
+        {
+            <li><span class="key">Subject:</span> <span class="value">@Model.SummaryData["subject"]</span></li>
+        }
+        <li><span class="key">Service:</span> <span class="value">@Model.AffectedService.Name</span></li>
         <li><span class="key">Link:</span> <span class="value"><a href="@Model.Uri" target="_blank">@Model.Uri</a></span></li>
         <li><span class="key">Status:</span> <span class="bold @Model.MonitorStatus.Class()">@Model.Status.ToTitleCase()</span></li>
-        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li>
+        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li> 
+        @if (Model.ResolvedBy != null)
+        {
+            <li><span class="key">Resolved By:</span> <span class="value">@Model.ResolvedBy.FullName</span></li>
+        }
+        @if (Model.LastChangedBy != null)
+        {
+            <li><span class="key">Last Change:</span> <span class="value">@Model.LastChangedBy.FullName - @Model.LastChangedOn.ToRelativeTimeSpan()</span></li>
+        }
         <li>
-            @if (Model.SummaryData != null && Model.SummaryData.Any())
+            @if (!isSubjectOnly && Model.SummaryData != null && Model.SummaryData.Any())
             {
                 <table>
                     <thead>
-                        <tr>
-                            <th colspan="2">Summary</th>
-                        </tr>
+                    <tr>
+                        <th colspan="2">Summary</th>
+                    </tr>
                     </thead>
                     <tbody>
                     @foreach (var s in Model.SummaryData)

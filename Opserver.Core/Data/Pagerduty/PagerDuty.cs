@@ -42,15 +42,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <summary>
         /// 
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="route"></param>
-        /// <param name="qs"></param>
+        /// <typeparam name="T">Type to return</typeparam>
+        /// <param name="path">The path to return, including any query string</param>
         /// <param name="getFromJson"></param>
         /// <returns></returns>
-        public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)
+        public T GetFromPagerDuty<T>(string path, Func<string, T> getFromJson)
         {
             var url = Settings.APIBaseUrl;
-            var fullUri = url + route + "?" + qs;
+            var fullUri = url + path;
             using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {
                 var req = (HttpWebRequest)WebRequest.Create(fullUri);

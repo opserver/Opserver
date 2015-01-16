@@ -27,7 +27,8 @@ namespace StackExchange.Opserver.Controllers
             {
                 AllOnCall = i.AllUsers.SafeData(true),
                 OnCallToShow = i.Settings.OnCalllToShow,
-                AllIncidents = i.Incidents.SafeData(true)
+                CachedDays = i.Settings.DaysToCache,
+                AllIncidents = i.Incidents.Data
             };
             return View("PagerDuty", vd);
         }

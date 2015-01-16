@@ -7,6 +7,7 @@ namespace StackExchange.Opserver.Views.PagerDuty
     {
         public List<PagerDutyPerson> AllOnCall { get; set; }
         public int OnCallToShow { get; set; }
+        public int CachedDays { get; set; }
 
         public List<PagerDutyIncident> AllIncidents { get; set; }
     }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -15,11 +14,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-                return _incidents ?? (_incidents = new Cache<List<PagerDutyIncident>>()
+                return _incidents ?? (_incidents = new Cache<List<PagerDutyIncident>>
                 {
-                    CacheForSeconds = 60 * 60,
+                    CacheForSeconds = 10 * 60,
                     UpdateCache = UpdateCacheItem(
-                        description: "Pager Duty Primary On Call",
+                        description: "Pager Duty Incidents",
                         getData: GetIncidents,
                         logExceptions: true
                         )
@@ -29,7 +28,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private List<PagerDutyIncident> GetIncidents()
         {
-            var i = GetFromPagerDuty("incidents","", getFromJson:
+            var url = string.Format("incidents?since={0}&until={1}&sort_by=created_on:desc",
+                DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
+                DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd"));
+            var i = GetFromPagerDuty(url, getFromJson:
                 response =>
                 {
                     var myResp =
@@ -59,15 +61,22 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "html_url")]
         public string Uri { get; set; }
         [DataMember(Name = "assigned_to")]
-        public List<PagerDutyPerson> Owners { get; set; }
+        public List<PagerDutyPerson> AssignedTo { get; set; }
+        [DataMember(Name = "last_status_change_on")]
+        public DateTime? LastChangedOn { get; set; }
         [DataMember(Name = "last_status_change_by")]
         public PagerDutyPerson LastChangedBy { get; set; }
+        [DataMember(Name = "resolved_by_user")]
+        public PagerDutyPerson ResolvedBy { get; set; }
         [DataMember(Name = "acknowledgers")]
         public List<PagerDutyAcknowledgement> AcknowledgedBy { get; set; }
         [DataMember(Name="trigger_summary_data")]
         public Dictionary<string, string> SummaryData { get; set; }
         [DataMember(Name = "service")]
         public PagerDutyService AffectedService { get; set; }
+        [DataMember(Name = "number_of_escalations")]
+        public int NumberOfEscalations { get; set; }
+
 
         public MonitorStatus MonitorStatus
         {

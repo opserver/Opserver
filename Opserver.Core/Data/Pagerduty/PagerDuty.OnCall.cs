@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private List<PagerDutyPerson> GetAllUsers()
         {
-            return GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
+            return GetFromPagerDuty("users/on_call?include[]=contact_methods", getFromJson:
                 response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
         }
     }
