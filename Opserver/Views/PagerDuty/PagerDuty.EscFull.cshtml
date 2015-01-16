@@ -1,21 +1,15 @@
-﻿@using System.Text
-@using StackExchange.Opserver.Data.PagerDuty
-@using StackExchange.Opserver.Views.PagerDuty
-
+﻿@using StackExchange.Opserver.Data.PagerDuty
 @model List<PagerDutyPerson>
 @{
     Layout = null;
     this.SetPageTitle("PagerDuty Full Escalation");
-
 }
 
-<h1>Full Escalation</h1>
-<table class="node-dashboard main-dashboard">
+<table class="node-dashboard main-dashboard" style="min-width: 600px;">
 <tbody class="node-header">
 <tr class="category-row">
     <th colspan="8">
-        <h1>On Call (<a href="#/pagerduty/escalation/full"></a>)
-        </h1>
+        <h3>Full Escalation Schedule</h3>
     </th>
 </tr>
 <tr>
@@ -24,16 +18,9 @@
     <th>Email</th>
     <th>Phone</th>
 </tr>
-@{
-    foreach (var p in PagerDutyApi.Instance.AllUsers.Data.OrderBy(u => u.Schedule[0].EscalationLevel))
-    {
-        <tr>
-            <td>@p.FullName</td>
-            <td>@p.Schedule[0].EscalationLevel</td>
-            <td>@p.Email</td>
-            <td>@p.ContactMethods.First(c => c.Type == "phone").Address</td>
-        </tr>
-    }
+@foreach (var p in Model.OrderBy(u => u.CurrentEscalationLevel))
+{
+    @Html.Partial("PagerDuty.OnCallRow", p)
 }
 </tbody>
 </table>

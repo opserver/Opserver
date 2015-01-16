@@ -1,21 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace StackExchange.Opserver
+﻿namespace StackExchange.Opserver
 {
-    public class PagerDutySettings : Settings<PagerDutySettings>, IAfterLoadActions
+    public class PagerDutySettings : Settings<PagerDutySettings>
     {
         public override bool Enabled { get { return APIKey.HasValue(); } }
         public string APIKey { get; set; }
-        public string APIBaseURL { get; set; }
+        public string APIBaseUrl { get; set; }
 
-        public void AfterLoad() 
-        { 
+        public int OnCalllToShow { get; set; }
+
+        public PagerDutySettings()
+        {
+            // Defaults
+            OnCalllToShow = 2;
         }
-
-
     }
 }

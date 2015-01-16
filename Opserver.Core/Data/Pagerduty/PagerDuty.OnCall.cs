@@ -2,46 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi
     {
-
-        
-        private Cache<PagerDutyPerson> _primaryoncall;
-        public Cache<PagerDutyPerson> PrimaryOnCall
+        // TODO: We need to able able to handle when people have more than one on call schedule
+        public PagerDutyPerson PrimaryOnCall
         {
-            get
-            {
-                return _primaryoncall ?? (_primaryoncall = new Cache<PagerDutyPerson>()
-                {
-                    CacheForSeconds = 60*60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "Pager Duty Primary On Call",
-                        getData: GetOnCall,
-                        logExceptions: true
-                        )
-                });
-            }
+            get { return AllUsers.Data.FirstOrDefault(p => p.CurrentEscalationLevel == 1); }
         }
 
-        private Cache<PagerDutyPerson> _secondaryoncall;
-        public Cache<PagerDutyPerson> SecondaryOnCall
+        public PagerDutyPerson SecondaryOnCall
         {
-            get
-            {
-                return _secondaryoncall ?? (_secondaryoncall = new Cache<PagerDutyPerson>()
-                {
-                    CacheForSeconds = 60*60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "Pager Duty Backup On Call",
-                        getData: GetEscOnCall,
-                        logExceptions: true
-                        )
-                });
-            }
+            get { return AllUsers.Data.FirstOrDefault(p => p.CurrentEscalationLevel == 2); }
         }
 
         private Cache<List<PagerDutyPerson>> _allusers;
@@ -62,29 +38,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        // TODO: We need to able able to handle when people have more than one on call schedule
-        public PagerDutyPerson GetOnCall()
-        {
-            return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 1);
-        }
-
-        public PagerDutyPerson GetEscOnCall()
-        {
-            return AllUsers.Data.FirstOrDefault(p => p.Schedule[0].EscalationLevel == 2);
-        }
-
         private List<PagerDutyPerson> GetAllUsers()
         {
-            var users = GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
-                response =>
-                {
-                    var myResp = JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users;
-                    return myResp;
-
-                });
-            return users;
+            return GetFromPagerDuty("users/on_call/", "include[]=contact_methods", getFromJson:
+                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
         }
-
     }
 
 
@@ -115,9 +73,51 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "contact_methods")]
         public List<PagerDutyContact> ContactMethods { get; set; }
         [DataMember(Name = "on_call")]
-        public List<OnCall> Schedule { get; set; } 
+        public List<OnCall> Schedule { get; set; }
 
+        private string _phone;
+        public string Phone
+        {
+            get
+            {
+                if (_phone == null)
+                {
+                    var m = ContactMethods.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS");
+                    _phone = m != null ? m.FormattedAddress : "";
+                }
+                return _phone;
+            }
+        }
 
+        public bool IsPrimary
+        {
+            get { return CurrentEscalationLevel == 1; }
+        }
+
+        public int? CurrentEscalationLevel
+        {
+            get { return Schedule != null && Schedule.Count > 0 ? Schedule[0].EscalationLevel : (int?)null; }
+        }
+
+        public string CurrentEscalationLevelDescription
+        {
+            get
+            {
+                switch (CurrentEscalationLevel)
+                {
+                    case 1:
+                        return "Primary";
+                    case 2:
+                        return "Secondary";
+                    case 3:
+                        return "Third";
+                    case null:
+                        return "Unknown";
+                    default:
+                        return CurrentEscalationLevel + "th";
+                }
+            }
+        }
     }
 
     public class PagerDutyContact
@@ -130,6 +130,22 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Address { get; set; }
         [DataMember(Name = "type")]
         public string Type { get; set; }
+
+        public string FormattedAddress
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case "SMS":
+                    case "phone":
+                        // I'm sure no one outside the US uses this...
+                        return Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
+                    default:
+                        return Address;
+                }
+            }
+        }
     }
 
     public class OnCall

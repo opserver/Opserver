@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -37,6 +38,14 @@ namespace StackExchange.Opserver
         public static string HtmlEncode(this string s)
         {
             return s.HasValue() ? HttpUtility.HtmlEncode(s) : s;
+        }
+
+        /// <summary>
+        /// Title cases a string given the current culture
+        /// </summary>
+        public static string ToTitleCase(this string s)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
         }
 
         /// <summary>

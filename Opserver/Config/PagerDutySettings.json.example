@@ -1,4 +1,5 @@
 ﻿{
     "APIKey": "ABC123",
-    "APIBaseURL":  "https://path.pagerduty.com"
+    "APIBaseURL":  "https://path.pagerduty.com",
+    "OnCallToShow": 3
 }

@@ -1,12 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -29,9 +24,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-                
-                yield return PrimaryOnCall;
-                // yield return Incedents;
+                yield return AllUsers;
+                yield return Incidents;
             }
         }
 
@@ -55,7 +49,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <returns></returns>
         public T GetFromPagerDuty<T>(string route, string qs , Func<string, T> getFromJson)
         {
-            var url = Settings.APIBaseURL;
+            var url = Settings.APIBaseUrl;
             var fullUri = url + route + "?" + qs;
             using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
             {

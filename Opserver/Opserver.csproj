@@ -306,6 +306,7 @@
     <Content Include="Views\PagerDuty\PagerDuty.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.Incident.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.EscFull.cshtml" />
+    <Content Include="Views\PagerDuty\PagerDuty.OnCallRow.cshtml" />
     <None Include="Views\SQL\Instance.Configuration.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </None>

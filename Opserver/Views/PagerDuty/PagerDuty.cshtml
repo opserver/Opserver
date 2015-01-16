@@ -1,23 +1,43 @@
-﻿@using System.Text
-@using StackExchange.Opserver.Data.PagerDuty
-@using StackExchange.Opserver.Views.PagerDuty
-
-@model PagerDutyModel
+﻿@model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
 
 }
-
-
-
-
+@section head {
+    <style>
+        .striped-dashboard {
+            width: 900px;
+        }
+        .incident-details {
+            min-width: 600px;
+        }
+        .incident-details .key {
+            color: #888;
+        }
+        .incident-details ul li {
+            padding: 2px 4px;
+        }
+        .incident-details ul li table {
+            margin: 10px 20px 5px 20px;
+            min-width: 560px;
+        }
+        .incident-details ul li table tr th {
+            font-weight: bold;
+            border-bottom: solid 1px #EEE;
+        }
+        .incident-details ul li table tr th, .incident-details ul li table tr td {
+            padding: 2px 5px;
+        }
+    </style>
+}
 <div class="dashboard-list">
-    <table class="node-dashboard main-dashboard">
+    <table class="striped-dashboard">
         <tbody class="node-header">
         <tr class="category-row">
             <th colspan="8">
-                <h1>On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)</h1>
+                <h3>On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)
+                </h3>
             </th>
         </tr>
         <tr>
@@ -26,57 +46,46 @@
             <th>Email</th>
             <th>Phone</th>
         </tr>
-        <tr>
-            <td>@Model.PrimaryOnCall.FullName</td>
-            <td>Primary</td>
-            <td>@Model.PrimaryOnCall.Email</td>
-            <td>@Model.PrimaryOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
-        </tr>
-        <tr>
-            <td class="good-row server-row">@Model.EscalationOnCall.FullName</td>
-            <td>Escalation</td>
-            <td>@Model.EscalationOnCall.Email</td>
-            <td>@Model.EscalationOnCall.ContactMethods.First(c => c.Type == "phone").Address</td>
-        </tr>
+        @foreach (var p in Model.AllOnCall.OrderBy(u => u.CurrentEscalationLevel).Take(Model.OnCallToShow))
+        {
+            @Html.Partial("PagerDuty.OnCallRow", p)
+        }
         </tbody>
-
     </table>
-    <table class="node-dashboard main-dashboard">
-        <tbody class="node-header">
-        <tr class="category-row">
-            <th colspan="8">
-                <h1>Incidents: Last 30 Days</h1>
-            </th>
-        </tr>
 
-        <tr class="node-group">
-            <th>Incident Id</th>
-            <th>Incident Date</th>
-            <th>Service</th>
-            <th>Status</th>
-            <th>Summary Data</th>
-        </tr>
+    <div class="node-dashboard-separator half-width"></div>
+
+    <table class="striped-dashboard">
+        <tbody class="node-header">
+            <tr class="category-row">
+                <th colspan="8">
+                    <h3>Incidents: Last 30 Days</h3>
+                </th>
+            </tr>
+            <tr class="node-group">
+                <th>Id</th>
+                <th></th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Summary</th>
+            </tr>
         </tbody>
         <tbody class="node-group">
 
-        @{
-            foreach (var i in Model.AllIncidents)
-            {
-                <tr class="server-row">
-                    <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
-                    <td>@i.CreationDate</td>
-                    <td>@i.AffectedService.Name</td>
-                    <td>@i.Status</td>
-                    <td>
-                        @{
-                            if (i.SummaryData.Keys.Contains("subject"))
-                            {
-                                @i.SummaryData["subject"]
-                            }
-                        }
-                    </td>
-                </tr>
-            }
+        @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+        {
+            <tr class="server-row @i.MonitorStatus.RowClass()">
+                <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
+                <td>@i.CreationDate.ToRelativeTimeSpan()</td>
+                <td>@i.AffectedService.Name</td>
+                <td class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</td>
+                <td>
+                    @if (i.SummaryData.Keys.Contains("subject"))
+                    {
+                        @i.SummaryData["subject"]
+                    }
+                </td>
+            </tr>
         }
         </tbody>
 
@@ -84,14 +93,12 @@
 </div>
 
 
-    <script type="text/javascript">
+    <script>
         $.extend(Status.ajaxLoaders, {
             '#/pagerduty/incident/': function (val) {
                 console.log(val);
                 Status.summaryPopup('/pagerduty/incident/' + val);
-            }
-        });
-        $.extend(Status.ajaxLoaders, {
+            },
             '#/pagerduty/escalation/': function (val) {
                 console.log(val);
                 Status.summaryPopup('/pagerduty/escalation/' + val);

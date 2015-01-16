@@ -57,6 +57,7 @@ namespace StackExchange.Opserver.Models
             AddTab(new TopTab("Redis", "/redis", 20, s.Redis) { GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus() });
             AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
             AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
+            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty));
             AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
             {
                 GetMonitorStatus = () => ExceptionStores.MonitorStatus,
@@ -70,7 +71,6 @@ namespace StackExchange.Opserver.Models
                 GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
             });
             AddTab(new TopTab("HAProxy", "/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
-            AddTab(new TopTab("PagerDuty","/pagerduty",70,s.PagerDuty));
         }
 
         public static TopTab AddTab(string name, string url, int order = 0)

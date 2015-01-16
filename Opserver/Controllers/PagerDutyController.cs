@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Linq;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
@@ -25,14 +22,12 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
-            var tmp = PagerDutyApi.Instance;
-            var vd = new PagerDutyModel()
+            var i = PagerDutyApi.Instance;
+            var vd = new PagerDutyModel
             {
-
-                PrimaryOnCall = tmp.PrimaryOnCall.Data,
-                EscalationOnCall = tmp.SecondaryOnCall.Data,
-                AllIncidents = tmp.Incidents.Data
-                
+                AllOnCall = i.AllUsers.SafeData(true),
+                OnCallToShow = i.Settings.OnCalllToShow,
+                AllIncidents = i.Incidents.SafeData(true)
             };
             return View("PagerDuty", vd);
         }
@@ -47,7 +42,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty/escalation/full")]
         public ActionResult PagerDutyFullEscalation()
         {
-            return View("PagerDuty.EscFull");
+            return View("PagerDuty.EscFull", PagerDutyApi.Instance.AllUsers.SafeData(true));
         }
     }
 }

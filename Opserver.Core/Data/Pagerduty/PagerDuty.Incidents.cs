@@ -63,11 +63,29 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "last_status_change_by")]
         public PagerDutyPerson LastChangedBy { get; set; }
         [DataMember(Name = "acknowledgers")]
-        public List<PagerDutyAcknowledgement> AckdBy { get; set; }
+        public List<PagerDutyAcknowledgement> AcknowledgedBy { get; set; }
         [DataMember(Name="trigger_summary_data")]
         public Dictionary<string, string> SummaryData { get; set; }
         [DataMember(Name = "service")]
         public PagerDutyService AffectedService { get; set; }
+
+        public MonitorStatus MonitorStatus
+        {
+            get
+            {
+                switch (Status)
+                {
+                    case "triggered":
+                        return MonitorStatus.Critical;
+                    case "acknowledged":
+                        return MonitorStatus.Warning;
+                    case "resolved":
+                        return MonitorStatus.Good;
+                    default:
+                        return MonitorStatus.Unknown;
+                }
+            }
+        }
     }
 
     public class PagerDutyAcknowledgement

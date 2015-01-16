@@ -1,38 +1,35 @@
-﻿@using System.Text
-@using StackExchange.Opserver.Data.PagerDuty
-@using StackExchange.Opserver.Views.PagerDuty
-
-@model PagerDutyIncident
+﻿@model StackExchange.Opserver.Data.PagerDuty.PagerDutyIncident
 @{
     Layout = null;
     this.SetPageTitle("PagerDuty Incident Email");
-
+    var acked = Model.AcknowledgedBy != null && Model.AcknowledgedBy.Any() ? "List" : "Nobody";
 }
-
-<h2>Incident Detail: @Model.Number</h2>
-<hr/>
-PagerDuty Link: <a href="@Model.Uri">@Model.Uri</a>
-<br/>
-Incident Status: @Model.Status
-<br/>
-
-@{
-    if (@Model.AckdBy != null)
-    {
-        @("Acknoledged By: " + Model.AckdBy);
-    }
-    else
-    {
-        @("Acknoledge By: Nobody");
-    }
-}
-
-<br/>
-Summary Data:
-<br/>
-@{
-    foreach(var s in @Model.SummaryData)
-    {
-        @(s.Key + ": " + @s.Value);   
-    }
-}
+<div class="incident-details">
+    <h3>Incident Detail: @Model.Number</h3>
+    <ul>
+        <li><span class="key">Link:</span> <span class="value"><a href="@Model.Uri" target="_blank">@Model.Uri</a></span></li>
+        <li><span class="key">Status:</span> <span class="bold @Model.MonitorStatus.Class()">@Model.Status.ToTitleCase()</span></li>
+        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li>
+        <li>
+            @if (Model.SummaryData != null && Model.SummaryData.Any())
+            {
+                <table>
+                    <thead>
+                        <tr>
+                            <th colspan="2">Summary</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var s in Model.SummaryData)
+                    {
+                        <tr>
+                            <td class="bold">@s.Key</td>
+                            <td>@s.Value</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            }
+        </li>
+    </ul>
+</div>

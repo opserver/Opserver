@@ -1,0 +1,7 @@
+﻿@model StackExchange.Opserver.Data.PagerDuty.PagerDutyPerson
+<tr>
+    <td class="name">@Model.FullName</td>
+    <td class="@(Model.IsPrimary ? "bold": null)">@Model.CurrentEscalationLevelDescription</td>
+    <td><a href="mailto:@Model.Email">@Model.Email</a></td>
+    <td>@Model.Phone</td>
+</tr>
