@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/server")]
-        public ActionResult Server(string node)
+        public ActionResult ServerView(string node)
         {
             if (node == null)
                 return RedirectToAction("Dashboard");
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
                 CurrentRedisServer = node,
                 Refresh = true
             };
-            return View(vd);
+            return View("Server", vd);
         }
 
         [Route("redis/instance")]
