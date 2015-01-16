@@ -109,13 +109,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "role")]
         public string Role { get; set; }
         [DataMember(Name = "avatar_url")]
-        public string Avatar { get; set; }
+        public string AvatarUrl { get; set; }
         [DataMember(Name = "user_url")]
         public string UserUrl { get; set; }
         [DataMember(Name = "contact_methods")]
         public List<PagerDutyContact> ContactMethods { get; set; }
         [DataMember(Name = "on_call")]
-        public List<PagerDutyOnCall> Schedule { get; set; } 
+        public List<OnCall> Schedule { get; set; } 
 
 
     }
@@ -132,7 +132,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Type { get; set; }
     }
 
-    public class PagerDutyOnCall
+    public class OnCall
     {
         [DataMember(Name = "level")]
         public int EscalationLevel { get; set; }

@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty/incident/detail/{id}")]
         public ActionResult PagerDutyIncidentDetail(int id)
         {
-            var incident = PagerDutyApi.Instance.Incidents.Data.First(i => i.IncidentNumber == id);
+            var incident = PagerDutyApi.Instance.Incidents.Data.First(i => i.Number == id);
             return View("PagerDuty.Incident", incident);
         }
 

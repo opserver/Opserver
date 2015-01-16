@@ -63,10 +63,10 @@
             foreach (var i in Model.AllIncidents)
             {
                 <tr class="server-row">
-                    <td><a href="#/pagerduty/incident/detail/@i.IncidentNumber">@i.IncidentNumber</a></td>
+                    <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
                     <td>@i.CreationDate</td>
                     <td>@i.AffectedService.Name</td>
-                    <td>@i.IncidentStatus</td>
+                    <td>@i.Status</td>
                     <td>
                         @{
                             if (i.SummaryData.Keys.Contains("subject"))

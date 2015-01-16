@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     var myResp =
                         JSON.Deserialize<PagerDutyIncidentResponce>(response.ToString(), Options.ISO8601)
-                            .PDI.OrderBy(ic => ic.CreationDate)
+                            .Incidents.OrderBy(ic => ic.CreationDate)
                             .ToList();
                     return myResp;
                 });
@@ -45,19 +45,19 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public class PagerDutyIncidentResponce
     {
         [DataMember(Name = "incidents")]
-        public List<PagerDutyIncident> PDI { get; set; }
+        public List<PagerDutyIncident> Incidents { get; set; }
     }
 
     public class PagerDutyIncident
     {
         [DataMember(Name = "incident_number")]
-        public int IncidentNumber { get; set; }
+        public int Number { get; set; }
         [DataMember(Name = "status")]
-        public string IncidentStatus { get; set; }
+        public string Status { get; set; }
         [DataMember(Name = "created_on")]
         public DateTime? CreationDate { get; set; }
         [DataMember(Name = "html_url")]
-        public string IncidentUri { get; set; }
+        public string Uri { get; set; }
         [DataMember(Name = "assigned_to")]
         public List<PagerDutyPerson> Owners { get; set; }
         [DataMember(Name = "last_status_change_by")]
