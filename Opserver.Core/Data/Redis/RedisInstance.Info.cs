@@ -87,11 +87,15 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                return
-                    (Replication != null
-                         ? Replication.SlaveConnections.Select(s => s.GetServer()).ToList()
-                         : new List<RedisInstance>())
+                if (Info.LastPollStatus == FetchStatus.Success)
+                {
+                    return (Replication != null
+                        ? Replication.SlaveConnections.Select(s => s.GetServer()).ToList()
+                        : new List<RedisInstance>())
                         .Union(AllInstances.Where(i => i.Master == this)).ToList();
+                }
+                // If we can't poll this server, ONLY trust the other nodes we can poll
+                return AllInstances.Where(i => i.Master == this).ToList();
             }
         }
 

@@ -25,7 +25,7 @@
 @helper ServerRow (RedisInstance server, int nest = 0, long? toSync = null, string prevMaster = null) {
     var info = server.Info.SafeData();
     var clients = server.Clients.SafeData();
-    <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group" : "")@(server.SlaveCount == 0 ? (nest == 0 ? " " : "") + "last-of-group" : "")">
+    <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group " : "")@(server.SlaveCount == 0 ? "last-of-group " : "") @server.RowClass()">
         <td class="redis-connection-name">@server.ConnectionInfo.Name</td>
         <td style="padding-left: @(20 * nest)px">@server.IconSpan() <a href="/redis/instance?node=@server.Host:@server.Port" class="node-name-link">@server.Host</a> <span class="note">(@server.Port@if (toSync > 0)
 {<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
