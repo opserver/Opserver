@@ -144,7 +144,7 @@
 else
 {
     <div class="top-section error-bread-top">
-        <div class="error-header"><a href="/exceptions">Exceptions</a> > <a href="/exceptions?log=@error.ApplicationName.UrlEncode()">@error.ApplicationName</a> > <span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()">view similar</a>)</span></div>
+        <div class="error-header"><a href="/exceptions">Exceptions</a> > <a href="/exceptions?log=@error.ApplicationName.UrlEncode()">@error.ApplicationName</a> > <span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&log=@error.ApplicationName.UrlEncode()">view similar</a>)</span></div>
     </div>
     <div class="error-info">
         <div class="error-type">@error.Type</div>
