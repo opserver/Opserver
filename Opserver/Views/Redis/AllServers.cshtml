@@ -114,13 +114,14 @@ foreach (var s in server.SlaveConnections) {
             <table class="cluster-dashboard striped-dashboard">
                 <thead class="node-header">
                     <tr class="category-row">
-                        <th colspan="@(Model.AllVersionsMatch ? 6 : 7)">
+                        <th colspan="@(Model.AllVersionsMatch ? 7 : 8)">
                             <h3>
                                 @MonitorStatus.Warning.IconSpan() @slaving.Count().Pluralize("Slaving Instance") @CommonVersionHeader()
                             </h3>
                         </th>
                     </tr>
                     <tr>
+                        <th>Name</th>
                         <th>Master</th>
                         <th>Slave</th>
                         <th>Master Status</th>
@@ -135,6 +136,7 @@ foreach (var s in server.SlaveConnections) {
                     {
                         var master = s.Master;
                         <tr>
+                            <td>@s.Name</td>
                             @if (master != null)
                             {
                                 <td>@master.IconSpan() <a href="?node=@master.Host:@master.Port" class="node-name-link">@master.Host</a> <span class="note">(@master.Port)</span></td>
