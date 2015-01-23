@@ -60,6 +60,12 @@ namespace StackExchange.Opserver.Data.Redis
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
+            // WE DON'T KNOW ANYTHING, k?
+            if (Info.PollsTotal == 0)
+            {
+                yield return MonitorStatus.Unknown;
+                yield break;
+            }
             if (Role == RedisInfo.RedisInstanceRole.Unknown) yield return MonitorStatus.Critical;
             if (Info.LastPollStatus == FetchStatus.Fail) yield return MonitorStatus.Warning;
             if (IsSlave && Replication.MasterLinkStatus != "up") yield return MonitorStatus.Warning;

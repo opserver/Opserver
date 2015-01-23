@@ -205,7 +205,7 @@ foreach (var s in server.SlaveConnections) {
                 <tbody class="node-group">
                     @foreach (var m in missing)
                     {
-                        <tr>
+                        <tr class="@m.RowClass()">
                             <td>@m.Name</td>
                             <td>@m.IconSpan() <a href="#" class="node-name-link">@m.Host</a> <span class="note">(@m.Port)</span></td>
                             <td>@ServerRole(m.Role)</td>
