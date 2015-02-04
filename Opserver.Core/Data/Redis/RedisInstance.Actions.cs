@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             using (var log = new StringWriter())
             {
-                this._connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.All, log);
+                this._connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast | ReplicationChangeOptions.SetTiebreaker, log);
                 return log.ToString();
             }
         }

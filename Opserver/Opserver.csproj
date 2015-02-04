@@ -99,7 +99,7 @@
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.394\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\packages\StackExchange.Redis.1.0.403\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="Svg, Version=0.5.2.17984, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

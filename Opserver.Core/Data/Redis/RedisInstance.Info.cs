@@ -62,6 +62,16 @@ namespace StackExchange.Opserver.Data.Redis
             get { return IsSlave && (Replication.MasterLinkStatus != "up" || Info.SafeData(true).Replication.MastSyncLeftBytes > 0); }
         }
 
+        public RedisInstance TopMaster
+        {
+            get
+            {
+                var top = this;
+                while (top.Master != null) { top = top.Master; }
+                return top;
+            }
+        }
+
         public RedisInstance Master
         {
             get
