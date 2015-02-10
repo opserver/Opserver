@@ -73,6 +73,17 @@ namespace StackExchange.Opserver
             get { return Context.User as User; }
         }
 
+        public static bool IsSecureConnection
+        {
+            get
+            {
+                return Request.IsSecureConnection ||
+                       // This can be "http", "https", or the more fun "https, http, https, https" even.
+                       (Request.Headers["X-Forwarded-Proto"] != null &&
+                        Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
+            }
+        }
+
         private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
         
         /// <summary>

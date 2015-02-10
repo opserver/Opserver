@@ -25,7 +25,10 @@ namespace StackExchange.Opserver.Controllers
             var vd = new LoginModel();
             if (Current.Security.ValidateUser(user, pass))
             {
-                FormsAuthentication.SetAuthCookie(user, true);
+                var cookie = FormsAuthentication.GetAuthCookie(user, true);
+                if (Current.IsSecureConnection) cookie.Secure = true;
+                Response.Cookies.Add(cookie);
+
                 return Redirect(url.HasValue() ? url : "/");
             }
             vd.ErrorMessage = "Login failed";

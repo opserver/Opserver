@@ -86,7 +86,6 @@ namespace StackExchange.Opserver.Data
             List<string> map;
             if (Current.Settings.TeamCity.ServerMaps.TryGetValue(server.ToLowerInvariant(), out map))
             {
-                //var builds = csv.Split(StringSplits.Comma_SemiColon).ToList();
                 if(map.Any())
                 {
                     return map.SelectMany(GetBuildsById).OrderBy(b => b.StartDate).ToList();
