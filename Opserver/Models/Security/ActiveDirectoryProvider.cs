@@ -63,7 +63,7 @@ namespace StackExchange.Opserver.Models.Security
                             });
                         return group ?? old ?? new List<string>();
                     }
-                }, 60 * 60, 60 * 60 * 24);
+                }, 5 * 60, 60 * 60 * 24);
         }
 
         public T RunCommand<T>(Func<PrincipalContext, T> command, int retries = 3)
