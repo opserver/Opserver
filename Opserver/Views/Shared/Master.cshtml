@@ -11,8 +11,9 @@
     <meta name="viewport" content="width=device-width">
     <link href="@Url.CacheBreaker("/Content/Styles.css")" rel="stylesheet" type="text/css" />
     <link href="@Url.CacheBreaker("/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
-    @Scripts.Render("~/scripts/plugins.js")    @Scripts.Render("~/scripts/scripts.js")    <script>
+    <script src="http://libs.useso.com/js/jquery/1.10.2/jquery.min.js"></script>
+    @Scripts.Render("~/scripts/plugins.js")    
+    @Scripts.Render("~/scripts/scripts.js")    <script>
         $(function() {
             Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', HeaderRefresh: 10 });
             @if (topNodes != null && topNodes.AllNodes != null && topNodes.AllNodes.Any())
