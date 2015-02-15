@@ -30,14 +30,14 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Semilcolon delimited list of groups that can administer the entire site, exceptions, HAProxy servers, etc.
+        /// Semicolon delimited list of groups that can administer the entire site, exceptions, HAProxy servers, etc.
         /// </summary>
         public static string AdminGroups
         {
             get { return ConfigurationManager.AppSettings["AdminGroups"].IsNullOrEmptyReturn(""); }
         }
         /// <summary>
-        /// Semilcolon delimited list of groups that can view the entire site, exceptions, HAProxy servers, etc.
+        /// Semicolon delimited list of groups that can view the entire site, exceptions, HAProxy servers, etc.
         /// </summary>
         public static string ViewGroups
         {

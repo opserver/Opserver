@@ -6,16 +6,18 @@ using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Exceptions;
+using StackExchange.Opserver.Data.Jira;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.Exceptions)] 
+    [OnlyAllow(Roles.Exceptions)]
     public class ExceptionsController : StatusController
     {
         protected override ISecurableSection SettingsSection
         {
             get { return Current.Settings.Exceptions; }
         }
+
         protected override string TopTab
         {
             get { return TopTabs.BuiltIn.Exceptions; }
@@ -25,7 +27,12 @@ namespace StackExchange.Opserver.Controllers
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
-            base.OnActionExecuting(filterContext); 
+            base.OnActionExecuting(filterContext);
+        }
+
+        private JiraSettings JiraSettings
+        {
+            get { return Current.Settings.Jira; }
         }
 
         [Route("exceptions")]
@@ -218,6 +225,42 @@ namespace StackExchange.Opserver.Controllers
                             MostRecent = g.Max(a => a.MostRecent)
                         })
                 );
+        }
+
+        [Route("exceptions/jiralinks"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
+        public ActionResult JiraLinks(string appName)
+        {
+            var issues = JiraSettings.GetIssuesForApplication(appName);
+            return View("Exceptions.Jira", issues);
+        }
+
+        [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        public ActionResult JiraLinks(string log, Guid id,int  actionid, bool redirect = false)
+        {
+            var e = ExceptionStores.GetError(log, id);
+
+            var issue = JiraSettings.Issues.FirstOrDefault(i => i.Id == actionid);
+            var jiraClient = new JiraClient(JiraSettings);
+            var result = jiraClient.CreateIssue(issue, e);
+
+            if (String.IsNullOrWhiteSpace(result.Key))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Can not create issue"
+                });
+            }
+            else
+            {
+                return Json(new
+                {
+                    success = true,
+                    issueKey = result.Key,
+                    browseUrl = result.BrowseUrl
+                });
+            }
+
         }
     }
 }

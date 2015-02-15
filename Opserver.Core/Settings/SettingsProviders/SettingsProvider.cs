@@ -20,6 +20,8 @@ namespace StackExchange.Opserver.SettingsProviders
         public PollingSettings Polling { get { return GetSettings<PollingSettings>(); } }
         public RedisSettings Redis { get { return GetSettings<RedisSettings>(); } }
         public SQLSettings SQL { get { return GetSettings<SQLSettings>(); } }
+        public JiraSettings Jira { get { return GetSettings<JiraSettings>(); } }
+
         // Generic build settings later
         public TeamCitySettings TeamCity { get { return GetSettings<TeamCitySettings>(); } }
 
