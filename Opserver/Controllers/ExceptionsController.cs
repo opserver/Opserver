@@ -238,10 +238,10 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult JiraLinks(string log, Guid id,int  actionid, bool redirect = false)
         {
             var e = ExceptionStores.GetError(log, id);
-
+            var user = Current.User;
             var issue = JiraSettings.Issues.FirstOrDefault(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = jiraClient.CreateIssue(issue, e);
+            var result = jiraClient.CreateIssue(issue, e,user == null? String.Empty:user.AccountName);
 
             if (String.IsNullOrWhiteSpace(result.Key))
             {

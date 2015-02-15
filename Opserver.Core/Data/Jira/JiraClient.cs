@@ -63,7 +63,7 @@ namespace StackExchange.Opserver.Data.Jira
                                                                  "SERVER_SOFTWARE"
                                                              };
         }
-        public JiraCreateIssueResponse CreateIssue(JiraIssue issue, Error error)
+        public JiraCreateIssueResponse CreateIssue(JiraIssue issue, Error error, string accountName)
         {
 
             var url = GetUrl(issue);
@@ -78,8 +78,8 @@ namespace StackExchange.Opserver.Data.Jira
             Dictionary<string, object> fields = new Dictionary<string, object>();
             fields.Add("project", new { key = projectKey });
             fields.Add("issuetype", new { name = issue.Name });
-            fields.Add("summary", error.Message);
-            fields.Add("description", RenderDescription(error));
+            fields.Add("summary", error.Message.TruncateWithEllipsis(255));
+            fields.Add("description", RenderDescription(error,accountName));
             var components = issue.GetComponentsForApplication(error.ApplicationName);
 
             if(components != null && components.Count > 0)
@@ -91,17 +91,6 @@ namespace StackExchange.Opserver.Data.Jira
 
             if(labels != null && labels.Length > 0)
                 fields.Add("labels", labels);
-
-             //new
-             //   {
-             //       project = new { key = projectKey },
-             //       issuetype = new { name = issue.Name },
-             //       summary = error.Message,
-             //       description = RenderDescription(error),
-             //       components = issue.GetComponentsForApplication(error.ApplicationName),
-             //       labels = String.IsNullOrWhiteSpace(issue.Labels) ? null : issue.Labels.Split(new char[1]{','},StringSplitOptions.RemoveEmptyEntries)
-             //   }
-
 
             var payload = new
             {
@@ -220,15 +209,21 @@ namespace StackExchange.Opserver.Data.Jira
 
         }
 
-        private string RenderDescription(Error error)
+        private string RenderDescription(Error error,string accountName)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{noformat}");
+            if(!String.IsNullOrWhiteSpace(accountName))
+            {
+                sb.AppendFormat("Reporter Account Name: {0}\r\n", accountName);
+            }
+            sb.AppendFormat("Error Guid: {0}\r\n", error.GUID);
             sb.AppendFormat("App. Name: {0}\r\n", error.ApplicationName);
             sb.AppendFormat("Machine Name: {0}\r\n", error.MachineName);
             sb.AppendFormat("Host: {0}\r\n", error.Host);
             sb.AppendFormat("Created On (UTC): {0}\r\n", error.CreationDate);
             sb.AppendFormat("Url: {0}\r\n", error.Url);
+            sb.AppendFormat("HTTP Method: {0}\r\n", error.HTTPMethod);
             sb.AppendFormat("IP Address: {0}\r\n", error.IPAddress);
             sb.AppendFormat("Count: {0}\r\n", error.DuplicateCount);
 
