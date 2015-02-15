@@ -49,6 +49,8 @@ In order to use Jira
 * You have to enable Exception monitoring 
 * Add JiraSettings.json file under `/config` folder (JiraSettings.json.example file is included)
 
+[Jira screenshots](http://imgur.com/a/XtW0j)
+
 Open Source Projects in Use
 ---------
 [BookSleeve](https://code.google.com/p/booksleeve/) by Marc Gravell  
