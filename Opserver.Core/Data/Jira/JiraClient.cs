@@ -78,7 +78,7 @@ namespace StackExchange.Opserver.Data.Jira
             Dictionary<string, object> fields = new Dictionary<string, object>();
             fields.Add("project", new { key = projectKey });
             fields.Add("issuetype", new { name = issue.Name });
-            fields.Add("summary", error.Message.TruncateWithEllipsis(255));
+            fields.Add("summary", error.Message.CleanCRLF().TruncateWithEllipsis(255));
             fields.Add("description", RenderDescription(error,accountName));
             var components = issue.GetComponentsForApplication(error.ApplicationName);
 
