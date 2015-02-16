@@ -1,672 +1,656 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-    <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProductVersion>
-        </ProductVersion>
-        <SchemaVersion>2.0</SchemaVersion>
-        <ProjectGuid>{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}</ProjectGuid>
-        <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>StackExchange.Opserver</RootNamespace>
-        <AssemblyName>StackExchange.Opserver</AssemblyName>
-        <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-        <MvcBuildViews>true</MvcBuildViews>
-        <UseIISExpress>false</UseIISExpress>
-        <FileUpgradeFlags>
-        </FileUpgradeFlags>
-        <UpgradeBackupLocation>
-        </UpgradeBackupLocation>
-        <OldToolsVersion>4.0</OldToolsVersion>
-        <TargetFrameworkProfile />
-        <IISExpressSSLPort />
-        <IISExpressAnonymousAuthentication />
-        <IISExpressWindowsAuthentication />
-        <IISExpressUseClassicPipelineMode />
-        <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <Optimize>false</Optimize>
-        <OutputPath>bin\</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <Prefer32Bit>false</Prefer32Bit>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>bin\</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <Prefer32Bit>false</Prefer32Bit>
-    </PropertyGroup>
-    <ItemGroup>
-        <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
-        </Reference>
-        <Reference Include="EasyHttp, Version=1.6.58.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
-        </Reference>
-        <Reference Include="Jil, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Jil.1.7.0\lib\net45\Jil.dll</HintPath>
-        </Reference>
-        <Reference Include="JsonFx, Version=2.0.1209.2802, Culture=neutral, PublicKeyToken=315052dd637f8a52, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
-        </Reference>
-        <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <Private>True</Private>
-            <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
-        </Reference>
-        <Reference Include="Microsoft.CSharp" />
-        <Reference Include="MiniProfiler, Version=3.1.1.139, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\MiniProfiler.3.1.1.139\lib\net40\MiniProfiler.dll</HintPath>
-        </Reference>
-        <Reference Include="MiniProfiler.Mvc, Version=3.0.11.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\MiniProfiler.MVC4.3.0.11\lib\net40\MiniProfiler.Mvc.dll</HintPath>
-        </Reference>
-        <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-        </Reference>
-        <Reference Include="Sigil, Version=4.2.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Sigil.4.2.1\lib\net45\Sigil.dll</HintPath>
-        </Reference>
-        <Reference Include="SnmpSharpNet, Version=0.9.3.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\SnmpSharpNet.0.9.3\lib\SnmpSharpNet.dll</HintPath>
-        </Reference>
-        <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
-        </Reference>
-        <Reference Include="StackExchange.Exceptional, Version=1.0.0.110, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\StackExchange.Exceptional.1.0.110\lib\StackExchange.Exceptional.dll</HintPath>
-        </Reference>
-        <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\StackExchange.Redis.1.0.322\lib\net45\StackExchange.Redis.dll</HintPath>
-        </Reference>
-        <Reference Include="Svg, Version=0.5.2.17984, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\Lib\Svg.dll</HintPath>
-        </Reference>
-        <Reference Include="System" />
-        <Reference Include="System.Data" />
-        <Reference Include="System.Data.DataSetExtensions" />
-        <Reference Include="System.DirectoryServices.AccountManagement" />
-        <Reference Include="System.Drawing" />
-        <Reference Include="System.Management" />
-        <Reference Include="System.Runtime.Serialization" />
-        <Reference Include="System.Web.DataVisualization" />
-        <Reference Include="System.Web.Extensions" />
-        <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.Helpers.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web.Mvc, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.0\lib\net45\System.Web.Mvc.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.0\lib\net45\System.Web.Razor.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web" />
-        <Reference Include="System.Web.Abstractions" />
-        <Reference Include="System.Web.Routing" />
-        <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
-        </Reference>
-        <Reference Include="System.Xml" />
-        <Reference Include="System.Configuration" />
-        <Reference Include="TeamCitySharp, Version=0.3.3.0, Culture=neutral, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\TeamCitySharp.0.3.5\lib\net40\TeamCitySharp.dll</HintPath>
-        </Reference>
-        <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-            <SpecificVersion>False</SpecificVersion>
-            <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Config\Readme.txt" />
-        <Content Include="Content\Common.css">
-            <DependentUpon>Common.less</DependentUpon>
-        </Content>
-        <Content Include="Content\Common.min.css">
-            <DependentUpon>Common.less</DependentUpon>
-        </Content>
-        <Content Include="Content\img\arrow-small.png" />
-        <Content Include="Content\img\database\blue.png" />
-        <Content Include="Content\img\database\grey.png" />
-        <Content Include="Content\img\database\red.png" />
-        <Content Include="Content\img\database\yellow.png" />
-        <Content Include="Content\img\lock-off.png" />
-        <Content Include="Content\img\lock-on.png" />
-        <Content Include="Content\img\logo\icon-128.png" />
-        <Content Include="Content\img\logo\icon-152.png" />
-        <Content Include="Content\img\logo\icon-16.png" />
-        <Content Include="Content\img\logo\icon-256.png" />
-        <Content Include="Content\img\logo\icon-316.png" />
-        <Content Include="Content\img\logo\icon-32.png" />
-        <Content Include="Content\img\logo\icon-64.png" />
-        <Content Include="Content\img\logo\icon-76.png" />
-        <Content Include="Content\img\logo\logo-big.png" />
-        <Content Include="Content\img\logo\logo-login%402x.png" />
-        <Content Include="Content\img\logo\logo-login.png" />
-        <Content Include="Content\img\logo\logo-text%402x.png" />
-        <Content Include="Content\img\logo\logo-text.png" />
-        <Content Include="Content\img\node\node-select-all.png" />
-        <Content Include="Content\img\node\node-select-child.png" />
-        <Content Include="Content\img\node\node-select-next.png" />
-        <Content Include="Content\img\node\node-select-previous.png" />
-        <Content Include="Content\img\node\node-select.png" />
-        <Content Include="Content\img\node\node.png" />
-        <Content Include="Content\img\refresh.png" />
-        <Content Include="Content\img\square-minus-disabled.png" />
-        <Content Include="Content\img\square-minus.png" />
-        <Content Include="Content\img\square-plus-disabled.png" />
-        <Content Include="Content\img\square-plus.png" />
-        <Content Include="Content\img\x.png" />
-        <Content Include="Content\js\plugins\colorbrewer.js" />
-        <Content Include="Content\_Styles.Exceptions.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\Common.less" />
-        <Content Include="Content\_Styles.HAProxy.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\_Styles.Graphs.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\_Styles.About.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="App_Code\Helpers.cshtml" />
-        <Content Include="Config\DashboardSettings.json.example" />
-        <Content Include="Config\ElasticSettings.json.example" />
-        <Content Include="Config\ExceptionsSettings.json.example" />
-        <Content Include="Config\HAProxySettings.json.example" />
-        <Content Include="Config\PollingSettings.json.example" />
-        <Content Include="Config\RedisSettings.json.example" />
-        <Content Include="Config\SecuritySettings.config.example" />
-        <Content Include="Config\SQLSettings.json.example" />
-        <Content Include="Config\TeamCitySettings.json.example" />
-        <Content Include="Content\img\logo\logo.eps" />
-        <Content Include="Content\Styles.css.map">
-            <DependentUpon>Styles.css</DependentUpon>
-        </Content>
-        <Content Include="Config\DashboardSettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="Config\ExceptionsSettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="Config\SecuritySettings.config">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="Config\SQLSettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <Content Include="Config\JiraSettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </Content>
-        <None Include="Config\JiraSettings.json.example">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Include="Content\_Styles.HeadsUp.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </None>
-        <None Include="Content\_Styles.Mobile.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </None>
-        <Content Include="Content\_Styles.Plugins.toastr.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\_Styles.Plugins.additional.less" />
-        <None Include="Content\_Styles.Plugins.prettify.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </None>
-        <Content Include="Content\js\plugins\toastr.js" />
-        <Content Include="Content\js\plugins\isotope.js" />
-        <Compile Include="Controllers\AdminController.cs" />
-        <Compile Include="Controllers\CacheController.cs" />
-        <Compile Include="Controllers\DataController.cs" />
-        <Compile Include="Controllers\CloudFlareController.cs" />
-        <Compile Include="Controllers\HubController.cs" />
-        <Compile Include="Controllers\PollController.cs" />
-        <Compile Include="Controllers\RedisController.Admin.cs">
-            <DependentUpon>RedisController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\RedisController.cs" />
-        <Compile Include="Controllers\DashboardController.Polling.cs">
-            <DependentUpon>DashboardController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\ElasticController.cs" />
-        <Compile Include="Controllers\SQLController.Admin.cs">
-            <DependentUpon>SQLController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Helpers\PerfCounters.cs" />
-        <Compile Include="Helpers\ProfiledModelBinder.cs" />
-        <Compile Include="Models\ExtensionMethods.cs" />
-        <Compile Include="Models\TopTabs.cs" />
-        <Compile Include="SecuritySettings.cs" />
-        <Compile Include="SiteSettings.cs" />
-        <Compile Include="Views\CloudFlare\Dashboard.Model.cs" />
-        <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
-        <Compile Include="Views\Dashboard\Ranges.cs" />
-        <Compile Include="Views\Dashboard\Node.Model.cs">
-            <DependentUpon>Node.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Elastic\Dashboard.Model.cs">
-            <DependentUpon>Dashboard.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Home\About.Model.cs" />
-        <Compile Include="Views\Hub\HubModel.cs" />
-        <Compile Include="Views\Redis\Dashboard.Model.cs">
-            <DependentUpon>Dashboard.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Shared\PageNotFound.Model.cs">
-            <DependentUpon>PageNotFound.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Shared\TopBoxOptions.cs" />
-        <Compile Include="Views\Shared\TopRefresh.Model.cs">
-            <DependentUpon>TopRefresh.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\SQL\Dashboard.Model.cs">
-            <DependentUpon>Dashboard.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\SQL\Databases.Model.cs">
-            <DependentUpon>Databases.cshtml</DependentUpon>
-        </Compile>
-        <None Include="Help\SQL\WaitStats.md" />
-        <Content Include="Views\CloudFlare\Railguns.cshtml" />
-        <Content Include="Views\CloudFlare\Dashboard.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml" />
-        <Content Include="Views\Redis\Dashboard.RoleActions.cshtml" />
-        <Content Include="Views\Elastic\_ViewStart.cshtml" />
-        <Content Include="Views\Redis\_ViewStart.cshtml" />
-        <Content Include="Views\CloudFlare\_ViewStart.cshtml" />
-        <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml" />
-        <Content Include="Views\CloudFlare\DNS.cshtml" />
-        <Content Include="Views\SQL\Instance.DBFiles.cshtml" />
-
-        <None Include="Views\SQL\Instance.Configuration.cshtml">
-            <DependentUpon>Instance.cshtml</DependentUpon>
-        </None>
-        <Compile Include="Views\SQL\Ops.Top.Detail.Model.cs">
-            <DependentUpon>Operations.Top.Detail.cshtml</DependentUpon>
-        </Compile>
-        <Content Include="App_Code\SQLHelpers.cshtml" />
-        <None Include="Content\Styles.less">
-            <Compile>False</Compile>
-            <Minify>False</Minify>
-        </None>
-        <Compile Include="Controllers\DashboardController.cs" />
-        <Compile Include="Controllers\ExceptionsController.cs" />
-        <Compile Include="Controllers\HAProxyController.Admin.cs">
-            <DependentUpon>HAProxyController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\HAProxyController.cs" />
-        <Compile Include="Controllers\LoginController.cs" />
-        <Compile Include="Controllers\ErrorController.cs" />
-        <Compile Include="Controllers\ExportController.cs" />
-        <Compile Include="Controllers\GraphController.cs" />
-        <Compile Include="Controllers\GraphController.HAProxy.cs">
-            <DependentUpon>GraphController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\GraphController.Json.cs">
-            <DependentUpon>GraphController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\GraphController.Spark.cs">
-            <DependentUpon>GraphController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\HomeController.cs" />
-        <Compile Include="Controllers\SQLController.cs" />
-        <Compile Include="Controllers\StatusController.Authentication.cs">
-            <DependentUpon>StatusController.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Controllers\StatusController.cs" />
-        <Compile Include="Current.Security.cs">
-            <DependentUpon>Current.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Helpers\OnlyAllowAttribute.cs" />
-        <Compile Include="Models\Security\ActiveDirectoryProvider.cs" />
-        <Compile Include="Models\Roles.cs" />
-        <Compile Include="Models\Security\EveryonesReadOnlyProvider.cs" />
-        <Compile Include="Models\Security\EveryonesAnAdminProvider.cs" />
-        <Compile Include="Models\Security\ISecuritySettings.cs" />
-        <Compile Include="Models\Security\SecurityProvider.cs" />
-        <Compile Include="Models\User.cs" />
-        <Compile Include="Current.cs" />
-        <Compile Include="Current.ViewSettings.cs">
-            <DependentUpon>Current.cs</DependentUpon>
-        </Compile>
-        <Compile Include="ExtensionMethods.cs" />
-        <Compile Include="Global.asax.cs">
-            <DependentUpon>Global.asax</DependentUpon>
-        </Compile>
-        <Compile Include="Helpers\DataKeys.cs" />
-        <Compile Include="Helpers\FileSizeFormatProvider.cs" />
-        <Compile Include="Helpers\HtmlUtilities.CacheBreaker.cs">
-            <DependentUpon>HtmlUtilities.cs</DependentUpon>
-        </Compile>
-        <Compile Include="Helpers\HtmlUtilities.cs" />
-        <Compile Include="Helpers\Status.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs" />
-        <Compile Include="Views\Exceptions\Exceptions.Model.cs">
-            <DependentUpon>Exceptions.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\HAProxy\HAProxy.Model.cs">
-            <DependentUpon>HAProxy.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Dashboard\Dashboard.Model.cs">
-            <DependentUpon>Dashboard.cshtml</DependentUpon>
-        </Compile>
-        <Compile Include="Views\Login\Login.Model.cs">
-            <DependentUpon>Login.cshtml</DependentUpon>
-        </Compile>
-        <EmbeddedResource Include="Content\img\loading.gif" />
-        <Content Include="Content\img\query-plan\arithmetic_expression.gif" />
-        <Content Include="Content\img\query-plan\assert.gif" />
-        <Content Include="Content\img\query-plan\assign.gif" />
-        <Content Include="Content\img\query-plan\bitmap.gif" />
-        <Content Include="Content\img\query-plan\bookmark_lookup.gif" />
-        <Content Include="Content\img\query-plan\clustered_index_delete.gif" />
-        <Content Include="Content\img\query-plan\clustered_index_insert.gif" />
-        <Content Include="Content\img\query-plan\clustered_index_scan.gif" />
-        <Content Include="Content\img\query-plan\clustered_index_seek.gif" />
-        <Content Include="Content\img\query-plan\clustered_index_update.gif" />
-        <Content Include="Content\img\query-plan\collapse.gif" />
-        <Content Include="Content\img\query-plan\compute_scalar.gif" />
-        <Content Include="Content\img\query-plan\concatenation.gif" />
-        <Content Include="Content\img\query-plan\constant_scan.gif" />
-        <Content Include="Content\img\query-plan\convert.gif" />
-        <Content Include="Content\img\query-plan\declare.gif" />
-        <Content Include="Content\img\query-plan\deleted_scan.gif" />
-        <Content Include="Content\img\query-plan\distribute_streams.gif" />
-        <Content Include="Content\img\query-plan\dynamic.gif" />
-        <Content Include="Content\img\query-plan\fetch_query.gif" />
-        <Content Include="Content\img\query-plan\filter.gif" />
-        <Content Include="Content\img\query-plan\gather_streams.gif" />
-        <Content Include="Content\img\query-plan\hash_match.gif" />
-        <Content Include="Content\img\query-plan\if.gif" />
-        <Content Include="Content\img\query-plan\inserted_scan.gif" />
-        <Content Include="Content\img\query-plan\intrinsic.gif" />
-        <Content Include="Content\img\query-plan\keyset.gif" />
-        <Content Include="Content\img\query-plan\log_row_scan.gif" />
-        <Content Include="Content\img\query-plan\merge_interval.gif" />
-        <Content Include="Content\img\query-plan\merge_join.gif" />
-        <Content Include="Content\img\query-plan\nested_loops.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_delete.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_insert.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_scan.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_seek.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_spool.gif" />
-        <Content Include="Content\img\query-plan\nonclustered_index_update.gif" />
-        <Content Include="Content\img\query-plan\online_index_insert.gif" />
-        <Content Include="Content\img\query-plan\parameter_table_scan.gif" />
-        <Content Include="Content\img\query-plan\population_query.gif" />
-        <Content Include="Content\img\query-plan\rdi_lookup.gif" />
-        <Content Include="Content\img\query-plan\refresh_query.gif" />
-        <Content Include="Content\img\query-plan\remote_delete.gif" />
-        <Content Include="Content\img\query-plan\remote_insert.gif" />
-        <Content Include="Content\img\query-plan\remote_query.gif" />
-        <Content Include="Content\img\query-plan\remote_scan.gif" />
-        <Content Include="Content\img\query-plan\remote_update.gif" />
-        <Content Include="Content\img\query-plan\repartition_streams.gif" />
-        <Content Include="Content\img\query-plan\result.gif" />
-        <Content Include="Content\img\query-plan\row_count_spool.gif" />
-        <Content Include="Content\img\query-plan\segment.gif" />
-        <Content Include="Content\img\query-plan\sequence.gif" />
-        <Content Include="Content\img\query-plan\sequenceproject.gif" />
-        <Content Include="Content\img\query-plan\snapshot.gif" />
-        <Content Include="Content\img\query-plan\sort.gif" />
-        <Content Include="Content\img\query-plan\split.gif" />
-        <Content Include="Content\img\query-plan\spool.gif" />
-        <Content Include="Content\img\query-plan\stream_aggregate.gif" />
-        <Content Include="Content\img\query-plan\switch.gif" />
-        <Content Include="Content\img\query-plan\table_delete.gif" />
-        <Content Include="Content\img\query-plan\table_insert.gif" />
-        <Content Include="Content\img\query-plan\table_scan.gif" />
-        <Content Include="Content\img\query-plan\table_spool.gif" />
-        <Content Include="Content\img\query-plan\table_update.gif" />
-        <Content Include="Content\img\query-plan\table_valued_function.gif" />
-        <Content Include="Content\img\query-plan\top.gif" />
-        <Content Include="Content\img\query-plan\udx.gif" />
-        <Content Include="Content\img\query-plan\while.gif" />
-        <Content Include="Content\js\plugins\autocomplete.js" />
-        <Content Include="Content\js\plugins\cookie.js" />
-        <Content Include="Content\js\plugins\d3.v3.js" />
-        <Content Include="Content\js\plugins\prettify.js" />
-        <Content Include="Content\js\plugins\qp.js" />
-        <Content Include="Content\js\plugins\simplemodal.js" />
-        <Content Include="Content\js\plugins\tablesorter.js" />
-        <Content Include="Content\Login.js" />
-        <Content Include="Content\img\search-icon.png" />
-        <Content Include="Content\img\apple-touch-icon.png" />
-        <Content Include="Content\img\progress-dots.gif" />
-        <Content Include="Content\Styles.css">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\Styles.min.css">
-            <DependentUpon>Styles.css</DependentUpon>
-        </Content>
-        <Content Include="Content\transforms\qp.xslt">
-            <SubType>Designer</SubType>
-        </Content>
-        <Content Include="Views\Dashboard\Dashboard.Table.cshtml">
-            <DependentUpon>Dashboard.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Shared\TopTabs.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.Detail.cshtml">
-            <DependentUpon>Exceptions.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Exceptions\Exceptions.Preview.cshtml">
-            <DependentUpon>Exceptions.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Exceptions\Exceptions.Table.cshtml">
-        </Content>
-        <Content Include="Views\Exceptions\Exceptions.Jira.cshtml">
-            <DependentUpon>Exceptions.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\HAProxy\HAProxy.Dashboard.cshtml">
-            <DependentUpon>HAProxy.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\HAProxy\HAProxy.Detailed.cshtml">
-            <DependentUpon>HAProxy.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Shared\AccessDenied.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.Search.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.Similar.cshtml" />
-        <Content Include="Views\Home\About.cshtml" />
-        <Content Include="Views\SQL\Dashboard.cshtml" />
-        <Content Include="Views\SQL\Servers.ClusterDetail.cshtml">
-            <DependentUpon>Servers.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\SQL\Operations.Active.cshtml" />
-        <Content Include="Views\SQL\Operations.Top.cshtml" />
-        <Content Include="Views\SQL\Operations.Top.Detail.cshtml">
-            <DependentUpon>Operations.Top.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Dashboard\Node.Current.VMHost.cshtml" />
-        <Content Include="Views\Exceptions\Exceptions.Table.mobile.cshtml">
-            <DependentUpon>Exceptions.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\Home\Test.cshtml" />
-        <Content Include="Views\Dashboard\Node.Current.Interfaces.cshtml" />
-        <Content Include="Views\Elastic\Dashboard.cshtml" />
-        <Content Include="Views\Elastic\Cluster.cshtml" />
-        <Content Include="Views\Elastic\Cluster.Shards.cshtml" />
-        <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
-        <Content Include="Views\Hub\Index.cshtml" />
-        <Content Include="Views\Dashboard\Node.Current.Stats.cshtml" />
-        <Content Include="Views\Redis\Dashboard.cshtml" />
-        <Content Include="Views\Redis\AllServers.cshtml" />
-        <Content Include="Views\Redis\Server.Info.cshtml" />
-        <Content Include="Views\Redis\Server.Clients.cshtml" />
-        <Content Include="Views\Redis\Server.Clients.ByIP.cshtml" />
-        <Content Include="Views\Redis\Server.cshtml" />
-        <Content Include="Views\Redis\Server.Analysis.Memory.cshtml" />
-        <Content Include="Views\Redis\Server.Clients.ByName.cshtml" />
-        <Content Include="Views\SQL\Databases.cshtml" />
-        <Content Include="Views\SQL\Instance.Connections.cshtml">
-            <DependentUpon>Instance.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\SQL\Instance.cshtml" />
-        <Content Include="Views\SQL\Instance.Errors.cshtml">
-            <DependentUpon>Instance.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\SQL\Instance.Jobs.cshtml">
-            <DependentUpon>Instance.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\SQL\Instance.Memory.cshtml">
-            <DependentUpon>Instance.cshtml</DependentUpon>
-        </Content>
-        <Content Include="Views\SQL\Instance.Selector.cshtml" />
-        <Content Include="Views\SQL\Connections.cshtml" />
-        <Content Include="Views\SQL\Servers.AvailabilityGroup.cshtml" />
-        <Content Include="Views\Hub\Dashboard.Node.cshtml" />
-        <Content Include="Views\Hub\SQL.AvailabilityGroup.cshtml" />
-        <Content Include="Content\_Styles.Reset.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\_Styles.SQL.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Content\_Styles.Redis.less">
-            <DependentUpon>Styles.less</DependentUpon>
-        </Content>
-        <Content Include="Views\Home\About.Caches.cshtml" />
-        <Content Include="Views\SQL\Databases.Modal.cshtml" />
-        <Content Include="Views\SQL\Databases.Modal.Tables.cshtml" />
-        <Content Include="Views\SQL\Databases.Modal.Views.cshtml" />
-        <Content Include="Views\Elastic\Node.cshtml" />
-        <Content Include="Views\Elastic\Node.Selector.cshtml" />
-        <Content Include="Views\Elastic\Node.Settings.cshtml" />
-        <Content Include="Views\Elastic\Indices.cshtml" />
-        <Content Include="Views\Elastic\Cluster.Selector.cshtml" />
-        <Content Include="Views\Elastic\Indices.Shards.cshtml" />
-        <Content Include="Views\Redis\Instance.cshtml" />
-        <Content Include="Views\Redis\Instance.Clients.cshtml" />
-        <Content Include="Views\Redis\Instance.Selector.cshtml" />
-        <Content Include="Views\Shared\IssuesList.cshtml" />
-        <Content Include="Views\Hub\Elastic.Cluster.cshtml">
-            <SubType>Code</SubType>
-        </Content>
-        <Content Include="Views\Hub\HAProxy.Group.cshtml" />
-        <Content Include="Views\Shared\TopRefresh.cshtml" />
-        <Content Include="Views\Shared\NoConfiguration.cshtml" />
-        <Content Include="Views\SQL\Servers.cshtml" />
-        <Content Include="Views\Redis\Instance.SlowLog.cshtml" />
-        <Content Include="Views\Redis\Instance.Config.cshtml" />
-        <Content Include="Views\SQL\_ViewStart.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Content\img\ajax-loader.gif" />
-        <Content Include="Content\img\se-stats.png" />
-        <Content Include="Content\Login.css" />
-        <Content Include="Content\js\Scripts.js" />
-        <Content Include="favicon.ico" />
-        <Content Include="Global.asax" />
-        <Content Include="Web.config">
-            <SubType>Designer</SubType>
-        </Content>
-        <Content Include="Views\Web.config">
-            <SubType>Designer</SubType>
-        </Content>
-        <Content Include="Views\_ViewStart.cshtml" />
-        <Content Include="Views\Shared\Error.cshtml" />
-        <Content Include="Views\Shared\Master.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="packages.config" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\Shared\PageNotFound.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\Dashboard\Node.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\Dashboard\Dashboard.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\HAProxy\HAProxy.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\HAProxy\HAProxy.Traffic.cshtml">
-            <DependentUpon>HAProxy.cshtml</DependentUpon>
-        </Content>
-    </ItemGroup>
-    <ItemGroup>
-        <Content Include="Views\Login\Login.cshtml" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj">
-            <Project>{c58aff99-f4d9-4a83-866e-18da0a633f6b}</Project>
-            <Name>Opserver.Core</Name>
-        </ProjectReference>
-    </ItemGroup>
-    <PropertyGroup>
-        <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
-        <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-    </PropertyGroup>
-    <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-    <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>
+    </ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>StackExchange.Opserver</RootNamespace>
+    <AssemblyName>StackExchange.Opserver</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <MvcBuildViews>true</MvcBuildViews>
+    <UseIISExpress>false</UseIISExpress>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>4.0</OldToolsVersion>
+    <TargetFrameworkProfile />
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+    <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="EasyHttp, Version=1.6.58.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
+    </Reference>
+    <Reference Include="Jil, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Jil.1.7.0\lib\net45\Jil.dll</HintPath>
+    </Reference>
+    <Reference Include="JsonFx, Version=2.0.1209.2802, Culture=neutral, PublicKeyToken=315052dd637f8a52, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <Private>True</Private>
+      <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="MiniProfiler, Version=3.1.1.139, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MiniProfiler.3.1.1.139\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniProfiler.Mvc, Version=3.0.11.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\MiniProfiler.MVC4.3.0.11\lib\net40\MiniProfiler.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Sigil, Version=4.2.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Sigil.4.2.1\lib\net45\Sigil.dll</HintPath>
+    </Reference>
+    <Reference Include="SnmpSharpNet, Version=0.9.3.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\SnmpSharpNet.0.9.3\lib\SnmpSharpNet.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Exceptional, Version=1.0.0.110, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\StackExchange.Exceptional.1.0.110\lib\StackExchange.Exceptional.dll</HintPath>
+    </Reference>
+    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\StackExchange.Redis.1.0.322\lib\net45\StackExchange.Redis.dll</HintPath>
+    </Reference>
+    <Reference Include="Svg, Version=0.5.2.17984, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Lib\Svg.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Web.DataVisualization" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=5.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.0\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.0\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.Abstractions" />
+    <Reference Include="System.Web.Routing" />
+    <Reference Include="System.Web.WebPages, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.0\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="TeamCitySharp, Version=0.3.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\TeamCitySharp.0.3.5\lib\net40\TeamCitySharp.dll</HintPath>
+    </Reference>
+    <Reference Include="WebGrease, Version=1.6.5135.21930, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WebGrease.1.6.0\lib\WebGrease.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Config\Readme.txt" />
+    <Content Include="Content\Common.css">
+      <DependentUpon>Common.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Common.min.css">
+      <DependentUpon>Common.less</DependentUpon>
+    </Content>
+    <Content Include="Content\img\arrow-small.png" />
+    <Content Include="Content\img\database\blue.png" />
+    <Content Include="Content\img\database\grey.png" />
+    <Content Include="Content\img\database\red.png" />
+    <Content Include="Content\img\database\yellow.png" />
+    <Content Include="Content\img\lock-off.png" />
+    <Content Include="Content\img\lock-on.png" />
+    <Content Include="Content\img\logo\icon-128.png" />
+    <Content Include="Content\img\logo\icon-152.png" />
+    <Content Include="Content\img\logo\icon-16.png" />
+    <Content Include="Content\img\logo\icon-256.png" />
+    <Content Include="Content\img\logo\icon-316.png" />
+    <Content Include="Content\img\logo\icon-32.png" />
+    <Content Include="Content\img\logo\icon-64.png" />
+    <Content Include="Content\img\logo\icon-76.png" />
+    <Content Include="Content\img\logo\logo-big.png" />
+    <Content Include="Content\img\logo\logo-login%402x.png" />
+    <Content Include="Content\img\logo\logo-login.png" />
+    <Content Include="Content\img\logo\logo-text%402x.png" />
+    <Content Include="Content\img\logo\logo-text.png" />
+    <Content Include="Content\img\node\node-select-all.png" />
+    <Content Include="Content\img\node\node-select-child.png" />
+    <Content Include="Content\img\node\node-select-next.png" />
+    <Content Include="Content\img\node\node-select-previous.png" />
+    <Content Include="Content\img\node\node-select.png" />
+    <Content Include="Content\img\node\node.png" />
+    <Content Include="Content\img\refresh.png" />
+    <Content Include="Content\img\square-minus-disabled.png" />
+    <Content Include="Content\img\square-minus.png" />
+    <Content Include="Content\img\square-plus-disabled.png" />
+    <Content Include="Content\img\square-plus.png" />
+    <Content Include="Content\img\x.png" />
+    <Content Include="Content\js\plugins\colorbrewer.js" />
+    <Content Include="Content\_Styles.Exceptions.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Common.less" />
+    <Content Include="Content\_Styles.HAProxy.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\_Styles.Graphs.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\_Styles.About.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="App_Code\Helpers.cshtml" />
+    <Content Include="Config\DashboardSettings.json.example" />
+    <Content Include="Config\ElasticSettings.json.example" />
+    <Content Include="Config\ExceptionsSettings.json.example" />
+    <Content Include="Config\HAProxySettings.json.example" />
+    <Content Include="Config\PollingSettings.json.example" />
+    <Content Include="Config\RedisSettings.json.example" />
+    <Content Include="Config\SecuritySettings.config.example" />
+    <Content Include="Config\SQLSettings.json.example" />
+    <Content Include="Config\TeamCitySettings.json.example" />
+    <Content Include="Content\img\logo\logo.eps" />
+    <Content Include="Content\Styles.css.map">
+      <DependentUpon>Styles.css</DependentUpon>
+    </Content>
+    <None Include="Config\JiraSettings.json.example">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Content\_Styles.HeadsUp.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </None>
+    <None Include="Content\_Styles.Mobile.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </None>
+    <Content Include="Content\_Styles.Plugins.toastr.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\_Styles.Plugins.additional.less" />
+    <None Include="Content\_Styles.Plugins.prettify.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </None>
+    <Content Include="Content\js\plugins\toastr.js" />
+    <Content Include="Content\js\plugins\isotope.js" />
+    <Compile Include="Controllers\AdminController.cs" />
+    <Compile Include="Controllers\CacheController.cs" />
+    <Compile Include="Controllers\DataController.cs" />
+    <Compile Include="Controllers\CloudFlareController.cs" />
+    <Compile Include="Controllers\HubController.cs" />
+    <Compile Include="Controllers\PollController.cs" />
+    <Compile Include="Controllers\RedisController.Admin.cs">
+      <DependentUpon>RedisController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\RedisController.cs" />
+    <Compile Include="Controllers\DashboardController.Polling.cs">
+      <DependentUpon>DashboardController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\ElasticController.cs" />
+    <Compile Include="Controllers\SQLController.Admin.cs">
+      <DependentUpon>SQLController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\PerfCounters.cs" />
+    <Compile Include="Helpers\ProfiledModelBinder.cs" />
+    <Compile Include="Models\ExtensionMethods.cs" />
+    <Compile Include="Models\TopTabs.cs" />
+    <Compile Include="SecuritySettings.cs" />
+    <Compile Include="SiteSettings.cs" />
+    <Compile Include="Views\CloudFlare\Dashboard.Model.cs" />
+    <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
+    <Compile Include="Views\Dashboard\Ranges.cs" />
+    <Compile Include="Views\Dashboard\Node.Model.cs">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Elastic\Dashboard.Model.cs">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Home\About.Model.cs" />
+    <Compile Include="Views\Hub\HubModel.cs" />
+    <Compile Include="Views\Redis\Dashboard.Model.cs">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Shared\PageNotFound.Model.cs">
+      <DependentUpon>PageNotFound.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Shared\TopBoxOptions.cs" />
+    <Compile Include="Views\Shared\TopRefresh.Model.cs">
+      <DependentUpon>TopRefresh.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SQL\Dashboard.Model.cs">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SQL\Databases.Model.cs">
+      <DependentUpon>Databases.cshtml</DependentUpon>
+    </Compile>
+    <None Include="Help\SQL\WaitStats.md" />
+    <Content Include="Views\CloudFlare\Railguns.cshtml" />
+    <Content Include="Views\CloudFlare\Dashboard.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml" />
+    <Content Include="Views\Redis\Dashboard.RoleActions.cshtml" />
+    <Content Include="Views\Elastic\_ViewStart.cshtml" />
+    <Content Include="Views\Redis\_ViewStart.cshtml" />
+    <Content Include="Views\CloudFlare\_ViewStart.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml" />
+    <Content Include="Views\CloudFlare\DNS.cshtml" />
+    <Content Include="Views\SQL\Instance.DBFiles.cshtml" />
+    <None Include="Views\SQL\Instance.Configuration.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </None>
+    <Compile Include="Views\SQL\Ops.Top.Detail.Model.cs">
+      <DependentUpon>Operations.Top.Detail.cshtml</DependentUpon>
+    </Compile>
+    <Content Include="App_Code\SQLHelpers.cshtml" />
+    <None Include="Content\Styles.less">
+      <Compile>False</Compile>
+      <Minify>False</Minify>
+    </None>
+    <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\ExceptionsController.cs" />
+    <Compile Include="Controllers\HAProxyController.Admin.cs">
+      <DependentUpon>HAProxyController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\HAProxyController.cs" />
+    <Compile Include="Controllers\LoginController.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
+    <Compile Include="Controllers\ExportController.cs" />
+    <Compile Include="Controllers\GraphController.cs" />
+    <Compile Include="Controllers\GraphController.HAProxy.cs">
+      <DependentUpon>GraphController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\GraphController.Json.cs">
+      <DependentUpon>GraphController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\GraphController.Spark.cs">
+      <DependentUpon>GraphController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\SQLController.cs" />
+    <Compile Include="Controllers\StatusController.Authentication.cs">
+      <DependentUpon>StatusController.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\StatusController.cs" />
+    <Compile Include="Current.Security.cs">
+      <DependentUpon>Current.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\OnlyAllowAttribute.cs" />
+    <Compile Include="Models\Security\ActiveDirectoryProvider.cs" />
+    <Compile Include="Models\Roles.cs" />
+    <Compile Include="Models\Security\EveryonesReadOnlyProvider.cs" />
+    <Compile Include="Models\Security\EveryonesAnAdminProvider.cs" />
+    <Compile Include="Models\Security\ISecuritySettings.cs" />
+    <Compile Include="Models\Security\SecurityProvider.cs" />
+    <Compile Include="Models\User.cs" />
+    <Compile Include="Current.cs" />
+    <Compile Include="Current.ViewSettings.cs">
+      <DependentUpon>Current.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="Global.asax.cs">
+      <DependentUpon>Global.asax</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\DataKeys.cs" />
+    <Compile Include="Helpers\FileSizeFormatProvider.cs" />
+    <Compile Include="Helpers\HtmlUtilities.CacheBreaker.cs">
+      <DependentUpon>HtmlUtilities.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\HtmlUtilities.cs" />
+    <Compile Include="Helpers\Status.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\Exceptions\Exceptions.Model.cs">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HAProxy\HAProxy.Model.cs">
+      <DependentUpon>HAProxy.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Dashboard\Dashboard.Model.cs">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Login\Login.Model.cs">
+      <DependentUpon>Login.cshtml</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Content\img\loading.gif" />
+    <Content Include="Content\img\query-plan\arithmetic_expression.gif" />
+    <Content Include="Content\img\query-plan\assert.gif" />
+    <Content Include="Content\img\query-plan\assign.gif" />
+    <Content Include="Content\img\query-plan\bitmap.gif" />
+    <Content Include="Content\img\query-plan\bookmark_lookup.gif" />
+    <Content Include="Content\img\query-plan\clustered_index_delete.gif" />
+    <Content Include="Content\img\query-plan\clustered_index_insert.gif" />
+    <Content Include="Content\img\query-plan\clustered_index_scan.gif" />
+    <Content Include="Content\img\query-plan\clustered_index_seek.gif" />
+    <Content Include="Content\img\query-plan\clustered_index_update.gif" />
+    <Content Include="Content\img\query-plan\collapse.gif" />
+    <Content Include="Content\img\query-plan\compute_scalar.gif" />
+    <Content Include="Content\img\query-plan\concatenation.gif" />
+    <Content Include="Content\img\query-plan\constant_scan.gif" />
+    <Content Include="Content\img\query-plan\convert.gif" />
+    <Content Include="Content\img\query-plan\declare.gif" />
+    <Content Include="Content\img\query-plan\deleted_scan.gif" />
+    <Content Include="Content\img\query-plan\distribute_streams.gif" />
+    <Content Include="Content\img\query-plan\dynamic.gif" />
+    <Content Include="Content\img\query-plan\fetch_query.gif" />
+    <Content Include="Content\img\query-plan\filter.gif" />
+    <Content Include="Content\img\query-plan\gather_streams.gif" />
+    <Content Include="Content\img\query-plan\hash_match.gif" />
+    <Content Include="Content\img\query-plan\if.gif" />
+    <Content Include="Content\img\query-plan\inserted_scan.gif" />
+    <Content Include="Content\img\query-plan\intrinsic.gif" />
+    <Content Include="Content\img\query-plan\keyset.gif" />
+    <Content Include="Content\img\query-plan\log_row_scan.gif" />
+    <Content Include="Content\img\query-plan\merge_interval.gif" />
+    <Content Include="Content\img\query-plan\merge_join.gif" />
+    <Content Include="Content\img\query-plan\nested_loops.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_delete.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_insert.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_scan.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_seek.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_spool.gif" />
+    <Content Include="Content\img\query-plan\nonclustered_index_update.gif" />
+    <Content Include="Content\img\query-plan\online_index_insert.gif" />
+    <Content Include="Content\img\query-plan\parameter_table_scan.gif" />
+    <Content Include="Content\img\query-plan\population_query.gif" />
+    <Content Include="Content\img\query-plan\rdi_lookup.gif" />
+    <Content Include="Content\img\query-plan\refresh_query.gif" />
+    <Content Include="Content\img\query-plan\remote_delete.gif" />
+    <Content Include="Content\img\query-plan\remote_insert.gif" />
+    <Content Include="Content\img\query-plan\remote_query.gif" />
+    <Content Include="Content\img\query-plan\remote_scan.gif" />
+    <Content Include="Content\img\query-plan\remote_update.gif" />
+    <Content Include="Content\img\query-plan\repartition_streams.gif" />
+    <Content Include="Content\img\query-plan\result.gif" />
+    <Content Include="Content\img\query-plan\row_count_spool.gif" />
+    <Content Include="Content\img\query-plan\segment.gif" />
+    <Content Include="Content\img\query-plan\sequence.gif" />
+    <Content Include="Content\img\query-plan\sequenceproject.gif" />
+    <Content Include="Content\img\query-plan\snapshot.gif" />
+    <Content Include="Content\img\query-plan\sort.gif" />
+    <Content Include="Content\img\query-plan\split.gif" />
+    <Content Include="Content\img\query-plan\spool.gif" />
+    <Content Include="Content\img\query-plan\stream_aggregate.gif" />
+    <Content Include="Content\img\query-plan\switch.gif" />
+    <Content Include="Content\img\query-plan\table_delete.gif" />
+    <Content Include="Content\img\query-plan\table_insert.gif" />
+    <Content Include="Content\img\query-plan\table_scan.gif" />
+    <Content Include="Content\img\query-plan\table_spool.gif" />
+    <Content Include="Content\img\query-plan\table_update.gif" />
+    <Content Include="Content\img\query-plan\table_valued_function.gif" />
+    <Content Include="Content\img\query-plan\top.gif" />
+    <Content Include="Content\img\query-plan\udx.gif" />
+    <Content Include="Content\img\query-plan\while.gif" />
+    <Content Include="Content\js\plugins\autocomplete.js" />
+    <Content Include="Content\js\plugins\cookie.js" />
+    <Content Include="Content\js\plugins\d3.v3.js" />
+    <Content Include="Content\js\plugins\prettify.js" />
+    <Content Include="Content\js\plugins\qp.js" />
+    <Content Include="Content\js\plugins\simplemodal.js" />
+    <Content Include="Content\js\plugins\tablesorter.js" />
+    <Content Include="Content\Login.js" />
+    <Content Include="Content\img\search-icon.png" />
+    <Content Include="Content\img\apple-touch-icon.png" />
+    <Content Include="Content\img\progress-dots.gif" />
+    <Content Include="Content\Styles.css">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\Styles.min.css">
+      <DependentUpon>Styles.css</DependentUpon>
+    </Content>
+    <Content Include="Content\transforms\qp.xslt">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\Dashboard\Dashboard.Table.cshtml">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Shared\TopTabs.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Detail.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Exceptions\Exceptions.Preview.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Exceptions\Exceptions.Table.cshtml">
+    </Content>
+    <Content Include="Views\Exceptions\Exceptions.Jira.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\HAProxy\HAProxy.Dashboard.cshtml">
+      <DependentUpon>HAProxy.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\HAProxy\HAProxy.Detailed.cshtml">
+      <DependentUpon>HAProxy.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Shared\AccessDenied.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Search.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Similar.cshtml" />
+    <Content Include="Views\Home\About.cshtml" />
+    <Content Include="Views\SQL\Dashboard.cshtml" />
+    <Content Include="Views\SQL\Servers.ClusterDetail.cshtml">
+      <DependentUpon>Servers.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Operations.Active.cshtml" />
+    <Content Include="Views\SQL\Operations.Top.cshtml" />
+    <Content Include="Views\SQL\Operations.Top.Detail.cshtml">
+      <DependentUpon>Operations.Top.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Dashboard\Node.Current.VMHost.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Table.mobile.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Home\Test.cshtml" />
+    <Content Include="Views\Dashboard\Node.Current.Interfaces.cshtml" />
+    <Content Include="Views\Elastic\Dashboard.cshtml" />
+    <Content Include="Views\Elastic\Cluster.cshtml" />
+    <Content Include="Views\Elastic\Cluster.Shards.cshtml" />
+    <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
+    <Content Include="Views\Hub\Index.cshtml" />
+    <Content Include="Views\Dashboard\Node.Current.Stats.cshtml" />
+    <Content Include="Views\Redis\Dashboard.cshtml" />
+    <Content Include="Views\Redis\AllServers.cshtml" />
+    <Content Include="Views\Redis\Server.Info.cshtml" />
+    <Content Include="Views\Redis\Server.Clients.cshtml" />
+    <Content Include="Views\Redis\Server.Clients.ByIP.cshtml" />
+    <Content Include="Views\Redis\Server.cshtml" />
+    <Content Include="Views\Redis\Server.Analysis.Memory.cshtml" />
+    <Content Include="Views\Redis\Server.Clients.ByName.cshtml" />
+    <Content Include="Views\SQL\Databases.cshtml" />
+    <Content Include="Views\SQL\Instance.Connections.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Instance.cshtml" />
+    <Content Include="Views\SQL\Instance.Errors.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Instance.Jobs.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Instance.Memory.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Instance.Selector.cshtml" />
+    <Content Include="Views\SQL\Connections.cshtml" />
+    <Content Include="Views\SQL\Servers.AvailabilityGroup.cshtml" />
+    <Content Include="Views\Hub\Dashboard.Node.cshtml" />
+    <Content Include="Views\Hub\SQL.AvailabilityGroup.cshtml" />
+    <Content Include="Content\_Styles.Reset.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\_Styles.SQL.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\_Styles.Redis.less">
+      <DependentUpon>Styles.less</DependentUpon>
+    </Content>
+    <Content Include="Views\Home\About.Caches.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Tables.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Views.cshtml" />
+    <Content Include="Views\Elastic\Node.cshtml" />
+    <Content Include="Views\Elastic\Node.Selector.cshtml" />
+    <Content Include="Views\Elastic\Node.Settings.cshtml" />
+    <Content Include="Views\Elastic\Indices.cshtml" />
+    <Content Include="Views\Elastic\Cluster.Selector.cshtml" />
+    <Content Include="Views\Elastic\Indices.Shards.cshtml" />
+    <Content Include="Views\Redis\Instance.cshtml" />
+    <Content Include="Views\Redis\Instance.Clients.cshtml" />
+    <Content Include="Views\Redis\Instance.Selector.cshtml" />
+    <Content Include="Views\Shared\IssuesList.cshtml" />
+    <Content Include="Views\Hub\Elastic.Cluster.cshtml">
+      <SubType>Code</SubType>
+    </Content>
+    <Content Include="Views\Hub\HAProxy.Group.cshtml" />
+    <Content Include="Views\Shared\TopRefresh.cshtml" />
+    <Content Include="Views\Shared\NoConfiguration.cshtml" />
+    <Content Include="Views\SQL\Servers.cshtml" />
+    <Content Include="Views\Redis\Instance.SlowLog.cshtml" />
+    <Content Include="Views\Redis\Instance.Config.cshtml" />
+    <Content Include="Views\SQL\_ViewStart.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Content\img\ajax-loader.gif" />
+    <Content Include="Content\img\se-stats.png" />
+    <Content Include="Content\Login.css" />
+    <Content Include="Content\js\Scripts.js" />
+    <Content Include="favicon.ico" />
+    <Content Include="Global.asax" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="Views\_ViewStart.cshtml" />
+    <Content Include="Views\Shared\Error.cshtml" />
+    <Content Include="Views\Shared\Master.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Shared\PageNotFound.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Dashboard\Node.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Dashboard\Dashboard.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\HAProxy\HAProxy.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\HAProxy\HAProxy.Traffic.cshtml">
+      <DependentUpon>HAProxy.cshtml</DependentUpon>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Views\Login\Login.cshtml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj">
+      <Project>{c58aff99-f4d9-4a83-866e-18da0a633f6b}</Project>
+      <Name>Opserver.Core</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>
   <Target Name="AfterBuild">
   </Target> -->
-    <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
-        <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
-    </Target>
-    <ProjectExtensions>
-        <VisualStudio>
-            <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
-                <WebProjectProperties>
-                    <UseIIS>True</UseIIS>
-                    <AutoAssignPort>True</AutoAssignPort>
-                    <DevelopmentServerPort>56259</DevelopmentServerPort>
-                    <DevelopmentServerVPath>/</DevelopmentServerVPath>
-                    <IISUrl>http://localhost:81</IISUrl>
-                    <NTLMAuthentication>False</NTLMAuthentication>
-                    <UseCustomServer>False</UseCustomServer>
-                    <CustomServerUrl>http://local.status.se.com</CustomServerUrl>
-                    <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
-                </WebProjectProperties>
-            </FlavorProperties>
-        </VisualStudio>
-    </ProjectExtensions>
+  <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
+    <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>56259</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:81</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>http://local.status.se.com</CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>
