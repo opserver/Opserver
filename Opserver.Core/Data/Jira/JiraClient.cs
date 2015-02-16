@@ -1,10 +1,11 @@
-﻿using Newtonsoft.Json.Linq;
-using RestSharp;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using StackExchange.Exceptional;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -29,41 +30,42 @@ namespace StackExchange.Opserver.Data.Jira
         private static void PrepareHttpKeys()
         {
             hiddenHttpKeys = new HashSet<string>
-                                                        {
-                                                            "ALL_HTTP",
-                                                            "ALL_RAW",
-                                                            "HTTP_CONTENT_LENGTH",
-                                                            "HTTP_CONTENT_TYPE",
-                                                            "HTTP_COOKIE",
-                                                            "QUERY_STRING"
-                                                        };
+            {
+                "ALL_HTTP",
+                "ALL_RAW",
+                "HTTP_CONTENT_LENGTH",
+                "HTTP_CONTENT_TYPE",
+                "HTTP_COOKIE",
+                "QUERY_STRING"
+            };
 
             defaultHttpKeys = new HashSet<string>
-                                                             {
-                                                                 "APPL_MD_PATH",
-                                                                 "APPL_PHYSICAL_PATH",
-                                                                 "GATEWAY_INTERFACE",
-                                                                 "HTTP_ACCEPT",
-                                                                 "HTTP_ACCEPT_CHARSET",
-                                                                 "HTTP_ACCEPT_ENCODING",
-                                                                 "HTTP_ACCEPT_LANGUAGE",
-                                                                 "HTTP_CONNECTION",
-                                                                 "HTTP_KEEP_ALIVE",
-                                                                 "HTTPS",
-                                                                 "INSTANCE_ID",
-                                                                 "INSTANCE_META_PATH",
-                                                                 "PATH_INFO",
-                                                                 "PATH_TRANSLATED",
-                                                                 "REMOTE_PORT",
-                                                                 "SCRIPT_NAME",
-                                                                 "SERVER_NAME",
-                                                                 "SERVER_PORT",
-                                                                 "SERVER_PORT_SECURE",
-                                                                 "SERVER_PROTOCOL",
-                                                                 "SERVER_SOFTWARE"
-                                                             };
+            {
+                "APPL_MD_PATH",
+                "APPL_PHYSICAL_PATH",
+                "GATEWAY_INTERFACE",
+                "HTTP_ACCEPT",
+                "HTTP_ACCEPT_CHARSET",
+                "HTTP_ACCEPT_ENCODING",
+                "HTTP_ACCEPT_LANGUAGE",
+                "HTTP_CONNECTION",
+                "HTTP_KEEP_ALIVE",
+                "HTTPS",
+                "INSTANCE_ID",
+                "INSTANCE_META_PATH",
+                "PATH_INFO",
+                "PATH_TRANSLATED",
+                "REMOTE_PORT",
+                "SCRIPT_NAME",
+                "SERVER_NAME",
+                "SERVER_PORT",
+                "SERVER_PORT_SECURE",
+                "SERVER_PROTOCOL",
+                "SERVER_SOFTWARE"
+            };
         }
-        public JiraCreateIssueResponse CreateIssue(JiraIssue issue, Error error, string accountName)
+
+        public async Task<JiraCreateIssueResponse> CreateIssue(JiraIssue issue, Error error, string accountName)
         {
 
             var url = GetUrl(issue);
@@ -71,73 +73,63 @@ namespace StackExchange.Opserver.Data.Jira
             var password = GetPassword(issue);
             var projectKey = GetProjectKey(issue);
 
-            var client = new RestClient();
-            client.BaseUrl = new Uri(url);
-            client.Authenticator = new HttpBasicAuthenticator(userName, password);
+            var client = new JsonRestClient(url);
+            client.Username = userName;
+            client.Password = password;
 
             Dictionary<string, object> fields = new Dictionary<string, object>();
             fields.Add("project", new { key = projectKey });
             fields.Add("issuetype", new { name = issue.Name });
             fields.Add("summary", error.Message.CleanCRLF().TruncateWithEllipsis(255));
-            fields.Add("description", RenderDescription(error,accountName));
+            fields.Add("description", RenderDescription(error, accountName));
             var components = issue.GetComponentsForApplication(error.ApplicationName);
 
-            if(components != null && components.Count > 0)
+            if (components != null && components.Count > 0)
                 fields.Add("components", components);
 
-            var labels = String.IsNullOrWhiteSpace(issue.Labels) 
-                ? null 
+            var labels = String.IsNullOrWhiteSpace(issue.Labels)
+                ? null
                 : issue.Labels.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if(labels != null && labels.Length > 0)
+            if (labels != null && labels.Length > 0)
                 fields.Add("labels", labels);
 
             var payload = new
             {
                 fields = fields
             };
- 
-            
-            var request = new RestRequest(Method.POST);
-           
-            request.Resource = "issue";
-            request.RequestFormat = DataFormat.Json;
-            request.AddBody(payload);
 
-            var result = client.Post<JiraCreateIssueResponse>(request);
-            
-            var commentBody = RenderVariableTable("Server Variables", error.ServerVariables) 
+            var result = await client.PostAsync<JiraCreateIssueResponse, object>("issue", payload).ConfigureAwait(false);
+
+            var commentBody = RenderVariableTable("Server Variables", error.ServerVariables)
                 + RenderVariableTable("QueryString", error.QueryString)
                 + RenderVariableTable("Form", error.Form)
                 + RenderVariableTable("Cookies", error.Cookies)
                 + RenderVariableTable("RequestHeaders", error.RequestHeaders);
 
-            Comment(issue, result.Data, commentBody);
-            result.Data.Host = GetHost(issue);
-            return result.Data;
+            var commentReponse = await Comment(issue, result, commentBody).ConfigureAwait(false);
+            result.Host = GetHost(issue);
+            return result;
         }
 
-        public IRestResponse Comment(JiraIssue issue, JiraCreateIssueResponse createResponse, string comment)
+        public async Task<string> Comment(JiraIssue issue, JiraCreateIssueResponse createResponse, string comment)
         {
             var url = GetUrl(issue);
             var userName = GetUsername(issue);
             var password = GetPassword(issue);
-            
-            var client = new RestClient();
-            client.BaseUrl = new Uri(url);
-            client.Authenticator = new HttpBasicAuthenticator(userName, password);
+
+            var client = new JsonRestClient(url);
+            client.Username = userName;
+            client.Password = password;
 
             var payload = new
             {
                 body = comment
             };
 
-            var request = new RestRequest(Method.POST);
-            request.Resource = String.Format("issue/{0}/comment",createResponse.Key);
-        
-            request.RequestFormat = DataFormat.Json;
-            request.AddBody(payload);
-            var response = client.Post(request); 
+            var resource = String.Format("issue/{0}/comment", createResponse.Key);
+
+            var response = await client.PostAsync<string, object>(resource, payload).ConfigureAwait(false);
             return response;
         }
 
@@ -179,7 +171,7 @@ namespace StackExchange.Opserver.Data.Jira
                 ? issue.Host
                 : _jiraSettings.DefaultHost;
         }
-        
+
         private string RenderVariableTable(string title, NameValueCollection vars)
         {
             if (vars == null || vars.Count == 0)
@@ -209,11 +201,11 @@ namespace StackExchange.Opserver.Data.Jira
 
         }
 
-        private string RenderDescription(Error error,string accountName)
+        private string RenderDescription(Error error, string accountName)
         {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("{noformat}");
-            if(!String.IsNullOrWhiteSpace(accountName))
+            if (!String.IsNullOrWhiteSpace(accountName))
             {
                 sb.AppendFormat("Reporter Account Name: {0}\r\n", accountName);
             }
@@ -256,4 +248,101 @@ namespace StackExchange.Opserver.Data.Jira
             }
         }
     }
+
+    public class JsonRestClient
+    {
+        private WebClient client = null;
+
+        public string Username { get; set; }
+        public string Password { get; set; }
+
+        public string BaseUrl { get; set; }
+        public JsonRestClient(string baseUrl)
+        {
+            if (String.IsNullOrWhiteSpace(baseUrl))
+                throw new TypeInitializationException("StackExchange.Opserver.Data.Jira.JsonService", new ApplicationException("BaseUrl is required"));
+
+            BaseUrl = baseUrl.Trim().TrimEnd("/") + "/";
+        }
+
+        private Uri GetUriForResource(string resource)
+        {
+            if (String.IsNullOrWhiteSpace(BaseUrl))
+                throw new ApplicationException("Base url is null or empty");
+
+            if (String.IsNullOrWhiteSpace(resource))
+                return new Uri(BaseUrl);
+
+            return new Uri(BaseUrl + resource.Trim().TrimStart('/'));
+        }
+
+        private string GetBasicAuthzValue()
+        {
+            if (String.IsNullOrWhiteSpace(Username))
+                return String.Empty;
+
+            string _auth = string.Format("{0}:{1}", Username, Password);
+            string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
+            return string.Format("{0} {1}", "Basic", _enc);
+        }
+
+        public async Task<TResponse> GetAsync<TResponse>(string resource)
+        {
+            if (client == null)
+                client = new WebClient();
+
+            client.Headers.Add(HttpRequestHeader.Accept, "application/json");
+            client.Encoding = System.Text.Encoding.UTF8;
+            var authz = GetBasicAuthzValue();
+            if (!String.IsNullOrWhiteSpace(authz))
+                client.Headers.Add(HttpRequestHeader.Authorization, authz);
+
+            var uri = GetUriForResource(resource);
+            var responseBytes = new byte[0];
+            try
+            {
+                responseBytes = await client.DownloadDataTaskAsync(uri).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            string response = Encoding.UTF8.GetString(responseBytes);
+            return JsonConvert.DeserializeObject<TResponse>(response);
+        }
+
+        public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
+        {
+            if (client == null)
+                client = new WebClient();
+
+            client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+            client.Encoding = System.Text.Encoding.UTF8;
+            var authz = GetBasicAuthzValue();
+            if (!String.IsNullOrWhiteSpace(authz))
+                client.Headers.Add(HttpRequestHeader.Authorization, authz);
+
+
+            var json = JsonConvert.SerializeObject(data);
+            byte[] dataBytes = Encoding.UTF8.GetBytes(json);
+            var uri = GetUriForResource(resource);
+            var responseBytes = new byte[0];
+            try
+            {
+                responseBytes = await client.UploadDataTaskAsync(uri, "POST", dataBytes).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
+            string response = Encoding.UTF8.GetString(responseBytes);
+            if (typeof(TResponse) == typeof(String))
+                return response as TResponse;
+
+            return JsonConvert.DeserializeObject<TResponse>(response);
+        }
+    }
+
 }

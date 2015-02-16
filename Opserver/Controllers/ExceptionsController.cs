@@ -7,6 +7,7 @@ using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Exceptions;
 using StackExchange.Opserver.Data.Jira;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -235,13 +236,13 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public ActionResult JiraLinks(string log, Guid id,int  actionid, bool redirect = false)
+        public async Task<ActionResult> JiraLinks(string log, Guid id,int  actionid, bool redirect = false)
         {
             var e = ExceptionStores.GetError(log, id);
             var user = Current.User;
             var issue = JiraSettings.Issues.FirstOrDefault(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = jiraClient.CreateIssue(issue, e,user == null? String.Empty:user.AccountName);
+            var result = await jiraClient.CreateIssue(issue, e, user == null ? String.Empty : user.AccountName);
 
             if (String.IsNullOrWhiteSpace(result.Key))
             {
