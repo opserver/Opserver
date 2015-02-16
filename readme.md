@@ -40,6 +40,17 @@ Even if you have correctly configured your monitors, you still may not see any d
 
 You can browse to /about to review which monitors have been enabled. 
 
+Exceptions Jira Configuration
+-----------
+You can use Jira to create issues using the links rendered in the exception details page. 
+
+In order to use Jira 
+
+* You have to enable Exception monitoring 
+* Add JiraSettings.json file under `/config` folder (JiraSettings.json.example file is included)
+
+[Jira screenshots](http://imgur.com/a/XtW0j)
+
 Open Source Projects in Use
 ---------
 [BookSleeve](https://code.google.com/p/booksleeve/) by Marc Gravell  
@@ -48,7 +59,7 @@ Open Source Projects in Use
 [MiniProfiler](http://miniprofiler.com/) by Stack Exchange  
 [NEST](https://github.com/Mpdreamz/NEST) by Martijn Laarman  
 [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional) by Nick Craver  
-[TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack  
+[TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack
 
 JavaScript:  
 [d3.js](http://d3js.org/) by Michael Bostock  
