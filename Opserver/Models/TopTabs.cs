@@ -6,10 +6,12 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Data.HAProxy;
+using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models.Security;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Models
 {
@@ -57,7 +59,7 @@ namespace StackExchange.Opserver.Models
             AddTab(new TopTab("Redis", "/redis", 20, s.Redis) { GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus() });
             AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
             AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
-            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty));
+            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty) { GetMonitorStatus = () => PagerDutyApi.Instance.MonitorStatus});
             AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
             {
                 GetMonitorStatus = () => ExceptionStores.MonitorStatus,
@@ -128,15 +130,17 @@ namespace StackExchange.Opserver.Models
             if (!IsEnabled) return MvcHtmlString.Empty;
 
             // Optimism!
-            var status = GetMonitorStatus != null ? GetMonitorStatus() : MonitorStatus.Good;
+            using (MiniProfiler.Current.Step("Render Tab: " + Name))
+            {
+                var status = GetMonitorStatus != null ? GetMonitorStatus() : MonitorStatus.Good;
 
-            return string.Format(@"<a class=""{0}{1}"" href=""{2}"" title=""{3}"">{4}</a>",
-                IsCurrentTab ? "selected " : "",
-                status.GetDescription(),
-                Url,
-                GetTooltip != null ? GetTooltip() : null,
-                GetText != null ? GetText() : Name).AsHtml();
-
+                return string.Format(@"<a class=""{0}{1}"" href=""{2}"" title=""{3}"">{4}</a>",
+                    IsCurrentTab ? "selected " : "",
+                    status.GetDescription(),
+                    Url,
+                    GetTooltip != null ? GetTooltip() : null,
+                    GetText != null ? GetText() : Name).AsHtml();
+            }
         }
     }
 

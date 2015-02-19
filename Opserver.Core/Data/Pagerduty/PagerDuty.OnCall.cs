@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -44,24 +45,37 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
         }
 
+        private List<OnCallAssignment> _scheduleCache;
+
         public List<OnCallAssignment> GetSchedule()
         {
-            var result = new List<OnCallAssignment>();
-            if (!AllUsers.HasData()) return result;
-            foreach (var p in AllUsers.Data)
+            if (_scheduleCache == null)
             {
-                if (p.Schedule == null) continue;
-                foreach (var oc in p.Schedule)
+                var result = new List<OnCallAssignment>();
+                if (!AllUsers.HasData()) return result;
+                foreach (var p in AllUsers.Data)
                 {
-                    result.Add(new OnCallAssignment { Person = p, Schedule = oc });
+                    if (p.Schedule == null) continue;
+                    for (var i = 0; i < p.Schedule.Count; i++)
+                    {
+                        result.Add(new OnCallAssignment { Person = p, Schedule = p.Schedule[i] });
+                    }
                 }
+                result.Sort((a, b) => a.EscalationLevel.GetValueOrDefault(int.MaxValue).CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
+
+                if (result.Count > 1 && result[0].Person.Id == result[1].Person.Id)
+                {
+                    result[1].MonitorStatus = MonitorStatus.Warning;
+                    result[1].MonitorStatusReason = "Primary and secondary on call are the same";
+                }
+
+                _scheduleCache = result;
             }
-            result.Sort((a, b) => a.EscalationLevel.GetValueOrDefault(int.MaxValue).CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
-            return result;
+            return _scheduleCache;
         }
     }
 
-    public class OnCallAssignment
+    public class OnCallAssignment : IMonitorStatus
     {
         public PagerDutyPerson Person { get; set; }
         public OnCall Schedule { get; set; }
@@ -80,6 +94,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get { return PagerDutyPerson.GetEscalationLevelDescription(EscalationLevel); }
         }
+
+        public MonitorStatus MonitorStatus { get; internal set; }
+
+        public string MonitorStatusReason { get; internal set; }
     }
 
     public class PagerDutyUserResponse

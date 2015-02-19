@@ -1,5 +1,6 @@
-﻿@model StackExchange.Opserver.Data.PagerDuty.OnCallAssignment
-<tr>
+﻿@using StackExchange.Opserver.Data.PagerDuty
+@model OnCallAssignment
+<tr class="@Model.RowClass()" title="@Model.MonitorStatusReason">
     <td class="name">@Model.Person.FullName</td>
     <td class="@(Model.IsPrimary ? "bold": null)">@Model.EscalationLevelDescription</td>
     <td><a href="mailto:@Model.Person.Email">@Model.Person.Email</a></td>

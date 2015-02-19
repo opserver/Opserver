@@ -12,7 +12,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutySettings Settings { get; internal set; }
         public override string NodeType { get { return "PagerDutyAPI"; } }
         public override int MinSecondsBetweenPolls { get { return 3600; } }
-        protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
+
+        protected override IEnumerable<MonitorStatus> GetMonitorStatus()
+        {
+            if (AllUsers.ContainsData)
+            {
+                foreach (var a in GetSchedule())
+                    yield return a.MonitorStatus;
+            }
+            if (Incidents.ContainsData)
+            {
+                foreach (var i in Incidents.Data)
+                    yield return i.MonitorStatus;
+            }
+            yield return MonitorStatus.Good;
+        }
         protected override string GetMonitorStatusReason() { return ""; }
         public string APIKey 
         {
@@ -37,6 +51,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyApi()
         {
             Settings = Current.Settings.PagerDuty;
+            CacheItemFetched += (sender, args) => { _scheduleCache = null; };
         }
 
         /// <summary>
