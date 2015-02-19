@@ -26,8 +26,8 @@ namespace StackExchange.Opserver.Controllers
             i.WaitForFirstPoll(5000);
             var vd = new PagerDutyModel
             {
-                AllOnCall = i.AllUsers.SafeData(true),
-                OnCallToShow = i.Settings.OnCalllToShow,
+                Schedule = i.GetSchedule(),
+                OnCallToShow = i.Settings.OnCallToShow,
                 CachedDays = i.Settings.DaysToCache,
                 AllIncidents = i.Incidents.SafeData(true)
             };
@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty/escalation/full")]
         public ActionResult PagerDutyFullEscalation()
         {
-            return View("PagerDuty.EscFull", PagerDutyApi.Instance.AllUsers.SafeData(true));
+            return View("PagerDuty.EscFull", PagerDutyApi.Instance.GetSchedule());
         }
     }
 }

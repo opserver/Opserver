@@ -1,5 +1,5 @@
 ﻿@using StackExchange.Opserver.Data.PagerDuty
-@model List<PagerDutyPerson>
+@model List<OnCallAssignment>
 @{
     Layout = null;
     this.SetPageTitle("PagerDuty Full Escalation");
@@ -18,9 +18,9 @@
     <th>Email</th>
     <th>Phone</th>
 </tr>
-@foreach (var p in Model.OrderBy(u => u.CurrentEscalationLevel))
+@foreach (var a in Model.OrderBy(u => u.EscalationLevel))
 {
-    @Html.Partial("PagerDuty.OnCallRow", p)
+    @Html.Partial("PagerDuty.OnCallRow", a)
 }
 </tbody>
 </table>

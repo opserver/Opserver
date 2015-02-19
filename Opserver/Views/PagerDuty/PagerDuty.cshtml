@@ -47,9 +47,9 @@
             <th>Email</th>
             <th>Phone</th>
         </tr>
-        @foreach (var p in Model.AllOnCall.OrderBy(u => u.CurrentEscalationLevel).Take(Model.OnCallToShow))
+        @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
         {
-            @Html.Partial("PagerDuty.OnCallRow", p)
+            @Html.Partial("PagerDuty.OnCallRow", a)
         }
         </tbody>
     </table>

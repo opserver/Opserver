@@ -12,12 +12,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
         // TODO: We need to able able to handle when people have more than one on call schedule
         public PagerDutyPerson PrimaryOnCall
         {
-            get { return AllUsers.Data.FirstOrDefault(p => p.CurrentEscalationLevel == 1); }
+            get { return AllUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1); }
         }
 
         public PagerDutyPerson SecondaryOnCall
         {
-            get { return AllUsers.Data.FirstOrDefault(p => p.CurrentEscalationLevel == 2); }
+            get { return AllUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2); }
         }
 
         private Cache<List<PagerDutyPerson>> _allusers;
@@ -43,8 +43,44 @@ namespace StackExchange.Opserver.Data.PagerDuty
             return GetFromPagerDuty("users/on_call?include[]=contact_methods", getFromJson:
                 response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
         }
+
+        public List<OnCallAssignment> GetSchedule()
+        {
+            var result = new List<OnCallAssignment>();
+            if (!AllUsers.HasData()) return result;
+            foreach (var p in AllUsers.Data)
+            {
+                if (p.Schedule == null) continue;
+                foreach (var oc in p.Schedule)
+                {
+                    result.Add(new OnCallAssignment { Person = p, Schedule = oc });
+                }
+            }
+            result.Sort((a, b) => a.EscalationLevel.GetValueOrDefault(int.MaxValue).CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
+            return result;
+        }
     }
 
+    public class OnCallAssignment
+    {
+        public PagerDutyPerson Person { get; set; }
+        public OnCall Schedule { get; set; }
+
+        public int? EscalationLevel
+        {
+            get { return Schedule != null ? Schedule.EscalationLevel : (int?)null; }
+        }
+        
+        public bool IsPrimary
+        {
+            get { return EscalationLevel == 1; }
+        }
+
+        public string EscalationLevelDescription
+        {
+            get { return PagerDutyPerson.GetEscalationLevelDescription(EscalationLevel); }
+        }
+    }
 
     public class PagerDutyUserResponse
     {
@@ -72,7 +108,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string UserUrl { get; set; }
         [DataMember(Name = "contact_methods")]
         public List<PagerDutyContact> ContactMethods { get; set; }
-        [DataMember(Name = "on_call")]
+        [DataMember(Name = "on_call")] 
         public List<OnCall> Schedule { get; set; }
 
         private string _phone;
@@ -89,33 +125,25 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        public bool IsPrimary
-        {
-            get { return CurrentEscalationLevel == 1; }
-        }
-
-        public int? CurrentEscalationLevel
+        public int? EscalationLevel
         {
             get { return Schedule != null && Schedule.Count > 0 ? Schedule[0].EscalationLevel : (int?)null; }
         }
 
-        public string CurrentEscalationLevelDescription
+        public static string GetEscalationLevelDescription(int? level)
         {
-            get
+            switch (level)
             {
-                switch (CurrentEscalationLevel)
-                {
-                    case 1:
-                        return "Primary";
-                    case 2:
-                        return "Secondary";
-                    case 3:
-                        return "Third";
-                    case null:
-                        return "Unknown";
-                    default:
-                        return CurrentEscalationLevel + "th";
-                }
+                case 1:
+                    return "Primary";
+                case 2:
+                    return "Secondary";
+                case 3:
+                    return "Third";
+                case null:
+                    return "Unknown";
+                default:
+                    return level + "th";
             }
         }
     }

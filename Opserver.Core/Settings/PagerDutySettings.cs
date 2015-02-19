@@ -10,13 +10,13 @@
         public string APIKey { get; set; }
         public string APIBaseUrl { get; set; }
 
-        public int OnCalllToShow { get; set; }
+        public int OnCallToShow { get; set; }
         public int DaysToCache { get; set; }
 
         public PagerDutySettings()
         {
             // Defaults
-            OnCalllToShow = 2;
+            OnCallToShow = 2;
             DaysToCache = 60;
         }
     }

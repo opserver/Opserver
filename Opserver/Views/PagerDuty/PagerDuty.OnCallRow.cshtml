@@ -1,7 +1,7 @@
-﻿@model StackExchange.Opserver.Data.PagerDuty.PagerDutyPerson
+﻿@model StackExchange.Opserver.Data.PagerDuty.OnCallAssignment
 <tr>
-    <td class="name">@Model.FullName</td>
-    <td class="@(Model.IsPrimary ? "bold": null)">@Model.CurrentEscalationLevelDescription</td>
-    <td><a href="mailto:@Model.Email">@Model.Email</a></td>
-    <td>@Model.Phone</td>
+    <td class="name">@Model.Person.FullName</td>
+    <td class="@(Model.IsPrimary ? "bold": null)">@Model.EscalationLevelDescription</td>
+    <td><a href="mailto:@Model.Person.Email">@Model.Person.Email</a></td>
+    <td>@Model.Person.Phone</td>
 </tr>
