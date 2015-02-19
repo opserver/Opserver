@@ -55,6 +55,7 @@ namespace StackExchange.Opserver.Data.Redis
                 yield return Info;
                 yield return Clients;
                 yield return SlowLog;
+                yield return Tiebreaker;
             }
         }
 

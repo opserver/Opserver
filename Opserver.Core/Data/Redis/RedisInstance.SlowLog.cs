@@ -50,6 +50,25 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
+        private Cache<string> _tieBreaker;
+        public Cache<string> Tiebreaker
+        {
+            get
+            {
+                return _tieBreaker ?? (_tieBreaker = new Cache<string>
+                {
+                    CacheForSeconds = 5,
+                    UpdateCache = GetFromRedis("Tiebreaker", rc =>
+                    {
+                        using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
+                        {
+                            return GetSERedisTiebreaker(rc);
+                        }
+                    })
+                });
+            }
+        }
+
         /// <summary>
         /// Sets the slow log threshold in milliseconds, note: 0 logs EVERY command, null or negative disables logging.
         /// </summary>

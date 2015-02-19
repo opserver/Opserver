@@ -63,29 +63,28 @@
                 }
             }
         </div>
-        @if (!i.IsSlave && !slaveOptions.Any())
-        {
-            <div class="no-option"><span class="note">There are no available options for this instance.</span></div>
-        }
-        else
-        {
-            <div class="options-title">Available Actions</div>
-            <div class="current-options">
-                @if (i.IsSlave)
-                {
-                    <div class="option">
-                        Promote to Master: <a href="#" class="js-promote-to-master">Promote / Deslave</a>
-                        <p class="note">Note: this will deslave the instance</p>
-                    </div>
-                }
-                @if (slaveOptions.Any())
-                {
-                    <div class="option">
-                        Slave to: <input type="text" name="newMaster" class="js-redis-role-new-master" /> <button class="js-redis-role-slave" disabled>Slave</button>
-                    </div>
-                }
-            </div>
-        }
+        <div class="options-title">Available Actions</div>
+        <div class="current-options">
+            @if (i.IsSlave)
+            {
+                <div class="option">
+                    Promote to Master: <a href="#" class="js-promote-to-master" title="Makes this redis node a master">Promote / Deslave</a>
+                    <p class="note">Note: this will deslave the instanceB</p>
+                </div>
+            }
+            @if (i.IsMaster)
+            {
+                <div class="option">
+                    SE.Redis Tiebreakers: <a href="#" class="js-set-tiebreaker">Set</a> - <a href="#" class="js-clear-tiebreaker">Clear</a>
+                </div>
+            }
+            @if (slaveOptions.Any())
+            {
+                <div class="option">
+                    Slave to: <input type="text" name="newMaster" class="js-redis-role-new-master" /> <button class="js-redis-role-slave" disabled>Slave</button>
+                </div>
+            }
+        </div>
     </div>
 </div>
 <script>
@@ -105,15 +104,13 @@
     }).result(function(e, data) {
         $(this).addClass('left-icon ' + data.sClass);
         $('button.js-redis-role-slave').prop('disabled', false);
-        //.closest('form').submit();
     }).keydown(function(e) {
         return e.keyCode != 13;
     }).on('change', function() {
         $('button.js-redis-role-slave').prop('disabled', this.value.length > 0);
     }).click();
     $('button.js-redis-role-slave').on('click', function() {
-        var node = '@i.Host:@i.Port',
-            newMaster = $('.js-redis-role-new-master').val();
+        var newMaster = $('.js-redis-role-new-master').val();
         if (!confirm('Are you sure you want make ' + node + ' a slave of ' + newMaster + '?')) return;
 
         $.ajax('redis/instance/actions/slave-to?node=' + node + '&newMaster=' + newMaster, {
@@ -125,20 +122,23 @@
     });
     </text>
     }
-    @if (i.IsSlave)
-    {
-    <text>
-    $('.js-promote-to-master').on('click', function() {
-        var node = '@i.Host:@i.Port';
-        if (!confirm('Are you sure you deslave ' + node + ' and make it a master?')) return;
+    function singleAction(clicked, actionRoute, confirmMessage) {
+        var node = $(clicked).closest('.js-redis-role-actions').data('node');
+        if (confirmMessage && !confirm(confirmMessage.replace(/\$Node\$/, node))) return;
 
-        $.ajax('redis/instance/actions/make-master?node=' + node, {
-            type: 'POST'
-        }).done(function() {
-            Status.refresh.resume();
-        });
-        $(this).closest('.actions-popup').remove();
-    });
-    </text>
+        $.post('redis/instance/actions/' + actionRoute, { node: node })
+            .done(function() {
+                Status.refresh.resume();
+            });
+        $(clicked).closest('.actions-popup').remove();
     }
+    $('.js-promote-to-master').on('click', function() {
+        singleAction(this, 'make-master', 'Are you sure you deslave $Node$ and make it a master?');
+    });
+    $('.js-set-tiebreaker').on('click', function() {
+        singleAction(this, 'set-tiebreaker');
+    });
+    $('.js-clear-tiebreaker').on('click', function() {
+        singleAction(this, 'clear-tiebreaker');
+    });
 </script>

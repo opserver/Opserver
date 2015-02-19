@@ -12,18 +12,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult KillClient(string node, string address)
         {
-            var i = RedisInstance.GetInstance(node);
-            if (i == null) return JsonNotFound();
-
-            try
-            {
-                bool success = i.KillClient(address);
-                return Json(new { success });
-            }
-            catch (Exception ex)
-            {
-                return JsonError(ex.Message);
-            }
+            return PerformInstanceAction(node, i => i.KillClient(address));
         }
 
         [Route("redis/instance/actions/role"), HttpGet, OnlyAllow(Roles.RedisAdmin)]
@@ -59,14 +48,31 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/actions/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult SlaveServer(string node, string newMaster)
         {
+            return PerformInstanceAction(node, i => i.SlaveTo(newMaster), poll: true);
+        }
+
+        [Route("redis/instance/actions/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public ActionResult SetTiebreaker(string node)
+        {
+            return PerformInstanceAction(node, i => i.SetSERedisTiebreaker());
+        }
+
+        [Route("redis/instance/actions/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public ActionResult ClearTiebreaker(string node)
+        {
+            return PerformInstanceAction(node, i => i.ClearSERedisTiebreaker());
+        }
+
+        private ActionResult PerformInstanceAction(string node, Func<RedisInstance, bool> action, bool poll = false)
+        {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             try
             {
-                var success = i.SlaveTo(newMaster);
-                i.Poll(true);
-                return Json(new {success});
+                var success = action(i);
+                if (poll) i.Poll(true);
+                return Json(new { success });
             }
             catch (Exception ex)
             {

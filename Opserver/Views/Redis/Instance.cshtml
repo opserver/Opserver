@@ -119,6 +119,19 @@
                                 } 
                             </td>
                         </tr>
+                        <tr>
+                            <td>SE.Redis Tiebreaker</td>
+                            <td>
+                                @if (i.Tiebreaker.HasData())
+                                {
+                                    @i.Tiebreaker.Data
+                                }
+                                else
+                                {
+                                    <span class="note">not set</span>
+                                }
+                            </td>
+                        </tr>
                         @if (i.Replication != null && i.Replication.BacklogActive)
                         {
                             <tr>
