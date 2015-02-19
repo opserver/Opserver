@@ -23,8 +23,16 @@
             }
         }
 
-        protected SinglePollNode() : base(typeof (T).FullName)
+        private static readonly string _shortName = typeof (T).FullName.Replace("StackExchange.Opserver.Data.", "");
+
+        protected SinglePollNode() : base(_shortName)
         {
+            TryAddToGlobalPollers();
+        }
+
+        public override string ToString()
+        {
+            return _shortName;
         }
     }
 }
