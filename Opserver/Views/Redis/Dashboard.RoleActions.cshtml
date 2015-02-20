@@ -110,7 +110,8 @@
         $('button.js-redis-role-slave').prop('disabled', this.value.length > 0);
     }).click();
     $('button.js-redis-role-slave').on('click', function() {
-        var newMaster = $('.js-redis-role-new-master').val();
+        var node = $(this).closest('.js-redis-role-actions').data('node'),
+            newMaster = $('.js-redis-role-new-master').val();
         if (!confirm('Are you sure you want make ' + node + ' a slave of ' + newMaster + '?')) return;
 
         $.ajax('redis/instance/actions/slave-to?node=' + node + '&newMaster=' + newMaster, {
