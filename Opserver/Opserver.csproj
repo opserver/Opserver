@@ -15,7 +15,7 @@
     <AssemblyName>StackExchange.Opserver</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <MvcBuildViews>true</MvcBuildViews>
-    <UseIISExpress>true</UseIISExpress>
+    <UseIISExpress>false</UseIISExpress>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <UpgradeBackupLocation>
@@ -224,9 +224,7 @@
     <Content Include="Content\Styles.css.map">
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
-    <None Include="Config\JiraSettings.json.example">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <None Include="Config\JiraSettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -479,8 +477,6 @@
       <DependentUpon>Exceptions.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Exceptions\Exceptions.Table.cshtml">
-    </Content>
-    <Content Include="Views\Exceptions\Exceptions.Jira.cshtml">
       <DependentUpon>Exceptions.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\HAProxy\HAProxy.Dashboard.cshtml">
@@ -490,6 +486,7 @@
       <DependentUpon>HAProxy.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Shared\AccessDenied.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Jira.cshtml"/>
     <Content Include="Views\Exceptions\Exceptions.Search.cshtml" />
     <Content Include="Views\Exceptions\Exceptions.Similar.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
@@ -593,9 +590,7 @@
     <Content Include="Views\Shared\Master.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="packages.config">
-      <SubType>Designer</SubType>
-    </Content>
+    <Content Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Views\Shared\PageNotFound.cshtml" />
@@ -623,6 +618,7 @@
       <Name>Opserver.Core</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
