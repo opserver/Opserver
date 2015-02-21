@@ -224,6 +224,7 @@
     <Content Include="Content\Styles.css.map">
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
+    <Content Include="Config\JiraSettings.json.example" />
     <None Include="Config\PagerDutySettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
@@ -307,6 +308,7 @@
     <Content Include="Views\PagerDuty\PagerDuty.Incident.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.EscFull.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.OnCallRow.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Jira.cshtml" />
     <None Include="Views\SQL\Instance.Configuration.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </None>

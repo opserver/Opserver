@@ -6,6 +6,8 @@ using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Exceptions;
+using System.Threading.Tasks;
+using StackExchange.Opserver.Data.Jira;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -20,7 +22,10 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return TopTabs.BuiltIn.Exceptions; }
         }
-
+        private JiraSettings JiraSettings
+        {
+            get { return Current.Settings.Jira; }
+        }
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
@@ -228,6 +233,42 @@ namespace StackExchange.Opserver.Controllers
                             MostRecent = g.Max(a => a.MostRecent)
                         })
                 );
+        }
+
+        [Route("exceptions/jiraactions"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
+        public ActionResult JiraActions(string appName)
+        {
+            var issues = JiraSettings.GetActionsForApplication(appName);
+            return View("Exceptions.Jira", issues);
+        }
+
+        [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        public async Task<ActionResult> JiraAction(string log, Guid id, int actionid, bool redirect = false)
+        {
+            var e = ExceptionStores.GetError(log, id);
+            var user = Current.User;
+            var action = JiraSettings.Actions.FirstOrDefault(i => i.Id == actionid);
+            var jiraClient = new JiraClient(JiraSettings);
+            var result = await jiraClient.CreateIssue(action, e, user == null ? String.Empty : user.AccountName);
+
+            if (String.IsNullOrWhiteSpace(result.Key))
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Can not create issue"
+                });
+            }
+            else
+            {
+                return Json(new
+                {
+                    success = true,
+                    issueKey = result.Key,
+                    browseUrl = result.BrowseUrl
+                });
+            }
+
         }
     }
 }

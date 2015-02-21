@@ -161,6 +161,7 @@
     </Compile>
     <Compile Include="Data\HAProxy\HAProxyIssues.cs" />
     <Compile Include="Data\IssuesProvider.cs" />
+    <Compile Include="Data\Jira\JiraClient.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.Incidents.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.OnCall.cs" />
@@ -337,6 +338,7 @@
     <Compile Include="Settings\HAProxySettings.cs" />
     <Compile Include="Settings\HAProxySettings.Traffic.cs" />
     <Compile Include="Settings\CloudFlareSettings.cs" />
+    <Compile Include="Settings\JiraSettings.cs" />
     <Compile Include="Settings\PagerDutySettings.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\PollingSettings.cs" />

@@ -1114,6 +1114,43 @@ Status.Exceptions = (function () {
             });
             return false;
         });
+
+        /* Jira action handlers*/
+        $('.info-jira-action-link a').on('click', function () {
+            $(this).addClass('loading');
+            var actionid = $(this).data("actionid");
+            $.ajax({
+                type: 'POST',
+                data: { id: options.id, log: options.log, actionid: actionid },
+                context: this,
+                url: '/exceptions/jiraaction',
+                success: function (data) {
+                    $(this).removeClass('loading');
+                    if (data.success == true) {
+                        if (data.browseUrl != null && data.browseUrl != "") {
+
+                            var issueLink = '<a href="' + data.browseUrl + '" target="_blank">' + data.issueKey + '</a>';
+                            $("#jira-links-container").show();
+                            $("#jira-links-container").append('<span> ( ' + issueLink + ' ) </span>')
+                            toastr.success('<div style="margin-top:5px">' + issueLink + '</div>', 'Issue Created')
+                        }
+                        else {
+                            toastr.success("Issue created : " + data.issueKey, 'Success')
+                        }
+
+                    }
+                    else {
+                        toastr.error(data.message, 'Error')
+                    }
+
+                },
+                error: function () {
+                    $(this).removeClass('loading').parent().errorPopup('An error occured while trying to perform the selected Jira issue action.');
+                }
+            });
+            return false;
+        });
+
     }
 
     return {
