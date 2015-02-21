@@ -59,8 +59,7 @@ Open Source Projects in Use
 [MiniProfiler](http://miniprofiler.com/) by Stack Exchange  
 [NEST](https://github.com/Mpdreamz/NEST) by Martijn Laarman  
 [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional) by Nick Craver  
-[TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack  
-[RestSharp](https://github.com/restsharp/RestSharp) by John Sheehan 
+[TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack
 
 JavaScript:  
 [d3.js](http://d3js.org/) by Michael Bostock  
