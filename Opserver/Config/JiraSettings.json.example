@@ -9,7 +9,7 @@
         "APP1",
         "APP2"
     ],
-    "issues": [
+    "actions": [
         {
             "caption": "Create Bug",
             "name": "Bug",

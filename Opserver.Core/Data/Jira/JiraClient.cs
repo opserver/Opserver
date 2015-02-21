@@ -65,13 +65,13 @@ namespace StackExchange.Opserver.Data.Jira
             };
         }
 
-        public async Task<JiraCreateIssueResponse> CreateIssue(JiraIssue issue, Error error, string accountName)
+        public async Task<JiraCreateIssueResponse> CreateIssue(JiraAction action, Error error, string accountName)
         {
 
-            var url = GetUrl(issue);
-            var userName = GetUsername(issue);
-            var password = GetPassword(issue);
-            var projectKey = GetProjectKey(issue);
+            var url = GetUrl(action);
+            var userName = GetUsername(action);
+            var password = GetPassword(action);
+            var projectKey = GetProjectKey(action);
 
             var client = new JsonRestClient(url);
             client.Username = userName;
@@ -79,17 +79,17 @@ namespace StackExchange.Opserver.Data.Jira
 
             Dictionary<string, object> fields = new Dictionary<string, object>();
             fields.Add("project", new { key = projectKey });
-            fields.Add("issuetype", new { name = issue.Name });
+            fields.Add("issuetype", new { name = action.Name });
             fields.Add("summary", error.Message.CleanCRLF().TruncateWithEllipsis(255));
             fields.Add("description", RenderDescription(error, accountName));
-            var components = issue.GetComponentsForApplication(error.ApplicationName);
+            var components = action.GetComponentsForApplication(error.ApplicationName);
 
             if (components != null && components.Count > 0)
                 fields.Add("components", components);
 
-            var labels = String.IsNullOrWhiteSpace(issue.Labels)
+            var labels = String.IsNullOrWhiteSpace(action.Labels)
                 ? null
-                : issue.Labels.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                : action.Labels.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (labels != null && labels.Length > 0)
                 fields.Add("labels", labels);
@@ -107,16 +107,16 @@ namespace StackExchange.Opserver.Data.Jira
                 + RenderVariableTable("Cookies", error.Cookies)
                 + RenderVariableTable("RequestHeaders", error.RequestHeaders);
 
-            var commentReponse = await Comment(issue, result, commentBody).ConfigureAwait(false);
-            result.Host = GetHost(issue);
+            var commentReponse = await Comment(action, result, commentBody).ConfigureAwait(false);
+            result.Host = GetHost(action);
             return result;
         }
 
-        public async Task<string> Comment(JiraIssue issue, JiraCreateIssueResponse createResponse, string comment)
+        public async Task<string> Comment(JiraAction actions, JiraCreateIssueResponse createResponse, string comment)
         {
-            var url = GetUrl(issue);
-            var userName = GetUsername(issue);
-            var password = GetPassword(issue);
+            var url = GetUrl(actions);
+            var userName = GetUsername(actions);
+            var password = GetPassword(actions);
 
             var client = new JsonRestClient(url);
             client.Username = userName;
@@ -133,42 +133,43 @@ namespace StackExchange.Opserver.Data.Jira
             return response;
         }
 
-        private string GetPassword(JiraIssue issue)
+
+        private string GetPassword(JiraAction action)
         {
-            var password = !String.IsNullOrWhiteSpace(issue.Password)
-                ? issue.Password
+            var password = !String.IsNullOrWhiteSpace(action.Password)
+                ? action.Password
                 : _jiraSettings.DefaultPassword;
             return password;
         }
 
-        private string GetUsername(JiraIssue issue)
+        private string GetUsername(JiraAction action)
         {
-            var userName = !String.IsNullOrWhiteSpace(issue.Username)
-               ? issue.Username
+            var userName = !String.IsNullOrWhiteSpace(action.Username)
+               ? action.Username
                : _jiraSettings.DefaultUsername;
             return userName;
         }
 
-        private string GetProjectKey(JiraIssue issue)
+        private string GetProjectKey(JiraAction action)
         {
-            var userName = !String.IsNullOrWhiteSpace(issue.ProjectKey)
-               ? issue.ProjectKey
+            var userName = !String.IsNullOrWhiteSpace(action.ProjectKey)
+               ? action.ProjectKey
                : _jiraSettings.DefaultProjectKey;
             return userName;
         }
 
 
-        private string GetUrl(JiraIssue issue)
+        private string GetUrl(JiraAction action)
         {
-            return !String.IsNullOrWhiteSpace(issue.Url)
-                ? issue.Url
+            return !String.IsNullOrWhiteSpace(action.Url)
+                ? action.Url
                 : _jiraSettings.DefaultUrl;
         }
 
-        private string GetHost(JiraIssue issue)
+        private string GetHost(JiraAction action)
         {
-            return !String.IsNullOrWhiteSpace(issue.Host)
-                ? issue.Host
+            return !String.IsNullOrWhiteSpace(action.Host)
+                ? action.Host
                 : _jiraSettings.DefaultHost;
         }
 

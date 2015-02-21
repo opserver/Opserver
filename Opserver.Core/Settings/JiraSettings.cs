@@ -10,12 +10,12 @@ namespace StackExchange.Opserver
 {
     public class JiraSettings : Settings<JiraSettings>, IAfterLoadActions
     {
-        public override bool Enabled { get { return Issues.Any(); } }
+        public override bool Enabled { get { return Actions.Any(); } }
 
-        public ObservableCollection<JiraIssue> Issues { get; set; }
-        public event EventHandler<JiraIssue> IssueAdded = delegate { };
-        public event EventHandler<List<JiraIssue>> IssueChanged = delegate { };
-        public event EventHandler<JiraIssue> IssueRemoved = delegate { };
+        public ObservableCollection<JiraAction> Actions { get; set; }
+        public event EventHandler<JiraAction> ActionAdded = delegate { };
+        public event EventHandler<List<JiraAction>> ActionChanged = delegate { };
+        public event EventHandler<JiraAction> ActionRemoved = delegate { };
 
         public ObservableCollection<string> Applications { get; set; }
         public event EventHandler<string> ApplicationAdded = delegate { };
@@ -25,54 +25,54 @@ namespace StackExchange.Opserver
 
         public JiraSettings()
         {
-            Issues = new ObservableCollection<JiraIssue>();
+            Actions = new ObservableCollection<JiraAction>();
             Applications = new ObservableCollection<string>();
         }
         public void AfterLoad()
         {
-            Issues.AddHandlers(this, IssueAdded, IssueChanged, IssueRemoved);
+            Actions.AddHandlers(this, ActionAdded, ActionChanged, ActionRemoved);
             Applications.AddHandlers(this, ApplicationAdded, ApplicationsChanged, ApplicationRemoved);
         }
 
         /// <summary>
-        /// Default url for all issues
+        /// Default url for all actions
         /// </summary>
         public string DefaultUrl { get; set; }
         /// <summary>
-        /// Default username for all issues
+        /// Default username for all actions
         /// </summary>
         public string DefaultUsername { get; set; }
         /// <summary>
-        /// Default password for all issues
+        /// Default password for all actions
         /// </summary>
-        public string DefaultPassword { get; set; } 
+        public string DefaultPassword { get; set; }
         /// <summary>
         /// Default host
         /// </summary>
         public string DefaultHost { get; set; }
         /// <summary>
-        /// Default project key for all issues
+        /// Default project key for all actions
         /// </summary>
         public string DefaultProjectKey { get; set; }
 
 
-        public List<JiraIssue> GetIssuesForApplication(string application)
+        public List<JiraAction> GetActionsForApplication(string application)
         {
             var isValidApp = Applications.Any(a => a.Equals(application, StringComparison.OrdinalIgnoreCase));
             if (!isValidApp)
                 return null;
-            var issues = Issues.Where(i => i.Applications == null
+            var actions = Actions.Where(i => i.Applications == null
                 || i.Applications.Count == 0
                 || i.Applications.Contains(application, StringComparer.OrdinalIgnoreCase)
                 ).Select(i => i).ToList();
 
-            return issues;
+            return actions;
         }
 
 
     }
 
-    public class JiraIssue : ISettingsCollectionItem<JiraIssue>, IAfterLoadActions
+    public class JiraAction : ISettingsCollectionItem<JiraAction>, IAfterLoadActions
     {
         public ObservableCollection<JiraComponent> Components { get; set; }
         public event EventHandler<JiraComponent> ComponentAdded = delegate { };
@@ -84,7 +84,7 @@ namespace StackExchange.Opserver
         public event EventHandler<List<string>> ApplicationsChanged = delegate { };
         public event EventHandler<string> ApplicationRemoved = delegate { };
 
-        public JiraIssue()
+        public JiraAction()
         {
             Components = new ObservableCollection<JiraComponent>();
             Applications = new ObservableCollection<string>();
@@ -141,14 +141,14 @@ namespace StackExchange.Opserver
                 return new List<object>();
 
             var components = Components
-                .Where(c => c.Application != null && application.Equals(c.Application,StringComparison.OrdinalIgnoreCase))
+                .Where(c => c.Application != null && application.Equals(c.Application, StringComparison.OrdinalIgnoreCase))
                 .Select(c => c).ToList();
 
-            
+
             return (from c in components
-                     select new { name = c.Name }).ToList<object>();
+                    select new { name = c.Name }).ToList<object>();
         }
-        public bool Equals(JiraIssue other)
+        public bool Equals(JiraAction other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -170,7 +170,7 @@ namespace StackExchange.Opserver
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((JiraIssue)obj);
+            return Equals((JiraAction)obj);
         }
 
         public override int GetHashCode()
@@ -225,7 +225,7 @@ namespace StackExchange.Opserver
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
             if (obj.GetType() != this.GetType()) return false;
-            return Equals((JiraIssue)obj);
+            return Equals((JiraAction)obj);
         }
 
         public override int GetHashCode()

@@ -228,21 +228,21 @@ namespace StackExchange.Opserver.Controllers
                 );
         }
 
-        [Route("exceptions/jiralinks"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
-        public ActionResult JiraLinks(string appName)
+        [Route("exceptions/jiraactions"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
+        public ActionResult JiraActions(string appName)
         {
-            var issues = JiraSettings.GetIssuesForApplication(appName);
+            var issues = JiraSettings.GetActionsForApplication(appName);
             return View("Exceptions.Jira", issues);
         }
 
         [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> JiraLinks(string log, Guid id,int  actionid, bool redirect = false)
+        public async Task<ActionResult> JiraAction(string log, Guid id, int actionid, bool redirect = false)
         {
             var e = ExceptionStores.GetError(log, id);
             var user = Current.User;
-            var issue = JiraSettings.Issues.FirstOrDefault(i => i.Id == actionid);
+            var action = JiraSettings.Actions.FirstOrDefault(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = await jiraClient.CreateIssue(issue, e, user == null ? String.Empty : user.AccountName);
+            var result = await jiraClient.CreateIssue(action, e, user == null ? String.Empty : user.AccountName);
 
             if (String.IsNullOrWhiteSpace(result.Key))
             {
