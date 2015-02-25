@@ -36,8 +36,8 @@ Select vs.volume_mount_point VolumeMountPoint,
        vs.available_bytes AvailableBytes, 
        vs.is_read_only IsReadOnly, 
        vs.is_compressed IsCompressed,
-       Sum(fs.io_stall_read_ms) / Sum(fs.num_of_reads) as AvgReadStallMS,
-       Sum(fs.io_stall_write_ms) / Sum(fs.num_of_writes) as AvgWriteStallMS
+       CASE SUM(fs.num_of_reads) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_read_ms) / (SUM(fs.num_of_reads)) END AS AvgReadStallMS,
+       CASE SUM(fs.num_of_writes) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_write_ms) / (SUM(fs.num_of_writes)) END AS AvgWriteStallMS       
   From sys.dm_io_virtual_file_stats(null, null) fs
        Join sys.master_files mf 
          On fs.database_id = mf.database_id
