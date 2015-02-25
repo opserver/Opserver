@@ -23,6 +23,7 @@ namespace StackExchange.Opserver.SettingsProviders
         public SQLSettings SQL { get { return GetSettings<SQLSettings>(); } }
         // Generic build settings later
         public TeamCitySettings TeamCity { get { return GetSettings<TeamCitySettings>(); } }
+        public JiraSettings Jira { get { return GetSettings<JiraSettings>(); } }
 
         public abstract T GetSettings<T>() where T : Settings<T>, new();
         public abstract T SaveSettings<T>(T settings) where T : class, new();

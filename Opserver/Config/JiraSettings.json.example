@@ -1,0 +1,51 @@
+﻿{
+    "defaultUrl": "http://yourserver/rest/api/latest",
+    "host": "http://yourserver",
+    "defaultUsername": "username",
+    "defaultPassword": "password",
+    "defaultProjectKey": "PRJ1",
+    "applications": [
+        "Optional",
+        "APP1",
+        "APP2"
+    ],
+    "actions": [
+        {
+            "caption": "Create Bug",
+            "name": "Bug",
+            "projectKey": "PRJ1",
+            "host": "optional host",
+            "url": "optional url",
+            "username": "optional username",
+            "password": "optional password",
+            "labels": "Label1,Label2",
+            "applications": [
+                "Optional",
+                "APP1",
+                "APP2"
+            ],
+            "components": [ 
+                {
+                    "application": "APP1",
+                    "name": "component name"
+                }
+            ]
+        },
+        {
+            "caption": "Create Ticket",
+            "name": "Ticket",
+            "projectKey": "optional project key",
+            "host": "optional host",
+            "url": "optional url",
+            "username": "optional username",
+            "password": "optional password",
+            "labels": "optional comma seperated labels",
+            "components": [
+                {
+                    "application": "APP2",
+                    "name": "component name"
+                }
+            ]
+        }
+    ]
+}

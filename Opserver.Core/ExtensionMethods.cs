@@ -169,6 +169,12 @@ namespace StackExchange.Opserver
 
             return string.Format("{0}...", Truncate(s, Math.Max(maxLength, 3) - 3));
         }
+        public static string CleanCRLF(this string s)
+        {
+            if (String.IsNullOrWhiteSpace(s))
+                return s;
+            return s.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
+        }
 
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> items)
         {
