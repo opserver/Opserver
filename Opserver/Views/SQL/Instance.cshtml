@@ -45,34 +45,34 @@ else if (i.LastFetch.LastSuccess == null)
             var pd = props.Data;
         <div class="section-wrap refresh-group" data-name="instance-summary">
             <table>
-                @Helpers.SectionHeader("Summary")
+                @Helpers.SectionHeader("综述")
                 <tbody>
                     <tr>
-                        <td>Machine / Server Name</td>
+                        <td>设备/服务器名称</td>
                         <td>@pd.MachineName@if (pd.ServerName != pd.MachineName)
                                            {<text> / @pd.ServerName</text>}</td>
                     </tr>
                     <tr title="@pd.FullVersion">
-                        <td>Version</td>
+                        <td>版本号</td>
                         <td>SQL @pd.MajorVersion @pd.Level (<a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>)</td>
                     </tr>
                     <tr>
-                        <td>Edition</td>
+                        <td>版本</td>
                         <td>@pd.Edition</td>
                     </tr>
                     <tr title="Started on @pd.SQLServerStartTime.ToRelativeTime() (@pd.SQLServerStartTime)">
-                        <td>Running since</td>
+                        <td>启动时间</td>
                         <td>@pd.SQLServerStartTime.ToRelativeTimeSpan() <span class="note">(@((DateTime.UtcNow - pd.SQLServerStartTime).ToTimeStringMini()))</span></td>
                     </tr>
                     <tr>
-                        <td>Databases</td>
+                        <td>数据库</td>
                         <td>@SQLHelpers.HealthDescription(i, dbs)</td>
                     </tr>
                     @if (jobs.Any())
                     {
                         var running = jobs.Count(j => j.IsRunning);
                         <tr>
-                            <td>Jobs</td>
+                            <td>作业</td>
                             <td>
                                 <a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a>
                                 @if (running > 0)
@@ -97,7 +97,7 @@ else if (i.LastFetch.LastSuccess == null)
         </div>
         <div class="section-wrap refresh-group" data-name="instance-stats">
             <table>
-                @Helpers.SectionHeader("Stats")
+                @Helpers.SectionHeader("状态")
                 <tbody>
                     <tr title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
                         <td>CPU</td>
@@ -106,7 +106,7 @@ else if (i.LastFetch.LastSuccess == null)
                     @if (pd.VirtualMachineType != VirtualMachineTypes.None)
                     {
                         <tr>
-                            <td>Machine Type</td>
+                            <td>服务器类型</td>
                             <td>@pd.VirtualMachineType.GetDescription()</td>
                         </tr>
                     }
@@ -121,7 +121,7 @@ SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToS
 Top Users:
 @foreach (var mc in clerks.OrderByDescending(mc => mc.UsedBytes).Take(5)) {<text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)
 </text>}">
-                            <td>Memory</td>
+                            <td>内存</td>
                             <td>
                                 <a href="#/sql/summary/memory">
                                     @(decimal.Round(i.CurrentMemoryPercent.Value, 2) + "%") (@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())

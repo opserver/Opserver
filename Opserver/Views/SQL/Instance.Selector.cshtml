@@ -4,7 +4,7 @@
     var instances = SQLInstance.AllInstances;
 }
 <div class="node-selector">
-    <div class="no-content">Please select a SQL server.</div>
+    <div class="no-content">请选择一个 SQL server 服务器。</div>
     @foreach (var i in instances)
     {
         var props = i.ServerProperties.SafeData(true);

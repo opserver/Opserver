@@ -1,7 +1,7 @@
 ﻿@using System.Collections
 @model StackExchange.Opserver.Views.Home.AboutModel
 @{
-    this.SetPageTitle("About - Caches");
+    this.SetPageTitle("关于 - 缓存");
     var pollingInfo = PollingEngine.GetPollingStatus();
     var pollerNodes = pollingInfo.Nodes
         .OrderByWorst(n => n.DataPollers.GetWorstStatus())
