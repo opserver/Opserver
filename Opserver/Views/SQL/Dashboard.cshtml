@@ -3,7 +3,7 @@
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetPageTitle("SQL Dashboard");
+    this.SetPageTitle("SQL 仪表盘");
     this.SetTopNodes(SQLInstance.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? "/sql/instance" : null);
 }
 @helper TabLink(SQLViews view, string href, string name, bool includeParams = true)
@@ -23,7 +23,7 @@
             @TabLink(SQLViews.Servers, "/sql/servers", "所有服务器", false)
             @TabLink(SQLViews.Instance, "/sql/instance", "实例")
             @TabLink(SQLViews.Top, "/sql/top", "大SQL")
-            @TabLink(SQLViews.Active, "/sql/active", "active")
+            @TabLink(SQLViews.Active, "/sql/active", "请求")
             @TabLink(SQLViews.Connections, "/sql/connections", "连接")
             @TabLink(SQLViews.Databases, "/sql/databases", "数据库")
         </div>
