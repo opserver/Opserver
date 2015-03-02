@@ -362,6 +362,7 @@ Status.Dashboard = (function () {
                     data: $.extend({}, Status.Dashboard.options.refreshData),
                     cache: false
                 }).done(function (html) {
+                    html = $('<div/>').append(html);
                     var serverGroups = $('.node-group[data-name], .node-header[data-name], .refresh-group[data-name]', html);
                     $('.node-group[data-name], .node-header[data-name], .refresh-group[data-name]').each(function () {
                         var name = $(this).data('name'),
