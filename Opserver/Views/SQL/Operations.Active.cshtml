@@ -40,28 +40,28 @@
                     <div class="filters-wrap">
                         <div class="filters-current">
                             <span class="filter-label">Sleeping: </span><span class="filter-value">@Model.ActiveSearchOptions.IncludeSleepingSessions.GetDescription()</span>
-                        @if (Model.ActiveSearchOptions.GetAdditionalInfo)
-                        {
-                            <span class="filter-label">Details: </span><span class="filter-value">Yes</span>
-                        }
-                        @if (Model.ActiveSearchOptions.IncludeSystemSessions)
-                        {
-                            <span class="filter-label">System: </span><span class="filter-value">Yes</span>
-                        }
-                        @if (Model.ActiveSearchOptions.FilterValue.HasValue())
-                        {
-                            <span class="filter-label">@Model.ActiveSearchOptions.FilterField.GetDescription(): </span><span class="filter-value">@Model.ActiveSearchOptions.FilterValue</span>
-                        }
+                            @if (Model.ActiveSearchOptions.GetAdditionalInfo)
+                            {
+                                <span class="filter-label">Details: </span><span class="filter-value">Yes</span>
+                            }
+                            @if (Model.ActiveSearchOptions.IncludeSystemSessions)
+                            {
+                                <span class="filter-label">System: </span><span class="filter-value">Yes</span>
+                            }
+                            @if (Model.ActiveSearchOptions.FilterValue.HasValue())
+                            {
+                                <span class="filter-label">@Model.ActiveSearchOptions.FilterField.GetDescription(): </span><span class="filter-value">@Model.ActiveSearchOptions.FilterValue</span>
+                            }
                         </div>
                         <div class="filters">
                             <form class="filter-form" action="" method="GET">
-                                <input type="hidden" name="node" value="@Model.CurrentInstance.Name" />
+                                <input type="hidden" name="node" value="@Model.CurrentInstance.Name"/>
                                 <div class="filters-header">Filters</div>
                                 <div class="filter">
-                                    <label>Include Details: <input type="checkbox" @(Model.ActiveSearchOptions.GetAdditionalInfo ? "checked " : "") name="details" value="true" /></label>
+                                    <label>Include Details: <input type="checkbox" @(Model.ActiveSearchOptions.GetAdditionalInfo ? "checked " : "") name="details" value="true"/></label>
                                 </div>
                                 <div class="filter">
-                                    <label>Include System Sessions: <input type="checkbox" @(Model.ActiveSearchOptions.IncludeSystemSessions ? "checked " : "") name="system" value="true" /></label>
+                                    <label>Include System Sessions: <input type="checkbox" @(Model.ActiveSearchOptions.IncludeSystemSessions ? "checked " : "") name="system" value="true"/></label>
                                 </div>
                                 <div class="filter">
                                     Include Sleeping:
@@ -70,14 +70,14 @@
                                     @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.All, "Yes")
                                 </div>
                                 <div class="filter">
-                                    Search: 
+                                    Search:
                                     <select name="filterField">
-                                    @foreach (SQLInstance.ActiveSearchOptions.FilterFields e in Enum.GetValues(typeof(SQLInstance.ActiveSearchOptions.FilterFields)))
-                                    {
-                                        <option value="@e.ToString()" @(e == Model.ActiveSearchOptions.FilterField ? "selected " : "")>@e.GetDescription()</option>
-                                    }
+                                        @foreach (SQLInstance.ActiveSearchOptions.FilterFields e in Enum.GetValues(typeof (SQLInstance.ActiveSearchOptions.FilterFields)))
+                                        {
+                                            <option value="@e.ToString()" @(e == Model.ActiveSearchOptions.FilterField ? "selected " : "")>@e.GetDescription()</option>
+                                        }
                                     </select>
-                                    <input style="width: 240px;" type="text" value="@Model.ActiveSearchOptions.FilterValue" name="filterValue" placeholder="Search Text" />
+                                    <input style="width: 240px;" type="text" value="@Model.ActiveSearchOptions.FilterValue" name="filterValue" placeholder="Search Text"/>
                                 </div>
                                 <button class="submit-button" type="submit">Apply</button>
                             </form>
@@ -85,6 +85,44 @@
                     </div>
                     @*<a href="#" class="reload-link">Refresh</a>*@
                 </h3>
+                @if (data.Any(o => o.BlockingSessionId.HasValue))
+                {
+                    <div class="critical-summary curved-section">
+                        <h3>Blocking Detected:</h3>
+                        <div>
+                            <ul>
+                                @helper BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked){
+                                <li>
+                                    Session: <a href="#spid-@op.SessionId">@op.SessionId</a>
+                                    @if (blocked[op].Any())
+                                    {
+                                        <ul>
+                                            <li>Session: @string.Join(", ", blocked[op].Where(b => !blocked[b].Any()).Select(b => string.Format("<a href=\"#spid-{0}\">{0}</a>", b.SessionId))).AsHtml()</li>
+                                        @foreach (var b in blocked[op].Where(bo => blocked[bo].Any()))
+                                        {
+                                            @BlockingTree(b, blocked)
+                                        }
+                                    </ul>
+                                    }
+                                </li>
+                                }
+                                @{
+                                    var blocked = new Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>>();
+                                    foreach (var op in data)
+                                    {
+                                        blocked[op] = data.Where(o => o.BlockingSessionId == op.SessionId).ToList();
+                                    }
+                                    // Iterate top level blockers
+                                    // TODO: Circular blocks
+                                    foreach (var op in data.Where(o => !o.BlockingSessionId.HasValue && blocked[o].Any()))
+                                    {
+                                        @BlockingTree(op, blocked)
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    </div>
+                }
                 <table class="striped-dashboard" style="table-layout: fixed;">
                     <thead>
                         <tr>
@@ -101,7 +139,7 @@
                     <tbody>
                         @foreach (var w in data)
                         {
-                            <tr>
+                            <tr id="spid-@w.SessionId">
                                 <td>
                                     @w.SessionId
                             </td>
@@ -132,7 +170,7 @@
                                 }
                                 @if (w.BlockingSessionId.HasValue)
                                 {
-                                    <div><span class="note">Blcoked By:</span> @w.BlockingSessionId</div>
+                                    <div><a href="#spid-@w.BlockingSessionId"><span class="note">Blocked By:</span> @w.BlockingSessionId</a></div>
                                 }
                             </td>
                             <td title="@w.WaitInfo
