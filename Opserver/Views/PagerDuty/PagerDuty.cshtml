@@ -56,8 +56,8 @@
 
     <div class="node-dashboard-separator half-width"></div>
 
-    <table class="striped-dashboard">
-        <tbody class="node-header">
+    <table class="striped-dashboard" class="refresh-group" data-name="pagerduty">
+        <tbody>
             <tr class="category-row">
                 <th colspan="8">
                     <h3>
@@ -74,27 +74,29 @@
                 <th>Summary</th>
             </tr>
         </tbody>
-        <tbody class="node-group">
+        <tbody>
 
-        @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
-        {
-            <tr class="server-row @i.MonitorStatus.RowClass()">
-                <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
-                <td>@i.CreationDate.ToRelativeTimeSpan()</td>
-                <td>@i.AffectedService.Name</td>
-                <td><span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span> 
-                @if (i.LastChangedBy != null)
-                {
-                    <span class="note">(@i.LastChangedBy.FullName)</span>
-                }</td>
-                <td>
-                    @if (i.SummaryData.Keys.Contains("subject"))
-                    {
-                        @i.SummaryData["subject"]
-                    }
-                </td>
-            </tr>
-        }
+            @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+            {
+                <tr class="server-row @i.MonitorStatus.RowClass()">
+                    <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
+                    <td>@i.CreationDate.ToRelativeTimeSpan()</td>
+                    <td>@i.AffectedService.Name</td>
+                    <td>
+                        <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
+                        @if (i.LastChangedBy != null)
+                        {
+                            <span class="note">(@i.LastChangedBy.FullName)</span>
+                        }
+                    </td>
+                    <td>
+                        @if (i.SummaryData.Keys.Contains("subject"))
+                        {
+                            @i.SummaryData["subject"]
+                        }
+                    </td>
+                </tr>
+            }
         </tbody>
 
     </table>
