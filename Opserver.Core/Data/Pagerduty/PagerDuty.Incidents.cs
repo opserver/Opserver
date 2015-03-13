@@ -32,17 +32,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
                 DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd"));
             var i = GetFromPagerDuty(url, getFromJson:
-                response =>
-                {
+                response => 
+            {
                     var myResp =
                         JSON.Deserialize<PagerDutyIncidentResponce>(response.ToString(), Options.ISO8601)
                             .Incidents.OrderBy(ic => ic.CreationDate)
                             .ToList();
                     return myResp;
                 });
+
             return i;
         }
+
+        
     }
+
 
     public class PagerDutyIncidentResponce
     {
@@ -52,6 +56,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
     public class PagerDutyIncident
     {
+        [DataMember(Name="id")]
+        public string Id { get; set; }
         [DataMember(Name = "incident_number")]
         public int Number { get; set; }
         [DataMember(Name = "status")]
@@ -75,9 +81,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "service")]
         public PagerDutyService AffectedService { get; set; }
         [DataMember(Name = "number_of_escalations")]
-        public int NumberOfEscalations { get; set; }
+        public int? NumberOfEscalations { get; set; }
 
+        
 
+        
+        public List<PagerDutyApi.PagerDutyLogEntry> IncidentLogs
+        {
+            get { return PagerDutyApi.Instance.GetIncidentEntries(Id); }
+        } 
+        /*
+        public PagerDutyApi.BadResponce IncidentLogs
+        {
+            get { return PagerDutyApi.Instance.GetIncidentEntries(Number); }
+        } 
+         * */
         public MonitorStatus MonitorStatus
         {
             get

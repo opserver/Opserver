@@ -8,14 +8,14 @@
 <div class="incident-details">
     <h3>Incident Detail: @Model.Number</h3>
     <ul>
-         @if (isSubjectOnly)
+        @if (isSubjectOnly)
         {
             <li><span class="key">Subject:</span> <span class="value">@Model.SummaryData["subject"]</span></li>
         }
         <li><span class="key">Service:</span> <span class="value">@Model.AffectedService.Name</span></li>
         <li><span class="key">Link:</span> <span class="value"><a href="@Model.Uri" target="_blank">@Model.Uri</a></span></li>
         <li><span class="key">Status:</span> <span class="bold @Model.MonitorStatus.Class()">@Model.Status.ToTitleCase()</span></li>
-        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li> 
+        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li>
         @if (Model.ResolvedBy != null)
         {
             <li><span class="key">Resolved By:</span> <span class="value">@Model.ResolvedBy.FullName</span></li>
@@ -46,4 +46,35 @@
             }
         </li>
     </ul>
+    <hr/>
+    <table class="striped-dashboard">
+        <tbody class="node-header">
+        <tr class="category-row">
+            <th colspan="8">
+                <h3>
+                    incident Log
+                </h3>
+            </th>
+        </tr>
+        <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Message</th>
+            <th>>Notes</th>
+        </tr>
+        @foreach (var l in @Model.IncidentLogs)
+        {
+            <tr>
+                <td>@l.CreationTime.ToRelativeTimeSpan()</td>
+                <td>@l.LogType.ToTitleCase()</td>
+                <td>@l.Detail.Message</td>
+                <td>@l.Note</td>
+            </tr>
+        }
+
+
+
+        </tbody>
+    </table>
+    
 </div>
