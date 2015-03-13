@@ -114,15 +114,23 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
                 catch (WebException e)
                 {
-                    using (var ers = e.Response.GetResponseStream())
+                    try
                     {
-                        if (ers == null) return getFromJson("fail");
-                        using (var er = new StreamReader(ers))
+                        using (var ers = e.Response.GetResponseStream())
                         {
-                            e.AddLoggedData("API Response JSON", er.ReadToEnd());
+                            if (ers == null) return getFromJson("fail");
+                            using (var er = new StreamReader(ers))
+                            {
+                                e.AddLoggedData("API Response JSON", er.ReadToEnd());
+                            }
                         }
                     }
-                    e.AddLoggedData("Sent Data", new StreamReader(req.GetRequestStream()).ReadToEnd());
+                    catch
+                    {
+                        
+                    }
+                    
+                    e.AddLoggedData("Sent Data", JSON.Serialize(data));
                     e.AddLoggedData("Endpoint", fullUri);
                     e.AddLoggedData("Headers", req.Headers.ToString());
                     e.AddLoggedData("Contecnt Type", req.ContentType);

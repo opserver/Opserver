@@ -164,6 +164,7 @@
     <Compile Include="Data\Jira\JiraClient.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.Incidents.cs" />
+    <Compile Include="Data\PagerDuty\PagerDuty.Logs.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.OnCall.cs" />
     <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
       <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
