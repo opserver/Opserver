@@ -1,5 +1,8 @@
 ﻿{
     "APIKey": "ABC123",
     "APIBaseURL":  "https://path.pagerduty.com",
-    "OnCallToShow": 3
+    "OnCallToShow": 3,
+    "UserNameMap": [ 
+        {"OpServerName": "OpServerAuthName",  "EmailUser": "EmailUserName"}
+    ]
 }

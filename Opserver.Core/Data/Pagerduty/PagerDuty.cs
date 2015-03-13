@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Text;
 using StackExchange.Profiling;
+using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
@@ -15,7 +17,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (AllUsers.ContainsData)
+            if (OnCallUsers.ContainsData)
             {
                 foreach (var a in GetSchedule())
                     yield return a.MonitorStatus;
@@ -38,9 +40,17 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-                yield return AllUsers;
+                yield return OnCallUsers;
                 yield return Incidents;
             }
+        }
+
+        public static class Statuses
+        {
+            public const string Triggered = "triggered";
+            public const string Acknowledged = "acknowledged";
+            public const string Resolved = "resolved";
+
         }
 
         public Action<Cache<T>> GetFromPagerDuty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
@@ -60,25 +70,94 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <typeparam name="T">Type to return</typeparam>
         /// <param name="path">The path to return, including any query string</param>
         /// <param name="getFromJson"></param>
+        /// <param name="httpMethod"></param>
+        /// <param name="data"></param>
         /// <returns></returns>
-        public T GetFromPagerDuty<T>(string path, Func<string, T> getFromJson)
+        public T GetFromPagerDuty<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null)
         {
             var url = Settings.APIBaseUrl;
             var fullUri = url + path;
-            using (MiniProfiler.Current.CustomTiming("http", fullUri, "GET"))
+            
+            using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
             {
                 var req = (HttpWebRequest)WebRequest.Create(fullUri);
+                req.Method = httpMethod;
                 req.Headers.Add("Authorization: Token token=" + APIKey);
-                using (var resp = req.GetResponse())
-                using (var rs = resp.GetResponseStream())
+
+                if (httpMethod == "POST" || httpMethod == "PUT")
                 {
-                    if (rs == null) return getFromJson(null);
-                    using (var sr = new StreamReader(rs))
+                    
+                    if (data != null)
                     {
-                        return getFromJson(sr.ReadToEnd());
+                        var stringData = JSON.Serialize(data);
+                        req.ContentType = "application/json";
+                        var byteData = new ASCIIEncoding().GetBytes(stringData);
+                        req.ContentLength = byteData.Length;
+                        var putStream = req.GetRequestStream();
+                        putStream.Write(byteData,0,byteData.Length);
+                    }
+                    
+
+
+                }
+                try
+                {
+                    var resp = req.GetResponse();
+                    using (var rs = resp.GetResponseStream())
+                    {
+                        if (rs == null) return getFromJson(null);
+                        using (var sr = new StreamReader(rs))
+                        {
+                            return getFromJson(sr.ReadToEnd());
+                        }
                     }
                 }
+                catch (WebException e)
+                {
+                    using (var ers = e.Response.GetResponseStream())
+                    {
+                        if (ers == null) return getFromJson("fail");
+                        using (var er = new StreamReader(ers))
+                        {
+                            e.AddLoggedData("API Response JSON", er.ReadToEnd());
+                        }
+                    }
+                    e.AddLoggedData("Sent Data", new StreamReader(req.GetRequestStream()).ReadToEnd());
+                    e.AddLoggedData("Endpoint", fullUri);
+                    e.AddLoggedData("Headers", req.Headers.ToString());
+                    e.AddLoggedData("Contecnt Type", req.ContentType);
+
+                    Current.LogException(e);
+                    return getFromJson("fail");
+                }
+                
+
+
             }
+        }
+
+        private Cache<List<PagerDutyPerson>> _allusers;
+
+        public Cache<List<PagerDutyPerson>> AllUsers
+        {
+            get
+            {
+                return _allusers ?? (_allusers = new Cache<List<PagerDutyPerson>>()
+                {
+                    CacheForSeconds = 60 * 60,
+                    UpdateCache = UpdateCacheItem(
+                        description: "All Users in The Organization",
+                        getData: GetAllUsers,
+                        logExceptions: true
+                        )
+                });
+            }
+        }
+
+        private List<PagerDutyPerson> GetAllUsers()
+        {
+            return GetFromPagerDuty("users/", getFromJson:
+                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
         }
     }
 }

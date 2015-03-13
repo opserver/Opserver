@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Mvc;
+using Jil;
 using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -45,6 +47,26 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult PagerDutyFullEscalation()
         {
             return View("PagerDuty.EscFull", PagerDutyApi.Instance.GetSchedule());
+        }
+
+        [Route("pagerduty/action")]
+        public void PagerDutyActionIncident(string apiAction, string userid, string incident)
+        {
+            var activeIncident = new PagerDutyEditIncident
+            {
+                Id = incident,
+                Status = apiAction
+            };
+            var data = new PagerDutyIncidentModel
+            {
+                Incidents = new List<PagerDutyEditIncident>() {activeIncident},
+                RequesterId = userid
+            };
+            PagerDutyApi.Instance.GetFromPagerDuty("incidents",
+                getFromJson: response => response.ToString(), httpMethod: "PUT", data: data);
+
+            PagerDutyApi.Instance.Incidents.Poll(true);
+
         }
     }
 }

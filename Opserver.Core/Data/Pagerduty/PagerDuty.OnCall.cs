@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,25 +15,25 @@ namespace StackExchange.Opserver.Data.PagerDuty
         // TODO: We need to able able to handle when people have more than one on call schedule
         public PagerDutyPerson PrimaryOnCall
         {
-            get { return AllUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1); }
+            get { return OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1); }
         }
 
         public PagerDutyPerson SecondaryOnCall
         {
-            get { return AllUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2); }
+            get { return OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2); }
         }
 
-        private Cache<List<PagerDutyPerson>> _allusers;
-        public Cache<List<PagerDutyPerson>> AllUsers
+        private Cache<List<PagerDutyPerson>> _oncallusers;
+        public Cache<List<PagerDutyPerson>> OnCallUsers
         {
             get
             {
-                return _allusers ?? (_allusers = new Cache<List<PagerDutyPerson>>()
+                return _oncallusers ?? (_oncallusers = new Cache<List<PagerDutyPerson>>()
                 {
                     CacheForSeconds = 60*60,
                     UpdateCache = UpdateCacheItem(
                         description: "On Call info",
-                        getData: GetAllUsers,
+                        getData: GetOnCallUsers,
                         logExceptions: true
                         )
                 });
@@ -39,7 +41,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        private List<PagerDutyPerson> GetAllUsers()
+
+        private List<PagerDutyPerson> GetOnCallUsers()
         {
             return GetFromPagerDuty("users/on_call?include[]=contact_methods", getFromJson:
                 response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
@@ -52,8 +55,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             if (_scheduleCache == null)
             {
                 var result = new List<OnCallAssignment>();
-                if (!AllUsers.HasData()) return result;
-                foreach (var p in AllUsers.Data)
+                if (!OnCallUsers.HasData()) return result;
+                foreach (var p in OnCallUsers.Data)
                 {
                     if (p.Schedule == null) continue;
                     for (var i = 0; i < p.Schedule.Count; i++)
@@ -104,6 +107,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         [DataMember(Name = "users")]
         public List<PagerDutyPerson> Users;
+    }
+
+    public class PagerDutySingleUserResponse
+    {
+        [DataMember(Name = "user")] public PagerDutyPerson User;
     }
 
     public class PagerDutyPerson
@@ -163,6 +171,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 default:
                     return level + "th";
             }
+        }
+
+        private string _emailusername;
+        public string EmailUserName
+        {
+            get { return _emailusername = (_emailusername ?? new MailAddress(Email).User); }
         }
     }
 
