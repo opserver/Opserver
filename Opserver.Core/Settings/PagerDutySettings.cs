@@ -16,6 +16,7 @@ namespace StackExchange.Opserver
 
         public int OnCallToShow { get; set; }
         public int DaysToCache { get; set; }
+        public string HeaderHtml { get; set; }
 
         public PagerDutySettings()
         {
