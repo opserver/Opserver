@@ -48,7 +48,7 @@
                     Status.summaryPopup('/pagerduty/escalation/' + val);
                 }
             });
-            $(".js_incident_action").on('click', function (e) {
+            $(".js_incident_action").on('click', function(e) {
                 e.preventDefault();
 
                 $.post('/pagerduty/action', {
@@ -88,6 +88,17 @@
         .header-blurb {
             width: 900px;
             margin: 0 auto;
+        }
+        .header-blurb h3 {
+            padding-top: 8px;
+            font-size: 16px;
+        }
+        .header-blurb ol {
+            padding-left: 20px;
+            margin-bottom: 0.5em;
+        }
+        .header-blurb p {
+            margin-bottom: 0.5em;
         }
     </style>
 }
