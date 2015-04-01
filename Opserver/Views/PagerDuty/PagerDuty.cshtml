@@ -1,11 +1,68 @@
-﻿@using StackExchange.Opserver.Data.PagerDuty
+﻿@using Jil
+@using StackExchange.Opserver.Data.PagerDuty
 @model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
 @{
-    Layout = "~/Views/Shared/Master.cshtml";
+    
+    Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
 
 }
+
+@helper GetActionString(string status, string userName, string incident)
+{
+    var loggedInUserId = PagerDutyApi.Instance.AllUsers.Data.Find(u => u.EmailUserName == userName);
+    if (loggedInUserId == null)
+    {
+        loggedInUserId = PagerDutyApi.Instance.AllUsers.Data.Find(
+                            u => u.EmailUserName == PagerDutyApi.Instance.Settings.UserNameMap.Find(un => un.OpServerName == userName).EmailUser);
+    }
+
+
+    if (loggedInUserId == null)
+    {
+        var e = new Exception("Could not Find User");
+        e.AddLoggedData("User: ", userName);
+        e.AddLoggedData("User Name Mapping", JSON.Serialize(PagerDutyApi.Instance.Settings.UserNameMap));
+        Current.LogException(e);
+
+    }
+    if (status == PagerDutyApi.Statuses.Acknowledged)
+    {
+        <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
+    }
+    else
+    {
+        <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Acknowledged" data-userid="@loggedInUserId.Id" data-incident="@incident" >Ack</a>  <a href=# class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
+    }
+}
+
 @section head {
+    <script>
+        Status.Dashboard.init({ refresh: 5 });
+        $(function() {
+            $.extend(Status.ajaxLoaders, {
+                '#/pagerduty/incident/': function(val) {
+                    console.log(val);
+                    Status.summaryPopup('/pagerduty/incident/' + val);
+                },
+                '#/pagerduty/escalation/': function(val) {
+                    console.log(val);
+                    Status.summaryPopup('/pagerduty/escalation/' + val);
+                }
+            });
+            $(".js_incident_action").on('click', function (e) {
+                e.preventDefault();
+
+                $.post('/pagerduty/action', {
+                    'apiAction': $(this).data('action'),
+                    'userid': $(this).data('userid'),
+                    'incident': $(this).data('incident')
+                }).done(function() {
+                    Status.refresh.run();
+                });
+            });
+        });
+    </script>
     <style>
         .striped-dashboard {
             width: 900px;
@@ -30,14 +87,22 @@
         .incident-details ul li table tr th, .incident-details ul li table tr td {
             padding: 2px 5px;
         }
+        .header-blurb {
+            width: 900px;
+            margin: 0 auto;
+        }
     </style>
 }
-<div class="dashboard-list">
+<div class="dashboard-list refresh-group" data-name="PagerDuty">
+    @if(Current.Settings.PagerDuty.HeaderHtml.HasValue()) {
+        <div class="header-blurb">@Current.Settings.PagerDuty.HeaderHtml.AsHtml()</div>
+    }
     <table class="striped-dashboard">
-        <tbody class="node-header">
+        <tbody>
         <tr class="category-row">
             <th colspan="8">
-                <h3>On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)
+                <h3>
+                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)
                 </h3>
             </th>
         </tr>
@@ -56,64 +121,61 @@
 
     <div class="node-dashboard-separator half-width"></div>
 
-    <table class="striped-dashboard" class="refresh-group" data-name="pagerduty">
+    <table class="striped-dashboard">
         <tbody>
-            <tr class="category-row">
-                <th colspan="8">
-                    <h3>
-                        Incidents: Last @Model.CachedDays Days
-                        @Helpers.PollNow(PagerDutyApi.Instance, PagerDutyApi.Instance.Incidents)
-                    </h3>
-                </th>
-            </tr>
-            <tr class="node-group">
-                <th>Id</th>
-                <th></th>
-                <th>Service</th>
-                <th>Status</th>
-                <th>Summary</th>
-            </tr>
+        <tr class="category-row">
+            <th colspan="8">
+                <h3>
+                    Incidents: Last @Model.CachedDays Days
+                    @Helpers.PollNow(PagerDutyApi.Instance, PagerDutyApi.Instance.Incidents)
+                </h3>
+            </th>
+        </tr>
+        <tr>
+            <th>Id</th>
+            <th></th>
+            <th>Service</th>
+            <th>Status</th>
+            <th>Summary</th>
+        </tr>
         </tbody>
         <tbody>
-
-            @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
-            {
-                <tr class="server-row @i.MonitorStatus.RowClass()">
-                    <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
-                    <td>@i.CreationDate.ToRelativeTimeSpan()</td>
-                    <td>@i.AffectedService.Name</td>
-                    <td>
-                        <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
-                        @if (i.LastChangedBy != null)
+        @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+        {
+            <tr class="server-row @i.MonitorStatus.RowClass()">
+                <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
+                <td>@i.CreationDate.ToRelativeTimeSpan()</td>
+                <td>@i.AffectedService.Name</td>
+                <td>
+                    <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
+                    @if (i.LastChangedBy != null)
+                    {
+                        if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                        {
+                            <span class="note">(@i.LastChangedBy.FullName)</span>
+                            @GetActionString(@i.Status, Current.User.AccountName, @i.Id)
+                            ;
+                        }
+                        else
                         {
                             <span class="note">(@i.LastChangedBy.FullName)</span>
                         }
-                    </td>
-                    <td>
-                        @if (i.SummaryData.Keys.Contains("subject"))
-                        {
-                            @i.SummaryData["subject"]
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
 
+                    }
+                    else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                    {
+                        @GetActionString(@i.Status, Current.User.AccountName, @i.Id)
+                        ;
+                    }
+                </td>
+                <td>
+                    @if (i.SummaryData.Keys.Contains("subject"))
+                    {
+                        @i.SummaryData["subject"]
+                    }
+                </td>
+            </tr>
+        }
+        </tbody>
     </table>
 </div>
-
-
-    <script>
-        $.extend(Status.ajaxLoaders, {
-            '#/pagerduty/incident/': function (val) {
-                console.log(val);
-                Status.summaryPopup('/pagerduty/incident/' + val);
-            },
-            '#/pagerduty/escalation/': function (val) {
-                console.log(val);
-                Status.summaryPopup('/pagerduty/escalation/' + val);
-            }
-        });
-    </script>
-
-
