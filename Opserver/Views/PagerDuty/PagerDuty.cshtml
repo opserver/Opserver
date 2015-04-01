@@ -42,11 +42,9 @@
         $(function() {
             $.extend(Status.ajaxLoaders, {
                 '#/pagerduty/incident/': function(val) {
-                    console.log(val);
                     Status.summaryPopup('/pagerduty/incident/' + val);
                 },
                 '#/pagerduty/escalation/': function(val) {
-                    console.log(val);
                     Status.summaryPopup('/pagerduty/escalation/' + val);
                 }
             });

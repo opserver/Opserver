@@ -90,12 +90,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get { return PagerDutyApi.Instance.GetIncidentEntries(Id); }
         } 
-        /*
-        public PagerDutyApi.BadResponce IncidentLogs
-        {
-            get { return PagerDutyApi.Instance.GetIncidentEntries(Number); }
-        } 
-         * */
+
         public MonitorStatus MonitorStatus
         {
             get
@@ -132,5 +127,4 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "html_url")]
         public string ServiceUri { get; set; }
     }
-
 }
