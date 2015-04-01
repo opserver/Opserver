@@ -3,21 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi
     {
-
         public PagerDutyLogEntry GetEventEntry(string id)
         {
             return GetFromPagerDuty("log_entries/" + id, getFromJson:
                 response => JSON.Deserialize<PagerDutyLogEntry>(response.ToString(), Options.ISO8601));
         }
-
         
         public List<PagerDutyLogEntry> GetIncidentEntries(string id)
         {
@@ -25,7 +21,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 response => JSON.Deserialize<LogEntries>(response.ToString(), Options.ISO8601).Logs);
             Debug.WriteLine(r);
             return r;
-            //return null;
         }
 
         public class LogEntries
@@ -114,6 +109,5 @@ namespace StackExchange.Opserver.Data.PagerDuty
             [DataMember(Name = "summary")]
             public string Summary { get; set; }
         }
-        
     }
 }

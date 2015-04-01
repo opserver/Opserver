@@ -10,7 +10,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi : SinglePollNode<PagerDutyApi>
     {
-
         public PagerDutySettings Settings { get; internal set; }
         public override string NodeType { get { return "PagerDutyAPI"; } }
         public override int MinSecondsBetweenPolls { get { return 3600; } }
@@ -34,7 +33,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get { return Settings.APIKey; }
         }
-
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -96,9 +94,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         var putStream = req.GetRequestStream();
                         putStream.Write(byteData,0,byteData.Length);
                     }
-                    
-
-
                 }
                 try
                 {
@@ -125,10 +120,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             }
                         }
                     }
-                    catch
-                    {
-                        
-                    }
+                    catch { }
                     
                     e.AddLoggedData("Sent Data", JSON.Serialize(data));
                     e.AddLoggedData("Endpoint", fullUri);
@@ -138,9 +130,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     Current.LogException(e);
                     return getFromJson("fail");
                 }
-                
-
-
             }
         }
 

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -40,7 +38,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
             }
         }
-
 
         private List<PagerDutyPerson> GetOnCallUsers()
         {
@@ -219,5 +216,4 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "escalation_policy")]
         public Dictionary<string,string> Policy { get; set; } 
     }
-  
 }
