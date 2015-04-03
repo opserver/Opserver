@@ -51,16 +51,14 @@
         <tbody class="node-header">
         <tr class="category-row">
             <th colspan="8">
-                <h3>
-                    incident Log
-                </h3>
+                <h3>Incident Log</h3>
             </th>
         </tr>
         <tr>
             <th>Time</th>
             <th>Type</th>
             <th>Message</th>
-            <th>>Notes</th>
+            <th>Notes</th>
         </tr>
         @foreach (var l in @Model.IncidentLogs)
         {
@@ -71,10 +69,6 @@
                 <td>@l.Note</td>
             </tr>
         }
-
-
-
         </tbody>
     </table>
-    
 </div>

@@ -141,8 +141,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             {
                 if (_phone == null)
                 {
-                    var m = ContactMethods.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS");
-                    _phone = m != null ? m.FormattedAddress : "";
+                    // The PagerDuty API does not always return a full contact. HANDLE IT.
+                    var m = ContactMethods != null ? ContactMethods.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS") : null;
+                    _phone = m != null ? m.FormattedAddress : "n/a";
                 }
                 return _phone;
             }
