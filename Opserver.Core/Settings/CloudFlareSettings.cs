@@ -121,12 +121,24 @@ namespace StackExchange.Opserver
             /// </summary>
             public List<string> Ranges { get; set; }
 
+            /// <summary>
+            /// The masked IP ranges for this data center, in CIDR format
+            /// </summary>
+            public List<string> MaskedRanges { get; set; }
+
+            public DataCenter()
+            {
+                Ranges = new List<string>();
+                MaskedRanges = new List<string>();
+            }
+
             public bool Equals(DataCenter other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
                 return string.Equals(Name, other.Name)
-                    && Ranges.SequenceEqual(other.Ranges);
+                       && Ranges.SequenceEqual(other.Ranges)
+                       && MaskedRanges.SequenceEqual(other.MaskedRanges);
             }
 
             public override bool Equals(object obj)
