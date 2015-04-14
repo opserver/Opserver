@@ -76,7 +76,7 @@
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.403\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -347,6 +347,7 @@
     <Compile Include="Settings\SettingsProviders\JSONFileSettingsProvider.cs" />
     <Compile Include="Settings\RedisSettings.cs" />
     <Compile Include="Settings\SettingsSection.cs" />
+    <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
     <Compile Include="StringSplits.cs" />

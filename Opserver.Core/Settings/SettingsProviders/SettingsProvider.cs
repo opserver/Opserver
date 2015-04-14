@@ -24,6 +24,13 @@ namespace StackExchange.Opserver.SettingsProviders
         // Generic build settings later
         public TeamCitySettings TeamCity { get { return GetSettings<TeamCitySettings>(); } }
         public JiraSettings Jira { get { return GetSettings<JiraSettings>(); } }
+        public UserSettings Users
+        {
+            get
+            {
+                return GetSettings<UserSettings>();
+            }
+        }
 
         public abstract T GetSettings<T>() where T : Settings<T>, new();
         public abstract T SaveSettings<T>(T settings) where T : class, new();
