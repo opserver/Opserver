@@ -215,6 +215,19 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
+        ///  Converts a unix Epoch to OLE Date, because whoever designed microsoft charting was retarded
+        /// </summary>
+        /// <param name="epoch">The unix epoch</param>
+        /// <returns></returns>
+        public static double ToOADate(this float epoch)
+        {
+            // OLE Dates are days since Dec 30th, 1899
+            // Epochs are seconds since Jan 1, 1970
+            // The diffrence in seconds is 2209161600 - so add it to the epoch and divide into days
+            return (epoch + 2209161600)/60d/60/24;
+        }
+
+        /// <summary>
         /// Converts a timespan to a readable string adapted from http://stackoverflow.com/a/4423615
         /// </summary>
         public static string ToReadableString(this TimeSpan span)

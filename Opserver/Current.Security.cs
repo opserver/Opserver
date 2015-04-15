@@ -21,6 +21,8 @@ namespace StackExchange.Opserver
                     return new ActiveDirectoryProvider(SecuritySettings.Current);
                 case "alladmin":
                     return new EveryonesAnAdminProvider();
+                case "configfile":
+                    return new ConfigFileProvider(SecuritySettings.Current);
                 //case "allview":
                 default:
                     return new EveryonesReadOnlyProvider();

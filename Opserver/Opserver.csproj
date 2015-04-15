@@ -99,7 +99,7 @@
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.403\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="Svg, Version=0.5.2.17984, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -171,6 +171,8 @@
     <Content Include="Content\img\database\yellow.png" />
     <Content Include="Content\img\lock-off.png" />
     <Content Include="Content\img\lock-on.png" />
+    <Content Include="Content\img\logo\full-grey.svg" />
+    <Content Include="Content\img\logo\full.svg" />
     <Content Include="Content\img\logo\icon-128.png" />
     <Content Include="Content\img\logo\icon-152.png" />
     <Content Include="Content\img\logo\icon-16.png" />
@@ -179,6 +181,7 @@
     <Content Include="Content\img\logo\icon-32.png" />
     <Content Include="Content\img\logo\icon-64.png" />
     <Content Include="Content\img\logo\icon-76.png" />
+    <Content Include="Content\img\logo\icon.svg" />
     <Content Include="Content\img\logo\logo-big.png" />
     <Content Include="Content\img\logo\logo-login%402x.png" />
     <Content Include="Content\img\logo\logo-login.png" />
@@ -226,6 +229,7 @@
     </Content>
     <Content Include="Config\JiraSettings.json.example" />
     <None Include="Config\PagerDutySettings.json.example" />
+    <Content Include="Config\UserSettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -262,6 +266,7 @@
     <Compile Include="Helpers\PerfCounters.cs" />
     <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />
+    <Compile Include="Models\Security\ConfigFileProvider.cs" />
     <Compile Include="Models\TopTabs.cs" />
     <Compile Include="SecuritySettings.cs" />
     <Compile Include="SiteSettings.cs" />
@@ -578,6 +583,7 @@
     <Content Include="Views\Redis\Instance.SlowLog.cshtml" />
     <Content Include="Views\Redis\Instance.Config.cshtml" />
     <Content Include="Views\SQL\_ViewStart.cshtml" />
+    <None Include="Properties\PublishProfiles\Local.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />

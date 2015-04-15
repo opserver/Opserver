@@ -10,14 +10,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
+        public string Host { get; protected set; }
         public string ConnectionString { get; protected set; }
         public int QueryTimeoutMs { get; protected set; }
         
         protected DashboardDataProvider(string uniqueKey) : base(uniqueKey) { }
 
-        protected DashboardDataProvider(DashboardSettings.Provider provider) : base(provider.Name)
+        protected DashboardDataProvider(DashboardSettings.ProviderSettings provider) : base(provider.Name)
         {
             Name = provider.Name;
+            Host = provider.Host;
             ConnectionString = provider.ConnectionString;
             QueryTimeoutMs = provider.QueryTimeoutMs;
         }
@@ -34,66 +36,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        #region Nodes
-
         public abstract List<Node> AllNodes { get; }
 
-        public Node GetNode(int id)
-        {
-            return AllNodes.FirstOrDefault(s => s.Id == id);
-        }
-
-        public Node GetNode(string hostName)
-        {
-            if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
-            return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
-        }
+        public abstract Node GetNode(string host);
 
         public abstract IEnumerable<Node> GetNodesByIP(IPAddress ip);
-        public abstract IEnumerable<IPAddress> GetIPsForNode(Node node);
 
         public virtual string GetManagementUrl(Node node) { return null; }
-        public abstract IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
 
-        #endregion
-
-        #region Interfaces
-
-        public abstract List<Interface> AllInterfaces { get; }
-
-        public Interface GetInterface(int id)
-        {
-            return AllInterfaces.FirstOrDefault(i => i.Id == id);
-        }
-
-        public abstract IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Volumes
-
-        public abstract List<Volume> AllVolumes { get; }
-
-        public Volume GetVolume(int id)
-        {
-            return AllVolumes.FirstOrDefault(v => v.Id == id);
-        }
-
-        public abstract IEnumerable<Volume.VolumeUtilization> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Applications
-
-        public abstract List<Application> AllApplications { get; }
-
-        public Application GetApplication(int id)
-        {
-            return AllApplications.FirstOrDefault(a => a.Id == id);
-        }
-
-        #endregion
+        public abstract PointSeries GetSeries(string metric, string host, int secondsAgo, int? pointCount = null, params Tuple<string, string>[] tags);
+        public abstract PointSeries GetSeries(string metric, string host, DateTime? start, DateTime? end, int? pointCount = null, params Tuple<string, string>[] tags);
 
         #region Cache
 
@@ -102,6 +54,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             int cacheSeconds,
             int? cacheFailureSeconds = null,
             bool affectsStatus = true,
+            bool logExceptions = false,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
@@ -112,18 +65,18 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     AffectsNodeStatus = affectsStatus,
                     CacheForSeconds = cacheSeconds,
                     CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromProvider(typeof (T).Name + "-List", fetch)
+                    UpdateCache = UpdateFromProvider(typeof (T).Name + "-List", fetch, logExceptions)
                 };
         }
 
-        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<T> fetch) where T : class
+        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<T> fetch, bool logExceptions = false) where T : class
         {
             return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
                                    getData: fetch,
+                                   logExceptions: logExceptions,
                                    addExceptionData: e => e.AddLoggedData("NodeType", NodeType));
         }
 
         #endregion
-
     }
 }

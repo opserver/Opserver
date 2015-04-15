@@ -7,9 +7,9 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         public PerfCounters.QueryResult<PerfCounters.CPUUtilization> GetCPUUtilization()
         {
-            if (MachineType.Contains("Windows"))
+            if (IsWindows)
             {
-                return PerfCounters.Windows.GetCPUUtilization(Ip);
+                return PerfCounters.Windows.GetCPUUtilization(Host);
             }
             return new PerfCounters.QueryResult<PerfCounters.CPUUtilization>
                 {

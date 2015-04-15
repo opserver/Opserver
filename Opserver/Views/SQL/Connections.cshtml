@@ -7,7 +7,7 @@
     if (i == null) { return; }
     var connections = i.Connections;
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
-    var monitoredList = DashboardData.AllNodes.Select(si => si.Name.ToLower()).ToHashSet();
+    var monitoredList = DashboardData.Current.AllNodes.Select(si => si.Name.ToLower()).ToHashSet();
 }
 <div class="bottom-sub-section">
     <div class="node-summary redis-summary">

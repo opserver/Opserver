@@ -8,17 +8,14 @@ namespace StackExchange.Opserver
 {
     public class DashboardSettings : Settings<DashboardSettings>, IAfterLoadActions, INodeSettings
     {
-        public override bool Enabled { get { return Providers.Any(); } }
+        public override bool Enabled { get { return Provider != null; } }
         
         public ObservableCollection<Category> Categories { get; set; }
         public event EventHandler<Category> CategoryAdded = delegate { };
         public event EventHandler<List<Category>> CategoriesChanged = delegate { };
         public event EventHandler<Category> CategoryRemoved = delegate { };
-        
-        public ObservableCollection<Provider> Providers { get; set; }
-        public event EventHandler<Provider> ProviderAdded = delegate { };
-        public event EventHandler<List<Provider>> ProvidersChanged = delegate { };
-        public event EventHandler<Provider> ProviderRemoved = delegate { };
+
+        public ProviderSettings Provider { get; set; }
 
         public ObservableCollection<NodeSettings> PerNodeSettings { get; set; }
         public event EventHandler<NodeSettings> PerNodeSettingAdded = delegate { };
@@ -30,7 +27,6 @@ namespace StackExchange.Opserver
         public DashboardSettings()
         {
             Categories = new ObservableCollection<Category>();
-            Providers = new ObservableCollection<Provider>();
             PerNodeSettings = new ObservableCollection<NodeSettings>();
             ShowOther = true;
         }
@@ -38,7 +34,6 @@ namespace StackExchange.Opserver
         public void AfterLoad()
         {
             Categories.AddHandlers(this, CategoryAdded, CategoriesChanged, CategoryRemoved);
-            Providers.AddHandlers(this, ProviderAdded, ProvidersChanged, ProviderRemoved);
             PerNodeSettings.AddHandlers(this, PerNodeSettingAdded, PerNodeSettingsChanged, PerNodeSettingRemoved);
         }
 
@@ -315,9 +310,9 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Data provider for dashboard data
         /// </summary>
-        public class Provider : ISettingsCollectionItem<Provider>
+        public class ProviderSettings
         {
-            public Provider()
+            public ProviderSettings()
             {
                 QueryTimeoutMs = 10 * 1000;
             }
@@ -347,7 +342,7 @@ namespace StackExchange.Opserver
             /// </summary>
             public int QueryTimeoutMs { get; set; }
 
-            public bool Equals(Provider other)
+            public bool Equals(ProviderSettings other)
             {
                 if (ReferenceEquals(null, other)) return false;
                 if (ReferenceEquals(this, other)) return true;
@@ -363,7 +358,7 @@ namespace StackExchange.Opserver
                 if (ReferenceEquals(null, obj)) return false;
                 if (ReferenceEquals(this, obj)) return true;
                 if (obj.GetType() != this.GetType()) return false;
-                return Equals((Provider) obj);
+                return Equals((ProviderSettings)obj);
             }
 
             public override int GetHashCode()

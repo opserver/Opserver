@@ -16,26 +16,22 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         protected override string GetMonitorStatusReason() { return null; }
 
         private static readonly List<Node> _allNodes = new List<Node>();
-        private static readonly List<Interface> _allInterfaces = new List<Interface>();
-        private static readonly List<Volume> _allVolumes = new List<Volume>();
-        private static readonly List<Application> _allApplications = new List<Application>();
-        private static readonly List<IPAddress> _nodeIPs = new List<IPAddress>();
 
         public override IEnumerable<string> GetExceptions() { yield break; }
 
         public override List<Node> AllNodes { get { return _allNodes; } }
-        public override IEnumerable<IPAddress> GetIPsForNode(Node node) { return _nodeIPs; }
+        public override Node GetNode(string host) { return null; }
+
         public override IEnumerable<Node> GetNodesByIP(IPAddress ip) { return _allNodes; }
 
-        public override IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) { yield break; }
-        public override IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) { yield break; }
+        public override PointSeries GetSeries(string metric, string host, int secondsAgo, int? pointCount = null, params Tuple<string, string>[] tags)
+        {
+            return new PointSeries(host);
+        }
 
-        public override List<Interface> AllInterfaces { get { return _allInterfaces; } }
-        public override IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null) { yield break; }
-
-        public override List<Volume> AllVolumes { get { return _allVolumes; } }
-        public override IEnumerable<Volume.VolumeUtilization> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null) { yield break; }
-
-        public override List<Application> AllApplications { get { return _allApplications; } }
+        public override PointSeries GetSeries(string metric, string host, DateTime? start, DateTime? end, int? pointCount = null, params Tuple<string, string>[] tags)
+        {
+            return new PointSeries(host);
+        }
     }
 }

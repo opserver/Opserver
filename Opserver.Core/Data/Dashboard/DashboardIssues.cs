@@ -7,12 +7,12 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         public IEnumerable<Issue> GetIssues()
         {
-            var downNodes = DashboardData.AllNodes
+            var downNodes = DashboardData.Current.AllNodes
                                          .Where(se => se.MonitorStatus != MonitorStatus.Good && se.MonitorStatus != MonitorStatus.Unknown)
                                          .OrderBy(n => n.Name);
             foreach (var n in downNodes)
             {
-                if (!n.IsUnwatched)
+                if (!n.IsSilenced)
                     yield return new Issue<Node>(n, n.Name);
             }
         }

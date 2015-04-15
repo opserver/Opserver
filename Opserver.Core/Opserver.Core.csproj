@@ -76,7 +76,7 @@
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.403\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\..\packages\StackExchange.Redis.1.0.414\lib\net45\StackExchange.Redis.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -116,24 +116,11 @@
     </Compile>
     <Compile Include="Data\Dashboard\DashboardData.cs" />
     <Compile Include="Data\Dashboard\DashboardIssues.cs" />
+    <Compile Include="Data\Dashboard\DhasboardMetric.cs" />
+    <Compile Include="Data\Dashboard\Disk.cs" />
+    <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\DashboardDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Node.Data.cs">
-      <DependentUpon>Node.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Dashboard\Providers\EmptyDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Applications.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Interfaces.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Nodes.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Volumes.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\DataProvider.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
@@ -279,17 +266,9 @@
     <Compile Include="Data\Dashboard\Application.cs" />
     <Compile Include="Data\Dashboard\DashboardCategory.cs" />
     <Compile Include="Data\Dashboard\Interface.cs" />
-    <Compile Include="Data\Dashboard\Interface.Data.cs">
-      <DependentUpon>Interface.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Dashboard\Node.cs" />
     <Compile Include="Data\Dashboard\Node.Polling.cs">
       <DependentUpon>Node.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\NodeStatus.cs" />
-    <Compile Include="Data\Dashboard\Volume.cs" />
-    <Compile Include="Data\Dashboard\Volume.Data.cs">
-      <DependentUpon>Volume.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Exceptions\Application.cs" />
     <Compile Include="Data\Exceptions\ExceptionStore.cs" />
@@ -347,6 +326,7 @@
     <Compile Include="Settings\SettingsProviders\JSONFileSettingsProvider.cs" />
     <Compile Include="Settings\RedisSettings.cs" />
     <Compile Include="Settings\SettingsSection.cs" />
+    <Compile Include="Settings\UserSettings.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
     <Compile Include="StringSplits.cs" />

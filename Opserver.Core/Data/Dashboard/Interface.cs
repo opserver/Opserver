@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -8,39 +9,20 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         internal DashboardDataProvider DataProvider { get; set; }
 
-        public int Id { get; internal set; }
-        public int NodeId { get; internal set; }
-        public int? Index { get; internal set; }
-        public DateTime? LastSync { get; internal set; }
+        public string Tag { get; internal set; }
         public string Name { get; internal set; }
-        public string FullName { get; internal set; }
-        public string Caption { get; internal set; }
-        public string Comments { get; internal set; }
-        public string Alias { get; internal set; }
-        public string IfName { get; internal set; }
-        public string TypeDescription { get; internal set; }
-        public string PhysicalAddress { get; internal set; }
-        public bool IsTeam { get; internal set; }
-        public bool IsUnwatched { get; internal set; }
-        public DateTime? UnwatchedFrom { get; internal set; }
-        public DateTime? UnwatchedUntil { get; internal set; }
+        public string Description { get; internal set; }
+        public string MAC { get; internal set; }
+        public long? LinkSpeed { get; internal set; }
+        public long? LastInbps { get; internal set; }
+        public long? LastOutbps { get; internal set; }
+        public long? LastTotalbps { get { return LastInbps + LastOutbps; } }
+        
+        public List<IPAddress> IPAddresses { get; internal set; }
+        
 
-        public NodeStatus Status { get; internal set; }
-
-        public Single? InBps { get; internal set; }
-        public Single? OutBps { get; internal set; }
-        public Single? InPps { get; internal set; }
-        public Single? OutPps { get; internal set; }
-        public Single? InPercentUtil { get; internal set; }
-        public Single? OutPercentUtil { get; internal set; }
-        public int? MTU { get; internal set; }
-        public Double? Speed { get; internal set; }
-
-        public MonitorStatus MonitorStatus
-        {
-            get { return Status.ToMonitorStatus(); }
-        }
-        // TODO: Implement
+        // TODO: Mean something
+        public MonitorStatus MonitorStatus { get { return MonitorStatus.Good; } }
         public string MonitorStatusReason { get { return null; } }
 
         private static readonly Dictionary<string, string> _prettyNameReplacements = new Dictionary<string, string>
@@ -58,7 +40,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_prettyName == null)
                 {
-                    _prettyName = Caption ?? "";
+                    _prettyName = Description ?? "";
                     foreach (var p in _prettyNameReplacements)
                     {
                         _prettyName = _prettyName.Replace(p.Key, p.Value);
@@ -68,12 +50,12 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        private static readonly string[] _speedSizes = new[] {"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"};
+        private static readonly string[] _speedSizes = {"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"};
         public string PrettySpeed
         {
-            get { 
-                if (!Speed.HasValue) return "n/a";
-                var iSpeed = Speed.Value;
+            get {
+                if (!LinkSpeed.HasValue) return "n/a";
+                var iSpeed = LinkSpeed.Value;
                 var order = 0;
                 while (iSpeed >= 1000 && order + 1 < _speedSizes.Length)
                 {
@@ -85,6 +67,13 @@ namespace StackExchange.Opserver.Data.Dashboard
         }
 
         public Interface() {}
-        public Interface(int id) { Id = id; }
+        public Interface(string tag) { Tag = tag; }
+
+        public struct InterfaceUtilization
+        {
+            public long Epoch { get; internal set; }
+            public float Inbps { get; internal set; }
+            public float Outbps { get; internal set; }
+        }
     }
 }

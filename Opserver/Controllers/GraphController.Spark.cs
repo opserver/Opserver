@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.UI.DataVisualization.Charting;
+using System.Xml.Schema;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -14,17 +17,16 @@ namespace StackExchange.Opserver.Controllers
     {
         private const int SparkHours = 24;
 
-        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom="highDPI")]
+        [OutputCache(Duration = 120, VaryByParam = "host", VaryByContentEncoding = "gzip;deflate", VaryByCustom="highDPI")]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult CPUSpark(int id)
+        public ActionResult CPUSpark(string host)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return ContentNotFound();
-
+            MiniProfiler.Stop(true);
             var chart = GetSparkChart();
-            var dataPoints = node.GetCPUUtilization(start: DateTime.UtcNow.AddHours(-SparkHours),
-                                                    end: null,
-                                                    pointCount: (int) chart.Width.Value);
+            var dataPoints = DashboardData.Current.GetSeries("os.cpu",
+                host,
+                secondsAgo: SparkHours*60*60,
+                pointCount: 400).Data;
 
             var area = GetSparkChartArea(100);
             var avgCPU = GetSparkSeries("Avg Load");
@@ -32,8 +34,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var mp in dataPoints)
             {
-                if (mp.AvgLoad.HasValue)
-                    avgCPU.Points.Add(new DataPoint(mp.DateTime.ToOADate(), mp.AvgLoad.Value));
+                avgCPU.Points.Add(new DataPoint(mp[0].ToOADate(), mp[1]));
             }
 
             chart.ChartAreas.Add(area);
@@ -41,19 +42,22 @@ namespace StackExchange.Opserver.Controllers
             return chart.ToResult();
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
+        [OutputCache(Duration = 120, VaryByParam = "host", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult MemorySpark(int id)
+        public ActionResult MemorySpark(string host)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return ContentNotFound();
-
+            MiniProfiler.Stop(true);
             var chart = GetSparkChart();
-            var dataPoints = node.GetMemoryUtilization(start: DateTime.UtcNow.AddHours(-SparkHours),
-                                                       end: null,
-                                                       pointCount: (int) chart.Width.Value).ToList();
-            var maxMem = dataPoints.Max(mp => mp.TotalMemory).GetValueOrDefault();
-            var maxGB = (int)Math.Ceiling(maxMem / _gb);
+            var node = DashboardData.Current.GetNode(host);
+            if (node == null) return JsonNotFound();
+            var dataPoints = DashboardData.Current.GetSeries("os.mem.used",
+                host,
+                secondsAgo: SparkHours*60*60,
+                pointCount: 400).Data;
+
+            // TODO: Max Fallback
+            var maxMem = node.TotalMemory.GetValueOrDefault(0);
+            var maxGB = (int)Math.Ceiling((double)maxMem / _gb);
 
             var area = GetSparkChartArea(maxMem + (maxGB / 8) * _gb);
             var used = GetSparkSeries("Used");
@@ -61,27 +65,23 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var mp in dataPoints)
             {
-                if (mp.AvgMemoryUsed.HasValue)
-                    used.Points.Add(new DataPoint(mp.DateTime.ToOADate(), mp.AvgMemoryUsed.Value));
+                used.Points.Add(new DataPoint(mp[0].ToOADate(), mp[1]));
             }
             chart.ChartAreas.Add(area);
 
             return chart.ToResult();
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
+        [OutputCache(Duration = 120, VaryByParam = "host", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult NetworkSpark(int id)
+        public ActionResult NetworkSpark(string host)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return ContentNotFound();
-
+            MiniProfiler.Stop(true);
             var chart = GetSparkChart();
-            var dataPoints = node.PrimaryInterfaces.SelectMany(
-                ni => ni.GetUtilization(start: DateTime.UtcNow.AddHours(-SparkHours),
-                                        end: null,
-                                        pointCount: (int) chart.Width.Value))
-                                 .OrderBy(dp => dp.DateTime);
+            // TODO: Only show teams if we have teams
+            var dataPoints = DashboardData.Current.GetSeries(DashboardMetric.NetBytes, host,
+                    secondsAgo: SparkHours*60*60,
+                    pointCount: 400).Data;
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Total");
@@ -90,7 +90,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateTime.ToOADate(), np.InAvgBps.GetValueOrDefault(0) + np.OutAvgBps.GetValueOrDefault(0)));
+                series.Points.Add(new DataPoint(np[0].ToOADate(), np[1]));
             }
             chart.DataManipulator.Group("SUM", 2, IntervalType.Minutes, series);
 
@@ -99,18 +99,16 @@ namespace StackExchange.Opserver.Controllers
             return chart.ToResult();
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
+        [OutputCache(Duration = 120, VaryByParam = "host;iface", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
         [Route("graph/interface/{direction}/spark")]
-        public ActionResult InterfaceOutSpark(string direction, int id)
+        public ActionResult InterfaceOutSpark(string host, string iface, string direction, int id)
         {
-            var i = DashboardData.GetInterfaceById(id);
-            if (i == null) return ContentNotFound();
-
+            MiniProfiler.Stop(true);
             var chart = GetSparkChart();
-            var dataPoints = i.GetUtilization(start: DateTime.UtcNow.AddHours(-SparkHours),
-                                              end: null,
-                                              pointCount: (int) chart.Width.Value)
-                              .OrderBy(dp => dp.DateTime);
+            var dataPoints = DashboardData.Current.GetSeries(DashboardMetric.NetBytes, host,
+                SparkHours*60*60,
+                (int) chart.Width.Value,
+                Tuple.Create(DashboardTag.Interface, iface), Tuple.Create(DashboardTag.Direction, direction)).Data;
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Bytes");
@@ -118,10 +116,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateTime.ToOADate(),
-                                                direction == "out"
-                                                    ? np.OutAvgBps.GetValueOrDefault(0)
-                                                    : np.InAvgBps.GetValueOrDefault(0)));
+                series.Points.Add(new DataPoint(np[0].ToOADate(), np[1]));
             }
             chart.ChartAreas.Add(area);
 
@@ -132,6 +127,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)
         {
+            MiniProfiler.Stop(true);
             var instance = SQLInstance.Get(node);
             if (instance == null) return ContentNotFound("SQLNode not found with name = '" + node + "'");
 

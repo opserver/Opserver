@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web;
-using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Xsl;
 using StackExchange.Opserver.Data;
@@ -15,7 +14,7 @@ namespace StackExchange.Opserver.Models
 {
     public static class ExtensionMethods
     {
-        public static IHtmlString ToSpeed(this float bps, string unit = "b")
+        public static IHtmlString ToSpeed(this long bps, string unit = "b")
         {
             if (bps < 1) return @"<span class=""speed pow0"">0 b/s</span>".AsHtml();
             var pow = Math.Floor(Math.Log10(bps) / 3);
@@ -44,30 +43,24 @@ namespace StackExchange.Opserver.Models
 
     public static class VolumeExtensionMethods
     {
-        public static IHtmlString FreeSpaceSpan(this Volume vol)
+        public static IHtmlString FreeSpaceSpan(this Disk disk)
         {
-            return string.Format("<span class=\"free-space {1}\">{0:n0}% Free</span>", 100 - vol.PercentUsed, vol.SpaceStatusClass).AsHtml();
+            return string.Format("<span class=\"free-space {1}\">{0:n0}% Free</span>", 100 - disk.PercentUsed, disk.SpaceStatusClass).AsHtml();
         }
     }
 
     public static class InterfaceExtensionMethods
     {
         private static readonly IHtmlString _unknownSpan = @"<span class=""unknown""></span>".AsHtml();
-
-        public static IHtmlString PrettyPercentUtilization(this Interface i)
-        {
-            if (!i.InPercentUtil.HasValue || !i.OutPercentUtil.HasValue) return "n/a".AsHtml();
-            return string.Format(@"{0}% <span class=""note"">In - </span>{1}% <span class=""note"">Out</span>", i.InPercentUtil, i.OutPercentUtil).AsHtml();
-        }
-
+        
         public static IHtmlString PrettyIn(this Interface i)
         {
-            return i.InBps.HasValue ? i.InBps.Value.ToSpeed() : _unknownSpan;
+            return i.LastInbps.HasValue ? i.LastInbps.Value.ToSpeed() : _unknownSpan;
         }
 
         public static IHtmlString PrettyOut(this Interface i)
         {
-            return i.OutBps.HasValue ? i.OutBps.Value.ToSpeed() : _unknownSpan;
+            return i.LastOutbps.HasValue ? i.LastOutbps.Value.ToSpeed() : _unknownSpan;
         }
     }
 
@@ -78,15 +71,15 @@ namespace StackExchange.Opserver.Models
         public static IHtmlString LastUpdatedSpan(this Node info)
         {
             var addClass = "";
-            if (info.LastSync < DateTime.UtcNow.AddMinutes(-30))
+            if (info.LastUpdated < DateTime.UtcNow.AddMinutes(-30))
             {
                 addClass = MonitorStatus.Critical.GetDescription();
             }
-            else if (info.LastSync < DateTime.UtcNow.AddMinutes(-15))
+            else if (info.LastUpdated < DateTime.UtcNow.AddMinutes(-15))
             {
                 addClass = MonitorStatus.Warning.GetDescription();
             }
-            return info.LastSync.ToRelativeTimeSpan(addClass);
+            return info.LastUpdated.ToRelativeTimeSpan(addClass);
         }
 
         public static string PrettyTotalMemory(this Node info)
@@ -143,7 +136,8 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString PrettyTotalNetwork(this Node info)
         {
-            if (info.Interfaces.All(i => i.InBps < 0)) return _unknownSpan;
+            if (info.Networkbps.HasValue) return info.Networkbps.Value.ToSpeed();
+            if (info.Interfaces.All(i => !i.LastTotalbps.HasValue)) return _unknownSpan;
             var bps = info.TotalPrimaryNetworkbps;
             return bps.ToSpeed();
         }
@@ -153,40 +147,44 @@ namespace StackExchange.Opserver.Models
                 var sb = new StringBuilder();
                 sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
                 sb.AppendFormat("Interfaces ({0} total):", info.Interfaces.Count()).AppendLine();
-                info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps)
+                info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.LastTotalbps)
                     .ForEach(
                         i => sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n",
                                              i.PrettyName,
-                                             (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
-                                             i.InBps.GetValueOrDefault(0).ToSize("b"),
-                                             i.OutBps.GetValueOrDefault(0).ToSize("b")));
+                                             (i.LastTotalbps.GetValueOrDefault(0)).ToSize("b"),
+                                             i.LastInbps.GetValueOrDefault(0).ToSize("b"),
+                                             i.LastOutbps.GetValueOrDefault(0).ToSize("b")));
                 return sb.ToString().AsHtml();
         }
 
         public static IHtmlString ApplicationCPUTextSummary(this Node info)
         {
-            var apps = info.Apps.ToList();
-            if (!apps.Any()) return MvcHtmlString.Empty;
+            return new HtmlString("");
+            // TODO: This
+            //var apps = info.Apps.ToList();
+            //if (!apps.Any()) return MvcHtmlString.Empty;
 
-            var sb = new StringBuilder();
-            sb.AppendFormat("Total App Pool CPU: {0} %\n", apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)));
-            sb.AppendLine("App Pools:");
-            info.Apps.OrderBy(a => a.NiceName)
-                .ForEach(a => sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU));
-            return sb.ToString().AsHtml();
+            //var sb = new StringBuilder();
+            //sb.AppendFormat("Total App Pool CPU: {0} %\n", apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)));
+            //sb.AppendLine("App Pools:");
+            //info.Apps.OrderBy(a => a.NiceName)
+            //    .ForEach(a => sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU));
+            //return sb.ToString().AsHtml();
         }
 
         public static IHtmlString ApplicationMemoryTextSummary(this Node info)
         {
-            var apps = info.Apps.ToList();
-            if (!apps.Any()) return MvcHtmlString.Empty;
+            return new HtmlString("");
+            // TODO: This
+            //var apps = info.Apps.ToList();
+            //if (!apps.Any()) return MvcHtmlString.Empty;
 
-            var sb = new StringBuilder();
-            sb.AppendFormat("Total App Pool Memory: {0}\n", apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
-            sb.AppendLine("App Pools:");
-            info.Apps.OrderBy(a => a.NiceName)
-                .ForEach(a => sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize()));
-            return sb.ToString().AsHtml();
+            //var sb = new StringBuilder();
+            //sb.AppendFormat("Total App Pool Memory: {0}\n", apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
+            //sb.AppendLine("App Pools:");
+            //info.Apps.OrderBy(a => a.NiceName)
+            //    .ForEach(a => sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize()));
+            //return sb.ToString().AsHtml();
         }
     }
 

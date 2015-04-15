@@ -1,0 +1,14 @@
+﻿{
+    "users": [
+        {
+        	"name": "Sample User",
+        	"userName": "username",
+        	"password": "password",
+            "groups": [
+                { 
+                    "name":"Admin"
+                }
+            ]
+        }      
+    ]
+}

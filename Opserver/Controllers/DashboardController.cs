@@ -25,8 +25,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new DashboardModel
                 {
-                    Nodes = DashboardData.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
-                    ErrorMessages = DashboardData.ProviderExceptions,
+                    Nodes = DashboardData.Current.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
+                    ErrorMessages = DashboardData.Current.GetExceptions(),
                     Filter = filter
                 };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new NodeModel
             {
-                CurrentNode = DashboardData.GetNodeByName(node),
+                CurrentNode = DashboardData.Current.GetNode(node),
                 CurrentStatusType = view
             };
 
