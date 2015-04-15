@@ -23,9 +23,14 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard")]
         public ActionResult Dashboard(string filter)
         {
+            var nodes = DashboardData.Current.AllNodes;
+            if(Current.Settings.Dashboard.ExcludePatternRegex!=null)
+            {
+                nodes = nodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList();
+            }
             var vd = new DashboardModel
                 {
-                    Nodes = DashboardData.Current.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
+                    Nodes = nodes,
                     ErrorMessages = DashboardData.Current.GetExceptions(),
                     Filter = filter
                 };
