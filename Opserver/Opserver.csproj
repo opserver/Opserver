@@ -183,10 +183,6 @@
     <Content Include="Content\img\logo\icon-76.png" />
     <Content Include="Content\img\logo\icon.svg" />
     <Content Include="Content\img\logo\logo-big.png" />
-    <Content Include="Content\img\logo\logo-login%402x.png" />
-    <Content Include="Content\img\logo\logo-login.png" />
-    <Content Include="Content\img\logo\logo-text%402x.png" />
-    <Content Include="Content\img\logo\logo-text.png" />
     <Content Include="Content\img\node\node-select-all.png" />
     <Content Include="Content\img\node\node-select-child.png" />
     <Content Include="Content\img\node\node-select-next.png" />
@@ -584,6 +580,7 @@
     <Content Include="Views\Redis\Instance.Config.cshtml" />
     <Content Include="Views\SQL\_ViewStart.cshtml" />
     <None Include="Properties\PublishProfiles\Local.pubxml" />
+    <None Include="Properties\PublishProfiles\ssvmwh.pubxml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />

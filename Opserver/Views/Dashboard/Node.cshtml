@@ -7,7 +7,6 @@
     var currentStatusType = Model.CurrentStatusType;
     
     this.SetPageTitle((s != null ? s.PrettyName + " " : "") + "Status");
-    this.SetMainTab(MainTab.Dashboard);
     this.SetTopNodes(DashboardData.Current.AllNodes, "Dashboard", Model.CurrentNode);
     var currentRange = Range.DefaultRanges.FirstOrDefault(r => r.Text == Request.QueryString["request"]) ?? Range.DefaultRanges.First();    
     var start = currentRange.Start.ToEpochTime(true) / 1000;
