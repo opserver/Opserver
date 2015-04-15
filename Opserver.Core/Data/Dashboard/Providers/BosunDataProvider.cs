@@ -303,7 +303,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override PointSeries GetSeries(string metric, string host, DateTime? start, DateTime? end, int? pointCount = null, params Tuple<string, string>[] tags)
         {
             var url = GetMetricUrl(metric, start, end, pointCount, host, DashboardMetric.IsCounter(metric));
-            return GetFromBosun<BosunMetricResponse>(url).Series.FirstOrDefault() ?? new PointSeries(host);
+            var response = GetFromBosun<BosunMetricResponse>(url);
+            var seriesCollection = response.Series;
+            PointSeries series = new PointSeries(host);
+            if(seriesCollection!=null && seriesCollection.Any())
+            {
+                series = seriesCollection.FirstOrDefault();
+            }
+            return series;
         }
     }
 
