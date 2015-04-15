@@ -146,7 +146,7 @@
                             <td title="Program: @w.ProgramName">
                                 <div>
                                     <span class="note">Host:</span>
-                                    @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
+                                    @if (enableDashboardLinks && DashboardData.Current.GetNode(w.HostName) != null)
                                     {
                                         <a href="/dashboard/node?node=@w.HostName.UrlEncode()" class="node-name-link">@w.HostName</a>
                                     }

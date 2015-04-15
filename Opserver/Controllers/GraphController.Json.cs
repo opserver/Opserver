@@ -4,119 +4,109 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
 using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
     {
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
+        [OutputCache(Duration = 120, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/cpu/json")]
-        public ActionResult CPUJson(int id, long start, long end, bool? summary = false)
+        public ActionResult CPUJson(string host, long start, long end, bool? summary = false)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return JsonNotFound();
-
             return Json(new
             {
-                points = node.GetCPUUtilization(start.ToDateTime(), end.ToDateTime(), 1000).Select(p => new
+                points = DashboardData.Current.GetSeries(DashboardMetric.CPUUsed, host, start.ToDateTime(), end.ToDateTime(), pointCount: 1000).Data.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true), 
-                        value = p.AvgLoad ?? 0
+                        date = p[0], value = p[1]
                     }),
-                summary = summary.GetValueOrDefault(false) ? node.GetCPUUtilization(null, null, 2000).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? DashboardData.Current.GetSeries(DashboardMetric.CPUUsed, host, null, null, pointCount: 2000).Data.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true), 
-                        value = p.AvgLoad ?? 0
-                    }) : null,
-                builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                                                                {
-                                                                    date = b.StartDate.ToEpochTime(true),
-                                                                    text = GetFlagTooltip(b),
-                                                                    link = b.WebUrl
-                                                                })
+                        date = p[0], value = p[1]
+                    }) : null
+                    //,builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(host, start, end).Select(b => new
+                    //                                            {
+                    //                                                date = b.StartDate.ToEpochTime(true),
+                    //                                                text = GetFlagTooltip(b),
+                    //                                                link = b.WebUrl
+                    //                                            })
             });
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
+        [OutputCache(Duration = 120, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/memory/json")]
-        public ActionResult MemoryJson(int id, long start, long end, bool? summary = false)
+        public ActionResult MemoryJson(string host, long start, long end, bool? summary = false)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return JsonNotFound();
-
             return Json(new
             {
-                points = node.GetMemoryUtilization(start.ToDateTime(), end.ToDateTime(), 1000).Select(p => new
+                points = DashboardData.Current.GetSeries(DashboardMetric.MemoryUsed, host, start.ToDateTime(), end.ToDateTime(), pointCount: 1000).Data.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true),
-                        value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
+                        date = p[0],
+                        value = (long)(p[1] / 1024 / 1024)
                     }),
-                summary = summary.GetValueOrDefault(false) ? node.GetMemoryUtilization(null, null, 1000).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? DashboardData.Current.GetSeries(DashboardMetric.MemoryUsed, host, null, null, pointCount: 1000).Data.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true),
-                        value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
-                    }) : null,
-                builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                {
-                    date = b.StartDate.ToEpochTime(true),
-                    text = GetFlagTooltip(b),
-                    link = b.WebUrl
-                })
+                        date = p[0],
+                        value = (long)(p[1] / 1024 / 1024)
+                    }) : null
+                //,builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(host, start, end).Select(b => new
+                //{
+                //    date = b.StartDate.ToEpochTime(true),
+                //    text = GetFlagTooltip(b),
+                //    link = b.WebUrl
+                //})
             });
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
+        [OutputCache(Duration = 120, VaryByParam = "host;iface;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/network/json")]
-        public ActionResult NetworkJson(int id, long start, long end, bool? summary = false)
+        public ActionResult NetworkJson(string host, string iface, long start, long end, bool? summary = false)
         {
-            var ni = DashboardData.GetInterfaceById(id);
-            if (ni == null) return JsonNotFound();
+            return Json(new {});
 
-            var traffic = ni.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000).ToList();
-            var anyTraffic = traffic.Any();
-
-            return Json(new
-                {
-                    maximums = new
-                        {
-                            main_in = anyTraffic ? traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)) : 0,
-                            main_out = anyTraffic ? traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0)) : 0
-                        },
-                    points = traffic.Select(i => new 
-                        {
-                            date = i.DateTime.ToEpochTime(true), 
-                            main_in = (int)(i.InAvgBps.GetValueOrDefault()),
-                            main_out = (int)(i.OutAvgBps.GetValueOrDefault())
-                        }),
-                    summary = summary.GetValueOrDefault()
-                                  ? ni.GetUtilization(null, null, 2000).Select(i => new
-                                      {
-                                          date = i.DateTime.ToEpochTime(true),
-                                          main_in = (int)(i.InAvgBps.GetValueOrDefault()),
-                                          main_out = (int)(i.OutAvgBps.GetValueOrDefault())
-                                      })
-                                  : null
-                });
+            //var traffic = DashboardData.Current.GetSeries(host, iface, start.ToDateTime(), end.ToDateTime(), 1000).ToList();
+            //var anyTraffic = traffic.Any();
+            //return Json(new
+            //    {
+            //        maximums = new
+            //            {
+            //                main_in = anyTraffic ? traffic.Max(i => (int)i.Inbps) : 0,
+            //                main_out = anyTraffic ? traffic.Max(i => (int)i.Outbps) : 0
+            //            },
+            //        points = traffic.Select(i => new 
+            //            {
+            //                date = i.Epoch,
+            //                main_in = (int)(i.Inbps),
+            //                main_out = (int)(i.Outbps)
+            //            }),
+            //        summary = summary.GetValueOrDefault()
+            //                      ? DashboardData.Current.GetInterfaceUtilization(host, iface, null, null, 2000).Select(i => new
+            //                          {
+            //                              date = i.Epoch,
+            //                              main_in = (int)(i.Inbps),
+            //                              main_out = (int)(i.Outbps)
+            //                          })
+            //                      : null
+            //    });
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end", VaryByContentEncoding = "gzip;deflate")]
+        [OutputCache(Duration = 120, VaryByParam = "host;start;end", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/builds/json")]
-        public ActionResult BuildsJson(int id, long start, long end)
+        public ActionResult BuildsJson(string host, long start, long end)
         {
             return Json(new
             {
-                builds = GetBuilds(id, start, end).Select(b => new
-                {
-                    date = b.StartDate.ToEpochTime(true),
-                    text = GetFlagTooltip(b),
-                    link = b.WebUrl
-                })
+                builds = new string[] { }
+                //GetBuilds(host, start, end).Select(b => new
+                //{
+                //    date = b.StartDate.ToEpochTime(true),
+                //    text = GetFlagTooltip(b),
+                //    link = b.WebUrl
+                //})
             });
         }
 
-        private static IEnumerable<Build> GetBuilds(int id, long startEpoch, long endEpoch)
+        private static IEnumerable<Build> GetBuilds(string host, long startEpoch, long endEpoch)
         {
             if (!Current.Settings.TeamCity.Enabled) return Enumerable.Empty<Build>();
 
@@ -125,9 +115,8 @@ namespace StackExchange.Opserver.Controllers
             if((endEpoch - startEpoch) > TimeSpan.FromDays(30).TotalSeconds)
                 return new List<Build>();
 
-            var node = DashboardData.GetNodeById(id);
             DateTime start = startEpoch.ToDateTime(), end = endEpoch.ToDateTime();
-            return BuildStatus.GetBuildsByServer(node.PrettyName).Where(b => b.StartDate >= start && b.StartDate <= end);
+            return BuildStatus.GetBuildsByServer(host).Where(b => b.StartDate >= start && b.StartDate <= end);
         }
 
         private static string GetFlagTooltip(Build b)

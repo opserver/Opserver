@@ -171,6 +171,8 @@
     <Content Include="Content\img\database\yellow.png" />
     <Content Include="Content\img\lock-off.png" />
     <Content Include="Content\img\lock-on.png" />
+    <Content Include="Content\img\logo\full-grey.svg" />
+    <Content Include="Content\img\logo\full.svg" />
     <Content Include="Content\img\logo\icon-128.png" />
     <Content Include="Content\img\logo\icon-152.png" />
     <Content Include="Content\img\logo\icon-16.png" />
@@ -179,6 +181,7 @@
     <Content Include="Content\img\logo\icon-32.png" />
     <Content Include="Content\img\logo\icon-64.png" />
     <Content Include="Content\img\logo\icon-76.png" />
+    <Content Include="Content\img\logo\icon.svg" />
     <Content Include="Content\img\logo\logo-big.png" />
     <Content Include="Content\img\logo\logo-login%402x.png" />
     <Content Include="Content\img\logo\logo-login.png" />

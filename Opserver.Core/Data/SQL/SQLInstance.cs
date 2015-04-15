@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Node ServerInfo
         {
-            get { return DashboardData.GetNodeByName(Name); }
+            get { return DashboardData.Current.GetNode(Name); }
         }
 
         /// <summary>

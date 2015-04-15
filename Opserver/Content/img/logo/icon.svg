@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 18.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 288 288" enable-background="new 0 0 288 288" xml:space="preserve">
+<g id="Layer_2">
+	<polygon display="none" opacity="0.25" fill="#2E8ACA" points="0,148.1 0,148.1 72,148.1 72,76.1 54,112.9 36,112.9 18,112.9 	"/>
+	<polygon display="none" opacity="0.25" fill="#2E8ACA" points="-0.1,140.1 0,148.1 72,148.1 71.9,112.8 54,130.8 36,121.6 
+		18,130.8 	"/>
+	<polygon display="none" opacity="0.25" fill="#2E8ACA" points="-0.1,130.8 0,148.1 72,148.1 71.9,112.8 54,76.1 36,103.2 18,103.2 
+			"/>
+	<polygon display="none" opacity="0.25" fill="#2E8ACA" points="-0.1,140.2 0,148.1 72,148.1 71.9,112.8 54,94.1 36,112.8 18,123.2 
+			"/>
+</g>
+<g id="Layer_3">
+</g>
+<g id="Layer_1">
+</g>
+<g id="Layer_5">
+</g>
+<g id="Layer_4">
+	<g>
+		<defs>
+			<rect id="SVGID_1_" x="90.7" y="83.5" width="107.5" height="107.5"/>
+		</defs>
+		<clipPath id="SVGID_2_">
+			<use xlink:href="#SVGID_1_"  overflow="visible"/>
+		</clipPath>
+		<g clip-path="url(#SVGID_2_)">
+			<defs>
+				<path id="SVGID_3_" d="M196.8,173.1c0,9.9-7.9,17.9-17.7,17.9h-70.7c-9.8,0-17.7-8-17.7-17.9v-71.7c0-9.9,7.9-17.9,17.7-17.9
+					h70.7c9.8,0,17.7,8,17.7,17.9V173.1z"/>
+			</defs>
+			<clipPath id="SVGID_4_">
+				<use xlink:href="#SVGID_3_"  overflow="visible"/>
+			</clipPath>
+			<g clip-path="url(#SVGID_4_)">
+				<polygon fill="#0F2A4C" points="198.3,191 90.7,191 90.7,138.2 90.7,83.5 198.3,83.5 				"/>
+			</g>
+			<g clip-path="url(#SVGID_4_)">
+				<ellipse opacity="0.2" fill="#2E8ACA" cx="89.3" cy="83.5" rx="106" ry="107.5"/>
+				<ellipse opacity="0.2" fill="#2E8ACA" cx="77.2" cy="84.1" rx="106" ry="107.5"/>
+				<ellipse opacity="0.2" fill="#2E8ACA" cx="64.1" cy="86.4" rx="106" ry="107.5"/>
+				<ellipse opacity="0.2" fill="#2E8ACA" cx="50.8" cy="90.5" rx="106" ry="107.5"/>
+			</g>
+			<g clip-path="url(#SVGID_4_)">
+				<ellipse fill="none" stroke="#77CFE5" stroke-width="2.9791" stroke-miterlimit="10" cx="89.3" cy="83.5" rx="106" ry="107.5"/>
+				
+					<ellipse opacity="0.8" fill="none" stroke="#77CFE5" stroke-width="2.9791" stroke-miterlimit="10" cx="77.2" cy="84.1" rx="106" ry="107.5"/>
+				
+					<ellipse opacity="0.6" fill="none" stroke="#77CFE5" stroke-width="2.9791" stroke-miterlimit="10" cx="64.1" cy="86.4" rx="106" ry="107.5"/>
+				
+					<ellipse opacity="0.4" fill="none" stroke="#77CFE5" stroke-width="2.9791" stroke-miterlimit="10" cx="50.8" cy="90.5" rx="106" ry="107.5"/>
+			</g>
+		</g>
+		<rect x="89.2" y="83.5" display="none" clip-path="url(#SVGID_2_)" fill="#FFFFFF" width="107.5" height="107.5"/>
+	</g>
+</g>
+</svg>

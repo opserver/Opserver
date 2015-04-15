@@ -383,7 +383,7 @@ Status.Dashboard = (function () {
 
         $('.node-dashboard').on('click', '.dashboard-spark', function() {
             var $this = $(this),
-                id = $this.data('id'),
+                host = $this.data('host'),
                 title = $this.data('title'),
                 max = $this.closest('[data-max]').data('max'),
                 type = title.toLowerCase(),
@@ -393,10 +393,10 @@ Status.Dashboard = (function () {
 
             switch (type) {
             case 'cpu':
-                $('#dashboard-chart').empty().cpuGraph({ id: id, title: 'CPU Utilization', subtitle: subtitle, animate: true });
+                $('#dashboard-chart').empty().cpuGraph({ host: host, title: 'CPU Utilization', subtitle: subtitle, animate: true });
                 break;
             case 'memory':
-                $('#dashboard-chart').empty().memoryGraph({ id: id, title: 'Memory Utilization', subtitle: subtitle, animate: true, max: max });
+                $('#dashboard-chart').empty().memoryGraph({ host: host, title: 'Memory Utilization', subtitle: subtitle, animate: true, max: max });
                 break;
             default:
                 return;
@@ -1531,6 +1531,7 @@ Status.HAProxy = (function () {
                 interpolation: 'linear',
                 leftMargin: 40,
                 id: this.data('id'),
+                host: this.data('host'),
                 title: this.data('title'),
                 subtitle: this.data('subtitle'),
                 start: this.data('start') || Status.Graphs.options && Status.Graphs.options.start,
@@ -1568,18 +1569,20 @@ Status.HAProxy = (function () {
                 x, x2, y, yr, y2,
                 xAxis, xAxis2, yAxis, yrAxis,
                 brush, brush2,
-                clipId = 'clip' + Status.Graphs.count++,
+                clipId = 'clip' + Status.Graphs.count,
+                clipSummaryId = 'clipSummary' + Status.Graphs.count++,
                 gradientId = 'gradient-' + Status.Graphs.count,
-                svg, focus, context, clip,
+                svg, focus, context, clip, clipSummary,
                 currentArea,
                 refreshTimer,
                 urlPath = '/graph/' + options.type + (options.subtype ? '/' + options.subtype : '') + '/json',
                 params = { summary: true },
                 stack, stackArea, stackSummaryArea, stackFunc; // stacked specific vars
             
-            if (options.id) params.id = options.id;
-            if (options.start) params.start = options.start / 1000;
-            if (options.end) params.end = options.end / 1000;
+            if (options.host) params.host = options.host;
+            if (options.iface) params.iface = options.iface;
+            if (options.start) params.start = options.start;
+            if (options.end) params.end = options.end;
             $.extend(params, options.params);
             
             options.width = options.width == 'auto' ? (chart.width() - 10) : options.width;
@@ -1641,11 +1644,18 @@ Status.HAProxy = (function () {
                     .attr('width', options.width)
                     .attr('height', options.height);
 
-                clip = svg.append('defs').append('clipPath')
+                var defs = svg.append('defs');
+                clip = defs.append('clipPath')
                     .attr('id', clipId)
                     .append('rect')
                     .attr('width', width)
                     .attr('height', height);
+
+                clipSummary = defs.append('clipPath')
+                    .attr('id', clipSummaryId)
+                    .append('rect')
+                    .attr("width", width)
+                    .attr("height", height2);
 
                 focus = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
                 context = svg.append('g').attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
@@ -1731,6 +1741,7 @@ Status.HAProxy = (function () {
                             .datum(data.summary)
                             .attr('class', getClass('summary-area', s))
                             .attr('fill', getColor())
+                            .attr('clip-path', 'url(#' + clipSummaryId + ')')
                             .attr('d', s.summaryArea.y0(y2(0)));
                     });
                 }
@@ -2024,8 +2035,8 @@ Status.HAProxy = (function () {
             function postProcess(data) {
                 function process(name) {
                     if (data[name]) {
-                        data[name].forEach(function(d) {
-                            d.date = new Date(d.date);
+                        data[name].forEach(function (d) {
+                            d.date = new Date(d.date*1000);
                         });
                         curData[name] = data[name];
                     }
@@ -2086,7 +2097,7 @@ Status.HAProxy = (function () {
 
                 if (options.noAjaxZoom) {
                     curData.points = curData.summary.filter(function (p) {
-                        var t = p.date.getTime() / 1000;
+                        var t = p.date.getTime();
                         return start <= t && t <= end;
                     });
                     rescaleYAxis(curData, true);
@@ -2094,7 +2105,7 @@ Status.HAProxy = (function () {
                     //refresh with high-res goodness
                     clearTimeout(refreshTimer);
                     refreshTimer = setTimeout(function () {
-                        $.getJSON(urlPath, { id: options.id, start: start, end: end }, function (newData) {
+                        $.getJSON(urlPath, { id: options.id, host: options.host, iface: options.iface, start: start, end: end }, function (newData) {
                             postProcess(newData);
                             rescaleYAxis(newData, true);
                             series.forEach(function (s) {
@@ -2184,7 +2195,7 @@ Status.HAProxy = (function () {
                 clipId = 'clip' + Status.Graphs.count++,
                 currentArea,
                 urlPath = '/dashboard/node/poll/' + options.type + (options.subtype ? '/' + options.subtype : ''),
-                params = $.extend({}, { id: options.id, start: options.start / 1000, end: options.end / 1000 }, options.params);
+                params = $.extend({}, { id: options.id, start: options.start, end: options.end }, options.params);
 
             options.width = options.width == 'auto' ? (chart.width() - 10) : options.width;
             options.height = options.height == 'auto' ? (chart.height() - 40) : options.height;

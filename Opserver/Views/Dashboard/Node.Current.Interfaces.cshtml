@@ -3,12 +3,7 @@
 @model Node
 @helper Graph(Interface i, string type)
 {
-    if (i.IsUnwatched)
-    {
-        <div class="spark-no-data">No Data Available</div>
-        return;
-    }
-    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@i.Id" data-name="@i.PrettyName" />
+    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?host=@Model.Host&iface=@i.Tag"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-host="@Model.Host" data-iface="@i.Tag" data-name="@i.PrettyName" />
 }
 <table class="node-dashboard main-dashboard interface-dashboard striped-dashboard">
     <thead>
@@ -26,26 +21,25 @@
         </tr>
     </thead>
     <tbody class="node-group">
-        @foreach (var i in Model.Interfaces.OrderBy(i => i.Index))
+        @foreach (var i in Model.Interfaces.OrderBy(i => i.Name))
         {
             <tr class="@i.MonitorStatus.RowClass()">
                 <td>@i.IconSpan()</td>
-                <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-                    last updated @i.LastSync.ToRelativeTime() " data-val=" @i.Index ">
+                <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.Description" data-val="@i.Tag">
                     @i.PrettyName
                 </td>
-                <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@string.Format("{0:F0}", i.Speed)">@i.PrettySpeed</td>
-                <td data-val="@string.Format("{0:F0}", i.InBps)">@i.PrettyIn()</td>
-                <td data-val="@string.Format("{0:F0}", i.InBps)">@Graph(i, "in")</td>
-                <td data-val="@string.Format("{0:F0}", i.OutBps)">@i.PrettyOut()</td>
-                <td data-val="@string.Format("{0:F0}", i.OutBps)">@Graph(i, "out")</td>
+                <td class="nowrap@(i.LinkSpeed > 10L * 1000 * 1000 * 1000 ? " very-fast" : i.LinkSpeed >= 10L * 1000 * 1000 * 1000 ? " fast" : "")" data-val="@string.Format("{0:F0}", i.LinkSpeed)">@i.PrettySpeed</td>
+                <td data-val="@string.Format("{0:F0}", i.LastInbps)">@i.PrettyIn()</td>
+                <td data-val="@string.Format("{0:F0}", i.LastInbps)">@Graph(i, "in")</td>
+                <td data-val="@string.Format("{0:F0}", i.LastOutbps)">@i.PrettyOut()</td>
+                <td data-val="@string.Format("{0:F0}", i.LastOutbps)">@Graph(i, "out")</td>
             </tr>
         }
     </tbody>
 </table>
 <script>
     $('.node-group').on('click', '.dashboard-spark', function () {
-        $('#dashboard-chart').empty().networkGraph({ id: $(this).data('nid'), title: 'Network Utilization', subtitle: $(this).data('name') });
+        $('#dashboard-chart').empty().networkGraph({ host: $(this).data('host'), iface: $(this).data('iface'), title: 'Network Utilization', subtitle: $(this).data('name') });
 
         $('#spark-detail').modal({
             overlayClose: true,

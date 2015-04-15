@@ -20,15 +20,15 @@
         <div class="spark-no-data">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
+    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?host=@s.Host"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-HOST="@s.Host" data-title="@type" data-node="@s.PrettyName" />
 }
 <div class="item @s.MonitorStatus.Class() @GetItemClass(s)">
     <div class="server-name">
         @s.IconSpan()
         <a href="/dashboard/node?node=@s.PrettyName" class="node-name-link">@s.PrettyName</a>
-        @if (s.IsUnwatched)
+        @if (s.IsSilenced)
         {
-            <span class="unmanaged">(unmanaged)</span>
+            <span class="unmanaged">(silenced)</span>
         }
         <span class="category">@s.Category.Name</span>
     </div>
@@ -38,7 +38,7 @@
     </div>
     <div class="status-block mem-status">
         <span class="label">Mem </span>@s.MemoryPercentStatusSpan()
-        <div class="status-graph">@s.MemoryStatusSpan()@if (s.HasValidMemoryReading) {
+        <div class="status-graph">@s.MemoryStatusSpan()@if (s.MemoryUsed.HasValue) {
             <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width:@(s.PercentMemoryUsed)%"></div></div>
         }
         </div>
