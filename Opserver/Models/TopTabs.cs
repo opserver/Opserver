@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Web;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.CloudFlare;
 using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Data.HAProxy;
@@ -58,7 +59,7 @@ namespace StackExchange.Opserver.Models
             AddTab(new TopTab("SQL", "/sql", 10, s.SQL) { GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus() });
             AddTab(new TopTab("Redis", "/redis", 20, s.Redis) { GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus() });
             AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
-            AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
+            AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare) { GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus });
             AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty) { GetMonitorStatus = () => PagerDutyApi.Instance.MonitorStatus});
             AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
             {

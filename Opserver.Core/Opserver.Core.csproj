@@ -102,10 +102,10 @@
       <DependentUpon>Current.cs</DependentUpon>
     </Compile>
     <Compile Include="Current.cs" />
-    <Compile Include="Data\CloudFlare\API.Actions.cs">
-      <DependentUpon>API.cs</DependentUpon>
+    <Compile Include="Data\CloudFlare\CloudFlareAPI.Actions.cs">
+      <DependentUpon>CloudFlareAPI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\API.cs" />
+    <Compile Include="Data\CloudFlare\CloudFlareAPI.cs" />
     <Compile Include="Data\CloudFlare\DataCenters.cs" />
     <Compile Include="Data\CloudFlare\RailgunInstance.Cache.cs">
       <DependentUpon>RailgunInstance.cs</DependentUpon>
@@ -369,8 +369,8 @@
     <Compile Include="Data\Elastic\ElasticCluster.Aliases.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\API.Zones.cs">
-      <DependentUpon>API.cs</DependentUpon>
+    <Compile Include="Data\CloudFlare\CloudFlareAPI.Zones.cs">
+      <DependentUpon>CloudFlareAPI.cs</DependentUpon>
     </Compile>
     <None Include="packages.config">
       <SubType>Designer</SubType>

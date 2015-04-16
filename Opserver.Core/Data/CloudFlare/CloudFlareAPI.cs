@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public partial class API : SinglePollNode<API>
+    public partial class CloudFlareAPI : SinglePollNode<CloudFlareAPI>
     {
         public CloudFlareSettings Settings { get; internal set; }
         public string Email { get { return Settings.Email; } }
@@ -28,12 +28,12 @@ namespace StackExchange.Opserver.Data.CloudFlare
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
 
-        public API()
+        public CloudFlareAPI()
         {
             Settings = Current.Settings.CloudFlare;
         }
 
-        public Action<Cache<T>> GetFromCloudFlare<T>(string opName, Func<API, T> getFromConnection) where T : class
+        public Action<Cache<T>> GetFromCloudFlare<T>(string opName, Func<CloudFlareAPI, T> getFromConnection) where T : class
         {
             return UpdateCacheItem("CloudFlare - API: " + opName, () => getFromConnection(this));
         }
