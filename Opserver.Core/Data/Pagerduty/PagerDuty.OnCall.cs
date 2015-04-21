@@ -198,6 +198,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     case "SMS":
                     case "phone":
                         // I'm sure no one outside the US uses this...
+                        // we will have to fix this soon
                         return Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
                     default:
                         return Address;
