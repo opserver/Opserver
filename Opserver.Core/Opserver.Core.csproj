@@ -166,6 +166,7 @@
     <Compile Include="Data\PagerDuty\PagerDuty.Incidents.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.Logs.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.OnCall.cs" />
+    <Compile Include="Data\PagerDuty\PagerDuty.Schedules.cs" />
     <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
       <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
     </Compile>
