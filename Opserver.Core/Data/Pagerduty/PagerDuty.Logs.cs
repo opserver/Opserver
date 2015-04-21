@@ -17,10 +17,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
         
         public List<PagerDutyLogEntry> GetIncidentEntries(string id)
         {
-            var r =  GetFromPagerDuty("incidents/" + id + "/log_entries", getFromJson:
+            return  GetFromPagerDuty("incidents/" + id + "/log_entries", getFromJson:
                 response => JSON.Deserialize<LogEntries>(response.ToString(), Options.ISO8601).Logs);
-            Debug.WriteLine(r);
-            return r;
         }
 
         public class LogEntries
