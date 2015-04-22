@@ -87,7 +87,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     
                     if (data != null)
                     {
-                        var stringData = JSON.Serialize(data);
+                        var stringData = JSON.Serialize(data,Options.ISO8601);
                         req.ContentType = "application/json";
                         var byteData = new ASCIIEncoding().GetBytes(stringData);
                         req.ContentLength = byteData.Length;
