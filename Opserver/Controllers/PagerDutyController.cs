@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using Jil;
@@ -49,7 +50,7 @@ namespace StackExchange.Opserver.Controllers
             return View("PagerDuty.EscFull", PagerDutyApi.Instance.GetSchedule());
         }
 
-        [Route("pagerduty/action")]
+        [Route("pagerduty/action/incident/updatestatus")]
         public void PagerDutyActionIncident(string apiAction, string userid, string incident)
         {
             var activeIncident = new PagerDutyEditIncident
@@ -66,6 +67,30 @@ namespace StackExchange.Opserver.Controllers
                 getFromJson: response => response.ToString(), httpMethod: "PUT", data: data);
 
             PagerDutyApi.Instance.Incidents.Poll(true);
+
+        }
+
+        [Route("pagerduty/action/oncall/override")]
+        public void PagerDutyActionOnCallOverride(string userid, DateTime? start = null, int durationHours = 1, int durationMins = 0)
+        {
+            var overrideDuration = new TimeSpan(durationHours, durationMins, 0);
+            var currentPrimarySchedule = PagerDutyApi.Instance.PrimaryScheduleId;
+            if (start == null)
+            {
+                start = DateTime.UtcNow; 
+            }
+
+            var overrideData = new PagerDutyScheduleOverride()
+            {
+                StartTime = start,
+                EndTime = start.Value.Add(overrideDuration),
+                UserID = userid
+            };
+
+            PagerDutyApi.Instance.GetFromPagerDuty("schedules/" + currentPrimarySchedule + "/overrides",
+                getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
+
+            PagerDutyApi.Instance.Poll(true);
 
         }
     }
