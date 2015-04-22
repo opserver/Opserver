@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         public string PrimaryScheduleId
         {
-            get { return AllSchedules.Data.Find(s => s.Name == "Primary On Call").Id; }
+            get { return AllSchedules.Data.FirstOrDefault(s => s.Name == Settings.PrimaryScheduleName).Id; }
         }
         private Cache<List<PagerDutySchedule>> _schedules;
 

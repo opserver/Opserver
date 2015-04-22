@@ -1,5 +1,6 @@
 ﻿@using Jil
 @using StackExchange.Opserver.Data.PagerDuty
+@using StackExchange.Opserver.Views.PagerDuty
 @model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
 @{
     
@@ -8,7 +9,7 @@
 
 }
 
-@helper GetActionString(string status, string userName, string incident)
+@helper GetActionString(string type, string userName, string incident = null, string status = null )
 {
     var loggedInUserId = PagerDutyApi.Instance.AllUsers.Data.Find(u => u.EmailUserName == userName);
     if (loggedInUserId == null)
@@ -26,14 +27,27 @@
         Current.LogException(e);
 
     }
-    if (status == PagerDutyApi.Statuses.Acknowledged)
+
+    switch (type)
     {
-        <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
+        case "incident":
+            if (status == PagerDutyApi.Statuses.Acknowledged)
+            {
+                <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
+            }
+            else
+            {
+                <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Acknowledged" data-userid="@loggedInUserId.Id" data-incident="@incident">Ack</a>  <a href=# class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
+            }
+            break;
+        case "override":
+            if (Current.User.IsGlobalAdmin)
+            {
+                <a href="#" class="js_override_action" data-userid="@loggedInUserId.Id">Take on Call</a>
+            }
+            break;
     }
-    else
-    {
-        <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Acknowledged" data-userid="@loggedInUserId.Id" data-incident="@incident" >Ack</a>  <a href=# class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
-    }
+
 }
 
 @section head {
@@ -51,11 +65,20 @@
             $(".js_incident_action").on('click', function(e) {
                 e.preventDefault();
 
-                $.post('/pagerduty/action', {
+                $.post('/pagerduty/action/incident/updatestatus', {
                     'apiAction': $(this).data('action'),
                     'userid': $(this).data('userid'),
                     'incident': $(this).data('incident')
                 }).done(function() {
+                    Status.refresh.run();
+                });
+            });
+            $(".js_override_action").on('click', function (e) {
+                e.preventDefault();
+
+                $.post('/pagerduty/action/oncall/override', {
+                    'userid': $(this).data('userid')
+                }).done(function () {
                     Status.refresh.run();
                 });
             });
@@ -111,7 +134,7 @@
         <tr class="category-row">
             <th colspan="8">
                 <h3>
-                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>)
+                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetActionString("override", Current.User.AccountName) (1hr)
                 </h3>
             </th>
         </tr>
@@ -162,7 +185,7 @@
                         if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
                         {
                             <span class="note">(@i.LastChangedBy.FullName)</span>
-                            @GetActionString(@i.Status, Current.User.AccountName, @i.Id)
+                            @GetActionString("incident", Current.User.AccountName, status: @i.Status, incident: @i.Id)
                             ;
                         }
                         else
@@ -173,7 +196,7 @@
                     }
                     else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
                     {
-                        @GetActionString(@i.Status, Current.User.AccountName, @i.Id)
+                        @GetActionString("incident", Current.User.AccountName, status: @i.Status, incident: @i.Id)
                         ;
                     }
                 </td>

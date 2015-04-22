@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using StackExchange.Opserver.Data.PagerDuty;
 
@@ -42,6 +43,16 @@ namespace StackExchange.Opserver.Views.PagerDuty
         //public string AssignedUser { get; set; }
         //[DataMember(Name="escalation_policy")]
         //public string EscalationPolicy { get; set; }
+    }
+
+    public class PagerDutyScheduleOverride
+    {
+        [DataMember(Name="user_id")]
+        public string UserID { get; set; }
+        [DataMember(Name="start")]
+        public DateTime? StartTime { get; set; }
+        [DataMember(Name="end")]
+        public DateTime? EndTime { get; set; }
     }
     
 
