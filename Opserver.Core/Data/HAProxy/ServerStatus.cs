@@ -31,7 +31,9 @@ namespace StackExchange.Opserver.Data.HAProxy
         [Description("Server is in maintenance and receiving no requests.")]
         Maintenance = 5,
         [Description("Front end is open to receiving requests.")]
-        Open = 1
+        Open = 1,
+        [Description("Server is draining and receiving no requests.")]
+        Drain = 11,
     }
 
     public static class ProxyServerStatusExtensions
@@ -72,6 +74,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             {
                 case ProxyServerStatus.ActiveUpGoingDown:
                 case ProxyServerStatus.BackupUpGoingDown:
+                case ProxyServerStatus.Drain:
                 case ProxyServerStatus.Down:
                     return true;
                 default:
