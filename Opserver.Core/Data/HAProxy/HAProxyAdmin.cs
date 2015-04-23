@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -102,6 +103,33 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public enum Action
         {
+            [Description("Set State to READY")]
+            ready,
+            [Description("Set State to DRAIN")]
+            drain,
+            [Description("Set State to MAINT")]
+            maint,
+            [Description("Health: disable checks")]
+            dhlth,
+            [Description("Health: enable checks")]
+            ehlth,
+            [Description("Health: force UP")]
+            hrunn,
+            [Description("Health: force NOLB")]
+            hnolb,
+            [Description("Health: force DOWN")]
+            hdown,
+            [Description("Agent: disable checks")]
+            dagent,
+            [Description("Agent: enable checks")]
+            eagent,
+            [Description("Agent: force UP")]
+            arunn,
+            [Description("Agent: force DOWN")]
+            adown,
+            [Description("Kill Sessions")]
+            shutdown,
+
             Enable,
             Disable
         }
