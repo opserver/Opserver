@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare/dns")]
         public ActionResult DNS()
         {
-            API.Instance.WaitForFirstPoll(10000);
+            CloudFlareAPI.Instance.WaitForFirstPoll(10000);
             var vd = new DashboardModel
             {
                 View = DashboardModel.Views.DNS

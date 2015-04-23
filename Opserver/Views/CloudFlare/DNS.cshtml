@@ -2,8 +2,8 @@
 @using StackExchange.Opserver.Views.CloudFlare
 @model DashboardModel
 @{
-    var zCache = API.Instance.Zones;
-    var records = API.Instance.DNSRecords.SafeData(true);
+    var zCache = CloudFlareAPI.Instance.Zones;
+    var records = CloudFlareAPI.Instance.DNSRecords.SafeData(true);
     var zones = zCache.SafeData(true);
     var dcs = DataCenters.All;
     var showDCs = dcs.Any();
@@ -23,7 +23,7 @@
                     <div>
                         <h3>
                             CloudFlare DNS
-                            @Helpers.PollNow(API.Instance)
+                            @Helpers.PollNow(CloudFlareAPI.Instance)
                         </h3>
                     </div>
                 </th>
@@ -90,15 +90,24 @@
                 }
                 var rootIPs = r.RootIPAddresses;
                 var servedDCs = rootIPs != null ? dcs.Where(dc => dc.Value.Any(range => rootIPs.Any(range.Contains))).ToList() : null;
+                var masked = rootIPs != null ? DataCenters.GetMasked(rootIPs).ToList() : null;
                 var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
                 <tr>
                     <td class="@(r.Type == "CNAME" ? "warning" : "bold")">@r.Type</td>
                     <td><b>@r.DisplayName</b>@if (r.DisplayName != r.ZoneName){<span class="note">.@r.ZoneName</span>}</td>
                     <td>
-                        @r.Content
-                        @if (r.Type == "CNAME" && rootIPs != null && rootIPs.Any())
+                        @switch (r.Type)
                         {
-                            <span class="note">(@string.Join(", ", rootIPs))</span>
+                            case "CNAME":
+                                @r.Content
+                                if (rootIPs != null && rootIPs.Any())
+                                {
+                                    <span class="note">(@string.Join(", ", masked))</span>
+                                }
+                                break;
+                            default:
+                                @(masked != null ? string.Join(", ", masked) : null)
+                                break;
                         }
                     </td>
                     <td>@(r.AutoTTL ? "Auto" : r.TTL)</td>

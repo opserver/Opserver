@@ -7,7 +7,7 @@ using Newtonsoft.Json.Linq;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public partial class API
+    public partial class CloudFlareAPI
     {
         private Cache<List<Zone>> _zones;
         public Cache<List<Zone>> Zones
@@ -141,7 +141,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
             public List<DNSRecord> DNSRecords
             {
-                get { return API.Instance.DNSRecords.SafeData(true).Where(r => r.ZoneName == ZoneName).ToList(); }
+                get { return CloudFlareAPI.Instance.DNSRecords.SafeData(true).Where(r => r.ZoneName == ZoneName).ToList(); }
             }
         }
 
@@ -214,7 +214,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
                         case "AAAA":
                             return new List<IPAddress> {IPAddress};
                         case "CNAME":
-                            return API.Instance.GetIPs(Content);
+                            return CloudFlareAPI.Instance.GetIPs(Content);
                         default:
                             return null;
                     }

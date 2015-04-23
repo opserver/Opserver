@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public partial class API
+    public partial class CloudFlareAPI
     {
         public void PurgeAllFiles(Zone zone)
         {
