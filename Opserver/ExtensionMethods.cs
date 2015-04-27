@@ -177,7 +177,7 @@ namespace StackExchange.Opserver
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (cache.LastPollStatus == FetchStatus.Fail)
                 return MonitorStatus.Warning.Span(mini ? dateToUse.ToRelativeTime() : dateToUse.ToRelativeTimeMini(),
-                                                  string.Format("Last Poll: {0} ({1})\nError: {2}", lf.ToUniversalTime(), lf.ToRelativeTime(), cache.ErrorMessage));
+                                                  string.Format("Last Poll: {0} ({1})\nError: {2}", lf.ToZuluTime(), lf.ToRelativeTime(), cache.ErrorMessage));
 
             return mini ? lf.ToRelativeTimeSpanMini() : lf.ToRelativeTimeSpan();
         }
@@ -201,15 +201,15 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Convert a nullable datetime to a zulu string
         /// </summary>
-        public static string ToUniversalTime(this DateTime? dt)
+        public static string ToZuluTime(this DateTime? dt)
         {
-            return !dt.HasValue ? string.Empty : ToUniversalTime(dt.Value);
+            return !dt.HasValue ? string.Empty : ToZuluTime(dt.Value);
         }
 
         /// <summary>
         /// Convert a datetime to a zulu string
         /// </summary>
-        public static string ToUniversalTime(this DateTime dt)
+        public static string ToZuluTime(this DateTime dt)
         {
             return dt.ToString("u");
         }

@@ -99,7 +99,7 @@
                     var upTime = stats.JVM != null && stats.JVM.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
                     <tr class="@n.RowClass()">
                         <td>@n.IconSpan()</td>
-                        <td title="Up since @(upTime.HasValue ? upTime.ToUniversalTime() + " (" + upTime.ToRelativeTime() + ")" : "(unknown)")">
+                        <td title="Up since @(upTime.HasValue ? upTime.ToZuluTime() + " (" + upTime.ToRelativeTime() + ")" : "(unknown)")">
                             <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                         </td>
                         <td>@shards.Count().ToComma() (@shards.Count(s => s.Primary) primary)</td>

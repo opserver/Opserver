@@ -154,7 +154,7 @@
             <div class="error-type">@error.Type</div>
             <pre class="error-detail">@error.Detail
         </pre>
-            <p class="error-time">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> on @error.MachineName@if (!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin)
+            <p class="error-time">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName@if (!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin)
             {<text> <span class="info-delete-link">(<a class="info-link" href="#" title="delete this error from the log">delete</a>)</span></text>}</p>
             @if (Current.Settings.Jira.Enabled && Current.User.IsExceptionAdmin)
             {

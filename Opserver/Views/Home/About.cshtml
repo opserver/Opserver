@@ -21,8 +21,8 @@
 <section class="properties">
     <ul>
         <li>App Revision: <span class="value">@rev</span></li>
-        <li>Last Built/Changed (UTC): <span class="value">@buildDate.ToString("u")</span></li>
-        <li>Running since: <span class="value">@GlobalApplication.StartDate.ToUniversalTime().ToString("u")</span> (@GlobalApplication.StartDate.ToRelativeTimeSpan())</li>
+        <li>Last Built/Changed (UTC): <span class="value">@buildDate.ToZuluTime()</span></li>
+        <li>Running since: <span class="value">@GlobalApplication.StartDate.ToUniversalTime().ToZuluTime()</span> (@GlobalApplication.StartDate.ToRelativeTimeSpan())</li>
         <li>Current server: <span class="value">@Environment.MachineName</span></li>
         <li>Get-Set Cache: <span class="value">Sync: @cacheStats.Item1.ToComma()</span>, <span class="value">Async: @cacheStats.Item2.ToComma()</span>, <span class="value">Async (error): @cacheStats.Item3.ToComma()</span></li>
     </ul>
