@@ -180,8 +180,8 @@
             @foreach (var g in groups)
             {
                 var combinedStats = g.AllStats.GroupBy(p => new { p.Description, p.Type, p.IsFrontend, p.IsChecked, p.IsServer }).ToList();
-                var anyUp = g.AllServers.Any(s => s.ProxyServerStatus != ProxyServerStatus.Maintenance);
-                var anyDown = g.AllServers.Any(s => s.ProxyServerStatus == ProxyServerStatus.Maintenance);
+                var anyUp = g.AllServers.Any(s => s.MonitorStatus != MonitorStatus.Maintenance);
+                var anyDown = g.AllServers.Any(s => s.MonitorStatus == MonitorStatus.Maintenance);
 
                 <tbody class="proxy-header @(g.GroupLinkName == Model.WatchProxy ? "watched-proxy" : "")">
                     <tr class="category-row @(g.GroupStatus.GetDescription())-row" title="Name: @g.GroupName">
@@ -212,8 +212,8 @@
                         var stat = s.Key;
                         var proxyStatus = s.GetWorstStatus();
                         var latestStat = s.OrderBy(si => si.LastStatusChange).Last();
-                        var sAnyUp = s.Any(sp => sp.ProxyServerStatus != ProxyServerStatus.Maintenance);
-                        var sAnyDown = s.Any(sp => sp.ProxyServerStatus == ProxyServerStatus.Maintenance);
+                        var sAnyUp = s.Any(sp => sp.MonitorStatus != MonitorStatus.Maintenance);
+                        var sAnyDown = s.Any(sp => sp.MonitorStatus == MonitorStatus.Maintenance);
 
                         <tr class="proxy-@stat.Type.ToString() status @(proxyStatus.GetDescription())-row">
                             @if (Model.AdminMode)
