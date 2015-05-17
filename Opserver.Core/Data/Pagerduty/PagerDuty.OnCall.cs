@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Jil;
@@ -174,7 +173,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private string _emailusername;
         public string EmailUserName
         {
-            get { return _emailusername = (_emailusername ?? new MailAddress(Email).User); }
+            get
+            {
+                return _emailusername = (_emailusername ?? (Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : ""));
+            }
         }
     }
 

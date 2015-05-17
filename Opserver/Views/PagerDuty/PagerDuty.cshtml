@@ -1,53 +1,30 @@
-﻿@using Jil
-@using StackExchange.Opserver.Data.PagerDuty
-@using StackExchange.Opserver.Views.PagerDuty
+﻿@using StackExchange.Opserver.Data.PagerDuty
 @model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
 @{
-    
     Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
-
+}
+@helper GetOverrideAction(string incident = null, string status = null)
+{
+    if (Model.CurrentPagerDutyPerson != null&& Current.User.IsGlobalAdmin)
+    {
+        @:<a href="#" class="js_override_action">Take on Call</a> (1hr)
+    }
 }
 
-@helper GetActionString(string type, string userName, string incident = null, string status = null )
+@helper GetIncidentAction(string status)
 {
-    var loggedInUserId = PagerDutyApi.Instance.AllUsers.Data.Find(u => u.EmailUserName == userName);
-    if (loggedInUserId == null)
+    if (Model.CurrentPagerDutyPerson == null) { return; }
+    switch (status)
     {
-        loggedInUserId = PagerDutyApi.Instance.AllUsers.Data.Find(
-                            u => u.EmailUserName == PagerDutyApi.Instance.Settings.UserNameMap.Find(un => un.OpServerName == userName).EmailUser);
-    }
-
-
-    if (loggedInUserId == null)
-    {
-        var e = new Exception("Could not Find User");
-        e.AddLoggedData("User: ", userName);
-        e.AddLoggedData("User Name Mapping", JSON.Serialize(PagerDutyApi.Instance.Settings.UserNameMap));
-        Current.LogException(e);
-
-    }
-
-    switch (type)
-    {
-        case "incident":
-            if (status == PagerDutyApi.Statuses.Acknowledged)
-            {
-                <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
-            }
-            else
-            {
-                <a href=# class='js_incident_action' data-action="@PagerDutyApi.Statuses.Acknowledged" data-userid="@loggedInUserId.Id" data-incident="@incident">Ack</a>  <a href=# class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved" data-userid="@loggedInUserId.Id" data-incident="@incident">Resolve</a>
-            }
+        case PagerDutyApi.Statuses.Acknowledged:
+            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved">Resolve</a>
             break;
-        case "override":
-            if (Current.User.IsGlobalAdmin)
-            {
-                <a href="#" class="js_override_action" data-userid="@loggedInUserId.Id">Take on Call</a>
-            }
+        default:
+            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Acknowledged">Ack</a>
+            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved">Resolve</a>
             break;
     }
-
 }
 
 @section head {
@@ -64,21 +41,16 @@
             });
             $(".js_incident_action").on('click', function(e) {
                 e.preventDefault();
-
                 $.post('/pagerduty/action/incident/updatestatus', {
                     'apiAction': $(this).data('action'),
-                    'userid': $(this).data('userid'),
-                    'incident': $(this).data('incident')
+                    'incident': $(this).closest('[data-incident]').data('incident')
                 }).done(function() {
                     Status.refresh.run();
                 });
             });
             $(".js_override_action").on('click', function (e) {
                 e.preventDefault();
-
-                $.post('/pagerduty/action/oncall/override', {
-                    'userid': $(this).data('userid')
-                }).done(function () {
+                $.post('/pagerduty/action/oncall/override').done(function () {
                     Status.refresh.run();
                 });
             });
@@ -134,7 +106,7 @@
         <tr class="category-row">
             <th colspan="8">
                 <h3>
-                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetActionString("override", Current.User.AccountName) (1hr)
+                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()
                 </h3>
             </th>
         </tr>
@@ -174,7 +146,7 @@
         <tbody>
         @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
         {
-            <tr class="server-row @i.MonitorStatus.RowClass()">
+            <tr class="server-row @i.MonitorStatus.RowClass()" data-incident="@i.Id">
                 <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
                 <td>@i.CreationDate.ToRelativeTimeSpan()</td>
                 <td>@i.AffectedService.Name</td>
@@ -185,8 +157,7 @@
                         if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
                         {
                             <span class="note">(@i.LastChangedBy.FullName)</span>
-                            @GetActionString("incident", Current.User.AccountName, status: @i.Status, incident: @i.Id)
-                            ;
+                            @GetIncidentAction(i.Status)
                         }
                         else
                         {
@@ -196,8 +167,7 @@
                     }
                     else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
                     {
-                        @GetActionString("incident", Current.User.AccountName, status: @i.Status, incident: @i.Id)
-                        ;
+                        @GetIncidentAction(i.Status)
                     }
                 </td>
                 <td>

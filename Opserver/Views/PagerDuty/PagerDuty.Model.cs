@@ -13,6 +13,7 @@ namespace StackExchange.Opserver.Views.PagerDuty
 
         public List<PagerDutyIncident> AllIncidents { get; set; }
         public bool Refresh { get; set; }
+        public PagerDutyPerson CurrentPagerDutyPerson { get; set; }
     }
 
     public class PagerDutyIncidentModel

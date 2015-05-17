@@ -25,6 +25,7 @@ namespace StackExchange.Opserver
             // Defaults
             OnCallToShow = 2;
             DaysToCache = 60;
+            UserNameMap = new List<EmailMapping>();
         }
 
 
