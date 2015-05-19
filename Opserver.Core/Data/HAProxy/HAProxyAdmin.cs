@@ -19,6 +19,10 @@ namespace StackExchange.Opserver.Data.HAProxy
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s }));
             Parallel.ForEach(matchingServers, _parallelOptions, pair =>
             {
+                // HAProxy will not drain a downed server, do the next best thing: MAINT
+                if (action == Action.drain && pair.Server.ProxyServerStatus == ProxyServerStatus.Down)
+                    action = Action.maint;
+
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
             return result;

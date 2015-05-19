@@ -1265,7 +1265,7 @@ Status.HAProxy = (function () {
                 url: '/haproxy/admin/proxy',
                 success: function (data) {
                     if (data === true) {
-                        refresh();
+                        startRefresh();
                     } else {
                         stopRefresh();
                     }
@@ -1296,7 +1296,7 @@ Status.HAProxy = (function () {
                 url: '/haproxy/admin/' + (server ? 'server' : 'group'),
                 success: function (data) {
                     if (data === true) {
-                        refresh();
+                        startRefresh();
                     } else {
                         stopRefresh();
                     }
