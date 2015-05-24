@@ -112,7 +112,7 @@
 
                                 <tr class="status @status.GetDescription()-row">
                                     <td style="text-align: center;">
-                                        <a href="#" data-group="@g.Name" data-action="@HAProxyAdmin.Action.Enable" class="action-icon action-plus@(maint == 0 ? " disabled" : "")" title="put all proxies in this group into rotation"></a><a href="#" data-group="@g.Name" data-action="@HAProxyAdmin.Action.Disable" class="action-icon action-minus@(up + down == 0 ? " disabled" : "")" title="take all proxies in this group out of rotation"></a>
+                                        <a href="#" data-group="@g.Name" data-action="@HAProxyAdmin.Action.ready" class="action-icon action-plus@(maint == 0 ? " disabled" : "")" title="put all proxies in this group into rotation"></a><a href="#" data-group="@g.Name" data-action="@HAProxyAdmin.Action.drain" class="action-icon action-minus@(up + down == 0 ? " disabled" : "")" title="take all proxies in this group out of rotation"></a>
                                     </td>
                                     <td>@status.IconSpan()</td>
                                     <td>@g.Name</td>
@@ -143,7 +143,7 @@
                                 var status = s.Down > 0 && s.Up == 0 ? MonitorStatus.Critical : s.Down > 0 && s.Up > 0 ? MonitorStatus.Warning : MonitorStatus.Good;
                                 <tr class="status @s.MonitorStatus.GetDescription()-row">
                                     <td style="text-align: center;">
-                                        <a href="#" data-server="@s.Server" data-action="@HAProxyAdmin.Action.Enable" class="action-icon action-plus@(s.Maint == 0 ? " disabled" : "")" title="put this server into rotation everywhere"></a><a href="#" data-server="@s.Server" data-action="@HAProxyAdmin.Action.Disable" class="action-icon action-minus@(s.Up + s.Down == 0 ? " disabled" : "")" title="take this server out of rotation everywhere"></a>
+                                        <a href="#" data-server="@s.Server" data-action="@HAProxyAdmin.Action.ready" class="action-icon action-plus@(s.Maint == 0 ? " disabled" : "")" title="put this server into rotation everywhere"></a><a href="#" data-server="@s.Server" data-action="@HAProxyAdmin.Action.drain" class="action-icon action-minus@(s.Up + s.Down == 0 ? " disabled" : "")" title="take this server out of rotation everywhere"></a>
                                     </td>
                                     <td>@status.IconSpan()</td>
                                     <td>@s.Server</td>
@@ -180,8 +180,8 @@
             @foreach (var g in groups)
             {
                 var combinedStats = g.AllStats.GroupBy(p => new { p.Description, p.Type, p.IsFrontend, p.IsChecked, p.IsServer }).ToList();
-                var anyUp = g.AllServers.Any(s => s.ProxyServerStatus != ProxyServerStatus.Maintenance);
-                var anyDown = g.AllServers.Any(s => s.ProxyServerStatus == ProxyServerStatus.Maintenance);
+                var anyUp = g.AllServers.Any(s => s.MonitorStatus != MonitorStatus.Maintenance);
+                var anyDown = g.AllServers.Any(s => s.MonitorStatus == MonitorStatus.Maintenance);
 
                 <tbody class="proxy-header @(g.GroupLinkName == Model.WatchProxy ? "watched-proxy" : "")">
                     <tr class="category-row @(g.GroupStatus.GetDescription())-row" title="Name: @g.GroupName">
@@ -189,7 +189,7 @@
                             <div>
                                 @if (Model.AdminMode)
                                 {
-                                    <a href="#" data-group="@g.GroupName" data-proxy="@g.ProxyName" data-action="@HAProxyAdmin.Action.Enable" class="action-icon action-plus@(anyDown ? "" : " disabled")" title="put this server into rotation for this backend"></a><a href="#" data-group="@g.GroupName" data-proxy="@g.ProxyName" data-action="@HAProxyAdmin.Action.Disable" class="action-icon action-minus@(anyUp ? "" : " disabled")" title="take this server out of rotation for this backend"></a>
+                                    <a href="#" data-group="@g.GroupName" data-proxy="@g.ProxyName" data-action="@HAProxyAdmin.Action.ready" class="action-icon action-plus@(anyDown ? "" : " disabled")" title="put this server into rotation for this backend"></a><a href="#" data-group="@g.GroupName" data-proxy="@g.ProxyName" data-action="@HAProxyAdmin.Action.drain" class="action-icon action-minus@(anyUp ? "" : " disabled")" title="take this server out of rotation for this backend"></a>
                                 }
                                 <a href="/haproxy?watch=@g.GroupLinkName.UrlEncode()@groupQS" class="node-name-link">@g.GroupStatus.IconSpan() @g.GroupName: @g.NiceName</a>
                             </div>
@@ -212,8 +212,8 @@
                         var stat = s.Key;
                         var proxyStatus = s.GetWorstStatus();
                         var latestStat = s.OrderBy(si => si.LastStatusChange).Last();
-                        var sAnyUp = s.Any(sp => sp.ProxyServerStatus != ProxyServerStatus.Maintenance);
-                        var sAnyDown = s.Any(sp => sp.ProxyServerStatus == ProxyServerStatus.Maintenance);
+                        var sAnyUp = s.Any(sp => sp.MonitorStatus != MonitorStatus.Maintenance);
+                        var sAnyDown = s.Any(sp => sp.MonitorStatus == MonitorStatus.Maintenance);
 
                         <tr class="proxy-@stat.Type.ToString() status @(proxyStatus.GetDescription())-row">
                             @if (Model.AdminMode)
@@ -221,7 +221,7 @@
                                 <td style="text-align: center;">
                                     @if (stat.IsServer)
                                     {
-                                        <a href="#" data-group="@g.Name" data-proxy="@g.ProxyName" data-server="@stat.Description" data-action="@HAProxyAdmin.Action.Enable" class="action-icon action-plus@(sAnyDown ? "" : " disabled")" title="put this server into rotation for this backend"></a><a href="#" data-group="@g.Name" data-proxy="@g.ProxyName" data-server="@stat.Description" data-action="@HAProxyAdmin.Action.Disable" class="action-icon action-minus@(sAnyUp ? "" : " disabled")" title="take this server out of rotation for this backend"></a>
+                                        <a href="#" data-group="@g.Name" data-proxy="@g.ProxyName" data-server="@stat.Description" data-action="@HAProxyAdmin.Action.ready" class="action-icon action-plus@(sAnyDown ? "" : " disabled")" title="put this server into rotation for this backend"></a><a href="#" data-group="@g.Name" data-proxy="@g.ProxyName" data-server="@stat.Description" data-action="@HAProxyAdmin.Action.drain" class="action-icon action-minus@(sAnyUp ? "" : " disabled")" title="take this server out of rotation for this backend"></a>
                                     }
                                 </td>
                             }

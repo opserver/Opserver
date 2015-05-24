@@ -447,6 +447,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                         return MonitorStatus.Warning;
 
                     case ProxyServerStatus.Maintenance:
+                    case ProxyServerStatus.Drain:
                         return MonitorStatus.Maintenance;
 
                     case ProxyServerStatus.Down:
@@ -495,6 +496,8 @@ namespace StackExchange.Opserver.Data.HAProxy
                     return ProxyServerStatus.Down;
                 case "MAINT":
                     return ProxyServerStatus.Maintenance;
+                case "DRAIN":
+                    return ProxyServerStatus.Drain;
                 // Server is not checked
                 case "no check":
                     return ProxyServerStatus.NotChecked;

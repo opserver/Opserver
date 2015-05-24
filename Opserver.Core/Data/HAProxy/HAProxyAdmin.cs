@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -18,6 +19,10 @@ namespace StackExchange.Opserver.Data.HAProxy
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s }));
             Parallel.ForEach(matchingServers, _parallelOptions, pair =>
             {
+                // HAProxy will not drain a downed server, do the next best thing: MAINT
+                if (action == Action.drain && pair.Server.ProxyServerStatus == ProxyServerStatus.Down)
+                    action = Action.maint;
+
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
             return result;
@@ -102,6 +107,33 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public enum Action
         {
+            [Description("Set State to READY")]
+            ready,
+            [Description("Set State to DRAIN")]
+            drain,
+            [Description("Set State to MAINT")]
+            maint,
+            [Description("Health: disable checks")]
+            dhlth,
+            [Description("Health: enable checks")]
+            ehlth,
+            [Description("Health: force UP")]
+            hrunn,
+            [Description("Health: force NOLB")]
+            hnolb,
+            [Description("Health: force DOWN")]
+            hdown,
+            [Description("Agent: disable checks")]
+            dagent,
+            [Description("Agent: enable checks")]
+            eagent,
+            [Description("Agent: force UP")]
+            arunn,
+            [Description("Agent: force DOWN")]
+            adown,
+            [Description("Kill Sessions")]
+            shutdown,
+
             Enable,
             Disable
         }

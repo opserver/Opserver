@@ -29,7 +29,7 @@ else
     <div class="server-list" style="padding-top: 10px;">
         <div class="node-summary">
             <div class="server-name">
-                <span title="Status: @s.Status.GetDescription()@if(s.IsUnwatched && s.UnwatchedUntil > DateTime.UtcNow) {<text> until @s.UnwatchedUntil.ToUniversalTime()</text> }">@s.IconSpan()</span>
+                <span title="Status: @s.Status.GetDescription()@if(s.IsUnwatched && s.UnwatchedUntil > DateTime.UtcNow) {<text> until @s.UnwatchedUntil.ToZuluTime()</text> }">@s.IconSpan()</span>
                 <b>
                     @s.PrettyName
                     @if(s.IsVM)

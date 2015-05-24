@@ -10,7 +10,7 @@
 }
 @helper PollNow(PollNode n, Cache c = null)
 {
-    <a href="#" class="reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c != null ? c.UniqueId : (Guid?)null)" title="Updated @n.LastPoll.ToUniversalTime()"><span class="image"></span><span class="js-text">Poll Now</span></a>
+    <a href="#" class="reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c != null ? c.UniqueId : (Guid?)null)" title="Updated @n.LastPoll.ToZuluTime()"><span class="image"></span><span class="js-text">Poll Now</span></a>
 }
 @helper PollNow(string nodeType)
 {
