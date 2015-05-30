@@ -2,18 +2,31 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi
     {
+        public PagerDutySchedule PrimarySchedule
+        {
+            get
+            {
+                var data = AllSchedules.SafeData(true);
+                // Many people likely have 1 schedule, or the primary is #1,
+                // so we make some assumptions here with no setting present.
+                return data.FirstOrDefault(s => s.Name == Settings.PrimaryScheduleName) ??
+                       data.FirstOrDefault();
+            }
+        }
 
         public string PrimaryScheduleId
         {
-            get { return AllSchedules.Data.FirstOrDefault(s => s.Name == Settings.PrimaryScheduleName).Id; }
+            get
+            {
+                var schedule = PrimarySchedule;
+                return schedule != null ? schedule.Id : "";
+            }
         }
         private Cache<List<PagerDutySchedule>> _schedules;
 
@@ -33,13 +46,31 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
+        private Cache<List<PagerDutyScheduleOverride>> _primaryScheduleOverrides;
+        public Cache<List<PagerDutyScheduleOverride>> PrimaryScheduleOverrides
+        {
+            get
+            {
+                var schedule = PrimarySchedule;
+                if (schedule == null) return null;
+                return _primaryScheduleOverrides ??
+                       (_primaryScheduleOverrides = new Cache<List<PagerDutyScheduleOverride>>()
+                       {
+                           CacheForSeconds = 10*60,
+                           UpdateCache = UpdateCacheItem(
+                               description: "Pager Duty Overrides",
+                               getData: PrimarySchedule.GetOverrides,
+                               logExceptions: true
+                               )
+                       });
+            }
+        }
+
         private List<PagerDutySchedule> GetAllSchedules()
         {
             return GetFromPagerDuty("schedules", getFromJson:
-                response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), Options.ISO8601).Schedules);
+                response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), JilOptions).Schedules);
         }
-
-
     }
 
     class PagerDutyScheduleResponse
@@ -56,5 +87,51 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Name { get; set; }
         [DataMember(Name="time_zone")]
         public string TimeZone { get; set; }
+
+        public string SetOverride(DateTime start, DateTime end, PagerDutyPerson pdPerson)
+        {
+            var overrideData = new
+            {
+                @override = new
+                {
+                    start,
+                    end,
+                    user_id = pdPerson.Id
+                }
+            };
+            var result = PagerDutyApi.Instance.GetFromPagerDuty("schedules/" + Id + "/overrides",
+                getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
+
+            PagerDutyApi.Instance.OnCallUsers.Poll(true);
+            PagerDutyApi.Instance.PrimaryScheduleOverrides.Poll(true);
+            return result;
+        }
+        
+        public List<PagerDutyScheduleOverride> GetOverrides()
+        {
+            string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
+                    until = DateTime.UtcNow.AddDays(1).ToString("s");
+
+            return PagerDutyApi.Instance.GetFromPagerDuty("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
+                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response.ToString(), PagerDutyApi.JilOptions).Overrides);
+        }
+    }
+
+    class PagerDutyScheduleOverrideResponse
+    {
+        [DataMember(Name = "total")]
+        public int Total { get; set; }
+        [DataMember(Name = "overrides")]
+        public List<PagerDutyScheduleOverride> Overrides { get; set; }
+    }
+
+    public class PagerDutyScheduleOverride
+    {
+        [DataMember(Name = "user")]
+        public PagerDutyPerson User { get; set; }
+        [DataMember(Name = "start")]
+        public DateTimeOffset StartTime { get; set; }
+        [DataMember(Name = "end")]
+        public DateTimeOffset EndTime { get; set; }
     }
 }

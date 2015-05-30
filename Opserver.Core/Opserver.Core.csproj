@@ -43,9 +43,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
     </Reference>
-    <Reference Include="Jil, Version=2.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Jil.2.7.0\lib\net45\Jil.dll</HintPath>
+    <Reference Include="Jil, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Jil.2.10.0\lib\net45\Jil.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="JsonFx">
       <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
@@ -58,9 +58,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Sigil, Version=4.3.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sigil.4.3.1\lib\net45\Sigil.dll</HintPath>
+    <Reference Include="Sigil, Version=4.4.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sigil.4.4.0\lib\net45\Sigil.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="SnmpSharpNet, Version=0.9.4.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

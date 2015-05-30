@@ -12,13 +12,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyLogEntry GetEventEntry(string id)
         {
             return GetFromPagerDuty("log_entries/" + id, getFromJson:
-                response => JSON.Deserialize<PagerDutyLogEntry>(response.ToString(), Options.ISO8601));
+                response => JSON.Deserialize<PagerDutyLogEntry>(response.ToString(), JilOptions));
         }
         
         public List<PagerDutyLogEntry> GetIncidentEntries(string id)
         {
             return  GetFromPagerDuty("incidents/" + id + "/log_entries", getFromJson:
-                response => JSON.Deserialize<LogEntries>(response.ToString(), Options.ISO8601).Logs);
+                response => JSON.Deserialize<LogEntries>(response.ToString(), JilOptions).Logs);
         }
 
         public class LogEntries

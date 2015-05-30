@@ -8,7 +8,7 @@
 {
     if (Model.CurrentPagerDutyPerson != null&& Current.User.IsGlobalAdmin)
     {
-        @:<a href="#" class="js_override_action">Take on Call</a> (1hr)
+        @:<span class="top-right-info"><a href="#" class="js_override_action">Take on Call</a> (1hr)</span>
     }
 }
 
@@ -95,89 +95,95 @@
         .header-blurb p {
             margin-bottom: 0.5em;
         }
+        .top-right-info {
+            margin-right: 0;
+        }
     </style>
 }
-<div class="dashboard-list refresh-group" data-name="PagerDuty">
-    @if(Current.Settings.PagerDuty.HeaderHtml.HasValue()) {
-        <div class="header-blurb">@Current.Settings.PagerDuty.HeaderHtml.AsHtml()</div>
-    }
-    <table class="striped-dashboard">
-        <tbody>
-        <tr class="category-row">
-            <th colspan="8">
-                <h3>
-                    On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()
-                </h3>
-            </th>
-        </tr>
-        <tr>
-            <th>Name</th>
-            <th>Level</th>
-            <th>Email</th>
-            <th>Phone</th>
-        </tr>
-        @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
+<div>
+    <div class="dashboard-list refresh-group" data-name="PagerDuty">
+        @if (Current.Settings.PagerDuty.HeaderHtml.HasValue())
         {
-            @Html.Partial("PagerDuty.OnCallRow", a)
+            <div class="header-blurb">@Current.Settings.PagerDuty.HeaderHtml.AsHtml()</div>
         }
-        </tbody>
-    </table>
+        <table class="striped-dashboard">
+            <tbody>
+                <tr class="category-row">
+                    <th colspan="8">
+                        <h3>
+                            On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()
+                        </h3>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Name</th>
+                    <th>Level</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                </tr>
+                @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
+                {
+                    @Html.Partial("PagerDuty.OnCallRow", a)
+                }
+            </tbody>
+        </table>
 
-    <div class="node-dashboard-separator half-width"></div>
+        <div class="node-dashboard-separator half-width"></div>
 
-    <table class="striped-dashboard">
-        <tbody>
-        <tr class="category-row">
-            <th colspan="8">
-                <h3>
-                    Incidents: Last @Model.CachedDays Days
-                    @Helpers.PollNow(PagerDutyApi.Instance, PagerDutyApi.Instance.Incidents)
-                </h3>
-            </th>
-        </tr>
-        <tr>
-            <th>Id</th>
-            <th></th>
-            <th>Service</th>
-            <th>Status</th>
-            <th>Summary</th>
-        </tr>
-        </tbody>
-        <tbody>
-        @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
-        {
-            <tr class="server-row @i.MonitorStatus.RowClass()" data-incident="@i.Id">
-                <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
-                <td>@i.CreationDate.ToRelativeTimeSpan()</td>
-                <td>@i.AffectedService.Name</td>
-                <td>
-                    <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
-                    @if (i.LastChangedBy != null)
-                    {
-                        if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
-                        {
-                            <span class="note">(@i.LastChangedBy.FullName)</span>
-                            @GetIncidentAction(i.Status)
-                        }
-                        else
-                        {
-                            <span class="note">(@i.LastChangedBy.FullName)</span>
-                        }
+        <table class="striped-dashboard">
+            <tbody>
+                <tr class="category-row">
+                    <th colspan="8">
+                        <h3>
+                            Incidents: Last @Model.CachedDays Days
+                            @Helpers.PollNow(PagerDutyApi.Instance)
+                        </h3>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Id</th>
+                    <th></th>
+                    <th>Service</th>
+                    <th>Status</th>
+                    <th>Summary</th>
+                </tr>
+            </tbody>
+            <tbody>
+                @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+                {
+                    <tr class="server-row @i.MonitorStatus.RowClass()" data-incident="@i.Id">
+                        <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
+                        <td>@i.CreationDate.ToRelativeTimeSpan()</td>
+                        <td>@i.AffectedService.Name</td>
+                        <td>
+                            <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
+                            @if (i.LastChangedBy != null)
+                            {
+                                if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                                {
+                                    <span class="note">(@i.LastChangedBy.FullName)</span>
+                                    @GetIncidentAction(i.Status)
+                                }
+                                else
+                                {
+                                    <span class="note">(@i.LastChangedBy.FullName)</span>
+                                }
 
-                    }
-                    else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
-                    {
-                        @GetIncidentAction(i.Status)
-                    }
-                </td>
-                <td>
-                    @if (i.SummaryData.Keys.Contains("subject"))
-                    {
-                        @i.SummaryData["subject"]
-                    }
-                </td>
-            </tr>
-        }
-        </tbody>
-    </table>
+                            }
+                            else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                            {
+                                @GetIncidentAction(i.Status)
+                            }
+                        </td>
+                        <td>
+                            @if (i.SummaryData.Keys.Contains("subject"))
+                            {
+                                @i.SummaryData["subject"]
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

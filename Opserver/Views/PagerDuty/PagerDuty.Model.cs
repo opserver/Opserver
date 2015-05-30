@@ -34,8 +34,7 @@ namespace StackExchange.Opserver.Views.PagerDuty
         public bool Refresh { get; set; }
 
         /*
-         * These arn't needed right now, but can be useful
-         * in the future.
+         * These aren't needed right now, but can be useful in the future.
          * I also suspect sending these as null breaks pagerduty
          */
         //[DataMember(Name="escalation_level")]
@@ -45,18 +44,4 @@ namespace StackExchange.Opserver.Views.PagerDuty
         //[DataMember(Name="escalation_policy")]
         //public string EscalationPolicy { get; set; }
     }
-
-    public class PagerDutyScheduleOverride
-    {
-        [DataMember(Name="user_id")]
-        public string UserID { get; set; }
-        [DataMember(Name="start")]
-        public DateTime? StartTime { get; set; }
-        [DataMember(Name="end")]
-        public DateTime? EndTime { get; set; }
-    }
-    
-
-    
-    
 }
