@@ -1,35 +1,4 @@
 #################
-## Eclipse
-#################
-
-*.pydevproject
-.project
-.metadata
-bin/
-tmp/
-*.tmp
-*.bak
-*.swp
-*~.nib
-local.properties
-.classpath
-.settings/
-.loadpath
-
-# External tool builders
-.externalToolBuilders/
-
-# Locally stored "Eclipse launch configurations"
-*.launch
-
-# CDT-specific
-.cproject
-
-# PDT-specific
-.buildpath
-
-
-#################
 ## Visual Studio
 #################
 
@@ -78,21 +47,10 @@ x64/
 *.log
 *.scc
 
-# Visual C++ cache files
-ipch/
-*.aps
-*.ncb
-*.opensdf
-*.sdf
-*.cachefile
-
 # Visual Studio profiler
 *.psess
 *.vsp
 *.vspx
-
-# Guidance Automation Toolkit
-*.gpState
 
 # ReSharper is a .NET coding add-in
 _ReSharper*/
@@ -104,54 +62,12 @@ _TeamCity*
 # DotCover is a Code Coverage Tool
 *.dotCover
 
-# NCrunch
-*.ncrunch*
-.*crunch*.local.xml
-
-# Installshield output folder
-[Ee]xpress/
-
-# DocProject is a documentation generator add-in
-DocProject/buildhelp/
-DocProject/Help/*.HxT
-DocProject/Help/*.HxC
-DocProject/Help/*.hhc
-DocProject/Help/*.hhk
-DocProject/Help/*.hhp
-DocProject/Help/Html2
-DocProject/Help/html
-
 # Click-Once directory
 publish/
 
 # Publish Web Output
 *.Publish.xml
 *.pubxml
-
-# NuGet Packages Directory
-## TODO: If you have NuGet Package Restore enabled, uncomment the next line
-#packages/
-
-# Windows Azure Build Output
-csx
-*.build.csdef
-
-# Windows Store app package directory
-AppPackages/
-
-# Others
-*.Cache
-ClientBin/
-[Ss]tyle[Cc]op.*
-~$*
-*~
-*.dbmdl
-*.[Pp]ublish.xml
-*.pfx
-*.publishsettings
-
-# RIA/Silverlight projects
-Generated_Code/
 
 # Backup & report files from converting an old project file to a newer
 # Visual Studio version. Backup files are not needed, because we have git ;-)
@@ -180,37 +96,6 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
-
-
-#############
-## Python
-#############
-
-*.py[co]
-
-# Packages
-*.egg
-*.egg-info
-dist/
-eggs/
-parts/
-var/
-sdist/
-develop-eggs/
-.installed.cfg
-
-# Installer logs
-pip-log.txt
-
-# Unit test / coverage reports
-.coverage
-.tox
-
-#Translations
-*.mo
-
-#Mr Developer
-.mr.developer.cfg
 
 .hg
 .hgignore
