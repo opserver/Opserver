@@ -51,6 +51,32 @@ In order to use Jira
 * Enable REST api on Jira
 
 [Jira action screenshots](http://imgur.com/a/XtW0j)
+
+PagerDuty Configuration
+------------
+You can connect OpServer to your pagerduty istallation.
+
+You need a PagerDuty ReadWrite API Key (RO will work for viewing but will throw errors when you do a RW action). 
+
+You need to set the following options in PagerDutySettings.json to get a minimally working setup: 
+
+  * APIKey: Your Pager Duty API Key
+  * APIBaseURL: https://<your_domain>.pagerduty.com/api/v1
+
+There is a username map option for when your email address does not match your OpServer login credentials. 
+
+For example George has an email of george@example.com, and a login of gsock. The plugin needs to be told how to map the email on the pagerduty side to the username on the opserver side. To setup a map to allow George to be discovered and associated correctly, you would do the following: 
+
+    "UserNameMap": [
+            {"OpServerName": "gsock", "EmailUser": "george"},
+        ],
+
+The UserNameMap is an array of OpserverName (login Name) and EmailUser (user part of email associated to PagerDuty Account). You can have as many User Name Mappings as you need.
+
+There is a HeaderHTML tag that lets you put arbitrary html above all content. You can use this to place notices, or messages for people who do not view the page all the time at the top. We use it to explain how to contact the on call Engineer. 
+
+
+
 Open Source Projects in Use
 ---------
 [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) by Marc Gravell  
