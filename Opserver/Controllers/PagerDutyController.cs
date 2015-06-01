@@ -1,7 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.Mvc;
-using Jil;
 using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -20,18 +18,32 @@ namespace StackExchange.Opserver.Controllers
         {
             get { return TopTabs.BuiltIn.PagerDuty; }
         }
-        
+
+        public PagerDutyPerson CurrentPagerDutyPerson
+        {
+            get
+            {
+                var pdMap = PagerDutyApi.Instance.Settings.UserNameMap.FirstOrDefault(
+                    un => un.OpServerName == Current.User.AccountName);
+                return pdMap != null
+                    ? PagerDutyApi.Instance.AllUsers.Data.Find(u => u.EmailUserName == pdMap.EmailUser)
+                    : null;
+            }
+        }
+
         [Route("pagerduty")]
         public ActionResult PagerDutyDashboard()
         {
             var i = PagerDutyApi.Instance;
             i.WaitForFirstPoll(5000);
+            
             var vd = new PagerDutyModel
             {
                 Schedule = i.GetSchedule(),
                 OnCallToShow = i.Settings.OnCallToShow,
                 CachedDays = i.Settings.DaysToCache,
-                AllIncidents = i.Incidents.SafeData(true)
+                AllIncidents = i.Incidents.SafeData(true),
+                CurrentPagerDutyPerson = CurrentPagerDutyPerson
             };
             return View("PagerDuty", vd);
         }
@@ -47,26 +59,6 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult PagerDutyFullEscalation()
         {
             return View("PagerDuty.EscFull", PagerDutyApi.Instance.GetSchedule());
-        }
-
-        [Route("pagerduty/action")]
-        public void PagerDutyActionIncident(string apiAction, string userid, string incident)
-        {
-            var activeIncident = new PagerDutyEditIncident
-            {
-                Id = incident,
-                Status = apiAction
-            };
-            var data = new PagerDutyIncidentModel
-            {
-                Incidents = new List<PagerDutyEditIncident>() {activeIncident},
-                RequesterId = userid
-            };
-            PagerDutyApi.Instance.GetFromPagerDuty("incidents",
-                getFromJson: response => response.ToString(), httpMethod: "PUT", data: data);
-
-            PagerDutyApi.Instance.Incidents.Poll(true);
-
         }
     }
 }

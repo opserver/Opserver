@@ -14,6 +14,7 @@
                                       Asterisk = {'*'},
                                       Percent = {'%'},
                                       Ampersand = {'&'},
+                                      AtSign = {'@'},
                                       Equal = {'='},
                                       Underscore = {'_'},
                                       NewLine = {'\n'},

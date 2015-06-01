@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 response => 
             {
                     var myResp =
-                        JSON.Deserialize<PagerDutyIncidentResponce>(response.ToString(), Options.ISO8601)
+                        JSON.Deserialize<PagerDutyIncidentResponce>(response.ToString(), JilOptions)
                             .Incidents.OrderBy(ic => ic.CreationDate)
                             .ToList();
                     return myResp;
@@ -43,11 +43,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
             return i;
         }
-
-        
     }
-
-
+    
     public class PagerDutyIncidentResponce
     {
         [DataMember(Name = "incidents")]
@@ -82,9 +79,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyService AffectedService { get; set; }
         [DataMember(Name = "number_of_escalations")]
         public int? NumberOfEscalations { get; set; }
-
-        
-
         
         public List<PagerDutyApi.PagerDutyLogEntry> IncidentLogs
         {

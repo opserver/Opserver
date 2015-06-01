@@ -1234,7 +1234,7 @@
             Memory allocated with LocalAllocate is released when the current method ends execution.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.DeclareLocal``1(System.String)">
+        <member name="M:Sigil.Emit`1.DeclareLocal``1(System.String,System.Boolean)">
             <summary>
             Declare a new local of the given type in the current method.
             
@@ -1243,9 +1243,13 @@
             
             Be aware that each local takes some space on the stack, inefficient use of locals
             could lead to StackOverflowExceptions at runtime.
+            
+            Jil will reuse local index on the stack if the corresponding Local instance has been disposed.
+            By default Jil will set reused locals to their default value, you can change this behavior
+            by passing initializeReused = false.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.DeclareLocal(System.Type,System.String)">
+        <member name="M:Sigil.Emit`1.DeclareLocal(System.Type,System.String,System.Boolean)">
             <summary>
             Declare a new local of the given type in the current method.
             
@@ -1254,9 +1258,13 @@
             
             Be aware that each local takes some space on the stack, inefficient use of locals
             could lead to StackOverflowExceptions at runtime.
+            
+            Jil will reuse local index on the stack if the corresponding Local instance has been disposed.
+            By default Jil will set reused locals to their default value, you can change this behavior
+            by passing initializeReused = false.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.DeclareLocal``1(Sigil.Local@,System.String)">
+        <member name="M:Sigil.Emit`1.DeclareLocal``1(Sigil.Local@,System.String,System.Boolean)">
             <summary>
             Declare a new local of the given type in the current method.
             
@@ -1265,9 +1273,13 @@
             
             Be aware that each local takes some space on the stack, inefficient use of locals
             could lead to StackOverflowExceptions at runtime.
+            
+            Jil will reuse local index on the stack if the corresponding Local instance has been disposed.
+            By default Jil will set reused locals to their default value, you can change this behavior
+            by passing initializeReused = false.
             </summary>
         </member>
-        <member name="M:Sigil.Emit`1.DeclareLocal(System.Type,Sigil.Local@,System.String)">
+        <member name="M:Sigil.Emit`1.DeclareLocal(System.Type,Sigil.Local@,System.String,System.Boolean)">
             <summary>
             Declare a new local of the given type in the current method.
             
@@ -1276,6 +1288,10 @@
             
             Be aware that each local takes some space on the stack, inefficient use of locals
             could lead to StackOverflowExceptions at runtime.
+            
+            Jil will reuse local index on the stack if the corresponding Local instance has been disposed.
+            By default Jil will set reused locals to their default value, you can change this behavior
+            by passing initializeReused = false.
             </summary>
         </member>
         <member name="M:Sigil.Emit`1.MakeReferenceAny``1">
@@ -1709,17 +1725,17 @@
             This method is meant for debugging purposes only.
             </summary>
         </member>
-        <member name="M:Sigil.EmitShorthand`1.DeclareLocal``1(System.String)">
-            <summary cref="M:Sigil.Emit`1.DeclareLocal``1(System.String)" />
+        <member name="M:Sigil.EmitShorthand`1.DeclareLocal``1(System.String,System.Boolean)">
+            <summary cref="M:Sigil.Emit`1.DeclareLocal``1(System.String, System.Boolean)" />
         </member>
-        <member name="M:Sigil.EmitShorthand`1.DeclareLocal``1(Sigil.Local@,System.String)">
-            <summary cref="M:Sigil.Emit`1.DeclareLocal``1(System.String)" />
+        <member name="M:Sigil.EmitShorthand`1.DeclareLocal``1(Sigil.Local@,System.String,System.Boolean)">
+            <summary cref="M:Sigil.Emit`1.DeclareLocal``1(Sigil.Local, System.String, System.Boolean)" />
         </member>
-        <member name="M:Sigil.EmitShorthand`1.DeclareLocal(System.Type,System.String)">
-            <summary cref="M:Sigil.Emit`1.DeclareLocal(System.Type, System.String)" />
+        <member name="M:Sigil.EmitShorthand`1.DeclareLocal(System.Type,System.String,System.Boolean)">
+            <summary cref="M:Sigil.Emit`1.DeclareLocal(System.Type, System.String, System.Boolean)" />
         </member>
-        <member name="M:Sigil.EmitShorthand`1.DeclareLocal(System.Type,Sigil.Local@,System.String)">
-            <summary cref="M:Sigil.Emit`1.DeclareLocal(System.Type, System.String)" />
+        <member name="M:Sigil.EmitShorthand`1.DeclareLocal(System.Type,Sigil.Local@,System.String,System.Boolean)">
+            <summary cref="M:Sigil.Emit`1.DeclareLocal(System.Type, Sigil.Local, System.String, System.Boolean)" />
         </member>
         <member name="M:Sigil.EmitShorthand`1.DefineLabel(System.String)">
             <summary cref="M:Sigil.Emit`1.DefineLabel(System.String)" />

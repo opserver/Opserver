@@ -18,11 +18,14 @@ namespace StackExchange.Opserver
         public int DaysToCache { get; set; }
         public string HeaderHtml { get; set; }
 
+        public string PrimaryScheduleName { get; set; }
+
         public PagerDutySettings()
         {
             // Defaults
             OnCallToShow = 2;
             DaysToCache = 60;
+            UserNameMap = new List<EmailMapping>();
         }
 
 

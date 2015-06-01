@@ -10,6 +10,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi : SinglePollNode<PagerDutyApi>
     {
+        internal static Options JilOptions = new Options(
+            dateFormat: DateTimeFormat.ISO8601,
+            unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC
+            );
+
         public PagerDutySettings Settings { get; internal set; }
         public override string NodeType { get { return "PagerDutyAPI"; } }
         public override int MinSecondsBetweenPolls { get { return 3600; } }
@@ -48,7 +53,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
             public const string Triggered = "triggered";
             public const string Acknowledged = "acknowledged";
             public const string Resolved = "resolved";
-
         }
 
         public Action<Cache<T>> GetFromPagerDuty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
@@ -87,7 +91,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     
                     if (data != null)
                     {
-                        var stringData = JSON.Serialize(data);
+                        var stringData = JSON.Serialize(data, JilOptions);
                         req.ContentType = "application/json";
                         var byteData = new ASCIIEncoding().GetBytes(stringData);
                         req.ContentLength = byteData.Length;
@@ -154,7 +158,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private List<PagerDutyPerson> GetAllUsers()
         {
             return GetFromPagerDuty("users/", getFromJson:
-                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
+                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users);
         }
     }
 }

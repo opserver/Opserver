@@ -11,6 +11,8 @@
         </member>
         <member name="F:Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch">
             <summary>
+            Obsolete: Use MicrosoftStyleMillisecondsSinceUnixEpoch instead
+            
             DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
             number of milliseconds since the unix epoch (January 1st, 1970 UTC).
             
@@ -54,6 +56,32 @@
                 P123DT11H30M2.3S
             </summary>
         </member>
+        <member name="F:Jil.DateTimeFormat.RFC1123">
+            <summary>
+            DateTimes will be formatted as "ddd, dd MMM yyyy HH:mm:ss GMT" where
+            ddd is the abbreviation of a day, dd is the day (starting at 01), MMM is the abbreviation of a month,
+            yyyy is the year, HH is the hour (starting at 00, continuing to 24), mm is the minute (start at 00),
+            and ss is the second (starting at 00), and GMT is a literal indicating the timezone (always GMT).
+            
+            Examples:
+                Thu, 10 Apr 2008 13:30:00 GMT
+                Tue, 10 Mar 2015 00:14:34 GMT
+                
+            TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch">
+            <summary>
+            DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
+            number of milliseconds since the unix epoch (January 1st, 1970 UTC).
+            See: https://msdn.microsoft.com/en-us/library/bb299886.aspx
+            
+            Example:
+                "\/Date(628318530718)\/"
+                
+            TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+            </summary>
+        </member>
         <member name="T:Jil.DeserializationException">
             <summary>
             An exception thrown when Jil encounters an error when deserializing a stream.
@@ -70,6 +98,14 @@
         <member name="P:Jil.DeserializationException.SnippetAfterError">
             <summary>
             A snippet of text immediately after an error occurred.
+            
+            This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
+            and throw an exception is an implementation detail.
+            </summary>
+        </member>
+        <member name="P:Jil.DeserializationException.EndedUnexpectedly">
+            <summary>
+            Whether or not the TextReader ended sooner than Jil expected.
             
             This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
             and throw an exception is an implementation detail.
@@ -289,7 +325,7 @@
             Configuration options for Jil serialization, passed to the JSON.Serialize method.
             </summary>
         </member>
-        <member name="M:Jil.Options.#ctor(System.Boolean,System.Boolean,System.Boolean,Jil.DateTimeFormat,System.Boolean)">
+        <member name="M:Jil.Options.#ctor(System.Boolean,System.Boolean,System.Boolean,Jil.DateTimeFormat,System.Boolean,Jil.UnspecifiedDateTimeKindBehavior)">
             <summary>
             Configuration for Jil serialization options.
             
@@ -299,7 +335,6 @@
               jsonp - whether or not the serialized json should be valid for use with JSONP
               dateFormat - the style in which to serialize DateTimes and TimeSpans
               includeInherited - whether or not to serialize members declared by an objects base types
-              allowHashFunction - whether or not Jil should try to use hashes instead of strings when deserializing object members, malicious content may be able to force member collisions if this is enabled
             </summary>
         </member>
         <member name="M:Jil.Options.ToString">
@@ -317,6 +352,23 @@
         <member name="M:Jil.Options.Equals(System.Object)">
             <summary>
             Returns true if two Options are equal, and false otherwise
+            </summary>
+        </member>
+        <member name="T:Jil.UnspecifiedDateTimeKindBehavior">
+            <summary>
+            Specifies what to convert a DateTime to if it has DateTimeKind.Unspecified as it's Kind.
+            </summary>
+        </member>
+        <member name="F:Jil.UnspecifiedDateTimeKindBehavior.IsLocal">
+            <summary>
+            Indicates that the DateTime is actually in the Local time.
+            
+            This is the default.
+            </summary>
+        </member>
+        <member name="F:Jil.UnspecifiedDateTimeKindBehavior.IsUTC">
+            <summary>
+            Indicates that the DateTime is actually in UTC time.
             </summary>
         </member>
         <member name="M:Jil.Common.Utils.GetAnonymousNameToConstructorMap(System.Type)">

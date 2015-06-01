@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using Jil;
@@ -42,7 +41,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private List<PagerDutyPerson> GetOnCallUsers()
         {
             return GetFromPagerDuty("users/on_call?include[]=contact_methods", getFromJson:
-                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), Options.ISO8601).Users);
+                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users);
         }
 
         private List<OnCallAssignment> _scheduleCache;
@@ -52,13 +51,15 @@ namespace StackExchange.Opserver.Data.PagerDuty
             if (_scheduleCache == null)
             {
                 var result = new List<OnCallAssignment>();
+                var overrides = PrimaryScheduleOverrides.SafeData(true);
                 if (!OnCallUsers.HasData()) return result;
                 foreach (var p in OnCallUsers.Data)
                 {
                     if (p.Schedule == null) continue;
                     for (var i = 0; i < p.Schedule.Count; i++)
                     {
-                        result.Add(new OnCallAssignment { Person = p, Schedule = p.Schedule[i] });
+                        var isOverride = overrides.Any(o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == p.Id);
+                        result.Add(new OnCallAssignment { Person = p, Schedule = p.Schedule[i], IsOverride = isOverride });
                     }
                 }
                 result.Sort((a, b) => a.EscalationLevel.GetValueOrDefault(int.MaxValue).CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
@@ -79,6 +80,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         public PagerDutyPerson Person { get; set; }
         public OnCall Schedule { get; set; }
+        public bool IsOverride { get; set; }
 
         public int? EscalationLevel
         {
@@ -174,7 +176,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private string _emailusername;
         public string EmailUserName
         {
-            get { return _emailusername = (_emailusername ?? new MailAddress(Email).User); }
+            get
+            {
+                return _emailusername = (_emailusername ?? (Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : ""));
+            }
         }
     }
 
@@ -198,6 +203,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     case "SMS":
                     case "phone":
                         // I'm sure no one outside the US uses this...
+                        // we will have to fix this soon
                         return Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
                     default:
                         return Address;

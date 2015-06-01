@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 using StackExchange.Opserver.Data.PagerDuty;
 
@@ -12,6 +13,7 @@ namespace StackExchange.Opserver.Views.PagerDuty
 
         public List<PagerDutyIncident> AllIncidents { get; set; }
         public bool Refresh { get; set; }
+        public PagerDutyPerson CurrentPagerDutyPerson { get; set; }
     }
 
     public class PagerDutyIncidentModel
@@ -32,8 +34,7 @@ namespace StackExchange.Opserver.Views.PagerDuty
         public bool Refresh { get; set; }
 
         /*
-         * These arn't needed right now, but can be useful
-         * in the future.
+         * These aren't needed right now, but can be useful in the future.
          * I also suspect sending these as null breaks pagerduty
          */
         //[DataMember(Name="escalation_level")]
@@ -43,8 +44,4 @@ namespace StackExchange.Opserver.Views.PagerDuty
         //[DataMember(Name="escalation_policy")]
         //public string EscalationPolicy { get; set; }
     }
-    
-
-    
-    
 }
