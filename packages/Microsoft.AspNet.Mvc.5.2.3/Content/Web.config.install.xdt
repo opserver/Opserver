@@ -27,7 +27,7 @@
     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
       <dependentAssembly xdt:Transform="Insert">
         <assemblyIdentity name="System.Web.Mvc" publicKeyToken="31bf3856ad364e35"  />
-        <bindingRedirect oldVersion="1.0.0.0-5.2.2.0" newVersion="5.2.2.0" />
+        <bindingRedirect oldVersion="1.0.0.0-5.2.3.0" newVersion="5.2.3.0" />
       </dependentAssembly>
     </assemblyBinding>
   </runtime>
