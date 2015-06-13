@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Jil;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
 
@@ -23,12 +24,13 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Number of consecutive cache fetch failures before backing off of polling the entire node for <see cref="BackoffDuration"/>
         /// </summary>
-        protected int FailsBeforeBackoff { get { return 3; } }
+        protected int FailsBeforeBackoff => 3;
+
         /// <summary>
         /// Length of time to backoff once <see cref="FailsBeforeBackoff"/> is hit
         /// </summary>
-        protected virtual TimeSpan BackoffDuration { get { return TimeSpan.FromSeconds(30); } }
-        
+        protected virtual TimeSpan BackoffDuration => TimeSpan.FromSeconds(30);
+
         /// <summary>
         /// Indicates if this was added to the global poller list, if false that means this is a duplicate
         /// and should not be used anywhere, you lost the race, let it go.
@@ -88,14 +90,11 @@ namespace StackExchange.Opserver.Data
                         if (!PreviousMonitorStatus.HasValue || PreviousMonitorStatus != CachedMonitorStatus)
                         {
                             var handler = MonitorStatusChanged;
-                            if (handler != null)
+                            handler?.Invoke(this, new MonitorStatusArgs
                             {
-                                handler(this, new MonitorStatusArgs
-                                {
-                                    OldMonitorStatus = PreviousMonitorStatus.Value,
-                                    NewMonitorStatus = CachedMonitorStatus.Value
-                                });
-                            }
+                                OldMonitorStatus = PreviousMonitorStatus.Value,
+                                NewMonitorStatus = CachedMonitorStatus.Value
+                            });
                             PreviousMonitorStatus = CachedMonitorStatus;
                         }
                     }
@@ -115,15 +114,12 @@ namespace StackExchange.Opserver.Data
         protected int PollFailsInaRow = 0;
 
         protected volatile bool _isPolling;
-        public bool IsPolling { get { return _isPolling; } }
+        public bool IsPolling => _isPolling;
 
         public AutoResetEvent FirstPollRun = new AutoResetEvent(false);
 
         protected Task _pollTask;
-        public virtual string PollTaskStatus
-        {
-            get { return _pollTask != null ? _pollTask.Status.ToString() : "Not running"; }
-        }
+        public virtual string PollTaskStatus => _pollTask?.Status.ToString() ?? "Not running";
 
         public virtual void Poll(bool force = false, bool sync = false)
         {
@@ -177,7 +173,7 @@ namespace StackExchange.Opserver.Data
                         Interlocked.Add(ref polled, pollerResult);
                     });
                 LastPoll = DateTime.UtcNow;
-                if (Polled != null) Polled(this, new PollResultArgs {Polled = polled});
+                Polled?.Invoke(this, new PollResultArgs {Polled = polled});
                 if (FirstPollRun != null)
                 {
                     FirstPollRun.Set();
@@ -218,7 +214,7 @@ namespace StackExchange.Opserver.Data
                 }
                 using (MiniProfiler.Current.Step(description))
                 {
-                    if (CacheItemFetching != null) CacheItemFetching(this, EventArgs.Empty);
+                    CacheItemFetching?.Invoke(this, EventArgs.Empty);
                     try
                     {
                         using (MiniProfiler.Current.Step("Data Fetch"))
@@ -231,10 +227,16 @@ namespace StackExchange.Opserver.Data
                     }
                     catch (Exception e)
                     {
+                        var deserializationException = e as DeserializationException;
+                        if (deserializationException != null)
+                        {
+                            e.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
+                             .AddLoggedData("Position", deserializationException.Position.ToString())
+                             .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
+                        }
                         if (logExceptions)
                         {
-                            if (addExceptionData != null)
-                                addExceptionData(e);
+                            addExceptionData?.Invoke(e);
                             Current.LogException(e);
                         }
                         cache.LastPoll = DateTime.UtcNow;
@@ -246,7 +248,7 @@ namespace StackExchange.Opserver.Data
 
                         if (e.InnerException != null) cache.ErrorMessage += "\n" + e.InnerException.Message;
                     }
-                    if (CacheItemFetched != null) CacheItemFetched(this, EventArgs.Empty);
+                    CacheItemFetched?.Invoke(this, EventArgs.Empty);
                     CachedMonitorStatus = null;
                 }
                 if (OpserverProfileProvider.EnablePollerProfiling)

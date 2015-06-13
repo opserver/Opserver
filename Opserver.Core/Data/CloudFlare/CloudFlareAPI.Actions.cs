@@ -1,37 +1,43 @@
-﻿using System.Collections.Specialized;
+﻿using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Text.RegularExpressions;
+using Jil;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class CloudFlareAPI
     {
-        public void PurgeAllFiles(Zone zone)
-        {
-            if (zone == null) return;
-
-            var nvc = new NameValueCollection {{"v", "1"}};
-
-            GetFromCloudFlare("fpurge_ts", CheckForSuccess, zone.ZoneName, nvc);
-        }
-
-        public void PurgeFile(string url)
+        public bool PurgeFile(string url)
         {
             var zone = GetZoneFromUrl(url);
-            if (zone == null) return;
+            if (zone == null) return false;
 
             var otherUrl = url.StartsWith("http:")
                 ? Regex.Replace(url, "^http:", "https:")
                 : Regex.Replace(url, "^https:", "http:");
 
-            PurgeFile(zone, url);
-            PurgeFile(zone, otherUrl);
+            return zone.PurgeFiles(new[] {url, otherUrl});
         }
+    }
 
-        private bool PurgeFile(Zone zone, string url)
+    public static partial class ZoneExtensions
+    {
+        private static readonly NameValueCollection _purgeAllParams = new NameValueCollection
         {
-            var nvc = new NameValueCollection { { "url", url } };
+            {"purge_everything", "true"}
+        };
 
-            return GetFromCloudFlare("zone_file_purge", CheckForSuccess, zone.ZoneName, nvc);
+        public static bool PurgeAllFiles(this CloudFlareZone zone)
+        {
+            var result = CloudFlareAPI.Instance.Post<CloudFlareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
+            return result.Success;
+        }
+        public static bool PurgeFiles(this CloudFlareZone zone, IEnumerable<string> files)
+        {
+            var nvc = new NameValueCollection {{"files", JSON.Serialize(files)}};
+
+            var result = CloudFlareAPI.Instance.Delete<CloudFlareResult>($"zones/{zone.Id}/purge_cache", nvc);
+            return result.Success;
         }
     }
 }

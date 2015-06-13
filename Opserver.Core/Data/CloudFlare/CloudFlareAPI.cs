@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
-using Newtonsoft.Json.Linq;
+using Jil;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class CloudFlareAPI : SinglePollNode<CloudFlareAPI>
     {
         public CloudFlareSettings Settings { get; internal set; }
-        public string Email { get { return Settings.Email; } }
-        public string APIKey { get { return Settings.APIKey; } }
+        public string Email => Settings.Email;
+        public string APIKey => Settings.APIKey;
 
-        public override string NodeType { get { return "CloudFlareAPI"; } }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
+        public override string NodeType => "CloudFlareAPI";
+        public override int MinSecondsBetweenPolls => 5;
+
+        private static Options JilOptions = new Options(dateFormat: DateTimeFormat.ISO8601);
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -33,57 +35,67 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = Current.Settings.CloudFlare;
         }
 
-        public Action<Cache<T>> GetFromCloudFlare<T>(string opName, Func<CloudFlareAPI, T> getFromConnection) where T : class
+        public Action<Cache<T>> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, T> get) where T : class
         {
-            return UpdateCacheItem("CloudFlare - API: " + opName, () => getFromConnection(this));
+            return UpdateCacheItem("CloudFlare - API: " + opName, () => get(this), logExceptions: true);
         }
+        
+        const string apiBaseUrl = "https://api.cloudflare.com/client/v4/";
 
         /// <summary>
-        /// If you just want to check the CloudFlare response for result: success
+        /// Gets a response from the CloudFlare API via GET
         /// </summary>
-        private Func<string, bool> CheckForSuccess = response =>
+        /// <param name="path">The API path to call, e.g. zones</param>
+        /// <param name="values">Variables to pass into this method</param>
+        /// <returns>The CloudFlare API response</returns>
+        public T Get<T>(string path, NameValueCollection values = null)
         {
-            var parsedResponse = JObject.Parse(response);
-            return parsedResponse["result"].Value<string>() == "success";
-        };
+            using (var wc = GetWebClient())
+            {
+                var url = new Uri($"{apiBaseUrl}{path}{(values != null ? "?" + values : "")}");
+                var rawResult = wc.DownloadString(url);
+                return JSON.Deserialize<CloudFlareResult<T>>(rawResult, JilOptions).Result;
+            }
+        }
 
         /// <summary>
         /// Gets a response from the CloudFlare API via POST
         /// </summary>
-        /// <param name="action">The action to call</param>
-        /// <param name="getFromJson">Function to get the object from Json</param>
-        /// <param name="zone">The zone to perform against, if relevant</param>
-        /// <param name="variables">Variables to pass into this param beyond the email, token and action</param>
-        /// <param name="start">The start index to pull</param>
+        /// <param name="path">The API path to call, e.g. zones</param>
+        /// <param name="values">Variables to pass into this method</param>
         /// <returns>The CloudFlare API response</returns>
-        /// <remarks>
-        /// This totally doesn't handle paging yet, ignoring until CloudFlare API v2 unless we need it
-        /// </remarks>
-        public T GetFromCloudFlare<T>(string action, Func<string, T> getFromJson, string zone = null, NameValueCollection variables = null, int start = 0)
-        {
-            const string url = "https://www.cloudflare.com/api_json.html";
-            using (var wb = new WebClient())
-            {
-                var data = new NameValueCollection();
-                if (variables != null)
-                {
-                    foreach (var k in variables.AllKeys)
-                    {
-                        data[k] = variables[k];
-                    }
-                }
-                data["email"] = Email;
-                data["tkn"] = APIKey;
-                data["a"] = action;
-                if (zone.HasValue())
-                    data["z"] = zone;
-                if (start > 0)
-                    data["o"] = start.ToString();
+        public T Post<T>(string path, NameValueCollection values = null) => Action<T>("POST", path, values);
+        
+        /// <summary>
+        /// Gets a response from the CloudFlare API via DELETE
+        /// </summary>
+        /// <param name="path">The API path to call, e.g. zones</param>
+        /// <param name="values">Variables to pass into this method</param>
+        /// <returns>The CloudFlare API response</returns>
+        public T Delete<T>(string path, NameValueCollection values = null) => Action<T>("DELETE", path, values);
 
-                var response = wb.UploadValues(url, "POST", data);
-                var responeString = Encoding.Default.GetString(response);
-                return getFromJson(responeString);
+        private T Action<T>(string method, string path, NameValueCollection values = null)
+        {
+            using (var wc = GetWebClient())
+            {
+                var url = new Uri($"{apiBaseUrl}{path}");
+                var rawResult = wc.UploadValues(url, method, values);
+                var resultString = Encoding.ASCII.GetString(rawResult);
+                return JSON.Deserialize<T>(resultString, JilOptions);
             }
+        }
+
+        private WebClient GetWebClient(string contentType = "application/json")
+        {
+            return new WebClient
+            {
+                Headers =
+                {
+                    ["X-Auth-Email"] = Email,
+                    ["X-Auth-Key"] = APIKey,
+                    ["Content-Type"] = contentType
+                }
+            };
         }
 
         public override string ToString()

@@ -1,4 +1,7 @@
-﻿@using StackExchange.Opserver.Data.CloudFlare
+﻿@using System.Collections.Generic
+@using System.Linq
+@using System.Net
+@using StackExchange.Opserver.Data.CloudFlare
 @using StackExchange.Opserver.Views.CloudFlare
 @model DashboardModel
 @{
@@ -7,7 +10,7 @@
     var zones = zCache.SafeData(true);
     var dcs = DataCenters.All;
     var showDCs = dcs.Any();
-    var hiddenRecordTypes = new List<string> {"TXT"};
+    var hiddenRecordTypes = new List<DNSRecordType> {DNSRecordType.TXT};
 }
 <style>
      .cloudflare-tabular table {
@@ -45,15 +48,15 @@
             @foreach (var z in zones)
             {
                 <tr>
-                    <td>@(z.IsGood ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan()) <b>@z.ZoneName</b></td>
+                    <td>@(z.MonitorStatus.IconSpan()) <b>@z.Name</b></td>
                     <td>
-                        @if (z.NameServerVanityMap != null && z.NameServerVanityMap.Count > 0)
+                        @if (z.VanityNameServers != null && z.VanityNameServers.Count > 0)
                         {
-                            @:@string.Join(", ", z.NameServerVanityMap.Keys)
+                            @:@string.Join(", ", z.VanityNameServers)
                         }
-                        else if (z.DNSServers != null)
+                        else if (z.NameServers != null)
                         {
-                            @:@string.Join(", ", z.DNSServers)
+                            @:@string.Join(", ", z.NameServers)
                         }
                     </td>
                     @if (showDCs)
@@ -82,7 +85,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach (var r in records.OrderBy(r => r.Type).ThenBy(r => r.ZoneName).ThenBy(r => r.FullyQualified))
+            @foreach (var r in records.OrderBy(r => r.Type).ThenBy(r => r.ZoneName).ThenBy(r => r.Name))
             {
                 if (hiddenRecordTypes.Contains(r.Type))
                 {
@@ -93,12 +96,12 @@
                 var masked = rootIPs != null ? DataCenters.GetMasked(rootIPs).ToList() : null;
                 var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
                 <tr>
-                    <td class="@(r.Type == "CNAME" ? "warning" : "bold")">@r.Type</td>
-                    <td><b>@r.DisplayName</b>@if (r.DisplayName != r.ZoneName){<span class="note">.@r.ZoneName</span>}</td>
+                    <td class="@(r.Type == DNSRecordType.CNAME ? "warning" : "bold")">@r.Type</td>
+                    <td><b>@(r.Name != r.ZoneName ? r.Name.Replace(r.ZoneName, "") : r.Name)</b>@if (r.Name != r.ZoneName){<span class="note">.@r.ZoneName</span>}</td>
                     <td>
                         @switch (r.Type)
                         {
-                            case "CNAME":
+                            case DNSRecordType.CNAME:
                                 @r.Content
                                 if (rootIPs != null && rootIPs.Any())
                                 {
@@ -110,9 +113,9 @@
                                 break;
                         }
                     </td>
-                    <td>@(r.AutoTTL ? "Auto" : r.TTL)</td>
-                    <td>@(r.IsCloudOn ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan())</td>
-                    <td class="@(r.IsCloudOn ? "all-good" : "")">
+                    <td>@(r.IsAutoTTL ? "Auto" : $"{r.TTL}s")</td>
+                    <td>@(r.Proxied ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan())</td>
+                    <td class="@(r.Proxied ? "all-good" : "")">
                         @recordDCs
                     </td>
                 </tr>

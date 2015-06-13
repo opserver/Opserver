@@ -114,6 +114,7 @@
       <DependentUpon>CloudFlareAPI.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\CloudFlare\CloudFlareAPI.cs" />
+    <Compile Include="Data\CloudFlare\CloudFlareResponse.cs" />
     <Compile Include="Data\CloudFlare\DataCenters.cs" />
     <Compile Include="Data\CloudFlare\RailgunInstance.Cache.cs">
       <DependentUpon>RailgunInstance.cs</DependentUpon>
