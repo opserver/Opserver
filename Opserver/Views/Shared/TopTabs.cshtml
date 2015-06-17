@@ -55,6 +55,12 @@
                 var recentExceptionCount = ExceptionStores.TotalRecentExceptionCount;
                 <a class="@GetClass(MainTab.Exceptions, ExceptionStores.MonitorStatus.GetDescription())" href="/exceptions" title="@exceptionCount.Pluralize("exception"), @recentExceptionCount recent"><span class="count exception-count">@(exceptionCount.ToComma())</span> @exceptionCount.Pluralize("Exception", false)</a>
             }
+            @if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
+            {
+                var issueCount = ExceptionStores.TotalIssueCount;
+                var recentIssueCount = ExceptionStores.TotalRecentIssueCount;
+                <a class="@GetClass(MainTab.Issues, ExceptionStores.MonitorStatus.GetDescription())" href="/issues" title="@issueCount.Pluralize("issue"), @recentIssueCount recent"><span class="count exception-count">@(issueCount.ToComma())</span> @issueCount.Pluralize("Issue", false)</a>
+            }
             @if (s.HAProxy.Enabled && s.HAProxy.HasAccess())
             {
                 <a class="@GetClass(MainTab.HAProxy, HAProxyGroup.AllGroups.GetWorstStatus().GetDescription())" href="/haproxy">HAProxy</a>

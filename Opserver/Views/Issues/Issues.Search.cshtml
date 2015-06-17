@@ -3,11 +3,11 @@
     var log = Model.SelectedLog;
     var exceptions = Model.Errors;
 
-    this.SetPageTitle(Model.ExceptionTitle);
-    this.SetMainTab(MainTab.Exceptions);
+    this.SetPageTitle(Model.IssueTitle);
+    this.SetMainTab(MainTab.Issues);
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
                       Model.Search,
-                      "/exceptions/search",
+                      "/issues/search",
                       log.HasValue() ? new Dictionary<string, string> { { "log", log } } : null);
 }
 @section head {
@@ -17,15 +17,15 @@
 }
 <div class="top-section error-bread-top">
     <div class="error-header">
-        <a href="/exceptions">Exceptions</a> > @if(Model.SelectedLog.HasValue()){<text><a href="/exceptions?log=@Model.SelectedLog.UrlEncode()">@Model.SelectedLog</a> > </text>}Search results for '@Model.Search'
+        <a href="/issues">Exceptions</a> > @if(Model.SelectedLog.HasValue()){<text><a href="/issues?log=@Model.SelectedLog.UrlEncode()">@Model.SelectedLog</a> > </text>}Search results for '@Model.Search'
         @if (!Model.ShowDeleted)
         {
-        <span class="top-link">(<a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">Include Deleted</a>)</span>
+        <span class="top-link">(<a href="/issues/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">Include Deleted</a>)</span>
         }
     </div>
 </div>
 <div class="bottom-section">
-    @Html.Partial("Exceptions.Table", Model)
+    @Html.Partial("Issues.Table", Model)
     <div class="no-content@(exceptions.Any() ? " hidden" : "")">
     @if (Model.ShowDeleted)
     {
@@ -33,7 +33,7 @@
     } 
     else 
     {                
-        @:No current exceptions found, <a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">would you like to search deleted errors?</a>
+        @:No current exceptions found, <a href="/issues/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">would you like to search deleted errors?</a>
     }
     </div>
 </div>

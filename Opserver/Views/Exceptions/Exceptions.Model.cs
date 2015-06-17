@@ -35,9 +35,10 @@ namespace StackExchange.Opserver.Views.Exceptions
 
         public bool ShowDeleted { get; set; }
         public bool ShowAll { get { return SelectedLog.IsNullOrEmpty(); } }
-        private int? _totalCount;
-        public int TotalCount { get { return _totalCount ?? (_totalCount = Applications.Where(a => ShowAll || a.Name == SelectedLog).Sum(a => a.ExceptionCount)).Value; } }
-        public string Title
+        private int? _totalExceptionCount, _totalIssueCount;
+        public int TotalExceptionCount { get { return _totalExceptionCount ?? (_totalExceptionCount = Applications.Where(a => ShowAll || a.Name == SelectedLog).Sum(a => a.ExceptionCount)).Value; } }
+        public int TotalIssueCount { get { return _totalIssueCount ?? (_totalIssueCount = Applications.Where(a => ShowAll || a.Name == SelectedLog).Sum(a => a.IssueCount)).Value; } }
+        public string ExceptionTitle
         {
             get
             {
@@ -47,9 +48,25 @@ namespace StackExchange.Opserver.Views.Exceptions
                 }
                 if (Exception == null)
                 {
-                    return TotalCount.Pluralize((SelectedLog + " Exception").Trim());
+                    return TotalExceptionCount.Pluralize((SelectedLog + " Exception").Trim());
                 }
                 return string.Format("Most recent {0} similar entries ({1} exceptions) from {2}", Errors.Count, Errors.Sum(e => e.DuplicateCount).ToComma(), SelectedLog);
+            }
+        }
+
+        public string IssueTitle
+        {
+            get
+            {
+                if (Search.HasValue())
+                {
+                    return string.Format("{0} Search results ({1} exceptions) for '{2}'{3}", Errors.Count, Errors.Sum(e => e.DuplicateCount).ToComma(), Search, SelectedLog.HasValue() ? " in " + SelectedLog : "");
+                }
+                if (Exception == null)
+                {
+                    return TotalIssueCount.Pluralize((SelectedLog + " Issue").Trim());
+                }
+                return string.Format("Most recent {0} similar entries ({1} issues) from {2}", Errors.Count, Errors.Sum(e => e.DuplicateCount).ToComma(), SelectedLog);
             }
         }
     }

@@ -26,7 +26,9 @@ namespace StackExchange.Opserver.Data.Exceptions
             get
             {
                 yield return Applications;
+                yield return Issues;
                 yield return ErrorSummary;
+                yield return IssueSummary;
             }
         }
 
@@ -83,9 +85,55 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 		From Exceptions
 		Where DeletionDate Is Null) er
 	   Inner Join Exceptions e On er.Id = e.Id
- Where er.r <= @PerAppSummaryCount
+ Where er.r <= @PerAppSummaryCount And
+ Type Not In @Filters
  Order By CreationDate Desc",
-                      new { PerAppSummaryCount }, commandTimeout: QueryTimeout).ToList())
+                      new { PerAppSummaryCount, Filters = Settings.IssuesExceptionFilter }, commandTimeout: QueryTimeout).ToList())
+                });
+            }
+        }
+
+        private Cache<List<Error>> _issueSummary;
+        public Cache<List<Error>> IssueSummary
+        {
+            get
+            {
+                return _issueSummary ?? (_issueSummary = new Cache<List<Error>>
+                {
+                    CacheForSeconds = Settings.PollIntervalSeconds,
+                    UpdateCache = UpdateFromSql("Error-Summary-List",
+                        conn => conn.Query<Error>(@"
+Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
+  From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
+		From Exceptions
+		Where DeletionDate Is Null) er
+	   Inner Join Exceptions e On er.Id = e.Id
+ Where er.r <= @PerAppSummaryCount And
+ Type In @Filters
+ Order By CreationDate Desc",
+                      new { PerAppSummaryCount, Filters = Settings.IssuesExceptionFilter }, commandTimeout: QueryTimeout).ToList())
+                });
+            }
+        }
+
+        private Cache<List<ApplicationIssue>> _issues;
+        public Cache<List<ApplicationIssue>> Issues
+        {
+            get
+            {
+                return _issues ?? (_issues = new Cache<List<ApplicationIssue>>
+                {
+                    CacheForSeconds = Settings.PollIntervalSeconds,
+                    UpdateCache = UpdateFromSql("Application-Issue-List",
+                        conn => conn.Query<ApplicationIssue>(@"
+Select ApplicationName as Application, 
+       Sum(DuplicateCount) as IssueCount,
+	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentIssueCount
+ From Exceptions
+ Where DeletionDate Is Null And
+ Type in @Filters
+ Group By ApplicationName",
+                      new { Current.Settings.Exceptions.RecentSeconds, Filters = Settings.IssuesExceptionFilter }, commandTimeout: QueryTimeout).ToList())
                 });
             }
         }
@@ -111,34 +159,56 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
                          .ToList();
         }
 
+        public List<Error> GetIssueSummary(int maxPerApp, string appName = null)
+        {
+            var errors = IssueSummary.SafeData(true);
+            // specific application
+            if (appName.HasValue())
+            {
+                return errors.Where(e => e.ApplicationName == appName)
+                             .Take(maxPerApp)
+                             .ToList();
+            }
+            // all apps, 1000
+            if (maxPerApp == PerAppSummaryCount)
+            {
+                return errors;
+            }
+            // app apps, n records
+            return errors
+                    .GroupBy(e => e.ApplicationName)
+                        .SelectMany(e => e.Take(maxPerApp))
+                            .ToList();
+        }
+
         /// <summary>
         /// Get all current errors, possibly per application
         /// </summary>
         /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
-        public List<Error> GetAllErrors(int maxPerApp, string appName = null)
-        {
-            try
-            {
-                using (MiniProfiler.Current.Step("GetAllErrors() for " + Name + " App: " + (appName ?? "All")))
-                using (var c = GetConnection())
-                {
-                    var sql = @"
-Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
-  From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
-		From Exceptions
-		Where DeletionDate Is Null" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + @") er
-	   Inner Join Exceptions e On er.Id = e.Id
- Where er.r <= @maxPerApp
- Order By CreationDate Desc";
-                    return c.Query<Error>(sql, new {maxPerApp, appName}, commandTimeout: QueryTimeout).ToList();
-                }
-            }
-            catch (Exception e)
-            {
-                Current.LogException(e);
-                return new List<Error>();
-            }
-        }
+//        public List<Error> GetAllErrors(int maxPerApp, string appName = null)
+//        {
+//            try
+//            {
+//                using (MiniProfiler.Current.Step("GetAllErrors() for " + Name + " App: " + (appName ?? "All")))
+//                using (var c = GetConnection())
+//                {
+//                    var sql = @"
+//Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
+//  From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
+//		From Exceptions
+//		Where DeletionDate Is Null" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + @") er
+//	   Inner Join Exceptions e On er.Id = e.Id
+// Where er.r <= @maxPerApp
+// Order By CreationDate Desc";
+//                    return c.Query<Error>(sql, new {maxPerApp, appName}, commandTimeout: QueryTimeout).ToList();
+//                }
+//            }
+//            catch (Exception e)
+//            {
+//                Current.LogException(e);
+//                return new List<Error>();
+//            }
+//        }
 
         public List<Error> GetSimilarErrors(Error error, int max)
         {

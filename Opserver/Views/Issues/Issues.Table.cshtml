@@ -16,12 +16,12 @@
     qs.Set("sort", linkSort);
     <a href="?@(qs.ToString())">@text</a>
 }
-<table class="exceptions-dashboard striped-dashboard" data-total-count="@Model.TotalExceptionCount" data-title="@Model.ExceptionTitle" data-displayed="@displayed">
+<table class="exceptions-dashboard striped-dashboard" data-total-count="@Model.TotalIssueCount" data-title="@Model.IssueTitle" data-displayed="@displayed">
         <thead>
             <tr class="category-row">
                 <th colspan="9">
                     <h3>
-                        <span class="exception-title">@Model.ExceptionTitle</span>
+                        <span class="exception-title">@Model.IssueTitle</span>
                         @if (Model.ShowClearLink)
                         {
                             if (Model.ClearLinkForVisibleOnly)
@@ -30,7 +30,7 @@
                             }
                             else
                             {
-                                <a class="clear-all-link" href="/exceptions/delete-all">&nbsp;X&nbsp;- Clear all non-protected errors</a>
+                                <a class="clear-all-link" href="/issues/delete-all">&nbsp;X&nbsp;- Clear all non-protected errors</a>
                             }
                         }
                     </h3>
@@ -49,6 +49,6 @@
             </tr>
         </thead>
         <tbody>
-            @Html.Partial("Exceptions.Table.Rows", Model)
+            @Html.Partial("Issues.Table.Rows", Model)
         </tbody>
     </table>

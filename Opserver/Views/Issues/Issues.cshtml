@@ -2,16 +2,16 @@
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     var log = Model.SelectedLog;
-    var exceptions = Model.Errors;
+    var exceptions = Model.Errors;//Model.Issues;
     
-    this.SetPageTitle(Model.ExceptionTitle);
-    this.SetMainTab(MainTab.Exceptions);
-    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
+    this.SetPageTitle(Model.IssueTitle);
+    this.SetMainTab(MainTab.Issues);
+    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Issues",
                       Model.Search,
-                      "/exceptions/search",
+                      "/issues/search",
                       log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
 
-    var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
+    var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.IssueCount), MostRecent = g.Max(a => a.MostRecent) });
     
     if (Current.IsMobile) {
         distinctApps = distinctApps.Where(a => a.ExceptionCount > 0); // filter out 0s for mobile
@@ -26,18 +26,18 @@
     <ul class="top-server-list">
         <li>Exception Logs: </li>
         @{ var ac = Model.ShowAll ? @" class=""selected""" : ""; }
-        <li@(ac.AsHtml())><a href="/exceptions"><span>All</span></a></li>
+        <li@(ac.AsHtml())><a href="/issues"><span>All</span></a></li>
         @foreach (var a in distinctApps)
         {
             var cl = a.Name == log ? "selected" : null;
-            <li class="@cl.AsHtml()"><a href="/exceptions?log=@a.Name.UrlEncode()" title="@a.ExceptionCount.Pluralize("Exception")@(a.MostRecent.HasValue ? ", Last: " + a.MostRecent.ToRelativeTime() : "")"><span>@a.Name</span></a><span class="count">@(a.ExceptionCount > 0 ? " (" + a.ExceptionCount.ToComma() + ")" : "")</span></li>
+            <li class="@cl.AsHtml()"><a href="/issues?log=@a.Name.UrlEncode()" title="@a.ExceptionCount.Pluralize("Exception")@(a.MostRecent.HasValue ? ", Last: " + a.MostRecent.ToRelativeTime() : "")"><span>@a.Name</span></a><span class="count">@(a.ExceptionCount > 0 ? " (" + a.ExceptionCount.ToComma() + ")" : "")</span></li>
         }
     </ul>
 </div>
 @if (ExceptionStores.Stores.Any(s => s.MonitorStatus == MonitorStatus.Good))
 {
     <div class="bottom-section">
-        @Html.Partial("Exceptions.Table", Model)
+        @Html.Partial("Issues.Table", Model)
         <div class="no-content good@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
         <div class="loading-more-spacer loading hidden"></div>
         <div class="no-content no-more hidden">End of active exception log</div>
