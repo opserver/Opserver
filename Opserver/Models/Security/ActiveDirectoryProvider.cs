@@ -58,7 +58,7 @@ namespace StackExchange.Opserver.Models.Security
                                 {
                                     return gp == null
                                                ? new List<string>()
-                                               : gp.GetMembers().ToList().Select(mp => mp.SamAccountName).ToList();
+                                               : gp.GetMembers(true).ToList().Select(mp => mp.SamAccountName).ToList();
                                 }
                             });
                         return group ?? old ?? new List<string>();
