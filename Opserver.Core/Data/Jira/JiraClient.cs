@@ -107,7 +107,11 @@ namespace StackExchange.Opserver.Data.Jira
                 + RenderVariableTable("Cookies", error.Cookies)
                 + RenderVariableTable("RequestHeaders", error.RequestHeaders);
 
-            var commentReponse = await Comment(action, result, commentBody).ConfigureAwait(false);
+            if (!String.IsNullOrWhiteSpace(commentBody))
+            {
+                var commentReponse = await Comment(action, result, commentBody).ConfigureAwait(false);
+            }
+            
             result.Host = GetHost(action);
             return result;
         }
