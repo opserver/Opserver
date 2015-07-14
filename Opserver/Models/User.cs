@@ -39,8 +39,8 @@ namespace StackExchange.Opserver.Models
         }
 
         private Roles? _role;
-        public Roles? RawRoles { get { return _role; } }
-        
+        public Roles? RawRoles => _role;
+
         /// <summary>
         /// Returns this user's role on the current site.
         /// </summary>
@@ -67,6 +67,7 @@ namespace StackExchange.Opserver.Models
                         result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
                         result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
                         result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
+                        result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
 
                         _role = result;
                     }
@@ -84,10 +85,10 @@ namespace StackExchange.Opserver.Models
             return Roles.None;
         }
 
-        public bool IsGlobalAdmin { get { return IsInRole(Roles.GlobalAdmin); } }
-        public bool IsExceptionAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
-        public bool IsHAProxyAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
-        public bool IsRedisAdmin { get { return IsInRole(Roles.RedisAdmin); } }
-        public bool IsSQLAdmin { get { return IsInRole(Roles.SQLAdmin); } }
+        public bool IsGlobalAdmin => IsInRole(Roles.GlobalAdmin);
+        public bool IsExceptionAdmin => IsInRole(Roles.ExceptionsAdmin);
+        public bool IsHAProxyAdmin => IsInRole(Roles.ExceptionsAdmin);
+        public bool IsRedisAdmin => IsInRole(Roles.RedisAdmin);
+        public bool IsSQLAdmin => IsInRole(Roles.SQLAdmin);
     }
 }
