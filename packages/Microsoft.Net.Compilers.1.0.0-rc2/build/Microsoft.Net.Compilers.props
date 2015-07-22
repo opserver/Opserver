@@ -1,8 +1,0 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <CscToolPath>$(MSBuildThisFileDirectory)..\tools</CscToolPath>
-    <CscToolExe>csc2.exe</CscToolExe>
-    <VbcToolPath>$(MSBuildThisFileDirectory)..\tools</VbcToolPath>
-    <VbcToolExe>vbc2.exe</VbcToolExe>
-  </PropertyGroup>
-</Project>
