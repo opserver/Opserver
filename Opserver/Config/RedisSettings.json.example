@@ -40,6 +40,11 @@
     "Servers": [
         { "name": "ny-redis01" },
         { "name": "ny-redis02" },
-        { "name": "or-redis01" }
+        { "name": "co-redis01" },
+        { "name": "co-redis02" },
+        {
+          "name": "ny-mlredis01",
+          "instances": [ { "name": "Machine Learning", "port": "6379" } ]
+        }
     ]
 }
