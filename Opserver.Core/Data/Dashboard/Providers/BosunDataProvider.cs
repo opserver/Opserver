@@ -226,6 +226,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     // TODO: Parallel
                     addMetric(DashboardMetric.CPUUsed);
                     addMetric(DashboardMetric.MemoryUsed);
+                    addMetric(DashboardMetric.MemoryTotal);
                     addMetric(DashboardMetric.NetBytes);
 
                     UpdateHostLasts(result, HostCache.Data);
@@ -248,6 +249,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Dictionary<string, PointSeries>
                     cpu = intervalCache.CPUUsed,
                     memory = intervalCache.MemoryUsed,
+                    memoryTotal = intervalCache.MemoryTotal,
                     network = intervalCache.NetBytes;
 
                 Func<string, Dictionary<string, PointSeries>, float?> getLast = (host, dict) =>
@@ -265,6 +267,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     n.Value.CPULoad = (int?) getLast(n.Key, cpu);
                     n.Value.MemoryUsed = (long?) getLast(n.Key, memory);
+                    n.Value.TotalMemory = (long?) getLast(n.Key, memoryTotal);
                     n.Value.Networkbps = (long?) getLast(n.Key, network)*8;
                 }
             }
@@ -280,6 +283,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public Dictionary<string, PointSeries> CPUUsed { get { return Series[DashboardMetric.CPUUsed]; } }
             public Dictionary<string, PointSeries> MemoryUsed { get { return Series[DashboardMetric.MemoryUsed]; } }
+            public Dictionary<string, PointSeries> MemoryTotal { get { return Series[DashboardMetric.MemoryTotal]; } }
             public Dictionary<string, PointSeries> NetBytes { get { return Series[DashboardMetric.NetBytes]; } }
 
             public ConcurrentDictionary<string, Dictionary<string, PointSeries>> Series { get; set; }
