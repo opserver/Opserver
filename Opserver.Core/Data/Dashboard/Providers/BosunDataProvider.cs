@@ -347,7 +347,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     /// </summary>
     public class PointSeries
     {
-        private static readonly Regex HostRegex = new Regex(@"\{host=(.*)[,|\}]", RegexOptions.Compiled);
+        private static readonly char[] _splComma = {','};
+        private static readonly char[] _splEq = {'='};
         private string _host;
         public string Host
         {
@@ -355,8 +356,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 if (_host == null)
                 {
-                    var match = HostRegex.Match(Name);
-                    _host = match.Success ? match.Groups[1].Value : "Unknown";
+                    string h;
+                    _host = TryGetHost(Name, out h) ? h : "Unknown";
                 }
                 return _host;
             }
@@ -373,6 +374,39 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             _host = host;
             Data = new List<float[]>();
+        }
+
+        /// <summary>
+        /// Extract the host value from the Name expression string
+        /// 
+        /// Example input/output:
+        ///     "this_should_fail"                            --> null
+        ///     "os.net.bytes{host=}"                         --> ""
+        ///     "os.net.bytes{host=fancy_machine}"            --> "fancy_machine"
+        ///     "os.net.bytes{host=fancy_machine,iface=eth0}" --> "fancy_machine"
+        /// </summary>
+        private static bool TryGetHost(string s, out string host)
+        {
+            host = null;
+            int beg = s.IndexOf('{');
+            int end = s.LastIndexOf('}');
+            if (-1 == beg) { return false; }
+            if (end < beg) { return false; }
+            int subBeg = beg + 1;
+            int subLen = end - 1 - beg;
+            if (subLen < 1) { return false; }
+            var pairs = s.Substring(subBeg, subLen).Split(_splComma);
+            for (int i = 0; i < pairs.Length; i++)
+            {
+                var kv = pairs[i].Split(_splEq);
+                if (kv.Length != 2) { continue; }
+                if ("host" == kv[0])
+                {
+                    host = kv[1];
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
