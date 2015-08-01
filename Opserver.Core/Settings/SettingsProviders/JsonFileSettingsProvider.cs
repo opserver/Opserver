@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.SettingsProviders
 {
     public class JSONFileSettingsProvider : SettingsProvider
     {
-        public override string ProviderType { get { return "JSON File"; } }
+        public override string ProviderType => "JSON File";
 
         public JSONFileSettingsProvider(SettingsSection settings) : base(settings)
         {
@@ -33,8 +33,6 @@ namespace StackExchange.Opserver.SettingsProviders
                 var settings = GetFromFile<T>();
                 if (settings == null)
                     return null;
-                if (typeof (IAfterLoadActions).IsAssignableFrom(typeof (T)))
-                    ((IAfterLoadActions) settings).AfterLoad();
                 AddUpdateWatcher(settings);
                 _settingsCache.TryAdd(typeof (T), settings);
                 return settings;

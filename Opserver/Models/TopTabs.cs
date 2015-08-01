@@ -67,9 +67,7 @@ namespace StackExchange.Opserver.Models
                 GetText = () =>
                 {
                     var exceptionCount = ExceptionStores.TotalExceptionCount;
-                    return string.Format("<span class=\"count exception-count\">{0}</span> {1}",
-                        exceptionCount.ToComma(),
-                        exceptionCount.Pluralize("Exception", false));
+                    return $"<span class=\"count exception-count\">{exceptionCount.ToComma()}</span> {exceptionCount.Pluralize("Exception", false)}";
                 },
                 GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
             });
@@ -113,10 +111,7 @@ namespace StackExchange.Opserver.Models
             }
         }
 
-        public bool IsCurrentTab
-        {
-            get { return string.Equals(TopTabs.CurrentTab, Name); }
-        }
+        public bool IsCurrentTab => string.Equals(TopTabs.CurrentTab, Name);
 
         public TopTab(string name, string url, int order = 0, ISecurableSection section = null)
         {
@@ -133,14 +128,11 @@ namespace StackExchange.Opserver.Models
             // Optimism!
             using (MiniProfiler.Current.Step("Render Tab: " + Name))
             {
-                var status = GetMonitorStatus != null ? GetMonitorStatus() : MonitorStatus.Good;
+                var status = GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
 
-                return string.Format(@"<a class=""{0}{1}"" href=""{2}"" title=""{3}"">{4}</a>",
-                    IsCurrentTab ? "selected " : "",
-                    status.GetDescription(),
-                    Url,
-                    GetTooltip != null ? GetTooltip() : null,
-                    GetText != null ? GetText() : Name).AsHtml();
+                return $@"<a class=""{(IsCurrentTab ? "selected " : "")}{status.GetDescription()}"" href=""{Url
+                        }"" title=""{GetTooltip?.Invoke()}"">{(GetText != null ? GetText() : Name)
+                        }</a>".AsHtml();
             }
         }
     }

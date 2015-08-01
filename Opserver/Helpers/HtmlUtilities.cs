@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Helpers
 
         public static bool HasValue(this IHtmlString html)
         {
-            return html != null && !string.IsNullOrEmpty(html.ToHtmlString());
+            return !string.IsNullOrEmpty(html?.ToHtmlString());
         }
         [Obsolete("This .AsHtml() call is redundant", false)]
         public static IHtmlString AsHtml(this IHtmlString html)
@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Helpers
         }
         public static string ToStringOrNull(this IHtmlString html)
         {
-            return html == null ? null : html.ToHtmlString();
+            return html?.ToHtmlString();
         }
         public static string Decode(this IHtmlString html)
         {

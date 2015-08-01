@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -53,12 +54,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public static int LineCount(this string s)
         {
-            var n = 0;
-            foreach (var c in s)
-            {
-                if (c == '\n') n++;
-            }
-            return n + 1;
+            return s.Count(c => c == '\n') + 1;
         }
 
         public static IHtmlString ToStatusSpan(this Data.HAProxy.Item item)
@@ -68,9 +64,9 @@ namespace StackExchange.Opserver
             switch (item.MonitorStatus)
             {
                 case MonitorStatus.Good:
-                    return string.Format("({0})", item.Status).AsHtml();
+                    return $"({item.Status})".AsHtml();
                 default:
-                    return string.Format("(<b>{0}</b>)", item.Status).AsHtml();
+                    return $"(<b>{item.Status}</b>)".AsHtml();
             }
         }
 
@@ -177,7 +173,7 @@ namespace StackExchange.Opserver
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (cache.LastPollStatus == FetchStatus.Fail)
                 return MonitorStatus.Warning.Span(mini ? dateToUse.ToRelativeTime() : dateToUse.ToRelativeTimeMini(),
-                                                  string.Format("Last Poll: {0} ({1})\nError: {2}", lf.ToZuluTime(), lf.ToRelativeTime(), cache.ErrorMessage));
+                    $"Last Poll: {lf.ToZuluTime()} ({lf.ToRelativeTime()})\nError: {cache.ErrorMessage}");
 
             return mini ? lf.ToRelativeTimeSpanMini() : lf.ToRelativeTimeSpan();
         }
@@ -189,7 +185,7 @@ namespace StackExchange.Opserver
 
         public static MvcHtmlString ToDateOnlySpanPretty(this DateTime dt, string cssClass)
         {
-            return MvcHtmlString.Create(String.Format(@"<span title=""{0:u}"" class=""{1}"">{2}</span>", dt, cssClass, ToDateOnlyStringPretty(dt, DateTime.UtcNow)));
+            return MvcHtmlString.Create($@"<span title=""{dt:u}"" class=""{cssClass}"">{ToDateOnlyStringPretty(dt, DateTime.UtcNow)}</span>");
         }
 
         public static string ToDateOnlyStringPretty(this DateTime dt, DateTime? utcNow = null)
@@ -244,7 +240,7 @@ namespace StackExchange.Opserver
             // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo = compareTo ?? DateTime.UtcNow;
             if (string.IsNullOrEmpty(cssclass))
-                return string.Format(@"<span title=""{0:u}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)).AsHtml();
+                return $@"<span title=""{dt:u}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
             else
                 return string.Format(@"<span title=""{0:u}"" class=""{2}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo), cssclass).AsHtml();
         }
@@ -318,7 +314,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public static IHtmlString ToRelativeTimeSpanMini(this DateTime dt, bool includeTimeForOldDates = true)
         {
-            return string.Format(@"<span title=""{0:u}"" class=""relativetime"">{1}</span>", dt, ToRelativeTimeMini(dt, includeTimeForOldDates)).AsHtml();
+            return $@"<span title=""{dt:u}"" class=""relativetime"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
         }
         /// <summary>
         /// returns AN HTML SPAN ELEMENT with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
@@ -339,18 +335,13 @@ namespace StackExchange.Opserver
         /// <returns></returns>
         public static string Mini(this int number)
         {
-
             if (number >= 1000000)
-            {
-                return String.Format("{0:0.0m}", (double)number / 1000000);
-            }
+                return $"{(double) number/1000000:0.0m}";
 
             if (number >= 1000)
-            {
-                return String.Format("{0:0.#k}", (double)number / 1000);
-            }
+                return $"{(double) number/1000:0.#k}";
 
-            return String.Format("{0:#,##0}", number);
+            return $"{number:#,##0}";
         }
         /// <summary>
         /// Full representation of a number
@@ -359,7 +350,7 @@ namespace StackExchange.Opserver
         /// <returns></returns>
         public static string Full(this int number)
         {
-            return String.Format("{0:#,##0}", number);
+            return $"{number:#,##0}";
         }
 
         /// <summary>
@@ -369,29 +360,19 @@ namespace StackExchange.Opserver
         /// <returns></returns>
         public static string Micro(this int number)
         {
-
             if (number >= 1000000)
-            {
-                return String.Format("{0:0.0m}", (double)number / 1000000);
-            }
+                return $"{(double) number/1000000:0.0m}";
 
             if (number >= 100000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-            }
+                return $"{(double) number/1000:0k}";
 
             if (number >= 10000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-
-            }
+                return $"{(double) number/1000:0k}";
 
             if (number >= 1000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-            }
+                return $"{(double) number/1000:0k}";
 
-            return String.Format("{0:#,##0}", number);
+            return $"{number:#,##0}";
         }
 
         /// <summary>
@@ -442,21 +423,21 @@ namespace StackExchange.Opserver
             }
             else if (time < 1000 * 500)
             {
-                title = String.Format("{0:0.###}", (double)time / 1000) + " seconds";
-                body = String.Format("{0:0.#} secs", (double)time / 1000);
+                title = $"{(double) time/1000:0.###}" + " seconds";
+                body = $"{(double) time/1000:0.#} secs";
             }
             else if (time < 1000 * 60 * 300)
             {
-                title = String.Format("{0:0.###}", (double)time / (1000 * 60)) + " minutes";
-                body = String.Format("{0:0.#} mins", (double)time / (1000 * 60));
+                title = $"{(double) time/(1000*60):0.###}" + " minutes";
+                body = $"{(double) time/(1000*60):0.#} mins";
             }
             else
             {
-                title = String.Format("{0:0.###}", (double)time / (1000 * 60 * 60)) + " hours";
-                body = String.Format("{0:0.#} hours", (double)time / (1000 * 60 * 60));
+                title = $"{(double) time/(1000*60*60):0.###}" + " hours";
+                body = $"{(double) time/(1000*60*60):0.#} hours";
             }
 
-            return String.Format(format, title, body).AsHtml();
+            return string.Format(format, title, body).AsHtml();
         }
 
         /// <summary>
@@ -474,18 +455,18 @@ namespace StackExchange.Opserver
             }
             else if (unit < 1000 * 1000)
             {
-                body = String.Format("{0:0.##}K", (double)unit / 1000);
+                body = $"{(double) unit/1000:0.##}K";
             }
             else if (unit < 1000 * 1000 * 1000)
             {
-                body = String.Format("{0:0.###}M", (double)unit / (1000 * 1000));
+                body = $"{(double) unit/(1000*1000):0.###}M";
             }
             else
             {
-                body = String.Format("{0:0.###}B", (double)unit / (1000 * 1000 * 1000));
+                body = $"{(double) unit/(1000*1000*1000):0.###}B";
             }
 
-            return String.Format(format, title, body).AsHtml();
+            return string.Format(format, title, body).AsHtml();
         }
 
         public static IHtmlString ToNoteIfNA(this string data)

@@ -1,35 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class SQLSettings : Settings<SQLSettings>, IAfterLoadActions
+    public class SQLSettings : Settings<SQLSettings>
     {
-        public override bool Enabled { get { return Clusters.Any() || Instances.Any(); } }
+        public override bool Enabled => Clusters.Any() || Instances.Any();
 
-        public ObservableCollection<Cluster> Clusters { get; set; }
-        public event EventHandler<Cluster> ClusterAdded = delegate { };
-        public event EventHandler<List<Cluster>> ClustersChanged = delegate { };
-        public event EventHandler<Cluster> ClusterRemoved = delegate { };
+        public List<Cluster> Clusters { get; set; }
 
-        public ObservableCollection<Instance> Instances { get; set; }
-        public event EventHandler<Instance> InstanceAdded = delegate { };
-        public event EventHandler<List<Instance>> InstancesChanged = delegate { };
-        public event EventHandler<Instance> InstanceRemoved = delegate { };
+        public List<Instance> Instances { get; set; }
 
         public SQLSettings()
         {
-            Clusters = new ObservableCollection<Cluster>();
-            Instances = new ObservableCollection<Instance>();
-        }
-
-        public void AfterLoad()
-        {
-            Clusters.AddHandlers(this, ClusterAdded, ClustersChanged, ClusterRemoved);
-            Instances.AddHandlers(this, InstanceAdded, InstancesChanged, InstanceRemoved);
-            Clusters.ForEach(c => c.AfterLoad());
+            Clusters = new List<Cluster>();
+            Instances = new List<Instance>();
         }
 
         /// <summary>
@@ -37,21 +22,13 @@ namespace StackExchange.Opserver
         /// </summary>
         public string DefaultConnectionString { get; set; }
 
-        public class Cluster : IAfterLoadActions, ISettingsCollectionItem<Cluster>
+        public class Cluster : ISettingsCollectionItem<Cluster>
         {
-            public ObservableCollection<Instance> Nodes { get; set; }
-            public event EventHandler<Instance> NodeAdded = delegate { };
-            public event EventHandler<List<Instance>> NodesChanged = delegate { };
-            public event EventHandler<Instance> NodeRemoved = delegate { };
+            public List<Instance> Nodes { get; set; }
 
             public Cluster()
             {
-                Nodes = new ObservableCollection<Instance>();
-            }
-
-            public void AfterLoad()
-            {
-                Nodes.AddHandlers(this, NodeAdded, NodesChanged, NodeRemoved);
+                Nodes = new List<Instance>();
             }
 
             /// <summary>
@@ -94,8 +71,8 @@ namespace StackExchange.Opserver
                     int hashCode = 0;
                     foreach (var n in Nodes)
                         hashCode = (hashCode*397) ^ n.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
                     return hashCode;
                 }
@@ -148,7 +125,7 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    return ((Name != null ? Name.GetHashCode() : 0)*397) ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
+                    return ((Name?.GetHashCode() ?? 0)*397) ^ (ConnectionString?.GetHashCode() ?? 0);
                 }
             }
         }

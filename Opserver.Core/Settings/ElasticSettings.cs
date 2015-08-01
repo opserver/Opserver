@@ -1,55 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class ElasticSettings : Settings<ElasticSettings>, IAfterLoadActions
+    public class ElasticSettings : Settings<ElasticSettings>
     {
-        public override bool Enabled { get { return Clusters.Any(); } }
+        public override bool Enabled => Clusters.Any();
 
         /// <summary>
         /// elastic search clusters to monitor
         /// </summary>
-        public ObservableCollection<Cluster> Clusters { get; set; }
-        public event EventHandler<Cluster> ClusterAdded = delegate { };
-        public event EventHandler<List<Cluster>> ClustersChanged = delegate { };
-        public event EventHandler<Cluster> ClusterRemoved = delegate { };
+        public List<Cluster> Clusters { get; set; }
 
         public ElasticSettings()
         {
-            Clusters = new ObservableCollection<Cluster>();
+            Clusters = new List<Cluster>();
         }
 
-        public void AfterLoad()
-        {
-            Clusters.AddHandlers(this, ClusterAdded, ClustersChanged, ClusterRemoved);
-            Clusters.ForEach(c => c.AfterLoad());
-        }
-
-        public class Cluster : IAfterLoadActions, ISettingsCollectionItem<Cluster>
+        public class Cluster : ISettingsCollectionItem<Cluster>
         {
             public Cluster()
             {
                 // Defaults
                 RefreshIntervalSeconds = 60;
                 DownRefreshIntervalSeconds = 5;
-                Nodes = new ObservableCollection<string>();
-            }
-
-            public void AfterLoad()
-            {
-                Nodes.AddHandlers(this, NodeAdded, NodesChanged, NodeRemoved);
+                Nodes = new List<string>();
             }
 
             /// <summary>
             /// Nodes in this cluster
             /// </summary>
-            public ObservableCollection<string> Nodes { get; set; }
-            public event EventHandler<string> NodeAdded = delegate { };
-            public event EventHandler<List<string>> NodesChanged = delegate { };
-            public event EventHandler<string> NodeRemoved = delegate { };
+            public List<string> Nodes { get; set; }
 
             /// <summary>
             /// The machine name for this SQL cluster
@@ -94,8 +75,8 @@ namespace StackExchange.Opserver
                     int hashCode = 0;
                     foreach (var n in Nodes)
                         hashCode = (hashCode*397) ^ n.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
                     hashCode = (hashCode*397) ^ DownRefreshIntervalSeconds;
                     return hashCode;

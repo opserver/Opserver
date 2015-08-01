@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Helpers
                     try
                     {
                         ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
-                        object result = valueProviderResult == null ? null : valueProviderResult.RawValue;
+                        object result = valueProviderResult?.RawValue;
                         if (result == null) return null;
                         Array arr = result as Array;
 

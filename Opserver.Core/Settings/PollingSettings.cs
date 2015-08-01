@@ -4,7 +4,7 @@ namespace StackExchange.Opserver
 {
     public class PollingSettings : Settings<PollingSettings>
     {
-        public override bool Enabled { get { return Windows != null; } }
+        public override bool Enabled => Windows != null;
 
         private WindowsPollingSettings _windows;
         public WindowsPollingSettings Windows

@@ -1,6 +1,5 @@
 ﻿namespace StackExchange.Opserver.Models.Security
 {
-
     public static class SecuritySettingsExtensions
     {
         public static bool HasAccess(this ISecurableSection settings)

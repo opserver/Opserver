@@ -7,34 +7,27 @@ namespace StackExchange.Opserver
 {
     public class SecuritySettings : ConfigurationSection
     {
-        private static readonly SecuritySettings _settings = ConfigurationManager.GetSection("SecuritySettings") as SecuritySettings;
-        public static SecuritySettings Current { get { return _settings; } }
+        public static SecuritySettings Current { get; } = ConfigurationManager.GetSection("SecuritySettings") as SecuritySettings;
 
-        public bool Enabled { get { return Provider.HasValue(); } }
+        public bool Enabled => Provider.HasValue();
 
         /// <summary>
         /// Security Provider to use, e.g. "ActiveDirectory"
         /// </summary>
         [ConfigurationProperty("provider")]
-        public string Provider { get { return this["provider"] as string ?? ""; } }
+        public string Provider => this["provider"] as string ?? "";
 
         [ConfigurationProperty("server")]
-        public string Server { get { return this["server"] as string ?? ""; } }
+        public string Server => this["server"] as string ?? "";
 
         [ConfigurationProperty("authUser"), DefaultValue("")]
-        public string AuthUser { get { return this["authUser"] as string ?? ""; } }
+        public string AuthUser => this["authUser"] as string ?? "";
 
         [ConfigurationProperty("authPassword"), DefaultValue("")]
-        public string AuthPassword { get { return this["authPassword"] as string ?? ""; } }
+        public string AuthPassword => this["authPassword"] as string ?? "";
 
         [ConfigurationProperty("InternalNetworks")]
-        public SettingsCollection<Network> InternalNetworks
-        {
-            get
-            {
-                return this["InternalNetworks"] as SettingsCollection<Network>;
-            }
-        }
+        public SettingsCollection<Network> InternalNetworks => this["InternalNetworks"] as SettingsCollection<Network>;
 
         public class Network : ConfigurationElement, ISettingsElementNamed
         {
@@ -42,37 +35,33 @@ namespace StackExchange.Opserver
             /// The name for this network
             /// </summary>
             [ConfigurationProperty("name", IsRequired = true)]
-            public string Name { get { return this["name"] as string; } }
+            public string Name => this["name"] as string;
 
             /// <summary>
             /// The CIDR notation for this node
             /// </summary>
             [ConfigurationProperty("cidr")]
-            public string CIDR { get { return this["cidr"] as string; } }
+            public string CIDR => this["cidr"] as string;
 
             /// <summary>
             /// The IP for this network, optionally used with Mask
             /// </summary>
             [ConfigurationProperty("ip")]
-            public string IP { get { return this["ip"] as string; } }
+            public string IP => this["ip"] as string;
 
             /// <summary>
             /// The subnet mask for this node
             /// </summary>
             [ConfigurationProperty("subnet")]
-            public string Subnet { get { return this["subnet"] as string; } }
+            public string Subnet => this["subnet"] as string;
         }
 
         public class SettingsCollection<T> : ConfigurationElementCollection where T : ConfigurationElement, ISettingsElementNamed, new()
         {
-            public virtual string Name
-            {
-                get { return typeof(T).Name; }
-            }
-            public T this[int index]
-            {
-                get { return BaseGet(index) as T; }
-            }
+            public virtual string Name => typeof(T).Name;
+
+            public T this[int index] => BaseGet(index) as T;
+
             protected override ConfigurationElement CreateNewElement()
             {
                 return new T();
@@ -88,15 +77,9 @@ namespace StackExchange.Opserver
                 BaseAdd(item);
             }
 
-            public override ConfigurationElementCollectionType CollectionType
-            {
-                get { return ConfigurationElementCollectionType.BasicMapAlternate; }
-            }
+            public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMapAlternate;
 
-            protected override string ElementName
-            {
-                get { return typeof(T).Name; }
-            }
+            protected override string ElementName => typeof(T).Name;
 
             protected override bool IsElementName(string elementName)
             {
@@ -109,10 +92,7 @@ namespace StackExchange.Opserver
             }
 
             private List<T> _all;
-            public List<T> All
-            {
-                get { return _all ?? (_all = this.Cast<T>().ToList()); }
-            }
+            public List<T> All => _all ?? (_all = this.Cast<T>().ToList());
         }
 
         public interface ISettingsElementNamed

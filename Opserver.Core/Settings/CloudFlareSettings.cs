@@ -1,21 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class CloudFlareSettings : Settings<CloudFlareSettings>, IAfterLoadActions
+    public class CloudFlareSettings : Settings<CloudFlareSettings>
     {
-        public override bool Enabled { get { return (Email.HasValue() && APIKey.HasValue()) || Railguns.Any(); } }
-        public ObservableCollection<Railgun> Railguns { get; set; }
-        public event EventHandler<Railgun> RailgunAdded = delegate { };
-        public event EventHandler<List<Railgun>> RailgunChanged = delegate { };
-        public event EventHandler<Railgun> RailgunRemoved = delegate { };
-        public ObservableCollection<DataCenter> DataCenters { get; set; }
-        public event EventHandler<DataCenter> DataCenterAdded = delegate { };
-        public event EventHandler<List<DataCenter>> DataCenterChanged = delegate { };
-        public event EventHandler<DataCenter> DataCenterRemoved = delegate { };
+        public override bool Enabled => (Email.HasValue() && APIKey.HasValue()) || Railguns.Any();
+        public List<Railgun> Railguns { get; set; }
+        public List<DataCenter> DataCenters { get; set; }
 
         /// <summary>
         /// Email for the CloudFlare account
@@ -29,14 +22,8 @@ namespace StackExchange.Opserver
 
         public CloudFlareSettings()
         {
-            Railguns = new ObservableCollection<Railgun>();
-            DataCenters = new ObservableCollection<DataCenter>();
-        }
-
-        public void AfterLoad()
-        {
-            Railguns.AddHandlers(this, RailgunAdded, RailgunChanged, RailgunRemoved);
-            DataCenters.AddHandlers(this, DataCenterAdded, DataCenterChanged, DataCenterRemoved);
+            Railguns = new List<Railgun>();
+            DataCenters = new List<DataCenter>();
         }
 
         public class Railgun : ISettingsCollectionItem<Railgun>
@@ -97,9 +84,9 @@ namespace StackExchange.Opserver
                 unchecked
                 {
                     int hashCode = 0;
-                    hashCode = (hashCode*397) ^ (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode * 397) ^ (Host != null ? Host.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
+                    hashCode = (hashCode * 397) ^ (Host?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
                     hashCode = (hashCode*397) ^ Port;
                     return hashCode;
@@ -156,7 +143,7 @@ namespace StackExchange.Opserver
                     int hashCode = 0;
                     foreach (var r in Ranges)
                         hashCode = (hashCode * 397) ^ r.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                    hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
                     return hashCode;
                 }
             }

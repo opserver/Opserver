@@ -1,14 +1,10 @@
 ﻿using System.Collections.Generic;
 
-
 namespace StackExchange.Opserver
 {
     public class PagerDutySettings : Settings<PagerDutySettings>
     {
-        public override bool Enabled
-        {
-            get { return APIKey.HasValue(); }
-        }
+        public override bool Enabled => APIKey.HasValue();
 
         public string APIKey { get; set; }
         public string APIBaseUrl { get; set; }
@@ -27,8 +23,6 @@ namespace StackExchange.Opserver
             DaysToCache = 60;
             UserNameMap = new List<EmailMapping>();
         }
-
-
     }
 
     public class EmailMapping
@@ -36,5 +30,4 @@ namespace StackExchange.Opserver
         public string OpServerName { get; set; }
         public string EmailUser { get; set; }
     }
-    
 }

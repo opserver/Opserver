@@ -12,36 +12,24 @@ namespace StackExchange.Opserver
 {
     public static partial class Current
     {
-        public static SettingsProvider Settings { get { return SettingsProvider.Current; } }
+        public static SettingsProvider Settings => SettingsProvider.Current;
 
-        public static LocalCache LocalCache
-        {
-            get { return CoreCurrent.LocalCache; }
-        }
-        
+        public static LocalCache LocalCache => CoreCurrent.LocalCache;
+
         /// <summary>
         /// Shortcut to HttpContext.Current.
         /// </summary>
-        public static HttpContext Context
-        {
-            get { return HttpContext.Current; }
-        }
+        public static HttpContext Context => HttpContext.Current;
 
         /// <summary>
         /// Shortcut to HttpContext.Current.Request.
         /// </summary>
-        public static HttpRequest Request
-        {
-            get { return Context.Request; }
-        }
-        
+        public static HttpRequest Request => Context.Request;
+
         /// <summary>
         /// Is the current request ajax? Determined by checking the X-Requested-With header
         /// </summary>
-        public static bool IsAjaxRequest
-        {
-            get { return Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest"; }
-        }
+        public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         /// <summary>
         /// Whether to render chart images at double resolution or not
@@ -60,29 +48,18 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Gets if the current request is for a mobile view
         /// </summary>
-        public static bool IsMobile
-        {
-            get { return new HttpContextWrapper(Context).GetOverriddenBrowser().IsMobileDevice; }
-        }
+        public static bool IsMobile => new HttpContextWrapper(Context).GetOverriddenBrowser().IsMobileDevice;
 
         /// <summary>
         /// Gets the current user from the request
         /// </summary>
-        public static User User
-        {
-            get { return Context.User as User; }
-        }
+        public static User User => Context.User as User;
 
-        public static bool IsSecureConnection
-        {
-            get
-            {
-                return Request.IsSecureConnection ||
-                       // This can be "http", "https", or the more fun "https, http, https, https" even.
-                       (Request.Headers["X-Forwarded-Proto"] != null &&
-                        Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
-            }
-        }
+        public static bool IsSecureConnection =>
+            Request.IsSecureConnection ||
+            // This can be "http", "https", or the more fun "https, http, https, https" even.
+            (Request.Headers["X-Forwarded-Proto"] != null &&
+             Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
 
         private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
         

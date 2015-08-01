@@ -5,12 +5,7 @@ namespace StackExchange.Opserver
 {
     public class TeamCitySettings : Settings<TeamCitySettings>
     {
-        public override bool Enabled { get { return Url.HasValue(); } }
-        
-        public override bool UpdateSettings(TeamCitySettings newSettings)
-        {
-            return base.UpdateSettings(newSettings);
-        }
+        public override bool Enabled => Url.HasValue();
 
         private Dictionary<string, List<string>> _serverMaps;
         public Dictionary<string, List<string>> ServerMaps

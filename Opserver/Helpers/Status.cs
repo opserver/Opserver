@@ -31,12 +31,12 @@ namespace StackExchange.Opserver.Helpers
 
         private static IHtmlString CustomSpan(string className, string text, string tooltip)
         {
-            return (string.Format(@"<span class=""status-{0}""{1}>{2}</span>", className, tooltip.HasValue() ? " title=\"" + tooltip.HtmlEncode() + "\"" : "", text)).AsHtml();
+            return ($@"<span class=""status-{className}""{(tooltip.HasValue() ? " title=\"" + tooltip.HtmlEncode() + "\"" : "")}>{text}</span>").AsHtml();
         }
 
         public static IHtmlString IconSpan(string statusClass, string tooltip = null)
         {
-            return string.Format("<span class=\"status-icon {0} icon\"{1}>●</span>", statusClass, tooltip.HasValue() ? "title=\"" + tooltip.HtmlEncode() + "\"" : "").AsHtml();
+            return $"<span class=\"status-icon {statusClass} icon\"{(tooltip.HasValue() ? "title=\"" + tooltip.HtmlEncode() + "\"" : "")}>●</span>".AsHtml();
         }
     }
 }

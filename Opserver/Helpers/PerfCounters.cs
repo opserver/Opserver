@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Helpers
             {
                 var timer = Stopwatch.StartNew();
 
-                var scope = new ManagementScope(string.Format(@"\\{0}\root\cimv2", machineName), GetConnectOptions(machineName));
+                var scope = new ManagementScope($@"\\{machineName}\root\cimv2", GetConnectOptions(machineName));
                 using (var searcher = new ManagementObjectSearcher(scope, new ObjectQuery(query)))
                 using (var results = searcher.Get())
                 {

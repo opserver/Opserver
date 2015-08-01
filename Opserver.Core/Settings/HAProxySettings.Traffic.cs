@@ -20,7 +20,8 @@ namespace StackExchange.Opserver
 
         public class HAProxyTrafficSettings
         {
-            public bool Enabled { get { return Connections.Any(); } }
+            public bool Enabled => Connections.Any();
+
             /// <summary>
             /// Connections for
             /// </summary>
@@ -64,8 +65,8 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    return ((Name != null ? Name.GetHashCode() : 0)*397)
-                           ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
+                    return ((Name?.GetHashCode() ?? 0)*397)
+                           ^ (ConnectionString?.GetHashCode() ?? 0);
                 }
             }
         }

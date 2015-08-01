@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Helpers
         public OnlyAllowAttribute(Roles roles)
         {
             if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException("roles");
+                throw new ArgumentOutOfRangeException(nameof(roles));
 
             Roles = roles;
         }
@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Helpers
         public AlsoAllowAttribute(Roles roles)
         {
             if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException("roles");
+                throw new ArgumentOutOfRangeException(nameof(roles));
 
             Roles = roles;
         }

@@ -6,15 +6,15 @@ namespace StackExchange.Opserver
     public class SettingsSection : ConfigurationSection
     {
         [ConfigurationProperty("provider"), DefaultValue("JSONFile")]
-        public string Provider { get { return this["provider"] as string; } }
+        public string Provider => this["provider"] as string;
 
         [ConfigurationProperty("name")]
-        public string Name { get { return this["name"] as string; } }
+        public string Name => this["name"] as string;
 
         [ConfigurationProperty("path")]
-        public string Path { get { return this["path"] as string; } }
+        public string Path => this["path"] as string;
 
         [ConfigurationProperty("connectionString")]
-        public string ConnectionString { get { return this["connectionString"] as string; } }
+        public string ConnectionString => this["connectionString"] as string;
     }
 }

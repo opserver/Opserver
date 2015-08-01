@@ -10,14 +10,9 @@ namespace StackExchange.Opserver
     public abstract class Settings<T> : Settings where T : class
     {
         private PropertyInfo[] _properties;
-        private IEnumerable<PropertyInfo> Properties
-        {
-            get
-            {
-                return _properties ?? (_properties =
-                                       GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty));
-            }
-        }
+
+        private IEnumerable<PropertyInfo> Properties => _properties ?? (_properties =
+            GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty));
 
         /// <summary>
         /// Updates this settings object, return true if there was an actual change
@@ -102,7 +97,7 @@ namespace StackExchange.Opserver
         protected void TriggerChanged()
         {
             var handler = Changed;
-            if (handler != null) handler(this, EventArgs.Empty);
+            handler?.Invoke(this, EventArgs.Empty);
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -110,7 +105,7 @@ namespace StackExchange.Opserver
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             var handler = PropertyChanged;
-            if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
+            handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }

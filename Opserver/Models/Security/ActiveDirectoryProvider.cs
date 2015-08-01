@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Models.Security
             AuthPassword = settings.AuthPassword;
         }
 
-        private bool UserAuth { get { return AuthUser.HasValue() && AuthPassword.HasValue(); } }
+        private bool UserAuth => AuthUser.HasValue() && AuthPassword.HasValue();
 
         public override bool ValidateUser(string userName, string password)
         {
@@ -56,9 +56,7 @@ namespace StackExchange.Opserver.Models.Security
                             {
                                 using (var gp = GroupPrincipal.FindByIdentity(pc, groupName))
                                 {
-                                    return gp == null
-                                               ? new List<string>()
-                                               : gp.GetMembers(true).ToList().Select(mp => mp.SamAccountName).ToList();
+                                    return gp?.GetMembers(true).ToList().Select(mp => mp.SamAccountName).ToList() ?? new List<string>();
                                 }
                             });
                         return group ?? old ?? new List<string>();

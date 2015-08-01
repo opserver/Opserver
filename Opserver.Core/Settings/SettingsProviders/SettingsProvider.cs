@@ -12,18 +12,18 @@ namespace StackExchange.Opserver.SettingsProviders
         public string ConnectionString { get; set; }
 
         // Accessors for built-in types
-        public PagerDutySettings PagerDuty { get { return GetSettings<PagerDutySettings>(); } }
-        public CloudFlareSettings CloudFlare { get { return GetSettings<CloudFlareSettings>(); } }
-        public DashboardSettings Dashboard { get { return GetSettings<DashboardSettings>(); } }
-        public ElasticSettings Elastic { get { return GetSettings<ElasticSettings>(); } }
-        public ExceptionsSettings Exceptions { get { return GetSettings<ExceptionsSettings>(); } }
-        public HAProxySettings HAProxy { get { return GetSettings<HAProxySettings>(); } }
-        public PollingSettings Polling { get { return GetSettings<PollingSettings>(); } }
-        public RedisSettings Redis { get { return GetSettings<RedisSettings>(); } }
-        public SQLSettings SQL { get { return GetSettings<SQLSettings>(); } }
+        public PagerDutySettings PagerDuty => GetSettings<PagerDutySettings>();
+        public CloudFlareSettings CloudFlare => GetSettings<CloudFlareSettings>();
+        public DashboardSettings Dashboard => GetSettings<DashboardSettings>();
+        public ElasticSettings Elastic => GetSettings<ElasticSettings>();
+        public ExceptionsSettings Exceptions => GetSettings<ExceptionsSettings>();
+        public HAProxySettings HAProxy => GetSettings<HAProxySettings>();
+        public PollingSettings Polling => GetSettings<PollingSettings>();
+        public RedisSettings Redis => GetSettings<RedisSettings>();
+        public SQLSettings SQL => GetSettings<SQLSettings>();
         // Generic build settings later
-        public TeamCitySettings TeamCity { get { return GetSettings<TeamCitySettings>(); } }
-        public JiraSettings Jira { get { return GetSettings<JiraSettings>(); } }
+        public TeamCitySettings TeamCity => GetSettings<TeamCitySettings>();
+        public JiraSettings Jira => GetSettings<JiraSettings>();
 
         public abstract T GetSettings<T>() where T : Settings<T>, new();
         public abstract T SaveSettings<T>(T settings) where T : class, new();
@@ -36,8 +36,8 @@ namespace StackExchange.Opserver.SettingsProviders
         }
 
         private static SettingsProvider _current;
-        public static SettingsProvider Current { get { return _current ?? (_current = GetCurrentProvider()); } }
-        
+        public static SettingsProvider Current => _current ?? (_current = GetCurrentProvider());
+
         public static SettingsProvider GetCurrentProvider()
         {
             var section = ConfigurationManager.GetSection("Settings") as SettingsSection;
@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.SettingsProviders
             var t = Type.GetType(provider, false);
             if (t == null)
             {
-                throw new ConfigurationErrorsException(string.Format("Could not resolve type '{0}' ('{1}')", section.Provider, provider));
+                throw new ConfigurationErrorsException($"Could not resolve type '{section.Provider}' ('{provider}')");
             }
             var p = (SettingsProvider) Activator.CreateInstance(t, section);
             return p;

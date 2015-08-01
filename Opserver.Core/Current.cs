@@ -6,11 +6,8 @@ namespace StackExchange.Opserver
 {
     internal static partial class Current
     {
-        public static SettingsProvider Settings
-        {
-            get { return SettingsProvider.Current; }
-        }
-        
+        public static SettingsProvider Settings => SettingsProvider.Current;
+
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>

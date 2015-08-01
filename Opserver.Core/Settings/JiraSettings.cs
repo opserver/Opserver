@@ -1,37 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace StackExchange.Opserver
 {
-    public class JiraSettings : Settings<JiraSettings>, IAfterLoadActions
+    public class JiraSettings : Settings<JiraSettings>
     {
-        public override bool Enabled { get { return Actions.Any(); } }
+        public override bool Enabled => Actions.Any();
 
-        public ObservableCollection<JiraAction> Actions { get; set; }
-        public event EventHandler<JiraAction> ActionAdded = delegate { };
-        public event EventHandler<List<JiraAction>> ActionChanged = delegate { };
-        public event EventHandler<JiraAction> ActionRemoved = delegate { };
+        public List<JiraAction> Actions { get; set; }
 
-        public ObservableCollection<string> Applications { get; set; }
-        public event EventHandler<string> ApplicationAdded = delegate { };
-        public event EventHandler<List<string>> ApplicationsChanged = delegate { };
-        public event EventHandler<string> ApplicationRemoved = delegate { };
+        public List<string> Applications { get; set; }
 
 
         public JiraSettings()
         {
-            Actions = new ObservableCollection<JiraAction>();
-            Applications = new ObservableCollection<string>();
-        }
-        public void AfterLoad()
-        {
-            Actions.AddHandlers(this, ActionAdded, ActionChanged, ActionRemoved);
-            Applications.AddHandlers(this, ApplicationAdded, ApplicationsChanged, ApplicationRemoved);
+            Actions = new List<JiraAction>();
+            Applications = new List<string>();
         }
 
         /// <summary>
@@ -72,34 +57,19 @@ namespace StackExchange.Opserver
 
     }
 
-    public class JiraAction : ISettingsCollectionItem<JiraAction>, IAfterLoadActions
+    public class JiraAction : ISettingsCollectionItem<JiraAction>
     {
-        public ObservableCollection<JiraComponent> Components { get; set; }
-        public event EventHandler<JiraComponent> ComponentAdded = delegate { };
-        public event EventHandler<List<JiraComponent>> ComponentsChanged = delegate { };
-        public event EventHandler<JiraComponent> ComponentRemoved = delegate { };
+        public List<JiraComponent> Components { get; set; }
 
-        public ObservableCollection<string> Applications { get; set; }
-        public event EventHandler<string> ApplicationAdded = delegate { };
-        public event EventHandler<List<string>> ApplicationsChanged = delegate { };
-        public event EventHandler<string> ApplicationRemoved = delegate { };
+        public List<string> Applications { get; set; }
 
         public JiraAction()
         {
-            Components = new ObservableCollection<JiraComponent>();
-            Applications = new ObservableCollection<string>();
+            Components = new List<JiraComponent>();
+            Applications = new List<string>();
         }
 
-        public void AfterLoad()
-        {
-            Components.AddHandlers(this, ComponentAdded, ComponentsChanged, ComponentRemoved);
-            Applications.AddHandlers(this, ApplicationAdded, ApplicationsChanged, ApplicationRemoved);
-        }
-
-        public int Id
-        {
-            get { return GetHashCode(); }
-        }
+        public int Id => GetHashCode();
 
         /// <summary>
         /// Host url
@@ -185,14 +155,13 @@ namespace StackExchange.Opserver
                 foreach (var a in Applications)
                     hashCode = (hashCode * 397) ^ a.GetHashCode();
 
-
-                hashCode = (hashCode * 397) ^ (Url != null ? Url.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Password != null ? Password.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Username != null ? Username.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (ProjectKey != null ? ProjectKey.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Caption != null ? Caption.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Labels != null ? Labels.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Url?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Password?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Username?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (ProjectKey?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Caption?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Labels?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }
@@ -233,8 +202,8 @@ namespace StackExchange.Opserver
             unchecked
             {
                 int hashCode = 0;
-                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (Application != null ? Application.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (Application?.GetHashCode() ?? 0);
                 return hashCode;
             }
         }

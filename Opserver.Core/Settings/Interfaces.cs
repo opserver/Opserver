@@ -17,9 +17,4 @@ namespace StackExchange.Opserver
     {
         string Name { get; }
     }
-
-    public interface IAfterLoadActions
-    {
-        void AfterLoad();
-    }
 }

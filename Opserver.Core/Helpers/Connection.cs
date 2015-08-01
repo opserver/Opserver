@@ -47,7 +47,7 @@ namespace StackExchange.Opserver.Helpers
                 catch (SqlException e)
                 {
                     var csb = new SqlConnectionStringBuilder(connectionString);
-                    var sqlException = string.Format("Error opening connection to {0} at {1} timeout was: {2} ms", csb.InitialCatalog, csb.DataSource, connectionTimeout.ToComma());
+                    var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
                     throw new Exception(sqlException, e);
                 }
                 setReadUncommitted(conn);
@@ -94,7 +94,7 @@ namespace StackExchange.Opserver.Helpers
                     catch (SqlException e)
                     {
                         var csb = new SqlConnectionStringBuilder(connectionString);
-                        var sqlException = string.Format("Error opening connection to {0} at {1} timeout was: {2} ms", csb.InitialCatalog, csb.DataSource, connectionTimeout.ToComma());
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
                         throw new Exception(sqlException, e);
                     }
                     await SetReadUncommitted(conn);

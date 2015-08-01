@@ -30,19 +30,13 @@ namespace StackExchange.Opserver.Monitoring
         /// <summary>
         /// Aggregate time executing sql on the request.
         /// </summary>
-        public long TotalMilliseconds
-        {
-            get { return _sw.ElapsedMilliseconds; }
-        }
+        public long TotalMilliseconds => _sw.ElapsedMilliseconds;
 
         public void ExecuteStart(IDbCommand profiledDbCommand, SqlExecuteType executeType)
         {
             Count++;
 
-            if (_wrapped != null)
-            {
-                _wrapped.ExecuteStart(profiledDbCommand, executeType);
-            }
+            _wrapped?.ExecuteStart(profiledDbCommand, executeType);
 
             // This is subtle, avoid measure time gathering stack trace (that happens on execute start)
             _sw.Start();
@@ -54,19 +48,13 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _sw.Stop();
             }
-            if (_wrapped != null)
-            {
-                _wrapped.ExecuteFinish(profiledDbCommand, executeType, reader);
-            }
+            _wrapped?.ExecuteFinish(profiledDbCommand, executeType, reader);
         }
 
         public void ReaderFinish(IDataReader reader)
         {
             _sw.Stop();
-            if (_wrapped != null)
-            {
-                _wrapped.ReaderFinish(reader);
-            }
+            _wrapped?.ReaderFinish(reader);
         }
 
         public void OnError(IDbCommand profiledDbCommand, SqlExecuteType executeType, Exception e)
@@ -76,10 +64,7 @@ namespace StackExchange.Opserver.Monitoring
             e.Data["SQL"] = formatter.FormatSql(profiledDbCommand.CommandText, parameters);
         }
 
-        public bool IsActive
-        {
-            get { return true; }
-        }
+        public bool IsActive => true;
 
         IDisposable Elastic.IProfiler.Profile(string name, string command)
         {
@@ -112,10 +97,7 @@ namespace StackExchange.Opserver.Monitoring
                     _parent._sw.Stop();
                     _parent = null;
                 }
-                if (_timing != null)
-                {
-                    _timing.Dispose();
-                }
+                _timing?.Dispose();
             }
         }
     }

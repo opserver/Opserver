@@ -1,50 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver
 {
-    public class DashboardSettings : Settings<DashboardSettings>, IAfterLoadActions, INodeSettings
+    public class DashboardSettings : Settings<DashboardSettings>, INodeSettings
     {
-        public override bool Enabled { get { return Providers.Any(); } }
-        
-        public ObservableCollection<Category> Categories { get; set; }
-        public event EventHandler<Category> CategoryAdded = delegate { };
-        public event EventHandler<List<Category>> CategoriesChanged = delegate { };
-        public event EventHandler<Category> CategoryRemoved = delegate { };
-        
-        public ObservableCollection<Provider> Providers { get; set; }
-        public event EventHandler<Provider> ProviderAdded = delegate { };
-        public event EventHandler<List<Provider>> ProvidersChanged = delegate { };
-        public event EventHandler<Provider> ProviderRemoved = delegate { };
+        public override bool Enabled => Providers.Any();
 
-        public ObservableCollection<NodeSettings> PerNodeSettings { get; set; }
-        public event EventHandler<NodeSettings> PerNodeSettingAdded = delegate { };
-        public event EventHandler<List<NodeSettings>> PerNodeSettingsChanged = delegate { };
-        public event EventHandler<NodeSettings> PerNodeSettingRemoved = delegate { };
+        public List<Category> Categories { get; set; }
+        
+        public List<Provider> Providers { get; set; }
+
+        public List<NodeSettings> PerNodeSettings { get; set; }
 
         public bool ShowOther { get; set; }
 
         public DashboardSettings()
         {
-            Categories = new ObservableCollection<Category>();
-            Providers = new ObservableCollection<Provider>();
-            PerNodeSettings = new ObservableCollection<NodeSettings>();
+            Categories = new List<Category>();
+            Providers = new List<Provider>();
+            PerNodeSettings = new List<NodeSettings>();
             ShowOther = true;
-        }
-
-        public void AfterLoad()
-        {
-            Categories.AddHandlers(this, CategoryAdded, CategoriesChanged, CategoryRemoved);
-            Providers.AddHandlers(this, ProviderAdded, ProvidersChanged, ProviderRemoved);
-            PerNodeSettings.AddHandlers(this, PerNodeSettingAdded, PerNodeSettingsChanged, PerNodeSettingRemoved);
         }
 
         public NodeSettings GetNodeSettings(string node, Category c)
         {
-            var s = PerNodeSettings != null ? PerNodeSettings.FirstOrDefault(n => n.PatternRegex.IsMatch(node)) : null;
+            var s = PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node));
             
             // Grab setting from node, then category, then global
             Func<Func<INodeSettings, decimal?>, decimal?> getVal = f => (s != null ? f(s) : null) ?? f(c) ?? f(this);
@@ -57,7 +40,7 @@ namespace StackExchange.Opserver
                     MemoryCriticalPercent = getVal(i => i.MemoryCriticalPercent),
                     DiskWarningPercent = getVal(i => i.DiskWarningPercent),
                     DiskCriticalPercent = getVal(i => i.DiskCriticalPercent),
-                    PrimaryInterfacePatternRegex = (s != null ? s.PrimaryInterfacePatternRegex : null) ?? c.PrimaryInterfacePatternRegex
+                    PrimaryInterfacePatternRegex = s?.PrimaryInterfacePatternRegex ?? c.PrimaryInterfacePatternRegex
                 };
         }
 
@@ -194,9 +177,9 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Pattern != null ? Pattern.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (PrimaryInterfacePattern != null ? PrimaryInterfacePattern.GetHashCode() : 0);
+                    int hashCode = Name?.GetHashCode() ?? 0;
+                    hashCode = (hashCode*397) ^ (Pattern?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (PrimaryInterfacePattern?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ CPUWarningPercent.GetHashCode();
                     hashCode = (hashCode*397) ^ CPUCriticalPercent.GetHashCode();
                     hashCode = (hashCode*397) ^ MemoryWarningPercent.GetHashCode();
@@ -213,7 +196,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public class NodeSettings : INodeSettings, ISettingsCollectionItem<NodeSettings>
         {
-            string ISettingsCollectionItem.Name { get { return Pattern; } }
+            string ISettingsCollectionItem.Name => Pattern;
 
             /// <summary>
             /// The name that appears for this category
@@ -224,10 +207,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// The pattern to match for these node settings
             /// </summary>
-            public Regex PatternRegex
-            {
-                get { return _patternRegEx ?? (_patternRegEx = GetPatternMatcher(Pattern)); }
-            }
+            public Regex PatternRegex => _patternRegEx ?? (_patternRegEx = GetPatternMatcher(Pattern));
 
             /// <summary>
             /// The Pattern to match on node interfaces, an interface matching this pattern will be shown on the dashboard.
@@ -299,8 +279,8 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    int hashCode = (Pattern != null ? Pattern.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (PrimaryInterfacePattern != null ? PrimaryInterfacePattern.GetHashCode() : 0);
+                    int hashCode = Pattern?.GetHashCode() ?? 0;
+                    hashCode = (hashCode*397) ^ (PrimaryInterfacePattern?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ CPUWarningPercent.GetHashCode();
                     hashCode = (hashCode*397) ^ CPUCriticalPercent.GetHashCode();
                     hashCode = (hashCode*397) ^ MemoryWarningPercent.GetHashCode();
@@ -370,10 +350,10 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Type != null ? Type.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Host != null ? Host.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
+                    int hashCode = Name?.GetHashCode() ?? 0;
+                    hashCode = (hashCode*397) ^ (Type?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Host?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (ConnectionString?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ QueryTimeoutMs;
                     return hashCode;
                 }

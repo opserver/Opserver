@@ -8,14 +8,13 @@ namespace StackExchange.Opserver.Helpers
     {
         public object GetFormat(Type formatType)
         {
-            if (formatType == typeof(ICustomFormatter)) return this;
-            return null;
+            return formatType == typeof(ICustomFormatter) ? this : null;
         }
 
         private const string fileSizeFormat = "fs";
-        private const Decimal OneKiloByte = 1024M;
-        private const Decimal OneMegaByte = OneKiloByte * 1024M;
-        private const Decimal OneGigaByte = OneMegaByte * 1024M;
+        private const decimal OneKiloByte = 1024M;
+        private const decimal OneMegaByte = OneKiloByte * 1024M;
+        private const decimal OneGigaByte = OneMegaByte * 1024M;
 
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
@@ -29,7 +28,7 @@ namespace StackExchange.Opserver.Helpers
                 return defaultFormat(format, arg, formatProvider);
             }
 
-            Decimal size;
+            decimal size;
 
             try
             {
@@ -62,8 +61,8 @@ namespace StackExchange.Opserver.Helpers
             }
 
             string precision = format.Substring(2);
-            if (String.IsNullOrEmpty(precision)) precision = "2";
-            return String.Format("{0:N" + precision + "}{1}", size, suffix);
+            if (string.IsNullOrEmpty(precision)) precision = "2";
+            return string.Format("{0:N" + precision + "}{1}", size, suffix);
 
         }
 

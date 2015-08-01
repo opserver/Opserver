@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class RedisSettings : Settings<RedisSettings>, IAfterLoadActions
+    public class RedisSettings : Settings<RedisSettings>
     {
-        public override bool Enabled { get { return Servers.Any(); } }
+        public override bool Enabled => Servers.Any();
 
-        public ObservableCollection<Server> Servers { get; set; }
-        public event EventHandler<Server> ServerAdded = delegate { };
-        public event EventHandler<List<Server>> ServersChanged = delegate { };
-        public event EventHandler<Server> ServerRemoved = delegate { };
+        public List<Server> Servers { get; set; }
 
         private Server _allServers;
         public Server AllServers
@@ -30,14 +26,9 @@ namespace StackExchange.Opserver
 
         public RedisSettings()
         {
-            Servers = new ObservableCollection<Server>();
+            Servers = new List<Server>();
             AllServers = new Server();
             Defaults = new Server();
-        }
-
-        public void AfterLoad()
-        {
-            Servers.AddHandlers(this, ServerAdded, ServersChanged, ServerRemoved);
         }
 
         public class Server : ISettingsCollectionItem<Server>
@@ -91,8 +82,8 @@ namespace StackExchange.Opserver
                     int hashCode = 0;
                     foreach (var i in Instances)
                         hashCode = (hashCode*397) ^ i.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
                     return hashCode;
                 }
@@ -149,7 +140,7 @@ namespace StackExchange.Opserver
                 unchecked
                 {
                     // TODO: Regexes should move
-                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
+                    int hashCode = Name?.GetHashCode() ?? 0;
                     hashCode = (hashCode*397) ^ Port;
                     return hashCode;
                 }

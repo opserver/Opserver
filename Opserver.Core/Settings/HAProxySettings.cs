@@ -1,23 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public partial class HAProxySettings : Settings<HAProxySettings>, IAfterLoadActions
+    public partial class HAProxySettings : Settings<HAProxySettings>
     {
-        public override bool Enabled { get { return Instances.Any() || Groups.Any(); } }
+        public override bool Enabled => Instances.Any() || Groups.Any();
 
-        public ObservableCollection<Group> Groups { get; set; }
-        public event EventHandler<Group> GroupAdded = delegate { };
-        public event EventHandler<List<Group>> GroupsChanged = delegate { };
-        public event EventHandler<Group> GroupRemoved = delegate { };
+        public List<Group> Groups { get; set; }
 
-        public ObservableCollection<Instance> Instances { get; set; }
-        public event EventHandler<Instance> InstanceAdded = delegate { };
-        public event EventHandler<List<Instance>> InstancesChanged = delegate { };
-        public event EventHandler<Instance> InstanceRemoved = delegate { };
+        public List<Instance> Instances { get; set; }
 
         private Dictionary<string, string> _aliases;
         public Dictionary<string, string> Aliases
@@ -35,16 +28,9 @@ namespace StackExchange.Opserver
         {
             // Defaults
             QueryTimeoutMs = 60*1000;
-            Groups = new ObservableCollection<Group>();
-            Instances = new ObservableCollection<Instance>();
+            Groups = new List<Group>();
+            Instances = new List<Instance>();
             Aliases = new Dictionary<string, string>();
-        }
-
-        public void AfterLoad()
-        {
-            Groups.AddHandlers(this, GroupAdded, GroupsChanged, GroupRemoved);
-            Groups.ForEach(g => g.AfterLoad());
-            Instances.AddHandlers(this, InstanceAdded, InstancesChanged, InstanceRemoved);
         }
 
         public InstanceSettings GetInstanceSettings(Instance instance, Group group)
@@ -59,7 +45,7 @@ namespace StackExchange.Opserver
             {
                 Name = instance.Name.IsNullOrEmptyReturn(group != null ? group.Name : "Unknown"),
                 Description = instance.Description.IsNullOrEmptyReturn(group != null ? group.Description : "Unknown"),
-                QueryTimeoutMs = instance.QueryTimeoutMs ?? (group != null ? group.QueryTimeoutMs : null) ?? QueryTimeoutMs,
+                QueryTimeoutMs = instance.QueryTimeoutMs ?? @group?.QueryTimeoutMs ?? QueryTimeoutMs,
                 User = getVal(i => i.User, User),
                 Password = getVal(i => i.Password, Password),
                 AdminUser = getVal(i => i.AdminUser, AdminUser),
@@ -91,24 +77,16 @@ namespace StackExchange.Opserver
         /// </summary>
         public int QueryTimeoutMs { get; set; }
 
-        public class Group : ISettingsCollectionItem<Group>, IAfterLoadActions, IInstanceSettings
+        public class Group : ISettingsCollectionItem<Group>, IInstanceSettings
         {
             /// <summary>
             /// Instances in this group
             /// </summary>
-            public ObservableCollection<Instance> Instances { get; set; }
-            public event EventHandler<Instance> InstanceAdded = delegate { };
-            public event EventHandler<List<Instance>> InstancesChanged = delegate { };
-            public event EventHandler<Instance> InstanceRemoved = delegate { };
+            public List<Instance> Instances { get; set; }
 
             public Group()
             {
-                Instances = new ObservableCollection<Instance>();
-            }
-
-            public void AfterLoad()
-            {
-                Instances.AddHandlers(this, InstanceAdded, InstancesChanged, InstanceRemoved);
+                Instances = new List<Instance>();
             }
             
             /// <summary>
@@ -169,8 +147,8 @@ namespace StackExchange.Opserver
                     foreach (var i in Instances)
                         hashCode = (hashCode * 397) ^ i.GetHashCode();
                     hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     return hashCode;
                 }
             }
@@ -239,12 +217,12 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    int hashCode = (Url != null ? Url.GetHashCode() : 0);
+                    int hashCode = Url?.GetHashCode() ?? 0;
                     hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
-                    hashCode = (hashCode*397) ^ (User != null ? User.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Password != null ? Password.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (AdminUser != null ? AdminUser.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (AdminPassword != null ? AdminPassword.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (User?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (Password?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (AdminUser?.GetHashCode() ?? 0);
+                    hashCode = (hashCode*397) ^ (AdminPassword?.GetHashCode() ?? 0);
                     return hashCode;
                 }
             }

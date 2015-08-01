@@ -7,8 +7,8 @@ namespace StackExchange.Opserver.Models.Security
 {
     public abstract class SecurityProvider
     {
-        public virtual bool IsAdmin { get { return InGroups(SiteSettings.AdminGroups); } }
-        public virtual bool IsViewer { get { return InGroups(SiteSettings.ViewGroups); } }
+        public virtual bool IsAdmin => InGroups(SiteSettings.AdminGroups);
+        public virtual bool IsViewer => InGroups(SiteSettings.ViewGroups);
 
         internal virtual bool InReadGroups(ISecurableSection settings)
         {

@@ -1,37 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class ExceptionsSettings : Settings<ExceptionsSettings>, IAfterLoadActions
+    public class ExceptionsSettings : Settings<ExceptionsSettings>
     {
-        public override bool Enabled { get { return Stores.Any(); } }
+        public override bool Enabled => Stores.Any();
 
-        public ObservableCollection<Store> Stores { get; set; }
-        public event EventHandler<Store> StoreAdded = delegate { };
-        public event EventHandler<List<Store>> StoresChanged = delegate { };
-        public event EventHandler<Store> StoreRemoved = delegate { };
+        public List<Store> Stores { get; set; }
 
-        public ObservableCollection<string> Applications { get; set; }
-        public event EventHandler<string> ApplicationAdded = delegate {};
-        public event EventHandler<List<string>> ApplicationsChanged = delegate {};
-        public event EventHandler<string> ApplicationRemoved = delegate { };
+        public List<string> Applications { get; set; }
         
         public ExceptionsSettings()
         {
             // Defaults
             RecentSeconds = 600;
             EnablePreviews = true;
-            Applications = new ObservableCollection<string>();
-            Stores = new ObservableCollection<Store>();
-        }
-
-        public void AfterLoad()
-        {
-            Applications.AddHandlers(this, ApplicationAdded, ApplicationsChanged, ApplicationRemoved);
-            Stores.AddHandlers(this, StoreAdded, StoresChanged, StoreRemoved);
+            Applications = new List<string>();
+            Stores = new List<Store>();
         }
 
         /// <summary>
@@ -114,11 +100,11 @@ namespace StackExchange.Opserver
             {
                 unchecked
                 {
-                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
+                    int hashCode = Name?.GetHashCode() ?? 0;
+                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
                     hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
                     hashCode = (hashCode*397) ^ PollIntervalSeconds;
-                    hashCode = (hashCode*397) ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (ConnectionString?.GetHashCode() ?? 0);
                     return hashCode;
                 }
             }

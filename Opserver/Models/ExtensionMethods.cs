@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Models
         public static IHtmlString PrettyPercentUtilization(this Interface i)
         {
             if (!i.InPercentUtil.HasValue || !i.OutPercentUtil.HasValue) return "n/a".AsHtml();
-            return string.Format(@"{0}% <span class=""note"">In - </span>{1}% <span class=""note"">Out</span>", i.InPercentUtil, i.OutPercentUtil).AsHtml();
+            return $@"{i.InPercentUtil}% <span class=""note"">In - </span>{i.OutPercentUtil}% <span class=""note"">Out</span>".AsHtml();
         }
 
         public static IHtmlString PrettyIn(this Interface i)
