@@ -51,7 +51,12 @@
             </tr>
         </tbody>
         <tbody class="node-group" data-name="shards-@c.HealthStatus.Data.Name">
-            @foreach (var s in shards.OrderByWorst(s => s.GetMonitorStatus()).ThenBy(s => { int j; return int.TryParse(s.Index, out j) ? j : 0; }).ThenBy(s => s.Shard).ThenByDescending(s => s.Primary).Take(maxTroubleShardsToShow))
+            @foreach (var s in shards.OrderByDescending(s => s.Node.HasValue() || s.RelocatingNode.HasValue())
+                .ThenByWorst(s => s.GetMonitorStatus())
+                .ThenBy(s => { int j; return int.TryParse(s.Index, out j) ? j : 0; })
+                .ThenBy(s => s.Shard)
+                .ThenByDescending(s => s.Primary)
+                .Take(maxTroubleShardsToShow))
             {
                 <tr class="@s.GetMonitorStatus().RowClass()">
                     <td>@s.GetMonitorStatus().IconSpan()</td>
