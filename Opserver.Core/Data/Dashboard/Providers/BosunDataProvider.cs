@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -163,7 +164,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private string ConvertToBosun(DateTime? date, DateTime valueIfNull)
         {
-            return (date.HasValue ? date.Value : valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss");
+            return (date.HasValue ? date.Value : valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss", CultureInfo.InvariantCulture);
         }
 
         public string GetJsonQuery(string metric, string host = "*", DateTime? start = null, DateTime? end = null, bool counter = true)
