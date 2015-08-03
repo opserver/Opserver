@@ -4,6 +4,7 @@
 @model DashboardModel
 @{
     Layout = null;
+    var maxTroubleShardsToShow = 250;
     var isAdmin = Current.User.IsInRole(Roles.ElasticAdmin);
 }
 @helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfoWrap> nodes)
@@ -21,7 +22,7 @@
     }
     <span class="unknown">@node</span>
 }
-@foreach (var c in Model.Clusters.OrderByWorst(c => c.Status.Data != null ? c.Status.Data.MonitorStatus : MonitorStatus.Critical))
+@foreach (var c in Model.Clusters.OrderByWorst(c => c.Status.Data?.MonitorStatus ?? MonitorStatus.Critical))
 {
     var shards = (Model.WarningsOnly ? c.TroubledShards : c.ShardStates).ToList();
     if (!shards.Any() || c.Nodes.Data == null)
@@ -50,7 +51,7 @@
             </tr>
         </tbody>
         <tbody class="node-group" data-name="shards-@c.HealthStatus.Data.Name">
-            @foreach (var s in shards.OrderByWorst(s => s.GetMonitorStatus()).ThenBy(s => { int j; return int.TryParse(s.Index, out j) ? j : 0; }).ThenBy(s => s.Shard).ThenByDescending(s => s.Primary))
+            @foreach (var s in shards.OrderByWorst(s => s.GetMonitorStatus()).ThenBy(s => { int j; return int.TryParse(s.Index, out j) ? j : 0; }).ThenBy(s => s.Shard).ThenByDescending(s => s.Primary).Take(maxTroubleShardsToShow))
             {
                 <tr class="@s.GetMonitorStatus().RowClass()">
                     <td>@s.GetMonitorStatus().IconSpan()</td>
@@ -75,6 +76,10 @@
                         </td>
                     }
                 </tr>
+            }
+            @if (shards.Count > maxTroubleShardsToShow)
+            {
+                <tr><td colspan="@(isAdmin ? 8 : 7)" style="text-align: center">More than @(maxTroubleShardsToShow.ToComma()) in trouble.</td></tr>
             }
         </tbody>
     </table>

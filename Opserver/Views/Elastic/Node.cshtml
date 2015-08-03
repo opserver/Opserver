@@ -37,7 +37,7 @@ Transport: @n.Stats.TransportAddress">@n.Name</td>
                         </tr>
                         <tr>
                             <td>Version</td>
-                            <td><a target="_blank" href="http://www.elasticsearch.org/downloads/">@(n != null ? n.Version.ToString() : "Unknown")</a></td>
+                            <td><a target="_blank" href="http://www.elasticsearch.org/downloads/">@n.Version.ToString()</a></td>
                         </tr>
                         <tr>
                             <td>Role</td>
@@ -151,7 +151,7 @@ User: @os.CPU.User%
                     </table>
                 </div>
             }
-            @if (fs != null && fs.Data != null)
+            @if (fs?.Data != null)
             {
                 <div class="section-wrap refresh-group" data-name="instance-filesystem">
                     <div class="summary-section-header">File System</div>
@@ -202,7 +202,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
         </div>
         <div class="right-col">
             @{
-                var indexStats = c.Stats.Data != null ? c.Stats.Data.GetIndexStats() : null;
+                var indexStats = c.Stats.Data?.GetIndexStats();
             }
             @if (indexStats == null)
             {
@@ -230,7 +230,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                             </tr>
                         </thead>
                         <tbody>
-                            @if (gs.Primaries.Search != null)
+                            @if (gs?.Primaries?.Search != null)
                             {
                                 <tr>
                                     <td>Searches</td>
@@ -238,7 +238,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                     <td title="Query time: @TimeSpan.FromMilliseconds(gs.Total.Search.QueryTimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Search.QueryTotal.ToComma()</td>
                                 </tr>
                             }
-                            @if (gs.Primaries.Documents != null)
+                            @if (gs?.Primaries?.Documents != null)
                             {
                                 <tr>
                                     <td>Documents</td>
@@ -251,7 +251,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                     <td class="note">@gs.Total.Documents.Deleted.ToComma()</td>
                                 </tr>
                             }
-                            @if (gs.Primaries.Store != null)
+                            @if (gs?.Primaries?.Store != null)
                             {
                                 <tr>
                                     <td>Size</td>
@@ -259,7 +259,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                     <td class="note">@gs.Total.Store.SizeInBytes.ToSize()</td>
                                 </tr>
                             }
-                            @if (gs.Primaries.Indexing != null)
+                            @if (gs?.Primaries?.Indexing != null)
                             {
                                 <tr>
                                     <td>Indexed</td>
@@ -267,7 +267,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                     <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Total.Indexing.TimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Indexing.Total.ToComma()</td>
                                 </tr>
                             }
-                            @if (gs.Primaries.Get != null)
+                            @if (gs?.Primaries?.Get != null)
                             {
                                 <tr>
                                     <td>Gets</td>
