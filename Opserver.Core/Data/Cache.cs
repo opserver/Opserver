@@ -13,9 +13,9 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Returns if this cache has data - THIS WILL NOT TRIGGER A FETCH
         /// </summary>
-        public override bool ContainsData { get { return DataBacker != null; } }
+        public override bool ContainsData => DataBacker != null;
         public override object GetData() { return DataBacker; }
-        public override Type Type { get { return typeof (T); } }
+        public override Type Type => typeof (T);
 
         private T DataBacker { get; set; }
         public T Data
@@ -209,33 +209,30 @@ namespace StackExchange.Opserver.Data
         /// Unique key for caching, only used for items that are on-demand, e.g. methods that have cache based on parameters
         /// </summary>
         public string CacheKey { get; set; }
-        protected string CompeteKey { get { return CacheKey + "-compete"; } }
+        protected string CompeteKey => CacheKey + "-compete";
         public int? CacheFailureForSeconds { get; set; }
         public int CacheForSeconds { get; set; }
         public int CacheStaleForSeconds { get; set; }
         public bool AffectsNodeStatus { get; set; }
-        public virtual Type Type { get { return typeof(Cache); } }
+        public virtual Type Type => typeof(Cache);
         public Guid UniqueId { get; private set; }
 
         internal bool NeedsPoll = true;
         private volatile bool _isPolling;
         public bool IsPolling { get { return _isPolling; } internal set { _isPolling = value; } }
-        public bool IsStale { get { return NextPoll < DateTime.UtcNow; } }
-        public bool IsExpired { get { return LastPoll.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow; } }
+        public bool IsStale => NextPoll < DateTime.UtcNow;
+        public bool IsExpired => LastPoll.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow;
 
         protected long _pollsTotal, _pollsSuccessful;
-        public long PollsTotal { get { return _pollsTotal; } }
-        public long PollsSuccessful { get { return _pollsSuccessful; } }
+        public long PollsTotal => _pollsTotal;
+        public long PollsSuccessful => _pollsSuccessful;
         public DateTime LastPoll { get; internal set; }
-        public DateTime NextPoll
-        {
-            get
-            {
-                return LastPoll.AddSeconds(LastPollStatus == FetchStatus.Fail
-                                               ? CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)
-                                               : CacheForSeconds);
-            }
-        }
+
+        public DateTime NextPoll =>
+            LastPoll.AddSeconds(LastPollStatus == FetchStatus.Fail
+                ? CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)
+                : CacheForSeconds);
+
         public TimeSpan LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
         public FetchStatus LastPollStatus { get; set; }
@@ -258,7 +255,7 @@ namespace StackExchange.Opserver.Data
 
         protected static readonly ConcurrentDictionary<string, object> NullLocks = new ConcurrentDictionary<string, object>();
         
-        public virtual bool ContainsData { get { return false; } }
+        public virtual bool ContainsData => false;
         public virtual object GetData() { return null; }
         public string ErrorMessage { get; internal set; }
 

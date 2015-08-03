@@ -12,30 +12,27 @@ namespace StackExchange.Opserver.Data
         public IPAddress IPAddress { get; private set; }
         public IPAddress Subnet { get; private set; }
         public int CIDR { get; private set; }
-        public AddressFamily AddressFamily { get { return IPAddress.AddressFamily; } }
+        public AddressFamily AddressFamily => IPAddress.AddressFamily;
 
         private TinyIPAddress? _tinyIPAddress { get; set; }
         private TinyIPAddress? _tinySubnet { get; set; }
 
-        internal TinyIPAddress TIPAddress
-        {
-            get { return (_tinyIPAddress ?? (_tinyIPAddress = TinyIPAddress.FromIPAddress(IPAddress))).Value; }
-        }
-        internal TinyIPAddress TSubnet
-        {
-            get { return (_tinySubnet ?? (_tinySubnet = TinyIPAddress.FromIPAddress(Subnet ?? IPAddress))).Value; }
-        }
+        internal TinyIPAddress TIPAddress =>
+            (_tinyIPAddress ?? (_tinyIPAddress = TinyIPAddress.FromIPAddress(IPAddress))).Value;
 
-        public IPAddress FirstAddressInSubnet { get { return TinyFirstAddressInSubnet.ToIPAddress(); } }
-        public IPAddress LastAddressInSubnet { get { return TinyLastAddressInSubnet.ToIPAddress(); } }
-        public IPAddress Broadcast { get { return AddressFamily == AddressFamily.InterNetwork ? TinyBroadcast.ToIPAddress() : null; } }
+        internal TinyIPAddress TSubnet =>
+            (_tinySubnet ?? (_tinySubnet = TinyIPAddress.FromIPAddress(Subnet ?? IPAddress))).Value;
+
+        public IPAddress FirstAddressInSubnet => TinyFirstAddressInSubnet.ToIPAddress();
+        public IPAddress LastAddressInSubnet => TinyLastAddressInSubnet.ToIPAddress();
+        public IPAddress Broadcast => AddressFamily == AddressFamily.InterNetwork ? TinyBroadcast.ToIPAddress() : null;
 
 
-        private TinyIPAddress TinyFirstAddressInSubnet { get { return (TIPAddress & TSubnet); } }
-        private TinyIPAddress TinyLastAddressInSubnet { get { return Subnet == null ? TIPAddress : (TIPAddress | ~TSubnet); } }
-        private TinyIPAddress TinyBroadcast { get { return Subnet == null ? TIPAddress : (TIPAddress | ~TSubnet); } }
+        private TinyIPAddress TinyFirstAddressInSubnet => (TIPAddress & TSubnet);
+        private TinyIPAddress TinyLastAddressInSubnet => Subnet == null ? TIPAddress : (TIPAddress | ~TSubnet);
+        private TinyIPAddress TinyBroadcast => Subnet == null ? TIPAddress : (TIPAddress | ~TSubnet);
 
-        public bool IsPrivate { get { return IsPrivateNetwork(this); } }
+        public bool IsPrivate => IsPrivateNetwork(this);
 
         public override string ToString()
         {
@@ -156,7 +153,7 @@ namespace StackExchange.Opserver.Data
             {
                 case AddressFamily.InterNetwork: return 32;
                 case AddressFamily.InterNetworkV6: return 128;
-                default: throw new ArgumentOutOfRangeException("family", "You're probably from the future, they added another more IPs, fix me.");
+                default: throw new ArgumentOutOfRangeException(nameof(family), "You're probably from the future, they added another more IPs, fix me.");
             }
         }
 
@@ -180,7 +177,7 @@ namespace StackExchange.Opserver.Data
         /// Private IP Ranges reserved for internal use by ARIN
         /// These are not routable on the global internet
         /// </summary>
-        public static List<IPNet> ReservedPrivateRanges = new List<IPNet>
+        private static List<IPNet> ReservedPrivateRanges = new List<IPNet>
             {
                 Parse("10.0.0.0/8"),
                 Parse("172.16.0.0/12"),
@@ -195,11 +192,11 @@ namespace StackExchange.Opserver.Data
 
         public struct TinyIPAddress : IEquatable<TinyIPAddress>, IComparable<TinyIPAddress>
         {
-            public readonly uint? IPv4Address;
-            public readonly ulong? FirstV6Leg;
-            public readonly ulong? LastV6Leg;
+            private readonly uint? IPv4Address;
+            private readonly ulong? FirstV6Leg;
+            private readonly ulong? LastV6Leg;
 
-            public AddressFamily AddressFamily { get { return IPv4Address.HasValue ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6; } }
+            public AddressFamily AddressFamily => IPv4Address.HasValue ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
 
             public string BitString
             {
@@ -377,7 +374,7 @@ namespace StackExchange.Opserver.Data
                 return true;
             }
 
-            public static bool IsValidSubnetImpl(ulong l)
+            private static bool IsValidSubnetImpl(ulong l)
             {
                 bool inZeros = false;
                 for (var j = 63; j >= 0; j--)

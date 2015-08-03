@@ -14,14 +14,9 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class HubController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.Dashboard; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.Dashboard; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.Dashboard;
+
+        protected override string TopTab => TopTabs.BuiltIn.Dashboard;
 
         [Route("headsup"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult HeadsUp()

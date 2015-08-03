@@ -2,7 +2,6 @@
 using System.IO;
 using System.Text;
 using System.Web.Mvc;
-using StackExchange.Opserver.Helpers;
 using Svg;
 using Svg.Transforms;
 
@@ -14,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult ChartExport(string fileName, string type, int width, string svg)
         {
             type = type.ToLowerInvariant(); //normalize bitches!
-            var name = string.Format("{0}.{1}", fileName.HasValue() ? fileName : "Chart", GetExtension(type));
+            var name = $"{(fileName.HasValue() ? fileName : "Chart")}.{GetExtension(type)}";
 
             byte[] result;
             using (var ms = new MemoryStream())

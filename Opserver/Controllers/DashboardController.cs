@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
 
@@ -10,15 +9,9 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.Dashboard; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.Dashboard;
 
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.Dashboard; }
-        }
+        protected override string TopTab => TopTabs.BuiltIn.Dashboard;
 
         [Route("dashboard")]
         public ActionResult Dashboard(string filter)

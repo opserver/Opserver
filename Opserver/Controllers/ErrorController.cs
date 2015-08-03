@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net;
 using System.Web.Mvc;
-using StackExchange.Opserver.Helpers;
+using StackExchange.Exceptional;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult InvokeErrorHandler(string resource, string subResource)
         {
             var context = System.Web.HttpContext.Current;
-            var factory = new Exceptional.HandlerFactory();
+            var factory = new HandlerFactory();
 
             var page = factory.GetHandler(context, Request.RequestType, Request.Url.ToString(), Request.PathInfo);
             page.ProcessRequest(context);

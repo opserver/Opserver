@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Linq;
 using System.Web.Mvc;
 using System.Web.UI.DataVisualization.Charting;
-using StackExchange.Opserver.Helpers;
+using StackExchange.Opserver.Data.HAProxy;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/traffic/json")]
         public ActionResult HAProxyTrafficJson(string host, long start, long end, bool? summary = false)
         {
-            var traffic = Data.HAProxy.HAProxyTraffic.GetTrafficSummary(host, null, null);
+            var traffic = HAProxyTraffic.GetTrafficSummary(host, null, null);
 
             return Json(new
                 {
@@ -47,7 +47,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-hits")]
         public ActionResult HAProxyRouteHits(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
         {
-            var dataPoints = Data.HAProxy.HAProxyTraffic.GetRouteData(route, days, host: host);
+            var dataPoints = HAProxyTraffic.GetRouteData(route, days, host: host);
 
             var chart = GetChart(height, width);
             chart.BackColor = alt ? AltRouteBackground : Color.White;
@@ -79,7 +79,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-performance")]
         public ActionResult HaProxyRoutePerformance(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
         {
-            var dataPoints = Data.HAProxy.HAProxyTraffic.GetRouteData(route, days, host: host);
+            var dataPoints = HAProxyTraffic.GetRouteData(route, days, host: host);
 
             var chart = GetChart(height, width);
             chart.BackColor = alt ? AltRouteBackground : Color.White;
@@ -138,7 +138,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-performance/json")]
         public ActionResult HaProxyRoutePerformanceJson(string route, int days = 30, string host = null, bool? summary = false)
         {
-            var dataPoints = Data.HAProxy.HAProxyTraffic.GetRouteData(route, summary.GetValueOrDefault() ? null : (int?)days, host: host);
+            var dataPoints = HAProxyTraffic.GetRouteData(route, summary.GetValueOrDefault() ? null : (int?)days, host: host);
 
             return Json(new
                 {
@@ -192,8 +192,6 @@ namespace StackExchange.Opserver.Controllers
                     LabelStyle = { Enabled = false },
                     LineWidth = 0,
                     MajorTickMark = { Enabled = false },
-                    //Maximum = DateTime.UtcNow.ToOADate(),
-                    //Minimum = DateTime.UtcNow.AddDays(-NodeStatus.GetDaysFromView(ViewRange.Summary)).ToOADate(),
                     MajorGrid = { Enabled = false }
                 }
             };

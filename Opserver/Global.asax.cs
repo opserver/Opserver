@@ -129,7 +129,7 @@ namespace StackExchange.Opserver
                 var key = de.Key as string;
                 if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
                 {
-                    data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value != null ? de.Value.ToString() : "");
+                    data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value?.ToString() ?? "");
                 }
             }
         }

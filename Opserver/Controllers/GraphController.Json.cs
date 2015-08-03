@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
 using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver.Controllers

@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 var message = i.PromoteToMaster();
                 i.Poll(true);
-                if (oldMaster != null) oldMaster.Poll(true);
+                oldMaster?.Poll(true);
                 return Json(new { message });
             }
             catch (Exception ex)

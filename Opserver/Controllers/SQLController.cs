@@ -14,14 +14,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.SQL; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.SQL; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.SQL;
+
+        protected override string TopTab => TopTabs.BuiltIn.SQL;
 
         [Route("sql")]
         public ActionResult Dashboard()
@@ -132,7 +127,7 @@ namespace StackExchange.Opserver.Controllers
 
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.Data.QueryPlan));
 
-            return File(ms, "text/xml", string.Format("QueryPlan-{0}.sqlplan", Math.Abs(handle.GetHashCode())));
+            return File(ms, "text/xml", $"QueryPlan-{Math.Abs(handle.GetHashCode())}.sqlplan");
         }
 
         [Route("sql/active")]

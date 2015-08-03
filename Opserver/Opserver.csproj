@@ -233,6 +233,7 @@
       <DependentUpon>Styles.css</DependentUpon>
     </Content>
     <Content Include="Config\JiraSettings.json.example" />
+    <None Include="compilerconfig.json" />
     <None Include="Config\PagerDutySettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>

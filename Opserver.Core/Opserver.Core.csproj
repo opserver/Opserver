@@ -220,7 +220,6 @@
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />
     <Compile Include="Data\IPNet.cs" />
     <Compile Include="Helpers\LocalCache.cs" />
-    <Compile Include="Helpers\ViewRange.cs" />
     <Compile Include="ISeachableNode.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.cs" />
     <Compile Include="Data\Cache.cs" />

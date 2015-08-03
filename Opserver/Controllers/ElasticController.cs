@@ -11,14 +11,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Elastic)]
     public partial class ElasticController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.Elastic; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.Elastic; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.Elastic;
+
+        protected override string TopTab => TopTabs.BuiltIn.Elastic;
 
         [Route("elastic")]
         public ActionResult Dashboard(string cluster, string node)
@@ -86,13 +81,13 @@ namespace StackExchange.Opserver.Controllers
             // Cluster names are not unique, names + node names should be though
             // If we see too many people with crazy combos, then node GUIDs it is.
             var cc = ElasticCluster.AllClusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
-                                             && (node == null || (c.Nodes.Data != null && c.Nodes.Data.Get(node) != null)));
-            var cn = cc != null ? cc.Nodes.Data.Get(node) : null;
+                                             && (node == null || (c.Nodes.Data?.Get(node) != null)));
+            var cn = cc?.Nodes.Data.Get(node);
             
             return new DashboardModel.CurrentData
                 {
                     NodeName = node,
-                    ClusterName = cc != null ? cc.Name : null,
+                    ClusterName = cc?.Name,
                     IndexName = index,
                     Cluster = cc,
                     Node = cn

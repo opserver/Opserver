@@ -10,14 +10,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.PagerDuty; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.PagerDuty; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.PagerDuty;
+
+        protected override string TopTab => TopTabs.BuiltIn.PagerDuty;
 
         public PagerDutyPerson CurrentPagerDutyPerson
         {

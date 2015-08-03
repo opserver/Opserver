@@ -9,14 +9,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.Redis; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.Redis; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.Redis;
+
+        protected override string TopTab => TopTabs.BuiltIn.Redis;
 
         [Route("redis")]
         public ActionResult Dashboard(string node)

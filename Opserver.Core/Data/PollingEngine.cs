@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data
 {
-    public class PollingEngine
+    public static class PollingEngine
     {
         private static readonly object _addLock = new object();
 

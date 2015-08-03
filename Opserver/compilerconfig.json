@@ -1,0 +1,12 @@
+﻿[
+  {
+    "outputFile": "Content/Styles.css",
+    "inputFile": "Content/Styles.less",
+    "minify": {
+      "enabled": true
+    },
+    "includeInProject": true,
+    "sourceMap": true,
+    "options": {}
+  }
+]

@@ -14,8 +14,8 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Authenticated)]
     public partial class StatusController : Controller
     {
-        protected virtual ISecurableSection SettingsSection { get { return null; } }
-        protected virtual string TopTab { get { return null; } }
+        protected virtual ISecurableSection SettingsSection => null;
+        protected virtual string TopTab => null;
 
         private IDisposable _betweenInitializeAndActionExecuting,
                             _betweenActionExecutingAndExecuted,
@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Controllers
                             _betweenResultExecutingAndExecuted;
 
         private readonly Func<string, IDisposable> _startStep = name => MiniProfiler.Current.Step(name);
-        private readonly Action<IDisposable> _stopStep = s => { if (s != null) s.Dispose(); };
+        private readonly Action<IDisposable> _stopStep = s => s?.Dispose();
         
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
@@ -166,7 +166,7 @@ namespace StackExchange.Opserver.Controllers
 
         protected ContentResult JsonRaw(object content)
         {
-            return new ContentResult { Content = (content != null ? content.ToString() : null), ContentType = "application/json" };
+            return new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
         }
 
         public new JsonNetResult Json(object data)
@@ -197,7 +197,7 @@ namespace StackExchange.Opserver.Controllers
             public override void ExecuteResult(ControllerContext context)
             {
                 if (context == null)
-                    throw new ArgumentNullException("context");
+                    throw new ArgumentNullException(nameof(context));
 
                 var response = context.HttpContext.Response;
                 response.ContentType = ContentType.HasValue() ? ContentType : "application/json";

@@ -9,7 +9,7 @@ using StackExchange.Profiling.Data;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public class Connection
+    public static class Connection
     {
         /// <summary>
         /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect

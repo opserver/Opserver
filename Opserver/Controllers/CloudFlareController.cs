@@ -9,14 +9,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.CloudFlare)]
     public partial class CloudFlareController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.CloudFlare; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.CloudFlare; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.CloudFlare;
+
+        protected override string TopTab => TopTabs.BuiltIn.CloudFlare;
 
         [Route("cloudflare")]
         public ActionResult Dashboard()

@@ -14,18 +14,12 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Exceptions)] 
     public class ExceptionsController : StatusController
     {
-        protected override ISecurableSection SettingsSection
-        {
-            get { return Current.Settings.Exceptions; }
-        }
-        protected override string TopTab
-        {
-            get { return TopTabs.BuiltIn.Exceptions; }
-        }
-        private JiraSettings JiraSettings
-        {
-            get { return Current.Settings.Jira; }
-        }
+        protected override ISecurableSection SettingsSection => Current.Settings.Exceptions;
+
+        protected override string TopTab => TopTabs.BuiltIn.Exceptions;
+
+        private JiraSettings JiraSettings => Current.Settings.Jira;
+
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
