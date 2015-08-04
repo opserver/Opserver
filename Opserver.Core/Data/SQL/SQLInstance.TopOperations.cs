@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return new Cache<List<TopOperation>>
             {
-                CacheKey = GetCacheKey("TopOperations-" + (options == null ? 0 : options.GetHashCode())),
+                CacheKey = GetCacheKey("TopOperations-" + (options?.GetHashCode() ?? 0)),
                 CacheForSeconds = 15,
                 CacheStaleForSeconds = 5*60,
                 UpdateCache = UpdateFromSql("Top Operations", conn =>
@@ -49,39 +49,37 @@ namespace StackExchange.Opserver.Data.SQL
 
         public class TopOperation : ISQLVersionedObject
         {
-            // ReSharper disable UnusedAutoPropertyAccessor.Local
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
-            public long AvgCPU { get; private set; }
-            public long TotalCPU { get; private set; }
-            public long AvgCPUPerMinute { get; private set; }
-            public long AvgCPUPerMinuteLifetime { get; private set; }
-            public decimal PercentCPU { get; private set; }
-            public long AvgDuration { get; private set; }
-            public long TotalDuration { get; private set; }
-            public decimal PercentDuration { get; private set; }
-            public long AvgReads { get; private set; }
-            public long TotalReads { get; private set; }
-            public decimal PercentReads { get; private set; }
-            public long ExecutionCount { get; private set; }
-            public decimal PercentExecutions { get; private set; }
-            public decimal ExecutionsPerMinute { get; private set; }
-            public decimal ExecutionsPerMinuteLifetime { get; private set; }
-            public DateTime PlanCreationTime { get; private set; }
-            public DateTime LastExecutionTime { get; private set; }
-            public string QueryText { get; private set; }
-            public string FullText { get; private set; }
-            public string QueryPlan { get; private set; }
-            public byte[] PlanHandle { get; private set; }
-            public int StatementStartOffset { get; private set; }
-            public int StatementEndOffset { get; private set; }
-            public long MinReturnedRows { get; private set; }
-            public long MaxReturnedRows { get; private set; }
-            public decimal AvgReturnedRows { get; private set; }
-            public long TotalReturnedRows { get; private set; }
-            public long LastReturnedRows { get; private set; }
-            public string CompiledOnDatabase { get; private set; }
-            // ReSharper restore UnusedAutoPropertyAccessor.Local
+            public long AvgCPU { get; internal set; }
+            public long TotalCPU { get; internal set; }
+            public long AvgCPUPerMinute { get; internal set; }
+            public long AvgCPUPerMinuteLifetime { get; internal set; }
+            public decimal PercentCPU { get; internal set; }
+            public long AvgDuration { get; internal set; }
+            public long TotalDuration { get; internal set; }
+            public decimal PercentDuration { get; internal set; }
+            public long AvgReads { get; internal set; }
+            public long TotalReads { get; internal set; }
+            public decimal PercentReads { get; internal set; }
+            public long ExecutionCount { get; internal set; }
+            public decimal PercentExecutions { get; internal set; }
+            public decimal ExecutionsPerMinute { get; internal set; }
+            public decimal ExecutionsPerMinuteLifetime { get; internal set; }
+            public DateTime PlanCreationTime { get; internal set; }
+            public DateTime LastExecutionTime { get; internal set; }
+            public string QueryText { get; internal set; }
+            public string FullText { get; internal set; }
+            public string QueryPlan { get; internal set; }
+            public byte[] PlanHandle { get; internal set; }
+            public int StatementStartOffset { get; internal set; }
+            public int StatementEndOffset { get; internal set; }
+            public long MinReturnedRows { get; internal set; }
+            public long MaxReturnedRows { get; internal set; }
+            public decimal AvgReturnedRows { get; internal set; }
+            public long TotalReturnedRows { get; internal set; }
+            public long LastReturnedRows { get; internal set; }
+            public string CompiledOnDatabase { get; internal set; }
 
             public string ReadablePlanHandle
             {
@@ -228,10 +226,7 @@ FROM (SELECT TOP (@MaxResultCount)
             public int? MaxResultCount { get; set; }
             public int? Database { get; set; }
 
-            public static TopSearchOptions Default
-            {
-                get { return new TopSearchOptions().SetDefaults(); }
-            }
+            public static TopSearchOptions Default => new TopSearchOptions().SetDefaults();
 
             public TopSearchOptions SetDefaults()
             {
@@ -266,7 +261,7 @@ FROM (SELECT TOP (@MaxResultCount)
 
             public string ToSQLOrder()
             {
-                return Sort.HasValue ? string.Format("\nORDER BY {0} DESC", Sort) : "";
+                return Sort.HasValue ? $"\nORDER BY {Sort} DESC" : "";
             }
         }
     }

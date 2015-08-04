@@ -9,18 +9,13 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// All SQL Instances, including those in clusters
         /// </summary>
-        public static List<SQLInstance> AllInstances
-        {
-            get { return _sqlInstances ?? (_sqlInstances = LoadInstances()); }
-        }
+        public static List<SQLInstance> AllInstances => _sqlInstances ?? (_sqlInstances = LoadInstances());
+
         /// <summary>
         /// SQL Instances not in clusters
         /// </summary>
-        public static List<SQLInstance> AllStandalone
-        {
-            get { return _standaloneInstances ?? (_standaloneInstances = LoadStandalone()); }
-        }
-        
+        public static List<SQLInstance> AllStandalone => _standaloneInstances ?? (_standaloneInstances = LoadStandalone());
+
         private static readonly object _loadLock = new object();
         private static List<SQLInstance> _standaloneInstances;
         private static List<SQLInstance> LoadStandalone()

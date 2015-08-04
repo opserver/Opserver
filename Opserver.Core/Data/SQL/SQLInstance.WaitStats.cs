@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public class WaitStatRecord : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string WaitType { get; internal set; }
             public int SecondsBetween { get; internal set; }
@@ -36,10 +36,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             private bool? _isIgnorable;
 
-            public bool IsIgnorable
-            {
-                get { return _isIgnorable ?? (_isIgnorable = IsIgnorableWait(WaitType)).Value; }
-            }
+            public bool IsIgnorable => _isIgnorable ?? (_isIgnorable = IsIgnorableWait(WaitType)).Value;
 
             public static bool IsIgnorableWait(string waitType)
             {
@@ -79,14 +76,9 @@ namespace StackExchange.Opserver.Data.SQL
                 }
             }
 
-            public double AverageWaitTime
-            {
-                get { return (double)WaitTimeMs/SecondsBetween; }
-            }
-            public double AverageTaskCount
-            {
-                get { return (double)WaitTaskCount / SecondsBetween; }
-            }
+            public double AverageWaitTime => (double)WaitTimeMs/SecondsBetween;
+
+            public double AverageTaskCount => (double)WaitTaskCount / SecondsBetween;
 
             internal string FetchSQL = @"
 Declare @delayInterval char(8) = Convert(Char(8), DateAdd(Second, @secondsBetween, '00:00:00'), 108);

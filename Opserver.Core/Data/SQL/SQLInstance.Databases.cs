@@ -8,22 +8,13 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLDatabaseInfo>> _databases;
-        public Cache<List<SQLDatabaseInfo>> Databases
-        {
-            get { return _databases ?? (_databases = SqlCacheList<SQLDatabaseInfo>(5 * 60)); }
-        }
+        public Cache<List<SQLDatabaseInfo>> Databases => _databases ?? (_databases = SqlCacheList<SQLDatabaseInfo>(5 * 60));
 
         private Cache<List<SQLDatabaseBackupInfo>> _databaseBackups;
-        public Cache<List<SQLDatabaseBackupInfo>> DatabaseBackups
-        {
-            get { return _databaseBackups ?? (_databaseBackups = SqlCacheList<SQLDatabaseBackupInfo>(5 * 60)); }
-        }
+        public Cache<List<SQLDatabaseBackupInfo>> DatabaseBackups => _databaseBackups ?? (_databaseBackups = SqlCacheList<SQLDatabaseBackupInfo>(5 * 60));
 
         private Cache<List<SQLDatabaseFileInfo>> _databaseFiles;
-        public Cache<List<SQLDatabaseFileInfo>> DatabaseFiles
-        {
-            get { return _databaseFiles ?? (_databaseFiles = SqlCacheList<SQLDatabaseFileInfo>(5 * 60)); }
-        }
+        public Cache<List<SQLDatabaseFileInfo>> DatabaseFiles => _databaseFiles ?? (_databaseFiles = SqlCacheList<SQLDatabaseFileInfo>(5 * 60));
 
         public Cache<List<SQLDatabaseTableInfo>> GetTableInfo(string databaseName)
         {
@@ -34,7 +25,7 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheStaleForSeconds = 5 * 60,
                     UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
                         {
-                            var sql = string.Format("Use [{0}]; {1}", databaseName, GetFetchSQL<SQLDatabaseTableInfo>());
+                            var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseTableInfo>()}";
                             return conn.Query<SQLDatabaseTableInfo>(sql).ToList();
                         })
                 };
@@ -49,7 +40,7 @@ namespace StackExchange.Opserver.Data.SQL
                 CacheStaleForSeconds = 30 * 60,
                 UpdateCache = UpdateFromSql("Column Info for " + databaseName, conn =>
                 {
-                    var sql = string.Format("Use [{0}]; {1}", databaseName, GetFetchSQL<SQLDatabaseColumnInfo>());
+                    var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseColumnInfo>()}";
                     return conn.Query<SQLDatabaseColumnInfo>(sql).ToList();
                 })
             };
@@ -127,10 +118,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             private bool? _isSystemDatabase;
             public int Id { get; internal set; }
-            public bool IsSystemDatabase
-            {
-                get { return (_isSystemDatabase ?? (_isSystemDatabase = SystemDatabaseNames.Contains(Name))).Value; }
-            }
+            public bool IsSystemDatabase => (_isSystemDatabase ?? (_isSystemDatabase = SystemDatabaseNames.Contains(Name))).Value;
             public string Name { get; internal set; }
             public DatabaseStates State { get; internal set; }
             public CompatabilityLevels CompatbilityLevel { get; internal set; }
@@ -153,7 +141,7 @@ namespace StackExchange.Opserver.Data.SQL
             public double? LogSizeMB { get; internal set; }
             public double? LogSizeUsedMB { get; internal set; }
 
-            public double? LogPercentUsed { get { return LogSizeMB > 0 ? 100 * LogSizeUsedMB / LogSizeMB : null; } }
+            public double? LogPercentUsed => LogSizeMB > 0 ? 100 * LogSizeUsedMB / LogSizeMB : null;
 
             internal const string FetchSQL2012Columns = @"
        db.replica_id ReplicaId,
@@ -217,7 +205,7 @@ From sys.databases db
 
         public class SQLDatabaseBackupInfo : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int Id { get; internal set; }
             public string Name { get; internal set; }
@@ -302,7 +290,7 @@ Select db.database_id Id,
 
         public class SQLDatabaseFileInfo : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string VolumeId { get; internal set; }
             public string VolumeMountPoint { get; internal set; }
@@ -325,9 +313,9 @@ Select db.database_id Id,
             public long StallWriteMs { get; internal set; }
             public long NumWrites { get; internal set; }
 
-            public double AvgReadStallMs { get { return StallReadMs / NumReads; } }
-            public double AvgWriteStallMs { get { return StallWriteMs / NumWrites; } }
-            public long FileSizeBytes { get { return FileSizePages*8*1024; } }
+            public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / NumReads;
+            public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / NumWrites;
+            public long FileSizeBytes => FileSizePages*8*1024;
 
             public string GrowthDescription
             {

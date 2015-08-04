@@ -6,15 +6,12 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<TraceFlagInfo>> _traceFlags;
-        public Cache<List<TraceFlagInfo>> TraceFlags
-        {
-            get { return _traceFlags ?? (_traceFlags = SqlCacheList<TraceFlagInfo>(60*60)); }
-        }
+        public Cache<List<TraceFlagInfo>> TraceFlags => _traceFlags ?? (_traceFlags = SqlCacheList<TraceFlagInfo>(60*60));
 
         public class TraceFlagInfo : ISQLVersionedObject
         {
             // This likely works fine on 6+, need to test
-            public Version MinVersion { get { return SQLServerVersions.SQL2000.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2000.RTM;
 
             public int TraceFlag { get; internal set; }
             public bool Enabled { get; internal set; }

@@ -31,10 +31,7 @@ namespace StackExchange.Opserver.Data.SQL
         }
 
         private Dictionary<string, int> _configurationDefaults;
-        public Dictionary<string, int> ConfigurationDefaults
-        {
-            get { return _configurationDefaults ?? (_configurationDefaults = SQLConfigurationOption.GetDefaults(this)); }
-        }
+        public Dictionary<string, int> ConfigurationDefaults => _configurationDefaults ?? (_configurationDefaults = SQLConfigurationOption.GetDefaults(this));
 
         public class SQLConfigurationOption
         {
@@ -49,10 +46,7 @@ namespace StackExchange.Opserver.Data.SQL
             public bool IsAdvanced { get; set; }
             public int Default { get; set; }
 
-            public bool IsDefault
-            {
-                get { return ValueInUse == Default || (Name == "min server memory (MB)" && ValueInUse == 16); }
-            }
+            public bool IsDefault => ValueInUse == Default || (Name == "min server memory (MB)" && ValueInUse == 16);
 
             internal const string FetchSQL = @"
  Select configuration_id ConfigurationId,

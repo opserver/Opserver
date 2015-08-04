@@ -5,19 +5,16 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<SQLServerFeatures> _serverFeatures;
-        public Cache<SQLServerFeatures> ServerFeatures
-        {
-            get { return _serverFeatures ?? (_serverFeatures = SqlCacheSingle<SQLServerFeatures>(60 * 60)); }
-        }
+        public Cache<SQLServerFeatures> ServerFeatures => _serverFeatures ?? (_serverFeatures = SqlCacheSingle<SQLServerFeatures>(60 * 60));
 
         public class SQLServerFeatures : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2000.RTM; } }
-
-            public bool HasSPWhoIsActive { get; private set; }
-            public bool HasSPBlitz { get; private set; }
-            public bool HasSPBlitzIndex { get; private set; }
-            public bool HasSPAskBrent { get; private set; }
+            public Version MinVersion => SQLServerVersions.SQL2000.RTM;
+            
+            public bool HasSPWhoIsActive { get; internal set; }
+            public bool HasSPBlitz { get; internal set; }
+            public bool HasSPBlitzIndex { get; internal set; }
+            public bool HasSPAskBrent { get; internal set; }
 
             internal const string FetchSQL = @"
 With Procs (name) as (

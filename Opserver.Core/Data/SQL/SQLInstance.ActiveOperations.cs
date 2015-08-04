@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<ActiveOperation>> GetActiveOperations(ActiveSearchOptions options)
         {
             if (options == null)
-                throw new ArgumentNullException("options", "Active Operations requires options");
+                throw new ArgumentNullException(nameof(options), "Active Operations requires options");
 
             return new Cache<List<ActiveOperation>>
                 {
@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public class ActiveOperation
         {
-            public TimeSpan Duration { get { return CollectionTime - StartTime; } }
+            public TimeSpan Duration => CollectionTime - StartTime;
             public Int16 SessionId { get; internal set; }
 
             private string _sqlText;
@@ -242,11 +242,9 @@ Exec sp_WhoIsActive @format_output = 0;
             /// </summary>
             public bool WildcardSearch { get; set; }
 
-            public string FilterFieldString { get { return FilterField.ToString().ToLower(); } }
-            public string FilterValueString
-            {
-                get { return FilterValue.HasValue() ? string.Format("{0}{1}{0}", WildcardSearch ? "%" : "", FilterValue) : ""; }
-            }
+            public string FilterFieldString => FilterField.ToString().ToLower();
+            
+            public string FilterValueString => FilterValue.HasValue() ? string.Format("{0}{1}{0}", WildcardSearch ? "%" : "", FilterValue) : "";
 
             //TODO: Sort Order
             

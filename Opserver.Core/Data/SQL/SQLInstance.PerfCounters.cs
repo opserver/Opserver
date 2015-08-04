@@ -27,15 +27,13 @@ namespace StackExchange.Opserver.Data.SQL
         public PerfCounterRecord GetPerfCounter(string category, string name, string instance)
         {
             var counters = PerfCounters.SafeData();
-            var objectName = this.ObjectName + ":" + category;
-            return counters != null
-                       ? counters.FirstOrDefault(c => c.ObjectName == objectName && c.CounterName == name && c.InstanceName == instance)
-                       : null;
+            var objectName = ObjectName + ":" + category;
+            return counters?.FirstOrDefault(c => c.ObjectName == objectName && c.CounterName == name && c.InstanceName == instance);
         }
 
         public class PerfCounterRecord : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2000.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2000.RTM;
 
             public string ObjectName { get; internal set; }
             public string CounterName { get; internal set; }

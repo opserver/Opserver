@@ -6,14 +6,11 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLMemoryClerkSummaryInfo>> _memoryClerkSummary;
-        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary
-        {
-            get { return _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(30)); }
-        }
+        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary => _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(30));
 
         public class SQLMemoryClerkSummaryInfo : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string ClerkType { get; internal set; }
             public long UsedBytes { get; internal set; }
@@ -107,8 +104,8 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
-            public bool IsBufferPool { get { return ClerkType == "MEMORYCLERK_SQLBUFFERPOOL"; } }
-            public bool IsPlanCache { get { return ClerkType == "CACHESTORE_SQLCP"; } }
+            public bool IsBufferPool => ClerkType == "MEMORYCLERK_SQLBUFFERPOOL";
+            public bool IsPlanCache => ClerkType == "CACHESTORE_SQLCP";
 
             internal const string FetchSQL = @"
    Select [type] ClerkType, 

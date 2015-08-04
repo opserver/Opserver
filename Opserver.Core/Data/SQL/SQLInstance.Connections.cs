@@ -7,29 +7,23 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLConnectionSummaryInfo>> _connectionsSummary;
-        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary
-        {
-            get { return _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30)); }
-        }
+        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30));
 
         private Cache<List<SQLConnectionInfo>> _connections;
-        public Cache<List<SQLConnectionInfo>> Connections
-        {
-            get { return _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(10)); }
-        }
+        public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(10));
 
         public class SQLConnectionSummaryInfo : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.SP2; } }
-
-            public string LoginName { get; private set; }
-            public string HostName { get; private set; }
-            public TransactionIsolationLevel TransactionIsolationLevel { get; private set; }
-            public DateTime LastConnectTime { get; private set; }
-            public int ConnectionCount { get; private set; }
-            public long TotalReads { get; private set; }
-            public long TotalWrites { get; private set; }
+            public Version MinVersion => SQLServerVersions.SQL2005.SP2;
             
+            public string LoginName { get; internal set; }
+            public string HostName { get; internal set; }
+            public TransactionIsolationLevel TransactionIsolationLevel { get; internal set; }
+            public DateTime LastConnectTime { get; internal set; }
+            public int ConnectionCount { get; internal set; }
+            public long TotalReads { get; internal set; }
+            public long TotalWrites { get; internal set; }
+
             internal const string FetchSQL = @"
 Select s.login_name LoginName,
        s.host_name HostName,
@@ -51,26 +45,26 @@ Select s.login_name LoginName,
 
         public class SQLConnectionInfo : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
-
-            public Guid Id { get; private set; }
-            public DateTime ConnectTime { get; private set; }
-            public byte[] PlanHandle { get; private set; }
-            public string QueryText { get; private set; }
-            public string LocalNetAddress { get; private set; }
-            public int LocalTCPPort { get; private set; }
-            public int NumReads { get; private set; }
-            public int NumWrites { get; private set; }
-            public int SessionId { get; private set; }
-            public DateTime LoginTime { get; private set; }
-            public string SessionStatus { get; private set; }
-            public TransactionIsolationLevel TransactionIsolationLevel { get; private set; }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            
+            public Guid Id { get; internal set; }
+            public DateTime ConnectTime { get; internal set; }
+            public byte[] PlanHandle { get; internal set; }
+            public string QueryText { get; internal set; }
+            public string LocalNetAddress { get; internal set; }
+            public int LocalTCPPort { get; internal set; }
+            public int NumReads { get; internal set; }
+            public int NumWrites { get; internal set; }
+            public int SessionId { get; internal set; }
+            public DateTime LoginTime { get; internal set; }
+            public string SessionStatus { get; internal set; }
+            public TransactionIsolationLevel TransactionIsolationLevel { get; internal set; }
 
             // SQL 2005 SP2+ columns
-            public int HostProcessId { get; private set; }
-            public string LoginName { get; private set; }
-            public string HostName { get; private set; }
-            public string ProgramName { get; private set; }
+            public int HostProcessId { get; internal set; }
+            public string LoginName { get; internal set; }
+            public string HostName { get; internal set; }
+            public string ProgramName { get; internal set; }
 
             public string ReadablePlanHandle
             {
