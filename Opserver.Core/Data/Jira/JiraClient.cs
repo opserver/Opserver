@@ -1,5 +1,4 @@
 ﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using StackExchange.Exceptional;
 using System;
 using System.Collections.Generic;
@@ -13,23 +12,8 @@ namespace StackExchange.Opserver.Data.Jira
 {
     public class JiraClient
     {
-        private JiraSettings _jiraSettings;
-        private static HashSet<string> hiddenHttpKeys;
-        private static HashSet<string> defaultHttpKeys;
-
-        static JiraClient()
-        {
-            PrepareHttpKeys();
-        }
-
-        public JiraClient(JiraSettings jiraSettings)
-        {
-            _jiraSettings = jiraSettings;
-        }
-
-        private static void PrepareHttpKeys()
-        {
-            hiddenHttpKeys = new HashSet<string>
+        private readonly JiraSettings _jiraSettings;
+        private static readonly HashSet<string> HiddenHttpKeys = new HashSet<string>
             {
                 "ALL_HTTP",
                 "ALL_RAW",
@@ -39,30 +23,34 @@ namespace StackExchange.Opserver.Data.Jira
                 "QUERY_STRING"
             };
 
-            defaultHttpKeys = new HashSet<string>
-            {
-                "APPL_MD_PATH",
-                "APPL_PHYSICAL_PATH",
-                "GATEWAY_INTERFACE",
-                "HTTP_ACCEPT",
-                "HTTP_ACCEPT_CHARSET",
-                "HTTP_ACCEPT_ENCODING",
-                "HTTP_ACCEPT_LANGUAGE",
-                "HTTP_CONNECTION",
-                "HTTP_KEEP_ALIVE",
-                "HTTPS",
-                "INSTANCE_ID",
-                "INSTANCE_META_PATH",
-                "PATH_INFO",
-                "PATH_TRANSLATED",
-                "REMOTE_PORT",
-                "SCRIPT_NAME",
-                "SERVER_NAME",
-                "SERVER_PORT",
-                "SERVER_PORT_SECURE",
-                "SERVER_PROTOCOL",
-                "SERVER_SOFTWARE"
-            };
+        private static readonly HashSet<string> DefaultHttpKeys = new HashSet<string>
+        {
+            "APPL_MD_PATH",
+            "APPL_PHYSICAL_PATH",
+            "GATEWAY_INTERFACE",
+            "HTTP_ACCEPT",
+            "HTTP_ACCEPT_CHARSET",
+            "HTTP_ACCEPT_ENCODING",
+            "HTTP_ACCEPT_LANGUAGE",
+            "HTTP_CONNECTION",
+            "HTTP_KEEP_ALIVE",
+            "HTTPS",
+            "INSTANCE_ID",
+            "INSTANCE_META_PATH",
+            "PATH_INFO",
+            "PATH_TRANSLATED",
+            "REMOTE_PORT",
+            "SCRIPT_NAME",
+            "SERVER_NAME",
+            "SERVER_PORT",
+            "SERVER_PORT_SECURE",
+            "SERVER_PROTOCOL",
+            "SERVER_SOFTWARE"
+        };
+
+        public JiraClient(JiraSettings jiraSettings)
+        {
+            _jiraSettings = jiraSettings;
         }
 
         public async Task<JiraCreateIssueResponse> CreateIssue(JiraAction action, Error error, string accountName)
@@ -73,31 +61,32 @@ namespace StackExchange.Opserver.Data.Jira
             var password = GetPassword(action);
             var projectKey = GetProjectKey(action);
 
-            var client = new JsonRestClient(url);
-            client.Username = userName;
-            client.Password = password;
+            var client = new JsonRestClient(url)
+            {
+                Username = userName,
+                Password = password
+            };
 
-            Dictionary<string, object> fields = new Dictionary<string, object>();
-            fields.Add("project", new { key = projectKey });
-            fields.Add("issuetype", new { name = action.Name });
-            fields.Add("summary", error.Message.CleanCRLF().TruncateWithEllipsis(255));
-            fields.Add("description", RenderDescription(error, accountName));
+            var fields = new Dictionary<string, object>
+            {
+                {"project", new {key = projectKey}},
+                {"issuetype", new {name = action.Name}},
+                {"summary", error.Message.CleanCRLF().TruncateWithEllipsis(255)},
+                {"description", RenderDescription(error, accountName)}
+            };
             var components = action.GetComponentsForApplication(error.ApplicationName);
 
             if (components != null && components.Count > 0)
                 fields.Add("components", components);
 
-            var labels = String.IsNullOrWhiteSpace(action.Labels)
+            var labels = action.Labels.IsNullOrEmpty()
                 ? null
-                : action.Labels.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                : action.Labels.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             if (labels != null && labels.Length > 0)
                 fields.Add("labels", labels);
 
-            var payload = new
-            {
-                fields = fields
-            };
+            var payload = new { fields };
 
             var result = await client.PostAsync<JiraCreateIssueResponse, object>("issue", payload).ConfigureAwait(false);
 
@@ -107,9 +96,9 @@ namespace StackExchange.Opserver.Data.Jira
                 + RenderVariableTable("Cookies", error.Cookies)
                 + RenderVariableTable("RequestHeaders", error.RequestHeaders);
 
-            if (!String.IsNullOrWhiteSpace(commentBody))
+            if (commentBody.HasValue())
             {
-                var commentReponse = await Comment(action, result, commentBody).ConfigureAwait(false);
+                await Comment(action, result, commentBody).ConfigureAwait(false);
             }
             
             result.Host = GetHost(action);
@@ -122,16 +111,18 @@ namespace StackExchange.Opserver.Data.Jira
             var userName = GetUsername(actions);
             var password = GetPassword(actions);
 
-            var client = new JsonRestClient(url);
-            client.Username = userName;
-            client.Password = password;
+            var client = new JsonRestClient(url)
+            {
+                Username = userName,
+                Password = password
+            };
 
             var payload = new
             {
                 body = comment
             };
 
-            var resource = String.Format("issue/{0}/comment", createResponse.Key);
+            var resource = $"issue/{createResponse.Key}/comment";
 
             var response = await client.PostAsync<string, object>(resource, payload).ConfigureAwait(false);
             return response;
@@ -140,53 +131,39 @@ namespace StackExchange.Opserver.Data.Jira
 
         private string GetPassword(JiraAction action)
         {
-            var password = !String.IsNullOrWhiteSpace(action.Password)
-                ? action.Password
-                : _jiraSettings.DefaultPassword;
-            return password;
+            return action.Password.IsNullOrEmptyReturn(_jiraSettings.DefaultPassword);
         }
 
         private string GetUsername(JiraAction action)
         {
-            var userName = !String.IsNullOrWhiteSpace(action.Username)
-               ? action.Username
-               : _jiraSettings.DefaultUsername;
-            return userName;
+            return action.Username.IsNullOrEmptyReturn(_jiraSettings.DefaultUsername);
         }
 
         private string GetProjectKey(JiraAction action)
         {
-            var userName = !String.IsNullOrWhiteSpace(action.ProjectKey)
-               ? action.ProjectKey
-               : _jiraSettings.DefaultProjectKey;
-            return userName;
+            return action.ProjectKey.IsNullOrEmptyReturn(_jiraSettings.DefaultProjectKey);
         }
-
 
         private string GetUrl(JiraAction action)
         {
-            return !String.IsNullOrWhiteSpace(action.Url)
-                ? action.Url
-                : _jiraSettings.DefaultUrl;
+            return action.Url.IsNullOrEmptyReturn(_jiraSettings.DefaultUrl);
         }
 
         private string GetHost(JiraAction action)
         {
-            return !String.IsNullOrWhiteSpace(action.Host)
-                ? action.Host
-                : _jiraSettings.DefaultHost;
+            return action.Host.IsNullOrEmptyReturn(_jiraSettings.DefaultHost);
         }
 
         private string RenderVariableTable(string title, NameValueCollection vars)
         {
             if (vars == null || vars.Count == 0)
             {
-                return String.Empty;
+                return string.Empty;
             }
-            Func<string, bool> isHidden = k => defaultHttpKeys.Contains(k);
-            var allKeys = vars.AllKeys.Where(key => !hiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
+            Func<string, bool> isHidden = k => DefaultHttpKeys.Contains(k);
+            var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine("h3." + title);
             sb.AppendLine("{noformat}");
             foreach (var k in allKeys.Where(k => !isHidden(k)))
@@ -203,14 +180,13 @@ namespace StackExchange.Opserver.Data.Jira
 
             sb.AppendLine("{noformat}");
             return sb.ToString();
-
         }
 
         private string RenderDescription(Error error, string accountName)
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine("{noformat}");
-            if (!String.IsNullOrWhiteSpace(accountName))
+            if (accountName.HasValue())
             {
                 sb.AppendFormat("Reporter Account Name: {0}\r\n", accountName);
             }
@@ -241,22 +217,15 @@ namespace StackExchange.Opserver.Data.Jira
 
             public string Host { get; set; }
 
-            public string BrowseUrl
-            {
-                get
-                {
-                    if (String.IsNullOrWhiteSpace(Host) || String.IsNullOrWhiteSpace(Key))
-                        return String.Empty;
-                    else
-                        return String.Format("{0}/browse/{1}", Host.TrimEnd('/'), Key);
-                }
-            }
+            public string BrowseUrl => Host.IsNullOrEmpty() || Key.IsNullOrEmpty()
+                ? string.Empty
+                : $"{Host.TrimEnd('/')}/browse/{Key}";
         }
     }
 
     public class JsonRestClient
     {
-        private WebClient client = null;
+        private WebClient client;
 
         public string Username { get; set; }
         public string Password { get; set; }
@@ -264,7 +233,7 @@ namespace StackExchange.Opserver.Data.Jira
         public string BaseUrl { get; set; }
         public JsonRestClient(string baseUrl)
         {
-            if (String.IsNullOrWhiteSpace(baseUrl))
+            if (baseUrl.IsNullOrEmpty())
                 throw new TypeInitializationException("StackExchange.Opserver.Data.Jira.JsonService", new ApplicationException("BaseUrl is required"));
 
             BaseUrl = baseUrl.Trim().TrimEnd("/") + "/";
@@ -272,10 +241,10 @@ namespace StackExchange.Opserver.Data.Jira
 
         private Uri GetUriForResource(string resource)
         {
-            if (String.IsNullOrWhiteSpace(BaseUrl))
+            if (BaseUrl.IsNullOrEmpty())
                 throw new ApplicationException("Base url is null or empty");
 
-            if (String.IsNullOrWhiteSpace(resource))
+            if (string.IsNullOrWhiteSpace(resource))
                 return new Uri(BaseUrl);
 
             return new Uri(BaseUrl + resource.Trim().TrimStart('/'));
@@ -283,23 +252,21 @@ namespace StackExchange.Opserver.Data.Jira
 
         private string GetBasicAuthzValue()
         {
-            if (String.IsNullOrWhiteSpace(Username))
-                return String.Empty;
+            if (Username.IsNullOrEmpty())
+                return string.Empty;
 
-            string _auth = string.Format("{0}:{1}", Username, Password);
+            string _auth = $"{Username}:{Password}";
             string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
-            return string.Format("{0} {1}", "Basic", _enc);
+            return $"{"Basic"} {_enc}";
         }
 
         public async Task<TResponse> GetAsync<TResponse>(string resource)
         {
-            if (client == null)
-                client = new WebClient();
-
+            client = client ?? new WebClient();
             client.Headers.Add(HttpRequestHeader.Accept, "application/json");
-            client.Encoding = System.Text.Encoding.UTF8;
+            client.Encoding = Encoding.UTF8;
             var authz = GetBasicAuthzValue();
-            if (!String.IsNullOrWhiteSpace(authz))
+            if (authz.HasValue())
                 client.Headers.Add(HttpRequestHeader.Authorization, authz);
 
             var uri = GetUriForResource(resource);
@@ -319,13 +286,11 @@ namespace StackExchange.Opserver.Data.Jira
 
         public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
         {
-            if (client == null)
-                client = new WebClient();
-
+            client = client ?? new WebClient();
             client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-            client.Encoding = System.Text.Encoding.UTF8;
+            client.Encoding = Encoding.UTF8;
             var authz = GetBasicAuthzValue();
-            if (!String.IsNullOrWhiteSpace(authz))
+            if (authz.HasValue())
                 client.Headers.Add(HttpRequestHeader.Authorization, authz);
 
 
@@ -343,11 +308,10 @@ namespace StackExchange.Opserver.Data.Jira
             }
 
             string response = Encoding.UTF8.GetString(responseBytes);
-            if (typeof(TResponse) == typeof(String))
+            if (typeof(TResponse) == typeof(string))
                 return response as TResponse;
 
             return JsonConvert.DeserializeObject<TResponse>(response);
         }
     }
-
 }
