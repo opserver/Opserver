@@ -117,8 +117,8 @@
                         }
                         @if (stats.Process != null && stats.Process.Memory != null)
                         {
-                            <td>@stats.Process.Memory.ResidentInBytes.ToSize("b")</td>
-                            <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize("b")</td>
+                            <td>@stats.Process.Memory.ResidentInBytes.ToSize()</td>
+                            <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize()</td>
                         }
                         else
                         {
@@ -130,7 +130,7 @@
                             <td title="@c.HealthStatus.Data.Indices.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
                                 <a href="/elastic/indices?cluster=@c.Name&node=@n.Name">
                                     @c.HealthStatus.Data.Indices.Count.ToComma()
-                                </a> <span class="note">@(stats.Indices.Store.SizeInBytes > 0 ? "(" + stats.Indices.Store.SizeInBytes.ToSize("b") + ")" : "")</span>
+                                </a> <span class="note">@(stats.Indices.Store.SizeInBytes > 0 ? "(" + stats.Indices.Store.SizeInBytes.ToSize() + ")" : "")</span>
                             </td>
                             <td>@stats.Indices.Search.QueryTotal.ToComma()</td>
                         }
@@ -149,8 +149,8 @@
                         }
                         @if (stats.Transport != null)
                         {
-                            <td>@stats.Transport.RXSizeInBytes.ToSize("b")</td>
-                            <td>@stats.Transport.TXSizeInBytes.ToSize("b")</td>
+                            <td>@stats.Transport.RXSizeInBytes.ToSize()</td>
+                            <td>@stats.Transport.TXSizeInBytes.ToSize()</td>
                         }
                         else
                         {
