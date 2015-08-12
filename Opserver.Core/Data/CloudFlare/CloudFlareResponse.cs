@@ -114,10 +114,10 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public string OriginalDNSHost { get; private set; }
 
         [DataMember(Name = "created_on")]
-        public DateTimeOffset CreatedOn { get; private set; }
+        public DateTimeOffset? CreatedOn { get; private set; }
 
         [DataMember(Name = "modified_on")]
-        public DateTimeOffset ModifiedOn { get; private set; }
+        public DateTimeOffset? ModifiedOn { get; private set; }
 
         [DataMember(Name = "vanity_name_servers")]
         public List<string> VanityNameServers { get; private set; }
