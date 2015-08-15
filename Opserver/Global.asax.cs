@@ -122,15 +122,18 @@ namespace StackExchange.Opserver
                 data.Add("User", Current.User.AccountName);
                 data.Add("Roles", Current.User.RawRoles.ToString());
             }
-
-            if (ex == null) return;
-            foreach (DictionaryEntry de in ex.Data)
+            
+            while (ex != null)
             {
-                var key = de.Key as string;
-                if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
+                foreach (DictionaryEntry de in ex.Data)
                 {
-                    data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value?.ToString() ?? "");
+                    var key = de.Key as string;
+                    if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
+                    {
+                        data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value?.ToString() ?? "");
+                    }
                 }
+                ex = ex.InnerException;
             }
         }
 
