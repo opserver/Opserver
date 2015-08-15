@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Management;
-using Newtonsoft.Json;
+using Jil;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -10,12 +9,9 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterNodeInfo> _nodes;
-        public Cache<ClusterNodeInfo> Nodes
-        {
-            get { return _nodes ?? (_nodes = GetCache<ClusterNodeInfo>(20)); }
-        }
-        
-        public string Name { get { return Nodes.Data != null ? Nodes.Data.Name : "Unknown"; } }
+        public Cache<ClusterNodeInfo> Nodes => _nodes ?? (_nodes = GetCache<ClusterNodeInfo>(20));
+
+        public string Name => Nodes.Data != null ? Nodes.Data.Name : "Unknown";
 
         public class ClusterNodeInfo : ElasticDataObject
         {
@@ -73,9 +69,8 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public NodeInfoWrap Get(string nameOrGuid)
             {
-                if (Nodes == null) return null;
                 return
-                    Nodes.FirstOrDefault(
+                    Nodes?.FirstOrDefault(
                         n => string.Equals(n.Name, nameOrGuid, StringComparison.InvariantCultureIgnoreCase)
                              || string.Equals(n.GUID, nameOrGuid, StringComparison.InvariantCultureIgnoreCase));
             }
@@ -94,15 +89,15 @@ namespace StackExchange.Opserver.Data.Elastic
             public NodeStats Stats { get; internal set; }
             public bool IsMaster { get; internal set; }
             // TODO: adjust monitor status/reason for nodes specified in config vs. what the cluster knows of
-            public MonitorStatus MonitorStatus { get { return MonitorStatus.Good; } }
-            public string MonitorStatusReason { get { return null; } }
+            public MonitorStatus MonitorStatus => MonitorStatus.Good;
+            public string MonitorStatusReason => null;
 
             private Version _version;
-            [JsonIgnore]
-            public Version Version { get { return _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0")); } }
+            [JilDirective(Ignore = true)]
+            public Version Version => _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0"));
 
-            public bool IsClient { get { return GetAttribute("client") == "true"; } }
-            public bool IsDataNode { get { return GetAttribute("data") == "true"; } }
+            public bool IsClient => GetAttribute("client") == "true";
+            public bool IsDataNode => GetAttribute("data") == "true";
 
             private string GetAttribute(string key)
             {

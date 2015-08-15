@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Newtonsoft.Json;
+using Jil;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -10,12 +10,12 @@ namespace StackExchange.Opserver.Data.HAProxy
     /// </summary>
     public class Proxy : IMonitorStatus
     {
-        [JsonIgnore]
+        [JilDirective(Ignore = true)]
         public HAProxyInstance Instance { get; internal set; }
         public string Name { get; internal set; }
-        public string GroupName { get { return Instance.Group != null ? Instance.Group.Name : ""; } }
-        public string GroupLinkName { get { return string.Concat(Instance.Group != null ? Instance.Group.Name + "-" : "", Name); } }
-        public string InstanceLinkName { get { return string.Concat(Instance.Name, "-", Name); } }
+        public string GroupName => Instance.Group != null ? Instance.Group.Name : "";
+        public string GroupLinkName => string.Concat(Instance.Group != null ? Instance.Group.Name + "-" : "", Name);
+        public string InstanceLinkName => string.Concat(Instance.Name, "-", Name);
         public Frontend Frontend { get; internal set; }
         public List<Server> Servers { get; internal set; }
         public Backend Backend { get; internal set; }
@@ -34,14 +34,11 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public bool HasContent
-        {
-            get { return Frontend != null || Backend != null || (Servers != null && Servers.Count > 0); }
-        }
-        
-        public bool HasFrontend { get { return Frontend != null; } }
-        public bool HasServers { get { return Servers != null && Servers.Count > 0; } }
-        public bool HasBackend { get { return Backend != null; } }
+        public bool HasContent => Frontend != null || Backend != null || (Servers != null && Servers.Count > 0);
+
+        public bool HasFrontend => Frontend != null;
+        public bool HasServers => Servers != null && Servers.Count > 0;
+        public bool HasBackend => Backend != null;
 
         public MonitorStatus MonitorStatus
         {
@@ -60,23 +57,20 @@ namespace StackExchange.Opserver.Data.HAProxy
                 var pieces = new List<string>();
                 foreach(var g in Servers.WithIssues().GroupBy(s => s.ProxyServerStatus).OrderByDescending(g => g.Key))
                 {
-                    pieces.Add(string.Format("{0}: {1} {2}", NiceName, g.Count().ToComma(), g.Key.ShortDescription()));
+                    pieces.Add($"{NiceName}: {g.Count().ToComma()} {g.Key.ShortDescription()}");
                 }
                 return string.Join(", ", pieces);
             }
         }
 
-        private Item Primary { get { return (Item)Frontend ?? Backend; } }
+        private Item Primary => (Item)Frontend ?? Backend;
 
-        public string Status { get { return Primary.Status; } }
-        public int LastStatusChangeSecondsAgo { get { return Primary.LastStatusChangeSecondsAgo; } }
-        public long BytesIn { get { return Primary.BytesIn; } }
-        public long BytesOut { get { return Primary.BytesIn; } }
+        public string Status => Primary.Status;
+        public int LastStatusChangeSecondsAgo => Primary.LastStatusChangeSecondsAgo;
+        public long BytesIn => Primary.BytesIn;
+        public long BytesOut => Primary.BytesIn;
 
-        public int Order
-        {
-            get { return Frontend != null ? 0 : HasServers ? 1 : 2; }
-        }
+        public int Order => Frontend != null ? 0 : HasServers ? 1 : 2;
 
         #region Display Properties
 
@@ -84,14 +78,10 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             get { return HasServers && Servers.Any(s => s.LimitSessions > 0 || s.LimitNewSessionPerSecond > 0); }
         }
-        public bool ShowWarnings
-        {
-            get { return HasServers; }
-        }
-        public bool ShowServers
-        {
-            get { return HasServers; }
-        }
+        public bool ShowWarnings => HasServers;
+
+        public bool ShowServers => HasServers;
+
         public bool ShowThrottle
         {
             get { return HasServers && Servers.Any(s => s.Throttle > 0); }

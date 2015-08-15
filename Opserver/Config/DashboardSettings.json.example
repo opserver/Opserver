@@ -1,25 +1,25 @@
 ﻿{
     "excludePattern": "redis|\\.com",
-    "cpuWarningPercent": "50",
-    "cpuCriticalPercent": "60",
-    "memoryWarningPercent": "90",
-    "memoryCriticalPercent": "90",
-    "diskWarningPercent": "85",
-    "diskCriticalPercent": "95",
+    "cpuWarningPercent": 50,
+    "cpuCriticalPercent": 60,
+    "memoryWarningPercent": 90,
+    "memoryCriticalPercent": 90,
+    "diskWarningPercent": 85,
+    "diskCriticalPercent": 95,
     "categories": [
         {
             "name": "Database Servers",
             "pattern": "-sql",
-            "cpuWarningPercent": "20",
-            "memoryWarningPercent": "98",
-            "memoryCriticalPercent": "99.2",
+            "cpuWarningPercent": 20,
+            "memoryWarningPercent": 98,
+            "memoryCriticalPercent": 99.2,
             "primaryInterfacePattern": "-TEAM$"
         },
         {
             "name": "Web Servers",
             "pattern": "-web|-promoweb|-vmweb",
-            "cpuWarningPercent": "25",
-            "memoryWarningPercent": "75",
+            "cpuWarningPercent": 25,
+            "memoryWarningPercent": 75,
             "primaryInterfacePattern": "-TEAM$|-TEAM · Local"
         },
         {
@@ -29,8 +29,8 @@
         {
             "name": "Misc Database Servers",
             "pattern": "-db|-.+sql|-halog",
-            "memoryWarningPercent": "98",
-            "memoryCriticalPercent": "99.2",
+            "memoryWarningPercent": 98,
+            "memoryCriticalPercent": 99.2,
             "primaryInterfacePattern": "-TEAM$"
         },
         {
@@ -71,7 +71,7 @@
         {
             "name": "LAMP Servers",
             "pattern": "-apache|-mysql|-blog",
-            "cpuWarningPercent": "40"
+            "cpuWarningPercent": 40
         },
         {
             "name": "Mail Servers",
@@ -80,7 +80,7 @@
         {
             "name": "Network Stack",
             "pattern": "ny-sw|or-sw|ny-asa|or-asa|-nexus|-mgmtsw",
-            "cpuWarningPercent": "30"
+            "cpuWarningPercent": 30
         },
         {
             "name": "PDUs",

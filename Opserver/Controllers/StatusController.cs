@@ -2,7 +2,7 @@
 using System.Net;
 using System.Web.WebPages;
 using System.Web.Mvc;
-using Newtonsoft.Json;
+using Jil;
 using StackExchange.Opserver.Views.Shared;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
@@ -203,7 +203,7 @@ namespace StackExchange.Opserver.Controllers
                 response.ContentType = ContentType.HasValue() ? ContentType : "application/json";
                 if (ContentEncoding != null) response.ContentEncoding = ContentEncoding;
 
-                var serializedObject = JsonConvert.SerializeObject(Data, Formatting.Indented);
+                var serializedObject = JSON.Serialize(Data);
                 response.Write(serializedObject);
             }
         }

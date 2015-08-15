@@ -1,5 +1,4 @@
-﻿@using Newtonsoft.Json
-@using StackExchange.Opserver.Data.CloudFlare
+﻿@using Jil
 @using StackExchange.Opserver.Views.CloudFlare
 @model DashboardModel
 @{
@@ -41,7 +40,7 @@
                     @rg.Stats.ToPollSpan()
                 </span>
             </div>
-        @if (stats == null || stats.Data == null)
+        @if (stats?.Data == null)
         {
             <div style="text-align: center; padding: 20px" class="critical">
                 Error polling node
@@ -49,8 +48,8 @@
         }
         else
         {
-            dynamic parsedJson = JsonConvert.DeserializeObject(stats.Data);
-            var formatted = JsonConvert.SerializeObject(parsedJson, Formatting.Indented);
+            dynamic parsedJson = JSON.DeserializeDynamic(stats.Data);
+            var formatted = JSON.SerializeDynamic(parsedJson, new Options(true));
             <div class="json-output">@formatted</div>
         }
         </div>

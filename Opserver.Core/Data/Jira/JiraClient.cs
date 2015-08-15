@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using StackExchange.Exceptional;
+﻿using StackExchange.Exceptional;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -7,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Jil;
 
 namespace StackExchange.Opserver.Data.Jira
 {
@@ -254,10 +254,9 @@ namespace StackExchange.Opserver.Data.Jira
         {
             if (Username.IsNullOrEmpty())
                 return string.Empty;
-
-            string _auth = $"{Username}:{Password}";
-            string _enc = Convert.ToBase64String(Encoding.ASCII.GetBytes(_auth));
-            return $"{"Basic"} {_enc}";
+            
+            var enc = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{Username}:{Password}"));
+            return $"{"Basic"} {enc}";
         }
 
         public async Task<TResponse> GetAsync<TResponse>(string resource)
@@ -270,18 +269,10 @@ namespace StackExchange.Opserver.Data.Jira
                 client.Headers.Add(HttpRequestHeader.Authorization, authz);
 
             var uri = GetUriForResource(resource);
-            var responseBytes = new byte[0];
-            try
-            {
-                responseBytes = await client.DownloadDataTaskAsync(uri).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            var responseBytes = await client.DownloadDataTaskAsync(uri).ConfigureAwait(false);
 
             string response = Encoding.UTF8.GetString(responseBytes);
-            return JsonConvert.DeserializeObject<TResponse>(response);
+            return JSON.Deserialize<TResponse>(response);
         }
 
         public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
@@ -294,7 +285,7 @@ namespace StackExchange.Opserver.Data.Jira
                 client.Headers.Add(HttpRequestHeader.Authorization, authz);
 
 
-            var json = JsonConvert.SerializeObject(data);
+            var json = JSON.Serialize(data);
             byte[] dataBytes = Encoding.UTF8.GetBytes(json);
             var uri = GetUriForResource(resource);
             var responseBytes = new byte[0];
@@ -311,7 +302,7 @@ namespace StackExchange.Opserver.Data.Jira
             if (typeof(TResponse) == typeof(string))
                 return response as TResponse;
 
-            return JsonConvert.DeserializeObject<TResponse>(response);
+            return JSON.Deserialize<TResponse>(response);
         }
     }
 }

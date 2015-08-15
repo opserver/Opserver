@@ -1,21 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLNode
     {
         private Cache<List<ClusterNetworkInfo>> _clusterNetworks;
-        public Cache<List<ClusterNetworkInfo>> ClusterNetworks
-        {
-            get { return _clusterNetworks ?? (_clusterNetworks = SqlCacheList<ClusterNetworkInfo>(Cluster.RefreshInterval)); }
-        }
+        public Cache<List<ClusterNetworkInfo>> ClusterNetworks => _clusterNetworks ?? (_clusterNetworks = SqlCacheList<ClusterNetworkInfo>(Cluster.RefreshInterval));
 
         public class ClusterNetworkInfo : ISQLVersionedObject
         {
-            [JsonIgnore]
-            public Version MinVersion { get { return SQLServerVersions.SQL2012.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public string MemberName { get; internal set; }
             public string NetworkSubnetIP { get; internal set; }

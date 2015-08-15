@@ -2,7 +2,7 @@
     "clusters": [
         {
             "name": "NY Production",
-            "refreshIntervalSeconds": "10",
+            "refreshIntervalSeconds": 10,
             "nodes": [
                 "ny-search01",
                 "ny-search02",
@@ -11,7 +11,7 @@
         },
         {
             "name": "NY Development",
-            "refreshIntervalSeconds": "20",
+            "refreshIntervalSeconds": 20,
             "nodes": [
                 "ny-devsearch01",
                 "ny-devsearch02"
@@ -19,7 +19,7 @@
         },
         {
             "name": "NY Dev Logstash",
-            "refreshIntervalSeconds": "20",
+            "refreshIntervalSeconds": 20,
             "nodes": [
                 "ny-devlogstash01",
                 "ny-devlogstash02"

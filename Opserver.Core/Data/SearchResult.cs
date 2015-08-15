@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Jil;
 
 namespace StackExchange.Opserver.Data
 {
     public class SearchResult<T> : SearchResult
     {
-        [JsonIgnore]
+        [JilDirective(Ignore = true)]
         public T Item { get; set; }
     }
 
