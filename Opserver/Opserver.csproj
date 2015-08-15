@@ -205,6 +205,7 @@
     <Content Include="Content\img\square-plus.png" />
     <Content Include="Content\img\x.png" />
     <Content Include="Content\js\plugins\colorbrewer.js" />
+    <Content Include="Content\js\plugins\visibility.js" />
     <Content Include="Content\_Styles.Exceptions.less">
       <DependentUpon>Styles.less</DependentUpon>
     </Content>

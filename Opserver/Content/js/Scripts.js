@@ -57,10 +57,12 @@ window.Status = (function () {
         }
 
         if (name && registeredRefreshes[name]) {
+            console.log('Refresh paused for: ' + name);
             pauseSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
+        console.log('Refresh paused');
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 pauseSingleRefresh(registeredRefreshes[key]);
@@ -79,10 +81,12 @@ window.Status = (function () {
         }
 
         if (name && registeredRefreshes[name]) {
+            console.log('Refresh resumed for: ' + name);
             resumeSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
+        console.log('Refresh resumed');
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 resumeSingleRefresh(registeredRefreshes[key]);
@@ -296,9 +300,17 @@ window.Status = (function () {
             e.preventDefault();
         }).on('click', '.issues-list, .action-popup', function (e) {
             e.stopPropagation();
-        }).on('click', function () {
-            $('.issues-list').removeClass('active');
-            $('.action-popup').remove();
+        }).on({
+            'click': function () {
+                $('.issues-list').removeClass('active');
+                $('.action-popup').remove();
+            },
+            'show': function () {
+                resumeRefresh();
+            },
+            'hide': function () {
+                pauseRefresh();
+            }
         });
         prepTableSorter();
     }
