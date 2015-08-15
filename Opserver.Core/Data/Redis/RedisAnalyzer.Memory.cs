@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -37,7 +36,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private static string GetMemoryAnalysisKey(RedisConnectionInfo connectionInfo, int database)
         {
-            return string.Format("redis-memory-analysis-{0}:{1}:{2}", connectionInfo.Host, connectionInfo.Port, database);
+            return $"redis-memory-analysis-{connectionInfo.Host}:{connectionInfo.Port}:{database}";
         }
 
         public static RedisMemoryAnalysis AnalyzeDatabaseMemory(RedisConnectionInfo connectionInfo, int database)
@@ -89,13 +88,13 @@ namespace StackExchange.Opserver.Data.Redis
     public class RedisMemoryAnalysis : IMonitorStatus
     {
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
-        public bool IsGlobal { get { return Database == -1; } }
+        public bool IsGlobal => Database == -1;
         public int Database { get; internal set; }
         public DateTime CreationDate { get; internal set; }
 
         public TimeSpan KeyTime { get; internal set; }
         public TimeSpan AnalysisTime { get; internal set; }
-        public TimeSpan TotalTime { get { return KeyTime + AnalysisTime; } }
+        public TimeSpan TotalTime => KeyTime + AnalysisTime;
 
         public List<KeyMatcher> KeyMatchers { get; internal set; }
         public ConcurrentDictionary<KeyMatcher,KeyStats> KeyStats { get; internal set; }
@@ -142,11 +141,11 @@ namespace StackExchange.Opserver.Data.Redis
         private long _valueByteSize;
         private long _errorCount;
 
-        public long Count { get { return _count; } }
-        public long KeyByteSize { get { return _keyByteSize; } }
-        public long ValueByteSize { get { return _valueByteSize; } }
-        public long TotalByteSize { get { return _keyByteSize + _valueByteSize; } }
-        public long ErrorCount { get { return _errorCount; } }
+        public long Count => _count;
+        public long KeyByteSize => _keyByteSize;
+        public long ValueByteSize => _valueByteSize;
+        public long TotalByteSize => _keyByteSize + _valueByteSize;
+        public long ErrorCount => _errorCount;
 
         public string ErrorMessage { get; internal set; }
 
@@ -247,9 +246,9 @@ namespace StackExchange.Opserver.Data.Redis
     {
         public string Name { get; internal set; }
         public KeyMatcher Matcher { get; internal set; }
-        public int KeyBytes { get { return Encoding.UTF8.GetByteCount(Name); } }
+        public int KeyBytes => Encoding.UTF8.GetByteCount(Name);
         public long ValueBytes { get; internal set; }
-        public long TotalBytes { get { return KeyBytes + ValueBytes; } }
+        public long TotalBytes => KeyBytes + ValueBytes;
     }
 
     public class KeyMatcher
@@ -266,10 +265,10 @@ namespace StackExchange.Opserver.Data.Redis
         internal long _keyByteSize;
         internal long _valueByteSize;
 
-        public long Count { get { return _count; } }
-        public long KeyByteSize { get { return _keyByteSize; } }
-        public long ValueByteSize { get { return _valueByteSize; } }
-        public long TotalByteSize { get { return _keyByteSize + _valueByteSize; } }
+        public long Count => _count;
+        public long KeyByteSize => _keyByteSize;
+        public long ValueByteSize => _valueByteSize;
+        public long TotalByteSize => _keyByteSize + _valueByteSize;
 
         public SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
 

@@ -163,7 +163,7 @@ namespace StackExchange.Opserver.Data.Redis
             public long Offset { get; internal set; }
 
             private IPAddress _ipAddress;
-            public IPAddress IPAddress { get { return _ipAddress ?? (_ipAddress = IPAddress.Parse(IP)); } }
+            public IPAddress IPAddress => _ipAddress ?? (_ipAddress = IPAddress.Parse(IP));
 
             public RedisInstance GetServer()
             {
@@ -190,7 +190,7 @@ namespace StackExchange.Opserver.Data.Redis
         public class ServerInfo : RedisInfoSection
         {
             private Version _version;
-            public Version Version { get { return _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version()); } }
+            public Version Version => _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version());
 
             [RedisInfoProperty("redis_version")]
             public string VersionNumber { get; internal set; }
@@ -360,7 +360,7 @@ namespace StackExchange.Opserver.Data.Redis
                                     Expires = long.Parse(keysMatch.Groups[2].Value)
                                 };
                             KeyData[int.Parse(dbMatch.Groups[1].Value)] = kd;
-                            value = string.Format("{0} keys, {1} expires", kd.Keys.ToComma(), kd.Expires.ToComma());
+                            value = $"{kd.Keys.ToComma()} keys, {kd.Expires.ToComma()} expires";
                         }
                         catch (Exception e)
                         {

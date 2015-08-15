@@ -13,12 +13,9 @@ namespace StackExchange.Opserver.Data.Redis
         public bool SlaveTo(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
-            this._connection.GetSingleServer().SlaveOf(newMaster);
+            _connection.GetSingleServer().SlaveOf(newMaster);
             var newMasterInstance = GetInstance(address);
-            if (newMasterInstance != null)
-            {
-                newMasterInstance.PublishSERedisReconfigure();
-            }
+            newMasterInstance?.PublishSERedisReconfigure();
             return true;
         }
 
@@ -29,7 +26,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             using (var log = new StringWriter())
             {
-                this._connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
+                _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
                 return log.ToString();
             }
         }
@@ -38,10 +35,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// The StackExchange.Redis tiebreaker key this node is currently using.
         /// </summary>
         /// <remarks>If this doesn't match the key (likely default) used in the other clients, it will have little or no effect</remarks>
-        public string SERedisTiebreakerKey
-        {
-            get { return ConfigurationOptions.Parse(_connection.Configuration).TieBreaker; }
-        }
+        public string SERedisTiebreakerKey => ConfigurationOptions.Parse(_connection.Configuration).TieBreaker;
 
         /// <summary>
         /// Sets the StackExchange.Redis tiebreaker key on this node.
@@ -50,10 +44,10 @@ namespace StackExchange.Opserver.Data.Redis
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
 
-            var myEndPoint = this._connection.GetEndPoints().FirstOrDefault();
+            var myEndPoint = _connection.GetEndPoints().FirstOrDefault();
             RedisValue tieBreakerValue = EndPointCollection.ToString(myEndPoint);
 
-            var result = this._connection.GetDatabase()
+            var result = _connection.GetDatabase()
                 .StringSet(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
             Tiebreaker.Poll(true);
             return result;
@@ -79,7 +73,7 @@ namespace StackExchange.Opserver.Data.Redis
         public bool ClearSERedisTiebreaker()
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
-            var result = this._connection.GetDatabase()
+            var result = _connection.GetDatabase()
                 .KeyDelete(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
             Tiebreaker.Poll(true);
             return result;
@@ -90,7 +84,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// </summary>
         public long PublishSERedisReconfigure()
         {
-            return this._connection.PublishReconfigure();
+            return _connection.PublishReconfigure();
         }
 
         /// <summary>
@@ -100,7 +94,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             var endpoint = EndPointCollection.TryParse(address);
             if (endpoint == null) return false;
-            this._connection.GetSingleServer().ClientKill(endpoint);
+            _connection.GetSingleServer().ClientKill(endpoint);
             return true;
         }
 

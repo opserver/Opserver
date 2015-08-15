@@ -7,10 +7,10 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisConnectionInfo
     {
-        public string Name { get { return Settings.Name; } }
+        public string Name => Settings.Name;
         public string Host { get; internal set; }
-        public int Port { get { return Settings.Port; } }
-        public string Password { get { return Settings.Password; } }
+        public int Port => Settings.Port;
+        public string Password => Settings.Password;
         public RedisFeatures Features { get; internal set; }
         internal RedisSettings.Instance Settings { get; set; }
 
@@ -20,14 +20,11 @@ namespace StackExchange.Opserver.Data.Redis
             Host = host;
         }
 
-        public List<IPAddress> IPAddresses
-        {
-            get { return AppCache.GetHostAddresses(Host); }
-        }
+        public List<IPAddress> IPAddresses => AppCache.GetHostAddresses(Host);
 
         public override string ToString()
         {
-            return string.Format("{0} ({1}:{2})", Name, Host, Port);
+            return $"{Name} ({Host}:{Port})";
         }
     }
 }

@@ -99,7 +99,7 @@ namespace StackExchange.Opserver.Data.Redis
                 }
                 catch (Exception e)
                 {
-                    throw new Exception(string.Format("Error parsing '{0}' from {1} as {2} for {3}.{4}", value, key, prop.PropertyType.Name, currentSection.GetType(), prop.Name), e);
+                    throw new Exception($"Error parsing '{value}' from {key} as {prop.PropertyType.Name} for {currentSection.GetType()}.{prop.Name}", e);
                 }
             }
 
@@ -166,32 +166,32 @@ namespace StackExchange.Opserver.Data.Redis
                         if (long.TryParse(value, out l))
                         {
                             var ts = TimeSpan.FromSeconds(l);
-                            return string.Format("{0} ({1}d {2}h {3}m {4}s)", value, (int)ts.TotalDays, ts.Hours, ts.Minutes, ts.Seconds);
+                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours}h {ts.Minutes}m {ts.Seconds}s)";
                         }
                         break;
                     case "last_save_time":
                         if (long.TryParse(value, out l))
                         {
                             var time = l.ToDateTime();
-                            return string.Format("{0} ({1})", value, time.ToRelativeTime());
+                            return $"{value} ({time.ToRelativeTime()})";
                         }
                         break;
                     case "master_sync_left_bytes":
                         if (long.TryParse(value, out l))
                         {
-                            return string.Format("{0:n0} bytes", l);
+                            return $"{l:n0} bytes";
                         }
                         break;
                     case "used_memory_rss":
                         if (long.TryParse(value, out l))
                         {
-                            return string.Format("{0} ({1})", l, l.ToSize(precision: 1));
+                            return $"{l} ({l.ToSize(precision: 1)})";
                         }
                         break;
                     default:
                         if (!_dontFormatList.Any(label.Contains) && long.TryParse(value, out l))
                         {
-                            return string.Format("{0:n0}", l);
+                            return $"{l:n0}";
                         }
                         break;
                 }

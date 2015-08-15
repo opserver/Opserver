@@ -2,7 +2,7 @@
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property)]
     public class RedisInfoPropertyAttribute : Attribute
     {
         public string PropertyName;

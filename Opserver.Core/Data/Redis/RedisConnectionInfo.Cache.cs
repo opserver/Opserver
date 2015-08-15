@@ -5,10 +5,7 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisConnectionInfo
     {
-        public static List<RedisConnectionInfo> AllConnections
-        {
-            get { return _redisConnectionInfos ?? (_redisConnectionInfos = LoadRedisConnections()); }
-        }
+        public static List<RedisConnectionInfo> AllConnections => _redisConnectionInfos ?? (_redisConnectionInfos = LoadRedisConnections());
 
         private static readonly object _loadLock = new object();
         private static List<RedisConnectionInfo> _redisConnectionInfos;
@@ -30,8 +27,7 @@ namespace StackExchange.Opserver.Data.Redis
                     {
                         var count = result.Count;
                         // Add instances that belong to any servers
-                        if (allServerInstances != null)
-                            allServerInstances.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
+                        allServerInstances?.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
 
                         // Add instances defined on this server
                         if (s.Instances.Any())

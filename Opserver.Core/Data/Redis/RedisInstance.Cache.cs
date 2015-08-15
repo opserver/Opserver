@@ -7,10 +7,7 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisInstance
     {
-        public static List<RedisInstance> AllInstances
-        {
-            get { return _redisInstances ?? (_redisInstances = LoadRedisServerInfos()); }
-        }
+        public static List<RedisInstance> AllInstances => _redisInstances ?? (_redisInstances = LoadRedisServerInfos());
 
         private static readonly object _loadLock = new object();
         private static List<RedisInstance> _redisInstances;
