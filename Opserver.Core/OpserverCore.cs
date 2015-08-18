@@ -1,4 +1,5 @@
-﻿using StackExchange.Elastic;
+﻿using System.Net;
+using StackExchange.Elastic;
 
 namespace StackExchange.Opserver
 {
@@ -15,6 +16,9 @@ namespace StackExchange.Opserver
                 //ElasticException.ExceptionOccurred += e => Current.LogException(e);
             }
             catch { }
+
+            // Enable TLS only for SSL negotiation, SSL has been broken for some time.
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
         }
     }
 }
