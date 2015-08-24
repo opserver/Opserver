@@ -8,10 +8,7 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterHealthStatusInfo> _healthStatus;
-        public Cache<ClusterHealthStatusInfo> HealthStatus
-        {
-            get { return _healthStatus ?? (_healthStatus = GetCache<ClusterHealthStatusInfo>(10)); }
-        }
+        public Cache<ClusterHealthStatusInfo> HealthStatus => _healthStatus ?? (_healthStatus = GetCache<ClusterHealthStatusInfo>(10));
 
         /// <summary>
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 
@@ -23,7 +20,7 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             get
             {
-                return HealthStatus.Data != null && HealthStatus.Data.Indices != null
+                return HealthStatus.Data?.Indices != null
                            ? HealthStatus.Data.Indices.Where(i => i.MonitorStatus != MonitorStatus.Good).OrderByWorst()
                            : Enumerable.Empty<NodeIndexInfo>();
             }
@@ -60,7 +57,7 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                 }
             }
-            public string MonitorStatusReason { get { return "Cluster is " + StringStatus; } }
+            public string MonitorStatusReason => "Cluster is " + StringStatus;
 
             public override ElasticResponse RefreshFromConnection(SearchClient cli)
             {
@@ -144,10 +141,7 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                 }
             }
-            public string MonitorStatusReason
-            {
-                get { return StringStatus != "green" ? "Index is " + StringStatus : null; }
-            }
+            public string MonitorStatusReason => StringStatus != "green" ? "Index is " + StringStatus : null;
         }
 
         public class NodeIndexShardInfo

@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Helpers
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step("Opening Connection, Timeout: " + conn.ConnectionTimeout))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
                 try
                 {
                     conn.Open();
@@ -55,9 +55,7 @@ namespace StackExchange.Opserver.Helpers
                 {
                     var b = new SqlConnectionStringBuilder { ConnectionString = connectionString };
 
-                    throw new TimeoutException("Timeout expired connecting to " + b.InitialCatalog + " on " +
-                                                b.DataSource + " on in the alloted " +
-                                                connectionTimeout.Value.ToComma() + " ms");
+                    throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.Value.ToComma()} ms");
                 }
             }
             return conn;
@@ -76,50 +74,45 @@ namespace StackExchange.Opserver.Helpers
             if (connectionTimeout.GetValueOrDefault(0) == 0)
             {
                 await conn.OpenAsync();
-                await SetReadUncommitted(conn);
+                await conn.SetReadUncommitted();
             }
             else
             {
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step("Opening Connection, Timeout: " + conn.ConnectionTimeout))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
                 using (var tokenSource = new CancellationTokenSource())
                 {
                     tokenSource.CancelAfter(connectionTimeout.Value);
                     try
                     {
                         await conn.OpenAsync(tokenSource.Token); // Throwing Null Refs
+                        await conn.SetReadUncommitted();
+                    }
+                    catch (TaskCanceledException e)
+                    {
+                        conn.Close();
+                        var csb = new SqlConnectionStringBuilder(connectionString);
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource}, timeout out at {connectionTimeout.ToComma()} ms";
+                        throw new Exception(sqlException, e);
                     }
                     catch (SqlException e)
                     {
+                        conn.Close();
                         var csb = new SqlConnectionStringBuilder(connectionString);
-                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource}: {e.Message}";
                         throw new Exception(sqlException, e);
                     }
-                    await SetReadUncommitted(conn);
                     if (conn.State == ConnectionState.Connecting)
                     {
                         tokenSource.Cancel();
                         var b = new SqlConnectionStringBuilder {ConnectionString = connectionString};
-
-                        throw new TimeoutException("Timeout expired connecting to " + b.InitialCatalog + " on " +
-                                                    b.DataSource + " on in the alloted " +
-                                                    connectionTimeout.Value.ToComma() + " ms");
+                        throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.Value.ToComma()} ms");
                     }
                 }
             }
             return conn;
-        }
-
-        private static async Task<int> SetReadUncommitted(DbConnection conn)
-        {
-            using (var cmd = conn.CreateCommand())
-            {
-                cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
-                await cmd.ExecuteNonQueryAsync();
-                return 1;
-            }
         }
     }
 }

@@ -22,7 +22,7 @@ namespace StackExchange.Opserver
     /// <summary>
     /// Provides a centralized place for common functionality exposed via extension methods.
     /// </summary>
-    public static class ExtensionMethods
+    public static partial class ExtensionMethods
     {
         public static string ExceptionLogPrefix = "ErrorLog-";
 

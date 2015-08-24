@@ -2,63 +2,51 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyApi
     {
-        private Cache<List<PagerDutyIncident>> _incidents;
-
-        public Cache<List<PagerDutyIncident>> Incidents
+        private Cache<List<Incident>> _incidents;
+        public Cache<List<Incident>> Incidents => _incidents ?? (_incidents = new Cache<List<Incident>>
         {
-            get
-            {
-                return _incidents ?? (_incidents = new Cache<List<PagerDutyIncident>>
-                {
-                    CacheForSeconds = 10 * 60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "Pager Duty Incidents",
-                        getData: GetIncidents,
-                        logExceptions: true
-                        )
-                });
-            }
-        }
+            CacheForSeconds = 10 * 60,
+            UpdateCache = UpdateCacheItem("Pager Duty Incidents", GetIncidents, true)
+        });
 
-        private List<PagerDutyIncident> GetIncidents()
+        private Task<List<Incident>> GetIncidents()
         {
-            var url = string.Format("incidents?since={0}&until={1}&sort_by=created_on:desc",
-                DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
-                DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd"));
-            var i = GetFromPagerDuty(url, getFromJson:
-                response => 
-            {
-                    var myResp =
-                        JSON.Deserialize<PagerDutyIncidentResponce>(response.ToString(), JilOptions)
-                            .Incidents.OrderBy(ic => ic.CreationDate)
-                            .ToList();
-                    return myResp;
-                });
-
-            return i;
+            string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
+                until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
+            var url = $"incidents?since={since}&until={until}&sort_by=created_on:desc";
+            return GetFromPagerDutyAsync(url, getFromJson: response =>
+                JSON.Deserialize<IncidentResponse>(response.ToString(), JilOptions)
+                    .Incidents.OrderBy(ic => ic.CreationDate)
+                    .ToList()
+                );
         }
     }
     
-    public class PagerDutyIncidentResponce
+    public class IncidentResponse
     {
         [DataMember(Name = "incidents")]
-        public List<PagerDutyIncident> Incidents { get; set; }
+        public List<Incident> Incidents { get; set; }
     }
 
-    public class PagerDutyIncident
+    public class IncidentMinimal
     {
-        [DataMember(Name="id")]
+        [DataMember(Name = "id")]
         public string Id { get; set; }
+        [DataMember(Name = "status")]
+        public IncidentStatus Status { get; set; }
+    }
+
+    public class Incident : IncidentMinimal
+    {
         [DataMember(Name = "incident_number")]
         public int Number { get; set; }
-        [DataMember(Name = "status")]
-        public string Status { get; set; }
         [DataMember(Name = "created_on")]
         public DateTime? CreationDate { get; set; }
         [DataMember(Name = "html_url")]
@@ -72,7 +60,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "resolved_by_user")]
         public PagerDutyPerson ResolvedBy { get; set; }
         [DataMember(Name = "acknowledgers")]
-        public List<PagerDutyAcknowledgement> AcknowledgedBy { get; set; }
+        public List<Acknowledgement> AcknowledgedBy { get; set; }
         [DataMember(Name="trigger_summary_data")]
         public Dictionary<string, string> SummaryData { get; set; }
         [DataMember(Name = "service")]
@@ -80,10 +68,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "number_of_escalations")]
         public int? NumberOfEscalations { get; set; }
         
-        public List<PagerDutyApi.PagerDutyLogEntry> IncidentLogs
-        {
-            get { return PagerDutyApi.Instance.GetIncidentEntries(Id); }
-        } 
+        public Task<List<LogEntry>> Logs => PagerDutyApi.Instance.GetIncidentEntriesAsync(Id);
 
         public MonitorStatus MonitorStatus
         {
@@ -91,11 +76,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
             {
                 switch (Status)
                 {
-                    case "triggered":
+                    case IncidentStatus.triggered:
                         return MonitorStatus.Critical;
-                    case "acknowledged":
+                    case IncidentStatus.acknowledged:
                         return MonitorStatus.Warning;
-                    case "resolved":
+                    case IncidentStatus.resolved:
                         return MonitorStatus.Good;
                     default:
                         return MonitorStatus.Unknown;
@@ -104,7 +89,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
     }
 
-    public class PagerDutyAcknowledgement
+    public class Acknowledgement
     {
         [DataMember(Name = "at")]
         public DateTime? AckTime { get; set; }

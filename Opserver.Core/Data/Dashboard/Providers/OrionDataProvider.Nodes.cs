@@ -2,23 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Dapper;
+using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public partial class OrionDataProvider
     {
-        public override List<Node> AllNodes
-        {
-            get { return NodeCache.Data ?? new List<Node>(); }
-        }
+        public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
 
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache
-        {
-            get { return _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 10)); }
-        }
+        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 10));
 
         private Dictionary<int, List<IPAddress>> _nodeToIPList;
         private Dictionary<IPAddress, List<int>> _ipToNodeList;
@@ -26,9 +20,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private Cache<List<Tuple<int, IPAddress>>> _nodeIPCache;
         private Cache<List<Tuple<int, IPAddress>>> NodeIPCache
         {
-            get { return _nodeIPCache ?? (_nodeIPCache = ProviderCache(() =>
+            get { return _nodeIPCache ?? (_nodeIPCache = ProviderCache(async () =>
                 {
-                    var result = GetNodeIPMap();
+                    var result = await GetNodeIPMap();
 
                     var nodeToIP = new Dictionary<int, List<IPAddress>>();
                     foreach (var ip in result)
@@ -54,11 +48,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }, 60)); }
         }
 
-        public List<Node> GetAllNodes()
+        public async Task<List<Node>> GetAllNodes()
         {
             using (MiniProfiler.Current.Step("Get Server Nodes"))
             {
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync())
                 {
                     const string sql = @"
 Select n.NodeID as Id, 
@@ -86,24 +80,24 @@ From Nodes n
      Left Join VIM_Hosts vh On n.NodeID = vh.NodeID
      Left Join APM_HardwareInfo hi On n.NodeID = hi.NodeID
 Order By Id, Caption";
-                    var nodes = conn.Query<Node>(sql, commandTimeout: QueryTimeoutMs).ToList();
+                    var nodes = await conn.QueryAsync<Node>(sql, commandTimeout: QueryTimeoutMs);
                     nodes.ForEach(n => n.DataProvider = this);
                     return nodes;
                 }
             }
         }
 
-        public List<Tuple<int, IPAddress>> GetNodeIPMap()
+        public async Task<List<Tuple<int, IPAddress>>> GetNodeIPMap()
         {
             List<Tuple<int, string>> ipList;
             using (MiniProfiler.Current.Step("Get Server IPs"))
-            using (var conn = GetConnection())
+            using (var conn = await GetConnectionAsync())
             {
-                ipList = conn.Query<int, string, Tuple<int, string>>(
+                ipList = await conn.QueryAsync<int, string, Tuple<int, string>>(
                     @"Select NodeID, IPAddress From NodeIPAddresses",
                     commandTimeout: QueryTimeoutMs,
                     map: Tuple.Create,
-                    splitOn: "IPAddress").ToList();
+                    splitOn: "IPAddress");
             }
 
             var result = new List<Tuple<int, IPAddress>>();
@@ -130,10 +124,10 @@ Order By Id, Caption";
 
         public override string GetManagementUrl(Node node)
         {
-            return !Host.HasValue() ? null : string.Format("http://{0}/Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{1}", Host, node.Id);
+            return !Host.HasValue() ? null : $"http://{Host}/Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{node.Id}";
         }
         
-        public override IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<IEnumerable<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select c.DateTime,
@@ -162,7 +156,7 @@ Order By c.DateTime";
             return UtilizationQuery<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount);
         }
 
-        public override IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<IEnumerable<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select c.DateTime,

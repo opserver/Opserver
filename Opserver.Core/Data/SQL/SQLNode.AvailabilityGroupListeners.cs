@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -15,14 +14,14 @@ namespace StackExchange.Opserver.Data.SQL
                 return _availabilityGroupListeners ?? (_availabilityGroupListeners = new Cache<List<AvailabilityGroupListener>>
                 {
                     CacheForSeconds = Cluster.RefreshInterval,
-                    UpdateCache = UpdateFromSql("AvailabilityGroups", conn =>
+                    UpdateCache = UpdateFromSql("AvailabilityGroups", async conn =>
                         {
                             var sql = GetFetchSQL<AvailabilityGroupListener>() + "\n" +
                                       GetFetchSQL<AvailabilityGroupLisenerIPAddress>();
 
                             List<AvailabilityGroupListener> listeners;
                             List<AvailabilityGroupLisenerIPAddress> listnerIPs;
-                            using (var multi = conn.QueryMultiple(sql))
+                            using (var multi = await conn.QueryMultipleAsync(sql))
                             {
                                 listeners = multi.Read<AvailabilityGroupListener>().ToList();
                                 listnerIPs = multi.Read<AvailabilityGroupLisenerIPAddress>().ToList();
@@ -38,22 +37,18 @@ namespace StackExchange.Opserver.Data.SQL
         }
 
         private Cache<List<AvailabilityGroupLisenerIPAddress>> _availabilityGroupLisenerIPAddresses;
-        public Cache<List<AvailabilityGroupLisenerIPAddress>> AvailabilityGroupLisenerIPAddresses
-        {
-            get
-            {
-                return _availabilityGroupLisenerIPAddresses ??
-                       (_availabilityGroupLisenerIPAddresses =
-                        SqlCacheList<AvailabilityGroupLisenerIPAddress>(Cluster.RefreshInterval));
-            }
-        }
-        
+
+        public Cache<List<AvailabilityGroupLisenerIPAddress>> AvailabilityGroupLisenerIPAddresses =>
+            _availabilityGroupLisenerIPAddresses ??
+            (_availabilityGroupLisenerIPAddresses =
+                SqlCacheList<AvailabilityGroupLisenerIPAddress>(Cluster.RefreshInterval));
+
         /// <summary>
         /// http://msdn.microsoft.com/en-us/library/hh231328.aspx
         /// </summary>
         public class AvailabilityGroupListener : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2012.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public Guid GroupId { get; internal set; }
             public string ListenerId { get; internal set; }
@@ -85,7 +80,7 @@ Select group_id GroupId,
         /// </summary>
         public class AvailabilityGroupLisenerIPAddress : ISQLVersionedObject
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2012.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public string ListenerId { get; internal set; }
             public string IPAddress { get; internal set; }

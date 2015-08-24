@@ -1,28 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Dapper;
+using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public partial class OrionDataProvider
     {
-        public override List<Application> AllApplications
-        {
-            get { return ApplicationCache.Data ?? new List<Application>(); }
-        }
+        public override List<Application> AllApplications => ApplicationCache.Data ?? new List<Application>();
 
         private Cache<List<Application>> _applicationCache;
-        public Cache<List<Application>> ApplicationCache
-        {
-            get { return _applicationCache ?? (_applicationCache = ProviderCache(GetAllApplications, 10)); }
-        }
+        public Cache<List<Application>> ApplicationCache => _applicationCache ?? (_applicationCache = ProviderCache(GetAllApplications, 10));
 
-        public List<Application> GetAllApplications()
+        public async Task<List<Application>> GetAllApplications()
         {
             using (MiniProfiler.Current.Step("Get Applications"))
             {
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync())
                 {
                     const string sql =
                         @"
@@ -55,7 +48,7 @@ From APM_Application app
        On ccs.ComponentStatusID = pe.ComponentStatusID
 Order By NodeID";
 
-                    var results = conn.Query<Application>(sql, commandTimeout: QueryTimeoutMs).ToList();
+                    var results = await conn.QueryAsync<Application>(sql, commandTimeout: QueryTimeoutMs);
                     foreach (var r in results)
                     {
                         r.DataProvider = this;

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
@@ -21,7 +22,7 @@ namespace StackExchange.Opserver.Controllers
                 var pdMap = PagerDutyApi.Instance.Settings.UserNameMap.FirstOrDefault(
                     un => un.OpServerName == Current.User.AccountName);
                 return pdMap != null
-                    ? PagerDutyApi.Instance.AllUsers.Data.Find(u => u.EmailUserName == pdMap.EmailUser)
+                    ? PagerDutyApi.Instance.AllUsers.SafeData(true).Find(u => u.EmailUserName == pdMap.EmailUser)
                     : null;
             }
         }
@@ -44,10 +45,16 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty/incident/detail/{id}")]
-        public ActionResult PagerDutyIncidentDetail(int id)
+        public async Task<ActionResult> PagerDutyIncidentDetail(int id)
         {
             var incident = PagerDutyApi.Instance.Incidents.Data.First(i => i.Number == id);
-            return View("PagerDuty.Incident", incident);
+            var vd = new PagerDutyIncidentModel
+            {
+                Incident = incident,
+                Logs = await incident.Logs
+            };
+
+            return View("PagerDuty.Incident", vd);
         }
 
         [Route("pagerduty/escalation/full")]

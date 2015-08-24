@@ -5,10 +5,7 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLCluster
     {
-        public static List<SQLCluster> AllClusters
-        {
-            get { return _sqlClusters ?? (_sqlClusters = LoadSQLClusters()); }
-        }
+        public static List<SQLCluster> AllClusters => _sqlClusters ?? (_sqlClusters = LoadSQLClusters());
 
         private static readonly object _loadLock = new object();
         private static List<SQLCluster> _sqlClusters;

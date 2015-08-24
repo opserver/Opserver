@@ -10,18 +10,16 @@ namespace StackExchange.Opserver.Data.Elastic
             var response = RefreshFromConnection(client);
 
             // Some implementations are raw
-            if (response == null) return;
-
-            if (response.Exception == null) return;
+            if (response?.Exception == null) return;
             string lastErrorMessage = response.Exception.Message;
             Exception lastException = response.Exception;
 
             // Failed to poll all nodes
             if (lastErrorMessage.HasValue())
             {
-                throw new Exception("Failed to poll all elastic nodes for " + GetType().Name + ": " + lastErrorMessage, lastException);
+                throw new Exception($"Failed to poll all elastic nodes for {GetType().Name}: {lastErrorMessage}", lastException);
             }
-            throw new Exception("Failed to poll all elastic nodes for " + GetType().Name);
+            throw new Exception($"Failed to poll all elastic nodes for {GetType().Name}");
         }
 
         public abstract ElasticResponse RefreshFromConnection(SearchClient cli);

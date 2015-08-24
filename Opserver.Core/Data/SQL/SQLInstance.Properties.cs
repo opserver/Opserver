@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -14,9 +13,9 @@ namespace StackExchange.Opserver.Data.SQL
                 return _serverProperties ?? (_serverProperties = new Cache<SQLServerProperties>
                     {
                         CacheForSeconds = 60,
-                        UpdateCache = UpdateFromSql("Properties", conn =>
+                        UpdateCache = UpdateFromSql("Properties", async conn =>
                             {
-                                var result = conn.Query<SQLServerProperties>(SQLServerProperties.FetchSQL).FirstOrDefault();
+                                var result = (await conn.QueryAsync<SQLServerProperties>(SQLServerProperties.FetchSQL)).FirstOrDefault();
                                 if (result != null)
                                 {
                                     Version = result.ParsedVersion;

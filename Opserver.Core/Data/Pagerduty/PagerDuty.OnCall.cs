@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -21,26 +22,19 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         private Cache<List<PagerDutyPerson>> _oncallusers;
-        public Cache<List<PagerDutyPerson>> OnCallUsers
+        public Cache<List<PagerDutyPerson>> OnCallUsers => _oncallusers ?? (_oncallusers = new Cache<List<PagerDutyPerson>>()
         {
-            get
-            {
-                return _oncallusers ?? (_oncallusers = new Cache<List<PagerDutyPerson>>()
-                {
-                    CacheForSeconds = 60*60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "On Call info",
-                        getData: GetOnCallUsers,
-                        logExceptions: true
-                        )
-                });
+            CacheForSeconds = 60*60,
+            UpdateCache = UpdateCacheItem(
+                description: "On Call info",
+                getData: GetOnCallUsers,
+                logExceptions: true
+                )
+        });
 
-            }
-        }
-
-        private List<PagerDutyPerson> GetOnCallUsers()
+        private Task<List<PagerDutyPerson>> GetOnCallUsers()
         {
-            return GetFromPagerDuty("users/on_call?include[]=contact_methods", getFromJson:
+            return GetFromPagerDutyAsync("users/on_call?include[]=contact_methods", getFromJson:
                 response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users);
         }
 
@@ -82,20 +76,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public OnCall Schedule { get; set; }
         public bool IsOverride { get; set; }
 
-        public int? EscalationLevel
-        {
-            get { return Schedule != null ? Schedule.EscalationLevel : (int?)null; }
-        }
-        
-        public bool IsPrimary
-        {
-            get { return EscalationLevel == 1; }
-        }
+        public int? EscalationLevel => Schedule?.EscalationLevel;
 
-        public string EscalationLevelDescription
-        {
-            get { return PagerDutyPerson.GetEscalationLevelDescription(EscalationLevel); }
-        }
+        public bool IsPrimary => EscalationLevel == 1;
+
+        public string EscalationLevelDescription => PagerDutyPerson.GetEscalationLevelDescription(EscalationLevel);
 
         public MonitorStatus MonitorStatus { get; internal set; }
 
@@ -144,17 +129,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 if (_phone == null)
                 {
                     // The PagerDuty API does not always return a full contact. HANDLE IT.
-                    var m = ContactMethods != null ? ContactMethods.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS") : null;
+                    var m = ContactMethods?.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS");
                     _phone = m != null ? m.FormattedAddress : "n/a";
                 }
                 return _phone;
             }
         }
 
-        public int? EscalationLevel
-        {
-            get { return Schedule != null && Schedule.Count > 0 ? Schedule[0].EscalationLevel : (int?)null; }
-        }
+        public int? EscalationLevel => Schedule != null && Schedule.Count > 0 ? Schedule[0].EscalationLevel : (int?)null;
 
         public static string GetEscalationLevelDescription(int? level)
         {

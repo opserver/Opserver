@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -18,7 +17,7 @@ namespace StackExchange.Opserver.Data.SQL
                         UpdateCache = UpdateFromSql("PerfCounters", conn =>
                             {
                                 var sql = GetFetchSQL<PerfCounterRecord>();
-                                return conn.Query<PerfCounterRecord>(sql, new {maxEvents = 60}).ToList();
+                                return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});
                             })
                     });
             }

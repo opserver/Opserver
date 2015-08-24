@@ -7,14 +7,11 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<IndexAliasInfo> _aliases;
-        public Cache<IndexAliasInfo> Aliases
-        {
-            get { return _aliases ?? (_aliases = GetCache<IndexAliasInfo>(5*60)); }
-        }
+        public Cache<IndexAliasInfo> Aliases => _aliases ?? (_aliases = GetCache<IndexAliasInfo>(5*60));
 
         public string GetIndexAliasedName(string index)
         {
-            if (Aliases.Data == null || Aliases.Data.Aliases == null)
+            if (Aliases.Data?.Aliases == null)
                 return index;
 
             List<string> aliases;
@@ -32,12 +29,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 var rawAliases = cli.GetAliases();
                 if (rawAliases.HasData)
                 {
-                    var result = new Dictionary<string, List<string>>();
-                    foreach (var a in rawAliases.Data)
-                    {
-                        if (a.Value != null && a.Value.Aliases != null && a.Value.Aliases.Count > 0)
-                            result.Add(a.Key, a.Value.Aliases.Keys.ToList());
-                    }
+                    var result = rawAliases.Data.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0).ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList());
                     Aliases = result;
                 }
 

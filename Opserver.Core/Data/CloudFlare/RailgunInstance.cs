@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
@@ -30,7 +31,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = settings;
         }
 
-        public Action<Cache<T>> GetFromRailgun<T>(string opName, Func<RailgunInstance, T> getFromConnection) where T : class
+        public Action<Cache<T>> GetFromRailgun<T>(string opName, Func<RailgunInstance, Task<T>> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "CloudFlare - Railgun Fetch: " + Name + ":" + opName,
                 getData: () => getFromConnection(this),

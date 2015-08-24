@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare/railgun")]
         public ActionResult Railguns() 
         {
-            var vd = new DashboardModel
+            var vd = new RailgunsModel
                 {
                     Railguns = RailgunInstance.AllInstances,
                     View = DashboardModel.Views.Railgun
@@ -34,9 +34,12 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult DNS()
         {
             CloudFlareAPI.Instance.WaitForFirstPoll(10000);
-            var vd = new DashboardModel
+            var vd = new DNSModel
             {
-                View = DashboardModel.Views.DNS
+                View = DashboardModel.Views.DNS,
+                Zones = CloudFlareAPI.Instance.Zones.SafeData(true),
+                DNSRecords = CloudFlareAPI.Instance.DNSRecords.Data,
+                DataCenters = DataCenters.All
             };
             return View(vd);
         }

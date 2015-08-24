@@ -1,31 +1,32 @@
-﻿@model StackExchange.Opserver.Data.PagerDuty.PagerDutyIncident
+﻿@model StackExchange.Opserver.Views.PagerDuty.PagerDutyIncidentModel
 @{
     Layout = null;
     this.SetPageTitle("PagerDuty Incident Email");
-    var acked = Model.AcknowledgedBy != null && Model.AcknowledgedBy.Any() ? "List" : "Nobody";
-    var isSubjectOnly = Model.SummaryData != null && Model.SummaryData.Count == 1 && Model.SummaryData.ContainsKey("subject");
+    var i = Model.Incident;
+    var acked = i.AcknowledgedBy != null && i.AcknowledgedBy.Any() ? "List" : "Nobody";
+    var isSubjectOnly = i.SummaryData?.Count == 1 && i.SummaryData.ContainsKey("subject");
 }
 <div class="incident-details">
-    <h3>Incident Detail: @Model.Number</h3>
+    <h3>Incident Detail: @i.Number</h3>
     <ul>
         @if (isSubjectOnly)
         {
-            <li><span class="key">Subject:</span> <span class="value">@Model.SummaryData["subject"]</span></li>
+            <li><span class="key">Subject:</span> <span class="value">@i.SummaryData["subject"]</span></li>
         }
-        <li><span class="key">Service:</span> <span class="value">@Model.AffectedService.Name</span></li>
-        <li><span class="key">Link:</span> <span class="value"><a href="@Model.Uri" target="_blank">@Model.Uri</a></span></li>
-        <li><span class="key">Status:</span> <span class="bold @Model.MonitorStatus.Class()">@Model.Status.ToTitleCase()</span></li>
+        <li><span class="key">Service:</span> <span class="value">@i.AffectedService.Name</span></li>
+        <li><span class="key">Link:</span> <span class="value"><a href="@i.Uri" target="_blank">@i.Uri</a></span></li>
+        <li><span class="key">Status:</span> <span class="bold @i.MonitorStatus.Class()">@i.Status.GetDescription()</span></li>
         <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li>
-        @if (Model.ResolvedBy != null)
+        @if (i.ResolvedBy != null)
         {
-            <li><span class="key">Resolved By:</span> <span class="value">@Model.ResolvedBy.FullName</span></li>
+            <li><span class="key">Resolved By:</span> <span class="value">@i.ResolvedBy.FullName</span></li>
         }
-        @if (Model.LastChangedBy != null)
+        @if (i.LastChangedBy != null)
         {
-            <li><span class="key">Last Change:</span> <span class="value">@Model.LastChangedBy.FullName - @Model.LastChangedOn.ToRelativeTimeSpan()</span></li>
+            <li><span class="key">Last Change:</span> <span class="value">@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()</span></li>
         }
         <li>
-            @if (!isSubjectOnly && Model.SummaryData != null && Model.SummaryData.Any())
+            @if (!isSubjectOnly && i.SummaryData != null && i.SummaryData.Any())
             {
                 <table>
                     <thead>
@@ -34,7 +35,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    @foreach (var s in Model.SummaryData)
+                    @foreach (var s in i.SummaryData)
                     {
                         <tr>
                             <td class="bold">@s.Key</td>
@@ -60,7 +61,7 @@
             <th>Message</th>
             <th>Notes</th>
         </tr>
-        @foreach (var l in @Model.IncidentLogs)
+        @foreach (var l in Model.Logs)
         {
             <tr>
                 <td>@l.CreationTime.ToRelativeTimeSpan()</td>

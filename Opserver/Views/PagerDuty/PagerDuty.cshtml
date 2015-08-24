@@ -12,17 +12,17 @@
     }
 }
 
-@helper GetIncidentAction(string status)
+@helper GetIncidentAction(IncidentStatus status)
 {
     if (Model.CurrentPagerDutyPerson == null) { return; }
     switch (status)
     {
-        case PagerDutyApi.Statuses.Acknowledged:
-            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved">Resolve</a>
+        case IncidentStatus.acknowledged:
+            <a href="#" class="js_incident_action" data-action="@IncidentStatus.resolved">Resolve</a>
             break;
         default:
-            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Acknowledged">Ack</a>
-            <a href="#" class="js_incident_action" data-action="@PagerDutyApi.Statuses.Resolved">Resolve</a>
+            <a href="#" class="js_incident_action" data-action="@IncidentStatus.acknowledged">Ack</a>
+            <a href="#" class="js_incident_action" data-action="@IncidentStatus.resolved">Resolve</a>
             break;
     }
 }
@@ -42,7 +42,7 @@
             $(".js_incident_action").on('click', function(e) {
                 e.preventDefault();
                 $.post('/pagerduty/action/incident/updatestatus', {
-                    'apiAction': $(this).data('action'),
+                    'newStatus': $(this).data('action'),
                     'incident': $(this).closest('[data-incident]').data('incident')
                 }).done(function() {
                     Status.refresh.run();
@@ -156,10 +156,10 @@
                         <td>@i.CreationDate.ToRelativeTimeSpan()</td>
                         <td>@i.AffectedService.Name</td>
                         <td>
-                            <span class="@i.MonitorStatus.Class()">@i.Status.ToTitleCase()</span>
+                            <span class="@i.MonitorStatus.Class()">@i.Status.GetDescription()</span>
                             @if (i.LastChangedBy != null)
                             {
-                                if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                                if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
                                 {
                                     <span class="note">(@i.LastChangedBy.FullName)</span>
                                     @GetIncidentAction(i.Status)
@@ -170,7 +170,7 @@
                                 }
 
                             }
-                            else if (@i.Status == PagerDutyApi.Statuses.Triggered || @i.Status == PagerDutyApi.Statuses.Acknowledged)
+                            else if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
                             {
                                 @GetIncidentAction(i.Status)
                             }

@@ -4,7 +4,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using Dapper;
 using StackExchange.Opserver.Data.SQL.QueryPlans;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -26,7 +25,7 @@ namespace StackExchange.Opserver.Data.SQL
                         (hasOptions ? options.ToSQLSearch() : ""));
                     sql = sql.Replace("query_plan AS QueryPlan,", "")
                              .Replace("CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp", "");
-                    return conn.Query<TopOperation>(sql, options).ToList();
+                    return conn.QueryAsync<TopOperation>(sql, options);
                 })
             };
         }
@@ -42,8 +41,8 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheForSeconds = 60,
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations",
-                                                conn =>
-                                                conn.Query<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1}).FirstOrDefault())
+                                                async conn =>
+                                                (await conn.QueryAsync<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1})).FirstOrDefault())
                 };
         }
 

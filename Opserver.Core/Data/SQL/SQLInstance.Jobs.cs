@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Threading.Tasks;
 using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -14,28 +15,28 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Enables or disables an agent job
         /// </summary>
-        public bool ToggleJob(Guid jobId, bool enabled)
+        public async Task<bool> ToggleJobAsync(Guid jobId, bool enabled)
         {
-            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
+            return await ExecJobAction(conn => conn.ExecuteAsync("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
         }
 
-        public bool StartJob(Guid jobId)
+        public async Task<bool> StartJobAsync(Guid jobId)
         {
-            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
+            return await ExecJobAction(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
         }
 
-        public bool StopJob(Guid jobId)
+        public async Task<bool> StopJobAsync(Guid jobId)
         {
-            return ExecJobAction(conn => conn.Execute("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
+            return await ExecJobAction(conn => conn.ExecuteAsync("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
         }
 
-        private bool ExecJobAction(Action<DbConnection> action)
+        private async Task<bool> ExecJobAction(Func<DbConnection, Task<int>> action)
         {
             try
             {
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync())
                 {
-                    action(conn);
+                    await action(conn);
                     JobSummary.Purge();
                     return true;
                 }

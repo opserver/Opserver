@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
@@ -10,12 +11,12 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Slave this instance to another instance
         /// </summary>
-        public bool SlaveTo(string address)
+        public async Task<bool> SlaveToAsync(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
-            _connection.GetSingleServer().SlaveOf(newMaster);
+            await _connection.GetSingleServer().SlaveOfAsync(newMaster);
             var newMasterInstance = GetInstance(address);
-            newMasterInstance?.PublishSERedisReconfigure();
+            await newMasterInstance?.PublishSERedisReconfigureAsync();
             return true;
         }
 
@@ -40,15 +41,15 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Sets the StackExchange.Redis tiebreaker key on this node.
         /// </summary>
-        public bool SetSERedisTiebreaker()
+        public async Task<bool> SetSERedisTiebreakerAsync()
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
 
             var myEndPoint = _connection.GetEndPoints().FirstOrDefault();
             RedisValue tieBreakerValue = EndPointCollection.ToString(myEndPoint);
 
-            var result = _connection.GetDatabase()
-                .StringSet(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
+            var result = await _connection.GetDatabase()
+                .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
             Tiebreaker.Poll(true);
             return result;
         }
@@ -56,25 +57,25 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Gets the current value of the StackExchange.Redis tiebreaker key on this node.
         /// </summary>
-        public string GetSERedisTiebreaker()
+        public Task<string> GetSERedisTiebreakerAsync()
         {
-            return GetSERedisTiebreaker(_connection);
+            return GetSERedisTiebreakerAsync(_connection);
         }
 
-        private string GetSERedisTiebreaker(ConnectionMultiplexer conn)
+        private async Task<string> GetSERedisTiebreakerAsync(ConnectionMultiplexer conn)
         {
             RedisKey tieBreakerKey = ConfigurationOptions.Parse(conn.Configuration).TieBreaker;
-            return conn.GetDatabase().StringGet(tieBreakerKey, CommandFlags.NoRedirect);
+            return await conn.GetDatabase().StringGetAsync(tieBreakerKey, CommandFlags.NoRedirect);
         }
 
         /// <summary>
         /// Clears the StackExchange.Redis tiebreaker key from this node.
         /// </summary>
-        public bool ClearSERedisTiebreaker()
+        public async Task<bool> ClearSERedisTiebreakerAsync()
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
-            var result = _connection.GetDatabase()
-                .KeyDelete(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
+            var result = await _connection.GetDatabase()
+                .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
             Tiebreaker.Poll(true);
             return result;
         }
@@ -82,19 +83,19 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Instructs the redis node to broadcast a reconfiguration request to all StackExchange.Redis clients.
         /// </summary>
-        public long PublishSERedisReconfigure()
+        public Task<long> PublishSERedisReconfigureAsync()
         {
-            return _connection.PublishReconfigure();
+            return _connection.PublishReconfigureAsync();
         }
 
         /// <summary>
         /// Kill a particular client's connection
         /// </summary>
-        public bool KillClient(string address)
+        public async Task<bool> KillClientAsync(string address)
         {
             var endpoint = EndPointCollection.TryParse(address);
             if (endpoint == null) return false;
-            _connection.GetSingleServer().ClientKill(endpoint);
+            await _connection.GetSingleServer().ClientKillAsync(endpoint);
             return true;
         }
 

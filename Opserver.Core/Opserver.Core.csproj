@@ -171,6 +171,8 @@
     <Compile Include="Data\HAProxy\HAProxyIssues.cs" />
     <Compile Include="Data\IssuesProvider.cs" />
     <Compile Include="Data\Jira\JiraClient.cs" />
+    <Compile Include="Data\PagerDuty\IncidentStatus.cs" />
+    <Compile Include="Data\PagerDuty\PagerDuty.Actions.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.Incidents.cs" />
     <Compile Include="Data\PagerDuty\PagerDuty.Logs.cs" />
@@ -215,6 +217,7 @@
     </Compile>
     <Compile Include="Data\SQL\SQLIssues.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="ExtensionMethods.Sql.cs" />
     <Compile Include="Helpers\AppCache.cs" />
     <Compile Include="Helpers\Connection.cs" />
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />

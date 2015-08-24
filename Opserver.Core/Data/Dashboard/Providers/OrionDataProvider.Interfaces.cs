@@ -1,29 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using Dapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public partial class OrionDataProvider
     {
-        public override List<Interface> AllInterfaces
-        {
-            get { return InterfaceCache.Data ?? new List<Interface>(); }
-        }
+        public override List<Interface> AllInterfaces => InterfaceCache.Data ?? new List<Interface>();
 
         private Cache<List<Interface>> _interfaceCache;
-        public Cache<List<Interface>> InterfaceCache
-        {
-            get { return _interfaceCache ?? (_interfaceCache = ProviderCache(GetAllInterfaces, 10)); }
-        }
+        public Cache<List<Interface>> InterfaceCache => _interfaceCache ?? (_interfaceCache = ProviderCache(GetAllInterfaces, 10));
 
-        public List<Interface> GetAllInterfaces()
+        public async Task<List<Interface>> GetAllInterfaces()
         {
             using (MiniProfiler.Current.Step("Get Interfaces"))
             {
                 // TODO: IsUnwatched
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync())
                 {
                     const string sql = @"
 Select InterfaceID as Id,
@@ -51,14 +45,14 @@ Select InterfaceID as Id,
        InterfaceMTU as MTU,
        InterfaceSpeed as Speed
 From Interfaces";
-                    var interfaces = conn.Query<Interface>(sql, commandTimeout: QueryTimeoutMs).ToList();
+                    var interfaces = await conn.QueryAsync<Interface>(sql, commandTimeout: QueryTimeoutMs);
                     interfaces.ForEach(i => i.DataProvider = this);
                     return interfaces;
                 }
             }
         }
 
-        public override IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface nodeInteface, System.DateTime? start, System.DateTime? end, int? pointCount = null)
+        public override Task<IEnumerable<Interface.InterfaceUtilization>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select itd.DateTime,

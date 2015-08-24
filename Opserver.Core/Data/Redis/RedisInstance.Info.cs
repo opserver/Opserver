@@ -34,14 +34,14 @@ namespace StackExchange.Opserver.Data.Redis
                 return _info ?? (_info = new Cache<RedisInfo>
                     {
                         CacheForSeconds = 5,
-                        UpdateCache = GetFromRedis("INFO", rc =>
+                        UpdateCache = GetFromRedisAsync("INFO", async rc =>
                         {
                             var server = rc.GetSingleServer();
                             string infoStr;
                             //TODO: Remove when StackExchange.Redis gets profiling
                             using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
                             {
-                                infoStr = server.InfoRaw();
+                                infoStr = await server.InfoRawAsync();
                             }
                             ConnectionInfo.Features = server.Features;
                             var ri = RedisInfo.FromInfoString(infoStr);

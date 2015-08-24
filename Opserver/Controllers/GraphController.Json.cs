@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
@@ -12,19 +13,19 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/cpu/json")]
-        public ActionResult CPUJson(int id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> CPUJson(int id, long start, long end, bool? summary = false)
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
 
             return Json(new
             {
-                points = node.GetCPUUtilization(start.ToDateTime(), end.ToDateTime(), 1000).Select(p => new
+                points = (await node.GetCPUUtilization(start.ToDateTime(), end.ToDateTime(), 1000)).Select(p => new
                     {
                         date = p.DateTime.ToEpochTime(true), 
                         value = p.AvgLoad ?? 0
                     }),
-                summary = summary.GetValueOrDefault(false) ? node.GetCPUUtilization(null, null, 2000).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetCPUUtilization(null, null, 2000)).Select(p => new
                     {
                         date = p.DateTime.ToEpochTime(true), 
                         value = p.AvgLoad ?? 0
@@ -40,19 +41,19 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/memory/json")]
-        public ActionResult MemoryJson(int id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> MemoryJson(int id, long start, long end, bool? summary = false)
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
 
             return Json(new
             {
-                points = node.GetMemoryUtilization(start.ToDateTime(), end.ToDateTime(), 1000).Select(p => new
+                points = (await node.GetMemoryUtilization(start.ToDateTime(), end.ToDateTime(), 1000)).Select(p => new
                     {
                         date = p.DateTime.ToEpochTime(true),
                         value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
                     }),
-                summary = summary.GetValueOrDefault(false) ? node.GetMemoryUtilization(null, null, 1000).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetMemoryUtilization(null, null, 1000)).Select(p => new
                     {
                         date = p.DateTime.ToEpochTime(true),
                         value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
@@ -68,12 +69,12 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/network/json")]
-        public ActionResult NetworkJson(int id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> NetworkJson(int id, long start, long end, bool? summary = false)
         {
             var ni = DashboardData.GetInterfaceById(id);
             if (ni == null) return JsonNotFound();
 
-            var traffic = ni.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000).ToList();
+            var traffic = (await ni.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000)).ToList();
             var anyTraffic = traffic.Any();
 
             return Json(new
@@ -90,7 +91,7 @@ namespace StackExchange.Opserver.Controllers
                             main_out = (int)(i.OutAvgBps.GetValueOrDefault())
                         }),
                     summary = summary.GetValueOrDefault()
-                                  ? ni.GetUtilization(null, null, 2000).Select(i => new
+                                  ? (await ni.GetUtilization(null, null, 2000)).Select(i => new
                                       {
                                           date = i.DateTime.ToEpochTime(true),
                                           main_in = (int)(i.InAvgBps.GetValueOrDefault()),
@@ -131,7 +132,7 @@ namespace StackExchange.Opserver.Controllers
 
         private static string GetFlagTooltip(Build b)
         {
-            return string.Format("{0} - {1} #{2}", b.NiceProjectName(), b.NiceName(), b.Number);
+            return $"{b.NiceProjectName()} - {b.NiceName()} #{b.Number}";
         }
     }
 }

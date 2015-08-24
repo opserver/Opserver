@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
@@ -12,10 +13,10 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster : PollNode, ISearchableNode, IMonitedService
     {
-        string ISearchableNode.DisplayName { get { return SettingsName; } }
-        string ISearchableNode.Name { get { return SettingsName; } }
-        string ISearchableNode.CategoryName { get { return "elastic"; } }
-        private string SettingsName { get; set; }
+        string ISearchableNode.DisplayName => SettingsName;
+        string ISearchableNode.Name => SettingsName;
+        string ISearchableNode.CategoryName => "elastic";
+        private string SettingsName { get; }
         public List<ElasticNode> SettingsNodes { get; set; }
         public ConnectionManager ConnectionManager { get; set; }
 
@@ -66,7 +67,8 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                     else
                     {
-                        Current.LogException(new ConfigurationErrorsException(string.Format("Invalid port specified for {0}: '{1}'", parts[0], parts[1])));
+                        Current.LogException(new ConfigurationErrorsException(
+                            $"Invalid port specified for {parts[0]}: '{parts[1]}'"));
                         Port = DefaultElasticPort;
                     }
                 }
@@ -75,12 +77,13 @@ namespace StackExchange.Opserver.Data.Elastic
                     Host = hostAndPort;
                     Port = DefaultElasticPort;
                 }
-                Url = string.Format("http://{0}:{1}/", Host, Port);
+                Url = $"http://{Host}:{Port}/";
             }
         }
 
-        public override string NodeType { get { return "elastic"; } }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
+        public override string NodeType => "elastic";
+        public override int MinSecondsBetweenPolls => 5;
+
         public override IEnumerable<Cache> DataPollers
         {
             get
@@ -134,7 +137,8 @@ namespace StackExchange.Opserver.Data.Elastic
                                        {
                                            var result = new T();
                                            result.PopulateFromConnections(ConnectionManager.GetClient());
-                                           return result;
+                                           // TODO: Make all of this actually async in the client
+                                           return Task.FromResult(result);
                                        },
                                    addExceptionData:
                                        e =>

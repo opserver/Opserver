@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using Dapper;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -17,10 +17,9 @@ namespace StackExchange.Opserver.Data.SQL
                 return _availabilityGroups ?? (_availabilityGroups = new Cache<List<AvailabilityGroupInfo>>
                     {
                         CacheForSeconds = Cluster.RefreshInterval,
-                        UpdateCache = UpdateFromSql("AvailabilityGroups", conn =>
+                        UpdateCache = UpdateFromSql("AvailabilityGroups", async conn =>
                             {
-                                var result =
-                                    conn.Query<AvailabilityGroupInfo>(GetFetchSQL<AvailabilityGroupInfo>()).ToList();
+                                var result = await conn.QueryAsync<AvailabilityGroupInfo>(GetFetchSQL<AvailabilityGroupInfo>());
                                 result.ForEach(r => { r.Node = this; });
                                 return result;
                             })
@@ -36,7 +35,7 @@ namespace StackExchange.Opserver.Data.SQL
                 return _availabilityGroupReplicas ?? (_availabilityGroupReplicas = new Cache<List<AvailabilityGroupReplicaInfo>>
                 {
                     CacheForSeconds = Cluster.RefreshInterval,
-                    UpdateCache = UpdateFromSql("AvailabilityGroups", conn => AvailabilityGroupReplicaInfo.PopulateFromConnection(conn, this))
+                    UpdateCache = UpdateFromSql("AvailabilityGroups", conn => AvailabilityGroupReplicaInfo.PopulateFromConnectionAsync(conn, this))
                 });
             }
         }
@@ -295,16 +294,16 @@ Drop Table #dbs;
                 return FetchSQL;
             }
 
-            public static List<AvailabilityGroupReplicaInfo> PopulateFromConnection(DbConnection conn, SQLNode node)
+            public static async Task<List<AvailabilityGroupReplicaInfo>> PopulateFromConnectionAsync(DbConnection conn, SQLNode node)
             {
                 List<AvailabilityGroupReplicaInfo> groups;
                 List<DatabaseReplicaState> databases;
 
                 var sql = node.GetFetchSQL<AvailabilityGroupReplicaInfo>() + "\n\n" + node.GetFetchSQL<DatabaseReplicaState>();
-                using (var multi = conn.QueryMultiple(sql))
+                using (var multi = await conn.QueryMultipleAsync(sql))
                 {
-                    groups = multi.Read<AvailabilityGroupReplicaInfo>().ToList();
-                    databases = multi.Read<DatabaseReplicaState>().ToList();
+                    groups = (await multi.ReadAsync<AvailabilityGroupReplicaInfo>()).AsList();
+                    databases = (await multi.ReadAsync<DatabaseReplicaState>()).AsList();
                 }
 
                 Func<string, string, PerfCounterRecord> getCounter = (cn, n) => node.GetPerfCounter("Availability Replica", cn, n);

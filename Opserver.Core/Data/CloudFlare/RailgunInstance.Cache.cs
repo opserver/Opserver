@@ -6,10 +6,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class RailgunInstance
     {
-        public static List<RailgunInstance> AllInstances
-        {
-            get { return _railgunInstances ?? (_railgunInstances = LoadRailgunInfos()); }
-        }
+        public static List<RailgunInstance> AllInstances => _railgunInstances ?? (_railgunInstances = LoadRailgunInfos());
 
         private static readonly object _loadLock = new object();
         private static List<RailgunInstance> _railgunInstances;

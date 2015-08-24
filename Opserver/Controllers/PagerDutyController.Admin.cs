@@ -1,39 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.PagerDuty;
-using StackExchange.Opserver.Views.PagerDuty;
 
 namespace StackExchange.Opserver.Controllers
 {
 	public partial class PagerDutyController
     {
         [Route("pagerduty/action/incident/updatestatus")]
-        public ActionResult PagerDutyActionIncident(string apiAction, string incident)
+        public async Task<ActionResult> PagerDutyActionIncident(string incident, IncidentStatus newStatus)
         {
             var pdUser = CurrentPagerDutyPerson;
-            if (pdUser == null) return ContentNotFound("PagerDuty Persoon Not Found for " + Current.User.AccountName);
-            
-            var activeIncident = new PagerDutyEditIncident
-            {
-                Id = incident,
-                Status = apiAction
-            };
-            var data = new PagerDutyIncidentModel
-            {
-                Incidents = new List<PagerDutyEditIncident> { activeIncident },
-                RequesterId = pdUser.Id
-            };
-            PagerDutyApi.Instance.GetFromPagerDuty("incidents",
-                getFromJson: response => response.ToString(), httpMethod: "PUT", data: data);
+            if (pdUser == null) return ContentNotFound("PagerDuty Person Not Found for " + Current.User.AccountName);
 
-            PagerDutyApi.Instance.Incidents.Poll(true);
+            var newIncident = await PagerDutyApi.Instance.UpdateIncidentStatusAsync(incident, pdUser, newStatus);
 
-            return Json(true);
+            return Json(newIncident?[0]?.Status == newStatus);
         }
 
         [Route("pagerduty/action/oncall/override")]
-        public ActionResult PagerDutyActionOnCallOverride(DateTime? start = null, int durationMins = 60)
+        public async Task<ActionResult> PagerDutyActionOnCallOverride(DateTime? start = null, int durationMins = 60)
         {
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Persoon Not Found for " + Current.User.AccountName);
@@ -46,7 +32,7 @@ namespace StackExchange.Opserver.Controllers
 
             start = start ?? DateTime.UtcNow;
             
-            currentPrimarySchedule.SetOverride(start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson);
+            await currentPrimarySchedule.SetOverrideAsync(start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson);
       
             return Json(true);
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.CloudFlare
@@ -16,7 +17,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public override string NodeType => "CloudFlareAPI";
         public override int MinSecondsBetweenPolls => 5;
 
-        private static Options JilOptions = new Options(dateFormat: DateTimeFormat.ISO8601);
+        private static readonly Options JilOptions = Options.ISO8601;
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -35,7 +36,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = Current.Settings.CloudFlare;
         }
 
-        public Action<Cache<T>> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, T> get) where T : class
+        public Action<Cache<T>> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, Task<T>> get) where T : class
         {
             return UpdateCacheItem("CloudFlare - API: " + opName, () => get(this), logExceptions: true);
         }
@@ -48,12 +49,12 @@ namespace StackExchange.Opserver.Data.CloudFlare
         /// <param name="path">The API path to call, e.g. zones</param>
         /// <param name="values">Variables to pass into this method</param>
         /// <returns>The CloudFlare API response</returns>
-        public T Get<T>(string path, NameValueCollection values = null)
+        public async Task<T> Get<T>(string path, NameValueCollection values = null)
         {
             using (var wc = GetWebClient())
             {
                 var url = new Uri($"{apiBaseUrl}{path}{(values != null ? "?" + values : "")}");
-                var rawResult = wc.DownloadString(url);
+                var rawResult = await wc.DownloadStringTaskAsync(url);
                 return JSON.Deserialize<CloudFlareResult<T>>(rawResult, JilOptions).Result;
             }
         }
@@ -98,9 +99,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
             };
         }
 
-        public override string ToString()
-        {
-            return string.Concat("CloudFlare API: ", Email);
-        }
+        public override string ToString() => string.Concat("CloudFlare API: ", Email);
     }
 }

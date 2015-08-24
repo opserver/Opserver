@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -26,7 +24,7 @@ namespace StackExchange.Opserver.Data.SQL
                     UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
                         {
                             var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseTableInfo>()}";
-                            return conn.Query<SQLDatabaseTableInfo>(sql).ToList();
+                            return conn.QueryAsync<SQLDatabaseTableInfo>(sql);
                         })
                 };
         }
@@ -41,16 +39,13 @@ namespace StackExchange.Opserver.Data.SQL
                 UpdateCache = UpdateFromSql("Column Info for " + databaseName, conn =>
                 {
                     var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseColumnInfo>()}";
-                    return conn.Query<SQLDatabaseColumnInfo>(sql).ToList();
+                    return conn.QueryAsync<SQLDatabaseColumnInfo>(sql);
                 })
             };
         }
 
         private Cache<List<SQLDatabaseVLFInfo>> _databaseVLFs;
-        public Cache<List<SQLDatabaseVLFInfo>> DatabaseVLFs
-        {
-            get { return _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SQLDatabaseVLFInfo>(10 * 60, 60, affectsStatus: false)); }
-        }
+        public Cache<List<SQLDatabaseVLFInfo>> DatabaseVLFs => _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SQLDatabaseVLFInfo>(10 * 60, 60, affectsStatus: false));
 
         public static List<string> SystemDatabaseNames = new List<string>
             {

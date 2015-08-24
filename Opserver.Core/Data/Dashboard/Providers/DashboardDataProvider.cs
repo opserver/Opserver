@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
@@ -53,8 +54,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract IEnumerable<IPAddress> GetIPsForNode(Node node);
 
         public virtual string GetManagementUrl(Node node) { return null; }
-        public abstract IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<IEnumerable<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<IEnumerable<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
 
         #endregion
 
@@ -67,7 +68,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return AllInterfaces.FirstOrDefault(i => i.Id == id);
         }
 
-        public abstract IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<IEnumerable<Interface.InterfaceUtilization>> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null);
 
         #endregion
 
@@ -80,7 +81,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return AllVolumes.FirstOrDefault(v => v.Id == id);
         }
 
-        public abstract IEnumerable<Volume.VolumeUtilization> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<IEnumerable<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
 
         #endregion
 
@@ -98,7 +99,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         #region Cache
 
         protected Cache<T> ProviderCache<T>(
-            Func<T> fetch,
+            Func<Task<T>> fetch,
             int cacheSeconds,
             int? cacheFailureSeconds = null,
             bool affectsStatus = true,
@@ -116,7 +117,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 };
         }
 
-        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<T> fetch) where T : class
+        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<Task<T>> fetch) where T : class
         {
             return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
                                    getData: fetch,

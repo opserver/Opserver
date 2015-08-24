@@ -10,23 +10,18 @@ namespace StackExchange.Opserver.Data.HAProxy
     {
         private static readonly object _insertLock = new object();
 
-        public string DisplayName { get { return Name; } }
-        public string CategoryName { get { return "HAProxy"; } }
+        public string DisplayName => Name;
+        public string CategoryName => "HAProxy";
 
-        public HAProxySettings.Group Settings { get; private set; }
+        public HAProxySettings.Group Settings { get; }
 
-        public string Name { get { return Settings.Name; }}
-        public string Description { get { return Settings.Description; } }
-        public List<HAProxyInstance> Instances { get; private set; }
+        public string Name => Settings.Name;
+        public string Description => Settings.Description;
+        public List<HAProxyInstance> Instances { get; }
         
-        public MonitorStatus MonitorStatus
-        {
-            get { return Instances.GetWorstStatus(); }
-        }
-        public string MonitorStatusReason
-        {
-            get { return Instances.GetReasonSummary(); }
-        }
+        public MonitorStatus MonitorStatus => Instances.GetWorstStatus();
+
+        public string MonitorStatusReason => Instances.GetReasonSummary();
 
         public HAProxyGroup(HAProxySettings.Group group)
         {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -29,7 +30,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>CPU usage data points</returns>
-        public IEnumerable<CPUUtilization> GetCPUUtilization(DateTime? start, DateTime? end, int? pointCount = null)
+        public Task<IEnumerable<CPUUtilization>> GetCPUUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
             return DataProvider.GetCPUUtilization(this, start, end, pointCount);
         }
@@ -41,7 +42,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>Memory usage data points</returns>
-        public IEnumerable<MemoryUtilization> GetMemoryUtilization(DateTime? start, DateTime? end, int? pointCount = null)
+        public Task<IEnumerable<MemoryUtilization>> GetMemoryUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
             return DataProvider.GetMemoryUtilization(this, start, end, pointCount);
         }

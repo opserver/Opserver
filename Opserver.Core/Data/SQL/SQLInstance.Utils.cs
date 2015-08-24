@@ -1,5 +1,5 @@
 ﻿using System;
-using Dapper;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -8,13 +8,13 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Removes a query plan from the cache
         /// </summary>
-        public int RemovePlan(byte[] planHandle)
+        public async Task<int> RemovePlanAsync(byte[] planHandle)
         {
             try
             {
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync())
                 {
-                    return conn.Execute("DBCC FREEPROCCACHE (@planHandle);", new { planHandle });
+                    return await conn.ExecuteAsync("DBCC FREEPROCCACHE (@planHandle);", new { planHandle });
                 }
             }
             catch (Exception ex)

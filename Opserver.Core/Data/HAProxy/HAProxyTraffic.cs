@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapper;
+using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.HAProxy
@@ -13,11 +13,11 @@ namespace StackExchange.Opserver.Data.HAProxy
             get
             {
                 var fc = Current.Settings.HAProxy.Traffic.Connections.FirstOrDefault();
-                return fc != null ? fc.ConnectionString : null;
+                return fc?.ConnectionString;
             }
         }
 
-        public static List<string> GetHosts()
+        public static async Task<List<string>> GetHosts()
         {
             const string cacheKey = "host-list";
             var results = Current.LocalCache.Get<List<string>>(cacheKey);
@@ -32,9 +32,9 @@ Where CreationDate > GETUTCDATE() - 15
 Group By Host
 Having Sum(Hits) > 5000
 Order By 1";
-                using (var conn = Connection.GetOpen(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString))
                 {
-                    results = conn.Query<string>(sql).ToList();
+                    results = await conn.QueryAsync<string>(sql);
                 }
                 results.RemoveAll(h => !IsValidHost(h));
                 Current.LocalCache.Set(cacheKey, results, 5 * 60 * 60); // cache for 5 hours, this *very* rarely changes
@@ -50,12 +50,12 @@ Order By 1";
             return true;
         }
 
-        public static List<TrafficDay> GetTrafficSummary(int lastNdays, string host = null)
+        public static Task<List<TrafficDay>> GetTrafficSummary(int lastNdays, string host = null)
         {
             return GetTrafficSummary(host, DateTime.UtcNow.AddDays(-lastNdays), DateTime.UtcNow);
         }
 
-        public static List<TrafficDay> GetTrafficSummary(string host, DateTime? startDate, DateTime? endDate)
+        public static async Task<List<TrafficDay>> GetTrafficSummary(string host, DateTime? startDate, DateTime? endDate)
         {
             var cacheKey = "haproxy-traffic-summary-" + host.IsNullOrEmptyReturn("*");
 
@@ -71,9 +71,9 @@ Order By CreationDate";
             var results = Current.LocalCache.Get<List<TrafficDay>>(cacheKey);
             if (results == null)
             {
-                using (var conn = Connection.GetOpen(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString))
                 {
-                    results = conn.Query<TrafficDay>(sql, new { host, start = startDate, end = endDate }).ToList();
+                    results = await conn.QueryAsync<TrafficDay>(sql, new { host, start = startDate, end = endDate });
                     Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, that's the SQL recalc interval
                 }
             }
@@ -86,7 +86,7 @@ Order By CreationDate";
             return fResults.ToList();
         }
 
-        public static List<RouteHit> GetTopPageRotues(int lastNdays, string host = null)
+        public static async Task<List<RouteHit>> GetTopPageRotues(int lastNdays, string host = null)
         {
             var cacheKey = "top-page-routes-" + lastNdays + "-" + host;
             var results = Current.LocalCache.Get<List<RouteHit>>(cacheKey);
@@ -117,16 +117,16 @@ Where RouteName Is Not Null
 Group By RouteName
 Order By Sum(Hits) Desc";
 
-                using (var conn = Connection.GetOpen(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString))
                 {
-                    results = conn.Query<RouteHit>(sql, new {lastNdays, host}).ToList();
+                    results = await conn.QueryAsync<RouteHit>(sql, new {lastNdays, host});
                 }
                 Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, this only aggregates in sql once an hour
             }
             return results;
         }
 
-        public static List<RouteData> GetRouteData(string routeName, int? lastNdays = null, string server = null, string host = null)
+        public static async Task<List<RouteData>> GetRouteData(string routeName, int? lastNdays = null, string server = null, string host = null)
         {
             var sql = @"
 Select CreationDate, 
@@ -152,9 +152,9 @@ Where ResponseCode = 200
 Group By CreationDate
 Order By CreationDate";
 
-            using (var conn = Connection.GetOpen(ConnectionString))
+            using (var conn = await Connection.GetOpenAsync(ConnectionString))
             {
-                return conn.Query<RouteData>(sql, new { routeName, host, lastNdays, server }).ToList();
+                return await conn.QueryAsync<RouteData>(sql, new { routeName, host, lastNdays, server });
             }
         }
 
@@ -185,26 +185,20 @@ Order By CreationDate";
 
             private readonly Func<long?, long?, decimal?> _getAvg = (v, h) => h > 0 && v.HasValue ? v/h : null;
 
-            public decimal? AvgBytes { get { return _getAvg(Bytes, Hits); } }
-            public decimal? AvgTr24Hrs { get { return _getAvg(Tr24Hrs, Hits24Hrs); } }
-            public decimal? AvgSqlCount24Hrs { get { return _getAvg(SqlCount24Hrs, Hits24Hrs); } }
-            public decimal? AvgSqlDurationMs24Hrs { get { return _getAvg(SqlDurationMs24Hrs, Hits24Hrs); } }
-            public decimal? AvgRedisCount24Hrs { get { return _getAvg(RedisCount24Hrs, Hits24Hrs); } }
-            public decimal? AvgRedisDurationMs24Hrs { get { return _getAvg(RedisDurationMs24Hrs, Hits24Hrs); } }
-            public decimal? AvgHttpCount24Hrs { get { return _getAvg(HttpCount24Hrs, Hits24Hrs); } }
-            public decimal? AvgHttpDurationMs24Hrs { get { return _getAvg(HttpDurationMs24Hrs, Hits24Hrs); } }
-            public decimal? AvgTagEngineCount24Hrs { get { return _getAvg(TagEngineCount24Hrs, Hits24Hrs); } }
-            public decimal? AvgTagEngineDurationMs24Hrs { get { return _getAvg(TagEngineDurationMs24Hrs, Hits24Hrs); } }
-            public decimal? AvgAspNetDurationMs24Hrs { get { return _getAvg(AspNetDurationMs24Hrs, Hits24Hrs); } }
+            public decimal? AvgBytes => _getAvg(Bytes, Hits);
+            public decimal? AvgTr24Hrs => _getAvg(Tr24Hrs, Hits24Hrs);
+            public decimal? AvgSqlCount24Hrs => _getAvg(SqlCount24Hrs, Hits24Hrs);
+            public decimal? AvgSqlDurationMs24Hrs => _getAvg(SqlDurationMs24Hrs, Hits24Hrs);
+            public decimal? AvgRedisCount24Hrs => _getAvg(RedisCount24Hrs, Hits24Hrs);
+            public decimal? AvgRedisDurationMs24Hrs => _getAvg(RedisDurationMs24Hrs, Hits24Hrs);
+            public decimal? AvgHttpCount24Hrs => _getAvg(HttpCount24Hrs, Hits24Hrs);
+            public decimal? AvgHttpDurationMs24Hrs => _getAvg(HttpDurationMs24Hrs, Hits24Hrs);
+            public decimal? AvgTagEngineCount24Hrs => _getAvg(TagEngineCount24Hrs, Hits24Hrs);
+            public decimal? AvgTagEngineDurationMs24Hrs => _getAvg(TagEngineDurationMs24Hrs, Hits24Hrs);
+            public decimal? AvgAspNetDurationMs24Hrs => _getAvg(AspNetDurationMs24Hrs, Hits24Hrs);
 
-            public decimal? AvgCalculatedAspNetDurationMs
-            {
-                get { return _getAvg(AspNetDurationMs24Hrs - SqlDurationMs24Hrs - RedisDurationMs24Hrs - HttpDurationMs24Hrs - TagEngineDurationMs24Hrs, Hits); }
-            }
-            public decimal? AvgCalculatedOtherDurationMs
-            {
-                get { return _getAvg(Tr24Hrs - AspNetDurationMs24Hrs, Hits); }
-            }
+            public decimal? AvgCalculatedAspNetDurationMs => _getAvg(AspNetDurationMs24Hrs - SqlDurationMs24Hrs - RedisDurationMs24Hrs - HttpDurationMs24Hrs - TagEngineDurationMs24Hrs, Hits);
+            public decimal? AvgCalculatedOtherDurationMs => _getAvg(Tr24Hrs - AspNetDurationMs24Hrs, Hits);
         }
 
         public class RouteData
@@ -225,26 +219,20 @@ Order By CreationDate";
 
             private readonly Func<long?, long?, decimal?> _getAvg = (v, h) => h > 0 && v.HasValue ? v / h : null;
 
-            public decimal? AvgBytes { get { return _getAvg(Bytes, Hits); } }
-            public decimal? AvgTr { get { return _getAvg(Tr, Hits); } }
-            public decimal? AvgSqlCount { get { return _getAvg(SqlCount, Hits); } }
-            public decimal? AvgSqlDurationMs { get { return _getAvg(SqlDurationMs, Hits); } }
-            public decimal? AvgRedisCount { get { return _getAvg(RedisCount, Hits); } }
-            public decimal? AvgRedisDurationMs { get { return _getAvg(RedisDurationMs, Hits); } }
-            public decimal? AvgHttpCount { get { return _getAvg(HttpCount, Hits); } }
-            public decimal? AvgHttpDurationMs { get { return _getAvg(HttpDurationMs, Hits); } }
-            public decimal? AvgTagEngineCount { get { return _getAvg(TagEngineCount, Hits); } }
-            public decimal? AvgTagEngineDurationMs { get { return _getAvg(TagEngineDurationMs, Hits); } }
-            public decimal? AvgAspNetDurationMs { get { return _getAvg(AspNetDurationMs, Hits); } }
+            public decimal? AvgBytes => _getAvg(Bytes, Hits);
+            public decimal? AvgTr => _getAvg(Tr, Hits);
+            public decimal? AvgSqlCount => _getAvg(SqlCount, Hits);
+            public decimal? AvgSqlDurationMs => _getAvg(SqlDurationMs, Hits);
+            public decimal? AvgRedisCount => _getAvg(RedisCount, Hits);
+            public decimal? AvgRedisDurationMs => _getAvg(RedisDurationMs, Hits);
+            public decimal? AvgHttpCount => _getAvg(HttpCount, Hits);
+            public decimal? AvgHttpDurationMs => _getAvg(HttpDurationMs, Hits);
+            public decimal? AvgTagEngineCount => _getAvg(TagEngineCount, Hits);
+            public decimal? AvgTagEngineDurationMs => _getAvg(TagEngineDurationMs, Hits);
+            public decimal? AvgAspNetDurationMs => _getAvg(AspNetDurationMs, Hits);
 
-            public decimal? AvgCalculatedAspNetDurationMs
-            {
-                get { return _getAvg(AspNetDurationMs - SqlDurationMs - RedisDurationMs - HttpDurationMs - TagEngineDurationMs, Hits); }
-            }
-            public decimal? AvgCalculatedOtherDurationMs
-            {
-                get { return _getAvg(Tr - AspNetDurationMs, Hits); }
-            }
+            public decimal? AvgCalculatedAspNetDurationMs => _getAvg(AspNetDurationMs - SqlDurationMs - RedisDurationMs - HttpDurationMs - TagEngineDurationMs, Hits);
+            public decimal? AvgCalculatedOtherDurationMs => _getAvg(Tr - AspNetDurationMs, Hits);
         }
     }
 }

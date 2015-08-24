@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -17,7 +15,7 @@ namespace StackExchange.Opserver.Data.SQL
                     UpdateCache = UpdateFromSql("Error Log last " + minutesAgo + " minutes", conn =>
                         {
                             var sql = GetFetchSQL<SQLErrorLogInfo>();
-                            return conn.Query<SQLErrorLogInfo>(sql, new {minutesAgo}).ToList();
+                            return conn.QueryAsync<SQLErrorLogInfo>(sql, new {minutesAgo});
                         })
                 };
         }

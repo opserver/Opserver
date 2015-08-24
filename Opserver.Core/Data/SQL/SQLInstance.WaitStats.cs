@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -18,7 +16,7 @@ namespace StackExchange.Opserver.Data.SQL
                     UpdateCache = UpdateFromSql("WaitStats", conn =>
                     {
                         var sql = GetFetchSQL<WaitStatRecord>();
-                        return conn.Query<WaitStatRecord>(sql, new { secondsBetween = 15 }).ToList();
+                        return conn.QueryAsync<WaitStatRecord>(sql, new { secondsBetween = 15 });
                     })
                 });
             }

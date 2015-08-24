@@ -6,11 +6,11 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {
-        public string Name { get { return ClusterSettings.Name; } }
-        public int RefreshInterval { get { return ClusterSettings.RefreshIntervalSeconds; } }
-        private SQLSettings.Cluster ClusterSettings { get; set; }
+        public string Name => ClusterSettings.Name;
+        public int RefreshInterval => ClusterSettings.RefreshIntervalSeconds;
+        private SQLSettings.Cluster ClusterSettings { get; }
 
-        public List<SQLNode> Nodes { get; private set; }
+        public List<SQLNode> Nodes { get; }
         
         public List<SQLNode.AvailabilityGroupInfo> AvailabilityGroups
         {
@@ -28,32 +28,20 @@ namespace StackExchange.Opserver.Data.SQL
             return Nodes.SelectMany(n => n.AvailabilityGroups.SafeData(true).Where(agMatch));
         }
 
-        public MonitorStatus MonitorStatus
-        {
-            get { return Nodes.GetWorstStatus("SQLCluster-" + Name); }
-        }
-        public string MonitorStatusReason
-        {
-            get { return MonitorStatus == MonitorStatus.Good ? null : Nodes.GetReasonSummary(); }
-        }
+        public MonitorStatus MonitorStatus => Nodes.GetWorstStatus("SQLCluster-" + Name);
+        public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : Nodes.GetReasonSummary();
 
         public SQLNode.ClusterState ClusterStatus
         {
             get
             {
                 var validNode = Nodes.FirstOrDefault(n => n.ClusterStatus.HasData() && n.ClusterStatus.Data.ClusterName.HasValue());
-                return validNode != null ? validNode.ClusterStatus.Data : null;
+                return validNode?.ClusterStatus.Data;
             }
         }
 
-        public QuorumTypes QuorumType
-        {
-            get { return ClusterStatus != null ? ClusterStatus.QuorumType : QuorumTypes.Unknown; }
-        }
-        public QuorumStates QuorumState
-        {
-            get { return ClusterStatus != null ? ClusterStatus.QuorumState : QuorumStates.Unknown; }
-        }
+        public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
+        public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
 
         public SQLCluster(SQLSettings.Cluster cluster)
         {

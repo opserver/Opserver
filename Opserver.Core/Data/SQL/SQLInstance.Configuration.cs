@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -15,9 +13,9 @@ namespace StackExchange.Opserver.Data.SQL
                 return _configuration ?? (_configuration = new Cache<List<SQLConfigurationOption>>
                 {
                     CacheForSeconds = 2*60,
-                    UpdateCache = UpdateFromSql("Configuration", conn =>
+                    UpdateCache = UpdateFromSql("Configuration", async conn =>
                     {
-                        var result = conn.Query<SQLConfigurationOption>(SQLConfigurationOption.FetchSQL).ToList();
+                        var result = await conn.QueryAsync<SQLConfigurationOption>(SQLConfigurationOption.FetchSQL);
                         foreach (var r in result)
                         {
                             int defaultVal;

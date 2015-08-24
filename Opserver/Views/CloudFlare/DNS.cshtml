@@ -1,14 +1,11 @@
-﻿@using System.Collections.Generic
-@using System.Linq
-@using System.Net
+﻿@using System.Linq
 @using StackExchange.Opserver.Data.CloudFlare
 @using StackExchange.Opserver.Views.CloudFlare
-@model DashboardModel
+@model DNSModel
 @{
-    var zCache = CloudFlareAPI.Instance.Zones;
-    var records = CloudFlareAPI.Instance.DNSRecords.SafeData(true);
-    var zones = zCache.SafeData(true);
-    var dcs = DataCenters.All;
+    var records = Model.DNSRecords;
+    var zones = Model.Zones;
+    var dcs = Model.DataCenters;
     var showDCs = dcs.Any();
     var hiddenRecordTypes = new List<DNSRecordType> {DNSRecordType.TXT};
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Helpers;
@@ -12,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult KillClient(string node, string address)
         {
-            return PerformInstanceAction(node, i => i.KillClient(address));
+            return PerformInstanceAction(node, i => i.KillClientAsync(address));
         }
 
         [Route("redis/instance/actions/role"), HttpGet, OnlyAllow(Roles.RedisAdmin)]
@@ -48,22 +49,22 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/actions/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult SlaveServer(string node, string newMaster)
         {
-            return PerformInstanceAction(node, i => i.SlaveTo(newMaster), poll: true);
+            return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
         }
 
         [Route("redis/instance/actions/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult SetTiebreaker(string node)
         {
-            return PerformInstanceAction(node, i => i.SetSERedisTiebreaker());
+            return PerformInstanceAction(node, i => i.SetSERedisTiebreakerAsync());
         }
 
         [Route("redis/instance/actions/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult ClearTiebreaker(string node)
         {
-            return PerformInstanceAction(node, i => i.ClearSERedisTiebreaker());
+            return PerformInstanceAction(node, i => i.ClearSERedisTiebreakerAsync());
         }
 
-        private ActionResult PerformInstanceAction(string node, Func<RedisInstance, bool> action, bool poll = false)
+        private ActionResult PerformInstanceAction(string node, Func<RedisInstance, Task<bool>> action, bool poll = false)
         {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();

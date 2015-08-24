@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -15,10 +14,10 @@ namespace StackExchange.Opserver.Data.SQL
                 return _cpuHistoryLastHour ?? (_cpuHistoryLastHour = new Cache<List<SQLCPUEvent>>
                     {
                         CacheForSeconds = 5*60,
-                        UpdateCache = UpdateFromSql("CPUHistoryLastHour", conn =>
+                        UpdateCache = UpdateFromSql("CPUHistoryLastHour", async conn =>
                             {
                                 var sql = GetFetchSQL<SQLCPUEvent>();
-                                var result = conn.Query<SQLCPUEvent>(sql, new {maxEvents = 60})
+                                var result = (await conn.QueryAsync<SQLCPUEvent>(sql, new {maxEvents = 60}))
                                                  .OrderBy(e => e.EventTime)
                                                  .ToList();
                                 CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;

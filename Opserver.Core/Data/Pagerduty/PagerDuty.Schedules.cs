@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -30,21 +31,15 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
         private Cache<List<PagerDutySchedule>> _schedules;
 
-        public Cache<List<PagerDutySchedule>> AllSchedules
+        public Cache<List<PagerDutySchedule>> AllSchedules => _schedules ?? (_schedules = new Cache<List<PagerDutySchedule>>()
         {
-            get
-            {
-                return _schedules ?? (_schedules = new Cache<List<PagerDutySchedule>>()
-                {
-                    CacheForSeconds = 10 * 60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "Pager Duty Incidents",
-                        getData: GetAllSchedules,
-                        logExceptions: true
-                        )
-                });
-            }
-        }
+            CacheForSeconds = 10 * 60,
+            UpdateCache = UpdateCacheItem(
+                description: "Pager Duty Incidents",
+                getData: GetAllSchedulesAsync,
+                logExceptions: true
+                )
+        });
 
         private Cache<List<PagerDutyScheduleOverride>> _primaryScheduleOverrides;
         public Cache<List<PagerDutyScheduleOverride>> PrimaryScheduleOverrides
@@ -59,16 +54,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
                            CacheForSeconds = 10*60,
                            UpdateCache = UpdateCacheItem(
                                description: "Pager Duty Overrides",
-                               getData: PrimarySchedule.GetOverrides,
+                               getData: PrimarySchedule.GetOverridesAsync,
                                logExceptions: true
                                )
                        });
             }
         }
 
-        private List<PagerDutySchedule> GetAllSchedules()
+        private Task<List<PagerDutySchedule>> GetAllSchedulesAsync()
         {
-            return GetFromPagerDuty("schedules", getFromJson:
+            return GetFromPagerDutyAsync("schedules", getFromJson:
                 response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), JilOptions).Schedules);
         }
     }
@@ -88,7 +83,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name="time_zone")]
         public string TimeZone { get; set; }
 
-        public string SetOverride(DateTime start, DateTime end, PagerDutyPerson pdPerson)
+        public async Task<string> SetOverrideAsync(DateTime start, DateTime end, PagerDutyPerson pdPerson)
         {
             var overrideData = new
             {
@@ -99,7 +94,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     user_id = pdPerson.Id
                 }
             };
-            var result = PagerDutyApi.Instance.GetFromPagerDuty("schedules/" + Id + "/overrides",
+            var result = await PagerDutyApi.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
                 getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
 
             PagerDutyApi.Instance.OnCallUsers.Poll(true);
@@ -107,12 +102,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
             return result;
         }
         
-        public List<PagerDutyScheduleOverride> GetOverrides()
+        public Task<List<PagerDutyScheduleOverride>> GetOverridesAsync()
         {
             string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
                     until = DateTime.UtcNow.AddDays(1).ToString("s");
 
-            return PagerDutyApi.Instance.GetFromPagerDuty("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
+            return PagerDutyApi.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
                 response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response.ToString(), PagerDutyApi.JilOptions).Overrides);
         }
     }

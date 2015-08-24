@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -26,7 +27,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>Interface usage data points</returns>
-        public IEnumerable<InterfaceUtilization> GetUtilization(DateTime? start, DateTime? end, int? pointCount = null)
+        public Task<IEnumerable<InterfaceUtilization>> GetUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
             return DataProvider.GetUtilization(this, start, end, pointCount);
         }

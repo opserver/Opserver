@@ -197,16 +197,16 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         /// <typeparam name="T">Type of item in the cache</typeparam>
         /// <param name="description">Description of the operation, used purely for profiling</param>
-        /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnection()) { return getFromConnection(conn); }</code></param>
+        /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnectionAsync()) { return getFromConnection(conn); }</code></param>
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
         /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
         protected Action<Cache<T>> UpdateCacheItem<T>(string description,
-                                                      Func<T> getData,
+                                                      Func<Task<T>> getData,
                                                       bool logExceptions = false, // TODO: Settings
                                                       Action<Exception> addExceptionData = null) where T : class
         {
-            return cache =>
+            return async cache =>
             {
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {
@@ -219,7 +219,7 @@ namespace StackExchange.Opserver.Data
                     {
                         using (MiniProfiler.Current.Step("Data Fetch"))
                         {
-                            cache.Data = getData();
+                            cache.Data = await getData();
                         }
                         cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
                         cache.ErrorMessage = "";

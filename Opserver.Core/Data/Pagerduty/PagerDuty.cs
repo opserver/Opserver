@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 using StackExchange.Profiling;
 using Jil;
 
@@ -12,12 +14,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         internal static Options JilOptions = new Options(
             dateFormat: DateTimeFormat.ISO8601,
-            unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC
+            unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC,
+            excludeNulls: true
             );
 
         public PagerDutySettings Settings { get; internal set; }
-        public override string NodeType { get { return "PagerDutyAPI"; } }
-        public override int MinSecondsBetweenPolls { get { return 3600; } }
+        public override string NodeType => "PagerDutyAPI";
+        public override int MinSecondsBetweenPolls => 3600;
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
@@ -34,10 +37,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             yield return MonitorStatus.Good;
         }
         protected override string GetMonitorStatusReason() { return ""; }
-        public string APIKey 
-        {
-            get { return Settings.APIKey; }
-        }
+        public string APIKey => Settings.APIKey;
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -47,17 +47,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 yield return Incidents;
             }
         }
-
-        public static class Statuses
+        
+        public Action<Cache<T>> GetFromPagerDutyAsync<T>(string opName, Func<PagerDutyApi, Task<T>> getFromPD) where T : class
         {
-            public const string Triggered = "triggered";
-            public const string Acknowledged = "acknowledged";
-            public const string Resolved = "resolved";
-        }
-
-        public Action<Cache<T>> GetFromPagerDuty<T>(string opName, Func<PagerDutyApi, T> getFromConnection) where T : class
-        {
-            return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromConnection(this), logExceptions:true);
+            return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromPD(this), logExceptions:true);
         }
 
         public PagerDutyApi()
@@ -75,7 +68,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <param name="httpMethod"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public T GetFromPagerDuty<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null)
+        public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null)
         {
             var url = Settings.APIBaseUrl;
             var fullUri = url + path;
@@ -92,16 +85,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     if (data != null)
                     {
                         var stringData = JSON.Serialize(data, JilOptions);
-                        req.ContentType = "application/json";
                         var byteData = new ASCIIEncoding().GetBytes(stringData);
+                        req.ContentType = "application/json";
                         req.ContentLength = byteData.Length;
-                        var putStream = req.GetRequestStream();
-                        putStream.Write(byteData,0,byteData.Length);
+                        var putStream = await req.GetRequestStreamAsync();
+                        await putStream.WriteAsync(byteData, 0, byteData.Length);
                     }
                 }
                 try
                 {
-                    var resp = req.GetResponse();
+                    var resp = await req.GetResponseAsync();
                     using (var rs = resp.GetResponseStream())
                     {
                         if (rs == null) return getFromJson(null);
@@ -125,13 +118,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         }
                     }
                     catch { }
-                    
-                    e.AddLoggedData("Sent Data", JSON.Serialize(data));
-                    e.AddLoggedData("Endpoint", fullUri);
-                    e.AddLoggedData("Headers", req.Headers.ToString());
-                    e.AddLoggedData("Contecnt Type", req.ContentType);
 
-                    Current.LogException(e);
+                    Current.LogException(
+                        e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
+                            .AddLoggedData("Endpoint", fullUri)
+                            .AddLoggedData("Headers", req.Headers.ToString())
+                            .AddLoggedData("Contecnt Type", req.ContentType));
                     return getFromJson("fail");
                 }
             }
@@ -139,26 +131,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private Cache<List<PagerDutyPerson>> _allusers;
 
-        public Cache<List<PagerDutyPerson>> AllUsers
+        public Cache<List<PagerDutyPerson>> AllUsers => _allusers ?? (_allusers = new Cache<List<PagerDutyPerson>>()
         {
-            get
-            {
-                return _allusers ?? (_allusers = new Cache<List<PagerDutyPerson>>()
-                {
-                    CacheForSeconds = 60 * 60,
-                    UpdateCache = UpdateCacheItem(
-                        description: "All Users in The Organization",
-                        getData: GetAllUsers,
-                        logExceptions: true
-                        )
-                });
-            }
-        }
+            CacheForSeconds = 60 * 60,
+            UpdateCache = UpdateCacheItem(
+                description: "All Users in The Organization",
+                getData: GetAllUsers,
+                logExceptions: true
+                )
+        });
 
-        private List<PagerDutyPerson> GetAllUsers()
+        public PagerDutyPerson GetPerson(string id) => AllUsers.Data.FirstOrDefault(u => u.Id == id);
+
+        private Task<List<PagerDutyPerson>> GetAllUsers()
         {
-            return GetFromPagerDuty("users/", getFromJson:
-                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users);
+            return GetFromPagerDutyAsync("users/", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users);
         }
     }
 }

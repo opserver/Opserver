@@ -269,13 +269,20 @@
     <Compile Include="Controllers\SQLController.Admin.cs">
       <DependentUpon>SQLController.cs</DependentUpon>
     </Compile>
-    <Compile Include="Helpers\PerfCounters.cs" />
     <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />
     <Compile Include="Models\TopTabs.cs" />
     <Compile Include="SecuritySettings.cs" />
     <Compile Include="SiteSettings.cs" />
-    <Compile Include="Views\CloudFlare\Dashboard.Model.cs" />
+    <Compile Include="Views\CloudFlare\Dashboard.Model.cs">
+      <DependentUpon>Dashboard.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CloudFlare\DNS.Model.cs">
+      <DependentUpon>DNS.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\CloudFlare\Railguns.Model.cs">
+      <DependentUpon>Railguns.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
     <Compile Include="Views\Dashboard\Ranges.cs" />
     <Compile Include="Views\Dashboard\Node.Model.cs">
@@ -287,6 +294,7 @@
     <Compile Include="Views\Home\About.Model.cs" />
     <Compile Include="Views\Hub\HubModel.cs" />
     <Compile Include="Views\PagerDuty\PagerDuty.Model.cs" />
+    <Compile Include="Views\PagerDuty\PagerDutyIncident.Model.cs" />
     <Compile Include="Views\Redis\Dashboard.Model.cs">
       <DependentUpon>Dashboard.cshtml</DependentUpon>
     </Compile>
@@ -303,7 +311,9 @@
     <Compile Include="Views\SQL\Databases.Model.cs">
       <DependentUpon>Databases.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Controllers\PagerDutyController.Admin.cs" />
+    <Compile Include="Controllers\PagerDutyController.Admin.cs">
+      <DependentUpon>PagerDutyController.cs</DependentUpon>
+    </Compile>
     <None Include="Help\SQL\WaitStats.md" />
     <Content Include="Views\CloudFlare\Railguns.cshtml" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />

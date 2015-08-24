@@ -3,60 +3,55 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
     public class HAProxyInstance : PollNode
     {
-        public string Name { get { return Settings.Name; } }
-        public string Description { get { return Settings.Description; } }
-        public int? QueryTimeoutMs { get { return Settings.QueryTimeoutMs; } }
-        public string Url { get { return RawSettings.Url; } }
-        public string User { get { return Settings.User; } }
-        public string Password { get { return Settings.Password; } }
-        public string AdminUser { get { return Settings.AdminUser; } }
-        public string AdminPassword { get { return Settings.AdminPassword; } }
+        public string Name => Settings.Name;
+        public string Description => Settings.Description;
+        public int? QueryTimeoutMs => Settings.QueryTimeoutMs;
+        public string Url => RawSettings.Url;
+        public string User => Settings.User;
+        public string Password => Settings.Password;
+        public string AdminUser => Settings.AdminUser;
+        public string AdminPassword => Settings.AdminPassword;
 
-        public HAProxySettings.Instance RawSettings { get; private set; }
-        public HAProxySettings.InstanceSettings Settings { get; private set; }
+        public HAProxySettings.Instance RawSettings { get; }
+        public HAProxySettings.InstanceSettings Settings { get; }
 
         public HAProxyGroup Group { get; internal set; }
 
-        public bool HasAdminLogin
-        {
-            get { return AdminUser.HasValue() && AdminPassword.HasValue(); }
-        }
+        public bool HasAdminLogin => AdminUser.HasValue() && AdminPassword.HasValue();
 
-        public override string NodeType { get { return "HAProxy"; } }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
+        public override string NodeType => "HAProxy";
+        public override int MinSecondsBetweenPolls => 5;
+
         public override IEnumerable<Cache> DataPollers
         {
             get { yield return Proxies; }
         }
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            yield return Proxies.Data != null ? Proxies.Data.GetWorstStatus() : MonitorStatus.Warning;
+            yield return Proxies.Data?.GetWorstStatus() ?? MonitorStatus.Warning;
         }
         protected override string GetMonitorStatusReason()
         {
-            if (Proxies.Data != null)
-            {
-                var statuses = Proxies.Data
-                                      .SelectMany(p => p.Servers)
-                                      .GroupBy(s => s.ProxyServerStatus)
-                                      .Where(g => g.Key.IsBad())
-                                      .OrderByDescending(g => g.Key);
-                return Name + ": " +
-                       string.Join(", ", statuses.Select(g =>
-                           {
-                               var count = g.Count();
-                               return string.Format("{0} {1}",
-                                                    count == 1 ? g.First().Name : count.Pluralize("Server"),
-                                                    g.Key.ShortDescription());
-                           }));
-            }
-            return Name + ": No Proxy Data Available";
+            if (Proxies.Data == null) return Name + ": No Proxy Data Available";
+
+            var statuses = Proxies.Data
+                .SelectMany(p => p.Servers)
+                .GroupBy(s => s.ProxyServerStatus)
+                .Where(g => g.Key.IsBad())
+                .OrderByDescending(g => g.Key);
+            return Name + ": " +
+                   string.Join(", ", statuses.Select(g =>
+                   {
+                       var count = g.Count();
+                       return $"{(count == 1 ? g.First().Name : count.Pluralize("Server"))} {g.Key.ShortDescription()}";
+                   }));
         }
 
         public HAProxyInstance(HAProxySettings.Instance instance, HAProxySettings.Group group = null)
@@ -91,7 +86,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        private List<Proxy> FetchHAProxyStats()
+        private async Task<List<Proxy>> FetchHAProxyStats()
         {
             var fetchUrl = Url + ";csv";
             using (MiniProfiler.Current.CustomTiming("http", fetchUrl, "GET"))
@@ -101,7 +96,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 req.Credentials = new NetworkCredential(User, Password);
                 if (QueryTimeoutMs.HasValue)
                     req.Timeout = QueryTimeoutMs.Value;
-                using (var resp = req.GetResponse())
+                using (var resp = await req.GetResponseAsync())
                 using (var rs = resp.GetResponseStream())
                 {
                     if (rs == null) return null;
@@ -150,11 +145,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// <summary>
         /// Dummy data for testing, durrrrrr
         /// </summary>
-        public static string DummyData
-        {
-            get
-            {
-                return @"# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
+        public static string DummyData => @"# pxname,svname,qcur,qmax,scur,smax,slim,stot,bin,bout,dreq,dresp,ereq,econ,eresp,wretr,wredis,status,weight,act,bck,chkfail,chkdown,lastchg,downtime,qlimit,pid,iid,sid,throttle,lbtot,tracked,type,rate,rate_lim,rate_max,check_status,check_code,check_duration,hrsp_1xx,hrsp_2xx,hrsp_3xx,hrsp_4xx,hrsp_5xx,hrsp_other,hanafail,req_rate,req_rate_max,req_tot,cli_abrt,srv_abrt,
 so,ny-web01,0,0,2,81,,13395064,9722134016,103474336732,,0,,0,35,0,0,UP,1,1,0,33,20,139857,4719,,1,1,1,,13395064,,2,33,,127,L7OK,200,22,6,12693042,570796,129622,1452,0,0,,,,875,33,
 so,ny-web02,0,0,1,92,,13613725,9898075500,112380934783,,0,,0,26,0,0,UP,1,1,0,49,26,139832,4876,,1,1,2,,13613725,,2,24,,116,L7OK,200,50,15,12899818,584998,127771,942,0,0,,,,701,22,
 so,ny-web03,0,0,0,90,,12907545,9513697093,98075046208,,0,,0,27,0,0,UP,1,1,0,66,33,139810,5055,,1,1,3,,12907545,,2,39,,114,L7OK,200,33,2,12209805,577319,118436,1848,0,0,,,,468,23,
@@ -254,9 +245,6 @@ fe_wordpress,FRONTEND,,,0,136,20000,227966,174896835,9402455818,0,0,14819,,,,,OP
 processed-ssl-in,FRONTEND,,,0,7,19995,149492,142029239,569682400,0,0,62,,,,,OPEN,,,,,,,,,1,28,0,,,,0,0,0,137,,,,0,122262,20895,1280,5055,0,,0,137,149492,,,
 fe_se_one,FRONTEND,,,48,245,19995,1343056,1506987478,46245888779,0,0,73480,,,,,OPEN,,,,,,,,,1,29,0,,,,0,8,0,201,,,,0,2245940,91724,132164,156,421,,18,206,2470405,,,
 fe_stackauth,FRONTEND,,,522,666,20000,13861423,6947938790,17983003223,0,0,4852156,,,,,OPEN,,,,,,,,,1,30,0,,,,0,25,0,81,,,,0,14765959,6978,4833785,360,22932,,51,125,19630015,,,";
-
-            }
-        }
 
         #endregion
     }

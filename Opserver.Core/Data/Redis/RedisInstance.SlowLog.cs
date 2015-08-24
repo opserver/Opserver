@@ -38,12 +38,12 @@ namespace StackExchange.Opserver.Data.Redis
                 return _slowLog ?? (_slowLog = new Cache<List<CommandTrace>>
                 {
                     CacheForSeconds = 60,
-                    UpdateCache = GetFromRedis("SlowLog", rc =>
+                    UpdateCache = GetFromRedisAsync("SlowLog", async rc =>
                     {
                         //TODO: Remove when StackExchange.Redis gets profiling
                         using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch))
                         {
-                            return rc.GetSingleServer().SlowlogGet(SlowLogCountToFetch).ToList();
+                            return (await rc.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch)).ToList();
                         }
                     })
                 });
@@ -58,11 +58,11 @@ namespace StackExchange.Opserver.Data.Redis
                 return _tieBreaker ?? (_tieBreaker = new Cache<string>
                 {
                     CacheForSeconds = 5,
-                    UpdateCache = GetFromRedis("Tiebreaker", rc =>
+                    UpdateCache = GetFromRedisAsync("Tiebreaker", rc =>
                     {
                         using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
                         {
-                            return GetSERedisTiebreaker(rc);
+                            return GetSERedisTiebreakerAsync(rc);
                         }
                     })
                 });

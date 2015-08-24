@@ -37,14 +37,14 @@ namespace StackExchange.Opserver.Data.CloudFlare
                     CacheForSeconds = 5*60,
                     CacheStaleForSeconds = 60*60,
                     UpdateCache = CloudFlareFetch("Fetch DNSRecords",
-                        api =>
+                        async api =>
                         {
                             var records = new List<CloudFlareDNSRecord>();
                             var data = Zones.Data; // Intentionally cause a load here, since by nature of caches we have a race
                             if (data == null) return records;
                             foreach (var z in data)
                             {
-                                var zoneRecords = api.Get<List<CloudFlareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams);
+                                var zoneRecords = await api.Get<List<CloudFlareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams);
                                 records.AddRange(zoneRecords);
                             }
                             return records;

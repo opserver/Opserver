@@ -1,18 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using Dapper;
+using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public partial class OrionDataProvider : DashboardDataProvider
     {
-        public override bool HasData { get { return NodeCache.HasData(); } }
+        public override bool HasData => NodeCache.HasData();
         public string Host { get; private set; }
         public OrionDataProvider(string uniqueKey) : base(uniqueKey) { }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
-        public override string NodeType { get { return "Orion"; } }
+        public override int MinSecondsBetweenPolls => 5;
+        public override string NodeType => "Orion";
+
         public override IEnumerable<Cache> DataPollers
         {
             get
@@ -33,30 +34,30 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return null; }
         
-        public DbConnection GetConnection()
+        public Task<DbConnection> GetConnectionAsync()
         {
-            return Connection.GetOpen(ConnectionString, QueryTimeoutMs);
+            return Connection.GetOpenAsync(ConnectionString, QueryTimeoutMs);
         }
 
         private string GetOptionalDateClause(string field, DateTime? start, DateTime? end)
         {
             if (start.HasValue && end.HasValue) // start & end
-                return string.Format("{0} Between @start and @end", field);
+                return $"{field} Between @start and @end";
             if (start.HasValue) // no end
-                return string.Format("{0} >= @start", field);
+                return $"{field} >= @start";
             if (end.HasValue)
-                return string.Format("{0} <= @end", field);
+                return $"{field} <= @end";
             return "1 = 1";
         }
         
-        private IEnumerable<T> UtilizationQuery<T>(int id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount)
+        private async Task<IEnumerable<T>> UtilizationQuery<T>(int id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount)
         {
-            using (var conn = GetConnection())
+            using (var conn = await GetConnectionAsync())
             {
-                return conn.Query<T>(
+                return await conn.QueryAsync<T>(
                     (pointCount.HasValue ? sampledSql : allSql)
                         .Replace("{dateRange}", GetOptionalDateClause(dateField, start, end)),
-                    new { id, start, end, intervals = pointCount });
+                    new {id, start, end, intervals = pointCount});
             }
         }
     }

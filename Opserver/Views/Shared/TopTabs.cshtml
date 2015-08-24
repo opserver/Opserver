@@ -12,44 +12,6 @@
             {
                 @tab.Render()
             }
-            @*@if (s.Dashboard.Enabled)
-            {
-                <a class="@GetClass(MainTab.Dashboard)" href="/dashboard">Dashboard</a>
-            }
-            @if (s.PagerDuty.Enabled)
-            {
-                <a class="@GetClass(MainTab.PagerDuty)" href="/pagerduty">PagerDuty</a>
-            }
-            @if (s.SQL.Enabled && s.SQL.HasAccess())
-            {
-                var status = SQLInstance.AllInstances.GetWorstStatus();
-                <a class="@GetClass(MainTab.SQL, status.GetDescription())" href="/sql">SQL</a>
-            }
-            @if (s.Redis.Enabled && s.Redis.HasAccess())
-            {
-                var status = RedisInstance.AllInstances.GetWorstStatus();
-                <a class="@GetClass(MainTab.Redis, status.GetDescription())" href="/redis">Redis</a>
-            }
-            @if (s.Elastic.Enabled && s.Elastic.HasAccess())
-            {
-                var status = ElasticCluster.AllClusters.GetWorstStatus();
-                <a class="@GetClass(MainTab.Elastic, status.GetDescription())" href="/elastic">Elastic</a>
-            }
-            @if (s.CloudFlare.Enabled && s.CloudFlare.HasAccess())
-            {
-                var status = RailgunInstance.AllInstances.GetWorstStatus();
-                <a class="@GetClass(MainTab.CloudFlare, status.GetDescription())" href="/cloudflare">CloudFlare</a>
-            }
-            @if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
-            {
-                var exceptionCount = ExceptionStores.TotalExceptionCount;
-                var recentExceptionCount = ExceptionStores.TotalRecentExceptionCount;
-                <a class="@GetClass(MainTab.Exceptions, ExceptionStores.MonitorStatus.GetDescription())" href="/exceptions" title="@exceptionCount.Pluralize("exception"), @recentExceptionCount recent"><span class="count exception-count">@(exceptionCount.ToComma())</span> @exceptionCount.Pluralize("Exception", false)</a>
-            }
-            @if (s.HAProxy.Enabled && s.HAProxy.HasAccess())
-            {
-                <a class="@GetClass(MainTab.HAProxy, HAProxyGroup.AllGroups.GetWorstStatus().GetDescription())" href="/haproxy">HAProxy</a>
-            }*@
         </div>
     }
 }    

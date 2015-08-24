@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.UI.DataVisualization.Charting;
 using StackExchange.Opserver.Data.HAProxy;
@@ -13,9 +14,9 @@ namespace StackExchange.Opserver.Controllers
         
         [OutputCache(Duration = 60 * 60, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/traffic/json")]
-        public ActionResult HAProxyTrafficJson(string host, long start, long end, bool? summary = false)
+        public async Task<ActionResult> HAProxyTrafficJson(string host, long start, long end, bool? summary = false)
         {
-            var traffic = HAProxyTraffic.GetTrafficSummary(host, null, null);
+            var traffic = await HAProxyTraffic.GetTrafficSummary(host, null, null);
 
             return Json(new
                 {
@@ -45,9 +46,9 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 20 * 60, VaryByParam = "route;days;host;height;width;alt", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/route-hits")]
-        public ActionResult HAProxyRouteHits(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
+        public async Task<ActionResult> HAProxyRouteHits(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
         {
-            var dataPoints = HAProxyTraffic.GetRouteData(route, days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteData(route, days, host: host);
 
             var chart = GetChart(height, width);
             chart.BackColor = alt ? AltRouteBackground : Color.White;
@@ -77,9 +78,9 @@ namespace StackExchange.Opserver.Controllers
 
         //[OutputCache(Duration = 20 * 60, VaryByParam = "route;days;host;height;width;alt", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/route-performance")]
-        public ActionResult HaProxyRoutePerformance(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
+        public async Task<ActionResult> HaProxyRoutePerformance(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
         {
-            var dataPoints = HAProxyTraffic.GetRouteData(route, days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteData(route, days, host: host);
 
             var chart = GetChart(height, width);
             chart.BackColor = alt ? AltRouteBackground : Color.White;
@@ -136,9 +137,9 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("graph/haproxy/route-performance/json")]
-        public ActionResult HaProxyRoutePerformanceJson(string route, int days = 30, string host = null, bool? summary = false)
+        public async Task<ActionResult> HaProxyRoutePerformanceJson(string route, int days = 30, string host = null, bool? summary = false)
         {
-            var dataPoints = HAProxyTraffic.GetRouteData(route, summary.GetValueOrDefault() ? null : (int?)days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteData(route, summary.GetValueOrDefault() ? null : (int?)days, host: host);
 
             return Json(new
                 {
