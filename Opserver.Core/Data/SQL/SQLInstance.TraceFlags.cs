@@ -6,7 +6,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<TraceFlagInfo>> _traceFlags;
-        public Cache<List<TraceFlagInfo>> TraceFlags => _traceFlags ?? (_traceFlags = SqlCacheList<TraceFlagInfo>(60*60));
+        public Cache<List<TraceFlagInfo>> TraceFlags => _traceFlags ?? (_traceFlags = SqlCacheList<TraceFlagInfo>(5*60));
 
         public class TraceFlagInfo : ISQLVersionedObject
         {
