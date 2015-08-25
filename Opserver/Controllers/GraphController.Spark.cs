@@ -82,7 +82,7 @@ namespace StackExchange.Opserver.Controllers
                 ni => ni.GetUtilization(start: DateTime.UtcNow.AddHours(-SparkHours),
                     end: null,
                     pointCount: (int) chart.Width.Value));
-            var dataPoints = (await Task.WhenAll(pointTasks)).SelectMany(t => t);
+            var dataPoints = (await Task.WhenAll(pointTasks)).SelectMany(t => t).OrderBy(t => t.DateTime);
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Total");
