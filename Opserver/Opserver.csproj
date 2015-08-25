@@ -165,6 +165,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\SQL\Instance.Model.cs">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SQL\Operations.Active.Model.cs">
+      <DependentUpon>Operations.Active.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SQL\Operations.Top.Model.cs">
+      <DependentUpon>Operations.Top.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SQL\Servers.Model.cs">
+      <DependentUpon>Servers.cshtml</DependentUpon>
+    </Compile>
     <Content Include="Config\Readme.txt" />
     <Content Include="Content\Common.css">
       <DependentUpon>Common.less</DependentUpon>
@@ -293,8 +305,12 @@
     </Compile>
     <Compile Include="Views\Home\About.Model.cs" />
     <Compile Include="Views\Hub\HubModel.cs" />
-    <Compile Include="Views\PagerDuty\PagerDuty.Model.cs" />
-    <Compile Include="Views\PagerDuty\PagerDutyIncident.Model.cs" />
+    <Compile Include="Views\PagerDuty\PagerDuty.Model.cs">
+      <DependentUpon>PagerDuty.cshtml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\PagerDuty\PagerDutyIncident.Model.cs">
+      <DependentUpon>PagerDuty.Incident.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Redis\Dashboard.Model.cs">
       <DependentUpon>Dashboard.cshtml</DependentUpon>
     </Compile>

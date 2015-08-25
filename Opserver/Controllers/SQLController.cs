@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/servers")]
         public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
         {
-            var vd = new DashboardModel
+            var vd = new ServersModel
                 {
                     StandaloneInstances = SQLInstance.AllStandalone,
                     Clusters = SQLCluster.AllClusters,
@@ -50,10 +50,9 @@ namespace StackExchange.Opserver.Controllers
         {
             var i = SQLInstance.Get(node);
 
-            var vd = new DashboardModel
+            var vd = new InstanceModel
             {
                 View = SQLViews.Instance,
-                StandaloneInstances = SQLInstance.AllStandalone,
                 Refresh = node.HasValue() ? 10 : 5,
                 CurrentInstance = i
             };
@@ -92,13 +91,22 @@ namespace StackExchange.Opserver.Controllers
             var i = SQLInstance.Get(node);
             options.SetDefaults();
 
-            var vd = new DashboardModel
+
+            var vd = new OperationsTopModel
             {
                 View = SQLViews.Top,
                 Detailed = detailed.GetValueOrDefault(),
                 CurrentInstance = i,
                 TopSearchOptions = options
             };
+
+            if (i != null)
+            {
+                var cache = i.GetTopOperations(options);
+                vd.TopOperations = cache.SafeData(true);
+                vd.ErrorMessage = cache.ErrorMessage;
+            }
+
             return View("Operations.Top", vd);
         }
 
@@ -109,11 +117,11 @@ namespace StackExchange.Opserver.Controllers
 
             var i = SQLInstance.Get(node);
 
-            var vd = new OpsTopDetailModel
-                {
-                    Instance = i,
-                    Op = i.GetTopOperation(planHandle, offset).Data
-                };
+            var vd = new OperationsTopDetailModel
+            {
+                Instance = i,
+                Op = i.GetTopOperation(planHandle, offset).Data
+            };
             return View("Operations.Top.Detail", vd);
         }
 
@@ -142,7 +150,7 @@ namespace StackExchange.Opserver.Controllers
 
             var i = SQLInstance.Get(node);
 
-            var vd = new DashboardModel
+            var vd = new OperationsActiveModel
             {
                 View = SQLViews.Active,
                 CurrentInstance = i,

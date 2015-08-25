@@ -1,14 +1,14 @@
 ﻿@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
-@model DashboardModel
+@model ServersModel
 @{
     var standalone = Model.StandaloneInstances;
 }
 @helper MemoryCell(SQLInstance i) {
     if (i.ServerInfo != null)
     {
-        <td>@(i.ServerInfo != null ? i.ServerInfo.MemoryPercentStatusSpan() : null)</td>
+        <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
     }
     else
     {

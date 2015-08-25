@@ -1,16 +1,12 @@
-﻿@using StackExchange.Profiling
-@using StackExchange.Opserver.Models
+﻿@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
-@model DashboardModel
+@model OperationsTopModel
 @{
     var i = Model.CurrentInstance;
+    var topOps = Model.TopOperations;
+    var errorMessage = Model.ErrorMessage;
     if (i == null) { return; }
-    Cache<List<SQLInstance.TopOperation>> topOps;
-    using (MiniProfiler.Current.Step("GetTopOperations"))
-    {
-        topOps = i.GetTopOperations(Model.TopSearchOptions);
-    }
 }
 @helper ReadableTime(long ms)
 {
@@ -29,20 +25,19 @@
     </th>
 }
 @helper RunInLast(DashboardModel.LastRunInterval interval, string label) {
-    var secs = @Model.LastRunIntervalSeconds(interval);
+    var secs = (int)interval;
     <label><input type="radio" name="LastRunSeconds" value="@secs" @(secs == Model.TopSearchOptions.LastRunSeconds ? "checked " : "")/> @label</label>
 }
 <div class="bottom-sub-section">
 <div class="node-summary redis-summary">
-    @if (topOps.ErrorMessage.HasValue())
+    @if (errorMessage.HasValue())
     {
         <div class="sql-server sql-error">
             <span class="error-label">There was an error fetching server status from @i.Name:</span>
-            @topOps.ErrorMessage
+            @errorMessage
         </div>
     } else
     {
-        var data = topOps.SafeData(true);
         <div class="sql-server">
             <h3 class="page-header">Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
                 <div class="filters-wrap">
@@ -136,7 +131,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var o in data)
+                    @foreach (var o in topOps)
                     {
                         <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset">
                             <td class="number-col">@o.AvgCPU.ToComma()µs</td>
@@ -160,7 +155,7 @@
                             <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
                         </tr>
                     }
-                    @if (!data.Any())
+                    @if (!topOps.Any())
                     {
                         <tr>
                             <td colspan="@(Model.Detailed ? 19 : 12)"><div class="none-active">There are no operations in the plan cache on this server.</div></td>
