@@ -824,7 +824,7 @@ Status.Exceptions = (function () {
             var count = apps[log].ExceptionCount;
             $('.exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count != 1 ? 's' : ''));
         } else {
-            $('.exception-title').text(total + ' Exception' + (total != 1 ? 's' : ''));
+            $('.exception-title').text(total.toLocaleString() + ' Exception' + (total != 1 ? 's' : ''));
         }
         $('.tabs-links .count.exception-count').text(total);
     }

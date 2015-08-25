@@ -70,22 +70,22 @@ namespace StackExchange.Opserver.Data.Exceptions
             return GetStores(appName).Select(async s => await s.GetError(guid)).FirstOrDefault(e => e != null);
         }
 
-        public static T Action<T>(string appName, Func<ExceptionStore, T> action)
+        public static async Task<T> Action<T>(string appName, Func<ExceptionStore, Task<T>> action)
         {
             var result = default(T);
-            GetApps(appName).ForEach(a =>
+            foreach(var a in GetApps(appName))
+            {
+                var aResult = await action(a.Store);
+                if (typeof(T) == typeof(bool) && Convert.ToBoolean(aResult))
                 {
-                    var aResult = action(a.Store);
-                    if (typeof(T) == typeof(bool) && Convert.ToBoolean(aResult))
-                    {
-                        result = aResult;
-                    }
-                    if (a.Store != null)
-                    {
-                        a.Store.Applications.Purge();
-                        a.Store.ErrorSummary.Purge();
-                    }
-                });
+                    result = aResult;
+                }
+                if (a.Store != null)
+                {
+                    a.Store.Applications.Purge();
+                    a.Store.ErrorSummary.Purge();
+                }
+            }
             return result;
         }
 
