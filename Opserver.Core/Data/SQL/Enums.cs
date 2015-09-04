@@ -192,7 +192,7 @@ namespace StackExchange.Opserver.Data.SQL
         Nothing = 0,
         [Description("Checkpoint")] Checkpoint = 1,
         [Description("Log Backup")] LogBackup = 2,
-        [Description("active Backup or Restore")] ActiveBackupOrRestore = 3,
+        [Description("Active Backup or Restore")] ActiveBackupOrRestore = 3,
         [Description("Active Transaction")] ActiveTransaction = 4,
         [Description("Database Mirroring")] DatabaseMirroring = 5,
         [Description("replication")] Replication = 6,
