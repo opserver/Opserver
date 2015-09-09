@@ -118,6 +118,7 @@
     <Compile Include="Data\Dashboard\DashboardIssues.cs" />
     <Compile Include="Data\Dashboard\DhasboardMetric.cs" />
     <Compile Include="Data\Dashboard\Disk.cs" />
+    <Compile Include="Data\Dashboard\HTTPUnitResult.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\DashboardDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\EmptyDataProvider.cs" />

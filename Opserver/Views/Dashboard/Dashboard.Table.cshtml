@@ -82,5 +82,35 @@
                 </tbody>
             }
         }
+        <tbody class="node-header">
+            <tr class="category-row">
+                <th colspan="8"><h3>HTTPUnit test results</h3></th>
+            </tr>
+            <tr>
+                <th></th>
+                <th>Test case</th>
+                <th>Time</th>
+                <th></th>
+                <th>Host URL</th>
+                <th></th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </tbody>
+        <tbody class="node-group">
+            @foreach (var r in Model.HTTPUnitResults.OrderBy(r => r.TestCase).ThenBy(r => r.UrlHost))
+            {
+            <tr class="@r.RowClass()" data-info="@r.TestCase.ToLower()-@r.UrlHost.ToLower()" data-node="NOT_SET_AS_TEST">
+                <td>@r.IconSpan()</td>
+                <td title="@r.TestCase.ToLower()-@r.UrlHost.ToLower()">@r.TestCase</td>
+                <td class="nowrap" title="@r.TimeTotal ms">@r.TimeTotal ms</td>
+                <td></td>
+                <td title="Host name part of the test URL">@r.UrlHost</td>
+                <td></td>
+                <td class="nowrap" title="Test result: OK or ERROR">@r.GetStatusText()</td>
+                <td></td>
+            </tr>
+            }
+        </tbody>
     </table>
 </div>
