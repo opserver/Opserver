@@ -5,6 +5,7 @@ using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.PagerDuty;
+using System;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -19,11 +20,12 @@ namespace StackExchange.Opserver.Controllers
         {
             get
             {
+                var allUsers = PagerDutyApi.Instance.AllUsers.SafeData(true);
                 var pdMap = PagerDutyApi.Instance.Settings.UserNameMap.FirstOrDefault(
                     un => un.OpServerName == Current.User.AccountName);
                 return pdMap != null
-                    ? PagerDutyApi.Instance.AllUsers.SafeData(true).Find(u => u.EmailUserName == pdMap.EmailUser)
-                    : null;
+                    ? allUsers.Find(u => u.EmailUserName == pdMap.EmailUser)
+                    : allUsers.FirstOrDefault(u => string.Equals(u.EmailUserName, Current.User.AccountName, StringComparison.OrdinalIgnoreCase));
             }
         }
 
