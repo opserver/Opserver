@@ -22,7 +22,7 @@ namespace StackExchange.Opserver
             //Current.LogException("Settings updated! " + GetType(), null);
             if (newSettings == null)
             {
-                Current.LogException("Updated settings for " + typeof(T).Name + " were null, aborting.", null);
+                //Current.LogException("Updated settings for " + typeof(T).Name + " were null, aborting.", null);
                 return false;
             }
 
