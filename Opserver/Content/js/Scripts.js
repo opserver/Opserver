@@ -852,7 +852,7 @@ Status.Exceptions = (function () {
                         newDB = $('.exceptions-dashboard', newPage),
                         newCount = newDB.data('total-count'),
                         newTitle = newDB.data('title');
-                    $('.exception-count').text(newCount);
+                    $('.exception-count').text((+newCount).toLocaleString());
                     $('.exception-title').text(newTitle);
                     if (newTitle) document.title = Status.options.SiteName ? newTitle + ' - ' + Status.options.SiteName : newTitle;
                     $('.top-server-list').replaceWith(newHeader);
