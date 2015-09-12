@@ -79,11 +79,10 @@ namespace StackExchange.Opserver.Data.HAProxy
             // if we can't issue any commands, bomb out
             if (instance.AdminUser.IsNullOrEmpty() || instance.AdminPassword.IsNullOrEmpty()) return false;
 
-            var loginInfo = instance.AdminUser + ":" + instance.AdminPassword;
+            var loginInfo = $"{instance.AdminUser}:{instance.AdminPassword}";
             var haproxyUri = new Uri(instance.Url);
-            var requestBody = string.Format("s={0}&action={1}&b={2}", server.Name, action.ToString().ToLower(), p.Name);
-            var requestHeader = string.Format("POST {0} HTTP/1.1\r\nHost: {1}\r\nContent-Length: {2}\r\nAuthorization: Basic {3}\r\n\r\n",
-                haproxyUri.AbsolutePath, haproxyUri.Host, Encoding.GetEncoding("ISO-8859-1").GetBytes(requestBody).Length, Convert.ToBase64String(Encoding.Default.GetBytes(loginInfo)));
+            var requestBody = $"s={server.Name}&action={action.ToString().ToLower()}&b={p.Name}";
+            var requestHeader = $"POST {haproxyUri.AbsolutePath} HTTP/1.1\r\nHost: {haproxyUri.Host}\r\nContent-Length: {Encoding.GetEncoding("ISO-8859-1").GetBytes(requestBody).Length}\r\nAuthorization: Basic {Convert.ToBase64String(Encoding.Default.GetBytes(loginInfo))}\r\n\r\n";
 
             try
             {
@@ -107,6 +106,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public enum Action
         {
+            // ReSharper disable InconsistentNaming
             [Description("Set State to READY")]
             ready,
             [Description("Set State to DRAIN")]
@@ -136,6 +136,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
             Enable,
             Disable
+            // ReSharper restore InconsistentNaming
         }
     }
 }
