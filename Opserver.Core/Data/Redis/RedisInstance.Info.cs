@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                if (IsSlave && Replication.MasterHost.HasValue())
+                if (Replication.MasterHost.HasValue())
                     return GetInstance(Replication.MasterHost, Replication.MasterPort);
                 return null;
             }
