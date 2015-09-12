@@ -32,27 +32,35 @@ namespace StackExchange.Opserver.Data.Redis
             get
             {
                 return _info ?? (_info = new Cache<RedisInfo>
+                {
+                    CacheForSeconds = 5,
+                    UpdateCache = GetFromRedisAsync("INFO", async rc =>
                     {
-                        CacheForSeconds = 5,
-                        UpdateCache = GetFromRedisAsync("INFO", async rc =>
-                        {
-                            var server = rc.GetSingleServer();
-                            string infoStr;
+                        var server = rc.GetSingleServer();
+                        string infoStr;
                             //TODO: Remove when StackExchange.Redis gets profiling
                             using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
-                            {
-                                infoStr = await server.InfoRawAsync();
-                            }
-                            ConnectionInfo.Features = server.Features;
-                            var ri = RedisInfo.FromInfoString(infoStr);
-                            if (ri != null) Replication = ri.Replication;
-                            return ri;
-                        })
-                    });
+                        {
+                            infoStr = await server.InfoRawAsync();
+                        }
+                        ConnectionInfo.Features = server.Features;
+                        var ri = RedisInfo.FromInfoString(infoStr);
+                        if (ri != null) Replication = ri.Replication;
+                        return ri;
+                    })
+                });
             }
         }
 
-        public RedisInfo.RedisInstanceRole Role => Replication?.RedisInstanceRole ?? RedisInfo.RedisInstanceRole.Unknown;
+        public RedisInfo.RedisInstanceRole Role
+        {
+            get
+            {
+                if (AllInstances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                    return RedisInfo.RedisInstanceRole.Slave;
+                return Replication?.RedisInstanceRole ?? RedisInfo.RedisInstanceRole.Unknown;
+            }
+        }
 
         public bool IsMaster => Role == RedisInfo.RedisInstanceRole.Master;
         public bool IsSlave => Role == RedisInfo.RedisInstanceRole.Slave;
