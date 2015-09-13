@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Controllers
     public partial class RedisController
     {
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult KillClient(string node, string address)
+        public Task<ActionResult> KillClient(string node, string address)
         {
             return PerformInstanceAction(node, i => i.KillClientAsync(address));
         }
@@ -47,31 +47,31 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/instance/actions/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult SlaveServer(string node, string newMaster)
+        public Task<ActionResult> SlaveServer(string node, string newMaster)
         {
             return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
         }
 
         [Route("redis/instance/actions/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult SetTiebreaker(string node)
+        public Task<ActionResult> SetTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.SetSERedisTiebreakerAsync());
         }
 
         [Route("redis/instance/actions/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult ClearTiebreaker(string node)
+        public Task<ActionResult> ClearTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.ClearSERedisTiebreakerAsync());
         }
 
-        private ActionResult PerformInstanceAction(string node, Func<RedisInstance, Task<bool>> action, bool poll = false)
+        private async Task<ActionResult> PerformInstanceAction(string node, Func<RedisInstance, Task<bool>> action, bool poll = false)
         {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             try
             {
-                var success = action(i);
+                var success = await action(i);
                 if (poll) i.Poll(true);
                 return Json(new { success });
             }
