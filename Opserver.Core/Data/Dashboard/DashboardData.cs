@@ -34,6 +34,9 @@ namespace StackExchange.Opserver.Data.Dashboard
                     case "orion":
                         _dataProviders.Add(new OrionDataProvider(p));
                         break;
+                    case "wmi":
+                        _dataProviders.Add(new WmiDataProvider(p));
+                        break;
                     // moar providers, feed me!
                 }
             }
