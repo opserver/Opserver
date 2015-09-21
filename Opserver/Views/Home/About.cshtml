@@ -104,11 +104,10 @@
                 <li>Provider: @p.IconSpan() @p.Name
                     <ul class="sub-list">
                         <li>Type: <span class="value">@p.NodeType</span></li>
-                        <li>Query Timeout (ms): <span class="value">@p.QueryTimeoutMs.ToComma()</span></li>
                         <li>Nodes: <span class="value">@p.AllNodes.Count.ToComma()</span></li>
-                        <li>Interfaces: <span class="value">@p.AllInterfaces.Count.ToComma()</span></li>
-                        <li>Volumes: <span class="value">@p.AllVolumes.Count.ToComma()</span></li>
-                        <li>Applications: <span class="value">@p.AllApplications.Count.ToComma()</span></li>
+                        <li>Interfaces: <span class="value">@p.AllNodes.Sum(n => n.Interfaces.Count).ToComma()</span></li>
+                        <li>Volumes: <span class="value">@p.AllNodes.Sum(n => n.Volumes.Count).ToComma()</span></li>
+                        <li>Applications: <span class="value">@p.AllNodes.Sum(n => n.Apps.Count).ToComma()</span></li>
                     </ul>
                 </li>
                 }

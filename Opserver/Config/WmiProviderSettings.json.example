@@ -1,6 +1,0 @@
-﻿{
-    nodes:  [ "localhost" ],
-    StaticDataTimeoutSec: 300,
-    DynamicDataTimeoutSec: 5,
-    HoursToKeepHistory: 2
-}

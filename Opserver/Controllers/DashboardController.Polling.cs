@@ -1,7 +1,7 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -9,14 +9,14 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 1, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
         [Route("dashboard/node/poll/cpu")]
-        public ActionResult PollCPU(int? id = null, string node = null, string range = null)
+        public async Task<JsonResult> PollCPU(string id = null, string node = null, string range = null)
         {
-            var n = id.HasValue ? DashboardData.GetNodeById(id.Value) : DashboardData.GetNodeByName(node);
+            var n = id.HasValue() ? DashboardData.GetNodeById(id) : DashboardData.GetNodeByName(node);
             if (n == null)
                 return JsonNotFound();
 
-            var data = n.GetCPUUtilization();
-            if (data == null || data.Data == null)
+            var data = await n.GetCPUUtilization();
+            if (data?.Data == null)
                 return JsonNotFound();
 
             var total = data.Data.FirstOrDefault(c => c.Name == "Total");
@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Controllers
                             name = c.Name,
                             utilization = c.Utilization
                         }),
-                    total = total != null ? total.Utilization : 0
+                    total = total?.Utilization ?? 0
                 });
         }
     }

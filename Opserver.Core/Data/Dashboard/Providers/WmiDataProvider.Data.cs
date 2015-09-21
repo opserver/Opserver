@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
@@ -11,42 +12,36 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         /// Contains node's data and stores utilizastion history
         /// (as soon as WMI provider doens't has orion storage...)
         /// </summary>
-        private class WmiNode
+        private partial class WmiNode : Node
         {
             private readonly Dictionary<string, List<Interface.InterfaceUtilization>> _netUtilization;
+            
+            internal readonly List<MemoryUtilization> MemoryHistory;
 
-            internal readonly List<Interface> Interfaces;
-
-            internal readonly List<Node.MemoryUtilization> MemoryUtilization;
-
-            internal readonly List<Node.CPUUtilization> CpuUtilization;
-
-            internal readonly List<Volume> Volumes;
-
-            internal int Id { get { return Node.Id; } }
-
-            internal Node Node { get; private set; }
+            internal readonly List<CPUUtilization> CPUHistory;
 
             /// <summary>
-            /// Name as specified in WmiProviderSettings.json.
+            /// Name as specified in DashboardSettings.json.
             /// Real name can be different, like for localhost, for example.
             /// </summary>
             internal string OriginalName { get; set; }
 
             internal List<Cache> Caches { get; private set; }
             
-            internal WmiProviderSettings Config { get; set; }
+            internal WMISettings Config { get; set; }
 
-            public WmiNode(Node node)
+            public WmiNode()
             {
                 Caches = new List<Cache>(2);
                 _netUtilization = new Dictionary<string, List<Interface.InterfaceUtilization>>(2);
                 Interfaces = new List<Interface>(2);
-                MemoryUtilization = new List<Node.MemoryUtilization>(1024);
-                CpuUtilization = new List<Node.CPUUtilization>(1024);
+                // TODO: Size for retention / interval and convert to limited list
+                MemoryHistory = new List<MemoryUtilization>(1024);
+                CPUHistory = new List<CPUUtilization>(1024);
                 Volumes = new List<Volume>(3);
-
-                Node = node;
+                VMs = new List<Node>();
+                Apps = new List<Application>();
+                IPs = new List<IPAddress>();
             }
 
             public void AddNetworkUtilization(Interface iface, Interface.InterfaceUtilization item)
@@ -104,14 +99,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return result;
             }
 
-            public void AddCpuUtilization(Node.CPUUtilization cpuUtilization)
+            public void AddCpuUtilization(CPUUtilization cpuUtilization)
             {
-                UpdateHistoryStorage(CpuUtilization, cpuUtilization, x => x.DateTime);
+                UpdateHistoryStorage(CPUHistory, cpuUtilization, x => x.DateTime);
             }
 
-            public void AddMemoryUtilization(Node.MemoryUtilization utilization)
+            public void AddMemoryUtilization(MemoryUtilization utilization)
             {
-                UpdateHistoryStorage(MemoryUtilization, utilization, x => x.DateTime);
+                UpdateHistoryStorage(MemoryHistory, utilization, x => x.DateTime);
             }
 
             private void UpdateHistoryStorage<T>(List<T> data, T newItem, Func<T, DateTime> getDate)
@@ -123,7 +118,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     if (data.Count%100 != 0)
                         return;
 
-                    var limit = DateTime.UtcNow.AddHours(-Config.HoursToKeepHistory);
+                    var limit = DateTime.UtcNow.AddHours(-Config.HistoryHours);
                     if (getDate(data[0]) >= limit)
                         return;
  
@@ -136,23 +131,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public override IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
             if (wNode == null)
-                return Enumerable.Empty<Node.CPUUtilization>();
+                return Task.FromResult(new List<Node.CPUUtilization>());
 
-            Node.CPUUtilization startVal = null;
-            if (start.HasValue)
-            {
-                startVal = new Node.CPUUtilization { DateTime = start.Value };
-            }
-            Node.CPUUtilization endVal = null;
-            if (end.HasValue)
-            {
-                endVal = new Node.CPUUtilization { DateTime = end.Value };
-            }
-            return FilterHistory(wNode.CpuUtilization, startVal, endVal, new CpuUtilComparer());
+            var startVal = start.HasValue ? new Node.CPUUtilization {DateTime = start.Value} : null;
+            var endVal = end.HasValue ? new Node.CPUUtilization { DateTime = end.Value } : null;
+
+            return FilterHistory(wNode.CPUHistory, startVal, endVal, new CpuUtilComparer());
         }
 
         class CpuUtilComparer : IComparer<Node.CPUUtilization>
@@ -179,8 +167,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        private static IEnumerable<T> FilterHistory<T>(List<T> list, T start, T end, IComparer<T> comparer = null)
-            where T: class
+        private static Task<List<T>> FilterHistory<T>(List<T> list, T start, T end, IComparer<T> comparer = null) where T: class
         {
             lock (list)
             {
@@ -206,17 +193,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     endIndex = Math.Min(index+1, endIndex);
                 }
                 var sliceLength = endIndex - startIndex;
-                return sliceLength <= 0 
-                    ? Enumerable.Empty<T>() 
-                    : list.Skip(startIndex).Take(sliceLength).ToList();
+                return Task.FromResult(sliceLength <= 0 ? new List<T>() : list.Skip(startIndex).Take(sliceLength).ToList());
             }
         }
 
-        public override IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
             if (wNode == null)
-                return Enumerable.Empty<Node.MemoryUtilization>();
+                return Task.FromResult(new List<Node.MemoryUtilization>());
 
             Node.MemoryUtilization startVal = null;
             if (start.HasValue)
@@ -228,20 +213,21 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 endVal = new Node.MemoryUtilization { DateTime = end.Value };
             }
-            return FilterHistory(wNode.MemoryUtilization, startVal, endVal, new MemoryUtilComparer());
+            return FilterHistory(wNode.MemoryHistory, startVal, endVal, new MemoryUtilComparer());
         }
 
-        public override IEnumerable<Volume.VolumeUtilization> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        // TODO: Needs implementation
+        public override Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            yield break;
+            return Task.FromResult(new List<Volume.VolumeUtilization>());
         }
 
-        public override IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var node = _wmiNodes.FirstOrDefault(x => x.Id == @interface.NodeId);
             if (node == null)
             {
-                return Enumerable.Empty<Interface.InterfaceUtilization>();
+                return Task.FromResult(new List<Interface.InterfaceUtilization>());
             }
 
             var history = node.GetInterfaceUtilizationHistory(@interface);

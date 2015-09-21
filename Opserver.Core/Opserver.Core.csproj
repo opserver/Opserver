@@ -130,17 +130,8 @@
       <DependentUpon>Node.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Dashboard\Providers\EmptyDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Applications.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Dashboard\Providers\OrionDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Interfaces.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Nodes.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Volumes.cs">
       <DependentUpon>OrionDataProvider.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Dashboard\Providers\WmiDataProvider.cs" />
@@ -230,6 +221,7 @@
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />
     <Compile Include="Data\IPNet.cs" />
     <Compile Include="Helpers\LocalCache.cs" />
+    <Compile Include="Helpers\WindowsKernelVersions.cs" />
     <Compile Include="ISeachableNode.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.cs" />
     <Compile Include="Data\Cache.cs" />
@@ -353,7 +345,19 @@
     <Compile Include="Monitoring\Wmi.cs" />
     <Compile Include="OpserverCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\DashboardSettings.Orion.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\DashboardSettings.Bosun.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\DashboardSettings.cs" />
+    <Compile Include="Settings\DashboardSettings.Providers.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\DashboardSettings.WMI.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\ElasticSettings.cs" />
     <Compile Include="Settings\ExceptionSettings.cs" />
     <Compile Include="Settings\HAProxySettings.cs" />
@@ -370,7 +374,6 @@
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
-    <Compile Include="Settings\WmiProviderSettings.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>
   <ItemGroup>

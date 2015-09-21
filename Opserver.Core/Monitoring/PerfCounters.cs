@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Monitoring
 {
@@ -22,7 +23,7 @@ namespace StackExchange.Opserver.Monitoring
             //    //                 Utilization = (UInt64)mo["PercentProcessorTime"]
             //    //             }));
             //}
-            public static QueryResult<CPUUtilization> GetCPUUtilization(string machineName)
+            public static Task<QueryResult<CPUUtilization>> GetCPUUtilization(string machineName)
             {
                 return Query(machineName,
                              "select Name, PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor",
@@ -33,13 +34,13 @@ namespace StackExchange.Opserver.Monitoring
                                  }));
             }
 
-            private static QueryResult<T> Query<T>(string machineName, string query, Func<IEnumerable<ManagementObject>, IEnumerable<T>> conversion)
+            private static async Task<QueryResult<T>> Query<T>(string machineName, string query, Func<IEnumerable<ManagementObject>, IEnumerable<T>> conversion)
             {
                 var timer = Stopwatch.StartNew();
 
                 using (var q = Wmi.Query(machineName, query))
                 {
-                    var queryResults = q.Result.Cast<ManagementObject>();
+                    var queryResults = (await q.Result).Cast<ManagementObject>();
                     timer.Stop();
                     return new QueryResult<T>
                         {
@@ -59,14 +60,14 @@ namespace StackExchange.Opserver.Monitoring
         public class CPUUtilization
         {
             public string Name { get; internal set; }
-            public UInt64 Utilization { get; internal set; }
+            public ulong Utilization { get; internal set; }
         }
 
         public class SystemUtilization
         {
             public string Name { get; internal set; }
-            public UInt64 CPUUtilization { get; internal set; }
-            public UInt64 MemoryUtilization { get; internal set; }
+            public ulong CPUUtilization { get; internal set; }
+            public ulong MemoryUtilization { get; internal set; }
         }
     }
 }

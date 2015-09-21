@@ -6,14 +6,12 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Volume : IMonitorStatus
     {
-        internal DashboardDataProvider DataProvider { get; set; }
-
         // TODO: Not constants eh?
         public const int WarningPercentUsed = 90;
         public const int CriticalPercentUsed = 95;
 
-        public int Id { get; internal set; }
-        public int NodeId { get; internal set; }
+        public string Id { get; internal set; }
+        public string NodeId { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public int? Index { get; internal set; }
         public string Name { get; internal set; }
@@ -22,26 +20,20 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Type { get; internal set; }
         public NodeStatus Status { get; internal set; }
 
-        public Double? Size { get; internal set; }
-        public Double? Used { get; internal set; }
-        public Double? Available { get; internal set; }
-        public Single? PercentUsed { get; internal set; }
+        public double? Size { get; internal set; }
+        public double? Used { get; internal set; }
+        public double? Available { get; internal set; }
+        public float? PercentUsed { get; internal set; }
 
-        public MonitorStatus MonitorStatus
-        {
-            get { return Status.ToMonitorStatus(); }
-        }
+        public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement
-        public string MonitorStatusReason { get { return null; } }
+        public string MonitorStatusReason => null;
 
-        public bool IsDisk { get { return Type == "Fixed Disk"; } }
-        public bool IsRAM { get { return Type == "RAM"; } }
-        public bool IsVirtualMemory { get { return Type == "Virtual Memory"; } }
+        public bool IsDisk => Type == "Fixed Disk";
+        public bool IsRAM => Type == "RAM";
+        public bool IsVirtualMemory => Type == "Virtual Memory";
 
-        public string PrettyName
-        {
-            get { return PrettyDescription; }
-        }
+        public string PrettyName => PrettyDescription;
 
         public string PrettyDescription
         {
@@ -52,11 +44,11 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        private readonly Func<Double?, string> _sizeFormat = s => s.HasValue ? s.Value.ToSize() : "";
+        private readonly Func<double?, string> _sizeFormat = s => s.HasValue ? s.Value.ToSize() : "";
 
-        public string PrettySize { get { return _sizeFormat(Size); } }
-        public string PrettyUsed { get { return _sizeFormat(Used); } }
-        public string PrettyAvailable { get { return _sizeFormat(Available); } }
+        public string PrettySize => _sizeFormat(Size);
+        public string PrettyUsed => _sizeFormat(Used);
+        public string PrettyAvailable => _sizeFormat(Available);
 
         public string SpaceStatusClass
         {

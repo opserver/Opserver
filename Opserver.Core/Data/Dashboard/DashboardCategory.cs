@@ -27,22 +27,22 @@ namespace StackExchange.Opserver.Data.Dashboard
                 };
         }
 
-        public string Name { get { return Settings.Name; } }
-        public Regex PatternRegex { get { return Settings.PatternRegex; } }
+        public string Name => Settings.Name;
+        public Regex PatternRegex => Settings.PatternRegex;
         public int Index { get; private set; }
 
         public DashboardSettings.Category Settings { get; private set; }
 
-        public decimal? CPUWarningPercent { get { return Settings.CPUWarningPercent; } }
-        public decimal? CPUCriticalPercent { get { return Settings.CPUCriticalPercent; } }
-        public decimal? MemoryWarningPercent { get { return Settings.MemoryWarningPercent; } }
-        public decimal? MemoryCriticalPercent { get { return Settings.MemoryCriticalPercent; } }
-        public decimal? DiskWarningPercent { get { return Settings.DiskWarningPercent; } }
-        public decimal? DiskCriticalPercent { get { return Settings.DiskCriticalPercent; } }
+        public decimal? CPUWarningPercent => Settings.CPUWarningPercent;
+        public decimal? CPUCriticalPercent => Settings.CPUCriticalPercent;
+        public decimal? MemoryWarningPercent => Settings.MemoryWarningPercent;
+        public decimal? MemoryCriticalPercent => Settings.MemoryCriticalPercent;
+        public decimal? DiskWarningPercent => Settings.DiskWarningPercent;
+        public decimal? DiskCriticalPercent => Settings.DiskCriticalPercent;
 
-        public Regex PrimaryInterfacePatternRegex { get { return Settings.PrimaryInterfacePatternRegex; } }
+        public Regex PrimaryInterfacePatternRegex => Settings.PrimaryInterfacePatternRegex;
 
-        
+
         public DashboardCategory() { }
         public DashboardCategory(DashboardSettings.Category settingsCategory)
         {

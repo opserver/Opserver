@@ -2,189 +2,107 @@
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Monitoring;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     partial class WmiDataProvider
     {
-        private Node GetDynamicData(WmiNode wmiNode)
+        private partial class WmiNode
         {
-            try
+            public async Task<Node> PollNodeInfo()
             {
-                PollCpuUtilization(wmiNode);
-                PollMemoryUtilization(wmiNode);
-                PollNetworkUtilization(wmiNode);
-            }
-            catch (COMException e)
-            {
-                Current.LogException(e);
-                wmiNode.Node.Status = NodeStatus.Unreachable;
-            }
-            return wmiNode.Node;
-        }
-
-        private Node GetStaticData(WmiNode wmiNode)
-        {
-            try
-            {
-                UpdateNodeData(wmiNode.Node);
-                GetAllVolumes(wmiNode);
-                GetAllInterfaces(wmiNode);
-            }
-            catch (COMException e)
-            {
-                Current.LogException(e);
-                wmiNode.Node.Status = NodeStatus.Unreachable;
-            }
-            return wmiNode.Node;
-        }
-
-        private void PollMemoryUtilization(WmiNode wmiNode)
-        {
-            var node = wmiNode.Node;
-
-            const string query = @"select 
-                AvailableKBytes 
-                from Win32_PerfFormattedData_PerfOS_Memory";
-
-            using (var q = Wmi.Query(node.Name, query))
-            {
-                var data = q.GetFirstResult();
-                if (data == null)
-                    return;
-
-                var available = data.AvailableKBytes * 1024;
-                node.MemoryUsed = node.TotalMemory - available;
-                var utilization = new Node.MemoryUtilization
+                try
                 {
-                    DateTime = DateTime.UtcNow,
-                    MaxMemoryUsed = node.MemoryUsed,
-                    AvgMemoryUsed = node.MemoryUsed
-                };
-                wmiNode.AddMemoryUtilization(utilization);
-            }
-        }
-
-        private void PollCpuUtilization(WmiNode wmiNode)
-        {
-            var node = wmiNode.Node;
-
-            const string query = @"select 
-                PercentProcessorTime 
-                from Win32_PerfFormattedData_PerfOS_Processor
-                where Name = '_Total'";
-
-            using (var q = Wmi.Query(node.Name, query))
-            {
-                var data = q.GetFirstResult();
-                if (data == null)
-                    return;
-
-                node.CPULoad = (short)data.PercentProcessorTime;
-                var cpuUtilization = new Node.CPUUtilization
+                    // TODO: Check concurrency options for a Task.WaitAll
+                    await UpdateNodeData();
+                    await GetAllInterfaces();
+                    await GetAllVolumes();
+                }
+                catch (COMException e)
                 {
-                    DateTime = DateTime.UtcNow,
-                    MaxLoad = node.CPULoad,
-                    AvgLoad = node.CPULoad
-                };
-                wmiNode.AddCpuUtilization(cpuUtilization);
+                    Current.LogException(e);
+                    Status = NodeStatus.Unreachable;
+                }
+                return this;
             }
-        }
 
-        private void UpdateNodeData(Node node)
-        {
-            UpdateOsData(node);
-            UpdateComputerData(node);
+            public async Task<Node> PollStats()
+            {
+                try
+                {
+                    // TODO: Check concurrency options for a Task.WaitAll
+                    await PollCpuUtilization();
+                    await PollMemoryUtilization();
+                    await PollNetworkUtilization();
+                }
+                catch (COMException e)
+                {
+                    Current.LogException(e);
+                    Status = NodeStatus.Unreachable;
+                }
+                return this;
+            }
 
-            node.LastSync = DateTime.UtcNow;
-            node.Status = NodeStatus.Active;
-        }
-
-        private static void UpdateComputerData(Node node)
-        {
-            const string machineQuery = @"select 
+            private async Task UpdateNodeData()
+            {
+                const string machineQuery = @"select 
                 DNSHostName,
                 Manufacturer,
                 Model
                 from Win32_ComputerSystem";
-            using (var q = Wmi.Query(node.Name, machineQuery))
-            {
-                var data = q.GetFirstResult();
-                if (data == null)
-                    return;
-                node.Model = data.Model;
-                node.Manufacturer = data.Manufacturer;
-                node.Name = data.DNSHostName;
-            }
-        }
+                using (var q = Wmi.Query(Name, machineQuery))
+                {
+                    var data = await q.GetFirstResult();
+                    if (data == null)
+                        return;
+                    Model = data.Model;
+                    Manufacturer = data.Manufacturer;
+                    Name = data.DNSHostName;
+                }
 
-        private static void UpdateOsData(Node node)
-        {
-            const string query = @"select 
+                const string query = @"select 
                 Caption,
                 LastBootUpTime,
                 Version,
                 FreePhysicalMemory,
-                TotalVisibleMemorySize
+                TotalVisibleMemorySize,
+                Version
                 from Win32_OperatingSystem";
 
-            using (var q = Wmi.Query(node.Name, query))
-            {
-                var data = q.GetFirstResult();
-                if (data == null)
-                    return;
-                node.LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
-                node.TotalMemory = data.TotalVisibleMemorySize * 1024;
-                node.MemoryUsed = node.TotalMemory - data.FreePhysicalMemory * 1024;
-                node.MachineType = data.Caption.ToString() + " " + data.Version.ToString();
-            }
-        }
-
-        private void PollNetworkUtilization(WmiNode node)
-        {
-            const string queryTemplate = @"select 
-                BytesReceivedPersec,
-                BytesSentPersec,
-                PacketsReceivedPersec,
-                PacketsSentPersec
-                FROM Win32_PerfFormattedData_Tcpip_NetworkInterface where name = '{name}'";
-
-            foreach (var iface in node.Interfaces)
-            {
-                var perfCounterName = iface.Name;
-                //adjust performance counter special symbols for instance name.
-                perfCounterName = perfCounterName.Replace("\\", "_");
-                perfCounterName = perfCounterName.Replace("/", "_");
-                perfCounterName = perfCounterName.Replace("(", "[");
-                perfCounterName = perfCounterName.Replace(")", "]");
-                perfCounterName = perfCounterName.Replace("#", "_");
-
-                var query = queryTemplate.Replace("{name}", perfCounterName);
-                using (var q = Wmi.Query(node.Node.Name, query))
+                using (var q = Wmi.Query(Name, query))
                 {
-                    var data = q.GetFirstResult();
+                    var data = await q.GetFirstResult();
                     if (data == null)
-                        continue;
-
-                    iface.InBps = data.BytesReceivedPersec;
-                    iface.OutBps = data.BytesSentPersec;
-                    iface.InPps = data.PacketsReceivedPersec;
-                    iface.OutPps = data.PacketsSentPersec;
-
-                    node.AddNetworkUtilization(iface, new Interface.InterfaceUtilization
-                    {
-                        DateTime = DateTime.UtcNow,
-                        InMaxBps = iface.InBps,
-                        OutMaxBps = iface.OutBps
-                    });
+                        return;
+                    LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
+                    TotalMemory = data.TotalVisibleMemorySize * 1024;
+                    MemoryUsed = TotalMemory - data.FreePhysicalMemory * 1024;
+                    KernelVersion = Version.Parse(data.Version);
+                    MachineType = data.Caption.ToString() + " " + data.Version.ToString();
                 }
-            }
-        }
 
-        private void GetAllInterfaces(WmiNode node)
-        {
-            const string query = @"SELECT 
+                LastSync = DateTime.UtcNow;
+                Status = NodeStatus.Active;
+            }
+
+            private async Task GetAllInterfaces()
+            {
+                if (KernelVersion > WindowsKernelVersions.Windows2012And8)
+                {
+                    //ActiveMaximumTransmissionUnit
+                    //MtuSize
+                    //
+                    //Speed
+                }
+                else
+                {
+                    
+                }
+
+                const string query = @"SELECT 
                 NetConnectionID,
                 Description,
                 Name,
@@ -192,43 +110,44 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Speed
                 FROM Win32_NetworkAdapter
                 WHERE NetConnectionStatus = 2"; //connected adapters.
-            //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
+                //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
 
-            using (var q = Wmi.Query(node.Node.Name, query))
-            {
-                foreach (var data in q.GetDynamicResult())
+                using (var q = Wmi.Query(Name, query))
                 {
-                    string name = data.Name;
-                    var i = node.Interfaces.FirstOrDefault(x => x.Name == name);
-                    if (i == null)
+                    foreach (var data in await q.GetDynamicResult())
                     {
-                        i = new Interface();
-                        node.Interfaces.Add(i);
-                    }
+                        string name = data.Name,
+                               caption = data.NetConnectionID;
+                        if (caption == "Ethernet") caption = name;
 
-                    i.Alias = "!alias";
-                    i.Caption = data.NetConnectionID;
-                    i.DataProvider = this;
-                    i.FullName = data.Description;
-                    i.IfName = data.Name;
-                    i.Id = node.Id*10000 + node.Interfaces.Count + 1;
-                    i.NodeId = node.Id;
-                    i.Index = 0;
-                    i.IsTeam = false;
-                    i.LastSync = DateTime.UtcNow;
-                    i.Name = data.Name;
-                    i.NodeId = node.Id;
-                    i.PhysicalAddress = data.MACAddress;
-                    i.Speed = data.Speed;
-                    i.Status = NodeStatus.Active;
-                    i.TypeDescription = "";
+                        var i = Interfaces.FirstOrDefault(x => x.Name == name && x.Caption == caption);
+                        if (i == null)
+                        {
+                            i = new Interface();
+                            Interfaces.Add(i);
+                        }
+
+                        i.Alias = "!alias";
+                        i.Caption = caption;
+                        i.FullName = data.Description;
+                        i.IfName = data.Name;
+                        i.Id = $"{Id}-Int-{Interfaces.Count + 1}";
+                        i.NodeId = Id;
+                        i.Index = 0;
+                        i.IsTeam = false; //TODO: Fix
+                        i.LastSync = DateTime.UtcNow;
+                        i.Name = name;
+                        i.PhysicalAddress = data.MACAddress;
+                        i.Speed = data.Speed;
+                        i.Status = NodeStatus.Active;
+                        i.TypeDescription = "";
+                    }
                 }
             }
-        }
 
-        private void GetAllVolumes(WmiNode node)
-        {
-            const string query = @"SELECT 
+            private async Task GetAllVolumes()
+            {
+                const string query = @"SELECT 
                 Caption,
                 Description,
                 FreeSpace,
@@ -238,35 +157,125 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 FROM Win32_LogicalDisk
             WHERE  DriveType = 3"; //fixed disks
 
-            using (var q = Wmi.Query(node.Node.Name, query))
-            {
-                foreach (var disk in q.GetDynamicResult())
+                using (var q = Wmi.Query(Name, query))
                 {
-                    var serial = disk.VolumeSerialNumber;
-                    var v = node.Volumes.FirstOrDefault(x => x.Caption == serial);
-                    if (v == null)
+                    foreach (var disk in await q.GetDynamicResult())
                     {
-                        v = new Volume();
-                        node.Volumes.Add(v);
-                    }
+                        var serial = disk.VolumeSerialNumber;
+                        var v = Volumes.FirstOrDefault(x => x.Caption == serial);
+                        if (v == null)
+                        {
+                            v = new Volume();
+                            Volumes.Add(v);
+                        }
 
-                    v.Id = node.Id * 20000 + node.Volumes.Count + 1;
-                    v.Available = disk.FreeSpace;
-                    v.Caption = disk.VolumeSerialNumber;
-                    v.Description = disk.Name + " - " + disk.Description;
-                    v.DataProvider = this;
-                    v.Name = disk.Name;
-                    v.NodeId = node.Id;
-                    v.Size = disk.Size;
-                    v.Type = "Fixed Disk";
-                    v.Status = NodeStatus.Active;
-                    v.Used = v.Size - v.Available;
-                    if (v.Size > 0)
-                    {
-                        v.PercentUsed = (float) (100*v.Used/v.Size);
+                        v.Id = $"{Id}-Vol-{Volumes.Count + 1}";
+                        v.Available = disk.FreeSpace;
+                        v.Caption = disk.VolumeSerialNumber;
+                        v.Description = disk.Name + " - " + disk.Description;
+                        v.Name = disk.Name;
+                        v.NodeId = Id;
+                        v.Size = disk.Size;
+                        v.Type = "Fixed Disk";
+                        v.Status = NodeStatus.Active;
+                        v.Used = v.Size - v.Available;
+                        if (v.Size > 0)
+                        {
+                            v.PercentUsed = (float)(100 * v.Used / v.Size);
+                        }
                     }
                 }
             }
+            
+            private async Task PollCpuUtilization()
+            {
+                const string query = @"select 
+                    PercentProcessorTime 
+                    from Win32_PerfFormattedData_PerfOS_Processor
+                    where Name = '_Total'";
+
+                using (var q = Wmi.Query(Name, query))
+                {
+                    var data = await q.GetFirstResult();
+                    if (data == null)
+                        return;
+                
+                    CPULoad = (short)data.PercentProcessorTime;
+                    var cpuUtilization = new CPUUtilization
+                    {
+                        DateTime = DateTime.UtcNow,
+                        MaxLoad = CPULoad,
+                        AvgLoad = CPULoad
+                    };
+                    AddCpuUtilization(cpuUtilization);
+                }
+            }
+
+            private async Task PollMemoryUtilization()
+            {
+                const string query = @"select 
+                    AvailableKBytes 
+                    from Win32_PerfFormattedData_PerfOS_Memory";
+
+                using (var q = Wmi.Query(Name, query))
+                {
+                    var data = await q.GetFirstResult();
+                    if (data == null)
+                        return;
+
+                    var available = data.AvailableKBytes * 1024;
+                    MemoryUsed = TotalMemory - available;
+                    var utilization = new MemoryUtilization
+                    {
+                        DateTime = DateTime.UtcNow,
+                        MaxMemoryUsed = MemoryUsed,
+                        AvgMemoryUsed = MemoryUsed
+                    };
+                    AddMemoryUtilization(utilization);
+                }
+            }
+
+            private async Task PollNetworkUtilization()
+            {
+                const string queryTemplate = @"select 
+                    BytesReceivedPersec,
+                    BytesSentPersec,
+                    PacketsReceivedPersec,
+                    PacketsSentPersec
+                    FROM Win32_PerfFormattedData_Tcpip_NetworkInterface where name = '{name}'";
+
+                foreach (var iface in Interfaces)
+                {
+                    var perfCounterName = iface.Name;
+                    //adjust performance counter special symbols for instance name.
+                    perfCounterName = perfCounterName.Replace("\\", "_");
+                    perfCounterName = perfCounterName.Replace("/", "_");
+                    perfCounterName = perfCounterName.Replace("(", "[");
+                    perfCounterName = perfCounterName.Replace(")", "]");
+                    perfCounterName = perfCounterName.Replace("#", "_");
+
+                    var query = queryTemplate.Replace("{name}", perfCounterName);
+                    using (var q = Wmi.Query(Name, query))
+                    {
+                        var data = await q.GetFirstResult();
+                        if (data == null)
+                            continue;
+
+                        iface.InBps = data.BytesReceivedPersec;
+                        iface.OutBps = data.BytesSentPersec;
+                        iface.InPps = data.PacketsReceivedPersec;
+                        iface.OutPps = data.PacketsSentPersec;
+
+                        AddNetworkUtilization(iface, new Interface.InterfaceUtilization
+                        {
+                            DateTime = DateTime.UtcNow,
+                            InMaxBps = iface.InBps,
+                            OutMaxBps = iface.OutBps
+                        });
+                    }
+                }
+            }
+        
         }
     }
 }
