@@ -125,6 +125,7 @@
     </Compile>
     <Compile Include="Data\Dashboard\DashboardData.cs" />
     <Compile Include="Data\Dashboard\DashboardIssues.cs" />
+    <Compile Include="Data\Dashboard\Providers\CachedDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\DashboardDataProvider.cs" />
     <Compile Include="Data\Dashboard\Node.Data.cs">
       <DependentUpon>Node.cs</DependentUpon>
