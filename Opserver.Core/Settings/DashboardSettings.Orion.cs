@@ -24,5 +24,10 @@
         {
             QueryTimeoutMs = 10 * 1000;
         }
+
+        public void Normalize()
+        {
+            Host = Host.NormalizeHostOrFQDN();
+        }
     }
 }

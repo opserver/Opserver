@@ -55,8 +55,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
-
-        public abstract IEnumerable<Node> GetNodesByIP(IPAddress ip);
+        
+        public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip)
+        {
+            return AllNodes.Where(n => n.IPs?.Contains(ip) == true);
+        }
 
         public virtual string GetManagementUrl(Node node) { return null; }
         public abstract Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);

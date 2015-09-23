@@ -181,14 +181,9 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             return result;
         }
 
-        public override IEnumerable<Node> GetNodesByIP(IPAddress ip)
-        {
-            return AllNodes.Where(n => n.IPs?.Contains(ip) == true);
-        }
-
         public override string GetManagementUrl(Node node)
         {
-            return !Host.HasValue() ? null : $"http://{Host}/Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{node.Id}";
+            return !Host.HasValue() ? null : $"{Host}Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{node.Id}";
         }
 
         public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)

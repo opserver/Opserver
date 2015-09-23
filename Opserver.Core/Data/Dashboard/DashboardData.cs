@@ -28,10 +28,15 @@ namespace StackExchange.Opserver.Data.Dashboard
                 return;
             }
             var providers = Current.Settings.Dashboard.Providers;
+
+            foreach (var p in providers.All)
+            {
+                p?.Normalize();
+            }
             
             // Add each provider type here
-            //if (providers.Bosun != null)
-            //    _dataProviders.Add(new BosunDataProvider(providers.Bosun));
+            if (providers.Bosun != null)
+                _dataProviders.Add(new BosunDataProvider(providers.Bosun));
             if (providers.Orion != null)
                 _dataProviders.Add(new OrionDataProvider(providers.Orion));
             if (providers.WMI != null)

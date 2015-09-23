@@ -141,6 +141,13 @@ namespace StackExchange.Opserver
             return s.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
         }
 
+        public static string NormalizeHostOrFQDN(this string s, bool defaultToHttps = false)
+        {
+            if (!s.HasValue()) return s;
+            if (!s.StartsWith("http://") && !s.StartsWith("https://")) return $"{(defaultToHttps ? "https" : "http")}://{s}/";
+            return s.EndsWith("/") ? s : $"{s}/";
+        }
+
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> items)
         {
             return new HashSet<T>(items);

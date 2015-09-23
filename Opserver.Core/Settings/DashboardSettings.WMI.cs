@@ -44,5 +44,7 @@ namespace StackExchange.Opserver
             DynamicDataTimeoutSeconds = 5;
             HistoryHours = 2;
         }
+
+        public void Normalize() {}
     }
 }
