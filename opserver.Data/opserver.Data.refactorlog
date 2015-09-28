@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="b0c99e01-d8ce-44bd-9fed-50be8c021ad7" ChangeDateTime="09/28/2015 17:19:13">
+    <Property Name="ElementName" Value="[dbo].[SnapshotNode].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SnapshotNode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SnapshotID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c8927f96-596c-44aa-bc62-0383dc0cdc3b" ChangeDateTime="09/28/2015 17:23:01">
+    <Property Name="ElementName" Value="[dbo].[SnapshotData].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SnapshotData]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="NodeID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="313c2b66-2230-4ff2-bdbe-b9d6e5b9379a" ChangeDateTime="09/28/2015 17:24:24">
+    <Property Name="ElementName" Value="[dbo].[SnapshotNode].[Node]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SnapshotNode]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="NodeID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="c038702c-227b-4a83-8e9f-c3cfb42b456f" ChangeDateTime="09/28/2015 17:30:17">
+    <Property Name="ElementName" Value="[dbo].[Snapshot].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Snapshot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SnapshotID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a9d7f6d6-e1bc-4bae-bb3d-f966425c11f1" ChangeDateTime="09/28/2015 17:31:40">
+    <Property Name="ElementName" Value="[dbo].[SnapshotData].[Node]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[SnapshotData]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="NodeName" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="7d833add-85fa-4d74-9136-875fdf433974" ChangeDateTime="09/28/2015 17:37:18">
+    <Property Name="ElementName" Value="[dbo].[Node].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Node]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="NodeID" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="a91738e9-f9aa-4e85-b755-3959e6d332d8" ChangeDateTime="09/28/2015 18:20:48">
+    <Property Name="ElementName" Value="[dbo].[Snapshot].[SQLCompilations]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Snapshot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="SQLCompilationsSec" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="fae7f1fa-8689-4298-a26b-5cacb5cb9355" ChangeDateTime="09/28/2015 18:20:53">
+    <Property Name="ElementName" Value="[dbo].[Snapshot].[Trans]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[Snapshot]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="TransactionsSec" />
+  </Operation>
+</Operations>
