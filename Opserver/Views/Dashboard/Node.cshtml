@@ -102,7 +102,7 @@ else
                 <ul class="stats-right volume-list">
                     @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
                     {
-                        <li title="@v.Description @string.Format("\n{0:n0}", v.Used) of @string.Format("{0:n0}", v.Size) bytes used">@v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatusClass">@v.FreeSpaceSpan()</span>
+                        <li title="@v.Description @($"\n{v.Used:n0}") of @($"{v.Size:n0}") bytes used">@v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatusClass">@v.FreeSpaceSpan()</span>
                             <div class="space-used"><div class="used @v.SpaceStatusClass" style="width: @(v.PercentUsed)%;"></div></div>
                         </li>
                     }

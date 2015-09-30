@@ -9,7 +9,7 @@ namespace StackExchange.Opserver
         string AdminGroups { get; }
     }
 
-    public interface ISettingsCollectionItem<T> : IEquatable<T>, ISettingsCollectionItem
+    public interface ISettingsCollectionItem<T> : ISettingsCollectionItem
     {
     }
 

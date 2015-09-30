@@ -80,9 +80,9 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                if (Replication.MasterHost.HasValue())
+                if (Replication?.MasterHost.HasValue() == true)
                     return GetInstance(Replication.MasterHost, Replication.MasterPort);
-                return null;
+                return AllInstances.FirstOrDefault(i => i.SlaveInstances.Contains(this));
             }
         }
         public int SlaveCount => Replication?.ConnectedSlaves ?? 0;
@@ -99,11 +99,11 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 if (Info.LastPollStatus == FetchStatus.Success)
                 {
-                    return (Replication?.SlaveConnections.Select(s => s.GetServer()).ToList() ?? new List<RedisInstance>())
-                        .Union(AllInstances.Where(i => i.Master == this)).ToList();
+                    return (Replication?.SlaveConnections.Select(s => s.GetServer()).ToList() ?? new List<RedisInstance>());
                 }
                 // If we can't poll this server, ONLY trust the other nodes we can poll
-                return AllInstances.Where(i => i.Master == this).ToList();
+                //return AllInstances.Where(i => i.Master == this).ToList();
+                return new List<RedisInstance>();
             }
         }
 

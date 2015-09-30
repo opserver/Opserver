@@ -6,11 +6,12 @@ using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    public partial class OrionDataProvider : DashboardDataProvider
+    public partial class OrionDataProvider : DashboardDataProvider<OrionSettings>
     {
         public override bool HasData => NodeCache.HasData();
-        public string Host { get; private set; }
-        public OrionDataProvider(string uniqueKey) : base(uniqueKey) { }
+        public string Host => Settings.Host;
+        public string ConnectionString => Settings.ConnectionString;
+        public int QueryTimeoutMs => Settings.QueryTimeoutMs;
         public override int MinSecondsBetweenPolls => 5;
         public override string NodeType => "Orion";
 
@@ -19,17 +20,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             get
             {
                 yield return NodeCache;
-                yield return InterfaceCache;
-                yield return VolumeCache;
-                yield return ApplicationCache;
-                yield return NodeIPCache;
             }
         }
 
-        public OrionDataProvider(DashboardSettings.Provider provider) : base(provider)
-        {
-            Host = provider.Host;
-        }
+        public OrionDataProvider(OrionSettings settings) : base(settings) {}
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return null; }
@@ -50,14 +44,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return "1 = 1";
         }
         
-        private async Task<IEnumerable<T>> UtilizationQuery<T>(int id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount)
+        private async Task<List<T>> UtilizationQuery<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount)
         {
             using (var conn = await GetConnectionAsync())
             {
                 return await conn.QueryAsync<T>(
                     (pointCount.HasValue ? sampledSql : allSql)
                         .Replace("{dateRange}", GetOptionalDateClause(dateField, start, end)),
-                    new {id, start, end, intervals = pointCount});
+                    new {id = int.Parse(id), start, end, intervals = pointCount});
             }
         }
     }

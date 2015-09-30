@@ -7,8 +7,8 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         internal DashboardDataProvider DataProvider { get; set; }
 
-        public int Id { get; internal set; }
-        public int NodeId { get; internal set; }
+        public string Id { get; internal set; }
+        public string NodeId { get; internal set; }
         public string NiceName { get; internal set; }
         public string AppName { get; internal set; }
         public string ComponentName { get; internal set; }

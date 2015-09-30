@@ -7,20 +7,26 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
+    public abstract class DashboardDataProvider<TSettings> : DashboardDataProvider where TSettings : class, IProviderSettings
+    {
+        public TSettings Settings { get; protected set; }
+
+        protected DashboardDataProvider(TSettings settings) : base(settings)
+        {
+            Settings = settings;
+        }
+    }
+
     public abstract class DashboardDataProvider : PollNode
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
-        public string ConnectionString { get; protected set; }
-        public int QueryTimeoutMs { get; protected set; }
         
         protected DashboardDataProvider(string uniqueKey) : base(uniqueKey) { }
 
-        protected DashboardDataProvider(DashboardSettings.Provider provider) : base(provider.Name)
+        protected DashboardDataProvider(IProviderSettings settings) : base(settings.Name + "Dashboard")
         {
-            Name = provider.Name;
-            ConnectionString = provider.ConnectionString;
-            QueryTimeoutMs = provider.QueryTimeoutMs;
+            Name = settings.Name;
         }
 
         /// <summary>
@@ -39,60 +45,32 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public abstract List<Node> AllNodes { get; }
 
-        public Node GetNode(int id)
+        public Node GetNodeById(string id)
         {
             return AllNodes.FirstOrDefault(s => s.Id == id);
         }
 
-        public Node GetNode(string hostName)
+        public Node GetNodeByHostname(string hostName)
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
 
         public abstract IEnumerable<Node> GetNodesByIP(IPAddress ip);
-        public abstract IEnumerable<IPAddress> GetIPsForNode(Node node);
 
         public virtual string GetManagementUrl(Node node) { return null; }
-        public abstract Task<IEnumerable<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract Task<IEnumerable<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        
+        public Interface GetInterface(string id) => AllNodes.SelectMany(n => n.Interfaces.Where(i => i.Id == id)).FirstOrDefault();
 
-        #endregion
+        public abstract Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
+        
+        public Volume GetVolume(string id) => AllNodes.SelectMany(n => n.Volumes.Where(v => v.Id == id)).FirstOrDefault();
 
-        #region Interfaces
-
-        public abstract List<Interface> AllInterfaces { get; }
-
-        public Interface GetInterface(int id)
-        {
-            return AllInterfaces.FirstOrDefault(i => i.Id == id);
-        }
-
-        public abstract Task<IEnumerable<Interface.InterfaceUtilization>> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Volumes
-
-        public abstract List<Volume> AllVolumes { get; }
-
-        public Volume GetVolume(int id)
-        {
-            return AllVolumes.FirstOrDefault(v => v.Id == id);
-        }
-
-        public abstract Task<IEnumerable<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Applications
-
-        public abstract List<Application> AllApplications { get; }
-
-        public Application GetApplication(int id)
-        {
-            return AllApplications.FirstOrDefault(a => a.Id == id);
-        }
+        public abstract Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
+        
+        public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 
         #endregion
 

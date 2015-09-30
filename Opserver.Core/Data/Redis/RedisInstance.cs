@@ -70,12 +70,18 @@ namespace StackExchange.Opserver.Data.Redis
             }
             if (Role == RedisInfo.RedisInstanceRole.Unknown) yield return MonitorStatus.Critical;
             if (Info.LastPollStatus == FetchStatus.Fail) yield return MonitorStatus.Warning;
+            if (Replication == null)
+            {
+                yield return MonitorStatus.Unknown;
+                yield break;
+            }
             if (IsSlave && Replication.MasterLinkStatus != "up") yield return MonitorStatus.Warning;
             if (IsMaster && Replication.SlaveConnections.Any(s => s.Status != "online")) yield return MonitorStatus.Warning;
         }
         protected override string GetMonitorStatusReason()
         {
             if (Role == RedisInfo.RedisInstanceRole.Unknown) return "Unknown role";
+            if (Replication == null) return "Replication Unknown";
             if (IsSlave && Replication.MasterLinkStatus != "up") return "Master link down";
             if (IsMaster && Replication.SlaveConnections.Any(s => s.Status != "online")) return "Slave offline";
             return null;
