@@ -90,12 +90,12 @@ Open Source Projects in Use
 JavaScript:  
 [d3.js](http://d3js.org/) by Michael Bostock  
 [ColorBrewer](http://colorbrewer2.org/) by Cynthia Brewer and Mark Harrower  
-[HTML Query Plan](https://code.google.com/p/html-query-plan/) by Justin Pealing  
+[HTML Query Plan](https://github.com/JustinPealing/html-query-plan) by Justin Pealing  
 [isotope](http://isotope.metafizzy.co) by Metafizzy  
 [jQuery](http://jquery.com) by The jQuery Foundation  
 [jQuery cookie plugin](https://github.com/js-cookie/js-cookie) by Klaus Hartl  
 [jQuery autocomplete](http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/) by Jörn Zaefferer  
-[prettify](https://code.google.com/p/google-code-prettify/) by Google  
+[prettify](https://github.com/google/code-prettify) by Google  
 [Simple Modal](http://simplemodal.com/) by Eric Martin  
 [TableSorter](http://tablesorter.com) by Christian Bach  
 [Toastr](https://github.com/CodeSeven/toastr) by John Papa and Hans Fjällemark  
