@@ -1,15 +1,16 @@
 ﻿using System;
+using System.Threading.Tasks;
 using StackExchange.Opserver.Monitoring;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Node
     {
-        public PerfCounters.QueryResult<PerfCounters.CPUUtilization> GetCPUUtilization()
+        public async Task<PerfCounters.QueryResult<PerfCounters.CPUUtilization>> GetCPUUtilization()
         {
             if (MachineType.Contains("Windows"))
             {
-                return PerfCounters.Windows.GetCPUUtilization(Ip);
+                return await PerfCounters.Windows.GetCPUUtilization(Ip);
             }
             return new PerfCounters.QueryResult<PerfCounters.CPUUtilization>
                 {

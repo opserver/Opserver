@@ -101,9 +101,9 @@ foreach (var s in server.SlaveConnections) {
 </style>
 @{
     var instances = Model.Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host);
-    var missing = instances.Where(i => i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || i.Info.LastPollStatus == FetchStatus.Fail);
     var masters = instances.Where(i => i.IsMaster).ToList();
     var slaving = instances.Where(i => i.IsSlaving).ToList();
+    var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || i.Info.LastPollStatus == FetchStatus.Fail));
     var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0);
     var standAloneMasters = masters.Where(m => m.SlaveCount == 0);
 }

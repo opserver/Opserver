@@ -8,27 +8,27 @@ using StackExchange.Opserver.Data.Dashboard.Providers;
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Node : IMonitorStatus, ISearchableNode
-    {
-        public DashboardDataProvider DataProvider { get; set; }
+    {   
+        string ISearchableNode.DisplayName => PrettyName;
+        string ISearchableNode.Name => PrettyName;
+        string ISearchableNode.CategoryName => Category?.Name.Replace(" Servers", "") ?? "Unknown";
         
-        string ISearchableNode.DisplayName { get { return PrettyName; } }
-        string ISearchableNode.Name { get { return PrettyName; } }
-        string ISearchableNode.CategoryName { get { return Category != null ? Category.Name.Replace(" Servers", "") : "Unknown"; } }
+        public DashboardDataProvider DataProvider { get; set; }
 
-        public int Id { get; internal set; }
+        public string Id { get; internal set; }
         public string Name { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
         public string Ip { get; internal set; }
-        public Int16? PollIntervalSeconds { get; internal set; }
+        public short? PollIntervalSeconds { get; internal set; }
 
         public DateTime LastBoot { get; internal set; }
         public NodeStatus Status { get; internal set; }
 
-        public Int16? CPULoad { get; internal set; }
-        public Single? TotalMemory { get; internal set; }
-        public Single? MemoryUsed { get; internal set; }
-        public int? VMHostID { get; internal set; }
+        public short? CPULoad { get; internal set; }
+        public float? TotalMemory { get; internal set; }
+        public float? MemoryUsed { get; internal set; }
+        public string VMHostID { get; internal set; }
         public bool IsVMHost { get; internal set; }
         public bool IsUnwatched { get; internal set; }
         public DateTime? UnwatchedFrom { get; internal set; }
@@ -37,23 +37,21 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Manufacturer { get; internal set; }
         public string Model { get; internal set; }
         public string ServiceTag { get; internal set; }
+        public Version KernelVersion { get; internal set; }
         
-        public string PrettyName { get { return (Name ?? "").ToUpper(); } }
-        public TimeSpan UpTime { get { return DateTime.UtcNow - LastBoot; } }
-        public MonitorStatus MonitorStatus { get { return Status.ToMonitorStatus(); } }
-        // TODO: Implement
-        public string MonitorStatusReason { get { return null; } }
+        public string PrettyName => (Name ?? "").ToUpper();
+        public TimeSpan UpTime => DateTime.UtcNow - LastBoot;
+        public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
 
-        public bool IsVM { get { return VMHostID.HasValue; } }
-        public bool HasValidMemoryReading { get { return MemoryUsed.HasValue && MemoryUsed >= 0; } }
-        public Node VMHost
-        {
-            get { return IsVM && VMHostID.HasValue ? DataProvider.GetNode(VMHostID.Value) : null; }
-        }
-        public List<Node> VMs
-        {
-            get { return IsVMHost ? DataProvider.AllNodes.Where(s => s.VMHostID == Id).ToList() : new List<Node>(); }
-        }
+        // TODO: Implement
+        public string MonitorStatusReason => null;
+
+        public bool IsVM => VMHostID.HasValue();
+        public bool HasValidMemoryReading => MemoryUsed.HasValue && MemoryUsed >= 0;
+
+        public Node VMHost { get; internal set; }
+
+        public List<Node> VMs { get; internal set; }
 
         private DashboardCategory _category;
         public DashboardCategory Category
@@ -61,10 +59,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             get { return _category ?? (_category = DashboardCategory.AllCategories.FirstOrDefault(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown); }
         }
 
-        public string ManagementUrl
-        {
-            get { return DataProvider.GetManagementUrl(this); }
-        }
+        public string ManagementUrl { get; internal set; }
 
         private string _searchString;
         public string SearchString
@@ -86,16 +81,19 @@ namespace StackExchange.Opserver.Data.Dashboard
                           .Append(Model)
                           .Append(delim)
                           .Append(ServiceTag)
-                          .Append(delim)
-                          .Append(string.Join(",", IPs))
-                          .Append(delim)
-                          .Append(string.Join(",", Apps.Select(a => a.NiceName)));
-                    if (IsVM)
+                          .Append(delim);
+                    if (IPs != null)
+                        result.Append(delim)
+                              .Append(string.Join(",", IPs));
+                    if (Apps != null)
+                        result.Append(delim)
+                              .Append(string.Join(",", Apps.Select(a => a.NiceName)));
+                    if (IsVM && VMHost != null)
                         result.Append(delim)
                               .Append(VMHost.PrettyName);
-                    if (IsVMHost)
+                    if (IsVMHost && VMs != null)
                         result.Append(delim)
-                              .Append(string.Join(",", DataProvider.AllNodes.Where(s => s.VMHostID == Id)));
+                              .Append(string.Join(",", VMs));
 
                     _searchString = result.ToString().ToLower();
                 }
@@ -103,46 +101,29 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        public TimeSpan? PollInterval
-        {
-            get { return PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null; }
-        }
-        
-        // Interfaces, Volumes and Applications are pulled from cache
-        public IEnumerable<Interface> Interfaces
-        {
-            get { return DataProvider.AllInterfaces.Where(i => i.NodeId == Id && i.Status != NodeStatus.Unknown); }
-        }
-        public IEnumerable<Volume> Volumes
-        {
-            get { return DataProvider.AllVolumes.Where(v => v.NodeId == Id && v.IsDisk && v.Size > 0); }
-        }
-        public IEnumerable<Application> Apps
-        {
-            get { return DataProvider.AllApplications.Where(a => a.NodeId == Id); }
-        }
-        public IEnumerable<IPAddress> IPs
-        {
-            get { return DataProvider.GetIPsForNode(this); }
-        }
+        public TimeSpan? PollInterval => PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null;
 
-        public Single? PercentMemoryUsed
-        {
-            get { return MemoryUsed * 100 / TotalMemory; }
-        }
+        // Interfaces, Volumes and Applications are set by the provider
+        public List<Interface> Interfaces { get; internal set; }
+        public List<Volume> Volumes { get; internal set; }
+        public List<Application> Apps { get; internal set; }
 
-        public Single TotalNetworkbps
+        public List<IPAddress> IPs { get; internal set; }
+
+        public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
+
+        public float TotalNetworkbps
         {
             get { return Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
         }
 
-        public Single TotalPrimaryNetworkbps
+        public float TotalPrimaryNetworkbps
         {
             get { return PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
         }
 
         private DashboardSettings.NodeSettings _settings;
-        public DashboardSettings.NodeSettings Settings { get { return _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings)); } }
+        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings));
 
         private List<Interface> _primaryInterfaces; 
         public IEnumerable<Interface> PrimaryInterfaces
@@ -153,7 +134,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 {
                     var s = Settings;
                     List<Interface> dbInterfaces;
-                    if (s != null && s.PrimaryInterfacePatternRegex != null)
+                    if (s?.PrimaryInterfacePatternRegex != null)
                     {
                         dbInterfaces = Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName)).ToList();
                     }

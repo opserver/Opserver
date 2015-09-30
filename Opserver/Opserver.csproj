@@ -496,7 +496,6 @@
     <Content Include="Content\js\plugins\qp.js" />
     <Content Include="Content\js\plugins\simplemodal.js" />
     <Content Include="Content\js\plugins\tablesorter.js" />
-    <Content Include="Content\Login.js" />
     <Content Include="Content\img\search-icon.png" />
     <Content Include="Content\img\apple-touch-icon.png" />
     <Content Include="Content\img\progress-dots.gif" />

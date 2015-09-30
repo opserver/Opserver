@@ -6,10 +6,8 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Interface : IMonitorStatus
     {
-        internal DashboardDataProvider DataProvider { get; set; }
-
-        public int Id { get; internal set; }
-        public int NodeId { get; internal set; }
+        public string Id { get; internal set; }
+        public string NodeId { get; internal set; }
         public int? Index { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string Name { get; internal set; }
@@ -27,21 +25,18 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public NodeStatus Status { get; internal set; }
 
-        public Single? InBps { get; internal set; }
-        public Single? OutBps { get; internal set; }
-        public Single? InPps { get; internal set; }
-        public Single? OutPps { get; internal set; }
-        public Single? InPercentUtil { get; internal set; }
-        public Single? OutPercentUtil { get; internal set; }
+        public float? InBps { get; internal set; }
+        public float? OutBps { get; internal set; }
+        public float? InPps { get; internal set; }
+        public float? OutPps { get; internal set; }
+        public float? InPercentUtil { get; internal set; }
+        public float? OutPercentUtil { get; internal set; }
         public int? MTU { get; internal set; }
-        public Double? Speed { get; internal set; }
+        public double? Speed { get; internal set; }
 
-        public MonitorStatus MonitorStatus
-        {
-            get { return Status.ToMonitorStatus(); }
-        }
+        public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement
-        public string MonitorStatusReason { get { return null; } }
+        public string MonitorStatusReason => null;
 
         private static readonly Dictionary<string, string> _prettyNameReplacements = new Dictionary<string, string>
             {
@@ -80,11 +75,11 @@ namespace StackExchange.Opserver.Data.Dashboard
                     order++;
                     iSpeed = iSpeed/1000;
                 }
-                return string.Format("{0:0} {1}ps", iSpeed, _speedSizes[order]);
+                return $"{iSpeed:0} {_speedSizes[order]}ps";
             }
         }
 
         public Interface() {}
-        public Interface(int id) { Id = id; }
+        public Interface(string id) { Id = id; }
     }
 }

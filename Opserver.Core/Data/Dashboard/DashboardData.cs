@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -27,22 +28,22 @@ namespace StackExchange.Opserver.Data.Dashboard
                 return;
             }
             var providers = Current.Settings.Dashboard.Providers;
-            foreach (var p in providers)
-            {
-                switch (p.Type.IsNullOrEmptyReturn("").ToLower())
-                {
-                    case "orion":
-                        _dataProviders.Add(new OrionDataProvider(p));
-                        break;
-                    // moar providers, feed me!
-                }
-            }
+            
+            // Add each provider type here
+            //if (providers.Bosun != null)
+            //    _dataProviders.Add(new BosunDataProvider(providers.Bosun));
+            if (providers.Orion != null)
+                _dataProviders.Add(new OrionDataProvider(providers.Orion));
+            if (providers.WMI != null)
+                _dataProviders.Add(new WmiDataProvider(providers.WMI));
+
+
             _dataProviders.ForEach(p => p.TryAddToGlobalPollers());
             if (_dataProviders.Count == 1)
                 _singleDataProvider = _dataProviders[0];
         }
 
-        public static ReadOnlyCollection<DashboardDataProvider> DataProviders { get { return _dataProviders.AsReadOnly(); } }
+        public static ReadOnlyCollection<DashboardDataProvider> DataProviders => _dataProviders.AsReadOnly();
 
         public static IEnumerable<string> ProviderExceptions
         {
@@ -64,10 +65,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        public static Node GetNodeById(int id)
-        {
-            return FirstById(p => p.GetNode(id));
-        }
+        public static Node GetNodeById(string id) => FirstById(p => p.GetNodeById(id));
 
         public static Node GetNodeByName(string hostName)
         {
@@ -82,10 +80,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                        : _dataProviders.SelectMany(p => p.GetNodesByIP(ip));
         }
 
-        public static Interface GetInterfaceById(int id)
-        {
-            return FirstById(p => p.GetInterface(id));
-        }
+        public static Interface GetInterfaceById(string id) => FirstById(p => p.GetInterface(id));
 
         private static T FirstById<T>(Func<DashboardDataProvider, T> fetch) where T : class
         {
@@ -96,6 +91,82 @@ namespace StackExchange.Opserver.Data.Dashboard
                 if (i != null) return i;
             }
             return null;
+        }
+        
+        /// <summary>
+        /// Gets CPU usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// </summary>
+        /// <param name="id">ID of the node</param>
+        /// <param name="start">Start date, unbounded if null</param>
+        /// <param name="end">End date, unbounded if null</param>
+        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
+        /// <returns>CPU usage data points</returns>
+        public static Task<List<Node.CPUUtilization>> GetCPUUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            foreach (var p in _dataProviders)
+            {
+                var n = p.GetNodeById(id);
+                if (n != null) return p.GetCPUUtilization(n, start, end, pointCount);
+            }
+            return Task.FromResult(new List<Node.CPUUtilization>());
+        }
+
+        /// <summary>
+        /// Gets memory usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// </summary>
+        /// <param name="id">ID of the node</param>
+        /// <param name="start">Start date, unbounded if null</param>
+        /// <param name="end">End date, unbounded if null</param>
+        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
+        /// <returns>Memory usage data points</returns>
+        public static Task<List<Node.MemoryUtilization>> GetMemoryUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            foreach (var p in _dataProviders)
+            {
+                var n = p.GetNodeById(id);
+                if (n != null) return p.GetMemoryUtilization(n, start, end, pointCount);
+            }
+            return Task.FromResult(new List<Node.MemoryUtilization>());
+        }
+
+
+
+        /// <summary>
+        /// Gets usage for this interface (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// </summary>
+        /// <param name="id">ID of the interface</param>
+        /// <param name="start">Start date, unbounded if null</param>
+        /// <param name="end">End date, unbounded if null</param>
+        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
+        /// <returns>Interface usage data points</returns>
+        public static Task<List<Interface.InterfaceUtilization>> GetInterfaceUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            foreach (var p in _dataProviders)
+            {
+                var i = p.GetInterface(id);
+                if (i != null) return p.GetUtilization(i, start, end, pointCount);
+            }
+            return Task.FromResult(new List<Interface.InterfaceUtilization>());
+        }
+
+
+
+        /// <summary>
+        /// Gets usage for this volume (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// </summary>
+        /// <param name="id">ID of the interface</param>
+        /// <param name="start">Start date, unbounded if null</param>
+        /// <param name="end">End date, unbounded if null</param>
+        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
+        /// <returns>Volume usage data points</returns>
+        public Task<List<Volume.VolumeUtilization>> GetVolumeUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            foreach (var p in _dataProviders)
+            {
+                var v = p.GetVolume(id);
+                if (v != null) return p.GetUtilization(v, start, end, pointCount);
+            }
+            return Task.FromResult(new List<Volume.VolumeUtilization>());
         }
     }
 }

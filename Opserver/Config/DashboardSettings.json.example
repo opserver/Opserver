@@ -1,116 +1,123 @@
-﻿{
-    "excludePattern": "redis|\\.com",
-    "cpuWarningPercent": 50,
-    "cpuCriticalPercent": 60,
-    "memoryWarningPercent": 90,
-    "memoryCriticalPercent": 90,
-    "diskWarningPercent": 85,
-    "diskCriticalPercent": 95,
-    "categories": [
-        {
-            "name": "Database Servers",
-            "pattern": "-sql",
-            "cpuWarningPercent": 20,
-            "memoryWarningPercent": 98,
-            "memoryCriticalPercent": 99.2,
-            "primaryInterfacePattern": "-TEAM$"
-        },
-        {
-            "name": "Web Servers",
-            "pattern": "-web|-promoweb|-vmweb",
-            "cpuWarningPercent": 25,
-            "memoryWarningPercent": 75,
-            "primaryInterfacePattern": "-TEAM$|-TEAM · Local"
-        },
-        {
-            "name": "Services",
-            "pattern": "-service|-auth|-avscan|-selenium"
-        },
-        {
-            "name": "Misc Database Servers",
-            "pattern": "-db|-.+sql|-halog",
-            "memoryWarningPercent": 98,
-            "memoryCriticalPercent": 99.2,
-            "primaryInterfacePattern": "-TEAM$"
-        },
-        {
-            "name": "Search Servers",
-            "pattern": "-(dev)?search",
-            "primaryInterfacePattern": "bond"
-        },
-        {
-            "name": "Redis Servers",
-            "pattern": "-(dev)?redis",
-            "primaryInterfacePattern": "bond"
-        },
-        {
-            "name": "Load Balancers",
-            "pattern": "-lb|-rtlb",
-            "primaryInterfacePattern": "bond"
-        },
-        {
-            "name": "Routers",
-            "pattern": "-rt|hqrtr|edge"
-        },
-        {
-            "name": "VMWare Servers",
-            "pattern": "-vm\\d+|-exesx|-vsphere|-hqvm"
-        },
-        {
-            "name": "File & Storage Servers",
-            "pattern": "-fs|-hqfs|-back|-eql"
-        },
-        {
-            "name": "DNS",
-            "pattern": "-exdns"
-        },
-        {
-            "name": "Domain Controllers",
-            "pattern": "-dc|-hqdc"
-        },
-        {
-            "name": "LAMP Servers",
-            "pattern": "-apache|-mysql|-blog",
-            "cpuWarningPercent": 40
-        },
-        {
-            "name": "Mail Servers",
-            "pattern": "-mail"
-        },
-        {
-            "name": "Network Stack",
-            "pattern": "ny-sw|or-sw|ny-asa|or-asa|-nexus|-mgmtsw",
-            "cpuWarningPercent": 30
-        },
-        {
-            "name": "PDUs",
-            "pattern": "-pdu"
-        },
-        {
-            "name": "Utility Servers",
-            "pattern": "-rdp|-util|-vpn|-cp|-orion|-man|-puppet|-sabuild|-yum|ny-tacacs|or-tacacs|-ca\\d+|-realog"
-        },
-        {
-            "name": "Phone",
-            "pattern": "-ast|-hqast"
-        },
-        {
-            "name": "Offices",
-            "pattern": "nyhq-|den-|lon-|-int"
-        }
-    ],
-    "perNodeSettings": [
-        {
-            "pattern": "EDGE\\d+ \\(INAP\\)",
-            "primaryInterfacePattern": "GigabitEthernet0/0/0"
-        }
-    ],
-    "providers": [
-        {
-            "name": "Orion",
-            "type": "Orion",
-            "host": "orion.ds.stackexchange.com",
-            "connectionString": "Data Source=ny-utilsql01;Initial Catalog=SolarWindsOrion;Integrated Security=SSPI;Timeout=10"
-        }
-    ]
+﻿{  
+  "providers": {
+    //"bosun": {
+    //  "host": "bosun.ds.stackexchange.com"
+    //},
+    //"wmi": {
+    //  "nodes": [ "ny-web01" ],
+    //  "staticDataTimeoutSeconds": 300,
+    //  "dynamicDataTimeoutSeconds": 5,
+    //  "historyHours": 2
+    //},
+    "orion": {
+      "host": "orion.ds.stackexchange.com",
+      "connectionString": "Data Source=ny-utilsql01;Initial Catalog=SolarWindsOrion;Integrated Security=SSPI;Timeout=10"
+    }
+  },
+  "excludePattern": "redis|\\.com",
+  "cpuWarningPercent": 50,
+  "cpuCriticalPercent": 60,
+  "memoryWarningPercent": 90,
+  "memoryCriticalPercent": 90,
+  "diskWarningPercent": 85,
+  "diskCriticalPercent": 95,
+  "categories": [
+    {
+      "name": "Database Servers",
+      "pattern": "-sql",
+      "cpuWarningPercent": 20,
+      "memoryWarningPercent": 98,
+      "memoryCriticalPercent": 99.2,
+      "primaryInterfacePattern": "-TEAM$"
+    },
+    {
+      "name": "Web Servers",
+      "pattern": "-web|-promoweb|-vmweb",
+      "cpuWarningPercent": 25,
+      "memoryWarningPercent": 75,
+      "primaryInterfacePattern": "-TEAM$|-TEAM · Local"
+    },
+    {
+      "name": "Services",
+      "pattern": "-service|-auth|-avscan|-selenium"
+    },
+    {
+      "name": "Misc Database Servers",
+      "pattern": "-db|-.+sql|-halog",
+      "memoryWarningPercent": 98,
+      "memoryCriticalPercent": 99.2,
+      "primaryInterfacePattern": "-TEAM$"
+    },
+    {
+      "name": "Search Servers",
+      "pattern": "-(dev)?search",
+      "primaryInterfacePattern": "bond"
+    },
+    {
+      "name": "Redis Servers",
+      "pattern": "-(dev)?redis",
+      "primaryInterfacePattern": "bond"
+    },
+    {
+      "name": "Load Balancers",
+      "pattern": "-lb|-rtlb",
+      "primaryInterfacePattern": "bond"
+    },
+    {
+      "name": "Routers",
+      "pattern": "-rt|hqrtr|edge"
+    },
+    {
+      "name": "VMWare Servers",
+      "pattern": "-vm\\d+|-exesx|-vsphere|-hqvm"
+    },
+    {
+      "name": "File & Storage Servers",
+      "pattern": "-fs|-hqfs|-back|-eql"
+    },
+    {
+      "name": "DNS",
+      "pattern": "-exdns"
+    },
+    {
+      "name": "Domain Controllers",
+      "pattern": "-dc|-hqdc"
+    },
+    {
+      "name": "LAMP Servers",
+      "pattern": "-apache|-mysql|-blog",
+      "cpuWarningPercent": 40
+    },
+    {
+      "name": "Mail Servers",
+      "pattern": "-mail"
+    },
+    {
+      "name": "Network Stack",
+      "pattern": "ny-sw|or-sw|ny-asa|or-asa|-nexus|-mgmtsw",
+      "cpuWarningPercent": 30
+    },
+    {
+      "name": "PDUs",
+      "pattern": "-pdu"
+    },
+    {
+      "name": "Utility Servers",
+      "pattern": "-rdp|-util|-vpn|-cp|-orion|-man|-puppet|-sabuild|-yum|ny-tacacs|or-tacacs|-ca\\d+|-realog"
+    },
+    {
+      "name": "Phone",
+      "pattern": "-ast|-hqast"
+    },
+    {
+      "name": "Offices",
+      "pattern": "nyhq-|den-|lon-|-int"
+    }
+  ],
+  "perNodeSettings": [
+    {
+      "pattern": "EDGE\\d+ \\(INAP\\)",
+      "primaryInterfacePattern": "GigabitEthernet0/0/0"
+    }
+  ]
 }

@@ -5,8 +5,8 @@
 <div class="history-graph-wrap half-width"><div id="cpu-container" class="history-graph"></div></div>
 <div class="history-graph-wrap half-width"><div id="memory-container" class="history-graph" data-max="@(n.TotalMemory/1024/1024)"></div></div>
 <script>
-    $('#cpu-container').cpuGraph({ id: @n.Id, title: 'CPU Utilization', subtitle: '@n.Name', realtime: true });
-    $('#memory-container').memoryGraph({ id: @n.Id, title: 'Memory Utilization', subtitle: '@n.Name - @(n.TotalMemory.GetValueOrDefault(0).ToSize())' });
+    $('#cpu-container').cpuGraph({ id: '@n.Id', title: 'CPU Utilization', subtitle: '@n.Name', realtime: true });
+    $('#memory-container').memoryGraph({ id: '@n.Id', title: 'Memory Utilization', subtitle: '@n.Name - @(n.TotalMemory.GetValueOrDefault(0).ToSize())' });
 </script>
 @if (n.Interfaces.Any())
 {
