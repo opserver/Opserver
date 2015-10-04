@@ -102,3 +102,4 @@ $RECYCLE.BIN/
 Opserver/config/*.json
 Opserver/config/*.config
 *.StackOverflow.*
+opserver.Data/opserver.Data.dbmdl
