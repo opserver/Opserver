@@ -87,7 +87,5 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override bool HasData => DataPollers.Any(x => x.HasData());
 
         public override List<Node> AllNodes => _wmiNodes.Cast<Node>().ToList();
-
-        public override IEnumerable<Node> GetNodesByIP(IPAddress ip) => AllNodes.Where(n => n.IPs.Contains(ip));
     }
 }
