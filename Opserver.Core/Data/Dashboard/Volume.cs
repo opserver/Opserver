@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
-        public bool IsDisk => Type == "Fixed Disk";
+        public bool IsDisk => Type == null || Type == "Fixed Disk";
         public bool IsRAM => Type == "RAM";
         public bool IsVirtualMemory => Type == "Virtual Memory";
 

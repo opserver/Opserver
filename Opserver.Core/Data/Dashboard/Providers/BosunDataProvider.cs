@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Jil;
+using Sigil;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
@@ -35,20 +37,33 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return Host + path;
         }
 
+        // ReSharper disable ClassNeverInstantiated.Local
         private class BosunHost
         {
             public string Name { get; set; }
             public string Model { get; set; }
             public string Manufacturer { get; set; }
             public string SerialNumber { get; set; }
+            public int? UptimeSeconds { get; set; }
 
+            public CPUInfo CPU { get; set; }
             public MemoryInfo Memory { get; set; }
             public OSInfo OS { get; set; }
+            public Dictionary<string, DiskInfo> Disks { get; set; }
+            public Dictionary<string, InterfaceInfo> Interfaces { get; set; }
+            public List<IncidentInfo> OpenIncidents { get; set; }
+
+            public class CPUInfo
+            {
+                public float? PercentUsed { get; set; }
+                public Dictionary<string, string> Processors { get; set; }
+            }
 
             public class MemoryInfo
             {
                 public Dictionary<string, string> Modules { get; set; }
-                public long? Total { get; set; } 
+                public float? UsedBytes { get; set; }
+                public float? TotalBytes { get; set; } 
             }
 
             public class OSInfo
@@ -56,7 +71,34 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public string Caption { get; set; }
                 public string Version { get; set; }
             }
+
+            public class DiskInfo
+            {
+                public float? UsedBytes { get; set; }
+                public float? TotalBytes { get; set; }
+                public DateTime StatsLastUpdated { get; set; }
+            }
+
+            public class InterfaceInfo
+            {
+                public string Name { get; set; }
+                public string Description { get; set; }
+                public string MAC { get; set; }
+                public List<string> IPAddresses { get; set; }
+                // TODO
+                public List<string> Members { get; set; }
+            }
+
+            public class IncidentInfo
+            {
+                public int IncidentID { get; set; } 
+                public string AlertKey { get; set; }
+                public string Status { get; set; }
+                public string Subject { get; set; }
+                public bool Silenced { get; set; }
+            }
         }
+        // ReSharper restore ClassNeverInstantiated.Local
 
 
         public async Task<List<Node>> GetAllNodes()
@@ -68,7 +110,19 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 // TODO: Convert to stream, just testing here
                 var hostsJson = await wc.DownloadStringTaskAsync(GetUrl("api/host"));
-                var hostsDict = Jil.JSON.Deserialize<Dictionary<string, BosunHost>>(hostsJson);
+                Dictionary<string, BosunHost> hostsDict = null;
+                try
+                {
+                    hostsDict = JSON.Deserialize<Dictionary<string, BosunHost>>(hostsJson,
+                        Options.SecondsSinceUnixEpochUtc);
+                }
+                catch (DeserializationException de)
+                {
+                    Current.LogException(
+                        de.AddLoggedData("Position", de.Position.ToString())
+                          .AddLoggedData("Snippet After", de.SnippetAfterError));
+                    return nodes;
+                }
 
                 foreach (var h in hostsDict.Values)
                 {
@@ -80,19 +134,46 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Id = h.Name,
                         Name = h.Name,
                         Model = h.Model,
-                        CPULoad = 0, // FAKE!
-                        TotalMemory = h.Memory?.Total,
+                        DataProvider = this,
+                        CPULoad = (short?) h.CPU?.PercentUsed,
+                        MemoryUsed = h.Memory?.UsedBytes,
+                        TotalMemory = h.Memory?.TotalBytes,
                         Manufacturer = h.Manufacturer,
                         ServiceTag = h.SerialNumber,
                         MachineType = h.OS?.Caption,
                         KernelVersion = Version.TryParse(h.OS?.Version, out kernelVersion) ? kernelVersion : null,
-                        // TODO: Rip out all of this and give ?. love to null refs that result
-                        Interfaces = new List<Interface>(),
-                        Volumes = new List<Volume>(),
-                        Apps = new List<Application>(),
-                        IPs = new List<IPAddress>(),
-                        VMs = new List<Node>()
+                        
+                        Interfaces = h.Interfaces?.Select(hi => new Interface
+                        {
+                            Id =  h.Name + "-int-" + hi.Key,
+                            NodeId = h.Name,
+                            Name = hi.Value.Name.IsNullOrEmptyReturn($"Unknown: {hi.Key}"),
+                            FullName = hi.Value.Name,
+                            Caption = hi.Value.Description,
+                            PhysicalAddress = hi.Value.MAC,
+                            IPs = hi.Value?.IPAddresses?.Select(IPAddress.Parse).ToList()
+                        }).ToList(),
+                        Volumes = h.Disks?.Select(hd => new Volume
+                        {
+                            Id = h.Name + "-vol-" + hd.Key,
+                            Name = hd.Key,
+                            NodeId = h.Name,
+                            Caption = hd.Key,
+                            Description = "Needs Description",
+                            LastSync = hd.Value.StatsLastUpdated,
+                            Used = hd.Value.UsedBytes,
+                            Size = hd.Value.TotalBytes,
+                            PercentUsed = 100 * (hd.Value.UsedBytes / hd.Value.TotalBytes),
+                        }).ToList(),
+                        //Apps = new List<Application>(),
+                        //VMs = new List<Node>()
                     };
+
+                    if (h.UptimeSeconds.HasValue) // TODO: Check if online - maybe against ICMP data last?
+                    {
+                        n.LastBoot = DateTime.UtcNow.AddSeconds(-h.UptimeSeconds.Value);
+                    }
+
                     nodes.Add(n);
                 }
 

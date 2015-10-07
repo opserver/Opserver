@@ -165,11 +165,10 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString ApplicationCPUTextSummary(this Node info)
         {
-            var apps = info.Apps.ToList();
-            if (!apps.Any()) return MvcHtmlString.Empty;
+            if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
 
             var sb = new StringBuilder();
-            sb.AppendFormat("Total App Pool CPU: {0} %\n", apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)));
+            sb.AppendFormat("Total App Pool CPU: {0} %\n", info.Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)));
             sb.AppendLine("App Pools:");
             info.Apps.OrderBy(a => a.NiceName)
                 .ForEach(a => sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU));
@@ -178,11 +177,10 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString ApplicationMemoryTextSummary(this Node info)
         {
-            var apps = info.Apps.ToList();
-            if (!apps.Any()) return MvcHtmlString.Empty;
+            if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
 
             var sb = new StringBuilder();
-            sb.AppendFormat("Total App Pool Memory: {0}\n", apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
+            sb.AppendFormat("Total App Pool Memory: {0}\n", info.Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
             sb.AppendLine("App Pools:");
             info.Apps.OrderBy(a => a.NiceName)
                 .ForEach(a => sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize()));

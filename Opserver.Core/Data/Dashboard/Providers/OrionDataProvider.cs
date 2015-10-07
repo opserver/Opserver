@@ -163,6 +163,12 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             }
         }
 
+        private class OrionIPMap
+        {
+            public int NodeID { get; set; }
+            public int InterfaceIndex { get; set; }
+        }
+
         public async Task<List<Tuple<string, IPAddress>>> GetNodeIPMap(DbConnection conn)
         {
             var ipList = await conn.QueryAsync<string, string, Tuple<string, string>>(

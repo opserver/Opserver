@@ -57,7 +57,7 @@ else
                     </li>
                     <li title="@s.ApplicationCPUTextSummary()">
                         <span class="label">CPU:</span> 
-                        <span class="value"><span class="total-cpu-percent">@s.CPUStatusSpan()</span> @if (s.MachineType.Contains("Windows")) { <span class="other-link-wrap">(<a href="#" class="other-link realtime-cpu">realtime</a>)</span> }</span>
+                        <span class="value"><span class="total-cpu-percent">@s.CPUStatusSpan()</span> @if (s.IsRealTimePollable) { <span class="other-link-wrap">(<a href="#" class="other-link realtime-cpu">realtime</a>)</span> }</span>
                     </li>
                     <li title="@s.ApplicationMemoryTextSummary()">
                         <span class="label">Memory:</span> 
@@ -96,7 +96,7 @@ else
                     <li>
                         <span class="label">Monitor IP:</span> 
                         <span class="value"><span title="All IPs:
-@string.Join("\n",s.IPs)">@s.Ip</span></span>
+@if (s.IPs != null){string.Join("\n", s.IPs);}">@s.Ip</span></span>
                     </li>
                 </ul>
                 <ul class="stats-right volume-list">

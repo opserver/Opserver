@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -33,6 +34,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? OutPercentUtil { get; internal set; }
         public int? MTU { get; internal set; }
         public double? Speed { get; internal set; }
+
+        public List<IPAddress> IPs { get; set; }
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement

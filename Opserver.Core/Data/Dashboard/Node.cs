@@ -14,6 +14,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         string ISearchableNode.CategoryName => Category?.Name.Replace(" Servers", "") ?? "Unknown";
         
         public DashboardDataProvider DataProvider { get; set; }
+        public bool IsRealTimePollable => MachineType?.Contains("Windows") == true;
 
         public string Id { get; internal set; }
         public string Name { get; internal set; }
@@ -136,7 +137,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                     List<Interface> dbInterfaces;
                     if (s?.PrimaryInterfacePatternRegex != null)
                     {
-                        dbInterfaces = Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName)).ToList();
+                        dbInterfaces = Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName.IsNullOrEmptyReturn(i.Name))).ToList();
                     }
                     else
                     {
