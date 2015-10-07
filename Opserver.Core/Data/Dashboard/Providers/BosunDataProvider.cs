@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using Jil;
-using Sigil;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
@@ -85,6 +85,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public string Description { get; set; }
                 public string MAC { get; set; }
                 public List<string> IPAddresses { get; set; }
+                public string Master { get; set; }
+                public DateTime? StatsLastUpdated { get; set; }
+
+                public float? Inbps { get; set; }
+                public float? Outbps { get; set; }
+                public float? LinkSpeed { get; set; }
                 // TODO
                 public List<string> Members { get; set; }
             }
@@ -107,14 +113,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             using (var wc = new WebClient())
             {
                 var nodes = new List<Node>();
-
-                // TODO: Convert to stream, just testing here
-                var hostsJson = await wc.DownloadStringTaskAsync(GetUrl("api/host"));
-                Dictionary<string, BosunHost> hostsDict = null;
+                
+                Dictionary<string, BosunHost> hostsDict;
                 try
                 {
-                    hostsDict = JSON.Deserialize<Dictionary<string, BosunHost>>(hostsJson,
-                        Options.SecondsSinceUnixEpochUtc);
+                    using (var s = await wc.OpenReadTaskAsync(GetUrl("api/host")))
+                    using (var sr = new StreamReader(s))
+                    {
+                        hostsDict = JSON.Deserialize<Dictionary<string, BosunHost>>(sr, Options.SecondsSinceUnixEpochUtc);
+                    }
                 }
                 catch (DeserializationException de)
                 {
@@ -134,6 +141,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Id = h.Name,
                         Name = h.Name,
                         Model = h.Model,
+                        Ip = "scollector",
                         DataProvider = this,
                         CPULoad = (short?) h.CPU?.PercentUsed,
                         MemoryUsed = h.Memory?.UsedBytes,
@@ -151,7 +159,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             FullName = hi.Value.Name,
                             Caption = hi.Value.Description,
                             PhysicalAddress = hi.Value.MAC,
-                            IPs = hi.Value?.IPAddresses?.Select(IPAddress.Parse).ToList()
+                            IPs = hi.Value?.IPAddresses?.Select(IPAddress.Parse).ToList(),
+                            LastSync = hi.Value.StatsLastUpdated,
+                            InBps = hi.Value.Inbps * 8,
+                            OutBps = hi.Value.Outbps * 8,
+                            Speed = hi.Value.LinkSpeed * 1000000
                         }).ToList(),
                         Volumes = h.Disks?.Select(hd => new Volume
                         {

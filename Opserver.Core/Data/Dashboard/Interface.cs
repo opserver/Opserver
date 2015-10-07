@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -43,7 +42,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         private static readonly Dictionary<string, string> _prettyNameReplacements = new Dictionary<string, string>
             {
-                {"Microsoft Network Adapter Multiplexor", "Microsoft NAM"},
+                {"Microsoft Network Adapter Multiplexor Driver", "Microsoft Team"},
                 {"Quad Port Server Adapter", "Quad Port SA"},
                 {"Microsoft Load Balancing/Failover Provider", "Microsoft LB/FP"},
                 {"Microsoft Load Balancing", "Microsoft LB"}

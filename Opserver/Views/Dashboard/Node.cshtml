@@ -94,11 +94,13 @@ else
                         </li>
                     }
                     <li>
-                        <span class="label">Monitor IP:</span> 
+                        <span class="label">Monitor:</span> 
                         <span class="value"><span title="All IPs:
 @if (s.IPs != null){string.Join("\n", s.IPs);}">@s.Ip</span></span>
                     </li>
                 </ul>
+                @if (s.Volumes != null)
+                {
                 <ul class="stats-right volume-list">
                     @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
                     {
@@ -107,6 +109,7 @@ else
                         </li>
                     }
                 </ul>
+                }
             </div>
         </div>
     </div>
