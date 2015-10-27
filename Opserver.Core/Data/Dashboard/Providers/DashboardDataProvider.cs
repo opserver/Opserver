@@ -102,10 +102,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
                                    getData: fetch,
-                                   addExceptionData: e => e.AddLoggedData("NodeType", NodeType));
+                                   addExceptionData: e => e.AddLoggedData("NodeType", NodeType),
+                                   logExceptions: true);
         }
 
         #endregion
-
     }
 }
