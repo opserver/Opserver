@@ -159,7 +159,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             FullName = hi.Value.Name,
                             Caption = hi.Value.Description,
                             PhysicalAddress = hi.Value.MAC,
-                            IPs = hi.Value?.IPAddresses?.Select(IPAddress.Parse).ToList(),
+                            IPs = hi.Value?.IPAddresses?.Select(ip =>
+                            {
+                                IPNet result;
+                                return IPNet.TryParse(ip, out result) ? result.IPAddress : null;
+                            }).Where(ip => ip != null).ToList(),
                             LastSync = hi.Value.StatsLastUpdated,
                             InBps = hi.Value.Inbps * 8,
                             OutBps = hi.Value.Outbps * 8,
