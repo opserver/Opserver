@@ -1436,7 +1436,7 @@ Status.HAProxy = (function () {
                     height: 'auto',
                     max: 100,
                     leftMargin: 40,
-                    areaTooltipFormat: function(value) { return '<span class="label">CPU: </span><b>' + value + '%</b>'; }
+                    areaTooltipFormat: function (value) { return '<span class="label">CPU: </span><b>' + value.toFixed(2) + '%</b>'; }
                 }, options));
         },
         memoryGraph: function (options) {
