@@ -318,6 +318,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 if (cpuCache?.TryGetValue(node.Id, out series) == true)
                     return series.PointData;
             }
+            else
+            {
+                var apiResponse = await GetMetric(
+                    BosunMetric.Globals.CPU,
+                    start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                    end,
+                    node.Id);
+                return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
+            }
 
             return new List<GraphPoint>();
         }
@@ -330,6 +339,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 var cache = DayCache.Data?.Memory;
                 if (cache?.TryGetValue(node.Id, out series) == true)
                     return series.PointData;
+            }
+            else
+            {
+                var apiResponse = await GetMetric(
+                    BosunMetric.Globals.MemoryUsed,
+                    start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                    end,
+                    node.Id);
+                return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
             }
 
             return new List<GraphPoint>();

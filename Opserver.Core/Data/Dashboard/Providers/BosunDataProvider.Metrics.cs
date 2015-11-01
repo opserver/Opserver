@@ -45,34 +45,22 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     }
                 });
             }
-
-            //{  
-            //   "start":"1h-ago",
-            //   "queries":[
-            //      {  
-            //         "aggregator":"sum",
-            //         "metric":"os.cpu",
-            //         "rate":false,
-            //         "rateOptions":{  
-            //         },
-            //         "derivative":"auto",
-            //         "ds":"",
-            //         "dstime":"",
-            //         "tags":{  
-            //            "host":"*"
-            //         },
-            //         "downsample":""
-            //      }
-            //   ]
-            //}
         }
 
         public async Task<BosunMetricResponse> RunTSDBQuery(TSDBQuery query, int? pointCount = null)
         {
             var json = JSON.SerializeDynamic(query, Options.ExcludeNullsUtc);
-            var url = GetUrl($"api/graph?json={json}{(pointCount.HasValue ? "&autods=" + pointCount : "")}&autorate=0");
+            var url = GetUrl($"api/graph?json={json}{(pointCount.HasValue ? "&autods=" + pointCount : "")}");
             var apiResult = await GetFromBosun<BosunMetricResponse>(url);
             return apiResult.Result;
+        }
+
+        public Task<BosunMetricResponse> GetMetric(string metricName, DateTime start, DateTime? end = null, string host = "*")
+        {
+            metricName = BosunMetric.GetDenormalized(metricName, host);
+            var query = new TSDBQuery(start, end);
+            query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName));
+            return RunTSDBQuery(query, 1000);
         }
 
         private Cache<IntervalCache> _dayCache;
@@ -85,14 +73,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var result = new IntervalCache(TimeSpan.FromDays(1));
                     Func<string, Task> addMetric = async metricName =>
                     {
-                        var query = new TSDBQuery(result.StartTime);
-                        query.AddQuery(metricName, counter: BosunMetric.IsCounter(metricName));
-                        var apiResult = await RunTSDBQuery(query, 1000);
+                        var apiResult = await GetMetric(metricName, result.StartTime);
                         if (apiResult != null)
                             result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host);
                     };
                     
-                    var c = addMetric(BosunMetric.Globals.CPUUsed);
+                    var c = addMetric(BosunMetric.Globals.CPU);
                     var m = addMetric(BosunMetric.Globals.MemoryUsed);
                     var n = addMetric(BosunMetric.Globals.NetBytes);
                     await Task.WhenAll(c, m, n); // parallel baby!
@@ -107,7 +93,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public TimeSpan TimeSpan { get; set; }
             public DateTime StartTime { get; set; }
 
-            public Dictionary<string, PointSeries> CPU => Series[BosunMetric.Globals.CPUUsed];
+            public Dictionary<string, PointSeries> CPU => Series[BosunMetric.Globals.CPU];
             public Dictionary<string, PointSeries> Memory => Series[BosunMetric.Globals.MemoryUsed];
             public Dictionary<string, PointSeries> Network => Series[BosunMetric.Globals.NetBytes];
 
@@ -128,23 +114,47 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public string Unit { get; set; }
         public List<BosunMetricDescription> Description { get; set; }
 
-        public class Globals
+        public static class Globals
         {
-            public const string CPUUsed = "os.cpu";
+            public const string CPU = "os.cpu";
             public const string MemoryUsed = "os.mem.used";
             public const string NetBytes = "os.net.bytes";
             public const string DiskUsed = "os.disk.fs.space_used";
         }
 
+        private static class Suffixes
+        {
+            public const string CPU = ".os.cpu";
+            public const string MemoryUsed = ".os.mem.used";
+        }
+
         public static bool IsCounter(string metric)
         {
+            if (metric.IsNullOrEmpty()) return false;
             switch (metric)
             {
-                case Globals.CPUUsed:
+                case Globals.CPU:
                     return true;
-                default:
-                    return false;
             }
+            if (metric.EndsWith(Suffixes.CPU))
+                return true;
+
+            return false;
+        }
+
+        public static string GetDenormalized(string metric, string host)
+        {
+            if (host != null && !host.Contains("*") && !host.Contains("|"))
+            {
+                switch (metric)
+                {
+                    case Globals.CPU:
+                        return $"__{host}{Suffixes.CPU}";
+                    case Globals.MemoryUsed:
+                        return $"__{host}{Suffixes.MemoryUsed}";
+                }
+            }
+            return metric;
         }
     }
 
