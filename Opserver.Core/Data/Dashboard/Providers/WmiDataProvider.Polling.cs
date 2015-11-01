@@ -203,8 +203,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     CPULoad = (short)data.PercentProcessorTime;
                     var cpuUtilization = new CPUUtilization
                     {
-                        DateTime = DateTime.UtcNow,
-                        MaxLoad = CPULoad,
+                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
                         AvgLoad = CPULoad
                     };
                     AddCpuUtilization(cpuUtilization);
@@ -216,7 +215,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 const string query = @"select 
                     AvailableKBytes 
                     from Win32_PerfFormattedData_PerfOS_Memory";
-
+                
                 using (var q = Wmi.Query(Name, query))
                 {
                     var data = await q.GetFirstResult();
@@ -227,8 +226,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     MemoryUsed = TotalMemory - available;
                     var utilization = new MemoryUtilization
                     {
-                        DateTime = DateTime.UtcNow,
-                        MaxMemoryUsed = MemoryUsed,
+                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
                         AvgMemoryUsed = MemoryUsed
                     };
                     AddMemoryUtilization(utilization);
@@ -268,9 +266,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                         AddNetworkUtilization(iface, new Interface.InterfaceUtilization
                         {
-                            DateTime = DateTime.UtcNow,
-                            InMaxBps = iface.InBps,
-                            OutMaxBps = iface.OutBps
+                            DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                            InAvgBps = iface.InBps,
+                            OutAvgBps = iface.OutBps
                         });
                     }
                 }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -24,9 +23,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override List<Node> AllNodes => _allNodes;
         public override IEnumerable<Node> GetNodesByIP(IPAddress ip) => _allNodes;
 
-        public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<Node.CPUUtilization>());
-        public override Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<Node.MemoryUtilization>());
-        public override Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<Interface.InterfaceUtilization>());
-        public override Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<Volume.VolumeUtilization>());
+        public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<GraphPoint>());
+        public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<GraphPoint>());
+        public override Task<List<DoubleGraphPoint>> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<DoubleGraphPoint>());
+        public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<GraphPoint>());
     }
 }

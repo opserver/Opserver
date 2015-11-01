@@ -9,7 +9,7 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    public class BosunDataProvider : DashboardDataProvider<BosunSettings>
+    public partial class BosunDataProvider : DashboardDataProvider<BosunSettings>
     {
         public override bool HasData => NodeCache.HasData();
         public string Host => Settings.Host;
@@ -18,7 +18,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override IEnumerable<Cache> DataPollers
         {
-            get { yield return NodeCache; }
+            get
+            {
+                yield return NodeCache;
+                yield return DayCache;
+            }
         }
 
         public BosunDataProvider(BosunSettings settings) : base(settings) { }
@@ -106,30 +110,59 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
         // ReSharper restore ClassNeverInstantiated.Local
 
-
-        public async Task<List<Node>> GetAllNodes()
+        public class BosunApiResult<T>
         {
-            using (MiniProfiler.Current.Step("Get Server Nodes"))
+            public T Result { get; internal set; }
+            public string Error { get; internal set; }
+            public bool Success => Error.IsNullOrEmpty();
+        }
+
+        public async Task<BosunApiResult<T>> GetFromBosun<T>(string url)
+        {
             using (var wc = new WebClient())
             {
-                var nodes = new List<Node>();
-                
-                Dictionary<string, BosunHost> hostsDict;
                 try
                 {
-                    using (var s = await wc.OpenReadTaskAsync(GetUrl("api/host")))
+                    using (var s = await wc.OpenReadTaskAsync(url))
                     using (var sr = new StreamReader(s))
                     {
-                        hostsDict = JSON.Deserialize<Dictionary<string, BosunHost>>(sr, Options.SecondsSinceUnixEpochUtc);
+                        var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
+                        return new BosunApiResult<T> {Result = result};
                     }
                 }
                 catch (DeserializationException de)
                 {
                     Current.LogException(
                         de.AddLoggedData("Position", de.Position.ToString())
-                          .AddLoggedData("Snippet After", de.SnippetAfterError));
-                    return nodes;
+                            .AddLoggedData("Snippet After", de.SnippetAfterError));
+                    return new BosunApiResult<T>
+                    {
+                        Error = $"Error deserializing response from bosun to {typeof (T).Name}: {de}. Details logged."
+                    };
                 }
+                catch (Exception e)
+                {
+                    e.AddLoggedData("Url", url);
+                    // TODO Log response in Data? Could be huge, likely truncate
+                    Current.LogException(e);
+                    return new BosunApiResult<T>
+                    {
+                        Error = $"Error fetching data from bosun: {e}. Details logged."
+                    };
+                }
+            }
+        }
+
+        public async Task<List<Node>> GetAllNodes()
+        {
+            using (MiniProfiler.Current.Step("Get Server Nodes"))
+            { 
+                var nodes = new List<Node>();
+
+                var apiResponse = await GetFromBosun<Dictionary<string, BosunHost>>(GetUrl("api/host"));
+                if (!apiResponse.Success) return nodes;
+
+                var hostsDict = apiResponse.Result;
 
                 foreach (var h in hostsDict.Values)
                 {
@@ -143,17 +176,17 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Model = h.Model,
                         Ip = "scollector",
                         DataProvider = this,
-                        CPULoad = (short?) h.CPU?.PercentUsed,
+                        CPULoad = (short?)h.CPU?.PercentUsed,
                         MemoryUsed = h.Memory?.UsedBytes,
                         TotalMemory = h.Memory?.TotalBytes,
                         Manufacturer = h.Manufacturer,
                         ServiceTag = h.SerialNumber,
                         MachineType = h.OS?.Caption,
                         KernelVersion = Version.TryParse(h.OS?.Version, out kernelVersion) ? kernelVersion : null,
-                        
+
                         Interfaces = h.Interfaces?.Select(hi => new Interface
                         {
-                            Id =  h.Name + "-int-" + hi.Key,
+                            Id = h.Name + "-int-" + hi.Key,
                             NodeId = h.Name,
                             Name = hi.Value.Name.IsNullOrEmptyReturn($"Unknown: {hi.Key}"),
                             FullName = hi.Value.Name,
@@ -194,7 +227,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
 
                 return nodes;
-                
+
                 //    LastSync, 
                 //    Cast(Status as int) Status,
                 //    LastBoot, 
@@ -205,7 +238,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 //    Cast(vmh.NodeID as varchar(50)) as VMHostID, 
                 //    Cast(IsNull(vh.HostID, 0) as Bit) IsVMHost,
                 //    IsNull(UnManaged, 0) as IsUnwatched, // Silence
-                
+
                 // Interfaces
                 //Select Cast(InterfaceID as varchar(50)) as Id,
                 //       Cast(NodeID as varchar(50)) as NodeId,
@@ -276,24 +309,59 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id}&time=1d-ago";
         }
 
-        public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(new List<Node.CPUUtilization>());
+            if (IsApproximatelyLast24Hrs(start, end))
+            {
+                PointSeries series = null;
+                var cpuCache = DayCache.Data?.CPU;
+                if (cpuCache?.TryGetValue(node.Id, out series) == true)
+                    return series.PointData;
+            }
+
+            return new List<GraphPoint>();
         }
 
-        public override Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(new List<Node.MemoryUtilization>());
+            if (IsApproximatelyLast24Hrs(start, end))
+            {
+                PointSeries series = null;
+                var cache = DayCache.Data?.Memory;
+                if (cache?.TryGetValue(node.Id, out series) == true)
+                    return series.PointData;
+            }
+
+            return new List<GraphPoint>();
         }
 
-        public override Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(new List<Volume.VolumeUtilization>());
+            return Task.FromResult(new List<GraphPoint>());
         }
 
-        public override Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(new List<Interface.InterfaceUtilization>());
+            // TODO: Refactor to interface, use TSDB to combine rather than local
+            return Task.FromResult(new List<DoubleGraphPoint>());
+        }
+
+        /// <summary>
+        /// Determines if the passed in dates are approximately the last 24 hours, 
+        /// so that we can share the day cache more efficiently
+        /// </summary>
+        /// <param name="start">Start date of the range</param>
+        /// <param name="end">Optional end date of the range</param>
+        /// <param name="fuzzySeconds">How many seconds to allow on each side of *exactly* 24 hours ago to be a match</param>
+        /// <returns></returns>
+        public bool IsApproximatelyLast24Hrs(DateTime? start, DateTime? end, int fuzzySeconds = 90)
+        {
+            if (!start.HasValue) return false;
+            if (Math.Abs((DateTime.UtcNow.AddDays(-1) - start.Value).TotalSeconds) <= fuzzySeconds)
+            {
+                return !end.HasValue || Math.Abs((DateTime.UtcNow - end.Value).TotalSeconds) <= fuzzySeconds;
+            }
+            return false;
         }
     }
 }

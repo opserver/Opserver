@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             /// </summary>
             internal string OriginalName { get; set; }
 
-            internal List<Cache> Caches { get; private set; }
+            internal List<Cache> Caches { get; }
             
             internal WMISettings Config { get; set; }
 
@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 IPs = new List<IPAddress>();
             }
 
-            public void AddNetworkUtilization(Interface iface, Interface.InterfaceUtilization item)
+            private void AddNetworkUtilization(Interface iface, Interface.InterfaceUtilization item)
             {
                 if (iface == null)
                     return;
@@ -63,23 +63,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     data = _netUtilization[ownIface.Name];
                 }
-
-                if (!item.InAvgBps.HasValue)
-                {
-                    item.InAvgBps = item.InMaxBps;
-                }
-                if (!item.OutAvgBps.HasValue)
-                {
-                    item.OutAvgBps = item.OutMaxBps;
-                }
-
-                if (iface.Speed.HasValue && iface.Speed.Value > 0)
-                {
-                    item.MaxLoad = (short)(100*(item.InMaxBps + item.OutMaxBps)/iface.Speed);
-                    item.AvgLoad = (short)(100*(item.InAvgBps + item.OutAvgBps)/iface.Speed);
-                }
                 
-                UpdateHistoryStorage(data, item, x => x.DateTime);
+                UpdateHistoryStorage(data, item, x => x.DateEpoch);
             }
 
 
@@ -99,17 +84,17 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return result;
             }
 
-            public void AddCpuUtilization(CPUUtilization cpuUtilization)
+            private void AddCpuUtilization(CPUUtilization cpuUtilization)
             {
-                UpdateHistoryStorage(CPUHistory, cpuUtilization, x => x.DateTime);
+                UpdateHistoryStorage(CPUHistory, cpuUtilization, x => x.DateEpoch);
             }
 
-            public void AddMemoryUtilization(MemoryUtilization utilization)
+            private void AddMemoryUtilization(MemoryUtilization utilization)
             {
-                UpdateHistoryStorage(MemoryHistory, utilization, x => x.DateTime);
+                UpdateHistoryStorage(MemoryHistory, utilization, x => x.DateEpoch);
             }
 
-            private void UpdateHistoryStorage<T>(List<T> data, T newItem, Func<T, DateTime> getDate)
+            private void UpdateHistoryStorage<T>(List<T> data, T newItem, Func<T, long> getDateEpoch) where T : GraphPoint
             {
                 lock (data)
                 {
@@ -118,11 +103,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     if (data.Count%100 != 0)
                         return;
 
-                    var limit = DateTime.UtcNow.AddHours(-Config.HistoryHours);
-                    if (getDate(data[0]) >= limit)
+                    var limit = DateTime.UtcNow.AddHours(-Config.HistoryHours).ToEpochTime();
+                    if (getDateEpoch(data[0]) >= limit)
                         return;
- 
-                    var index = data.FindIndex(x => getDate(x) >= limit);
+                    var index = data.FindIndex(x => getDateEpoch(x) >= limit);
                     if (index <= 0)
                         return;
 
@@ -131,118 +115,60 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
-            if (wNode == null)
-                return Task.FromResult(new List<Node.CPUUtilization>());
-
-            var startVal = start.HasValue ? new Node.CPUUtilization {DateTime = start.Value} : null;
-            var endVal = end.HasValue ? new Node.CPUUtilization { DateTime = end.Value } : null;
-
-            return FilterHistory(wNode.CPUHistory, startVal, endVal, new CpuUtilComparer());
+            return Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(wNode?.CPUHistory, start, end).ToList<GraphPoint>());
         }
 
-        class CpuUtilComparer : IComparer<Node.CPUUtilization>
+        public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            public int Compare(Node.CPUUtilization x, Node.CPUUtilization y)
-            {
-                return x.DateTime.CompareTo(y.DateTime);
-            }
+            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
+            return Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(wNode?.MemoryHistory, start, end).ToList<GraphPoint>());
         }
 
-        class MemoryUtilComparer : IComparer<Node.MemoryUtilization>
+        // TODO: Needs implementation
+        public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            public int Compare(Node.MemoryUtilization x, Node.MemoryUtilization y)
-            {
-                return x.DateTime.CompareTo(y.DateTime);
-            }
+            return Task.FromResult(new List<GraphPoint>());
         }
 
-        class InterfaceUtilComparer : IComparer<Interface.InterfaceUtilization>
+        public override Task<List<DoubleGraphPoint>> GetUtilization(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            public int Compare(Interface.InterfaceUtilization x, Interface.InterfaceUtilization y)
-            {
-                return x.DateTime.CompareTo(y.DateTime);
-            }
+            var node = _wmiNodes.FirstOrDefault(x => x.Id == @interface.NodeId);
+            return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(node?.GetInterfaceUtilizationHistory(@interface), start, end).ToList());
         }
 
-        private static Task<List<T>> FilterHistory<T>(List<T> list, T start, T end, IComparer<T> comparer = null) where T: class
+        private static IEnumerable<TResult> FilterHistory<T, TResult>(List<T> list, DateTime? start, DateTime? end) where T : IGraphPoint, TResult, new()
         {
+            if (list == null)
+                return Enumerable.Empty<TResult>();
+
             lock (list)
             {
-                var startIndex = 0;
-                var endIndex = list.Count;
+                int startIndex = 0, endIndex = list.Count;
+                var comparer = new GraphPointComparer<T>();
 
                 if (start != null)
                 {
-                    var index = list.BinarySearch(start, comparer);
-                    if (index < 0)
-                    {
-                        index = ~index;
-                    }
+                    var index = list.BinarySearch(new T { DateEpoch = start.Value.ToEpochTime() }, comparer);
+                    if (index < 0) index = ~index;
                     startIndex = Math.Min(index, endIndex);
                 }
                 if (end != null)
                 {
-                    var index = list.BinarySearch(end, comparer);
-                    if (index < 0)
-                    {
-                        index = ~index;
-                    }
-                    endIndex = Math.Min(index+1, endIndex);
+                    var index = list.BinarySearch(new T { DateEpoch = end.Value.ToEpochTime() }, comparer);
+                    if (index < 0) index = ~index;
+                    endIndex = Math.Min(index + 1, endIndex);
                 }
                 var sliceLength = endIndex - startIndex;
-                return Task.FromResult(sliceLength <= 0 ? new List<T>() : list.Skip(startIndex).Take(sliceLength).ToList());
+                return sliceLength <= 0 ? Enumerable.Empty<TResult>() : list.Skip(startIndex).Take(sliceLength).Cast<TResult>();
             }
         }
 
-        public override Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        class GraphPointComparer<T> : IComparer<T> where T : IGraphPoint
         {
-            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
-            if (wNode == null)
-                return Task.FromResult(new List<Node.MemoryUtilization>());
-
-            Node.MemoryUtilization startVal = null;
-            if (start.HasValue)
-            {
-                startVal = new Node.MemoryUtilization { DateTime = start.Value };
-            }
-            Node.MemoryUtilization endVal = null;
-            if (end.HasValue)
-            {
-                endVal = new Node.MemoryUtilization { DateTime = end.Value };
-            }
-            return FilterHistory(wNode.MemoryHistory, startVal, endVal, new MemoryUtilComparer());
-        }
-
-        // TODO: Needs implementation
-        public override Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            return Task.FromResult(new List<Volume.VolumeUtilization>());
-        }
-
-        public override Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            var node = _wmiNodes.FirstOrDefault(x => x.Id == @interface.NodeId);
-            if (node == null)
-            {
-                return Task.FromResult(new List<Interface.InterfaceUtilization>());
-            }
-
-            var history = node.GetInterfaceUtilizationHistory(@interface);
-
-            Interface.InterfaceUtilization startVal = null;
-            if (start.HasValue)
-            {
-                startVal = new Interface.InterfaceUtilization { DateTime = start.Value };
-            }
-            Interface.InterfaceUtilization endVal = null;
-            if (end.HasValue)
-            {
-                endVal = new Interface.InterfaceUtilization { DateTime = end.Value };
-            }
-            return FilterHistory(history, startVal, endVal, new InterfaceUtilComparer());
+            public int Compare(T x, T y) => x.DateEpoch.CompareTo(y.DateEpoch);
         }
     }
 }

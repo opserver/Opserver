@@ -1,17 +1,13 @@
-﻿using System;
-
-namespace StackExchange.Opserver.Data.Dashboard
+﻿namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Volume
     {
-        public class VolumeUtilization
+        public class VolumeUtilization : GraphPoint
         {
-            public DateTime DateTime { get; internal set; }
+            public override long DateEpoch { get; set; }
+            public double AvgDiskUsed { get; internal set; }
 
-            public Double AvgDiskUsed { get; internal set; }
-            public Double MaxDiskUsed { get; internal set; }
-            public Double DiskSize { get; internal set; }
-            public Single PercentDiskUsed { get; internal set; }
+            public override double? Value => AvgDiskUsed;
         }
     }
 }

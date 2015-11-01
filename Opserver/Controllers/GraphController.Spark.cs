@@ -33,8 +33,8 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var mp in dataPoints)
             {
-                if (mp.AvgLoad.HasValue)
-                    avgCPU.Points.Add(new DataPoint(mp.DateTime.ToOADate(), mp.AvgLoad.Value));
+                if (mp.Value.HasValue)
+                    avgCPU.Points.Add(new DataPoint(mp.DateEpoch.ToDateTime().ToOADate(), mp.Value.Value));
             }
 
             chart.ChartAreas.Add(area);
@@ -46,13 +46,14 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> MemorySpark(string id)
         {
+            var node = DashboardData.GetNodeById(id);
             var chart = GetSparkChart();
             var dataPoints = (await DashboardData.GetMemoryUtilization(id,
                 start: DateTime.UtcNow.AddHours(-SparkHours),
                 end: null,
                 pointCount: (int) chart.Width.Value)).ToList();
 
-            var maxMem = dataPoints.Max(mp => mp.TotalMemory).GetValueOrDefault();
+            var maxMem = (double)node.TotalMemory.GetValueOrDefault();
             var maxGB = (int)Math.Ceiling(maxMem / _gb);
 
             var area = GetSparkChartArea(maxMem + (maxGB / 8) * _gb);
@@ -61,8 +62,8 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var mp in dataPoints)
             {
-                if (mp.AvgMemoryUsed.HasValue)
-                    used.Points.Add(new DataPoint(mp.DateTime.ToOADate(), mp.AvgMemoryUsed.Value));
+                if (mp.Value.HasValue)
+                    used.Points.Add(new DataPoint(mp.DateEpoch.ToDateTime().ToOADate(), mp.Value.Value));
             }
             chart.ChartAreas.Add(area);
 
@@ -82,7 +83,7 @@ namespace StackExchange.Opserver.Controllers
                     start: DateTime.UtcNow.AddHours(-SparkHours),
                     end: null,
                     pointCount: (int) chart.Width.Value));
-            var dataPoints = (await Task.WhenAll(pointTasks)).SelectMany(t => t).OrderBy(t => t.DateTime);
+            var dataPoints = (await Task.WhenAll(pointTasks)).SelectMany(t => t).OrderBy(t => t.DateEpoch);
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Total");
@@ -91,7 +92,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateTime.ToOADate(), np.InAvgBps.GetValueOrDefault(0) + np.OutAvgBps.GetValueOrDefault(0)));
+                series.Points.Add(new DataPoint(np.DateEpoch.ToDateTime().ToOADate(), np.Value.GetValueOrDefault(0) + np.BottomValue.GetValueOrDefault(0)));
             }
             chart.DataManipulator.Group("SUM", 2, IntervalType.Minutes, series);
 
@@ -109,7 +110,7 @@ namespace StackExchange.Opserver.Controllers
                 start: DateTime.UtcNow.AddHours(-SparkHours),
                 end: null,
                 pointCount: (int) chart.Width.Value))
-                .OrderBy(dp => dp.DateTime);
+                .OrderBy(dp => dp.DateEpoch);
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Bytes");
@@ -117,10 +118,10 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateTime.ToOADate(),
+                series.Points.Add(new DataPoint(np.DateEpoch.ToDateTime().ToOADate(),
                                                 direction == "out"
-                                                    ? np.OutAvgBps.GetValueOrDefault(0)
-                                                    : np.InAvgBps.GetValueOrDefault(0)));
+                                                    ? np.BottomValue.GetValueOrDefault(0)
+                                                    : np.Value.GetValueOrDefault(0)));
             }
             chart.ChartAreas.Add(area);
 

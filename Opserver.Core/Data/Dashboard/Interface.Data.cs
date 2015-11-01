@@ -1,21 +1,15 @@
-﻿using System;
-
-namespace StackExchange.Opserver.Data.Dashboard
+﻿namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Interface
     {
-        public class InterfaceUtilization
+        public class InterfaceUtilization : DoubleGraphPoint
         {
-            public DateTime DateTime { get; internal set; }
+            public override long DateEpoch { get; set; }
+            public float? InAvgBps { get; internal set; }
+            public float? OutAvgBps { get; internal set; }
 
-            public Int16? AvgLoad { get; internal set; }
-            public Int16? MaxLoad { get; internal set; }
-
-            public Single? InMaxBps { get; internal set; }
-            public Single? InAvgBps { get; internal set; }
-
-            public Single? OutMaxBps { get; internal set; }
-            public Single? OutAvgBps { get; internal set; }
+            public override double? Value => InAvgBps;
+            public override double? BottomValue => OutAvgBps;
         }
     }
 }

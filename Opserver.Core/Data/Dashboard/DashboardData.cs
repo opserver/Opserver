@@ -106,14 +106,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>CPU usage data points</returns>
-        public static Task<List<Node.CPUUtilization>> GetCPUUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        public static Task<List<GraphPoint>> GetCPUUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
         {
             foreach (var p in _dataProviders)
             {
                 var n = p.GetNodeById(id);
                 if (n != null) return p.GetCPUUtilization(n, start, end, pointCount);
             }
-            return Task.FromResult(new List<Node.CPUUtilization>());
+            return Task.FromResult(new List<GraphPoint>());
         }
 
         /// <summary>
@@ -124,14 +124,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>Memory usage data points</returns>
-        public static Task<List<Node.MemoryUtilization>> GetMemoryUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        public static Task<List<GraphPoint>> GetMemoryUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
         {
             foreach (var p in _dataProviders)
             {
                 var n = p.GetNodeById(id);
                 if (n != null) return p.GetMemoryUtilization(n, start, end, pointCount);
             }
-            return Task.FromResult(new List<Node.MemoryUtilization>());
+            return Task.FromResult(new List<GraphPoint>());
         }
 
 
@@ -144,14 +144,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>Interface usage data points</returns>
-        public static Task<List<Interface.InterfaceUtilization>> GetInterfaceUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        public static Task<List<DoubleGraphPoint>> GetInterfaceUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
         {
             foreach (var p in _dataProviders)
             {
                 var i = p.GetInterface(id);
                 if (i != null) return p.GetUtilization(i, start, end, pointCount);
             }
-            return Task.FromResult(new List<Interface.InterfaceUtilization>());
+            return Task.FromResult(new List<DoubleGraphPoint>());
         }
 
 
@@ -164,14 +164,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <param name="end">End date, unbounded if null</param>
         /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
         /// <returns>Volume usage data points</returns>
-        public Task<List<Volume.VolumeUtilization>> GetVolumeUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
+        public Task<List<GraphPoint>> GetVolumeUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
         {
             foreach (var p in _dataProviders)
             {
                 var v = p.GetVolume(id);
                 if (v != null) return p.GetUtilization(v, start, end, pointCount);
             }
-            return Task.FromResult(new List<Volume.VolumeUtilization>());
+            return Task.FromResult(new List<GraphPoint>());
         }
     }
 }

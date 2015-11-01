@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        private static readonly string[] _speedSizes = new[] {"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"};
+        private static readonly string[] _speedSizes = {"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"};
         public string PrettySpeed
         {
             get { 
@@ -80,6 +80,10 @@ namespace StackExchange.Opserver.Data.Dashboard
                 return $"{iSpeed:0} {_speedSizes[order]}ps";
             }
         }
+
+        public bool IsLikelyPrimary => Name.ToLower().EndsWith("team") ||
+                                       Name.ToLower().StartsWith("bond") ||
+                                       Name.Contains("Microsoft Network Adapter Multiplexor Driver");
 
         public Interface() {}
         public Interface(string id) { Id = id; }

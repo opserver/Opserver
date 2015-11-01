@@ -22,13 +22,13 @@ namespace StackExchange.Opserver.Controllers
             {
                 points = nodePoints.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true), 
-                        value = p.AvgLoad ?? 0
+                        date = p.DateEpoch, 
+                        value = p.Value ?? 0
                     }),
                 summary = summary.GetValueOrDefault(false) ? (await DashboardData.GetCPUUtilization(id, null, null, 2000)).Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true), 
-                        value = p.AvgLoad ?? 0
+                        date = p.DateEpoch, 
+                        value = p.Value ?? 0
                     }) : null,
                 builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
                                                                 {
@@ -43,7 +43,6 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/memory/json")]
         public async Task<ActionResult> MemoryJson(string id, long start, long end, bool? summary = false)
         {
-
             var detailPoints = await DashboardData.GetMemoryUtilization(id, start.ToDateTime(), end.ToDateTime(), 1000);
             if (detailPoints == null) return JsonNotFound();
 
@@ -51,13 +50,13 @@ namespace StackExchange.Opserver.Controllers
             {
                 points = detailPoints.Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true),
-                        value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
+                        date = p.DateEpoch,
+                        value = (int)(p.Value / 1024 / 1024 ?? 0)
                     }),
                 summary = summary.GetValueOrDefault(false) ? (await DashboardData.GetMemoryUtilization(id, null, null, 1000)).Select(p => new
                     {
-                        date = p.DateTime.ToEpochTime(true),
-                        value = (int)(p.AvgMemoryUsed / 1024 / 1024 ?? 0)
+                        date = p.DateEpoch,
+                        value = (int)(p.Value / 1024 / 1024 ?? 0)
                     }) : null,
                 builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
                 {
@@ -81,21 +80,21 @@ namespace StackExchange.Opserver.Controllers
                 {
                     maximums = new
                         {
-                            main_in = anyTraffic ? traffic.Max(i => (int)i.InAvgBps.GetValueOrDefault(0)) : 0,
-                            main_out = anyTraffic ? traffic.Max(i => (int)i.OutAvgBps.GetValueOrDefault(0)) : 0
+                            main_in = anyTraffic ? traffic.Max(i => (int)i.Value.GetValueOrDefault(0)) : 0,
+                            main_out = anyTraffic ? traffic.Max(i => (int)i.BottomValue.GetValueOrDefault(0)) : 0
                         },
                     points = traffic.Select(i => new 
                         {
-                            date = i.DateTime.ToEpochTime(true), 
-                            main_in = (int)(i.InAvgBps.GetValueOrDefault()),
-                            main_out = (int)(i.OutAvgBps.GetValueOrDefault())
+                            date = i.DateEpoch, 
+                            main_in = (int)(i.Value.GetValueOrDefault()),
+                            main_out = (int)(i.BottomValue.GetValueOrDefault())
                         }),
                     summary = summary.GetValueOrDefault()
                                   ? (await DashboardData.GetInterfaceUtilization(id, null, null, 2000)).Select(i => new
                                       {
-                                          date = i.DateTime.ToEpochTime(true),
-                                          main_in = (int)(i.InAvgBps.GetValueOrDefault()),
-                                          main_out = (int)(i.OutAvgBps.GetValueOrDefault())
+                                          date = i.DateEpoch,
+                                          main_in = (int)(i.Value.GetValueOrDefault()),
+                                          main_out = (int)(i.BottomValue.GetValueOrDefault())
                                       })
                                   : null
                 });

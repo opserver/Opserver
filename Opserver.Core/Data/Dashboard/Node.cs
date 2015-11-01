@@ -113,15 +113,9 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
 
-        public float TotalNetworkbps
-        {
-            get { return Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
-        }
+        public float TotalNetworkbps => Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
 
-        public float TotalPrimaryNetworkbps
-        {
-            get { return PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
-        }
+        public float TotalPrimaryNetworkbps => PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
 
         private DashboardSettings.NodeSettings _settings;
         public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings));
@@ -134,19 +128,9 @@ namespace StackExchange.Opserver.Data.Dashboard
                 if (_primaryInterfaces == null)
                 {
                     var s = Settings;
-                    List<Interface> dbInterfaces;
-                    if (s?.PrimaryInterfacePatternRegex != null)
-                    {
-                        dbInterfaces = Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName.IsNullOrEmptyReturn(i.Name))).ToList();
-                    }
-                    else
-                    {
-                        dbInterfaces = Interfaces.Where(i =>
-                                                        i.Name.ToLower().EndsWith("team") ||
-                                                        i.Name.ToLower().StartsWith("bond") ||
-                                                        i.Name.Contains("Microsoft Network Adapter Multiplexor Driver"))
-                                                 .ToList();
-                    }
+                    var dbInterfaces = s?.PrimaryInterfacePatternRegex != null
+                        ? Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName.IsNullOrEmptyReturn(i.Name))).ToList()
+                        : Interfaces.Where(i => i.IsLikelyPrimary).ToList();
                     _primaryInterfaces = (dbInterfaces.Any()
                                               ? dbInterfaces.OrderBy(i => i.Name)
                                               : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();

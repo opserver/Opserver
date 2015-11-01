@@ -192,22 +192,20 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             return !Host.HasValue() ? null : $"{Host}Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{node.Id}";
         }
 
-        public override Task<List<Node.CPUUtilization>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
-Select c.DateTime,
-        c.AvgLoad,
-        c.MaxLoad,
-        Row_Number() Over(Order By c.DateTime) as RowNumber
-    From CPULoad c
-Where c.DateTime > @minDate
-    And c.NodeID = @id";
+Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
+       c.AvgLoad
+  From CPULoad c
+ Where c.DateTime > @minDate
+   And c.NodeID = @id";
 
             const string sampledSql = @"
-Select * 
+Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
+       c.AvgLoad
  From (Select c.DateTime,
               c.AvgLoad,
-              c.MaxLoad,
               Row_Number() Over(Order By c.DateTime) as RowNumber
          From CPULoad c
         Where {dateRange}
@@ -218,27 +216,23 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return UtilizationQuery<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount);
+            return (await UtilizationQuery<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override Task<List<Node.MemoryUtilization>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
-Select c.DateTime,
-        c.AvgMemoryUsed, 
-        c.MaxMemoryUsed,
-        c.TotalMemory,
-        Row_Number() Over(Order By c.DateTime) as RowNumber
-    From CPULoad c
-Where c.DateTime > @minDate
-    And c.NodeID = @id";
+Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
+       c.AvgMemoryUsed
+  From CPULoad c
+ Where c.DateTime > @minDate
+   And c.NodeID = @id";
 
             const string sampledSql = @"
-Select * 
+Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
+       c.AvgMemoryUsed
  From (Select c.DateTime,
-              c.AvgMemoryUsed,  
-              c.MaxMemoryUsed,
-              c.TotalMemory,
+              c.AvgMemoryUsed,
               Row_Number() Over(Order By c.DateTime) as RowNumber
          From CPULoad c
         Where {dateRange}
@@ -249,28 +243,23 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return UtilizationQuery<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount);
+            return (await UtilizationQuery<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override async Task<List<Volume.VolumeUtilization>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
-Select v.DateTime,
-       v.AvgDiskUsed,
-       v.MaxDiskUsed,
-       v.DiskSize,
-       v.PercentDiskUsed,
-       Row_Number() Over(Order By v.DateTime) as RowNumber
+Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
+       v.AvgDiskUsed
   From VolumeUsage v
  Where {dateRange}
    And v.VolumeID = @id";
 
             const string sampledSql = @"
-Select * 
-  From (Select v.DateTime,
+Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
+       v.AvgDiskUsed
+  From (Select v.DateTime
                v.AvgDiskUsed,
-               v.DiskSize,
-               v.PercentDiskUsed,
                Row_Number() Over(Order By v.DateTime) as RowNumber
           From VolumeUsage v
          Where {dateRange}
@@ -280,35 +269,27 @@ Select *
                         Where {dateRange}
                           And v.VolumeID = @id)/@intervals) = 0
  Order By v.DateTime";
-            using (var conn = await GetConnectionAsync())
-            {
-                return await conn.QueryAsync<Volume.VolumeUtilization>(
-                    (pointCount.HasValue ? sampledSql : allSql)
-                        .Replace("{dateRange}", GetOptionalDateClause("v.DateTime", start, end)),
-                    new { id = volume.Id, start, end, intervals = pointCount });
-            }
+
+            return (await UtilizationQuery<Volume.VolumeUtilization>(volume.Id, allSql, sampledSql, "v.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override Task<List<Interface.InterfaceUtilization>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
-Select itd.DateTime,
-		       itd.In_Maxbps InMaxBps,
-		       itd.In_Averagebps InAvgBps,
-		       itd.Out_Maxbps OutMaxBps,
-		       itd.Out_Averagebps OutAvgBps,
-		       Row_Number() Over(Order By itd.DateTime) RowNumber
-          From InterfaceTraffic itd
-         Where itd.InterfaceID = @Id
-           And {dateRange}
+Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
+       itd.In_Averagebps InAvgBps,
+       itd.Out_Averagebps OutAvgBps
+  From InterfaceTraffic itd
+ Where itd.InterfaceID = @Id
+   And {dateRange}
 ";
 
             const string sampledSql = @"
-Select * 
+Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
+       itd.InAvgBps,
+       itd.OutAvgBps
   From (Select itd.DateTime,
-		       itd.In_Maxbps InMaxBps,
 		       itd.In_Averagebps InAvgBps,
-		       itd.Out_Maxbps OutMaxBps,
 		       itd.Out_Averagebps OutAvgBps,
 		       Row_Number() Over(Order By itd.DateTime) RowNumber
           From InterfaceTraffic itd
@@ -319,7 +300,7 @@ Select *
 					      Where itd.InterfaceID = @Id
                             And {dateRange})/@intervals) = 0";
 
-            return UtilizationQuery<Interface.InterfaceUtilization>(nodeInteface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount);
+            return (await UtilizationQuery<Interface.InterfaceUtilization>(nodeInteface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
         }
 
         public Task<DbConnection> GetConnectionAsync()
@@ -338,7 +319,7 @@ Select *
             return "1 = 1";
         }
 
-        private async Task<List<T>> UtilizationQuery<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount)
+        private async Task<List<T>> UtilizationQuery<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount) where T : IGraphPoint
         {
             using (var conn = await GetConnectionAsync())
             {
