@@ -2071,8 +2071,8 @@ Status.HAProxy = (function () {
             }
 
             function redrawMain(newBounds, timerDelay) {
-                var start = Math.round(newBounds[0] / 1000),
-                    end = Math.round(newBounds[1] / 1000);
+                var start = Math.round(newBounds[0]),
+                    end = Math.round(newBounds[1]);
 
                 // load low-res summary view quickly
                 if (!options.noAjaxZoom) {
@@ -2098,7 +2098,7 @@ Status.HAProxy = (function () {
 
                 if (options.noAjaxZoom) {
                     curData.points = curData.summary.filter(function (p) {
-                        var t = p.date.getTime() / 1000;
+                        var t = p.date.getTime();
                         return start <= t && t <= end;
                     });
                     rescaleYAxis(curData, true);
