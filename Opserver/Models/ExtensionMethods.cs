@@ -53,13 +53,7 @@ namespace StackExchange.Opserver.Models
     public static class InterfaceExtensionMethods
     {
         private static readonly IHtmlString _unknownSpan = @"<span class=""unknown""></span>".AsHtml();
-
-        public static IHtmlString PrettyPercentUtilization(this Interface i)
-        {
-            if (!i.InPercentUtil.HasValue || !i.OutPercentUtil.HasValue) return "n/a".AsHtml();
-            return $@"{i.InPercentUtil}% <span class=""note"">In - </span>{i.OutPercentUtil}% <span class=""note"">Out</span>".AsHtml();
-        }
-
+        
         public static IHtmlString PrettyIn(this Interface i)
         {
             return i.InBps.HasValue ? i.InBps.Value.ToSpeed() : _unknownSpan;

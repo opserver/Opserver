@@ -42,6 +42,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         // ReSharper disable ClassNeverInstantiated.Local
+        // ReSharper disable CollectionNeverUpdated.Local
+        // ReSharper disable UnusedAutoPropertyAccessor.Local
         private class BosunHost
         {
             public string Name { get; set; }
@@ -62,6 +64,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 public float? PercentUsed { get; set; }
                 public Dictionary<string, string> Processors { get; set; }
+                public DateTime? StatsLastUpdated { get; set; }
             }
 
             public class MemoryInfo
@@ -116,7 +119,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public float? RTTMS { get; set; }
             }
         }
+        // ReSharper restore CollectionNeverUpdated.Local
         // ReSharper restore ClassNeverInstantiated.Local
+        // ReSharper restore UnusedAutoPropertyAccessor.Local
 
         public class BosunApiResult<T>
         {
@@ -185,6 +190,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Ip = "scollector",
                         DataProvider = this,
                         Status = GetNodeStatus(h),
+                        // TODO: Add Last Ping time to all providers
+                        LastSync = h.CPU?.StatsLastUpdated,
                         CPULoad = (short?)h.CPU?.PercentUsed,
                         MemoryUsed = h.Memory?.UsedBytes,
                         TotalMemory = h.Memory?.TotalBytes,
@@ -217,10 +224,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Name = hd.Key,
                             NodeId = h.Name,
                             Caption = hd.Key,
-                            Description = "Needs Description",
+                            Description = $"{hd.Key} - Needs Description",
                             LastSync = hd.Value.StatsLastUpdated,
                             Used = hd.Value.UsedBytes,
                             Size = hd.Value.TotalBytes,
+                            Available = hd.Value.TotalBytes - hd.Value.UsedBytes,
                             PercentUsed = 100 * (hd.Value.UsedBytes / hd.Value.TotalBytes),
                         }).ToList(),
                         //Apps = new List<Application>(),
@@ -237,11 +245,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 return nodes;
 
+                // Nodes
                 //    LastSync, 
                 //    Cast(Status as int) Status,
-                //    LastBoot, 
-                //    Coalesce(Cast(vm.CPULoad as smallint), n.CPULoad) as CPULoad, 
-                //    MemoryUsed, 
+                //    LastBoot,  
                 //    IP_Address as Ip, 
                 //    PollInterval as PollIntervalSeconds,
                 //    Cast(vmh.NodeID as varchar(50)) as VMHostID, 
@@ -249,44 +256,26 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 //    IsNull(UnManaged, 0) as IsUnwatched, // Silence
 
                 // Interfaces
-                //Select Cast(InterfaceID as varchar(50)) as Id,
-                //       Cast(NodeID as varchar(50)) as NodeId,
                 //       InterfaceIndex [Index],
                 //       LastSync,
-                //       InterfaceName as Name,
-                //       FullName,
-                //       Caption,
                 //       Comments,
                 //       InterfaceAlias Alias,
                 //       IfName,
                 //       InterfaceTypeDescription TypeDescription,
-                //       PhysicalAddress,
                 //       IsNull(UnManaged, 0) as IsUnwatched,
                 //       UnManageFrom as UnwatchedFrom,
                 //       UnManageUntil as UnwatchedUntil,
                 //       Cast(Status as int) Status,
-                //       InBps,
-                //       OutBps,
                 //       InPps,
                 //       OutPps,
-                //       InPercentUtil,
-                //       OutPercentUtil,
                 //       InterfaceMTU as MTU,
                 //       InterfaceSpeed as Speed
 
                 // Volumes
-                //Select Cast(VolumeID as varchar(50)) as Id,
-                //       Cast(NodeID as varchar(50)) as NodeId,
                 //       LastSync,
                 //       VolumeIndex as [Index],
-                //       FullName as Name,
-                //       Caption,
                 //       VolumeDescription as [Description],
                 //       VolumeType as Type,
-                //       VolumeSize as Size,
-                //       VolumeSpaceUsed as Used,
-                //       VolumeSpaceAvailable as Available,
-                //       VolumePercentUsed as PercentUsed
 
                 // Applications
                 //Select Cast(com.ApplicationID as varchar(50)) as Id, 

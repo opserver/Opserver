@@ -86,8 +86,6 @@ Select Cast(InterfaceID as varchar(50)) as Id,
        OutBps,
        InPps,
        OutPps,
-       InPercentUtil,
-       OutPercentUtil,
        InterfaceMTU as MTU,
        InterfaceSpeed as Speed
 From Interfaces", commandTimeout: QueryTimeoutMs);

@@ -29,8 +29,6 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? OutBps { get; internal set; }
         public float? InPps { get; internal set; }
         public float? OutPps { get; internal set; }
-        public float? InPercentUtil { get; internal set; }
-        public float? OutPercentUtil { get; internal set; }
         public int? MTU { get; internal set; }
         public double? Speed { get; internal set; }
 
