@@ -246,6 +246,47 @@ Order By c.DateTime";
             return (await UtilizationQuery<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
+        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            const string allSql = @"
+Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
+       Sum(itd.In_Averagebps) InAvgBps,
+       Sum(itd.Out_Averagebps) OutAvgBps
+  From InterfaceTraffic itd
+ Where itd.InterfaceID In @Ids
+   And {dateRange}
+ Group By itd.DateTime
+";
+
+            const string sampledSql = @"
+Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
+       Sum(itd.InAvgBps) InAvgBps,
+       Sum(itd.OutAvgBps) OutAvgBps
+  From (Select itd.DateTime,
+		       itd.In_Averagebps InAvgBps,
+		       itd.Out_Averagebps OutAvgBps,
+		       Row_Number() Over(Order By itd.DateTime) RowNumber
+          From InterfaceTraffic itd
+         Where itd.InterfaceID In @Ids
+           And {dateRange}) itd
+ Where itd.RowNumber % ((Select Count(*) + @intervals
+						   From InterfaceTraffic itd
+					      Where itd.InterfaceID In @Ids
+                            And {dateRange})/@intervals) = 0
+ Group By itd.DateTime";
+            
+            if (!node.PrimaryInterfaces.Any()) return new List<DoubleGraphPoint>();
+
+            using (var conn = await GetConnectionAsync())
+            {
+                var result = await conn.QueryAsync<Interface.InterfaceUtilization>(
+                    (pointCount.HasValue ? sampledSql : allSql)
+                        .Replace("{dateRange}", GetOptionalDateClause("itd.DateTime", start, end)),
+                    new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, intervals = pointCount });
+                return result.ToList<DoubleGraphPoint>();
+            }
+        }
+
         public override async Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"

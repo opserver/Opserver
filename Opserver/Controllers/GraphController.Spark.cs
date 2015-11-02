@@ -36,7 +36,6 @@ namespace StackExchange.Opserver.Controllers
                 if (mp.Value.HasValue)
                     avgCPU.Points.Add(new DataPoint(mp.DateEpoch.ToDateTime().ToOADate(), mp.Value.Value));
             }
-
             chart.ChartAreas.Add(area);
 
             return chart.ToResult();
@@ -78,24 +77,19 @@ namespace StackExchange.Opserver.Controllers
             if (node == null) return ContentNotFound();
 
             var chart = GetSparkChart();
-            var pointTasks = node.PrimaryInterfaces.Select(
-                ni => DashboardData.GetInterfaceUtilization(ni.Id,
-                    start: DateTime.UtcNow.AddHours(-SparkHours),
-                    end: null,
-                    pointCount: (int) chart.Width.Value));
-            var dataPoints = (await Task.WhenAll(pointTasks)).SelectMany(t => t).OrderBy(t => t.DateEpoch);
+            var dataPoints = (await DashboardData.GetNetworkUtilization(id,
+                start: DateTime.UtcNow.AddHours(-SparkHours),
+                end: null,
+                pointCount: (int)chart.Width.Value)).OrderBy(t => t.DateEpoch);
 
             var area = GetSparkChartArea();
             var series = GetSparkSeries("Total");
-            series.ChartType = SeriesChartType.StackedArea;
             chart.Series.Add(series);
 
             foreach (var np in dataPoints)
             {
                 series.Points.Add(new DataPoint(np.DateEpoch.ToDateTime().ToOADate(), np.Value.GetValueOrDefault(0) + np.BottomValue.GetValueOrDefault(0)));
             }
-            chart.DataManipulator.Group("SUM", 2, IntervalType.Minutes, series);
-
             chart.ChartAreas.Add(area);
 
             return chart.ToResult();

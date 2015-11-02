@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,11 +15,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         /// </summary>
         private partial class WmiNode : Node
         {
-            private readonly Dictionary<string, List<Interface.InterfaceUtilization>> _netUtilization;
-            
             internal readonly List<MemoryUtilization> MemoryHistory;
-
             internal readonly List<CPUUtilization> CPUHistory;
+            internal readonly List<Interface.InterfaceUtilization> CombinedNetHistory;
+            private readonly ConcurrentDictionary<string, List<Interface.InterfaceUtilization>> NetHistory;
+            private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
 
             /// <summary>
             /// Name as specified in DashboardSettings.json.
@@ -33,49 +34,27 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public WmiNode()
             {
                 Caches = new List<Cache>(2);
-                _netUtilization = new Dictionary<string, List<Interface.InterfaceUtilization>>(2);
                 Interfaces = new List<Interface>(2);
                 // TODO: Size for retention / interval and convert to limited list
                 MemoryHistory = new List<MemoryUtilization>(1024);
                 CPUHistory = new List<CPUUtilization>(1024);
+                CombinedNetHistory = new List<Interface.InterfaceUtilization>(1024);
+                NetHistory = new ConcurrentDictionary<string, List<Interface.InterfaceUtilization>>();
+                VolumeHistory = new ConcurrentDictionary<string, List<Volume.VolumeUtilization>>();
                 Volumes = new List<Volume>(3);
                 VMs = new List<Node>();
                 Apps = new List<Application>();
                 IPs = new List<IPAddress>();
             }
 
-            private void AddNetworkUtilization(Interface iface, Interface.InterfaceUtilization item)
-            {
-                if (iface == null)
-                    return;
-
-                var ownIface = Interfaces.FirstOrDefault(x => x == iface);
-                if (ownIface == null)
-                    return;
-
-                List<Interface.InterfaceUtilization> data;
-                if (!_netUtilization.ContainsKey(ownIface.Name))
-                {
-                    data = new List<Interface.InterfaceUtilization>(1024);
-                    _netUtilization[ownIface.Name] = data;
-                }
-                else
-                {
-                    data = _netUtilization[ownIface.Name];
-                }
-                
-                UpdateHistoryStorage(data, item, x => x.DateEpoch);
-            }
-
-
             internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface @interface)
             {
                 List<Interface.InterfaceUtilization> result;
                 if (@interface != null 
                     && Interfaces.FirstOrDefault(x => x == @interface) != null
-                    && _netUtilization.ContainsKey(@interface.Name))
+                    && NetHistory.ContainsKey(@interface.Name))
                 {
-                    result = _netUtilization[@interface.Name];
+                    result = NetHistory[@interface.Name];
                 }
                 else
                 {
@@ -84,17 +63,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return result;
             }
 
-            private void AddCpuUtilization(CPUUtilization cpuUtilization)
-            {
-                UpdateHistoryStorage(CPUHistory, cpuUtilization, x => x.DateEpoch);
-            }
-
-            private void AddMemoryUtilization(MemoryUtilization utilization)
-            {
-                UpdateHistoryStorage(MemoryHistory, utilization, x => x.DateEpoch);
-            }
-
-            private void UpdateHistoryStorage<T>(List<T> data, T newItem, Func<T, long> getDateEpoch) where T : GraphPoint
+            private void UpdateHistoryStorage<T>(List<T> data, T newItem) where T : GraphPoint
             {
                 lock (data)
                 {
@@ -104,9 +73,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         return;
 
                     var limit = DateTime.UtcNow.AddHours(-Config.HistoryHours).ToEpochTime();
-                    if (getDateEpoch(data[0]) >= limit)
+                    if (data[0].DateEpoch >= limit)
                         return;
-                    var index = data.FindIndex(x => getDateEpoch(x) >= limit);
+                    var index = data.FindIndex(x => x.DateEpoch >= limit);
                     if (index <= 0)
                         return;
 
@@ -118,13 +87,19 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
-            return Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(wNode?.CPUHistory, start, end).ToList<GraphPoint>());
+            return Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(wNode?.CPUHistory, start, end).ToList());
         }
 
         public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
-            return Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(wNode?.MemoryHistory, start, end).ToList<GraphPoint>());
+            return Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(wNode?.MemoryHistory, start, end).ToList());
+        }
+        
+        public override Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
+            return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(wNode?.CombinedNetHistory, start, end).ToList());
         }
 
         // TODO: Needs implementation

@@ -204,7 +204,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public List<float[]> Data { get; set; }
 
         private List<GraphPoint> _pointData;
-        public List<GraphPoint> PointData => (_pointData ?? (_pointData = Data.Select(p => new GraphPoint()
+        public List<GraphPoint> PointData => (_pointData ?? (_pointData = Data.Select(p => new GraphPoint
         {
             DateEpoch = (long) p[0],
             Value = p[1]

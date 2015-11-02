@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings));
 
         private List<Interface> _primaryInterfaces; 
-        public IEnumerable<Interface> PrimaryInterfaces
+        public List<Interface> PrimaryInterfaces
         {
             get
             {

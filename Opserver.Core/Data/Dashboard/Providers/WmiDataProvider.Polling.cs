@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Monitoring;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
@@ -90,26 +92,22 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             private async Task GetAllInterfaces()
             {
-                if (KernelVersion > WindowsKernelVersions.Windows2012And8)
-                {
-                    //ActiveMaximumTransmissionUnit
-                    //MtuSize
-                    //
-                    //Speed
-                }
-                else
-                {
-                    
-                }
+                //if (KernelVersion > WindowsKernelVersions.Windows2012And8)
+                //{
+                //    //ActiveMaximumTransmissionUnit
+                //    //MtuSize
+                //    //
+                //    //Speed
+                //}
 
-                const string query = @"SELECT 
-                NetConnectionID,
-                Description,
-                Name,
-                MACAddress,
-                Speed
-                FROM Win32_NetworkAdapter
-                WHERE NetConnectionStatus = 2"; //connected adapters.
+                const string query = @"
+SELECT Name,
+       NetConnectionID,
+       Description,
+       MACAddress,
+       Speed
+  FROM Win32_NetworkAdapter
+ WHERE NetConnectionStatus = 2"; //connected adapters.
                 //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
 
                 using (var q = Wmi.Query(Name, query))
@@ -147,15 +145,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             private async Task GetAllVolumes()
             {
-                const string query = @"SELECT 
-                Caption,
-                Description,
-                FreeSpace,
-                Name,
-                Size,
-                VolumeSerialNumber
-                FROM Win32_LogicalDisk
-            WHERE  DriveType = 3"; //fixed disks
+                const string query = @"
+SELECT Caption,
+       Description,
+       FreeSpace,
+       Name,
+       Size,
+       VolumeSerialNumber
+  FROM Win32_LogicalDisk
+ WHERE DriveType = 3"; //fixed disks
 
                 using (var q = Wmi.Query(Name, query))
                 {
@@ -189,10 +187,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             
             private async Task PollCpuUtilization()
             {
-                const string query = @"select 
-                    PercentProcessorTime 
-                    from Win32_PerfFormattedData_PerfOS_Processor
-                    where Name = '_Total'";
+                const string query = @"
+SELECT PercentProcessorTime 
+  FROM Win32_PerfFormattedData_PerfOS_Processor
+ WHERE Name = '_Total'";
 
                 using (var q = Wmi.Query(Name, query))
                 {
@@ -206,15 +204,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         DateEpoch = DateTime.UtcNow.ToEpochTime(),
                         AvgLoad = CPULoad
                     };
-                    AddCpuUtilization(cpuUtilization);
+                    UpdateHistoryStorage(CPUHistory, cpuUtilization);
                 }
             }
 
             private async Task PollMemoryUtilization()
             {
-                const string query = @"select 
-                    AvailableKBytes 
-                    from Win32_PerfFormattedData_PerfOS_Memory";
+                const string query = @"
+SELECT AvailableKBytes 
+  FROM Win32_PerfFormattedData_PerfOS_Memory";
                 
                 using (var q = Wmi.Query(Name, query))
                 {
@@ -229,51 +227,73 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         DateEpoch = DateTime.UtcNow.ToEpochTime(),
                         AvgMemoryUsed = MemoryUsed
                     };
-                    AddMemoryUtilization(utilization);
+                    UpdateHistoryStorage(MemoryHistory, utilization);
                 }
+            }
+
+            private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();
+
+            private static string GetCounterName(string original)
+            {
+                return CounterLookup.GetOrAdd(original,
+                    k => new StringBuilder(k)
+                        .Replace("\\", "_")
+                        .Replace("/", "_")
+                        .Replace("(", "[")
+                        .Replace(")", "]")
+                        .Replace("#", "_").ToString());
             }
 
             private async Task PollNetworkUtilization()
             {
-                const string queryTemplate = @"select 
-                    BytesReceivedPersec,
-                    BytesSentPersec,
-                    PacketsReceivedPersec,
-                    PacketsSentPersec
-                    FROM Win32_PerfFormattedData_Tcpip_NetworkInterface where name = '{name}'";
+                const string query = @"
+SELECT Name,
+       BytesReceivedPersec,
+       BytesSentPersec,
+       PacketsReceivedPersec,
+       PacketsSentPersec
+  FROM Win32_PerfFormattedData_Tcpip_NetworkInterface";
 
-                foreach (var iface in Interfaces)
+                var queryTime = DateTime.UtcNow.ToEpochTime();
+                var combinedUtil = new Interface.InterfaceUtilization
                 {
-                    var perfCounterName = iface.Name;
-                    //adjust performance counter special symbols for instance name.
-                    perfCounterName = perfCounterName.Replace("\\", "_");
-                    perfCounterName = perfCounterName.Replace("/", "_");
-                    perfCounterName = perfCounterName.Replace("(", "[");
-                    perfCounterName = perfCounterName.Replace(")", "]");
-                    perfCounterName = perfCounterName.Replace("#", "_");
+                    DateEpoch = queryTime,
+                    InAvgBps = 0,
+                    OutAvgBps = 0
+                };
 
-                    var query = queryTemplate.Replace("{name}", perfCounterName);
-                    using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Name, query))
+                {
+                    foreach (var data in await q.GetDynamicResult())
                     {
-                        var data = await q.GetFirstResult();
-                        if (data == null)
-                            continue;
+                        if (data == null) continue;
+                        var iface = Interfaces.FirstOrDefault(i => data.Name == GetCounterName(i.Name));
+                        if (iface == null) continue;
 
                         iface.InBps = data.BytesReceivedPersec;
                         iface.OutBps = data.BytesSentPersec;
                         iface.InPps = data.PacketsReceivedPersec;
                         iface.OutPps = data.PacketsSentPersec;
 
-                        AddNetworkUtilization(iface, new Interface.InterfaceUtilization
+                        var util = new Interface.InterfaceUtilization
                         {
-                            DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                            DateEpoch = queryTime,
                             InAvgBps = iface.InBps,
                             OutAvgBps = iface.OutBps
-                        });
+                        };
+
+                        var netData = NetHistory.GetOrAdd(iface.Name, k => new List<Interface.InterfaceUtilization>(1024));
+                        UpdateHistoryStorage(netData, util);
+
+                        if (PrimaryInterfaces.Contains(iface))
+                        {
+                            combinedUtil.InAvgBps += util.InAvgBps;
+                            combinedUtil.OutAvgBps += util.OutAvgBps;
+                        }
                     }
                 }
+                UpdateHistoryStorage(CombinedNetHistory, combinedUtil);
             }
-        
         }
     }
 }

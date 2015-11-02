@@ -56,6 +56,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public Dictionary<string, DiskInfo> Disks { get; set; }
             public Dictionary<string, InterfaceInfo> Interfaces { get; set; }
             public List<IncidentInfo> OpenIncidents { get; set; }
+            public Dictionary<string, ICMPInfo> ICMPData { get; set; }
 
             public class CPUInfo
             {
@@ -106,6 +107,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public string Status { get; set; }
                 public string Subject { get; set; }
                 public bool Silenced { get; set; }
+            }
+
+            public class ICMPInfo
+            {
+                public bool TimedOut { get; set; }
+                public bool DNSResolved { get; set; }
+                public float? RTTMS { get; set; }
             }
         }
         // ReSharper restore ClassNeverInstantiated.Local
@@ -176,6 +184,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Model = h.Model,
                         Ip = "scollector",
                         DataProvider = this,
+                        Status = GetNodeStatus(h),
                         CPULoad = (short?)h.CPU?.PercentUsed,
                         MemoryUsed = h.Memory?.UsedBytes,
                         TotalMemory = h.Memory?.TotalBytes,
@@ -303,6 +312,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
+        private NodeStatus GetNodeStatus(BosunHost host)
+        {
+            if (host.OpenIncidents?.Count > 0)
+                return NodeStatus.Warning;
+            if (host.ICMPData?.Values.All(p => p.TimedOut) == true)
+                return NodeStatus.Unreachable;
+            return NodeStatus.Active;
+        }
+
         public override string GetManagementUrl(Node node)
         {
             // TODO: UrlEncode
@@ -318,17 +336,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 if (cpuCache?.TryGetValue(node.Id, out series) == true)
                     return series.PointData;
             }
-            else
-            {
-                var apiResponse = await GetMetric(
-                    BosunMetric.Globals.CPU,
-                    start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
-                    end,
-                    node.Id);
-                return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
-            }
-
-            return new List<GraphPoint>();
+            
+            var apiResponse = await GetMetric(
+                BosunMetric.Globals.CPU,
+                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                end,
+                node.Id);
+            return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
         public override async Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
@@ -340,17 +354,18 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 if (cache?.TryGetValue(node.Id, out series) == true)
                     return series.PointData;
             }
-            else
-            {
-                var apiResponse = await GetMetric(
-                    BosunMetric.Globals.MemoryUsed,
-                    start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
-                    end,
-                    node.Id);
-                return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
-            }
 
-            return new List<GraphPoint>();
+            var apiResponse = await GetMetric(
+                BosunMetric.Globals.MemoryUsed,
+                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                end,
+                node.Id);
+            return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
+        }
+
+        public override Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            return Task.FromResult(new List<DoubleGraphPoint>());
         }
 
         public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
