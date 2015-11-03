@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         public static bool PerformProxyAction(IEnumerable<Proxy> proxies, string serverName, Action action)
         {
             var result = true;
-            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s }));
+            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s })).ToList();
             Parallel.ForEach(matchingServers, _parallelOptions, pair =>
             {
                 // HAProxy will not drain a downed server, do the next best thing: MAINT
@@ -25,6 +25,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
+            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
             return result;
         }
 
@@ -37,24 +38,28 @@ namespace StackExchange.Opserver.Data.HAProxy
                     {
                         result = result && PostAction(proxy, s, action);
                     });
+                proxy.Instance.Poll(true, true);
                 return result;
             }
             else
             {
-                return PostAction(proxy, server, action);
+                var result = PostAction(proxy, null, action);
+                proxy.Instance.Poll(true, true);
+                return result;
             }
         }
 
         public static bool PerformServerAction(string server, Action action)
         {
             var proxies = HAProxyGroup.GetAllProxies();
-            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == server).Select(s => new { Proxy = p, Server = s }));
+            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == server).Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
             Parallel.ForEach(matchingServers, _parallelOptions, pair =>
                 {
                     result = result && PostAction(pair.Proxy, pair.Server, action);
                 });
+            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
             return result;
         }
 
@@ -63,13 +68,14 @@ namespace StackExchange.Opserver.Data.HAProxy
             var haGroup = HAProxyGroup.GetGroup(group);
             if (haGroup == null) return false;
             var proxies = haGroup.GetProxies();
-            var matchingServers = proxies.SelectMany(p => p.Servers.Select(s => new { Proxy = p, Server = s }));
+            var matchingServers = proxies.SelectMany(p => p.Servers.Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
             Parallel.ForEach(matchingServers, _parallelOptions, pair =>
             {
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
+            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
             return result;
         }
 
@@ -94,7 +100,6 @@ namespace StackExchange.Opserver.Data.HAProxy
                 socket.Receive(responseBytes);
 
                 var response = Encoding.UTF8.GetString(responseBytes);
-                instance.PurgeCache();
                 return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
             }
             catch (Exception e)
