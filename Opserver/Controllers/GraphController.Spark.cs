@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Controllers
             foreach (var mp in dataPoints)
             {
                 if (mp.Value.HasValue)
-                    avgCPU.Points.Add(new DataPoint(mp.DateEpoch.ToDateTime().ToOADate(), mp.Value.Value));
+                    avgCPU.Points.Add(new DataPoint(mp.DateEpoch.ToOLEDate(), mp.Value.Value));
             }
             chart.ChartAreas.Add(area);
 
@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Controllers
             foreach (var mp in dataPoints)
             {
                 if (mp.Value.HasValue)
-                    used.Points.Add(new DataPoint(mp.DateEpoch.ToDateTime().ToOADate(), mp.Value.Value));
+                    used.Points.Add(new DataPoint(mp.DateEpoch.ToOLEDate(), mp.Value.Value));
             }
             chart.ChartAreas.Add(area);
 
@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateEpoch.ToDateTime().ToOADate(), np.Value.GetValueOrDefault(0) + np.BottomValue.GetValueOrDefault(0)));
+                series.Points.Add(new DataPoint(np.DateEpoch.ToOLEDate(), np.Value.GetValueOrDefault(0) + np.BottomValue.GetValueOrDefault(0)));
             }
             chart.ChartAreas.Add(area);
 
@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Controllers
 
             foreach (var np in dataPoints)
             {
-                series.Points.Add(new DataPoint(np.DateEpoch.ToDateTime().ToOADate(),
+                series.Points.Add(new DataPoint(np.DateEpoch.ToOLEDate(),
                                                 direction == "out"
                                                     ? np.BottomValue.GetValueOrDefault(0)
                                                     : np.Value.GetValueOrDefault(0)));
