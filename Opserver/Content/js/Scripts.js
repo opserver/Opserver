@@ -168,7 +168,7 @@ window.Status = (function () {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
             for (var h in ajaxLoaders) {
-                if (ajaxLoaders.hasOwnProperty(h) && hash.indexOf(h) == 0) {
+                if (ajaxLoaders.hasOwnProperty(h) && hash.indexOf(h) === 0) {
                     var val = hash.replace(h, '');
                     ajaxLoaders[h](val);
                 }
@@ -228,7 +228,7 @@ window.Status = (function () {
         if (options.HeaderRefresh) {
             Status.refresh.register("TopBar", function () {
                 return $.ajax('/top-refresh', {
-                    data: { tab: Status.options.Tab },
+                    data: { tab: Status.options.Tab }
                 }).done(function (html) {
                     var tabs = $(html).filter('.top-tabs');
                     if (tabs.length) {
@@ -269,7 +269,7 @@ window.Status = (function () {
                 uniqueKey: $(this).data('uk'),
                 guid: $(this).data('guid')
             };
-            if (!data.type && (this.href || '#') != '#') return;
+            if (!data.type && (this.href || '#') !== '#') return;
             if (data.type && data.uniqueKey) {
                 // Node to refresh, do it
                 var link = $(this).addClass('reloading');
@@ -350,10 +350,7 @@ Status.Dashboard = (function () {
         Status.Dashboard.options.filter = filter = (filter || '').toLowerCase();
         if (!filter) {
             $('.server-row[data-info], .node-group, .node-header').removeClass('hidden');
-            //history.pushState({ filter: filter }, 'Dashboard Search: ' + filter, '/dashboard');
             return;
-        } else {
-            //history.pushState({ filter: filter }, 'Dashboard Search: ' + filter, '/dashboard?filter=' + encodeURIComponent(filter));
         }
         $('.server-row[data-info]').each(function () {
             var show = $(this).data('info').indexOf(filter) > -1;
@@ -547,7 +544,7 @@ Status.Elastic = (function () {
             },
             '#/elastic/index/': function (val) {
                 var parts = val.split('/');
-                if (parts.length != 2) {
+                if (parts.length !== 2) {
                     console.log('Unrecognized index string: ' + val);
                     return;
                 }
@@ -596,13 +593,13 @@ Status.NodeSearch = (function () {
         }).result(function (e, data) {
             $(this).addClass('left-icon ' + data.sClass).closest('form').submit();
         }).keydown(function (e) {
-            return e.keyCode != 13;
+            return e.keyCode !== 13;
         });
         $('.server-search').on('click', '.js-show-all-down', function () {
             $(this).siblings('.hidden').removeClass('hidden').end().remove();
         });
         $('.node-category-list').on('click', '.filters-current', function (e) {
-            if (e.target.tagName != 'INPUT') $('.filters, .filters-toggle').toggle();
+            if (e.target.tagName !== 'INPUT') $('.filters, .filters-toggle').toggle();
         }).on('keyup', '.filter-form', function (e) {
             if (e.keyCode === 13) {
                 $(this).submit();
@@ -726,7 +723,7 @@ Status.SQL = (function () {
         }).on('click', '.filters-current', function () {
             $('.filters').fadeToggle();
         }).on('keyup', '.filter-form', function (e) {
-            if (e.keyCode == 13) {
+            if (e.keyCode === 13) {
                 $(this).submit();
                 $('.filters').hide();
                 $('.filters-current').addClass('loading');
@@ -814,7 +811,7 @@ Status.Exceptions = (function () {
             var app = apps[$(this).text()];
             $(this)
                 .parent()
-                .attr('title', app ? (app.ExceptionCount + ' Exception' + (app.ExceptionCount == 1 ? '' : 's') + (app.MostRecent ? ', Last: ' + app.MostRecent : '')) : '0 Exceptions')
+                .attr('title', app ? (app.ExceptionCount + ' Exception' + (app.ExceptionCount === 1 ? '' : 's') + (app.MostRecent ? ', Last: ' + app.MostRecent : '')) : '0 Exceptions')
                 .siblings('span.count')
                 .text(app && app.ExceptionCount ? ' (' + app.ExceptionCount.toLocaleString() + ')' : '');
         });
@@ -822,9 +819,9 @@ Status.Exceptions = (function () {
         var log = Status.Exceptions.options.log;
         if (log) {
             var count = apps[log].ExceptionCount;
-            $('.exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count != 1 ? 's' : ''));
+            $('.exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count !== 1 ? 's' : ''));
         } else {
-            $('.exception-title').text(total.toLocaleString() + ' Exception' + (total != 1 ? 's' : ''));
+            $('.exception-title').text(total.toLocaleString() + ' Exception' + (total !== 1 ? 's' : ''));
         }
         $('.tabs-links .count.exception-count').text(total);
     }
@@ -834,7 +831,7 @@ Status.Exceptions = (function () {
 
         function getLoadCount() {
             // If scrolled back to the top, load 500
-            if ($(window).scrollTop() == 0) {
+            if ($(window).scrollTop() === 0) {
                 return 500;
             }
             return Math.max($('.exceptions-dashboard tbody tr').length, 500);
@@ -998,7 +995,7 @@ Status.Exceptions = (function () {
                 }
             });
             $(document).keydown(function(e) {
-                if (e.keyCode == 46 || e.keyCode == 8) {
+                if (e.keyCode === 46 || e.keyCode === 8) {
                     var selected = $('.error.selected').not('.protected');
                     if (selected.length > 0) {
                         var ids = selected.map(function () { return $(this).data('id'); }).get();
@@ -1024,6 +1021,7 @@ Status.Exceptions = (function () {
                         return false;
                     }
                 }
+                return true;
             });
         }
 
@@ -1138,21 +1136,21 @@ Status.Exceptions = (function () {
                 url: '/exceptions/jiraaction',
                 success: function (data) {
                     $(this).removeClass('loading');
-                    if (data.success == true) {
-                        if (data.browseUrl != null && data.browseUrl != "") {
+                    if (data.success) {
+                        if (data.browseUrl != null && data.browseUrl !== "") {
 
                             var issueLink = '<a href="' + data.browseUrl + '" target="_blank">' + data.issueKey + '</a>';
                             $("#jira-links-container").show();
-                            $("#jira-links-container").append('<span> ( ' + issueLink + ' ) </span>')
-                            toastr.success('<div style="margin-top:5px">' + issueLink + '</div>', 'Issue Created')
+                            $("#jira-links-container").append('<span> ( ' + issueLink + ' ) </span>');
+                            toastr.success('<div style="margin-top:5px">' + issueLink + '</div>', 'Issue Created');
                         }
                         else {
-                            toastr.success("Issue created : " + data.issueKey, 'Success')
+                            toastr.success("Issue created : " + data.issueKey, 'Success');
                         }
 
                     }
                     else {
-                        toastr.error(data.message, 'Error')
+                        toastr.error(data.message, 'Error');
                     }
 
                 },
@@ -1177,7 +1175,7 @@ Status.Graphs = (function () {
         $(function () {
             $('.sub-tabs').on('click', 'a', function (e) {
                 var range = $(this).data('range');
-                if (e.ctrlKey || e.shiftKey || range == 'now' || !range) { return true; }
+                if (e.ctrlKey || e.shiftKey || range === 'now' || !range) { return true; }
                 $(this).addClass('selected').siblings().removeClass('selected');
                 Status.Graphs.selectRange(range);
                 return false;
@@ -1189,13 +1187,13 @@ Status.Graphs = (function () {
         Status.Graphs.options.selectedRange = range;
         var ranges = Status.Graphs.options.ranges;
         for (var i = 0; i < ranges.length; i++) {
-            if (ranges[i].text == range) {
+            if (ranges[i].text === range) {
                 Status.Graphs.options.start = ranges[i].start;
             }
         }
 
         $('rect ~ text tspan').filter(function () {
-            return $(this).text() == range;
+            return $(this).text() === range;
         }).trigger('click');
     }
 
@@ -1215,7 +1213,7 @@ Status.HAProxy = (function () {
         if (options.refresh) {
             Status.refresh.register("Status.HAProxy", function () {
                 return $.ajax(window.location.pathname, {
-                    data: { group: Status.HAProxy.options.group, watch: Status.HAProxy.options.proxy },
+                    data: { group: Status.HAProxy.options.group, watch: Status.HAProxy.options.proxy }
                 }).done(function (html) {
                     var proxies = $('.proxies-wrap, .dashboard-wrap', html);
                     $('.proxies-wrap, .dashboard-wrap').replaceWith(proxies);
@@ -1246,7 +1244,7 @@ Status.HAProxy = (function () {
         }
 
         refreshLink.on('click', function () {
-            if ($(this).text() == 'Disable Refresh') {
+            if ($(this).text() === 'Disable Refresh') {
                 stopRefresh();
             } else {
                 startRefresh();
@@ -1330,7 +1328,7 @@ Status.HAProxy = (function () {
 
     function bytesToSize(bytes, large, zeroLabel) {
         var sizes = large ? ['Bytes', 'KB', 'MB', 'GB', 'TB'] : ['bytes', 'kb', 'mb', 'gb', 'tb'];
-        if (bytes == 0) return '0 ' + (zeroLabel || sizes[0]);
+        if (bytes === 0) return '0 ' + (zeroLabel || sizes[0]);
         var ubytes = Math.abs(bytes);
         var i = parseInt(Math.floor(Math.log(ubytes) / Math.log(1024)));
         var dec = (ubytes / Math.pow(1024, i)).toFixed(1).replace('.0', '');
@@ -1342,7 +1340,7 @@ Status.HAProxy = (function () {
     }
     
     function getExtremes(array, series, min, max, stacked) {
-        if (max == 'auto' || min == 'auto') {
+        if (max === 'auto' || min === 'auto') {
             var maximums = { up: 0, down: 0 };
             if (stacked) {
                 min = 0;
@@ -1453,7 +1451,7 @@ Status.HAProxy = (function () {
                     height: 'auto',
                     leftMargin: 60,
                     max: this.data('max'),
-                    areaTooltipFormat: function (value) { return '<span class="label">Memory: </span><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; },
+                    areaTooltipFormat: function (value) { return '<span class="label">Memory: </span><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
                 }, options));
         },
         networkGraph: function (options) {
@@ -1594,11 +1592,13 @@ Status.HAProxy = (function () {
             if (options.end) params.end = options.end / 1000;
             $.extend(params, options.params);
             
-            options.width = options.width == 'auto' ? (chart.width() - 10) : options.width;
-            options.height = options.height == 'auto' ? (chart.height() - 40) : options.height;
+            options.width = options.width === 'auto' ? (chart.width() - 10) : options.width;
+            options.height = options.height === 'auto' ? (chart.height() - 40) : options.height;
 
             for (var range in dateRanges) {
-                $('<button />', { data: { start: dateRanges[range] } }).text(range).appendTo(rangeSelections);
+                if (dateRanges.hasOwnProperty(range)) {
+                    $('<button />', { data: { start: dateRanges[range] } }).text(range).appendTo(rangeSelections);
+                }
             }
 
             if (options.title) {
@@ -1691,6 +1691,7 @@ Status.HAProxy = (function () {
                 x2.domain(d3.extent(data.summary.map(function (d) { return d.date; })));
                 y2.domain(getExtremes(data.summary, series, options.min, options.max));
 
+                console.log(x);
                 rescaleYAxis(data, true);
                 
                 if (options.stacked) {
@@ -1881,19 +1882,19 @@ Status.HAProxy = (function () {
             
             function prepSeries() {
                 series.forEach(function (s) {
-                    var negative = s.direction == 'down';
+                    var negative = s.direction === 'down';
                     s.area = d3.svg.area()
                         .interpolate(options.interpolation)
                         .x(function (d) { return x(d.date); })
                         .y1(function (d) { return y(negative ? -d[s.name] : d[s.name]); });
                     s.summaryArea = d3.svg.area()
                         .interpolate(options.interpolation)
-                        .x(function(d) { return x2(d.date); })
+                        .x(function (d) { return x2(d.date); })
                         .y1(function(d) { return y2(negative ? -d[s.name] : d[s.name]); });
                 });
                 if (rightSeries) {
                     rightSeries.forEach(function (s) {
-                        var negative = s.direction == 'down';
+                        var negative = s.direction === 'down';
                         s.line = d3.svg.line()
                             .interpolate(options.interpolation)
                             .x(function (d) { return x(d.date); })
@@ -1959,10 +1960,10 @@ Status.HAProxy = (function () {
                 if (rightSeries) {
                     rightSeries.forEach(function (s, i) {
                         var val = d[s.name] || 0, gc = getColor(rightSeries, rightPalette),
-                        fakeVal = options.interpolation == 'linear'
+                        fakeVal = options.interpolation === 'linear'
                             ? d3.interpolate(dateBefore[s.name], dateAfter[s.name])(through)
                             : val,
-                            cPos = (s.direction == 'down' ? -1 : 1) * fakeVal;
+                            cPos = (s.direction === 'down' ? -1 : 1) * fakeVal;
                         tooltip += (options.rightAreaTooltipFormat || areaTooltipFormat)(val, s.label, s.name, gc ? gc(s, i) : null) + '<br/>';
                         currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + yr(cPos) + ')');
                     });
@@ -1970,11 +1971,11 @@ Status.HAProxy = (function () {
                 
                 series.forEach(function (s, i) {
                     var val = d[s.name] || 0, gc = getColor(),
-                        fakeVal = options.interpolation == 'linear'
+                        fakeVal = options.interpolation === 'linear'
                             ? d3.interpolate(dateBefore[s.name], dateAfter[s.name])(through)
                             : val;
                     runningTotal += fakeVal;
-                    var cPos = (s.direction == 'down' ? -1 : 1)
+                    var cPos = (s.direction === 'down' ? -1 : 1)
                         * (options.stacked ? runningTotal : fakeVal);
 
                     tooltipRows.push(options.areaTooltipFormat(val, s.label, s.name, gc ? gc(s, i) : null) + '<br/>');
@@ -1996,7 +1997,7 @@ Status.HAProxy = (function () {
             function onWindowResized() {
                 var newWidth = chart.width(),
                     newHeight = chart.height();
-                if (curWidth != newWidth || curHeight != newHeight) {
+                if (curWidth !== newWidth || curHeight !== newHeight) {
                     options.width = curWidth = newWidth;
                     curHeight = newHeight;
 
@@ -2037,7 +2038,7 @@ Status.HAProxy = (function () {
                 function process(name) {
                     if (data[name]) {
                         data[name].forEach(function(d) {
-                            d.date = new Date(d.date);
+                            d.date = new Date(d.date * 1000);
                         });
                         curData[name] = data[name];
                     }
@@ -2071,8 +2072,8 @@ Status.HAProxy = (function () {
             }
 
             function redrawMain(newBounds, timerDelay) {
-                var start = Math.round(newBounds[0]),
-                    end = Math.round(newBounds[1]);
+                var start = Math.round(newBounds[0] / 1000),
+                    end = Math.round(newBounds[1] / 1000);
 
                 // load low-res summary view quickly
                 if (!options.noAjaxZoom) {
@@ -2142,17 +2143,7 @@ Status.HAProxy = (function () {
                 .addClass(options.type + (options.subtype ? '-' + options.subtype : '') + '-chart')
                 .on('click', 'button', function () {
                     var start = $(this).data('start'),
-                        end = endDate.getTime(); // options.end;
-                    //if (!start && $(this).hasClass('export')) {
-                    //    $('#svg-export').remove();
-                    //    var form = $('<form />', { id: 'svg-export', method: 'POST', action: '/export' });
-                    //    $('<input />', { name: 'fileName', value: 'Test' }).appendTo(form);
-                    //    $('<input />', { name: 'type', value: 'image/png' }).appendTo(form);
-                    //    $('<input />', { name: 'width', value: '960' }).appendTo(form);
-                    //    $('<input />', { name: 'svg', value: (new XMLSerializer).serializeToString($('svg', chart)[0]) }).appendTo(form);
-                    //    form.appendTo(document.body).submit();
-                    //    return;
-                    //}
+                        end = endDate.getTime();
                     brush2.extent([new Date(Math.max(start.getTime(), minDate)), new Date(Math.min(end, maxDate))])(bottomBrushArea); //set the range and redraw
                     redrawMain(brush2.extent());
                 });
@@ -2184,7 +2175,7 @@ Status.HAProxy = (function () {
                 curData = d3.range(60 * 10).map(function(i) {
                     var result = { date: new Date(+now - (60 * 10 * 1000) + (i * 1000)) };
                     series.forEach(function (s) {
-                        result[s.name] = i == 60 * 10 ? 0 : null;
+                        result[s.name] = i === 60 * 10 ? 0 : null;
                     });
                     return result;
                 }),
@@ -2198,8 +2189,8 @@ Status.HAProxy = (function () {
                 urlPath = '/dashboard/node/poll/' + options.type + (options.subtype ? '/' + options.subtype : ''),
                 params = $.extend({}, { id: options.id, start: options.start / 1000, end: options.end / 1000 }, options.params);
 
-            options.width = options.width == 'auto' ? (chart.width() - 10) : options.width;
-            options.height = options.height == 'auto' ? (chart.height() - 40) : options.height;
+            options.width = options.width === 'auto' ? (chart.width() - 10) : options.width;
+            options.height = options.height === 'auto' ? (chart.height() - 40) : options.height;
 
             if (options.title) {
                 var titleDiv = $('<div class="chart-title"/>').text(options.title).prependTo(chart);
@@ -2303,7 +2294,7 @@ Status.HAProxy = (function () {
             
             function prepSeries() {
                 series.forEach(function (s) {
-                    var negative = s.direction == 'down';
+                    var negative = s.direction === 'down';
                     s.area = d3.svg.area()
                         .interpolate('basis')
                         .x(function (d) { return x(d.date); })
@@ -2344,7 +2335,7 @@ Status.HAProxy = (function () {
                         d = dateBefore && date - dateBefore.date > dateAfter && dateAfter.date - date ? dateAfter : dateBefore; // pick the nearest
 
                     tooltip += options.areaTooltipFormat(d[s.name], s.label, s.name) + '<br/>';
-                    currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + y(s.direction == 'down' ? -d[s.name] : d[s.name]) + ')');
+                    currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + y(s.direction === 'down' ? -d[s.name] : d[s.name]) + ')');
                 });
                 
                 areaTooltip.html(tooltip)
@@ -2356,7 +2347,7 @@ Status.HAProxy = (function () {
             function onWindowResized() {
                 var newWidth = chart.width(),
                     newHeight = chart.height();
-                if (curWidth != newWidth || curHeight != newHeight) {
+                if (curWidth !== newWidth || curHeight !== newHeight) {
                     options.width = curWidth = newWidth;
                     curHeight = newHeight;
 

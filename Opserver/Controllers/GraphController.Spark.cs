@@ -22,10 +22,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> CPUSpark(string id)
         {
             var chart = GetSparkChart(max: 100);
-            var dataPoints = await DashboardData.GetCPUUtilization(id, 
-                start: SparkStart,
-                end: null,
-                pointCount: SparkPoints);
+            var dataPoints = await GetPoints(id, DashboardData.GetCPUUtilization);
             AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -39,10 +36,7 @@ namespace StackExchange.Opserver.Controllers
             if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
 
             var chart = GetSparkChart(max: node.TotalMemory);
-            var dataPoints = await DashboardData.GetMemoryUtilization(id,
-                start: SparkStart,
-                end: null,
-                pointCount: SparkPoints);
+            var dataPoints = await GetPoints(id, DashboardData.GetMemoryUtilization);
             AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -53,10 +47,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> NetworkSpark(string id)
         {
             var chart = GetSparkChart();
-            var dataPoints = await DashboardData.GetNetworkUtilization(id,
-                start: SparkStart,
-                end: null,
-                pointCount: SparkPoints);
+            var dataPoints = await GetPoints(id, DashboardData.GetNetworkUtilization);
             AddPoints(chart, dataPoints, p => (p.Value + p.BottomValue).GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -67,10 +58,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> InterfaceOutSpark(string direction, string id)
         {
             var chart = GetSparkChart();
-            var dataPoints = await DashboardData.GetInterfaceUtilization(id,
-                start: SparkStart,
-                end: null,
-                pointCount: SparkPoints);
+            var dataPoints = await GetPoints(id, DashboardData.GetInterfaceUtilization);
             
             Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
             if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
@@ -106,7 +94,12 @@ namespace StackExchange.Opserver.Controllers
             return chart.ToResult();
         }
 
-        private void AddPoints<T>(Chart chart, IEnumerable<T> points, Func<T, double> getValue) where T : IGraphPoint
+        private static Task<List<T>> GetPoints<T>(string id, Func<string, DateTime?, DateTime?, int?, Task<List<T>>> fetch)
+        {
+            return fetch(id, SparkStart, null, SparkPoints);
+        }
+
+        private static void AddPoints<T>(Chart chart, IEnumerable<T> points, Func<T, double> getValue) where T : IGraphPoint
         {
             var series = chart.Series.First();
             foreach (var p in points)
