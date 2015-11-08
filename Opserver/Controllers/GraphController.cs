@@ -8,21 +8,7 @@ using System.Web.UI.WebControls;
 namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController : StatusController
-    {
-        const long _gb = 1024 * 1024 * 1024;
-        
-        private Chart GetSparkChart(int? height = null, int? width = null)
-        {
-            height = height.GetValueOrDefault(Current.ViewSettings.SparklineChartHeight);
-            width = width.GetValueOrDefault(Current.ViewSettings.SparklineChartWidth);
-            if (Current.IsHighDPI)
-            {
-                height *= 2;
-                width *= 2;
-            }
-            return GetChart(height, width);
-        }
-        
+    {   
         private static Chart GetChart(int? height = null, int? width = null)
         {
             return new Chart

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,30 +14,19 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
     {
-        private const int SparkHours = 24;
+        private static DateTime SparkStart => DateTime.UtcNow.AddHours(-24);
+        private static int SparkPoints => Current.ViewSettings.SparklineChartWidth * 2;
 
         [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom="highDPI")]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSpark(string id)
         {
-            var chart = GetSparkChart();
+            var chart = GetSparkChart(max: 100);
             var dataPoints = await DashboardData.GetCPUUtilization(id, 
-                start: DateTime.UtcNow.AddHours(-SparkHours),
+                start: SparkStart,
                 end: null,
-                pointCount: (int) chart.Width.Value);
-
-            if (dataPoints == null) return ContentNotFound();
-
-            var area = GetSparkChartArea(100);
-            var avgCPU = GetSparkSeries("Avg Load");
-            chart.Series.Add(avgCPU);
-
-            foreach (var mp in dataPoints)
-            {
-                if (mp.Value.HasValue)
-                    avgCPU.Points.Add(new DataPoint(mp.DateEpoch.ToOLEDate(), mp.Value.Value));
-            }
-            chart.ChartAreas.Add(area);
+                pointCount: SparkPoints);
+            AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
         }
@@ -46,25 +36,14 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> MemorySpark(string id)
         {
             var node = DashboardData.GetNodeById(id);
-            var chart = GetSparkChart();
-            var dataPoints = (await DashboardData.GetMemoryUtilization(id,
-                start: DateTime.UtcNow.AddHours(-SparkHours),
+            if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
+
+            var chart = GetSparkChart(max: node.TotalMemory);
+            var dataPoints = await DashboardData.GetMemoryUtilization(id,
+                start: SparkStart,
                 end: null,
-                pointCount: (int) chart.Width.Value)).ToList();
-
-            var maxMem = (double)node.TotalMemory.GetValueOrDefault();
-            var maxGB = (int)Math.Ceiling(maxMem / _gb);
-
-            var area = GetSparkChartArea(maxMem + (maxGB / 8) * _gb);
-            var used = GetSparkSeries("Used");
-            chart.Series.Add(used);
-
-            foreach (var mp in dataPoints)
-            {
-                if (mp.Value.HasValue)
-                    used.Points.Add(new DataPoint(mp.DateEpoch.ToOLEDate(), mp.Value.Value));
-            }
-            chart.ChartAreas.Add(area);
+                pointCount: SparkPoints);
+            AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
         }
@@ -73,24 +52,12 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
         {
-            var node = DashboardData.GetNodeById(id);
-            if (node == null) return ContentNotFound();
-
             var chart = GetSparkChart();
             var dataPoints = (await DashboardData.GetNetworkUtilization(id,
-                start: DateTime.UtcNow.AddHours(-SparkHours),
+                start: SparkStart,
                 end: null,
-                pointCount: (int)chart.Width.Value)).OrderBy(t => t.DateEpoch);
-
-            var area = GetSparkChartArea();
-            var series = GetSparkSeries("Total");
-            chart.Series.Add(series);
-
-            foreach (var np in dataPoints)
-            {
-                series.Points.Add(new DataPoint(np.DateEpoch.ToOLEDate(), np.Value.GetValueOrDefault(0) + np.BottomValue.GetValueOrDefault(0)));
-            }
-            chart.ChartAreas.Add(area);
+                pointCount: SparkPoints)).OrderBy(t => t.DateEpoch);
+            AddPoints(chart, dataPoints, p => (p.Value + p.BottomValue).GetValueOrDefault(0));
 
             return chart.ToResult();
         }
@@ -101,23 +68,13 @@ namespace StackExchange.Opserver.Controllers
         {
             var chart = GetSparkChart();
             var dataPoints = (await DashboardData.GetInterfaceUtilization(id,
-                start: DateTime.UtcNow.AddHours(-SparkHours),
+                start: SparkStart,
                 end: null,
-                pointCount: (int) chart.Width.Value))
-                .OrderBy(dp => dp.DateEpoch);
-
-            var area = GetSparkChartArea();
-            var series = GetSparkSeries("Bytes");
-            chart.Series.Add(series);
-
-            foreach (var np in dataPoints)
-            {
-                series.Points.Add(new DataPoint(np.DateEpoch.ToOLEDate(),
-                                                direction == "out"
-                                                    ? np.BottomValue.GetValueOrDefault(0)
-                                                    : np.Value.GetValueOrDefault(0)));
-            }
-            chart.ChartAreas.Add(area);
+                pointCount: SparkPoints)).OrderBy(dp => dp.DateEpoch);
+            
+            Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
+            if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
+            AddPoints(chart, dataPoints, getter);
 
             return chart.ToResult();
         }
@@ -127,31 +84,62 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult SQLCPUSpark(string node)
         {
             var instance = SQLInstance.Get(node);
-            if (instance == null) return ContentNotFound("SQLNode not found with name = '" + node + "'");
+            if (instance == null) return ContentNotFound($"SQLNode not found with name = '{node}'");
 
-            var chart = GetSparkChart(20, 100);
+            var chart = GetSparkChart(height: 20, width: 100, max: 100);
             var dataPoints = instance.CPUHistoryLastHour;
-
-            var area = GetSparkChartArea(noLine: true);
-            area.AxisY.Maximum = 100;
+            
+            var area = chart.ChartAreas.First();
             area.AxisX.Minimum = DateTime.UtcNow.AddHours(-1).ToOADate();
             area.AxisX.Maximum = DateTime.UtcNow.ToOADate();
-            var series = GetSparkSeries("PercentCPU");
-            chart.Series.Add(series);
+            area.AxisX.LineColor = Color.Transparent;
 
             if (dataPoints.HasData())
             {
+                var series = chart.Series.First();
                 foreach (var cpu in dataPoints.Data)
                 {
                     series.Points.Add(new DataPoint(cpu.EventTime.ToOADate(), cpu.ProcessUtilization));
                 }
             }
-            chart.ChartAreas.Add(area);
 
             return chart.ToResult();
         }
 
-        private static ChartArea GetSparkChartArea(double? max = null, int? daysAgo = null, bool noLine = false)
+        private void AddPoints<T>(Chart chart, IEnumerable<T> points, Func<T, double> getValue) where T : IGraphPoint
+        {
+            var series = chart.Series.First();
+            foreach (var p in points)
+            {
+                series.Points.Add(new DataPoint(p.DateEpoch.ToOLEDate(), getValue(p)));
+            }
+        }
+
+        private Chart GetSparkChart(
+            int height = Current.ViewSettings.SparklineChartHeight, 
+            int width = Current.ViewSettings.SparklineChartWidth, 
+            double? max = null)
+        {
+            if (Current.IsHighDPI)
+            {
+                height *= 2;
+                width *= 2;
+            }
+            var chart = GetChart(height, width);
+            var area = GetSparkChartArea(max);
+            var series = new Series("Main")
+            {
+                ChartType = SeriesChartType.Area,
+                XValueType = ChartValueType.DateTime,
+                Color = ColorTranslator.FromHtml("#c6d5e2"),
+                EmptyPointStyle = {Color = Color.Transparent, BackSecondaryColor = Color.Transparent}
+            };
+            chart.Series.Add(series);
+            chart.ChartAreas.Add(area);
+            return chart;
+        }
+
+        private static ChartArea GetSparkChartArea(double? max = null)
         {
             var area = new ChartArea("area")
             {
@@ -172,7 +160,7 @@ namespace StackExchange.Opserver.Controllers
                     MaximumAutoSize = 100,
                     LabelStyle = { Enabled = false },
                     Maximum = DateTime.UtcNow.ToOADate(),
-                    Minimum = DateTime.UtcNow.AddDays(-(daysAgo ?? 1)).ToOADate(),
+                    Minimum = SparkStart.ToOADate(),
                     MajorGrid = { Enabled = false },
                     LineColor = ColorTranslator.FromHtml("#a3c0d7")
                 }
@@ -180,22 +168,8 @@ namespace StackExchange.Opserver.Controllers
 
             if (max.HasValue)
                 area.AxisY.Maximum = max.Value;
-            if (noLine)
-                area.AxisX.LineColor = Color.Transparent;
 
             return area;
-        }
-
-        private static Series GetSparkSeries(string name, Color? color = null)
-        {
-            color = color ?? Color.SteelBlue;
-            return new Series(name)
-                       {
-                           ChartType = SeriesChartType.Area,
-                           XValueType = ChartValueType.DateTime,
-                           Color = ColorTranslator.FromHtml("#c6d5e2"),
-                           EmptyPointStyle = { Color = Color.Transparent, BackSecondaryColor = Color.Transparent }
-                       };
         }
     }
 }
