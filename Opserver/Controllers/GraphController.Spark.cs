@@ -53,10 +53,10 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> NetworkSpark(string id)
         {
             var chart = GetSparkChart();
-            var dataPoints = (await DashboardData.GetNetworkUtilization(id,
+            var dataPoints = await DashboardData.GetNetworkUtilization(id,
                 start: SparkStart,
                 end: null,
-                pointCount: SparkPoints)).OrderBy(t => t.DateEpoch);
+                pointCount: SparkPoints);
             AddPoints(chart, dataPoints, p => (p.Value + p.BottomValue).GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -67,10 +67,10 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> InterfaceOutSpark(string direction, string id)
         {
             var chart = GetSparkChart();
-            var dataPoints = (await DashboardData.GetInterfaceUtilization(id,
+            var dataPoints = await DashboardData.GetInterfaceUtilization(id,
                 start: SparkStart,
                 end: null,
-                pointCount: SparkPoints)).OrderBy(dp => dp.DateEpoch);
+                pointCount: SparkPoints);
             
             Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
             if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);

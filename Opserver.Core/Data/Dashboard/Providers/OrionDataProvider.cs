@@ -197,7 +197,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
        c.AvgLoad
   From CPULoad c
  Where c.DateTime > @minDate
-   And c.NodeID = @id";
+   And c.NodeID = @id
+ Order By c.DateTime";
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
@@ -224,7 +225,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
        c.AvgMemoryUsed
   From CPULoad c
  Where c.DateTime > @minDate
-   And c.NodeID = @id";
+   And c.NodeID = @id
+ Order By c.DateTime";
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
@@ -254,6 +256,7 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
  Where itd.InterfaceID In @Ids
    And {dateRange}
  Group By itd.DateTime
+ Order By itd.DateTime
 ";
 
             const string sampledSql = @"
@@ -271,7 +274,8 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
 						   From InterfaceTraffic itd
 					      Where itd.InterfaceID In @Ids
                             And {dateRange})/@intervals) = 0
- Group By itd.DateTime";
+ Group By itd.DateTime
+ Order By itd.DateTime";
             
             if (!node.PrimaryInterfaces.Any()) return new List<DoubleGraphPoint>();
 
@@ -292,7 +296,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
        v.AvgDiskUsed
   From VolumeUsage v
  Where {dateRange}
-   And v.VolumeID = @id";
+   And v.VolumeID = @id
+ Order By v.DateTime";
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
@@ -321,6 +326,7 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
   From InterfaceTraffic itd
  Where itd.InterfaceID = @Id
    And {dateRange}
+ Order By itd.DateTime
 ";
 
             const string sampledSql = @"
@@ -337,7 +343,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
  Where itd.RowNumber % ((Select Count(*) + @intervals
 						   From InterfaceTraffic itd
 					      Where itd.InterfaceID = @Id
-                            And {dateRange})/@intervals) = 0";
+                            And {dateRange})/@intervals) = 0
+ Order By itd.DateTime";
 
             return (await UtilizationQuery<Interface.InterfaceUtilization>(nodeInteface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
         }
