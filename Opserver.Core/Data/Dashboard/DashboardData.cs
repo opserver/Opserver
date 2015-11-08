@@ -12,11 +12,9 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         public static bool HasData
         {
-            get { return _dataProviders != null && _dataProviders.Any(p => p.HasData); }
+            get { return _dataProviders?.Any(p => p.HasData) ?? false; }
         }
-
-        // special case for the common single provider case
-        private static readonly DashboardDataProvider _singleDataProvider;
+        
         private static readonly List<DashboardDataProvider> _dataProviders;
     
         static DashboardData()
@@ -24,7 +22,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             _dataProviders = new List<DashboardDataProvider>();
             if (!Current.Settings.Dashboard.Enabled)
             {
-                _singleDataProvider = new EmptyDataProvider("EmptyDataProvider");
+                _dataProviders.Add(new EmptyDataProvider("EmptyDataProvider"));
                 return;
             }
             var providers = Current.Settings.Dashboard.Providers;
@@ -44,31 +42,19 @@ namespace StackExchange.Opserver.Data.Dashboard
 
 
             _dataProviders.ForEach(p => p.TryAddToGlobalPollers());
-            if (_dataProviders.Count == 1)
-                _singleDataProvider = _dataProviders[0];
         }
 
         public static ReadOnlyCollection<DashboardDataProvider> DataProviders => _dataProviders.AsReadOnly();
 
-        public static IEnumerable<string> ProviderExceptions
-        {
-            get
-            {
-                return _singleDataProvider != null
-                           ? _singleDataProvider.GetExceptions()
-                           : _dataProviders.SelectMany(p => p.GetExceptions());
-            }
-        }
+        public static IEnumerable<string> ProviderExceptions =>
+            _dataProviders.Count == 0
+                ? _dataProviders[0].GetExceptions()
+                : _dataProviders.SelectMany(p => p.GetExceptions());
 
-        public static List<Node> AllNodes
-        {
-            get
-            {
-                return _singleDataProvider != null
-                           ? _singleDataProvider.AllNodes
-                           : _dataProviders.SelectMany(p => p.AllNodes).ToList();
-            }
-        }
+        public static List<Node> AllNodes =>
+            _dataProviders.Count == 0
+                ? _dataProviders[0].AllNodes
+                : _dataProviders.SelectMany(p => p.AllNodes).ToList();
 
         public static Node GetNodeById(string id) => FirstById(p => p.GetNodeById(id));
 
@@ -80,9 +66,9 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public static IEnumerable<Node> GetNodesByIP(IPAddress ip)
         {
-            return _singleDataProvider != null
-                       ? _singleDataProvider.GetNodesByIP(ip)
-                       : _dataProviders.SelectMany(p => p.GetNodesByIP(ip));
+            return _dataProviders.Count == 0
+                ? _dataProviders[0].GetNodesByIP(ip)
+                : _dataProviders.SelectMany(p => p.GetNodesByIP(ip));
         }
 
         public static Interface GetInterfaceById(string id) => FirstById(p => p.GetInterface(id));
