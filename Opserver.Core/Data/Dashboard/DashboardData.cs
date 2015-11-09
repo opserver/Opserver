@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -71,8 +70,6 @@ namespace StackExchange.Opserver.Data.Dashboard
                 : _dataProviders.SelectMany(p => p.GetNodesByIP(ip));
         }
 
-        public static Interface GetInterfaceById(string id) => FirstById(p => p.GetInterface(id));
-
         private static T FirstById<T>(Func<DashboardDataProvider, T> fetch) where T : class
         {
             if (!Current.Settings.Dashboard.Enabled) return null;
@@ -82,100 +79,6 @@ namespace StackExchange.Opserver.Data.Dashboard
                 if (i != null) return i;
             }
             return null;
-        }
-        
-        /// <summary>
-        /// Gets CPU usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
-        /// </summary>
-        /// <param name="id">ID of the node</param>
-        /// <param name="start">Start date, unbounded if null</param>
-        /// <param name="end">End date, unbounded if null</param>
-        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
-        /// <returns>CPU usage data points</returns>
-        public static Task<List<GraphPoint>> GetCPUUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            foreach (var p in _dataProviders)
-            {
-                var n = p.GetNodeById(id);
-                if (n != null) return p.GetCPUUtilization(n, start, end, pointCount);
-            }
-            return Task.FromResult(new List<GraphPoint>());
-        }
-
-        /// <summary>
-        /// Gets memory usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
-        /// </summary>
-        /// <param name="id">ID of the node</param>
-        /// <param name="start">Start date, unbounded if null</param>
-        /// <param name="end">End date, unbounded if null</param>
-        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
-        /// <returns>Memory usage data points</returns>
-        public static Task<List<GraphPoint>> GetMemoryUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            foreach (var p in _dataProviders)
-            {
-                var n = p.GetNodeById(id);
-                if (n != null) return p.GetMemoryUtilization(n, start, end, pointCount);
-            }
-            return Task.FromResult(new List<GraphPoint>());
-        }
-
-        /// <summary>
-        /// Gets network usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
-        /// </summary>
-        /// <param name="id">ID of the node</param>
-        /// <param name="start">Start date, unbounded if null</param>
-        /// <param name="end">End date, unbounded if null</param>
-        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
-        /// <returns>Network usage data points</returns>
-        public static Task<List<DoubleGraphPoint>> GetNetworkUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            foreach (var p in _dataProviders)
-            {
-                var n = p.GetNodeById(id);
-                if (n != null) return p.GetNetworkUtilization(n, start, end, pointCount);
-            }
-            return Task.FromResult(new List<DoubleGraphPoint>());
-        }
-
-
-
-        /// <summary>
-        /// Gets usage for this interface (optionally) for the given time period, optionally sampled if pointCount is specified
-        /// </summary>
-        /// <param name="id">ID of the interface</param>
-        /// <param name="start">Start date, unbounded if null</param>
-        /// <param name="end">End date, unbounded if null</param>
-        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
-        /// <returns>Interface usage data points</returns>
-        public static Task<List<DoubleGraphPoint>> GetInterfaceUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            foreach (var p in _dataProviders)
-            {
-                var i = p.GetInterface(id);
-                if (i != null) return p.GetUtilization(i, start, end, pointCount);
-            }
-            return Task.FromResult(new List<DoubleGraphPoint>());
-        }
-
-
-
-        /// <summary>
-        /// Gets usage for this volume (optionally) for the given time period, optionally sampled if pointCount is specified
-        /// </summary>
-        /// <param name="id">ID of the interface</param>
-        /// <param name="start">Start date, unbounded if null</param>
-        /// <param name="end">End date, unbounded if null</param>
-        /// <param name="pointCount">Points to return, if specified results will be sampled rather than including every point</param>
-        /// <returns>Volume usage data points</returns>
-        public Task<List<GraphPoint>> GetVolumeUtilization(string id, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            foreach (var p in _dataProviders)
-            {
-                var v = p.GetVolume(id);
-                if (v != null) return p.GetUtilization(v, start, end, pointCount);
-            }
-            return Task.FromResult(new List<GraphPoint>());
         }
     }
 }

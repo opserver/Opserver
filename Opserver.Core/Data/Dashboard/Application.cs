@@ -1,11 +1,10 @@
 ﻿using System;
-using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public class Application
     {
-        internal DashboardDataProvider DataProvider { get; set; }
+        public Node Node { get; set; }
 
         public string Id { get; internal set; }
         public string NodeId { get; internal set; }

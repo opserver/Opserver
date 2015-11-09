@@ -35,16 +35,17 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 Caches = new List<Cache>(2);
                 Interfaces = new List<Interface>(2);
+                Volumes = new List<Volume>(3);
+                VMs = new List<Node>();
+                Apps = new List<Application>();
+                IPs = new List<IPAddress>();
+
                 // TODO: Size for retention / interval and convert to limited list
                 MemoryHistory = new List<MemoryUtilization>(1024);
                 CPUHistory = new List<CPUUtilization>(1024);
                 CombinedNetHistory = new List<Interface.InterfaceUtilization>(1024);
                 NetHistory = new ConcurrentDictionary<string, List<Interface.InterfaceUtilization>>();
                 VolumeHistory = new ConcurrentDictionary<string, List<Volume.VolumeUtilization>>();
-                Volumes = new List<Volume>(3);
-                VMs = new List<Node>();
-                Apps = new List<Application>();
-                IPs = new List<IPAddress>();
             }
 
             internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface @interface)

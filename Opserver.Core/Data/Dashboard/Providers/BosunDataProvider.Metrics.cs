@@ -30,20 +30,28 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return (date ?? valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss");
             }
 
-            public void AddQuery(string metric, string host = "*", bool counter = true)
+            public void AddQuery(string metric, string host = "*", bool counter = true, IDictionary<string, string> tags = null)
             {
-                queries.Add(new
+                var query = new
                 {
                     metric,
                     aggregator = "sum",
-                    tags = new {host},
+                    tags = new Dictionary<string, string>
+                    {
+                        [nameof(host)] = host
+                    },
                     rate = counter,
                     rateOptions = new
                     {
                         resetValue = 1,
                         counter = true
                     }
-                });
+                };
+                if (tags != null)
+                {
+                    foreach (var p in tags) query.tags[p.Key] = p.Value;
+                }
+                queries.Add(query);
             }
         }
 
@@ -55,11 +63,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return apiResult.Result;
         }
 
-        public Task<BosunMetricResponse> GetMetric(string metricName, DateTime start, DateTime? end = null, string host = "*")
+        public Task<BosunMetricResponse> GetMetric(string metricName, DateTime start, DateTime? end = null, string host = "*", IDictionary<string, string> tags = null)
         {
             metricName = BosunMetric.GetDenormalized(metricName, host);
             var query = new TSDBQuery(start, end);
-            query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName));
+            query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName), tags);
             return RunTSDBQuery(query, 1000);
         }
 
@@ -71,16 +79,24 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return _dayCache ?? (_dayCache = ProviderCache(async () =>
                 {
                     var result = new IntervalCache(TimeSpan.FromDays(1));
-                    Func<string, Task> addMetric = async metricName =>
+                    Func<string, string[], Task> addMetric = async (metricName, tags) =>
                     {
-                        var apiResult = await GetMetric(metricName, result.StartTime);
-                        if (apiResult != null)
+                        var tagDict = tags?.ToDictionary(t => t, t => "*");
+                        var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict);
+                        if (apiResult == null) return;
+                        if (tags?.Any() ?? false)
+                        {
+                            result.MultiSeries[metricName] = apiResult.Series
+                                .GroupBy(s => s.Host)
+                                .ToDictionary(s => s.Key, s => s.ToList());
+                        }
+                        else
                             result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host);
                     };
                     
-                    var c = addMetric(BosunMetric.Globals.CPU);
-                    var m = addMetric(BosunMetric.Globals.MemoryUsed);
-                    var n = addMetric(BosunMetric.Globals.NetBytes);
+                    var c = addMetric(BosunMetric.Globals.CPU, null);
+                    var m = addMetric(BosunMetric.Globals.MemoryUsed, null);
+                    var n = addMetric(BosunMetric.Globals.NetBytes, new[] {BosunMetric.Tags.Direction});
                     await Task.WhenAll(c, m, n); // parallel baby!
 
                     return result;
@@ -95,15 +111,17 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public Dictionary<string, PointSeries> CPU => Series[BosunMetric.Globals.CPU];
             public Dictionary<string, PointSeries> Memory => Series[BosunMetric.Globals.MemoryUsed];
-            public Dictionary<string, PointSeries> Network => Series[BosunMetric.Globals.NetBytes];
+            public Dictionary<string, List<PointSeries>> Network => MultiSeries[BosunMetric.Globals.NetBytes];
 
-            public ConcurrentDictionary<string, Dictionary<string, PointSeries>> Series { get; set; }
+            internal ConcurrentDictionary<string, Dictionary<string, PointSeries>> Series { get; set; }
+            internal ConcurrentDictionary<string, Dictionary<string, List<PointSeries>>> MultiSeries { get; set; }
 
             public IntervalCache(TimeSpan timespan)
             {
                 TimeSpan = timespan;
                 StartTime = DateTime.UtcNow - timespan;
                 Series = new ConcurrentDictionary<string, Dictionary<string, PointSeries>>();
+                MultiSeries = new ConcurrentDictionary<string, Dictionary<string, List<PointSeries>>>();
             }
         }
     }
@@ -128,12 +146,26 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public const string MemoryUsed = ".os.mem.used";
         }
 
+        public static class Tags
+        {
+            public const string Direction = "direction";
+            public const string Host = "host";
+            public const string IFace = "iface";
+        }
+
+        public static class TagValues
+        {
+            public const string In = "in";
+            public const string Out = "out";
+        }
+
         public static bool IsCounter(string metric)
         {
             if (metric.IsNullOrEmpty()) return false;
             switch (metric)
             {
                 case Globals.CPU:
+                case Globals.NetBytes:
                     return true;
             }
             if (metric.EndsWith(Suffixes.CPU))
@@ -190,8 +222,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 if (_host == null)
                 {
-                    var match = HostRegex.Match(Name);
-                    _host = match.Success ? match.Groups[1].Value : "Unknown";
+                    if (Tags.ContainsKey("host"))
+                    {
+                        Host = Tags["host"];
+                    }
+                    else
+                    {
+                        var match = HostRegex.Match(Name);
+                        _host = match.Success ? match.Groups[1].Value : "Unknown";
+                    }
                 }
                 return _host;
             }
@@ -200,6 +239,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public string Name { get; set; }
         public string Metric { get; set; }
+        public string Unit { get; set; }
         public Dictionary<string, string> Tags { get; set; }
         public List<float[]> Data { get; set; }
 

@@ -66,10 +66,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
         public abstract Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
 
-        public Interface GetInterface(string id) => AllNodes.SelectMany(n => n.Interfaces.Where(i => i.Id == id)).FirstOrDefault();
         public abstract Task<List<DoubleGraphPoint>> GetUtilization(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
         
-        public Volume GetVolume(string id) => AllNodes.SelectMany(n => n.Volumes.Where(v => v.Id == id)).FirstOrDefault();
         public abstract Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
         
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();

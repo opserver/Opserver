@@ -109,6 +109,10 @@ namespace StackExchange.Opserver.Data.Dashboard
         public List<Volume> Volumes { get; internal set; }
         public List<Application> Apps { get; internal set; }
 
+        public Interface GetInterface(string id) => Interfaces.FirstOrDefault(i => i.Id == id);
+        public Volume GetVolume(string id) => Volumes.FirstOrDefault(v => v.Id == id);
+        public Application GetApp(string id) => Apps.FirstOrDefault(a => a.Id == id);
+
         public List<IPAddress> IPs { get; internal set; }
 
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
@@ -137,6 +141,17 @@ namespace StackExchange.Opserver.Data.Dashboard
                 }
                 return _primaryInterfaces;
             }
+        }
+
+        /// <summary>
+        /// Should be called after a node is created to set parent referneces
+        /// This allows interfaces, volumes, etc. to poll through the provider
+        /// </summary>
+        public void SetReferences()
+        {
+            Interfaces?.ForEach(i => i.Node = this);
+            Volumes?.ForEach(v => v.Node = this);
+            Apps?.ForEach(a => a.Node = this);
         }
     }
 }

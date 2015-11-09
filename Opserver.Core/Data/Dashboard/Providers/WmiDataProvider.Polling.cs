@@ -22,6 +22,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     await UpdateNodeData();
                     await GetAllInterfaces();
                     await GetAllVolumes();
+                    SetReferences();
                 }
                 catch (COMException e)
                 {
@@ -102,6 +103,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 const string query = @"
 SELECT Name,
+       DeviceID,
        NetConnectionID,
        Description,
        MACAddress,
@@ -114,27 +116,24 @@ SELECT Name,
                 {
                     foreach (var data in await q.GetDynamicResult())
                     {
-                        string name = data.Name,
-                               caption = data.NetConnectionID;
-                        if (caption == "Ethernet") caption = name;
-
-                        var i = Interfaces.FirstOrDefault(x => x.Name == name && x.Caption == caption);
+                        string id = $"{data.DeviceID}";
+                        var i = Interfaces.FirstOrDefault(x => x.Id == id);
                         if (i == null)
                         {
                             i = new Interface();
                             Interfaces.Add(i);
                         }
 
+                        i.Id = $"{data.DeviceID}";
                         i.Alias = "!alias";
-                        i.Caption = caption;
+                        i.Caption = data.NetConnectionID == "Ethernet" ? data.Name : data.NetConnectionID;
                         i.FullName = data.Description;
                         i.IfName = data.Name;
-                        i.Id = $"{Id}-Int-{Interfaces.Count + 1}";
                         i.NodeId = Id;
                         i.Index = 0;
                         i.IsTeam = false; //TODO: Fix
                         i.LastSync = DateTime.UtcNow;
-                        i.Name = name;
+                        i.Name = data.Name;
                         i.PhysicalAddress = data.MACAddress;
                         i.Speed = data.Speed;
                         i.Status = NodeStatus.Active;
@@ -147,6 +146,7 @@ SELECT Name,
             {
                 const string query = @"
 SELECT Caption,
+       DeviceID,
        Description,
        FreeSpace,
        Name,
@@ -159,15 +159,15 @@ SELECT Caption,
                 {
                     foreach (var disk in await q.GetDynamicResult())
                     {
-                        var serial = disk.VolumeSerialNumber;
-                        var v = Volumes.FirstOrDefault(x => x.Caption == serial);
+                        var id = $"{disk.DeviceID}";
+                        var v = Volumes.FirstOrDefault(x => x.Id == id);
                         if (v == null)
                         {
                             v = new Volume();
                             Volumes.Add(v);
                         }
-
-                        v.Id = $"{Id}-Vol-{Volumes.Count + 1}";
+                        
+                        v.Id = $"{disk.DeviceID}";
                         v.Available = disk.FreeSpace;
                         v.Caption = disk.VolumeSerialNumber;
                         v.Description = disk.Name + " - " + disk.Description;

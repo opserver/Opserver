@@ -17,11 +17,11 @@
         public virtual double? Value { get; set; }
     }
 
-    public abstract class DoubleGraphPoint : GraphPoint
+    public class DoubleGraphPoint : GraphPoint
     {
         /// <summary>
         /// Value of the bottom (or second) point
         /// </summary>
-        public abstract double? BottomValue { get; }
+        public virtual double? BottomValue { get; set; }
     }
 }

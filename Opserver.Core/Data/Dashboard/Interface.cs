@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Interface : IMonitorStatus
     {
+        public Node Node { get; set; }
+
         public string Id { get; internal set; }
         public string NodeId { get; internal set; }
         public int? Index { get; internal set; }

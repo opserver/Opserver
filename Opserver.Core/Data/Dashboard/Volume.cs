@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Volume : IMonitorStatus
     {
+        public Node Node { get; set; }
+
         // TODO: Not constants eh?
         public const int WarningPercentUsed = 90;
         public const int CriticalPercentUsed = 95;

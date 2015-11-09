@@ -15,7 +15,9 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/cpu/json")]
         public async Task<ActionResult> CPUJson(string id, long start, long end, bool? summary = false)
         {
-            var nodePoints = await DashboardData.GetCPUUtilization(id, start.ToDateTime(), end.ToDateTime(), 1000);
+            var node = DashboardData.GetNodeById(id);
+            if (node == null) return JsonNotFound();
+            var nodePoints = await node.GetCPUUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
             if (nodePoints == null) return JsonNotFound();
 
             return Json(new
@@ -25,7 +27,7 @@ namespace StackExchange.Opserver.Controllers
                         date = p.DateEpoch, 
                         value = p.Value ?? 0
                     }),
-                summary = summary.GetValueOrDefault(false) ? (await DashboardData.GetCPUUtilization(id, null, null, 2000)).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetCPUUtilization(null, null, 2000)).Select(p => new
                     {
                         date = p.DateEpoch, 
                         value = p.Value ?? 0
@@ -43,7 +45,9 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/memory/json")]
         public async Task<ActionResult> MemoryJson(string id, long start, long end, bool? summary = false)
         {
-            var detailPoints = await DashboardData.GetMemoryUtilization(id, start.ToDateTime(), end.ToDateTime(), 1000);
+            var node = DashboardData.GetNodeById(id);
+            if (node == null) return JsonNotFound();
+            var detailPoints = await node.GetMemoryUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
             if (detailPoints == null) return JsonNotFound();
 
             return Json(new
@@ -53,7 +57,7 @@ namespace StackExchange.Opserver.Controllers
                         date = p.DateEpoch,
                         value = (int)(p.Value / 1024 / 1024 ?? 0)
                     }),
-                summary = summary.GetValueOrDefault(false) ? (await DashboardData.GetMemoryUtilization(id, null, null, 1000)).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetMemoryUtilization(null, null, 1000)).Select(p => new
                     {
                         date = p.DateEpoch,
                         value = (int)(p.Value / 1024 / 1024 ?? 0)
@@ -67,11 +71,13 @@ namespace StackExchange.Opserver.Controllers
             });
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
+        [OutputCache(Duration = 120, VaryByParam = "id;iid;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/network/json")]
-        public async Task<ActionResult> NetworkJson(string id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> NetworkJson(string id, string iid, long start, long end, bool? summary = false)
         {
-            var traffic = await DashboardData.GetInterfaceUtilization(id, start.ToDateTime(), end.ToDateTime(), 1000);
+            var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
+            if (iface == null) return JsonNotFound();
+            var traffic = await iface.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
             if (traffic == null) return JsonNotFound();
 
             var anyTraffic = traffic.Any();
@@ -90,7 +96,7 @@ namespace StackExchange.Opserver.Controllers
                             main_out = (int)(i.BottomValue.GetValueOrDefault())
                         }),
                     summary = summary.GetValueOrDefault()
-                                  ? (await DashboardData.GetInterfaceUtilization(id, null, null, 2000)).Select(i => new
+                                  ? (await iface.GetUtilization(null, null, 2000)).Select(i => new
                                       {
                                           date = i.DateEpoch,
                                           main_in = (int)(i.Value.GetValueOrDefault()),

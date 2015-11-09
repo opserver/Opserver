@@ -1588,6 +1588,7 @@ Status.HAProxy = (function () {
                 stack, stackArea, stackSummaryArea, stackFunc; // stacked specific vars
             
             if (options.id) params.id = options.id;
+            if (options.iid) params.iid = options.iid;
             if (options.start) params.start = options.start / 1000;
             if (options.end) params.end = options.end / 1000;
             $.extend(params, options.params);
@@ -1691,7 +1692,6 @@ Status.HAProxy = (function () {
                 x2.domain(d3.extent(data.summary.map(function (d) { return d.date; })));
                 y2.domain(getExtremes(data.summary, series, options.min, options.max));
 
-                console.log(x);
                 rescaleYAxis(data, true);
                 
                 if (options.stacked) {

@@ -154,6 +154,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
                         n.IPs = ips.Where(t => t.Item1 == n.Id).Select(t => t.Item2).ToList();
                         n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
                         n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
+                        n.SetReferences();
                     }
 
                     return nodes;

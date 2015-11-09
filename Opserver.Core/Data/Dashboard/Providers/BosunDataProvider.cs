@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Jil;
 using StackExchange.Profiling;
+using static StackExchange.Opserver.Data.Dashboard.Providers.BosunMetric;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
@@ -202,7 +203,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                         Interfaces = h.Interfaces?.Select(hi => new Interface
                         {
-                            Id = h.Name + "-int-" + hi.Key,
+                            Id = hi.Key,
                             NodeId = h.Name,
                             Name = hi.Value.Name.IsNullOrEmptyReturn($"Unknown: {hi.Key}"),
                             FullName = hi.Value.Name,
@@ -220,7 +221,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         }).ToList(),
                         Volumes = h.Disks?.Select(hd => new Volume
                         {
-                            Id = h.Name + "-vol-" + hd.Key,
+                            Id = hd.Key,
                             Name = hd.Key,
                             NodeId = h.Name,
                             Caption = hd.Key,
@@ -239,7 +240,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     {
                         n.LastBoot = DateTime.UtcNow.AddSeconds(-h.UptimeSeconds.Value);
                     }
-
+                    n.SetReferences();
                     nodes.Add(n);
                 }
 
@@ -327,7 +328,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
             
             var apiResponse = await GetMetric(
-                BosunMetric.Globals.CPU,
+                Globals.CPU,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 node.Id);
@@ -345,27 +346,64 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
 
             var apiResponse = await GetMetric(
-                BosunMetric.Globals.MemoryUsed,
+                Globals.MemoryUsed,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 node.Id);
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
-        public override Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        private static readonly Dictionary<string, string> NetDirectionTags = new Dictionary<string, string>
         {
-            return Task.FromResult(new List<DoubleGraphPoint>());
+            {Tags.Direction, "*"}
+        };
+
+        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            if (IsApproximatelyLast24Hrs(start, end))
+            {
+                List<PointSeries> series = null;
+                var cache = DayCache.Data?.Network;
+                if (cache?.TryGetValue(node.Id, out series) == true)
+                {
+                    var result = JoinNetwork(series);
+                    if (result != null)
+                        return result;
+                }
+            }
+
+            var apiResponse = await GetMetric(
+                Globals.NetBytes,
+                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                end,
+                node.Id,
+                NetDirectionTags);
+
+            return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
         public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
+            // TODO: Implement
             return Task.FromResult(new List<GraphPoint>());
         }
 
-        public override Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            // TODO: Refactor to interface, use TSDB to combine rather than local
-            return Task.FromResult(new List<DoubleGraphPoint>());
+            var tags = new Dictionary<string, string>
+            {
+                {Tags.Direction, "*"},
+                {Tags.IFace, nodeInteface.Id}
+            };
+
+            var apiResponse = await GetMetric(
+                Globals.NetBytes,
+                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                end,
+                nodeInteface.NodeId,
+                tags);
+
+            return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
         /// <summary>
@@ -385,5 +423,24 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
             return false;
         }
+
+        private List<DoubleGraphPoint> JoinNetwork(List<PointSeries> allSeries)
+        {
+            var inData = allSeries?.FirstOrDefault(s => s.Tags[Tags.Direction] == TagValues.In)?.PointData;
+            var outData = allSeries?.FirstOrDefault(s => s.Tags[Tags.Direction] == TagValues.Out)?.PointData;
+
+            if (inData == null || outData == null)
+                return null;
+
+            return inData.Join(outData,
+                i => i.DateEpoch,
+                o => o.DateEpoch,
+                (i, o) => new DoubleGraphPoint
+                {
+                    DateEpoch = i.DateEpoch,
+                    Value = i.Value,
+                    BottomValue = o.Value
+                }).ToList();
+        } 
     }
 }

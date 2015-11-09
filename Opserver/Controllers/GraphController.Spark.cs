@@ -21,8 +21,10 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSpark(string id)
         {
+            var node = DashboardData.GetNodeById(id);
+            if (node == null) return ContentNotFound();
             var chart = GetSparkChart(max: 100);
-            var dataPoints = await GetPoints(id, DashboardData.GetCPUUtilization);
+            var dataPoints = await node.GetCPUUtilization(SparkStart, null, SparkPoints);
             AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -36,7 +38,7 @@ namespace StackExchange.Opserver.Controllers
             if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
 
             var chart = GetSparkChart(max: node.TotalMemory);
-            var dataPoints = await GetPoints(id, DashboardData.GetMemoryUtilization);
+            var dataPoints = await node.GetMemoryUtilization(SparkStart, null, SparkPoints);
             AddPoints(chart, dataPoints, p => p.Value.GetValueOrDefault(0));
 
             return chart.ToResult();
@@ -46,20 +48,24 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
         {
+            var node = DashboardData.GetNodeById(id);
+            if (node == null) return ContentNotFound();
             var chart = GetSparkChart();
-            var dataPoints = await GetPoints(id, DashboardData.GetNetworkUtilization);
+            var dataPoints = await node.GetNetworkUtilization(SparkStart, null, SparkPoints);
             AddPoints(chart, dataPoints, p => (p.Value + p.BottomValue).GetValueOrDefault(0));
 
             return chart.ToResult();
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
+        [OutputCache(Duration = 120, VaryByParam = "id;iid", VaryByContentEncoding = "gzip;deflate", VaryByCustom = "highDPI")]
         [Route("graph/interface/{direction}/spark")]
-        public async Task<ActionResult> InterfaceOutSpark(string direction, string id)
+        public async Task<ActionResult> InterfaceOutSpark(string direction, string id, string iid)
         {
+            var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
+            if (iface == null) return ContentNotFound();
             var chart = GetSparkChart();
-            var dataPoints = await GetPoints(id, DashboardData.GetInterfaceUtilization);
-            
+            var dataPoints = await iface.GetUtilization(SparkStart, null, SparkPoints);
+
             Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
             if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
             AddPoints(chart, dataPoints, getter);
@@ -92,11 +98,6 @@ namespace StackExchange.Opserver.Controllers
             }
 
             return chart.ToResult();
-        }
-
-        private static Task<List<T>> GetPoints<T>(string id, Func<string, DateTime?, DateTime?, int?, Task<List<T>>> fetch)
-        {
-            return fetch(id, SparkStart, null, SparkPoints);
         }
 
         private static void AddPoints<T>(Chart chart, IEnumerable<T> points, Func<T, double> getValue) where T : IGraphPoint

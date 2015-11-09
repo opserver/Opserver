@@ -8,7 +8,7 @@
         <div class="spark-no-data">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@i.Id" data-name="@i.PrettyName" />
+    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@Model.Id" data-iid="@i.Id" data-name="@i.PrettyName" />
 }
 <table class="node-dashboard main-dashboard interface-dashboard striped-dashboard">
     <thead>
@@ -31,21 +31,26 @@
             <tr class="@i.MonitorStatus.RowClass()">
                 <td>@i.IconSpan()</td>
                 <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-                    last updated @i.LastSync.ToRelativeTime() " data-val=" @i.Index ">
+                    last updated @i.LastSync.ToRelativeTime() " data-val="@i.Index">
                     @i.PrettyName
                 </td>
-                <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@string.Format("{0:F0}", i.Speed)">@i.PrettySpeed</td>
-                <td data-val="@string.Format("{0:F0}", i.InBps)">@i.PrettyIn()</td>
-                <td data-val="@string.Format("{0:F0}", i.InBps)">@Graph(i, "in")</td>
-                <td data-val="@string.Format("{0:F0}", i.OutBps)">@i.PrettyOut()</td>
-                <td data-val="@string.Format("{0:F0}", i.OutBps)">@Graph(i, "out")</td>
+                <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
+                <td data-val="@($"{i.InBps:F0}")">@i.PrettyIn()</td>
+                <td data-val="@($"{i.InBps:F0}")">@Graph(i, "in")</td>
+                <td data-val="@($"{i.OutBps:F0}")">@i.PrettyOut()</td>
+                <td data-val="@($"{i.OutBps:F0}")">@Graph(i, "out")</td>
             </tr>
         }
     </tbody>
 </table>
 <script>
     $('.node-group').on('click', '.dashboard-spark', function () {
-        $('#dashboard-chart').empty().networkGraph({ id: $(this).data('nid'), title: 'Network Utilization', subtitle: $(this).data('name') });
+        $('#dashboard-chart').empty().networkGraph({
+            id: $(this).data('nid'),
+            iid: $(this).data('iid'),
+            title: 'Network Utilization',
+            subtitle: $(this).data('name')
+        });
 
         $('#spark-detail').modal({
             overlayClose: true,
