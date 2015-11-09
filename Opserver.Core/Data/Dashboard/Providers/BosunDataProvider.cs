@@ -217,7 +217,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             LastSync = hi.Value.StatsLastUpdated,
                             InBps = hi.Value.Inbps * 8,
                             OutBps = hi.Value.Outbps * 8,
-                            Speed = hi.Value.LinkSpeed * 1000000
+                            Speed = hi.Value.LinkSpeed * 1000000,
+                            TeamMembers = h.Interfaces?.Where(i => i.Value.Master == hi.Value.Name).Select(i => i.Key).ToList()
                         }).ToList(),
                         Volumes = h.Disks?.Select(hd => new Volume
                         {
@@ -235,6 +236,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         //Apps = new List<Application>(),
                         //VMs = new List<Node>()
                     };
+
+                    n.Interfaces.ForEach(i => i.IsTeam = i.TeamMembers.Any());
 
                     if (h.UptimeSeconds.HasValue) // TODO: Check if online - maybe against ICMP data last?
                     {
@@ -317,46 +320,37 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id}&time=1d-ago";
         }
 
-        public override async Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            return GetRecent(node.Id, start, end, p => p?.CPU, Globals.CPU);
+        }
+
+        public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            return GetRecent(node.Id, start, end, p => p?.Memory, Globals.MemoryUsed);
+        }
+
+        private async Task<List<GraphPoint>> GetRecent(
+            string id,
+            DateTime? start,
+            DateTime? end,
+            Func<IntervalCache, Dictionary<string, PointSeries>> get,
+            string metricName)
         {
             if (IsApproximatelyLast24Hrs(start, end))
             {
                 PointSeries series = null;
-                var cpuCache = DayCache.Data?.CPU;
-                if (cpuCache?.TryGetValue(node.Id, out series) == true)
-                    return series.PointData;
-            }
-            
-            var apiResponse = await GetMetric(
-                Globals.CPU,
-                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
-                end,
-                node.Id);
-            return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
-        }
-
-        public override async Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
-        {
-            if (IsApproximatelyLast24Hrs(start, end))
-            {
-                PointSeries series = null;
-                var cache = DayCache.Data?.Memory;
-                if (cache?.TryGetValue(node.Id, out series) == true)
+                if (get(DayCache.Data)?.TryGetValue(id, out series) == true)
                     return series.PointData;
             }
 
             var apiResponse = await GetMetric(
-                Globals.MemoryUsed,
+                metricName,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
-                node.Id);
+                id);
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
-
-        private static readonly Dictionary<string, string> NetDirectionTags = new Dictionary<string, string>
-        {
-            {Tags.Direction, "*"}
-        };
 
         public override async Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
@@ -377,31 +371,31 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 node.Id,
-                NetDirectionTags);
+                TagCombos.AllNetDirections);
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
-        public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            // TODO: Implement
-            return Task.FromResult(new List<GraphPoint>());
+            var apiResponse = await GetMetric(
+                Globals.DiskUsed,
+                start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
+                end,
+                volume.NodeId,
+                TagCombos.AllDisks);
+
+            return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
         public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var tags = new Dictionary<string, string>
-            {
-                {Tags.Direction, "*"},
-                {Tags.IFace, nodeInteface.Id}
-            };
-
             var apiResponse = await GetMetric(
-                Globals.NetBytes,
+                nodeInteface.IsTeam ? Globals.NetBondBytes : Globals.NetBytes,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 nodeInteface.NodeId,
-                tags);
+                TagCombos.AllDirectionsForInterface(nodeInteface.Id));
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }

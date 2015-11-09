@@ -137,6 +137,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public const string CPU = "os.cpu";
             public const string MemoryUsed = "os.mem.used";
             public const string NetBytes = "os.net.bytes";
+            public const string NetBondBytes = "os.net.bond.bytes";
             public const string DiskUsed = "os.disk.fs.space_used";
         }
 
@@ -149,6 +150,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public static class Tags
         {
             public const string Direction = "direction";
+            public const string Disk = "disk";
             public const string Host = "host";
             public const string IFace = "iface";
         }
@@ -159,6 +161,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public const string Out = "out";
         }
 
+        public static class TagCombos
+        {
+            public static readonly Dictionary<string, string>
+                AllNetDirections = new Dictionary<string, string> {{Tags.Direction, "*"}},
+                AllDisks = new Dictionary<string, string> {{Tags.Disk, "*"}};
+
+            public static Dictionary<string, string> AllDirectionsForInterface(string ifaceId)
+                => new Dictionary<string, string> {{Tags.Direction, "*"}, {Tags.IFace, ifaceId}};
+        }
+
         public static bool IsCounter(string metric)
         {
             if (metric.IsNullOrEmpty()) return false;
@@ -166,6 +178,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 case Globals.CPU:
                 case Globals.NetBytes:
+                case Globals.NetBondBytes:
                     return true;
             }
             if (metric.EndsWith(Suffixes.CPU))

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -34,6 +33,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? OutPps { get; internal set; }
         public int? MTU { get; internal set; }
         public double? Speed { get; internal set; }
+        public List<string> TeamMembers { get; set; }
 
         public List<IPAddress> IPs { get; set; }
 
@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public bool IsLikelyPrimary => Name.ToLower().EndsWith("team") ||
                                        Name.ToLower().StartsWith("bond") ||
                                        Name.Contains("Microsoft Network Adapter Multiplexor Driver");
-
+        
         public Interface() {}
         public Interface(string id) { Id = id; }
     }
