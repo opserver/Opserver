@@ -102,6 +102,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public float? LinkSpeed { get; set; }
                 // TODO
                 public List<string> Members { get; set; }
+                public string Type { get; set; }
             }
 
             public class IncidentInfo
@@ -207,6 +208,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             NodeId = h.Name,
                             Name = hi.Value.Name.IsNullOrEmptyReturn($"Unknown: {hi.Key}"),
                             FullName = hi.Value.Name,
+                            TypeDescription = hi.Value.Type,
                             Caption = hi.Value.Description,
                             PhysicalAddress = hi.Value.MAC,
                             IPs = hi.Value?.IPAddresses?.Select(ip =>
@@ -226,7 +228,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Name = hd.Key,
                             NodeId = h.Name,
                             Caption = hd.Key,
-                            Description = $"{hd.Key} - Needs Description",
+                            Description = $"{hd.Key}",
                             LastSync = hd.Value.StatsLastUpdated,
                             Used = hd.Value.UsedBytes,
                             Size = hd.Value.TotalBytes,
@@ -391,7 +393,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var apiResponse = await GetMetric(
-                nodeInteface.IsTeam ? Globals.NetBondBytes : Globals.NetBytes,
+                InterfaceMetricName(nodeInteface),
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 nodeInteface.NodeId,

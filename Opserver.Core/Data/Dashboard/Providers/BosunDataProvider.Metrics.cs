@@ -138,6 +138,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public const string MemoryUsed = "os.mem.used";
             public const string NetBytes = "os.net.bytes";
             public const string NetBondBytes = "os.net.bond.bytes";
+            public const string NetVirtualBytes = "os.net.virtual.bytes";
+            public const string NetTunnelBytes = "os.net.tunnel.bytes";
+            public const string NetOtherBytes = "os.net.other.bytes";
             public const string DiskUsed = "os.disk.fs.space_used";
         }
 
@@ -185,6 +188,23 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return true;
 
             return false;
+        }
+
+        public static string InterfaceMetricName(Interface i)
+        {
+            switch (i.TypeDescription)
+            {
+                case "bond":
+                    return Globals.NetBondBytes;
+                case "other":
+                    return Globals.NetOtherBytes;
+                case "tunnel":
+                    return Globals.NetTunnelBytes;
+                case "virtual":
+                    return Globals.NetVirtualBytes;
+                default:
+                    return Globals.NetBytes;
+            }
         }
 
         public static string GetDenormalized(string metric, string host)
