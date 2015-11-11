@@ -64,6 +64,17 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
+        /// Returns result of <paramref name="action"/> when this String is null/empty.
+        /// </summary>
+        /// <param name="s"></param>
+        /// <param name="action"></param>
+        /// <returns></returns>
+        public static string IsNullOrEmptyReturn(this string s, Func<string> action)
+        {
+            return IsNullOrEmptyReturn(action());
+        }
+
+        /// <summary>
         /// If this string ends in "toTrim", this will trim it once off the end
         /// </summary>
         public static string TrimEnd(this string s, string toTrim)

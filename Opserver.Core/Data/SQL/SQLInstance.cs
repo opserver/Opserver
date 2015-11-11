@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
@@ -19,6 +20,10 @@ namespace StackExchange.Opserver.Data.SQL
         protected string ConnectionString { get; set; }
         public Version Version { get; internal set; }
         public static Dictionary<Type, ISQLVersionedObject> VersionSingletons;
+        /// <summary>
+        /// Regular expression for <see cref="ObjectName"/> not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
+        /// </summary>
+        private static readonly Regex ObjectNameRegex = new Regex(@"^Data Source=.+\\(\w+);.+$", RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
         static SQLInstance()
         {
@@ -41,9 +46,12 @@ namespace StackExchange.Opserver.Data.SQL
         {
             Version = new Version(); // default to 0.0
             Name = name;
-            // TODO: Object Name regex for not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
-            ObjectName = objectName.IsNullOrEmptyReturn(objectName, "SQLServer");
             ConnectionString = connectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", name));
+            ObjectName = objectName.IsNullOrEmptyReturn(() =>
+            {
+                var match = ObjectNameRegex.Match(ConnectionString);
+                return match.Success ? $"MSSQL${match.Groups[1].Value}" : "SQLServer";
+            });
         }
 
         public static SQLInstance Get(string name)
