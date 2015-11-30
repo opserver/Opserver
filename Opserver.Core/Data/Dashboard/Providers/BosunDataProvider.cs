@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
 
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 10));
+        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 60, 4 * 60 * 60));
 
         private string GetUrl(string path)
         {
@@ -217,8 +217,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                                 return IPNet.TryParse(ip, out result) ? result.IPAddress : null;
                             }).Where(ip => ip != null).ToList(),
                             LastSync = hi.Value.StatsLastUpdated,
-                            InBps = hi.Value.Inbps * 8,
-                            OutBps = hi.Value.Outbps * 8,
+                            InBps = hi.Value.Inbps,
+                            OutBps = hi.Value.Outbps,
                             Speed = hi.Value.LinkSpeed * 1000000,
                             TeamMembers = h.Interfaces?.Where(i => i.Value.Master == hi.Value.Name).Select(i => i.Key).ToList()
                         }).ToList(),
@@ -342,7 +342,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             if (IsApproximatelyLast24Hrs(start, end))
             {
                 PointSeries series = null;
-                if (get(DayCache.Data)?.TryGetValue(id, out series) == true)
+                if (get(DayCache.Data)?.TryGetValue(id.NormalizeForCache(), out series) == true)
                     return series.PointData;
             }
 
@@ -360,7 +360,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 List<PointSeries> series = null;
                 var cache = DayCache.Data?.Network;
-                if (cache?.TryGetValue(node.Id, out series) == true)
+                if (cache?.TryGetValue(node.Id.NormalizeForCache(), out series) == true)
                 {
                     var result = JoinNetwork(series);
                     if (result != null)

@@ -277,6 +277,7 @@ namespace StackExchange.Opserver.Data.Redis
             public long AOFCurrentRewriteTimeSeconds { get; internal set; }
             [RedisInfoProperty("aof_last_bgrewrite_status")]
             public string AOFLastBGRewriteStatus { get; internal set; }
+            public bool AOFLastBGRewriteStatusIsGood => AOFLastBGRewriteStatus == "ok";
             [RedisInfoProperty("aof_current_size")]
             public long AOFCurrentSize { get; internal set; }
             [RedisInfoProperty("aof_base_size")]

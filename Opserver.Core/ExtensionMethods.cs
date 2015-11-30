@@ -141,6 +141,11 @@ namespace StackExchange.Opserver
             return s.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
         }
 
+        public static string NormalizeForCache(this string s)
+        {
+            return s?.ToLower();
+        }
+
         public static string NormalizeHostOrFQDN(this string s, bool defaultToHttps = false)
         {
             if (!s.HasValue()) return s;
@@ -752,22 +757,17 @@ namespace StackExchange.Opserver
         private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
         public static string TraceDescription(this CommandTrace trace, int? truncateTo = null)
         {
-            if (truncateTo != null && trace.Arguments.Length >= 4)
+            if (truncateTo != null)
             {
-                var match = _traceRegex.Match(trace.Arguments[3]);
-                if (match.Success)
+                Match match;
+                if (trace.Arguments.Length >= 4 && (match = _traceRegex.Match(trace.Arguments[3])).Success)
                 {
-                    var startStr = string.Join(" ", trace.Arguments.Take(2));
-                    var message = match.Groups[1].Value.TruncateWithEllipsis(truncateTo.Value);
-                    var bytesTotal = int.Parse(match.Groups[2].Value) + message.Length;
-                    int bytesLeft = truncateTo.Value - startStr.Length;
-                    
-                    return startStr + (bytesLeft > 3
-                        ? $" {message.TruncateWithEllipsis(bytesLeft)} ({bytesTotal.Pluralize("byte")} total)"
-                        : $" ({bytesTotal.Pluralize("byte")} total)");
+                    var str = string.Concat(string.Join(" ", trace.Arguments.Take(2)), " ", match.Groups[1].Value);
+                    var bytesTotal = int.Parse(match.Groups[2].Value) + match.Groups[1].Value.Length;
+                    return $"{str.TruncateWithEllipsis(truncateTo.Value)} ({bytesTotal.Pluralize("byte")} total)";
                 }
+                return string.Join(" ", trace.Arguments).TruncateWithEllipsis(truncateTo.Value);
             }
-
             return string.Join(" ", trace.Arguments);
         }
     }

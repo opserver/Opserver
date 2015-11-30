@@ -88,10 +88,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         {
                             result.MultiSeries[metricName] = apiResult.Series
                                 .GroupBy(s => s.Host)
-                                .ToDictionary(s => s.Key, s => s.ToList());
+                                .ToDictionary(s => s.Key.NormalizeForCache(), s => s.ToList());
                         }
                         else
-                            result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host);
+                            result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host.NormalizeForCache());
                     };
                     
                     var c = addMetric(BosunMetric.Globals.CPU, null);
