@@ -21,7 +21,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
-        
+
+        public override string ToString() => GetType().Name;
+
         protected DashboardDataProvider(string uniqueKey) : base(uniqueKey) { }
 
         protected DashboardDataProvider(IProviderSettings settings) : base(settings.Name + "Dashboard")
@@ -62,13 +64,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         public virtual string GetManagementUrl(Node node) { return null; }
-        public abstract Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
 
-        public abstract Task<List<DoubleGraphPoint>> GetUtilization(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
         
-        public abstract Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
         
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 

@@ -6,61 +6,67 @@
     var acked = i.AcknowledgedBy != null && i.AcknowledgedBy.Any() ? "List" : "Nobody";
     var isSubjectOnly = i.SummaryData?.Count == 1 && i.SummaryData.ContainsKey("subject");
 }
-<div class="incident-details">
-    <h3>Incident Detail: @i.Number</h3>
-    <ul>
+<div class="incident-details" data-title="Incident: @i.Number">
+    <dl>
         @if (isSubjectOnly)
         {
-            <li><span class="key">Subject:</span> <span class="value">@i.SummaryData["subject"]</span></li>
+            <dt>Subject</dt>
+            <dd>@i.SummaryData["subject"]</dd>
         }
-        <li><span class="key">Service:</span> <span class="value">@i.AffectedService.Name</span></li>
-        <li><span class="key">Link:</span> <span class="value"><a href="@i.Uri" target="_blank">@i.Uri</a></span></li>
-        <li><span class="key">Status:</span> <span class="bold @i.MonitorStatus.Class()">@i.Status.GetDescription()</span></li>
-        <li><span class="key">Acknowledged By:</span> <span class="value">@acked</span></li>
+        <dt>Service</dt>
+        <dd>@i.AffectedService.Name</dd>
+
+        <dt>Link</dt>
+        <dd><a href="@i.Uri" target="_blank">@(i.Uri.Split('/').Last())</a></dd>
+
+        <dt>Status</dt>
+        <dd class="@i.TextClass()">@i.Status.GetDescription()</dd>
+
+        <dt>Acknowledged By</dt>
+        <dd>@acked</dd>
+
         @if (i.ResolvedBy != null)
         {
-            <li><span class="key">Resolved By:</span> <span class="value">@i.ResolvedBy.FullName</span></li>
+            <dt>Resolved By</dt>
+            <dd>@i.ResolvedBy.FullName</dd>
         }
+
         @if (i.LastChangedBy != null)
         {
-            <li><span class="key">Last Change:</span> <span class="value">@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()</span></li>
+            <dt>Last Change</dt>
+            <dd>@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()</dd>
         }
-        <li>
-            @if (!isSubjectOnly && i.SummaryData != null && i.SummaryData.Any())
+    </dl>
+    @if (!isSubjectOnly && i.SummaryData != null && i.SummaryData.Any())
+    {
+        <table>
+            <thead>
+                <tr>
+                    <th colspan="2">Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var s in i.SummaryData)
             {
-                <table>
-                    <thead>
-                    <tr>
-                        <th colspan="2">Summary</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    @foreach (var s in i.SummaryData)
-                    {
-                        <tr>
-                            <td class="bold">@s.Key</td>
-                            <td>@s.Value</td>
-                        </tr>
-                    }
-                    </tbody>
-                </table>
+                <tr>
+                    <td class="bold">@s.Key</td>
+                    <td>@s.Value</td>
+                </tr>
             }
-        </li>
-    </ul>
-    <hr/>
-    <table class="striped-dashboard">
-        <tbody class="node-header">
-        <tr class="category-row">
-            <th colspan="8">
-                <h3>Incident Log</h3>
-            </th>
-        </tr>
-        <tr>
-            <th>Time</th>
-            <th>Type</th>
-            <th>Message</th>
-            <th>Notes</th>
-        </tr>
+            </tbody>
+        </table>
+    }
+    <h4 class="page-header">Incident Log</h4>
+    <table class="table table-striped table-hover table-responsive text-nowrap">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Type</th>
+                <th>Message</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody>
         @foreach (var l in Model.Logs)
         {
             <tr>

@@ -7,19 +7,27 @@
 <div class="error-preview">
 @if (error == null)
 {
-    <div class="error-header">Error not found.</div>
-    <div class="error-not-found">Error was not found.</div>
+    <div class="alert alert-warning">
+        <h5>Error not found.</h5>
+        <p>The error was no longer found in the store.</p>
+    </div>
 }
 else
 {
-    <div class="error-header"><span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&log=@error.ApplicationName.UrlEncode()" title="view exceptions with the same message in the same log">view similar</a>)</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()&byTime=true" title="view exceptions within 5 minutes of this one">view nearby</a>)</span></div>
+    <h6 class="page-header">
+        <strong>@error.Type</strong>
+        <span class="pull-right">
+            <a href="/exceptions/similar?id=@error.GUID&log=@error.ApplicationName.UrlEncode()" title="View exceptions with the same message in the same log">View Similar</a>
+            <span class="text-muted">|</span>
+            <a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()&byTime=true" title="View exceptions within 5 minutes of this one">View Nearby</a>
+            <span class="text-muted">|</span>
+            <a class="text-danger js-clear-all" href="#" data-url="/exceptions/delete-similar" data-log="@error.ApplicationName" data-id="@error.GUID"><span class="glyphicon glyphicon-remove"></span> Clear all similar</a>
+        </span>
+    </h6>
+    <p class="small text-danger">@error.Message</p>
     <div class="error-info">
-        <div class="error-type">@error.Type</div>
-        <pre class="error-detail">@error.Detail
-        </pre>
-        <p class="error-time">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> on @error.MachineName
-            <span class="preview-delete-link similar-link">(<a class="clear-all-link" href="/exceptions/delete-similar" data-log="@error.ApplicationName" data-id="@error.GUID">Clear all similar</a>)</span>
-        </p>
+        <pre class="pre-code error-detail">@error.Detail</pre>
+        <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
     </div>
 }
 </div>

@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <returns>CPU usage data points</returns>
         public Task<List<GraphPoint>> GetCPUUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return DataProvider.GetCPUUtilization(this, start, end, pointCount);
+            return DataProvider.GetCPUUtilizationAsync(this, start, end, pointCount);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <returns>Memory usage data points</returns>
         public Task<List<GraphPoint>> GetMemoryUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return DataProvider.GetMemoryUtilization(this, start, end, pointCount);
+            return DataProvider.GetMemoryUtilizationAsync(this, start, end, pointCount);
         }
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <returns>Network usage data points</returns>
         public Task<List<DoubleGraphPoint>> GetNetworkUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return DataProvider.GetNetworkUtilization(this, start, end, pointCount);
+            return DataProvider.GetNetworkUtilizationAsync(this, start, end, pointCount);
         }
     }
 }

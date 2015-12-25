@@ -85,31 +85,31 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
             return Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(wNode?.CPUHistory, start, end).ToList());
         }
 
-        public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
             return Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(wNode?.MemoryHistory, start, end).ToList());
         }
         
-        public override Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
             return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(wNode?.CombinedNetHistory, start, end).ToList());
         }
 
         // TODO: Needs implementation
-        public override Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             return Task.FromResult(new List<GraphPoint>());
         }
 
-        public override Task<List<DoubleGraphPoint>> GetUtilization(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var node = _wmiNodes.FirstOrDefault(x => x.Id == @interface.NodeId);
             return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(node?.GetInterfaceUtilizationHistory(@interface), start, end).ToList());

@@ -14,12 +14,7 @@
         Status.Graphs.init({ start: @start, end: @end });
     });
     </script>}
-@*<div class="top-filter" style="margin-top: 10px;">
-    <label class="filter-box-float">Filter: 
-        <input class="" type="text" value="@Model.Filter" name="filter" title="Filter nodes by name, type, service tag or status" placeholder="by type, name, tag, etc." autocomplete="off" />
-    </label>
-</div>*@
-<div class="dashboard-list">
+<div>
     @Html.Partial("Dashboard.Table", Model)
     <div id="spark-detail">
         <div id="dashboard-chart" style="width: 960px; height: 330px;"></div>

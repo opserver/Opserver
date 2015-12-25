@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -8,7 +9,7 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterHealthStatusInfo> _healthStatus;
-        public Cache<ClusterHealthStatusInfo> HealthStatus => _healthStatus ?? (_healthStatus = GetCache<ClusterHealthStatusInfo>(10));
+        public Cache<ClusterHealthStatusInfo> HealthStatus => _healthStatus ?? (_healthStatus = GetCache<ClusterHealthStatusInfo>(Settings.RefreshIntervalSeconds));
 
         /// <summary>
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 
@@ -59,9 +60,9 @@ namespace StackExchange.Opserver.Data.Elastic
             }
             public string MonitorStatusReason => "Cluster is " + StringStatus;
 
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
+            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawHealth = cli.GetClusterHealth();
+                var rawHealth = await cli.GetClusterHealthAsync();
                 if (rawHealth.HasData)
                 {
                     var health = rawHealth.Data;

@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.Redis
                         //TODO: Remove when StackExchange.Redis gets profiling
                         using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
                         {
-                            return (await rc.GetSingleServer().ConfigGetAsync("*")).ToDictionary(x => x.Key, x => x.Value);
+                            return (await rc.GetSingleServer().ConfigGetAsync("*").ConfigureAwait(false)).ToDictionary(x => x.Key, x => x.Value);
                         }
                     })
                 });

@@ -4,7 +4,7 @@
     Layout = null;
 }
 <div class="summary-dashboard">
-    <table class=" sub-dashboard no-update striped-dashboard">
+    <table class="sub-dashboard no-update striped-dashboard">
         @foreach (var ag in Model.AvailabilityGroups.OrderBy(p => p.MonitorStatus == MonitorStatus.Good))
         {
             if (Model.AvailabilityGroups != null && !Model.AvailabilityGroups.Contains(ag)) { continue; }
@@ -14,12 +14,11 @@
                 var dbs = agr.Databases.OrderBy(p => p.MonitorStatus == MonitorStatus.Good).ThenBy(ldb => ldb.DatabaseName).ToList();
                 <tbody class="node-header" data-name="header-@Model.CurrentCluster.Name-@ag.Node.Name-@ag.Name">
                     <tr class="category-row sub-category-row">
-                        <th colspan="9">
-                            <h3 class="header">@agr.IconSpan() @ag.Node.Name: @ag.Name <span class="add-info">(@agr.Role.ToSpan()) @props.Version (@props.MajorVersion @props.Level) <span class="note">(@dbs.Count.Pluralize("database"))</span></span></h3>
+                        <th colspan="8">
+                            <h3 class="header">@agr.IconSpan() @ag.Node.Name: @ag.Name <span class="small">(@agr.Role.ToSpan()) @props.Version (@props.MajorVersion @props.Level) (@dbs.Count.Pluralize("database"))</span></h3>
                         </th>
                     </tr>
                     <tr>
-                        <th></th>
                         <th>Database</th>
                         <th>State</th>
                         <th>Sync State</th>
@@ -30,12 +29,11 @@
                         <th>ETA</th>
                     </tr>
                 </tbody>
-                <tbody class="node-group" data-name="@Model.CurrentCluster.Name-@ag.Node.Name-@ag.Name">
+                <tbody>
                     @foreach (var db in dbs)
                     {
                         <tr class="@db.RowClass()">
-                            <td>@db.IconSpan()</td>
-                            <td>@db.DatabaseName</td>
+                            <td>@db.IconSpan() @db.DatabaseName</td>
                             <td>@db.DatabaseStateDescription</td>
                             <td>@db.SynchronizationState.ToSpan(@db.SuspendReasonDescription)</td>
                             <td>
@@ -87,7 +85,6 @@
                 var logLocalTotal = dbs.Sum(db => db.LogKBytesUsed);
                     }
                     <tr class="total-row">
-                        <td></td>
                         <td><b>Total</b></td>
                         <td></td>
                         <td></td>

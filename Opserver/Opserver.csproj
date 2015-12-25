@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
-  <Import Project="..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\packages\Microsoft.Net.Compilers.1.1.1\build\Microsoft.Net.Compilers.props" Condition="Exists('..\packages\Microsoft.Net.Compilers.1.1.1\build\Microsoft.Net.Compilers.props')" />
+  <Import Project="..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props" Condition="Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -56,12 +56,16 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
     </Reference>
-    <Reference Include="EasyHttp, Version=1.6.75.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyHttp.1.6.75.0\lib\net40\EasyHttp.dll</HintPath>
+    <Reference Include="Dapper, Version=1.50.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Dapper.1.50.0-beta6\lib\net45\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Jil, Version=2.10.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Jil.2.10.0\lib\net45\Jil.dll</HintPath>
+    <Reference Include="EasyHttp, Version=1.6.80.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\EasyHttp.1.6.80.0\lib\net40\EasyHttp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Jil, Version=2.13.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Jil.2.13.0-beta1\lib\net45\Jil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JsonFx, Version=2.0.1209.2802, Culture=neutral, PublicKeyToken=315052dd637f8a52, processorArchitecture=MSIL">
@@ -69,7 +73,7 @@
       <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
+      <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Web.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -77,20 +81,20 @@
       <HintPath>..\packages\Microsoft.Web.Infrastructure.1.0.0.0\lib\net40\Microsoft.Web.Infrastructure.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
-    <Reference Include="MiniProfiler, Version=3.1.1.140, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.3.1.1.140\lib\net40\MiniProfiler.dll</HintPath>
+    <Reference Include="MiniProfiler, Version=3.2.0.157, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
+      <HintPath>..\packages\MiniProfiler.3.2.0.157\lib\net40\MiniProfiler.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="MiniProfiler.Mvc, Version=3.0.11.0, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MiniProfiler.MVC4.3.0.11\lib\net40\MiniProfiler.Mvc.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Sigil, Version=4.4.0.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
-      <HintPath>..\packages\Sigil.4.4.0\lib\net45\Sigil.dll</HintPath>
+    <Reference Include="Sigil, Version=4.5.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
+      <HintPath>..\packages\Sigil.4.5.1\lib\net45\Sigil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SnmpSharpNet, Version=0.9.4.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
@@ -101,12 +105,12 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Exceptional, Version=1.0.0.111, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Exceptional.1.0.111\lib\StackExchange.Exceptional.dll</HintPath>
+    <Reference Include="StackExchange.Exceptional, Version=1.0.0.122, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Exceptional.1.0.122\lib\StackExchange.Exceptional.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\StackExchange.Redis.1.0.481\lib\net45\StackExchange.Redis.dll</HintPath>
+      <HintPath>..\packages\StackExchange.Redis.1.0.488\lib\net45\StackExchange.Redis.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Svg, Version=0.5.2.17984, Culture=neutral, processorArchitecture=MSIL">
@@ -165,6 +169,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\Home\About.Model.cs">
+      <DependentUpon>About.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Views\SQL\Instance.Model.cs">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Compile>
@@ -178,59 +185,46 @@
       <DependentUpon>Servers.cshtml</DependentUpon>
     </Compile>
     <Content Include="Config\Readme.txt" />
+    <Content Include="Content\bootstrap\css\bootstrap.min.css" />
+    <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="Content\bootstrap\js\bootstrap.min.js" />
     <Content Include="Content\Common.css">
       <DependentUpon>Common.less</DependentUpon>
     </Content>
     <Content Include="Content\Common.min.css">
       <DependentUpon>Common.less</DependentUpon>
     </Content>
-    <Content Include="Content\img\arrow-small.png" />
-    <Content Include="Content\img\database\blue.png" />
-    <Content Include="Content\img\database\grey.png" />
-    <Content Include="Content\img\database\red.png" />
-    <Content Include="Content\img\database\yellow.png" />
-    <Content Include="Content\img\lock-off.png" />
-    <Content Include="Content\img\lock-on.png" />
+    <Content Include="Content\img\logo\full-dark.svg" />
+    <Content Include="Content\img\logo\full.svg" />
     <Content Include="Content\img\logo\icon-128.png" />
-    <Content Include="Content\img\logo\icon-152.png" />
     <Content Include="Content\img\logo\icon-16.png" />
     <Content Include="Content\img\logo\icon-256.png" />
-    <Content Include="Content\img\logo\icon-316.png" />
     <Content Include="Content\img\logo\icon-32.png" />
-    <Content Include="Content\img\logo\icon-64.png" />
-    <Content Include="Content\img\logo\icon-76.png" />
-    <Content Include="Content\img\logo\logo-big.png" />
-    <Content Include="Content\img\logo\logo-login%402x.png" />
-    <Content Include="Content\img\logo\logo-login.png" />
-    <Content Include="Content\img\logo\logo-text%402x.png" />
-    <Content Include="Content\img\logo\logo-text.png" />
-    <Content Include="Content\img\node\node-select-all.png" />
-    <Content Include="Content\img\node\node-select-child.png" />
-    <Content Include="Content\img\node\node-select-next.png" />
-    <Content Include="Content\img\node\node-select-previous.png" />
-    <Content Include="Content\img\node\node-select.png" />
-    <Content Include="Content\img\node\node.png" />
-    <Content Include="Content\img\refresh.png" />
-    <Content Include="Content\img\square-minus-disabled.png" />
-    <Content Include="Content\img\square-minus.png" />
-    <Content Include="Content\img\square-plus-disabled.png" />
-    <Content Include="Content\img\square-plus.png" />
-    <Content Include="Content\img\x.png" />
+    <Content Include="Content\img\logo\icon.svg" />
+    <Content Include="Content\js\jquery-1.11.3.js" />
+    <Content Include="Content\js\jquery-1.11.3.map">
+      <DependentUpon>jquery-1.11.3.js</DependentUpon>
+    </Content>
+    <Content Include="Content\js\jquery-1.11.3.min.js">
+      <DependentUpon>jquery-1.11.3.js</DependentUpon>
+    </Content>
+    <Content Include="Content\js\plugins\bootbox.js" />
     <Content Include="Content\js\plugins\colorbrewer.js" />
+    <Content Include="Content\js\plugins\jquery-ui.js" />
     <Content Include="Content\js\plugins\visibility.js" />
-    <Content Include="Content\_Styles.Exceptions.less">
-      <DependentUpon>Styles.less</DependentUpon>
+    <Content Include="Content\themes\dark\styles.css">
+      <DependentUpon>styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\themes\dark\styles.min.css">
+      <DependentUpon>styles.css</DependentUpon>
+    </Content>
+    <Content Include="Content\themes\light\styles.css">
+      <DependentUpon>styles.less</DependentUpon>
+    </Content>
+    <Content Include="Content\themes\light\styles.min.css">
+      <DependentUpon>styles.css</DependentUpon>
     </Content>
     <Content Include="Content\Common.less" />
-    <Content Include="Content\_Styles.HAProxy.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
-    <Content Include="Content\_Styles.Graphs.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
-    <Content Include="Content\_Styles.About.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
     <Content Include="App_Code\Helpers.cshtml" />
     <Content Include="Config\DashboardSettings.json.example" />
     <Content Include="Config\ElasticSettings.json.example" />
@@ -242,25 +236,100 @@
     <Content Include="Config\SQLSettings.json.example" />
     <Content Include="Config\TeamCitySettings.json.example" />
     <Content Include="Content\img\logo\logo.eps" />
-    <Content Include="Content\Styles.css.map">
-      <DependentUpon>Styles.css</DependentUpon>
-    </Content>
     <Content Include="Config\JiraSettings.json.example" />
     <None Include="compilerconfig.json" />
-    <None Include="Config\PagerDutySettings.json.example" />
-    <None Include="Content\_Styles.HeadsUp.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </None>
-    <None Include="Content\_Styles.Mobile.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </None>
-    <Content Include="Content\_Styles.Plugins.toastr.less">
-      <DependentUpon>Styles.less</DependentUpon>
+    <Content Include="compilerconfig.json.defaults">
+      <DependentUpon>compilerconfig.json</DependentUpon>
     </Content>
-    <Content Include="Content\_Styles.Plugins.additional.less" />
-    <None Include="Content\_Styles.Plugins.prettify.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </None>
+    <None Include="Config\PagerDutySettings.json.example" />
+    <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="Content\bootstrap\less\.csscomb.json" />
+    <Content Include="Content\bootstrap\less\.csslintrc" />
+    <Content Include="Content\bootstrap\less\alerts.less" />
+    <Content Include="Content\bootstrap\less\badges.less" />
+    <Content Include="Content\bootstrap\less\bootstrap.less" />
+    <Content Include="Content\bootstrap\less\breadcrumbs.less" />
+    <Content Include="Content\bootstrap\less\button-groups.less" />
+    <Content Include="Content\bootstrap\less\buttons.less" />
+    <Content Include="Content\bootstrap\less\carousel.less" />
+    <Content Include="Content\bootstrap\less\close.less" />
+    <Content Include="Content\bootstrap\less\code.less" />
+    <Content Include="Content\bootstrap\less\component-animations.less" />
+    <Content Include="Content\bootstrap\less\dropdowns.less" />
+    <Content Include="Content\bootstrap\less\forms.less" />
+    <Content Include="Content\bootstrap\less\glyphicons.less" />
+    <Content Include="Content\bootstrap\less\grid.less" />
+    <Content Include="Content\bootstrap\less\input-groups.less" />
+    <Content Include="Content\bootstrap\less\jumbotron.less" />
+    <Content Include="Content\bootstrap\less\labels.less" />
+    <Content Include="Content\bootstrap\less\list-group.less" />
+    <Content Include="Content\bootstrap\less\media.less" />
+    <Content Include="Content\bootstrap\less\mixins.less" />
+    <Content Include="Content\bootstrap\less\mixins\alerts.less" />
+    <Content Include="Content\bootstrap\less\mixins\background-variant.less" />
+    <Content Include="Content\bootstrap\less\mixins\border-radius.less" />
+    <Content Include="Content\bootstrap\less\mixins\buttons.less" />
+    <Content Include="Content\bootstrap\less\mixins\center-block.less" />
+    <Content Include="Content\bootstrap\less\mixins\clearfix.less" />
+    <Content Include="Content\bootstrap\less\mixins\forms.less" />
+    <Content Include="Content\bootstrap\less\mixins\gradients.less" />
+    <Content Include="Content\bootstrap\less\mixins\grid-framework.less" />
+    <Content Include="Content\bootstrap\less\mixins\grid.less" />
+    <Content Include="Content\bootstrap\less\mixins\hide-text.less" />
+    <Content Include="Content\bootstrap\less\mixins\image.less" />
+    <Content Include="Content\bootstrap\less\mixins\labels.less" />
+    <Content Include="Content\bootstrap\less\mixins\list-group.less" />
+    <Content Include="Content\bootstrap\less\mixins\nav-divider.less" />
+    <Content Include="Content\bootstrap\less\mixins\nav-vertical-align.less" />
+    <Content Include="Content\bootstrap\less\mixins\opacity.less" />
+    <Content Include="Content\bootstrap\less\mixins\pagination.less" />
+    <Content Include="Content\bootstrap\less\mixins\panels.less" />
+    <Content Include="Content\bootstrap\less\mixins\progress-bar.less" />
+    <Content Include="Content\bootstrap\less\mixins\reset-filter.less" />
+    <Content Include="Content\bootstrap\less\mixins\reset-text.less" />
+    <Content Include="Content\bootstrap\less\mixins\resize.less" />
+    <Content Include="Content\bootstrap\less\mixins\responsive-visibility.less" />
+    <Content Include="Content\bootstrap\less\mixins\size.less" />
+    <Content Include="Content\bootstrap\less\mixins\tab-focus.less" />
+    <Content Include="Content\bootstrap\less\mixins\table-row.less" />
+    <Content Include="Content\bootstrap\less\mixins\text-emphasis.less" />
+    <Content Include="Content\bootstrap\less\mixins\text-overflow.less" />
+    <Content Include="Content\bootstrap\less\mixins\vendor-prefixes.less" />
+    <Content Include="Content\bootstrap\less\modals.less" />
+    <Content Include="Content\bootstrap\less\navbar.less" />
+    <Content Include="Content\bootstrap\less\navs.less" />
+    <Content Include="Content\bootstrap\less\normalize.less" />
+    <Content Include="Content\bootstrap\less\pager.less" />
+    <Content Include="Content\bootstrap\less\pagination.less" />
+    <Content Include="Content\bootstrap\less\panels.less" />
+    <Content Include="Content\bootstrap\less\popovers.less" />
+    <Content Include="Content\bootstrap\less\print.less" />
+    <Content Include="Content\bootstrap\less\progress-bars.less" />
+    <Content Include="Content\bootstrap\less\responsive-embed.less" />
+    <Content Include="Content\bootstrap\less\responsive-utilities.less" />
+    <Content Include="Content\bootstrap\less\scaffolding.less" />
+    <Content Include="Content\bootstrap\less\tables.less" />
+    <Content Include="Content\bootstrap\less\theme.less" />
+    <Content Include="Content\bootstrap\less\thumbnails.less" />
+    <Content Include="Content\bootstrap\less\tooltip.less" />
+    <Content Include="Content\bootstrap\less\type.less" />
+    <Content Include="Content\bootstrap\less\utilities.less" />
+    <Content Include="Content\bootstrap\less\variables.less" />
+    <Content Include="Content\bootstrap\less\wells.less" />
+    <Content Include="Content\themes\dark\styles.less" />
+    <Content Include="Content\themes\_shared.less" />
+    <Content Include="Content\themes\_shared\charts.less" />
+    <Content Include="Content\themes\_shared\_variables.less" />
+    <Content Include="Content\themes\_shared\_bootswatch.less" />
+    <Content Include="Content\themes\light\styles.less" />
+    <Content Include="Content\themes\_shared\animations.less" />
+    <Content Include="Content\themes\_shared\spinkit.less" />
+    <Content Include="Content\themes\_shared\prettify.less" />
+    <Content Include="Content\themes\_shared\exceptions.less" />
+    <Content Include="Content\themes\_shared\sql.less" />
     <Content Include="Content\js\plugins\toastr.js" />
     <Content Include="Content\js\plugins\isotope.js" />
     <Compile Include="Controllers\AdminController.cs" />
@@ -296,14 +365,12 @@
       <DependentUpon>Railguns.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
-    <Compile Include="Views\Dashboard\Ranges.cs" />
     <Compile Include="Views\Dashboard\Node.Model.cs">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Views\Elastic\Dashboard.Model.cs">
       <DependentUpon>Dashboard.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Home\About.Model.cs" />
     <Compile Include="Views\Hub\HubModel.cs" />
     <Compile Include="Views\PagerDuty\PagerDuty.Model.cs">
       <DependentUpon>PagerDuty.cshtml</DependentUpon>
@@ -333,7 +400,9 @@
     <None Include="Help\SQL\WaitStats.md" />
     <Content Include="Views\CloudFlare\Railguns.cshtml" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />
-    <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Redis\Dashboard.RoleActions.cshtml" />
     <Content Include="Views\Elastic\_ViewStart.cshtml" />
     <Content Include="Views\Redis\_ViewStart.cshtml" />
@@ -353,10 +422,6 @@
       <DependentUpon>Operations.Top.Detail.cshtml</DependentUpon>
     </Compile>
     <Content Include="App_Code\SQLHelpers.cshtml" />
-    <None Include="Content\Styles.less">
-      <Compile>False</Compile>
-      <Minify>False</Minify>
-    </None>
     <Compile Include="Controllers\DashboardController.cs" />
     <Compile Include="Controllers\ExceptionsController.cs" />
     <Compile Include="Controllers\HAProxyController.Admin.cs">
@@ -420,7 +485,6 @@
     <Compile Include="Views\Login\Login.Model.cs">
       <DependentUpon>Login.cshtml</DependentUpon>
     </Compile>
-    <EmbeddedResource Include="Content\img\loading.gif" />
     <Content Include="Content\img\query-plan\arithmetic_expression.gif" />
     <Content Include="Content\img\query-plan\assert.gif" />
     <Content Include="Content\img\query-plan\assign.gif" />
@@ -489,22 +553,12 @@
     <Content Include="Content\img\query-plan\top.gif" />
     <Content Include="Content\img\query-plan\udx.gif" />
     <Content Include="Content\img\query-plan\while.gif" />
-    <Content Include="Content\js\plugins\autocomplete.js" />
     <Content Include="Content\js\plugins\cookie.js" />
     <Content Include="Content\js\plugins\d3.v3.js" />
     <Content Include="Content\js\plugins\prettify.js" />
     <Content Include="Content\js\plugins\qp.js" />
-    <Content Include="Content\js\plugins\simplemodal.js" />
     <Content Include="Content\js\plugins\tablesorter.js" />
-    <Content Include="Content\img\search-icon.png" />
     <Content Include="Content\img\apple-touch-icon.png" />
-    <Content Include="Content\img\progress-dots.gif" />
-    <Content Include="Content\Styles.css">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
-    <Content Include="Content\Styles.min.css">
-      <DependentUpon>Styles.css</DependentUpon>
-    </Content>
     <Content Include="Content\transforms\qp.xslt">
       <SubType>Designer</SubType>
     </Content>
@@ -525,9 +579,6 @@
     <Content Include="Views\HAProxy\HAProxy.Dashboard.cshtml">
       <DependentUpon>HAProxy.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\HAProxy\HAProxy.Detailed.cshtml">
-      <DependentUpon>HAProxy.cshtml</DependentUpon>
-    </Content>
     <Content Include="Views\Shared\AccessDenied.cshtml" />
     <Content Include="Views\Exceptions\Exceptions.Search.cshtml" />
     <Content Include="Views\Exceptions\Exceptions.Similar.cshtml" />
@@ -542,9 +593,6 @@
       <DependentUpon>Operations.Top.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Dashboard\Node.Current.VMHost.cshtml" />
-    <Content Include="Views\Exceptions\Exceptions.Table.mobile.cshtml">
-      <DependentUpon>Exceptions.cshtml</DependentUpon>
-    </Content>
     <Content Include="Views\Home\Test.cshtml" />
     <Content Include="Views\Dashboard\Node.Current.Interfaces.cshtml" />
     <Content Include="Views\Elastic\Dashboard.cshtml" />
@@ -580,15 +628,6 @@
     <Content Include="Views\SQL\Servers.AvailabilityGroup.cshtml" />
     <Content Include="Views\Hub\Dashboard.Node.cshtml" />
     <Content Include="Views\Hub\SQL.AvailabilityGroup.cshtml" />
-    <Content Include="Content\_Styles.Reset.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
-    <Content Include="Content\_Styles.SQL.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
-    <Content Include="Content\_Styles.Redis.less">
-      <DependentUpon>Styles.less</DependentUpon>
-    </Content>
     <Content Include="Views\Home\About.Caches.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.Tables.cshtml" />
@@ -615,7 +654,6 @@
     <Content Include="Views\SQL\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\img\ajax-loader.gif" />
     <Content Include="Content\img\se-stats.png" />
     <Content Include="Content\Login.css" />
     <Content Include="Content\js\Scripts.js" />
@@ -689,7 +727,7 @@
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.0.0\build\Microsoft.Net.Compilers.props'))" />
-    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.0\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\build\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Net.Compilers.1.1.1\build\Microsoft.Net.Compilers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Net.Compilers.1.1.1\build\Microsoft.Net.Compilers.props'))" />
   </Target>
 </Project>

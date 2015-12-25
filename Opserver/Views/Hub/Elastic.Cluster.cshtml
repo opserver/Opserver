@@ -4,11 +4,11 @@
     var c = Model;
     var nodes = c.Nodes.SafeData(true).Nodes;
 }
-<div class="item @c.MonitorStatus.Class()">
+<div class="item @c.TextClass()">
     <div class="server-name" title="Last Updated: @c.LastPoll.ToRelativeTime()">
         @c.IconSpan()
         <a href="/elastic?node=@c.Name" class="node-name-link">@c.Name</a>
-        <span class="category">@((nodes != null ? nodes.Count : 0).Pluralize("node"))</span>
+        <span class="category">@((nodes?.Count ?? 0).Pluralize("node"))</span>
     </div>
     <div>
         @if (nodes != null && nodes.Any())
@@ -31,7 +31,7 @@
                         <tr>
                             <td>@n.Name</td>
                             <td>@shards.Count().ToComma()</td>
-                            @if (n.Stats != null && n.Stats.Process != null && n.Stats.Process.CPU != null)
+                            @if (n.Stats?.Process?.CPU != null)
                             {
                             <td>@((n.Stats.OS.CPU.User + n.Stats.OS.CPU.System).ToComma())%</td>
                             }
@@ -39,7 +39,7 @@
                             {
                             <td class="note">n/a</td>
                             }
-                            @if (n.Stats != null && n.Stats.Process.Memory != null)
+                            @if (n.Stats?.Process.Memory != null)
                             {
                                 <td>@n.Stats.Process.Memory.ResidentInBytes.ToSize("b")</td>
                             }

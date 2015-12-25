@@ -36,8 +36,8 @@
         {
             var data = activeOps.SafeData(true);
             <div class="sql-server">
-                <h3 class="page-header">Current active queries on @i.Name:
-                    <div class="filters-wrap">
+                <h5 class="page-header">Current active queries on @i.Name:
+                    <div class="filters-wrap" style="display: none;">
                         <div class="filters-current">
                             <span class="filter-label">Sleeping: </span><span class="filter-value">@Model.ActiveSearchOptions.IncludeSleepingSessions.GetDescription()</span>
                             @if (Model.ActiveSearchOptions.GetAdditionalInfo)
@@ -84,11 +84,11 @@
                         </div>
                     </div>
                     @*<a href="#" class="reload-link">Refresh</a>*@
-                </h3>
+                </h5>
                 @if (data.Any(o => o.BlockingSessionId.HasValue))
                 {
                     <div class="critical-summary curved-section">
-                        <h3>Blocking Detected:</h3>
+                        <h5>Blocking Detected:</h5>
                         <div>
                             <ul>
                                 @helper BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked){
@@ -123,16 +123,16 @@
                         </div>
                     </div>
                 }
-                <table class="striped-dashboard" style="table-layout: fixed;">
+                <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
                     <thead>
                         <tr>
-                            <th style="width: 75px;">Session</th>
-                            <th style="width: 100px;" title="Operation Duration">Time</th>
-                            <th style="width: 150px;">Stats</th>
-                            <th style="width: 150px;"></th>
-                            <th style="width: 150px;"></th>
-                            <th style="width: 75px;">Status</th>
-                            <th style="width: 150px;">Details</th>
+                            <th>Session</th>
+                            <th title="Operation Duration">Time</th>
+                            <th>Stats</th>
+                            <th></th>
+                            <th></th>
+                            <th>Status</th>
+                            <th>Details</th>
                             <th>SQL Text</th>
                         </tr>
                     </thead>
@@ -142,62 +142,62 @@
                             <tr id="spid-@w.SessionId">
                                 <td>
                                     @w.SessionId
-                            </td>
-                            <td title="@w.Duration.ToReadableString()">@w.Duration.ToTimeStringMini()</td>
-                            <td>
-                                <div><span class="note">CPU:</span> @w.CPU.ToComma()</div>
-                                <div><span class="note">Reads:</span> @w.Reads.ToComma()</div>
-                                @if (w.PhysicalReads > 0)
-                                {
-                                    <div><span class="note">PhysReads:</span> @w.PhysicalReads.ToComma()</div>
-                                }
-                                <div><span class="note">Writes:</span> @w.Writes.ToComma()</div>
-                            </td>
-                            <td colspan="2">
-                                @if (w.TempDBCurrent > 0)
-                                {
-                                    <div><span class="note">Temp (Pages):</span> @w.TempDBCurrent.ToComma()</div>
-                                }
-                                @if (w.TempDBAllocations > 0)
-                                {
-                                    <div><span class="note">Temp (Writes):</span> @w.TempDBAllocations.ToComma()</div>
-                                }
-                                @if (w.WaitInfo.HasValue())
-                                {
-                                    <div>
-                                        <span class="note">Waits:</span><br /> @w.WaitInfo
-                                    </div>
-                                }
-                                @if (w.BlockingSessionId.HasValue)
-                                {
-                                    <div><a href="#spid-@w.BlockingSessionId"><span class="note">Blocked By:</span> @w.BlockingSessionId</a></div>
-                                }
-                            </td>
-                            <td title="@w.WaitInfo
+                                </td>
+                                <td title="@w.Duration.ToReadableString()">@w.Duration.ToTimeStringMini()</td>
+                                <td>
+                                    <div><span class="note">CPU:</span> @w.CPU.ToComma()</div>
+                                    <div><span class="note">Reads:</span> @w.Reads.ToComma()</div>
+                                    @if (w.PhysicalReads > 0)
+                                    {
+                                        <div><span class="note">PhysReads:</span> @w.PhysicalReads.ToComma()</div>
+                                    }
+                                    <div><span class="note">Writes:</span> @w.Writes.ToComma()</div>
+                                </td>
+                                <td colspan="2">
+                                    @if (w.TempDBCurrent > 0)
+                                    {
+                                        <div><span class="note">Temp (Pages):</span> @w.TempDBCurrent.ToComma()</div>
+                                    }
+                                    @if (w.TempDBAllocations > 0)
+                                    {
+                                        <div><span class="note">Temp (Writes):</span> @w.TempDBAllocations.ToComma()</div>
+                                    }
+                                    @if (w.WaitInfo.HasValue())
+                                    {
+                                        <div>
+                                            <span class="note">Waits:</span><br /> @w.WaitInfo
+                                        </div>
+                                    }
+                                    @if (w.BlockingSessionId.HasValue)
+                                    {
+                                        <div><a href="#spid-@w.BlockingSessionId"><span class="note">Blocked By:</span> @w.BlockingSessionId</a></div>
+                                    }
+                                </td>
+                                <td title="@w.WaitInfo
                                 % complete @(w.PercentComplete.HasValue ? w.PercentComplete.ToString() : "Unknown") ">
-                                @w.Status
-                                @if (w.PercentComplete.HasValue)
-                                {
-                                    <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="note">% done</span></div>
-                                }
-                            </td>
-                            <td title="Program: @w.ProgramName">
-                                <div>
-                                    <span class="note">Host:</span>
-                                    @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
+                                    @w.Status
+                                    @if (w.PercentComplete.HasValue)
                                     {
-                                        <a href="/dashboard/node?node=@w.HostName.UrlEncode()" class="node-name-link">@w.HostName</a>
+                                        <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="note">% done</span></div>
                                     }
-                                    else
-                                    {
-                                        @w.HostName
-                                    }
-                                </div>
-                                <div><span class="note">DB:</span> @w.DatabaseName</div>
-                                <div><span class="note">Login:</span> @w.LoginName</div>
-                            </td>
-                            <td><div class="sql-block-wrap"><pre class="sql-block prettyprint lang-sql">@w.SqlText</pre></div></td>
-                        </tr>
+                                </td>
+                                <td title="Program: @w.ProgramName">
+                                    <div>
+                                        <span class="note">Host:</span>
+                                        @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
+                                        {
+                                            <a href="/dashboard/node?node=@w.HostName.UrlEncode()" class="node-name-link">@w.HostName</a>
+                                        }
+                                        else
+                                        {
+                                            @w.HostName
+                                        }
+                                    </div>
+                                    <div><span class="note">DB:</span> @w.DatabaseName</div>
+                                    <div><span class="note">Login:</span> @w.LoginName</div>
+                                </td>
+                                <td><div class="sql-block-wrap"><pre class="sql-block prettyprint lang-sql">@w.SqlText</pre></div></td>
+                            </tr>
                         }
                         @if (!data.Any())
                         {

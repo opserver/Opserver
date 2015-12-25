@@ -5,18 +5,15 @@
 {
     if (i.IsUnwatched)
     {
-        <div class="spark-no-data">No Data Available</div>
+        <div class="spark-no-data text-muted">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@Model.Id" data-iid="@i.Id" data-name="@i.PrettyName" />
+    <img class="js-dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@Model.Id" data-iid="@i.Id" data-name="@i.PrettyName" />
 }
-<table class="node-dashboard main-dashboard interface-dashboard striped-dashboard">
+<h4 class="page-header">@Model.Interfaces.Count.Pluralize("Network Interface")</h4>
+<table class="table table-striped table-middle table-super-condensed table-responsive text-nowrap">
     <thead>
-        <tr class="category-row">
-            <th colspan="8"><div>@Model.Interfaces.Count.Pluralize("Interface") on @Model.PrettyName</div></th>
-        </tr>
-        <tr class="sort-row">
-            <th></th>
+        <tr>
             <th>Interface</th>
             <th>Speed</th>
             <th>In</th>
@@ -25,13 +22,13 @@
             <th></th>
         </tr>
     </thead>
-    <tbody class="node-group">
+    <tbody class="js-interfaces">
         @foreach (var i in Model.Interfaces.OrderBy(i => !i.IsTeam).ThenBy(i => i.Index))
         {
-            <tr class="@i.MonitorStatus.RowClass()">
-                <td>@i.IconSpan()</td>
+            <tr class="@i.RowClass()">
                 <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-                    last updated @i.LastSync.ToRelativeTime() " data-val="@i.Index">
+                    last updated @i.LastSync.ToRelativeTime() " data-val="@i.Index.ToString()">
+                    @i.IconSpan()
                     @i.PrettyName
                 </td>
                 <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
@@ -44,7 +41,7 @@
     </tbody>
 </table>
 <script>
-    $('.node-group').on('click', '.dashboard-spark', function () {
+    $('.js-content').on('click', '.js-interfaces .js-dashboard-spark', function () {
         $('#dashboard-chart').empty().networkGraph({
             id: $(this).data('nid'),
             iid: $(this).data('iid'),

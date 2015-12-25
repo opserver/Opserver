@@ -2,5 +2,9 @@
 @{
     Layout = null;
 }
-@Html.Partial("~/Views/Shared/TopTabs.cshtml", Model.Tab)
-@Html.Partial("IssuesList")
+<div>
+    @Html.Partial("~/Views/Shared/TopTabs.cshtml", Model.Tab)
+</div>
+<ul>
+    @Html.Partial("IssuesList")
+</ul>

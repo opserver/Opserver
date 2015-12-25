@@ -36,32 +36,16 @@ namespace StackExchange.Opserver.Controllers
             return View("HAProxy.Dashboard", vd);
         }
 
-        [Route("haproxy/detailed")]
-        public ActionResult HAProxyDetailed(string group, string node, string watch = null, bool norefresh = false)
-        {
-            var haGroup = HAProxyGroup.GetGroup(group ?? node);
-            var vd = new HAProxyModel
-            {
-                SelectedGroup = haGroup,
-                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyGroup.AllGroups,
-                Proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies()),
-                View = HAProxyModel.Views.Detailed,
-                Refresh = !norefresh,
-                WatchProxy = watch
-            };
-            return View("HAProxy.Detailed", vd);
-        }
-
         [Route("haproxy/traffic")]
-        public ActionResult HAProxyTraffic(string host)
+        public async Task<ActionResult> HAProxyTraffic(string host)
         {
             if (!Current.Settings.HAProxy.Traffic.Enabled)
                 return DefaultAction();
             
-            var hosts = Task.Run(() => Data.HAProxy.HAProxyTraffic.GetHosts());
-            var topRoutes = Task.Run(() => Data.HAProxy.HAProxyTraffic.GetTopPageRotues(30, host));
+            var hosts = Data.HAProxy.HAProxyTraffic.GetHostsAsync();
+            var topRoutes = Data.HAProxy.HAProxyTraffic.GetTopPageRotuesAsync(30, host);
 
-            Task.WaitAll(hosts, topRoutes);
+            await Task.WhenAll(hosts, topRoutes);
 
             var vd = new HAProxyModel
             {

@@ -19,6 +19,12 @@ namespace StackExchange.Opserver.Data.HAProxy
         [Stat("svname", 1)]
         public string ServerName { get; internal set; }
 
+        // TODO: Settings
+        private static readonly Regex _compactReplacer = new Regex(@"-\d+$", RegexOptions.Compiled);
+        private string _compactServerName;
+        public string CompactServerName => 
+            _compactServerName ?? (_compactServerName = _compactReplacer.Replace(ServerName, ""));
+
         /// <summary>
         /// qcur: current queued requests
         /// </summary>
@@ -427,6 +433,10 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public virtual string Description => Type == StatusType.Server ? ServerName : Type.ToString();
 
+        public bool InMaintenance
+            => ProxyServerStatus == ProxyServerStatus.Maintenance
+               || ProxyServerStatus == ProxyServerStatus.Drain;
+
         public virtual MonitorStatus MonitorStatus
         {
             get
@@ -441,11 +451,9 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                     case ProxyServerStatus.ActiveUpGoingDown:
                     case ProxyServerStatus.BackupUpGoingDown:
-                        return MonitorStatus.Warning;
-
                     case ProxyServerStatus.Maintenance:
                     case ProxyServerStatus.Drain:
-                        return MonitorStatus.Maintenance;
+                        return MonitorStatus.Warning;
 
                     case ProxyServerStatus.Down:
                     case ProxyServerStatus.ActiveDownGoingUp:

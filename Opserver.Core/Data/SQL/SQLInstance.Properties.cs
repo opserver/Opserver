@@ -11,9 +11,9 @@ namespace StackExchange.Opserver.Data.SQL
             get
             {
                 return _serverProperties ?? (_serverProperties = new Cache<SQLServerProperties>
-                    {
-                        CacheForSeconds = 60,
-                        UpdateCache = UpdateFromSql("Properties", async conn =>
+                {
+                    CacheForSeconds = RefreshInterval,
+                    UpdateCache = UpdateFromSql("Properties", async conn =>
                             {
                                 var result = (await conn.QueryAsync<SQLServerProperties>(SQLServerProperties.FetchSQL)).FirstOrDefault();
                                 if (result != null)
@@ -30,7 +30,9 @@ namespace StackExchange.Opserver.Data.SQL
             }
         }
 
-        public decimal? CurrentMemoryPercent { get; set; }
+        public decimal? CurrentMemoryPercent { get; private set; }
+
+        public const string DefaultInstanceName = "MSSQLSERVER";
 
         public class SQLServerProperties
         {
@@ -64,10 +66,24 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime SQLServerStartTime { get; internal set; }
             public VirtualMachineTypes VirtualMachineType { get; internal set; }
 
+            public bool IsVM => VirtualMachineType == VirtualMachineTypes.Hypervisor;
+
             public int CPUSocketCount => CPUCount/HyperthreadRatio;
 
             private Version _version;
             public Version ParsedVersion => _version ?? (_version = Version != null ? System.Version.Parse(Version) : new Version(0, 0));
+
+            public string ShortEdition
+            {
+                get
+                {
+                    if (Edition.Contains("Enterprise")) return "Enterprise";
+                    if (Edition.Contains("Standard")) return "Standard";
+                    if (Edition.Contains("Developer")) return "Developer";
+                    if (Edition.Contains("Compact")) return "Compact";
+                    return Edition;
+                }
+            }
 
             public string MajorVersion
             {
@@ -75,6 +91,7 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     if (Version.HasValue())
                     {
+                        if (Version.StartsWith("13.")) return "SQL 2016";
                         if (Version.StartsWith("12.")) return "SQL 2014";
                         if (Version.StartsWith("11.")) return "SQL 2012";
                         if (Version.StartsWith("10.5")) return "SQL 2008 R2";

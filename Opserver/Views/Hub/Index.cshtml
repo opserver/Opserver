@@ -14,7 +14,7 @@
     <script>
         $(function() {
             function layout() {
-                $('.node-group').isotope({
+                $('.js-isotope').isotope({
                     masonry: {
                         columnWidth: 175,
                         gutterWidth: 10
@@ -26,9 +26,9 @@
             layout();
         });
     </script>}
-<div class="dashboard-list">
+<div>
     <div class="node-dashboard main-dashboard striped-dashboard heads-up">
-        <div class="node-group" data-name="all-servers">
+        <div class="js-isotope js-refresh" data-name="all-servers">
             @foreach (var i in displayItems)
             {
                 var s = i as StackExchange.Opserver.Data.Dashboard.Node;
@@ -36,7 +36,7 @@
                 {
                     @Html.Partial("Dashboard.Node", s)
                 }
-                var ag = i as SQLNode.AvailabilityGroupInfo;
+                var ag = i as SQLNode.AGInfo;
                 if (ag != null)
                 {
                     @Html.Partial("SQL.AvailabilityGroup", ag)

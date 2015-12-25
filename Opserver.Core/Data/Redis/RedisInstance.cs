@@ -12,13 +12,14 @@ namespace StackExchange.Opserver.Data.Redis
     public partial class RedisInstance : PollNode, IEquatable<RedisInstance>, ISearchableNode
     {
         // TODO: Per-Instance searchability, sub-nodes
-        string ISearchableNode.DisplayName => Host + ":" + Port + " - " + Name;
-        string ISearchableNode.Name => Host + ":" + Port;
+        string ISearchableNode.DisplayName => Host + ":" + Port.ToString() + " - " + Name;
+        string ISearchableNode.Name => Host + ":" + Port.ToString();
         string ISearchableNode.CategoryName => "Redis";
 
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
         public string Name => ConnectionInfo.Name;
         public string Host => ConnectionInfo.Host;
+        public string ShortHost { get; internal set; }
 
         public Version Version => Info.HasData() ? Info.Data.Server.Version : null;
 
@@ -31,18 +32,26 @@ namespace StackExchange.Opserver.Data.Redis
         public override string NodeType => "Redis";
         public override int MinSecondsBetweenPolls => 5;
 
+        private readonly object _connectionLock = new object();
         private ConnectionMultiplexer _connection;
         public ConnectionMultiplexer Connection
         {
             get
             {
-                if (_connection == null)
+                if (_connection == null || !_connection.IsConnected)
                 {
-                    _connection = GetConnection(allowAdmin: true);
-                }
-                if (!_connection.IsConnected)
-                {
-                    _connection.Configure();
+                    // TODO: deadlocks - rethink
+                    //lock (_connectionLock)
+                    {
+                        if (_connection == null)
+                        {
+                            _connection = GetConnection(allowAdmin: true);
+                        }
+                        if (!_connection.IsConnected)
+                        {
+                            _connection.Configure();
+                        }
+                    }
                 }
                 return _connection;
             }
@@ -87,9 +96,10 @@ namespace StackExchange.Opserver.Data.Redis
             return null;
         }
 
-        public RedisInstance(RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port)
+        public RedisInstance(RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
         {
             ConnectionInfo = connectionInfo;
+            ShortHost = Host.Split(StringSplits.Period).First();
         }
 
         public string GetServerName(string hostOrIp)
@@ -108,11 +118,12 @@ namespace StackExchange.Opserver.Data.Redis
         // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
         public static SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
 
-        private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 5000)
+        private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 10000)
         {
             var config = new ConfigurationOptions
             {
                 SyncTimeout = syncTimeout,
+                ConnectTimeout = 20000,
                 AllowAdmin = allowAdmin,
                 Password = Password,
                 EndPoints =
@@ -143,7 +154,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public override string ToString()
         {
-            return string.Concat(Host, ": ", Port);
+            return string.Concat(Host, ": ", Port.ToString());
         }
 
         public RedisMemoryAnalysis GetDatabaseMemoryAnalysis(int database, bool runIfMaster = false)

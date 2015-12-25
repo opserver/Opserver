@@ -5,7 +5,7 @@
     var i = Model;
     var slaveOptions = i.RecommendedMasterTargets.Select(s => new
     {
-        sClass = s.MonitorStatus.Class(),
+        sClass = s.TextClass(),
         name = s.Host + ":" + s.Port,
         category = s.Name
     }).ToList();

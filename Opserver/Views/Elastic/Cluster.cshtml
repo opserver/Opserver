@@ -1,11 +1,11 @@
-﻿@using StackExchange.Elastic
-@using StackExchange.Opserver.Data.Dashboard
+﻿@using System.Security.Cryptography
+@using StackExchange.Elastic
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
-    var knownClusters = Model.Clusters.Where(c => c.Nodes.Data != null && c.Nodes.Data.Nodes != null && c.Nodes.Data.Nodes.Any());
-    var unknownClusters = Model.Clusters.Where(c => c.Nodes.Data == null || c.Nodes.Data.Nodes == null || !c.Nodes.Data.Nodes.Any());
+    var knownClusters = Model.Clusters.Where(c => c.Nodes.Data?.Nodes != null && c.Nodes.Data.Nodes.Any());
+    var unknownClusters = Model.Clusters.Where(c => !c.Nodes.Data?.Nodes?.Any() ?? true);
 }
 @helper CommonVersionHeader(ElasticCluster c)
 {
@@ -19,19 +19,15 @@
         @:- Version @versionString
     }
 }
-<div class="node-group" data-name="elastic-overview">
+<div class="js-refresh" data-name="elastic-overview">
     @foreach (var c in unknownClusters)
     {
-        <table class="node-dashboard cluster-dashboard striped-dashboard">
-            <tbody>
-                <tr class="category-row">
-                    <th colspan="12">
-                        <h3>
-                            @c.IconSpan() @(((ISearchableNode)c).DisplayName)
-                            <span class="cluster-info">(unknown)</span>
-                        </h3>
-                    </th>
-                </tr>
+        <h5 class="page-header">
+            @c.IconSpan() @(((ISearchableNode)c).DisplayName)
+            <span class="cluster-info">(unknown)</span>
+        </h5>
+        <table class="table table-striped table-hover table-responsive table-super-condensed">
+            <thead>
                 <tr>
                     <th></th>
                     <th>Node</th>
@@ -39,7 +35,7 @@
                     <th>Error</th>
                     <th>As of</th>
                 </tr>
-            </tbody>
+            </thead>
             <tbody>
                 @foreach (var n in c.ConnectionManager.AllNodes)
                 {
@@ -47,7 +43,7 @@
                         <td>@(MonitorStatus.Critical.IconSpan())</td>
                         <td>@n.Endpoint</td>
                         <td>@n.IsHealthy</td>
-                        <td title="@(n.LastError != null ? n.LastError.Message : null)">@(n.LastError != null ? n.LastError.Message.TruncateWithEllipsis(60) : null)</td>
+                        <td title="@(n.LastError?.Message)">@(n.LastError?.Message.TruncateWithEllipsis(60))</td>
                         <td>@((n.LastPing ?? n.LastSeen).ToRelativeTimeSpan())</td>
                     </tr>
                 }
@@ -59,23 +55,26 @@
         var ss = c.ShardStates;
         var hs = c.HealthStatus.SafeData(true);
         var ns = c.Nodes.SafeData(true);
-        <table class="node-dashboard cluster-dashboard striped-dashboard">
-            <tbody>
-                <tr class="category-row">
-                    <th colspan="12">
-                        <h3>
-                            @hs.IconSpan() @c.Name
-                            <span class="cluster-info">
-                                (@ns.Nodes.Count.Pluralize("node"), @ss.Count().ToComma() @ss.Count().Pluralize("shard", includeNumber: false)@if (hs.InitializingShards > 0)
-                                                                                                                                              {<text>, <b>@hs.InitializingShards.ToComma() initializing</b></text>}@if (hs.RelocatingShards > 0)
-                                                                                                                                                                                                                   {<text>, <b>@hs.RelocatingShards.ToComma() relocating</b></text>}@if (hs.UnassignedShards > 0)
-                                                                                                                                                                                                                                                                                    {<text>, <b>@hs.UnassignedShards.ToComma() unassigned</b></text>})@CommonVersionHeader(c)
-                            </span>
-                        </h3>
-                    </th>
-                </tr>
+        var attribs = new List<string> {ns.Nodes.Count.Pluralize("node"), ss.Count().Pluralize("shard")};
+        if (hs.InitializingShards > 0)
+        {
+            attribs.Add($"{hs.InitializingShards.ToComma()} initializing");
+        }
+        if (hs.RelocatingShards > 0)
+        {
+            attribs.Add($"{hs.RelocatingShards.ToComma()} relocating");
+        }
+        if (hs.UnassignedShards > 0)
+        {
+            attribs.Add($"{hs.UnassignedShards.ToComma()} unassigned");
+        }
+        <h5 class="page-header">
+            @hs.IconSpan() @c.Name
+            <span class="text-muted small">(@string.Join(", ", attribs))@CommonVersionHeader(c)</span>
+        </h5>
+        <table class="table table-striped table-hover table-responsive table-super-condensed">
+            <thead>
                 <tr>
-                    <th></th>
                     <th>Node</th>
                     <th>Shards</th>
                     <th>CPU</th>
@@ -88,7 +87,7 @@
                     <th>Tx</th>
                     <th>As of</th>
                 </tr>
-            </tbody>
+            </thead>
             <tbody>
                 @foreach (var n in ns.Nodes)
                 {
@@ -98,12 +97,12 @@
                     var stats = n.Stats ?? new NodeStats();
                     var upTime = stats.JVM != null && stats.JVM.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
                     <tr class="@n.RowClass()">
-                        <td>@n.IconSpan()</td>
                         <td title="Up since @(upTime.HasValue ? upTime.ToZuluTime() + " (" + upTime.ToRelativeTime() + ")" : "(unknown)")">
-                            <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
+                            @n.IconSpan()
+                            <a class="@n.TextClass()" href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                         </td>
-                        <td>@shards.Count().ToComma() (@shards.Count(s => s.Primary) primary)</td>
-                        @if (stats.Process != null && stats.Process.CPU != null)
+                        <td>@shards.Count().ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary) primary)</span></td>
+                        @if (stats.Process?.CPU != null)
                         {
                             <td title="Process CPU: @stats.Process.CPU.Percent.ToComma()%
                                 @if (stats.OS.LoadAverage != null)
@@ -113,31 +112,31 @@
                         }
                         else
                         {
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
                         }
-                        @if (stats.Process != null && stats.Process.Memory != null)
+                        @if (stats.Process?.Memory != null)
                         {
                             <td>@stats.Process.Memory.ResidentInBytes.ToSize()</td>
                             <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize()</td>
                         }
                         else
                         {
-                            <td class="note">n/a</td>
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
+                            <td class="text-muted">n/a</td>
                         }
                         @if (stats.Process != null)
                         {
                             <td title="@c.HealthStatus.Data.Indices.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
                                 <a href="/elastic/indices?cluster=@c.Name&node=@n.Name">
                                     @c.HealthStatus.Data.Indices.Count.ToComma()
-                                </a> <span class="note">@(stats.Indices.Store.SizeInBytes > 0 ? "(" + stats.Indices.Store.SizeInBytes.ToSize() + ")" : "")</span>
+                                </a> <span class="text-muted">@(stats.Indices.Store.SizeInBytes > 0 ? "(" + stats.Indices.Store.SizeInBytes.ToSize() + ")" : "")</span>
                             </td>
                             <td>@stats.Indices.Search.QueryTotal.ToComma()</td>
                         }
                         else
                         {
-                            <td class="note">n/a</td>
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
+                            <td class="text-muted">n/a</td>
                         }
                         @if (stats.HTTP != null)
                         {
@@ -145,7 +144,7 @@
                         }
                         else
                         {
-                            <td><span class="note">n/a</span></td>
+                            <td><span class="text-muted">n/a</span></td>
                         }
                         @if (stats.Transport != null)
                         {
@@ -154,8 +153,8 @@
                         }
                         else
                         {
-                            <td class="note">n/a</td>
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
+                            <td class="text-muted">n/a</td>
                         }
                         <td>@c.Status.ToPollSpan()</td>
                     </tr>
@@ -170,15 +169,15 @@
         </table>
     }
 </div>
-    <div class="cluster-sub-detail">
-        @if (Model.Clusters.Any(c => c.TroubledIndexes.Any()))
-        {
-            <div class="node-dashboard-separator"></div>
-            @Html.Partial("Cluster.Indices", Model)
-        }
-        @if (Model.Clusters.Any(c => c.TroubledShards.Any()))
-        {
-            <div class="node-dashboard-separator"></div>
-            @Html.Partial("Cluster.Shards", Model)
-        }
-    </div>
+<div class="js-refresh" data-name="cluster-sub-detail">
+    @if (Model.Clusters.Any(c => c.TroubledIndexes.Any()))
+    {
+        <div class="node-dashboard-separator"></div>
+        @Html.Partial("Cluster.Indices", Model)
+    }
+    @if (Model.Clusters.Any(c => c.TroubledShards.Any()))
+    {
+        <div class="node-dashboard-separator"></div>
+        @Html.Partial("Cluster.Shards", Model)
+    }
+</div>

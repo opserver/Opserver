@@ -6,20 +6,20 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {
-        public string Name => ClusterSettings.Name;
-        public int RefreshInterval => ClusterSettings.RefreshIntervalSeconds;
-        private SQLSettings.Cluster ClusterSettings { get; }
+        public string Name => Settings.Name;
+        public int RefreshInterval { get; }
+        private SQLSettings.Cluster Settings { get; }
 
         public List<SQLNode> Nodes { get; }
         
-        public List<SQLNode.AvailabilityGroupInfo> AvailabilityGroups
+        public List<SQLNode.AGInfo> AvailabilityGroups
         {
             get { return Nodes.SelectMany(n => n.AvailabilityGroups.SafeData(true).Where(ag => ag.IsPrimaryReplica)).ToList(); }
         }
         
-        public IEnumerable<SQLNode.AvailabilityGroupInfo> GetAvailabilityGroups(string node, string agName)
+        public IEnumerable<SQLNode.AGInfo> GetAvailabilityGroups(string node, string agName)
         {
-            Func<SQLNode.AvailabilityGroupInfo, bool> agMatch = ag => agName.IsNullOrEmpty() || ag.Name == agName;
+            Func<SQLNode.AGInfo, bool> agMatch = ag => agName.IsNullOrEmpty() || ag.Name == agName;
 
             if (node.HasValue())
                 return Nodes.Where(n => string.Equals(n.Name, node))
@@ -31,25 +31,20 @@ namespace StackExchange.Opserver.Data.SQL
         public MonitorStatus MonitorStatus => Nodes.GetWorstStatus("SQLCluster-" + Name);
         public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : Nodes.GetReasonSummary();
 
-        public SQLNode.ClusterState ClusterStatus
-        {
-            get
-            {
-                var validNode = Nodes.FirstOrDefault(n => n.ClusterStatus.HasData() && n.ClusterStatus.Data.ClusterName.HasValue());
-                return validNode?.ClusterStatus.Data;
-            }
-        }
+        public SQLNode.AGClusterState ClusterStatus =>
+            Nodes.FirstOrDefault(n => n.AGClusterInfo.Data?.ClusterName.HasValue() ?? false)?.AGClusterInfo.Data;
 
         public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
         public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
 
         public SQLCluster(SQLSettings.Cluster cluster)
         {
-            ClusterSettings = cluster;
+            Settings = cluster;
             Nodes = cluster.Nodes
                            .Select(n => new SQLNode(this, n))
                            .Where(n => n.TryAddToGlobalPollers())
                            .ToList();
+            RefreshInterval = cluster.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds;
         }
 
         public bool Equals(SQLCluster other)

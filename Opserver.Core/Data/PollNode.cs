@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Data
         /// and should not be used anywhere, you lost the race, let it go.
         /// </summary>
         public bool AddedToGlobalPollers { get; private set; }
-        public string UniqueKey { get; private set; }
+        public string UniqueKey { get; }
 
         protected PollNode(string uniqueKey)
         {

@@ -7,11 +7,11 @@
 @if (clients.Any())
 {
     <div class="summary-dashboard">
-        <h3>
-            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> @clients.Count Clients
-        </h3>
+        <h5>
+            <a href="/redis/instance?node=@Model.Host:@Model.Port.ToString()">@Model.Host:@Model.Port.ToString() (@Model.Name)</a><span class="note">:</span> @clients.Count Clients
+        </h5>
         <div>
-            <table id="clients-table" data-node="@Model.Host:@Model.Port">
+            <table id="clients-table" data-node="@Model.Host:@Model.Port.ToString()">
                 <thead>
                     <tr>
                         <th>Address</th>
@@ -37,7 +37,7 @@
                                 }</td>
                             <td>@(server.HasValue() ? server : "unknown")</td>
                             <td>@c.Name</td>
-                            <td>@c.Database</td>
+                            <td>@c.Database.ToString()</td>
                             @if (c.Flags != ClientFlags.None)
                             {
                                 <td>@c.Flags.ToString()</td>
@@ -46,9 +46,9 @@
                             {
                                 <td class="note">none</td>
                             }
-                            <td data-val="@(c.SubscriptionCount + c.PatternSubscriptionCount)">@c.SubscriptionCount.ToComma() <span class="note">(@c.PatternSubscriptionCount.ToComma())</span></td>
-                            <td data-val="@c.AgeSeconds">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
-                            <td data-val="@c.IdleSeconds">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
+                            <td data-val="@((c.SubscriptionCount + c.PatternSubscriptionCount).ToString())">@c.SubscriptionCount.ToComma() <span class="note">(@c.PatternSubscriptionCount.ToComma())</span></td>
+                            <td data-val="@c.AgeSeconds.ToString()">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
+                            <td data-val="@c.IdleSeconds.ToString()">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
                             <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>
                         </tr>
                     }
@@ -65,29 +65,28 @@
                         7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                     }
                 });
-                $('.kill-client').click(function (e) {
+                $('.kill-client').click(function(e) {
 
                     var anchor = $(this);
                     var node = anchor.closest('#clients-table').data('node');
                     var address = anchor.data('addr');
-                    if (node && address && confirm('Kill the connection ' + address + ' ?'))
-                    {
+                    if (node && address && confirm('Kill the connection ' + address + ' ?')) {
                         $.ajax('/redis/instance/kill-client', {
                             type: 'POST',
                             data: {
                                 node: node,
                                 address: address
                             },
-                            success: function (data) {
+                            success: function(data) {
                                 if (data && data.success) {
                                     anchor.closest('tr').find('td').css('text-decoration', 'line-through');
                                     anchor.remove();
                                 }
-                            }   
+                            }
                         });
                     }
                     e.preventDefault();
-                })
+                });
             });
         </script>
     </div>

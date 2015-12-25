@@ -16,7 +16,10 @@ namespace StackExchange.Opserver.Data.Redis
             var newMaster = EndPointCollection.TryParse(address);
             await _connection.GetSingleServer().SlaveOfAsync(newMaster);
             var newMasterInstance = GetInstance(address);
-            await newMasterInstance?.PublishSERedisReconfigureAsync();
+            if (newMasterInstance != null)
+            {
+                await (newMasterInstance?.PublishSERedisReconfigureAsync()).ConfigureAwait(false);
+            }
             return true;
         }
 
@@ -49,7 +52,8 @@ namespace StackExchange.Opserver.Data.Redis
             RedisValue tieBreakerValue = EndPointCollection.ToString(myEndPoint);
 
             var result = await _connection.GetDatabase()
-                .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
+                .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
+                .ConfigureAwait(false);
             Tiebreaker.Poll(true);
             return result;
         }
@@ -62,10 +66,12 @@ namespace StackExchange.Opserver.Data.Redis
             return GetSERedisTiebreakerAsync(_connection);
         }
 
-        private async Task<string> GetSERedisTiebreakerAsync(ConnectionMultiplexer conn)
+        private async Task<string> GetSERedisTiebreakerAsync(IConnectionMultiplexer conn)
         {
             RedisKey tieBreakerKey = ConfigurationOptions.Parse(conn.Configuration).TieBreaker;
-            return await conn.GetDatabase().StringGetAsync(tieBreakerKey, CommandFlags.NoRedirect);
+            return await conn.GetDatabase()
+                .StringGetAsync(tieBreakerKey, CommandFlags.NoRedirect)
+                .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -75,7 +81,8 @@ namespace StackExchange.Opserver.Data.Redis
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
             var result = await _connection.GetDatabase()
-                .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority);
+                .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
+                .ConfigureAwait(false);
             Tiebreaker.Poll(true);
             return result;
         }
@@ -95,7 +102,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             var endpoint = EndPointCollection.TryParse(address);
             if (endpoint == null) return false;
-            await _connection.GetSingleServer().ClientKillAsync(endpoint);
+            await _connection.GetSingleServer().ClientKillAsync(endpoint).ConfigureAwait(false);
             return true;
         }
 

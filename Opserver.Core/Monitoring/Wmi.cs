@@ -30,9 +30,9 @@ namespace StackExchange.Opserver.Monitoring
                 Timeout = TimeSpan.FromSeconds(30)
             };
             string username = Current.Settings.Dashboard.Providers?.WMI?.Username ??
-                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn(null),
+                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn((string)null),
                 password = Current.Settings.Dashboard.Providers?.WMI?.Password ??
-                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(null);
+                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn((string)null);
 
             if (username.HasValue() && password.HasValue())
             {
@@ -89,13 +89,13 @@ namespace StackExchange.Opserver.Monitoring
                 }
             }
 
-            public async Task<IEnumerable<dynamic>> GetDynamicResult()
+            public async Task<IEnumerable<dynamic>> GetDynamicResultAsync()
             {
                 using (MiniProfiler.Current.CustomTiming("WMI", _rawQuery, _machineName))
                     return (await Result).Cast<ManagementObject>().Select(mo => new WmiDynamic(mo));
             }
 
-            public async Task<dynamic> GetFirstResult()
+            public async Task<dynamic> GetFirstResultAsync()
             {
                 ManagementObject obj;
                 using (MiniProfiler.Current.CustomTiming("WMI", _rawQuery, _machineName))

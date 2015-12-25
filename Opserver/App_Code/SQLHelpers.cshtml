@@ -10,14 +10,32 @@
     var bad = ims.Except(warning).Except(good).ToList();
     if (linkify)
     {
-        if(bad.Any()){<text> @MonitorStatus.Critical.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@bad.Count() Unhealthy</a></text>}
-        if(warning.Any()){<text> @MonitorStatus.Warning.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@warning.Count() Warning</a></text>}                                                                                                                                                                               
-        if(good.Any()){<text> @MonitorStatus.Good.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@good.Count() Healthy</a></text>}    
+        if (bad.Any())
+        {
+            @MonitorStatus.Critical.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()">@bad.Count.ToComma()</a>
+        }
+        if (warning.Any())
+        {
+            @MonitorStatus.Warning.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()">@warning.Count.ToComma()</a>
+        }
+        if (good.Any())
+        {
+            @MonitorStatus.Good.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()">@good.Count.ToComma()</a>
+        }    
     } 
     else {
-        if(bad.Any()){<text>@MonitorStatus.Critical.IconSpan() @bad.Count().ToComma() Unhealthy</text>}
-        if(warning.Any()){<text> @MonitorStatus.Warning.IconSpan() @warning.Count().ToComma() Warning</text>}                                                                                                                                                                               
-        if(good.Any()){<text> @MonitorStatus.Good.IconSpan() @good.Count().ToComma() Healthy</text>}
+        if (bad.Any())
+        {
+            @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma()
+        }
+        if (warning.Any())
+        {
+            @:@MonitorStatus.Warning.IconSpan() @warning.Count.ToComma()
+        }
+        if (good.Any())
+        {
+            @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
+        }
     }
 }
 
@@ -28,12 +46,24 @@
     var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good).ToList();
     if (minimal)
     {
-        if(good.Any()){@MonitorStatus.Good.Span(good.Count().ToComma(), good.Count().Pluralize("Healthy Database"))}
-        if(bad.Any()){@MonitorStatus.Critical.Span(" (" + bad.Count().ToComma() + ")", bad.Count().Pluralize("Unhealthy Database"))}
+        if (good.Any())
+        {
+            <span class="@(MonitorStatus.Good.TextClass())" title="@good.Count.Pluralize("Healthy Database")">@good.Count.ToComma()</span>
+        }
+        if (bad.Any())
+        {
+            <span class="@MonitorStatus.Critical.TextClass()" title="@bad.Count.Pluralize("Unhealthy Database")">(@bad.Count.ToComma())</span>
+        }
     }
     else
     {
-        if(bad.Any()){<text>@MonitorStatus.Critical.IconSpan() @bad.Count() Unhealthy</text>}
-        if(good.Any()){<text>@MonitorStatus.Good.IconSpan() @good.Count() Healthy</text>} 
+        if (bad.Any())
+        {
+            @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma() Unhealthy
+        }
+        if (good.Any())
+        {
+            @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma() Healthy
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public static async Task<List<string>> GetHosts()
+        public static async Task<List<string>> GetHostsAsync()
         {
             const string cacheKey = "host-list";
             var results = Current.LocalCache.Get<List<string>>(cacheKey);
@@ -27,11 +27,11 @@ namespace StackExchange.Opserver.Data.HAProxy
                 const string sql =
                     @"
 Select Host
-From Logs_Summary
-Where CreationDate > GETUTCDATE() - 15
-Group By Host
+  From Log_Summary_Daily
+ Where CreationDate > GETUTCDATE() - 15
+ Group By Host
 Having Sum(Hits) > 5000
-Order By 1";
+ Order By 1";
                 using (var conn = await Connection.GetOpenAsync(ConnectionString))
                 {
                     results = await conn.QueryAsync<string>(sql);
@@ -50,12 +50,12 @@ Order By 1";
             return true;
         }
 
-        public static Task<List<TrafficDay>> GetTrafficSummary(int lastNdays, string host = null)
+        public static Task<List<TrafficDay>> GetTrafficSummaryAsync(int lastNdays, string host = null)
         {
-            return GetTrafficSummary(host, DateTime.UtcNow.AddDays(-lastNdays), DateTime.UtcNow);
+            return GetTrafficSummaryAsync(host, DateTime.UtcNow.AddDays(-lastNdays), DateTime.UtcNow);
         }
 
-        public static async Task<List<TrafficDay>> GetTrafficSummary(string host, DateTime? startDate, DateTime? endDate)
+        public static async Task<List<TrafficDay>> GetTrafficSummaryAsync(string host, DateTime? startDate, DateTime? endDate)
         {
             var cacheKey = "haproxy-traffic-summary-" + host.IsNullOrEmptyReturn("*");
 
@@ -63,10 +63,10 @@ Order By 1";
 Select CreationDate, 
        Sum(Cast(Hits as BigInt)) as Hits,
        Sum(Case IsPageView When 1 Then Cast(Hits as BigInt) Else 0 End) as PageHits
-From Logs_Summary" + (host.HasValue() ? @"
-Where Host = @host" : "") + @"
-Group By CreationDate
-Order By CreationDate";
+  From Log_Summary_Daily" + (host.HasValue() ? @"
+ Where Host = @host" : "") + @"
+ Group By CreationDate
+ Order By CreationDate";
 
             var results = Current.LocalCache.Get<List<TrafficDay>>(cacheKey);
             if (results == null)
@@ -86,7 +86,7 @@ Order By CreationDate";
             return fResults.ToList();
         }
 
-        public static async Task<List<RouteHit>> GetTopPageRotues(int lastNdays, string host = null)
+        public static async Task<List<RouteHit>> GetTopPageRotuesAsync(int lastNdays, string host = null)
         {
             var cacheKey = "top-page-routes-" + lastNdays + "-" + host;
             var results = Current.LocalCache.Get<List<RouteHit>>(cacheKey);
@@ -108,14 +108,14 @@ Select RouteName,
        Sum(Case When CreationDate > GETUTCDATE() - 1 Then Cast(TagEngineDurationMs as BigInt) Else Null End) TagEngineDurationMs24Hrs,
        Sum(Case When CreationDate > GETUTCDATE() - 1 Then Cast(AspNetDurationMs as BigInt) Else Null End) AspNetDurationMs24Hrs,
        Sum(Case When CreationDate > GETUTCDATE() - 1 Then Cast(Hits as BigInt) Else Null End) Hits24Hrs
-From Logs_Summary
-Where RouteName Is Not Null
-  And IsPageView = 1" + (host.HasValue() ? @"
-  And Host = @host" : "") + @"
-  And CreationDate > GETUTCDATE() - @lastNdays
-  And ResponseCode = 200
-Group By RouteName
-Order By Sum(Hits) Desc";
+  From Log_Summary_Daily
+ Where RouteName Is Not Null
+   And IsPageView = 1" + (host.HasValue() ? @"
+   And Host = @host" : "") + @"
+   And CreationDate > GETUTCDATE() - @lastNdays
+   And ResponseCode = 200
+ Group By RouteName
+ Order By Sum(Hits) Desc";
 
                 using (var conn = await Connection.GetOpenAsync(ConnectionString))
                 {
@@ -126,7 +126,7 @@ Order By Sum(Hits) Desc";
             return results;
         }
 
-        public static async Task<List<RouteData>> GetRouteData(string routeName, int? lastNdays = null, string server = null, string host = null)
+        public static async Task<List<RouteData>> GetRouteDataAsync(string routeName, int? lastNdays = null, string server = null, string host = null)
         {
             var sql = @"
 Select CreationDate, 
@@ -142,7 +142,7 @@ Select CreationDate,
        Sum(Cast(TagEngineCount as BigInt)) as TagEngineCount,
        Sum(Cast(TagEngineDurationMs as BigInt)) as TagEngineDurationMs,
        Sum(Cast(AspNetDurationMs as BigInt)) as AspNetDurationMs
-From Logs_Summary
+From Log_Summary_Daily
 Where ResponseCode = 200
   And IsPageView = 1
   And RouteName = @routeName" + (host.HasValue() ? @"

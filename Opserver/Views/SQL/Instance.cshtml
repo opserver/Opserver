@@ -1,17 +1,12 @@
-﻿@using StackExchange.Opserver.Data.SQL
+﻿@using System.Globalization
+@using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model InstanceModel
 @{ 
     var i = Model.CurrentInstance; 
     if (i == null) { return; }
-    var ci = i as SQLNode;
-    var props = i.ServerProperties;
-    var services = i.Services.SafeData(true);
-    var dbs = i.Databases.SafeData(true);
-    var volumes = i.Volumes.SafeData(true);
-    var enabledTraceFlags = i.TraceFlags.SafeData(true).Where(tf => tf.Enabled);
+    var enabledTraceFlags = i.TraceFlags.Data?.Where(tf => tf.Enabled)?.ToList();
     var counters = Model.PerfCounters = i.PerfCounters.SafeData(true);
-    var jobs = i.JobSummary.SafeData(true);
     Func<decimal, string> kbToSize = d => "(" + ((long)d * 1024).ToSize() + ")";
 }
 <script>
@@ -21,264 +16,314 @@
         });
     });
 </script>
-<div class="bottom-sub-section">
-<div class="summary-dashboard">
-    <h3 class="header">
-        <a href="/sql/servers">SQL Instances</a><span class="note">:</span> @i.IconSpan() @i.Name
+<div>
+    <h5 class="page-header">
+        @i.IconSpan() @i.Name
         @Helpers.PollNow(i)
-    </h3>
-@if (i.LastFetch == null)
-{
-    <div class="no-content">No data fetched for @i.Name</div>
-}
-else if (i.LastFetch.LastSuccess == null)
-{
-    <div class="no-content">No data successfully fetched for @i.Name</div>
-    if (i.LastFetch.ErrorMessage.HasValue())
+    </h5>
+    @if (i.LastFetch?.LastSuccess == null)
     {
-        <div class="no-content critical" style="white-space:pre;">@i.LastFetch.ErrorMessage</div>
-    }
-}
-    <div class="left-col">
-        @if (props.HasData())
-        {
-            var pd = props.Data;
-        <div class="section-wrap refresh-group" data-name="instance-summary">
-            <table>
-                @Helpers.SectionHeader("Summary")
-                <tbody>
-                    <tr>
-                        <td>Machine / Server Name</td>
-                        <td>@pd.MachineName@if (pd.ServerName != pd.MachineName)
-                                           {<text> / @pd.ServerName</text>}</td>
-                    </tr>
-                    <tr title="@pd.FullVersion">
-                        <td>Version</td>
-                        <td>SQL @pd.MajorVersion @pd.Level (<a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>)</td>
-                    </tr>
-                    <tr>
-                        <td>Edition</td>
-                        <td>@pd.Edition</td>
-                    </tr>
-                    <tr title="Started on @pd.SQLServerStartTime.ToRelativeTime() (@pd.SQLServerStartTime)">
-                        <td>Running since</td>
-                        <td>@pd.SQLServerStartTime.ToRelativeTimeSpan() <span class="note">(@((DateTime.UtcNow - pd.SQLServerStartTime).ToTimeStringMini()))</span></td>
-                    </tr>
-                    <tr>
-                        <td>Databases</td>
-                        <td>@SQLHelpers.HealthDescription(i, dbs)</td>
-                    </tr>
-                    @if (jobs.Any())
-                    {
-                        var running = jobs.Count(j => j.IsRunning);
-                        <tr>
-                            <td>Jobs</td>
-                            <td>
-                                <a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a>
-                                @if (running > 0)
-                                {
-                                    <span class="note">(@running running)</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    @if (enabledTraceFlags.Any())
-                    {
-                        <tr>
-                            <td><a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">Trace Flags</a></td>
-                            <td>@string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))</td>
-                        </tr>
-                    }
-                </tbody>
-            </table> 
-            <div class="link-row">
-                <a href="#/sql/summary/configuration">View Configuration</a>
-            </div>
+        <div class="alert alert-danger">
+            <h5>No data successfully fetched for @i.Name</h5>
+            @if (i.LastFetch?.ErrorMessage.HasValue() ?? false)
+            {
+                <p class="error-stack">@i.LastFetch.ErrorMessage</p>
+            }
         </div>
-        <div class="section-wrap refresh-group" data-name="instance-stats">
-            <table>
-                @Helpers.SectionHeader("Stats")
-                <tbody>
-                    <tr title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
-                        <td>CPU</td>
-                        <td><a href="/sql/top?node=@i.Name">@(i.CurrentCPUPercent)%</a> <span class="note">(@pd.CPUCount.Pluralize("Core"))</span> <img class="cpu-graph" width="100" alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd-HH-mm")" /></td>
-                    </tr>
-                    @if (pd.VirtualMachineType != VirtualMachineTypes.None)
-                    {
-                        <tr>
-                            <td>Machine Type</td>
-                            <td>@pd.VirtualMachineType.GetDescription()</td>
-                        </tr>
-                    }
-                    @if (pd.PhysicalMemoryBytes > 0)
-                    {
-                        var clerks = i.MemoryClerkSummary.SafeData(true);
-                        <tr title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
+    }
+    <div class="row js-refresh" data-name="instance-summary">
+        <div class="col-md-6">
+            @{
+                var pd = i.ServerProperties.Data;
+                if (pd != null)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/sql/summary/configuration">view config</a>)</span></div>
+                        <div class="panel-body small">
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.MachineName @if (pd.IsVM)
+                                                {
+                                                    <span class="text-muted">(VM)</span>
+                                                }
+                                <label>Server</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @(pd.InstanceName ?? SQLInstance.DefaultInstanceName)
+                                <label>Instance</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.FullVersion">
+                                @pd.MajorVersion @pd.Level
+                                <label>Release</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.FullVersion">
+                                <a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>
+                                <label>Version</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.Edition">
+                                @pd.ShortEdition
+                                <label>Edition</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="Started on @pd.SQLServerStartTime.ToRelativeTime() (@pd.SQLServerStartTime)">
+                                @((DateTime.UtcNow - pd.SQLServerStartTime).ToTimeStringMini())
+                                <label>Uptime</label>
+                            </div>
+                            @if (i.Databases.Data != null)
+                            {
+                                var dbs = i.Databases.Data;
+                                var dbStatus = dbs.GetWorstStatus();
+                                <div class="value-block col-md-3 col-sm-6 @dbStatus.BackgroundClass()">
+                                    @SQLHelpers.HealthDescription(i, dbs)
+                                    <label>@dbs.Count.Pluralize("Database", includeNumber: false)</label>
+                                </div>
+                            }
+                            @if (i.JobSummary.Data?.Any() ?? false)
+                            {
+                                var jobs = i.JobSummary.Data;
+                                var running = jobs.Count(j => j.IsRunning);
+                                var jobStatus = jobs.GetWorstStatus();
+                                <div class="value-block col-md-3 col-sm-6 @jobStatus.BackgroundClass()">
+                                    <a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, linkify: false, unknownIsHealthy: true)</a>
+                                    <label>
+                                        @jobs.Count.Pluralize("Job", includeNumber: false)
+                                        @if (running > 0)
+                                        {
+                                            @:- <span class="text-success">@running.ToComma() running</span>
+                                        }
+                                    </label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Stats</div>
+                        <div class="panel-body small">
+                            <div class="value-block col-md-3">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @i.CurrentCPUPercent.ToString()%;"></div>
+                                    <span>@i.CurrentCPUPercent.ToString()%</span>
+                                </div>
+                                <label>CPU</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
+                                @pd.CPUCount.ToString()
+                                <label>@pd.CPUCount.Pluralize("Core", includeNumber: false)</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.CurrentWorkerCount.ToComma() / @pd.MaxWorkersCount.ToComma()
+                                <label>Workers</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.SessionCount.ToComma()
+                                <label>Sessions</label>
+                            </div>
+                            @if (pd.PhysicalMemoryBytes > 0)
+                            {
+                                var clerks = i.MemoryClerkSummary.SafeData(true);
+                                <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
 Virtual: @pd.VirtualMemoryBytes.ToComma() (@pd.VirtualMemoryBytes.ToSize())
 SQL Server Used: @pd.CommittedBytes.ToComma() (@pd.CommittedBytes.ToSize())
 SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToSize())
 
 Top Users:
-@foreach (var mc in clerks.OrderByDescending(mc => mc.UsedBytes).Take(5)) {<text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)
-</text>}">
-                            <td>Memory</td>
-                            <td>
-                                <a href="#/sql/summary/memory">
-                                    @(decimal.Round(i.CurrentMemoryPercent.Value, 2) + "%") (@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())
-                                </a>
-                                <a href="#/sql/summary/memory">
-                                    <div class="memory-bar">
-                                        <div class="space-used">
-                                            @if (clerks.Any())
-                                            {
-                                                var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
-                                                var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
-                                                decimal other = 100;
-                                                long otherBytes = clerks.Sum(c => c.UsedBytes);
-                                                if (buffer != null) {
-                                                    other -= buffer.UsedPercent;
-                                                    otherBytes -= buffer.UsedBytes;
-                                                    <div class="used buffer" title="Buffer Pool: @buffer.UsedBytes.ToSize()" style="width: @buffer.UsedPercent%"></div>
-                                                }
-                                                if (plans != null) {
-                                                    other -= plans.UsedPercent;
-                                                    otherBytes -= plans.UsedBytes;
-                                                    <div class="used plans" title="Plan Cache: @plans.UsedBytes.ToSize()" style="width: @plans.UsedPercent%"></div>
-                                                }
-                                                <div class="used good" title="Other: @otherBytes.ToSize() (click for more detail)" style="width: @other%"></div>
-                                            }
-                                            else
-                                            {
-                                                <div class="used good" style="width: @i.CurrentMemoryPercent%"></div>
-                                            }
-                                            @*<div class="used bad" style="width:5%"></div>*@
-                                        </div>
+@foreach (var mc in clerks.OrderByDescending(mc => mc.UsedBytes).Take(5))
+{
+    <text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)
+</text>
+}">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.ToString())%;"></div>
+                                        <span>
+                                    @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)% 
+                                    <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
+                                </span>
                                     </div>
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                    <tr>
-                        <td>Connections</td>
-                        <td><a href="#/sql/summary/connections">@pd.ConnectionCount.ToComma()</a></td>
-                    </tr>
-                    <tr>
-                        <td>Sessions</td>
-                        <td>@pd.SessionCount.ToComma()</td>
-                    </tr>
-                    <tr>
-                        <td>Max Workers</td>
-                        <td>@pd.MaxWorkersCount.ToComma() <span class="note">(@pd.CurrentWorkerCount.ToComma() in use)</span></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-        }
-        @if (volumes.Any())
-        {
-            <div class="section-wrap refresh-group" data-name="instance-volumes">
-                <div class="summary-section-header">Volumes</div>
-                @foreach (var v in volumes)
-                {
-                    var percentUsed = 100 * (v.TotalBytes - v.AvailableBytes) / (float)v.TotalBytes;
-                    <div class="section-wrap half-wrap volume" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
+                                    <label>Memory</label>
+                                </div>
+                                if (clerks.Any())
+                                {
+                                    var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
+                                    var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
+                                    if (buffer != null)
+                                    {
+                                        <div class="value-block col-md-3">
+                                            @buffer.UsedBytes.ToSize()
+                                            <label>Buffer Pool</label>
+                                        </div>
+                                    }
+                                    if (plans != null)
+                                    {
+                                        <div class="value-block col-md-3">
+                                            @plans.UsedBytes.ToSize()
+                                            <label>Plan Cache</label>
+                                        </div>
+                                    }
+                                }
+                            }
+                            <div class="value-block col-md-3 col-sm-6">
+                                <a href="#/sql/summary/connections">@pd.ConnectionCount.ToComma()</a>
+                                <label>Connections</label>
+                            </div>
+                        </div>
+                    </div>
+                    var volumes = i.Volumes.Data;
+                    if (volumes?.Any() ?? false)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Volumes</div>
+                            <div class="panel-body small">
+                                @foreach (var v in volumes)
+                                {
+                                    var percentUsed = 100*(v.TotalBytes - v.AvailableBytes)/(float) v.TotalBytes;
+                                    <div class="value-block col-md-@(volumes.Count == 1 ? "12" : "6") col-sm-6" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
 Total: @v.TotalBytes.ToComma() bytes (@v.TotalBytes.ToSize())
 Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
 Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
-Avgerage Read Stall: @v.AvgReadStallMS ms
-Avgerage Write Stall: @v.AvgWriteStallMS ms">
-                        <div class="volume-label"><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></div>
-                        <div class="volume-usage">@(v.UsedBytes.ToSize()) / @v.TotalBytes.ToSize() <span class="note">(@v.AvailableBytes.ToSize() free)</span></div>
-                        <div class="volume-bar">
-                            <div class="space-used" style="width: auto;"><div class="used good" style="width:@percentUsed%"></div></div>
-                        </div>
-                    </div>
-                }
-            </div>         
-        }
-        @if (ci != null)
-        {
-            var ags = ci.AvailabilityGroups.SafeData(true);
-            var networks = ci.ClusterNetworks.SafeData(true);
-            var iter = 0;
-            <div class="cluster-info section-wrap">
-                <div class="summary-section-header">Cluster Info</div>
-                <div class="cluster-members">
-                    @foreach (var cn in ci.Cluster.Nodes)
-                    {
-                        if (iter > 0)
-                        {
-                            @:,
-                        }
-                        <span title="@cn.ClusterStatus">@cn.IconSpan() <a href="/sql/instance?node=@cn.Name" class="node-name-link @(cn.IsAnAGPrimary ? "bold" : "")">@cn.Name</a></span>
-                        iter++;
-                    }
-                </div>
-                @foreach (var ag in ags)
-                {
-                    <div class="availability-group section-wrap collapsed">
-                        <div class="availability-group-header">
-                            @ag.IconSpan() <a href="/sql/servers#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a> <span class="nite light">(@(ag.LocalReplica != null ? ag.LocalReplica.Role.ToSpan() : null))</span>
-                            <span class="expander">click to expand</span>
-                            <span class="availability-group-databases">
-                                <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(ci, ag.LocalReplica != null ? ag.LocalReplica.Databases : null, minimal: true)
-                            </span>
-                        </div>
-                        
-                        @if (ci.Cluster.Nodes.Any())
-                        {
-                            <div class="availability-group-nodes">
-                                @foreach (var cn in ci.Cluster.Nodes.OrderByDescending(n => n.Name == ag.PrimaryReplica).ThenBy(n => n.Name))
-                                {
-                                    var cnag = cn.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == ag.Name);
-                                    if (cnag == null) { continue; }
-                                    <div class="availability-group-node@(cn == ci ? " current" : "")">
-                                        <span class="icon node @(cn.Name == ag.PrimaryReplica ? "master" : "slave")"></span>
-                                        @cn.MonitorStatus.Span("<a href=\"/sql/instance?node=" + cn.Name + "\">" + cn.Name + "</a>", cn.ClusterMember.State.GetDescription())
-                                        <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(cn, cnag.LocalReplica != null ? cnag.LocalReplica.Databases : null, minimal: true)
+Avgerage Read Stall: @v.AvgReadStallMS.ToString(CultureInfo.CurrentCulture) ms
+Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms">
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.CurrentCulture)%;"></div>
+                                            <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
+                                        </div>
+                                        <label><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></label>
                                     </div>
                                 }
                             </div>
-                        }
-                        <div class="availability-group-listeners">
-                            @foreach (var l in ag.Listeners)
+                        </div>
+                    }
+                }
+                var ci = i as SQLNode;
+                if (ci != null)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Cluster Members</div>
+                        <div class="panel-body small">
+                            @foreach (var cn in ci.Cluster.Nodes)
                             {
-                                <div class="availability-group-listener" title="@l.IPConfigurationString">
-                                    <span class="note">(Listener)</span>@l.DnsName: @string.Join(", ", l.Addresses.OrderByDescending(a => a.State).Select(a => "<span class=\"listener " + a.State.GetDescription() + "\">" + a.IPAddress + "</span>")).AsHtml()
+                                <div class="value-block col-md-3 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
+                                    <a href="/sql/instance?node=@cn.Name">@cn.Name</a>
+                                    <label>Replica</label>
                                 </div>
-                            }                        
+                            }
                         </div>
                     </div>
+
+                    var ags = ci.AvailabilityGroups.Data;
+                    if (ags?.Any() ?? false)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Availability Groups</div>
+                            <div class="panel-body small">
+                                @foreach (var ag in ags)
+                                {
+                                    <h6 class="page-header row">
+                                        @ag.IconSpan()
+                                        <a href="/sql/servers#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.LocalReplica?.Role.ToSpan())
+                                            <label>Role</label>
+                                        </div>
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.Replicas?.Count.ToComma())
+                                            <label>Replicas</label>
+                                        </div>
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.LocalReplica?.Databases?.Count.ToComma())
+                                            <label>Databases</label>
+                                        </div>
+                                        @foreach (var l in ag.Listeners)
+                                        {
+                                            foreach (var a in l.Addresses)
+                                            {
+                                                <div class="value-block col-md-3 col-sm-6 @a.BackgroundClass()">
+                                                    @a.IPAddress - @a.NetworkSubnetIP - @a.State
+                                                    <label>@l.DnsName</label>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    var networks = ci.AGClusterInfo.Data?.Networks;
                 }
-                @if (counters.Any())
-                {
-                    <table class="performance-counters">
-                        <thead>
+            }
+        </div>
+        <div class="col-md-6">
+        </div>
+    </div>
+
+    <div class="left-col">
+        <table>
+            @if (enabledTraceFlags?.Any() ?? false)
+            {
+                <tr>
+                    <td><a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">Trace Flags</a></td>
+                    <td>@string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))</td>
+                </tr>
+            }
+        </table>
+        @{
+            if (ci != null)
+            {
+                var ags = ci.AvailabilityGroups.SafeData(true);
+                var networks = ci.AGClusterInfo.Data?.Networks;
+                <div class="cluster-info section-wrap">
+                    @foreach (var ag in ags)
+                    {
+                        <div class="availability-group section-wrap collapsed">
+                            @if (ci.Cluster.Nodes.Any())
+                            {
+                                <div class="availability-group-nodes">
+                                    @foreach (var cn in ci.Cluster.Nodes.OrderByDescending(n => n.Name == ag.PrimaryReplica).ThenBy(n => n.Name))
+                                    {
+                                        var cnag = cn.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == ag.Name);
+                                        if (cnag == null)
+                                        {
+                                            continue;
+                                        }
+                                        <div class="availability-group-node@(cn == ci ? " current" : "")">
+                                            <span class="icon node @(cn.Name == ag.PrimaryReplica ? "master" : "slave")"></span>
+                                            @cn.MonitorStatus.Span("<a href=\"/sql/instance?node=" + cn.Name + "\">" + cn.Name + "</a>", cn.AGClusterMember.State.GetDescription())
+                                            <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(cn, cnag.LocalReplica?.Databases, minimal: true)
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                    }
+                    @if (counters.Any())
+                    {
+                        <table class="performance-counters">
+                            <thead>
                             <tr>
                                 <th>AlwaysOn Replication</th>
                                 <th>Bytes</th>
                                 <th title="Total since last restart" class="note">Total</th>
                             </tr>
-                        </thead>
-                        <tbody>
-                        @RenderPerSecCounter("Availability Replica", "Bytes Received from Replica/sec", "_Total")
-                        @RenderPerSecCounter("Availability Replica", "Bytes Sent to Replica/sec", "_Total")
-                        @RenderPerSecCounter("Availability Replica", "Bytes Sent to Transport/sec", "_Total")
-                        </tbody>
-                    </table>
-                }
-                @if (networks.Any())
-                {
-                    var groups = networks.GroupBy(n => new { n.NetworkSubnetIP, n.NetworkSubnetPrefixLength });
-                    foreach (var g in groups)
-                    {
-                        <div class="section-wrap third-wrap">
-                            <div class="network-range">@g.Key.NetworkSubnetIP/@g.Key.NetworkSubnetPrefixLength</div>
-                            <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName))).AsHtml()</div>
-                        </div>
+                            </thead>
+                            <tbody>
+                            @RenderPerSecCounter("Availability Replica", "Bytes Received from Replica/sec", "_Total")
+                            @RenderPerSecCounter("Availability Replica", "Bytes Sent to Replica/sec", "_Total")
+                            @RenderPerSecCounter("Availability Replica", "Bytes Sent to Transport/sec", "_Total")
+                            </tbody>
+                        </table>
                     }
-                }
-            </div>
+                    @if (networks?.Any() ?? false)
+                    {
+                        var groups = networks.GroupBy(n => new {n.NetworkSubnetIP, n.NetworkSubnetPrefixLength});
+                        foreach (var g in groups)
+                        {
+                            <div class="section-wrap third-wrap">
+                                <div class="network-range">@g.Key.NetworkSubnetIP/@g.Key.NetworkSubnetPrefixLength</div>
+                                <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName))).AsHtml()</div>
+                            </div>
+                        }
+                    }
+                </div>
+            }
         }
         </div>
 @helper RenderCounter(string category, string name, string instance, string title = null,
@@ -290,11 +335,15 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
     var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
     if (counter != null)
     {
-        <tr title="@if (tooltip != null)
-                   {@tooltip(counter.CalculatedValue)}">
+        <tr title="@if (tooltip != null){@tooltip(counter.CalculatedValue)}">
             <td>@(title ?? name)</td>
-            <td>@toValue(counter.CalculatedValue)@if (toSuffix != null)
-                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</td>
+            <td>
+                @toValue(counter.CalculatedValue)
+                @if (toSuffix != null)
+                {
+                    <span class="note">@toSuffix(counter.CalculatedValue)</span>
+                }
+            </td>
         </tr>
     }
 }
@@ -317,11 +366,22 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
             }
             @if (valueUrl.HasValue())
             {
-                <td><a href="@valueUrl">@toValue(counter.CalculatedValue)@if (toSuffix != null)
-                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</a></td>
+                <td>
+                    <a href="@valueUrl">@toValue(counter.CalculatedValue)
+                        @if (toSuffix != null)
+                        {
+                            <span class="note">@toSuffix(counter.CalculatedValue)</span>
+                        }
+                    </a>
+                </td>
             } else {
-                <td>@toValue(counter.CalculatedValue)@if (toSuffix != null)
-                                                 { <span class="note">@toSuffix(counter.CalculatedValue)</span>}</td>
+                <td>
+                    @toValue(counter.CalculatedValue)
+                    @if (toSuffix != null)
+                    {
+                        <span class="note">@toSuffix(counter.CalculatedValue)</span>
+                    }
+                </td>
             }
             <td class="note">@counter.CurrentValue.ToString("#,##0.###")</td>
         </tr>
@@ -344,8 +404,8 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         </tr>
                     </thead>
                     <tbody>
-                        @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: string.Format("/sql/top?node={0}&sort=ExecutionsPerMinute&LastRunSeconds=300", i.Name))
-                        @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? string.Format("({0}%)", compPercent.Value.ToString("##0.##")) : null)
+                        @RenderPerSecCounter("SQL Statistics", "Batch Requests/sec", "", valueUrl: $"/sql/top?node={i.Name.UrlEncode()}&sort=ExecutionsPerMinute&LastRunSeconds=300")
+                        @RenderPerSecCounter("SQL Statistics", "SQL Compilations/sec", "", toSuffix: v => compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
                         @RenderPerSecCounter("SQL Statistics", "SQL Re-Compilations/sec", "")
                         @RenderPerSecCounter("SQL Statistics", "Guided plan executions/sec", "")
 
@@ -406,8 +466,8 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                         Func<string, string, string, Func<decimal, string>> GetCacheSize = (o, c, j) =>
                         {
                             var counter = i.GetPerfCounter(o, c, j);
-                            var bytes = counter != null ? counter.CurrentValue * 8 * 1024 : (long?)null;
-                            return v => bytes.HasValue ? string.Format("({0})", bytes.Value.ToSize()) : null;
+                            var bytes = counter?.CurrentValue * 8 * 1024;
+                            return v => bytes.HasValue ? $"({bytes.Value.ToSize()})" : null;
                         };
                         var dbCacheBytes = GetCacheSize("Buffer Manager", "Database pages", "");
                         var planCacheBytes = GetCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
@@ -443,8 +503,9 @@ Avgerage Write Stall: @v.AvgWriteStallMS ms">
                 </table>
             </div>*@
         }
-        @if (services.Any())
+        @if (i.Services.Data?.Any() ?? false)
         {
+            var services = i.Services.Data;
             <div class="section-wrap refresh-group" data-name="instance-services">
                 <div class="summary-section-header">Services</div>
                 <table>
@@ -470,5 +531,4 @@ Clustered: @(s.IsClusteredBool ? "Yes" : "No")">
             </div>
         }
     </div>
-</div>
 </div>

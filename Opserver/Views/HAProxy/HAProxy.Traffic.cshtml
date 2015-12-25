@@ -61,13 +61,13 @@
         Status.Graphs.init({ start: @start, end: @end });
         $(function() {
             $('#hits-container').haproxyGraph({ title: 'HAProxy Traffic', subtitle: '@subtitle', params: { host: '@Model.Host' } });
-            $('#content').on('click', '.route-row', function () {
+            $(document).on('click', '.route-row', function () {
                 if ($('#route-graph').length) return;
                 var route = $(this).data('route'),
                     days = $(this).data('days'),
                     host = $(this).data('host'),
                     container = '<div id="route-graph"><div class="cpu-total"><div id="route-time-graph" class="chart route-chart" data-title="Route Time Breakdown"></div></div></div>',
-                    wrap = $(container).appendTo('#content');
+                    wrap = $(container).appendTo('.js-content');
 
                 $('#route-time-graph').haproxyRouteGraph(route, days, host);
 

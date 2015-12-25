@@ -176,7 +176,7 @@ namespace StackExchange.Opserver
 
             split++; // just for Craver
 
-            var sqlComment = " /* " + path.Substring(split) + "@" + lineNumber + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap;
+            var sqlComment = " /* " + path.Substring(split) + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap;
 
             var ret =
                 sql.Substring(0, i) +

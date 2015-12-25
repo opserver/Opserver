@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Jil;
+using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.HAProxy
     /// </summary>
     public class Proxy : IMonitorStatus
     {
-        [JilDirective(Ignore = true)]
+        [IgnoreDataMember]
         public HAProxyInstance Instance { get; internal set; }
         public string Name { get; internal set; }
         public string GroupName => Instance.Group != null ? Instance.Group.Name : "";
@@ -21,16 +21,21 @@ namespace StackExchange.Opserver.Data.HAProxy
         public Backend Backend { get; internal set; }
         public DateTime PollDate { get; internal set; }
 
-        public IEnumerable<Item> AllStats
+        private List<Item> _allStats; 
+
+        public List<Item> AllStats
         {
             get
             {
-                if(Frontend != null)
-                    yield return Frontend;
-                foreach (var s in Servers)
-                    yield return s;
-                if (Backend != null)
-                    yield return Backend;
+                if (_allStats == null)
+                {
+                    var stats = new List<Item>();
+                    if (Frontend != null) stats.Add(Frontend);
+                    stats.AddRange(Servers);
+                    if (Backend != null) stats.Add(Backend);
+                    _allStats = stats;
+                }
+                return _allStats;
             }
         }
 

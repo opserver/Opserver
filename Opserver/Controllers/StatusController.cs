@@ -169,31 +169,38 @@ namespace StackExchange.Opserver.Controllers
             return new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
         }
 
-        public new JsonNetResult Json(object data)
+        protected JsonResult Json<T>(T data)
         {
-            return new JsonNetResult { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonJilResult<T> { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
-        protected JsonResult JsonNotFound(object toSerialize = null)
+        protected JsonResult JsonNotFound()
+        {
+            Response.StatusCode = (int)HttpStatusCode.NotFound;
+            return Json<object>(null);
+        }
+
+        protected JsonResult JsonNotFound<T>(T toSerialize = default(T))
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
             return Json(toSerialize);
         }
 
-        protected JsonNetResult JsonError(string message, HttpStatusCode? status = null)
+        protected JsonResult JsonError(string message, HttpStatusCode? status = null)
         {
             Response.StatusCode = (int)(status ?? HttpStatusCode.InternalServerError);
             return Json(new { ErrorMessage = message });
         }
 
-        protected JsonNetResult JsonError(object toSerialize, HttpStatusCode? status = null)
+        protected JsonResult JsonError<T>(T toSerialize, HttpStatusCode? status = null)
         {
             Response.StatusCode = (int)(status ?? HttpStatusCode.InternalServerError);
             return Json(toSerialize);
         }
 
-        public class JsonNetResult : JsonResult
+        public class JsonJilResult<T> : JsonResult
         {
+            public new T Data { get; set; }
             public override void ExecuteResult(ControllerContext context)
             {
                 if (context == null)

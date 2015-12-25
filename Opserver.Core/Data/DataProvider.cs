@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data
             protected override JsonProperty CreateProperty(System.Reflection.MemberInfo member, MemberSerialization memberSerialization)
             {
                 var property = base.CreateProperty(member, memberSerialization);
-                if (typeof(ISQLVersionedObject).IsAssignableFrom(property.DeclaringType) && property.PropertyName == "MinVersion")
+                if (typeof(ISQLVersioned).IsAssignableFrom(property.DeclaringType) && property.PropertyName == "MinVersion")
                 {
                     property.ShouldSerialize = i => false;
                 }

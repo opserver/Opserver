@@ -20,11 +20,11 @@
             </div>
         } else {
             <div class="sql-server">
-                <h3 class="page-header">@connections.Data.Count.Pluralize("Current active connection") on @i.Name:
-                    
-                    <a href="?node=@i.Name.UrlEncode()&refresh=true" class="reload-link">Refresh</a>
-                </h3>
-                <table class="striped-dashboard" id="connections-table">
+                <h5 class="page-header">
+                    @connections.Data.Count.Pluralize("Current active connection") on @i.Name:
+                    @Helpers.PollNow(i)
+                </h5>
+                <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
                     <thead>
                         <tr>
                             <th>Login</th>

@@ -1,5 +1,4 @@
 ﻿@using StackExchange.Elastic
-@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -10,328 +9,286 @@
     var jvm = n.Stats.JVM;
     var fs = n.Stats.FileSystem;
     var transport = n.Stats.Transport;
+    var cnd = c?.Nodes.Data?.Nodes.FirstOrDefault(nd => nd.GUID == n.GUID);
 }
-<div class="bottom-sub-section">
-    <div class="summary-dashboard">
-        <h3 class="header">
-            <a href="/elastic">Elastic</a><span class="note">:</span> @c.IconSpan() @c.Name<span class="note">: </span> @n.Name
-            @Helpers.PollNow(c)
-        </h3>
-        <div class="left-col">
-            <div class="section-wrap refresh-group" data-name="instance-summary">
-                <table>
-                    @Helpers.SectionHeader("Summary")
-                    <tbody>
-                        <tr>
-                            <td>Cluster</td>
-                            <td title="Unique ID: @c.Nodes.UniqueId">@c.Name</td>
-                        </tr>
-                        <tr>
-                            <td>Node</td>
-                            <td title="Host: @n.Hostname
-Transport: @n.Stats.TransportAddress">@n.Name</td>
-                        </tr>
-                        <tr>
-                            <td>ID</td>
-                            <td>@n.GUID</td>
-                        </tr>
-                        <tr>
-                            <td>Version</td>
-                            <td><a target="_blank" href="http://www.elasticsearch.org/downloads/">@n.Version.ToString()</a></td>
-                        </tr>
-                        <tr>
-                            <td>Role</td>
-                            <td>@(c.Status.Data.MasterNode == n.GUID ? "Master" : "Slave") <span class="note">(<a href="#/elastic/summary/settings">View Settings</a>)</span></td>
-                        </tr>
-                    </tbody>
-                </table> 
-            </div>
-            @if (os != null)
-            {
-                <div class="section-wrap refresh-group" data-name="instance-os">
-                    <table>
-                        @Helpers.SectionHeader("System")
-                        <tbody>
-                            @if (os.UptimeInMilliseconds > 0)
-                            {
-                                var upTime = TimeSpan.FromMilliseconds(os.UptimeInMilliseconds);
-                                <tr>
-                                    <td>Uptime</td>
-                                    <td title="@upTime.ToReadableString()">@upTime.ToTimeStringMini(4)</td>
-                                </tr>
-                            }
-                            @if (os.CPU != null)
-                            {
-                            <tr>
-                                <td>CPU</td>
-                                <td title="System: @os.CPU.System%
-User: @os.CPU.User%
-@if (os.LoadAverage != null) {<text>Load average: @(string.Join(",", os.LoadAverage))</text>}">@(100 - os.CPU.Idle)% 
-                                    @if (os.LoadAverage != null){<text>(@string.Join(", ", os.LoadAverage))</text>}</td>
-                            </tr>
-                            }
-                            @if (os.Memory != null)
-                            {
-                                var totalMemory = os.Memory.ActualFreeInbytes + os.Memory.ActualUsedInBytes;
-                                var percentMemoryUsed = 100 * os.Memory.ActualUsedInBytes / (decimal)totalMemory;
-                                <tr>
-                                    <td>Memory</td>
-                                    <td>
-                                        @(decimal.Round(percentMemoryUsed, 2) + "%") (@os.Memory.ActualUsedInBytes.ToSize() / @totalMemory.ToSize())
-                                        <div class="memory-bar">
-                                            <div class="space-used">
-                                                <div class="used good" style="width: @percentMemoryUsed%"></div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            }
-                            @if (os.Swap != null)
-                            {
-                            <tr>
-                                <td>Swap</td>
-                                <td>
-                                    @os.Swap.UsedInBytes.ToSize() / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize()) <span>(@os.Swap.FreeInBytes.ToSize() free)</span>
-                                </td>
-                            </tr>
-                            }
-                            @if (os.CPU == null && os.Memory == null && os.Swap == null)
-                            {
-                                <tr>
-                                    <td colspan="2" class="no-content">No System Stats Available</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+<div>
+    <h5 class="page-header">
+        <a href="/elastic">Elastic</a><span class="text-muted">:</span> @c.IconSpan() @c.Name<span class="text-muted">: </span> @n.ShortName
+        @Helpers.PollNow(c)
+    </h5>
+    <p></p>
+    <div class="row js-refresh" data-name="node-summary">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/summary/settings">View Settings</a>)</span></div>
+                <div class="panel-body small">
+                    <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
+Transport: @n.Stats.TransportAddress">
+                        @c.Name
+                        <label>Cluster</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @n.Version.ToString()
+                        <label>Version</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @(c.Status?.Data?.MasterNode == n.GUID ? "Master" : "Slave")
+                        <label>Role</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @((c.Nodes?.Data?.Nodes?.Count - 1).ToString())
+                        <label>Siblings</label>
+                    </div>
                 </div>
-            
+            </div>
+            @if (os != null && (os.CPU != null || os.Memory != null || os.Swap != null))
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">System</div>
+                    <div class="panel-body small">
+                        @if (os.UptimeInMilliseconds > 0)
+                        {
+                            // Yeah, this API is bugged in 1.4
+                            // TODO: Fix with matching fix in Elastic upgrade, I hope
+                            var upTime = TimeSpan.FromSeconds(os.UptimeInMilliseconds);
+                            <div class="value-block col-md-3 col-sm-6" title="@upTime.ToReadableString()">
+                                @upTime.ToTimeStringMini(3)
+                                <label>Uptime</label>
+                            </div>
+                        }
+                        @if (os.CPU != null)
+                        {
+                            var percentCpu = (100 - os.CPU.Idle).ToString();
+                            <div class="value-block col-md-3 col-sm-6" title="System: @os.CPU.System.ToString()%, User: @os.CPU.User.ToString()%">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                    <span>@percentCpu% @if (os.LoadAverage != null){<span class="smaller">(@string.Join(", ", os.LoadAverage))</span>}</span>
+                                </div>
+                                <label>CPU</label>
+                            </div>
+                        }
+                        @if (os.Memory != null)
+                        {
+                            var totalMemory = os.Memory.ActualFreeInbytes + os.Memory.ActualUsedInBytes;
+                            var percentMemoryUsed = 100 * os.Memory.ActualUsedInBytes / (decimal)totalMemory;
+                            var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString();
+                            <div class="value-block col-md-3 col-sm-6">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @percentUsed%;"></div>
+                                    <span>@percentUsed% <span class="smaller">(@os.Memory.ActualUsedInBytes.ToSize(precision: 0) / @totalMemory.ToSize(precision: 0))</span></span>
+                                </div>
+                                <label>Memory</label>
+                            </div>
+                        }
+                        @if (os.Swap != null)
+                        {
+                            <div class="value-block col-md-3 col-sm-6" title="@os.Swap.FreeInBytes.ToSize() free">
+                                @os.Swap.UsedInBytes.ToSize() / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
+                                <label>Swap</label>
+                            </div>
+                        }
+                    </div>
+                </div>
             }
             @if (jvm != null)
             {
                 var uptime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
                 var gcTime = TimeSpan.FromMilliseconds(jvm.GC.CollectionTimeInMilliseconds);
-                <div class="section-wrap refresh-group" data-name="instance-jvm">
-                    <table>
-                        @Helpers.SectionHeader("Java Virtual Machine")
-                        <tbody>
-                            <tr>
-                                <td>Uptime</td>
-                                <td title="@uptime.ToReadableString()">@uptime.ToTimeStringMini(4)</td>
-                            </tr>
-                            <tr>
-                                <td>Memory (Heap)</td>
-                                <td>@jvm.Memory.HeapUsedInBytes.ToSize() <span class="note">(@jvm.Memory.HeapCommittedInBytes.ToSize() committed)</span></td>
-                            </tr>
-                            <tr>
-                                <td>Memory (Non-Heap)</td>
-                                <td>@jvm.Memory.NonHeapUsedInBytes.ToSize() <span class="note">(@jvm.Memory.NonHeapCommittedInBytes.ToSize() committed)</span></td>
-                            </tr>
-                            <tr title="
-@foreach (var k in jvm.Memory.Pools.Keys)
-{
-    // TODO: Fix once used_in_bytes in NEST is corrected
-    var val = jvm.Memory.Pools[k];
-    <text>
-@k:
-  Used: @val.Used (@val.PeakUsed peak)
-  Max: @val.Max (@val.PeakMax peak)</text>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Java Virtual Machine <span class="small text-muted">(PID: @(cnd?.Info?.JVM.PID))</span></div>
+                    <div class="panel-body small">
+                        <div class="value-block col-md-4 col-sm-6" title="@uptime.ToReadableString()">
+                            @uptime.ToTimeStringMini(3)
+                            <label>Uptime</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6">
+                            @jvm.Memory.HeapUsedInBytes.ToSize() <span class="text-muted">(@jvm.Memory.HeapCommittedInBytes.ToSize() commit)</span>
+                            <label>Heap</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6">
+                            @jvm.Memory.NonHeapUsedInBytes.ToSize() <span class="text-muted">(@jvm.Memory.NonHeapCommittedInBytes.ToSize() commit)</span>
+                            <label>Non-Heap</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6" title="
+                             @foreach (var k in jvm.Memory.Pools.Keys) { var val = jvm.Memory.Pools[k]; <text>
+                             @k
+                             Used @val.Used (@val.PeakUsed peak)
+                             Max @val.Max (@val.PeakMax peak)</text>
 }">
-                                <td>Memory Pools</td>
-                                <td>@jvm.Memory.Pools.Keys.Count.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Threads</td>
-                                <td>@jvm.Threads.Count.ToComma() <span class="note">(@jvm.Threads.PeakCount.ToComma() peak)</span></td>
-                            </tr>
-                            <tr>
-                                <td>Garbage Collection Runs</td>
-                                <td>@jvm.GC.CollectionCount.ToComma() <span class="note" title="@gcTime.ToReadableString()">(@gcTime.ToTimeStringMini(4))</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            @jvm.Memory.Pools.Keys.Count.ToComma()
+                            <label>Pools</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @jvm.Threads.Count.ToComma() <span class="text-muted">(@jvm.Threads.PeakCount.ToComma() peak)</span>
+                            <label>Threads</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @jvm.GC.CollectionCount.ToComma() <span class="text-muted" title="@gcTime.ToReadableString()">(@gcTime.ToTimeStringMini(4))</span>
+                            <label>GC Runs</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @(cnd?.Info?.JVM.Version)
+                            <label>Version</label>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (transport != null)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">Network</div>
+                    <div class="panel-body small">
+                        <div class="value-block col-md-3 col-sm-6">
+                            @(cnd?.Info?.Network?.PrimaryInterface?.Address)
+                            <label>Address</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.ServerOpen.ToComma()
+                            <label>Open Conns</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.RXSizeInBytes.ToSize()
+                            <label>Received</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.TXSizeInBytes.ToSize()
+                            <label>Sent</label>
+                        </div>
+                    </div>
                 </div>
             }
             @if (fs?.Data != null)
             {
-                <div class="section-wrap refresh-group" data-name="instance-filesystem">
-                    <div class="summary-section-header">File System</div>
-                    @foreach (var fsd in fs.Data)
-                    {
-                        var percentUsed = 100*(fsd.TotalInBytes - fsd.AvailableInBytes)/(float) fsd.TotalInBytes;
-                        <div class="section-wrap@(fs.Data.Length == 1 ? "" : " half-wrap") volume" title="Mount: @fsd.Mount
+                <div class="panel panel-default">
+                    <div class="panel-heading">File System Mounts</div>
+                    <div class="panel-body small">
+                        @foreach (var fsd in fs.Data)
+                        {
+                            var percentUsed = 100 * (fsd.TotalInBytes - fsd.AvailableInBytes) / (float)fsd.TotalInBytes;
+                            <div class="value-block col-md-@(fs.Data.Length == 1 ? "12" : "6") col-sm-6" title="Mount: @fsd.Mount
 Path: @fsd.Path
 Queue: @fsd.DiskQueue
 
 Total: @fsd.TotalInBytes.ToSize()
 Free: @fsd.FreeInBytes.ToSize()
 Available: @fsd.AvailableInBytes.ToSize()
-                    
+
 Reads: @fsd.DiskReads.ToComma() (@fsd.DiskReadSizeInBytes.ToSize())
 Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
-                            <div class="volume-label"><span class="note">Mount:</span> @fsd.Mount</div>
-                            <div class="volume-usage">@((fsd.TotalInBytes - fsd.AvailableInBytes).ToSize()) / @fsd.TotalInBytes.ToSize() <span class="note">(@fsd.AvailableInBytes.ToSize() free)</span></div>
-                            <div class="volume-bar">
-                                <div class="space-used" style="width: auto;"><div class="used good" style="width:@percentUsed%"></div></div>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @percentUsed.ToString()%;"></div>
+                                    <span>@((fsd.TotalInBytes - fsd.AvailableInBytes).ToSize()) / @fsd.TotalInBytes.ToSize() <span class="smaller">(@fsd.AvailableInBytes.ToSize() free)</span></span>
+                                </div>
+                                <label>@fsd.Mount</label>
                             </div>
-                        </div>
-                    }
-                </div>
-            }
-            @if (transport != null)
-            {
-                <div class="section-wrap refresh-group" data-name="instance-transport">
-                    <table>
-                        @Helpers.SectionHeader("Transport")
-                        <tbody>
-                            <tr>
-                                <td>Open Connections</td>
-                                <td>@transport.ServerOpen.ToComma()</td>
-                            </tr>
-                            <tr>
-                                <td>Received</td>
-                                <td>@transport.RXSizeInBytes.ToSize()</td>
-                            </tr>
-                            <tr>
-                                <td>Sent</td>
-                                <td>@transport.TXSizeInBytes.ToSize()</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                        }
+                    </div>
                 </div>
             }
         </div>
-        <div class="right-col">
-            @{
-                var indexStats = c.Stats.Data?.GetIndexStats();
-            }
-            @if (indexStats == null)
-            {
-                <div class="section-wrap refresh-group" data-name="instance-indexes-global">
-                    <div class="summary-section-header">Cluster Indexes</div>
-                    <div class="no-content">No Indexes Found</div>
-                    @if (n != null && n.Version < ElasticCluster.MinIndexInfoVersion)
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Cluster Stats</div>
+                <div class="panel-body small">
+                    @{
+                        var gs = c.Stats.Data?.GlobalStats;
+                    }
+                    @if (gs == null)
                     {
-                        <div class="warning" style="text-align: center">Note: elasticsearch <a href="https://github.com/elasticsearch/elasticsearch/issues/2862" target="_blank">changed the index API</a> in version 0.90+<br />Index info is not fetched in prior versions</div>
+                        <div class="no-content">No Indexes Found</div>
+                    }
+                    else
+                    {
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Documents?.Count.ToComma())">
+                            @(gs?.Total?.Documents?.Count.ToComma() ?? "Unknown")
+                            <label>Docs</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Documents?.Deleted.ToComma())">
+                            @(gs.Total?.Documents?.Deleted.ToComma() ?? "Unknown")
+                            <label>Deleted Docs</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Search?.QueryTotal.ToComma())">
+                            @(gs?.Total?.Search?.QueryTotal.ToComma() ?? "Unknown")
+                            <label>Searches</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Store.SizeInBytes.ToSize())">
+                            @(gs?.Total?.Store?.SizeInBytes.ToSize() ?? "Unknown")
+                            <label>Size</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Indexing?.Total.ToComma())">
+                            @(gs?.Total?.Indexing?.Total.ToComma() ?? "Unknown")
+                            <label>Indexed</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Get?.Total.ToComma())">
+                            @(gs?.Total?.Get?.Total.ToComma() ?? "Unknown")
+                            <label>Gets</label>
+                        </div>
                     }
                 </div>
-            }
-            else
-            {
-                var gs = c.Stats.Data.GlobalStats;
-                var indexes = c.HealthStatus.Data.Indices;
-                <div class="section-wrap refresh-group" data-name="instance-indexes-global">
-                    <div class="summary-section-header">Cluster Index Stats</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Primary</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (gs?.Primaries?.Search != null)
-                            {
-                                <tr>
-                                    <td>Searches</td>
-                                    <td title="Query time: @TimeSpan.FromMilliseconds(gs.Primaries.Search.QueryTimeInMilliseconds).ToReadableString()">@gs.Primaries.Search.QueryTotal.ToComma()</td>
-                                    <td title="Query time: @TimeSpan.FromMilliseconds(gs.Total.Search.QueryTimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Search.QueryTotal.ToComma()</td>
-                                </tr>
-                            }
-                            @if (gs?.Primaries?.Documents != null)
-                            {
-                                <tr>
-                                    <td>Documents</td>
-                                    <td>@gs.Primaries.Documents.Count.ToComma()</td>
-                                    <td class="note">@gs.Total.Documents.Count.ToComma()</td>
-                                </tr>
-                                <tr>
-                                    <td>Documents (Deleted)</td>
-                                    <td>@gs.Primaries.Documents.Deleted.ToComma()</td>
-                                    <td class="note">@gs.Total.Documents.Deleted.ToComma()</td>
-                                </tr>
-                            }
-                            @if (gs?.Primaries?.Store != null)
-                            {
-                                <tr>
-                                    <td>Size</td>
-                                    <td>@gs.Primaries.Store.SizeInBytes.ToSize()</td>
-                                    <td class="note">@gs.Total.Store.SizeInBytes.ToSize()</td>
-                                </tr>
-                            }
-                            @if (gs?.Primaries?.Indexing != null)
-                            {
-                                <tr>
-                                    <td>Indexed</td>
-                                    <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Primaries.Indexing.TimeInMilliseconds).ToReadableString()">@gs.Primaries.Indexing.Total.ToComma()</td>
-                                    <td title="Time taken: @TimeSpan.FromMilliseconds(gs.Total.Indexing.TimeInMilliseconds).ToReadableString()" class="note">@gs.Total.Indexing.Total.ToComma()</td>
-                                </tr>
-                            }
-                            @if (gs?.Primaries?.Get != null)
-                            {
-                                <tr>
-                                    <td>Gets</td>
-                                    <td>@gs.Primaries.Get.Total.ToComma()</td>
-                                    <td class="note">@gs.Total.Get.Total.ToComma()</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="section-wrap refresh-group" data-name="instance-indexes">
-                    <div class="summary-section-header">Cluster Indexes
-                        <a href="#/elastic/summary/indices" class="top-right-nav">View Detail</a></div>
-
-                    @if (indexStats.Count > 0 && indexes != null && indexes.Any()) 
-                    {
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Index</th>
-                                    <th>Searches</th>
-                                    <th>Docs <span class="note">(Size) xCount</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/summary/indices">View Detail</a>)</span></div>
+                <div class="panel-body small">
+                    @{
+                        var indexes = c?.HealthStatus?.Data?.Indices;
+                        var indexStats = c.Stats.Data?.Indices;
+                        if (indexStats?.Count > 0 && indexes != null && indexes.Any())
+                        {
+                            <table class="table table-striped table-hover table-super-condensed">
+                                <thead>
+                                    <tr>
+                                        <th>Index</th>
+                                        <th>Searches</th>
+                                        <th>Docs <span class="text-muted">(Size) xCount</span></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
                                     @foreach (var i in indexes.OrderByWorst().ThenBy(i => { int j; return int.TryParse(i.Name, out j) ? j : 0; }).ThenBy(i => i.Name))
                                     {
                                         IndexStats indexStat;
                                         indexStats.TryGetValue(i.Name, out indexStat);
+                                        var alias = c.GetIndexAliasedName(i.Name);
                                         <tr title="Status: @i.StringStatus
-                                            shards @i.NumberOfShards.ToComma()
-                                            replicas @i.NumberOfReplicas.ToComma()
-                                            active @i.ActiveShards.ToComma()
-                                            active (primary) @i.ActivePrimaryShards.ToComma()
-                                            initializing @i.InitializingShards.ToComma()
-                                            relocating @i.RelocatingShards.ToComma()
-                                            unassigned @i.UnassignedShards.ToComma() ">
-                                            <td>@i.IconSpan() <a href="#/elastic/index/@i.Name/shards">@c.GetIndexAliasedName(i.Name)</a></td>
+Name: @i.Name
+Alias: @(alias == i.Name ? "none" : alias)
+Shards: @i.NumberOfShards.ToComma()
+Replicas: @i.NumberOfReplicas.ToComma()
+Active: @i.ActiveShards.ToComma()
+Active (Primary): @i.ActivePrimaryShards.ToComma()
+Initializing: @i.InitializingShards.ToComma()
+Relocating: @i.RelocatingShards.ToComma()
+Unassigned: @i.UnassignedShards.ToComma() ">
+                                            <td>
+                                                @i.IconSpan()
+                                                <a href="#/elastic/index/@i.Name/shards" class="@i.TextClass()">@alias</a>
+                                            </td>
                                             @if (indexStat != null)
                                             {
                                                 <td>@indexStat.Total.Search.QueryTotal.ToComma()</td>
-                                                <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="note">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas + 1)</span></span></td>
+                                                <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="text-muted">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas + 1)</span></span></td>
                                             }
                                             else
                                             {
-                                                <td colspan="2" class="note">(no stats)</td>
+                                                <td colspan="2" class="text-muted">(no stats)</td>
                                             }
                                         </tr>
                                     }
-                            </tbody>
-                        </table>
-                    }
-                    else
-                    {
-                        <div class="note no-content">No stats available for existing indexes.</div>   
+                                </tbody>
+                            </table>
+                        }
+                        else
+                        {
+                            <div class="no-content">No stats available for existing indexes.</div>
+                        }
                     }
                 </div>
-            }
+            </div>
         </div>
     </div>
 </div>
 @switch (Model.Popup)
 {
     case DashboardModel.Popups.Indices:
-        @Html.Partial("Indices", Model.Current)
+        @Html.Partial("Indices", Model)
         break;
 }

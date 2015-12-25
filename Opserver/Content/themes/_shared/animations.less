@@ -1,0 +1,49 @@
+﻿.spin, .hover-spin:hover .glyphicon {
+  -webkit-animation: spin 2s infinite linear;
+  -moz-animation: spin 2s infinite linear;
+  -o-animation: spin 2s infinite linear;
+  animation: spin 2s infinite linear;
+}
+@-moz-keyframes spin {
+  0% { -moz-transform: rotate(0deg); }
+  100% { -moz-transform: rotate(359deg); }
+}
+@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(359deg); }
+}
+@-o-keyframes spin {
+  0% { -o-transform: rotate(0deg); }
+  100% { -o-transform: rotate(359deg); }
+}
+@keyframes spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+
+.hover-pulsate:not(.icon-rotate-flip):hover .glyphicon, .hover-pulsate.glyphicon:not(.icon-rotate-flip):not(.disabled):hover {
+  -webkit-animation: pulsate 2s infinite linear;
+  -moz-animation: pulsate 2s infinite linear;
+  -o-animation: pulsate 2s infinite linear;
+  animation: pulsate 2s infinite linear;
+}
+
+@-webkit-keyframes pulsate {
+  0% {
+    -webkit-transform: scale(1.0, 1.0);
+  }
+
+  50% {
+    -webkit-transform: scale(0.8, 0.8);
+  }
+
+  100% {
+    -webkit-transform: scale(1.0, 1.0);
+  }
+}

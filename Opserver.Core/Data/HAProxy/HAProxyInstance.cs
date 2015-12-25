@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                         CacheForSeconds = 10,
                         UpdateCache = UpdateCacheItem(
                             description: "HAProxy Fetch: " + Name,
-                            getData: FetchHAProxyStats,
+                            getData: FetchHAProxyStatsAsync,
                             addExceptionData:
                                 e =>
                                 e.AddLoggedData("Server", Name)
@@ -86,7 +86,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        private async Task<List<Proxy>> FetchHAProxyStats()
+        private async Task<List<Proxy>> FetchHAProxyStatsAsync()
         {
             var fetchUrl = Url + ";csv";
             using (MiniProfiler.Current.CustomTiming("http", fetchUrl, "GET"))

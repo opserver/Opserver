@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.SQL
         private Cache<List<SQLServiceInfo>> _services;
         public Cache<List<SQLServiceInfo>> Services => _services ?? (_services = SqlCacheList<SQLServiceInfo>(5 * 60));
 
-        public class SQLServiceInfo : ISQLVersionedObject, IMonitorStatus
+        public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {
             public Version MinVersion => SQLServerVersions.SQL2008R2.SP1;
 
@@ -58,8 +58,8 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTimeOffset? LastStartupTime { get; internal set; }
             public string IsClustered { get; internal set; }
             public bool IsClusteredBool => IsClustered == "Y";
-
-            internal const string FetchSQL = @"
+            
+            public string GetFetchSQL(Version version) => @"
 Select servicename ServiceName,
        service_account ServiceAccount, 
        process_id ProcessId, 
@@ -67,12 +67,8 @@ Select servicename ServiceName,
        status Status,
        last_startup_time LastStartupTime,
        is_clustered IsClustered
-  From sys.dm_server_services";
-
-            public string GetFetchSQL(Version version)
-            {
-                return FetchSQL;
-            }
+  From sys.dm_server_services;
+";
         }
     }
 }

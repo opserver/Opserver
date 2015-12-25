@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -6,10 +7,8 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterStatsInfo> _stats;
-        public Cache<ClusterStatsInfo> Stats
-        {
-            get { return _stats ?? (_stats = GetCache<ClusterStatsInfo>(10)); }
-        }
+        public Cache<ClusterStatsInfo> Stats =>
+            _stats ?? (_stats = GetCache<ClusterStatsInfo>(Settings.RefreshIntervalSeconds));
 
         public class ClusterStatsInfo : ElasticDataObject
         {
@@ -17,9 +16,9 @@ namespace StackExchange.Opserver.Data.Elastic
             public ShardCountStats Shards { get; internal set; }
             public Dictionary<string, IndexStats> Indices { get; internal set; }
             
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
+            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var health = cli.GetIndexStats();
+                var health = await cli.GetIndexStatsAsync();
                 if (health.HasData)
                 {
                     GlobalStats = health.Data.All;
@@ -33,11 +32,6 @@ namespace StackExchange.Opserver.Data.Elastic
                     Indices = new Dictionary<string, IndexStats>();
                 }
                 return health;
-            }
-
-            public Dictionary<string, IndexStats> GetIndexStats()
-            {
-                return Indices ?? new Dictionary<string, IndexStats>();
             }
         }
     }

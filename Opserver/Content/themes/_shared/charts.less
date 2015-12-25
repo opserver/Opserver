@@ -1,0 +1,187 @@
+﻿@chart-area-red: rgb(191, 94, 91);
+@chart-area-blue: rgb(70, 130, 180);
+@circle-border: rgba(60, 60, 60, 1);
+@chart-area-split-top: rgb(181, 137, 0);
+@chart-area-split-bottom: rgb(42, 161, 152);
+
+.d3-chart(@chart-color) {
+    path {
+        //fill: fadeout(@chart-color, 50%);
+        fill: @chart-color;
+        &.area {
+            //stroke: @chart-color;
+        }
+        &.line {
+            fill: none;
+            stroke-width: 1px;
+            stroke: @chart-color;
+        }
+    }
+    .current-area circle {
+        fill: @chart-color;
+    }
+}
+.d3-multi-chart(@chart-color, @seriesName: main, @fadeOut: 50%) {
+    path.series-@{seriesName} {
+        fill: fadeout(@chart-color, @fadeOut);
+        &.area {
+            stroke-width: 1px;
+            stroke: @chart-color;
+        }
+        &.line {
+            fill: none;
+            stroke-width: 1px;
+            stroke: @chart-color;
+        }
+    }
+    .legend-block.series-@{seriesName} {
+        background: @chart-color;
+    }
+    .current-area circle.series-@{seriesName} {
+        fill: @chart-color;
+    }
+    span.series-@{seriesName} {
+        color: @chart-color;
+    }
+}
+
+.chart {
+    position: relative;
+    .chart-title {
+        margin-top: 10px;
+        text-align: center;
+        font-family: "Lucida Grande", "Lucida Sans Unicode", Verdana, Arial, Helvetica, sans-serif;
+        font-size: 16px;
+        color: #3E576F;
+        text-shadow: 1px 1px 3px #ffffff;
+        position: relative;
+        .chart-subtitle {
+            font-size: 12px;
+            color: #6D869F;
+            text-align: center;
+        }
+    }
+    svg {
+        font: 10px sans-serif;
+    }
+    &.cpu-chart {
+        .d3-chart(@chart-area-blue);
+    }        
+    &.memory-chart {
+        .d3-chart(@chart-area-red);
+    }
+    &.network-chart {
+        .d3-multi-chart(@chart-area-split-top, main_in, 40%);
+        .d3-multi-chart(@chart-area-split-bottom, main_out, 40%);
+    }
+    &.haproxy-traffic-chart {
+        .d3-multi-chart(@chart-area-blue, main_hits, 80%);
+        .d3-multi-chart(rgb(191, 94, 91), main_pages, 80%);
+    }   
+    .current-area circle {
+        stroke: @circle-border;
+    } 
+    .axis {
+        path, line {
+            fill: none;
+            stroke: #BBB;
+            shape-rendering: crispEdges;
+        }
+        &.y {
+            path, line {
+                fill: none;
+                stroke: @axis-color;
+                shape-rendering: crispEdges;
+                stroke-width: 1px;
+                stroke-opacity: 0.06;
+            }
+        }
+    }
+    .axis text, .chart-tooltip, .range-selection {
+        -webkit-user-select: none;
+        -moz-user-select: none; 
+        -ms-user-select: none;
+        user-select: none;
+    }
+    .axis text {
+        fill: @axis-color;
+    }
+    .cross-line {
+        stroke: #000000;
+        stroke-opacity: 0.1;
+    }
+    .brush .extent {
+        //stroke: #fff;
+        fill-opacity: .200;
+        shape-rendering: crispEdges;
+    }
+    .chart-tooltip {
+        padding: 5px;
+        border-radius: 5px;
+        width: auto;
+        display: none;
+        box-shadow: 2px 2px 6px #444;
+        position: absolute;
+        background-color: white;
+        white-space: nowrap;
+        z-index: 5;
+        border: solid 1px #EEE;
+
+        .note {
+            color: #AAA;
+        }
+        .tooltip-date {
+            padding-bottom: 2px;
+        }
+    }    
+    .build-tooltips {
+        z-index: 3;
+    }
+    .build-tooltip {
+        z-index: 3;
+
+        .label {
+            color: #888;
+        }
+    }
+    .build-dot {
+        z-index: 3;
+    }
+    .area-tooltip-line {
+        stroke: #fff;
+        stroke-width: 1px;
+    }
+    .range-selection {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+
+        button {
+            box-shadow: inset 0 1px 0 0 #ffffff;
+            background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf));
+            background: -moz-linear-gradient(center top, #ededed 5%, #dfdfdf 100%);
+            filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+            background-color: #ededed;
+            border-radius: 6px;
+            border: 1px solid #dcdcdc;
+            display: inline-block;
+            color: #777777;
+            font-family: arial;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 3px 10px;
+            text-decoration: none;
+            text-shadow: 1px 1px 0 #ffffff;
+            &:hover {
+                background: -webkit-gradient(linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed));
+                background: -moz-linear-gradient(center top, #dfdfdf 5%, #ededed 100%);
+                filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+                background-color: #dfdfdf;
+            }
+            &:active {
+                position: relative;
+                top: 1px;
+            }
+        }
+    }
+}

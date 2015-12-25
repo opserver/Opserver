@@ -2,11 +2,27 @@
 @{
     var n = Model;
 }
-<div class="history-graph-wrap half-width"><div id="cpu-container" class="history-graph"></div></div>
-<div class="history-graph-wrap half-width"><div id="memory-container" class="history-graph" data-max="@(n.TotalMemory/1024/1024)"></div></div>
+<div class="row">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">CPU Utilization</div>
+            <div class="panel-body">
+                <div class="history-graph" id="cpu-container"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Memory Utilization <span cass="muted">(@(n.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
+            <div class="panel-body">
+                <div class="history-graph" id="memory-container" data-max="@(n.TotalMemory/1024/1024)"></div>
+            </div>
+        </div>
+    </div>
+</div>
 <script>
-    $('#cpu-container').cpuGraph({ id: '@n.Id', title: 'CPU Utilization', subtitle: '@n.Name', realtime: true });
-    $('#memory-container').memoryGraph({ id: '@n.Id', title: 'Memory Utilization', subtitle: '@n.Name - @(n.TotalMemory.GetValueOrDefault(0).ToSize())' });
+    $('#cpu-container').cpuGraph({ id: '@n.Id', realtime: true });
+    $('#memory-container').memoryGraph({ id: '@n.Id' });
 </script>
 @if (n.Interfaces.Any())
 {

@@ -46,14 +46,14 @@ namespace StackExchange.Opserver.Models
     {
         public static IHtmlString FreeSpaceSpan(this Volume vol)
         {
-            return string.Format("<span class=\"free-space {1}\">{0:n0}% Free</span>", 100 - vol.PercentUsed, vol.SpaceStatusClass).AsHtml();
+            return string.Format("<span class=\"free-space {1}\">{0:n0}% Free</span>", 100 - vol.PercentUsed, vol.SpaceStatus).AsHtml();
         }
     }
 
     public static class InterfaceExtensionMethods
     {
         private static readonly IHtmlString _unknownSpan = @"<span class=""unknown""></span>".AsHtml();
-        
+
         public static IHtmlString PrettyIn(this Interface i)
         {
             return i.InBps.HasValue ? i.InBps.Value.ToSpeed() : _unknownSpan;
@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Models
     public static class ServerInfoExtensionMethods
     {
         private static readonly IHtmlString _unknownSpan = @"<span class=""unknown""></span>".AsHtml();
-        
+
         public static IHtmlString LastUpdatedSpan(this Node info)
         {
             var addClass = "";
@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.Models
 
         public static string PrettyTotalMemory(this Node info)
         {
-            return info.TotalMemory.HasValue ? (info.TotalMemory.Value + 16 * 1024 * 1024).ToSize() : "";
+            return info.TotalMemory.HasValue ? (info.TotalMemory.Value + 16*1024*1024).ToSize() : "";
         }
 
         public static string PrettyMemoryUsed(this Node info)
@@ -96,29 +96,21 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus MemoryMonitorStatus(this Node info)
         {
             if (!info.PercentMemoryUsed.HasValue) return MonitorStatus.Unknown;
-            if (info.Category.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float)info.Category.MemoryCriticalPercent) return MonitorStatus.Critical;
-            if (info.Category.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float)info.Category.MemoryWarningPercent) return MonitorStatus.Warning;
+            if (info.Category.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryCriticalPercent) return MonitorStatus.Critical;
+            if (info.Category.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
         public static IHtmlString MemoryStatusSpan(this Node info)
         {
-                if (info.MemoryUsed == -2) return _unknownSpan;
-                return string.Format(@"<span class=""{3}"">{0} / {1} ({2:n2}%)</span>",
-                                  info.PrettyMemoryUsed(),
-                                  info.PrettyTotalMemory(),
-                                  info.PercentMemoryUsed,
-                                  info.MemoryMonitorStatus().GetDescription()).AsHtml();
+            if (info.MemoryUsed == -2) return _unknownSpan;
+            return string.Format(@"<span class=""{3}"">{0} / {1} ({2:n2}%)</span>", info.PrettyMemoryUsed(), info.PrettyTotalMemory(), info.PercentMemoryUsed, info.MemoryMonitorStatus().TextClass()).AsHtml();
         }
 
         public static IHtmlString MemoryPercentStatusSpan(this Node info)
         {
             if (info.MemoryUsed == -2) return _unknownSpan;
-            return string.Format(@"<span title=""{0} / {1}"" class=""{3}"">{2:n0}%</span>",
-                                info.PrettyMemoryUsed(),
-                                info.PrettyTotalMemory(),
-                                info.PercentMemoryUsed,
-                                info.MemoryMonitorStatus().GetDescription()).AsHtml();
+            return string.Format(@"<span title=""{0} / {1}"" class=""{3}"">{2:n0}%</span>", info.PrettyMemoryUsed(), info.PrettyTotalMemory(), info.PercentMemoryUsed, info.MemoryMonitorStatus().GetDescription()).AsHtml();
         }
 
         public static MonitorStatus CPUMonitorStatus(this Node info)
@@ -144,17 +136,11 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString NetworkTextSummary(this Node info)
         {
-                var sb = new StringBuilder();
-                sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
-                sb.AppendFormat("Interfaces ({0} total):", info.Interfaces.Count()).AppendLine();
-                info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps)
-                    .ForEach(
-                        i => sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n",
-                                             i.PrettyName,
-                                             (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
-                                             i.InBps.GetValueOrDefault(0).ToSize("b"),
-                                             i.OutBps.GetValueOrDefault(0).ToSize("b")));
-                return sb.ToString().AsHtml();
+            var sb = new StringBuilder();
+            sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
+            sb.AppendFormat("Interfaces ({0} total):", info.Interfaces.Count()).AppendLine();
+            info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps).ForEach(i => sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n", i.PrettyName, (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"), i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b")));
+            return sb.ToString().AsHtml();
         }
 
         public static IHtmlString ApplicationCPUTextSummary(this Node info)
@@ -164,8 +150,7 @@ namespace StackExchange.Opserver.Models
             var sb = new StringBuilder();
             sb.AppendFormat("Total App Pool CPU: {0} %\n", info.Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)));
             sb.AppendLine("App Pools:");
-            info.Apps.OrderBy(a => a.NiceName)
-                .ForEach(a => sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU));
+            info.Apps.OrderBy(a => a.NiceName).ForEach(a => sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU));
             return sb.ToString().AsHtml();
         }
 
@@ -176,8 +161,7 @@ namespace StackExchange.Opserver.Models
             var sb = new StringBuilder();
             sb.AppendFormat("Total App Pool Memory: {0}\n", info.Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
             sb.AppendLine("App Pools:");
-            info.Apps.OrderBy(a => a.NiceName)
-                .ForEach(a => sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize()));
+            info.Apps.OrderBy(a => a.NiceName).ForEach(a => sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize()));
             return sb.ToString().AsHtml();
         }
     }
@@ -197,10 +181,10 @@ namespace StackExchange.Opserver.Models
         {
             if (op.QueryPlan == null) return null;
 
-            using(var sr = new StringReader(op.QueryPlan))
+            using (var sr = new StringReader(op.QueryPlan))
             using (var xmlr = XmlReader.Create(sr))
             {
-                using(var sw = new StringWriter())
+                using (var sw = new StringWriter())
                 using (var xmlw = XmlWriter.Create(sw, _queryPlanTransform.OutputSettings))
                 {
                     _queryPlanTransform.Transform(xmlr, xmlw);

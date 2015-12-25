@@ -1,57 +1,28 @@
 ﻿@using Jil
 @using StackExchange.Opserver.Views.CloudFlare
 @model RailgunsModel
-@{
-}
-<style>
-    .vertical-servers {
-        text-align: center;
-    }
-     .vertical-server {
-         border: solid 1px #eee;
-         border-radius: 10px;
-         display: inline-block;
-         vertical-align: top;
-         margin: 10px;
-     }
-    .vertical-server .server-name {
-        font-weight: bold;
-        font-size: 14px;
-        color: #444;
-        padding: 5px;
-        border-bottom: solid 1px #BBB;
-    }
-    .server-name .last-updated {
-        float: right;
-    } 
-    .json-output {
-        white-space: pre;
-        font-family: consolas;
-    }
-</style>
-<div class="vertical-servers">
+<p></p>
+<div class="row">
     @foreach (var rg in Model.Railguns)
     {
         var stats = rg.Stats;
-        <div class="vertical-server" style="width: 300px;">
-            <div class="server-name">
-                @rg.Name
-                <span class="last-updated">
-                    @rg.Stats.ToPollSpan()
-                </span>
+        <div class="col-md-4">
+            <div class="panel @(rg.LastFetch.LastPollSuccessful ? "panel-default" : "panel-danger")">
+                <div class="panel-heading">
+                    @rg.Name <span class="text-muted small">(@rg.Stats.ToPollSpan())</span>
+                </div>
+                <div class="panel-body">
+                    @if (stats?.Data == null)
+                    {
+                        @:Error polling node
+                    }
+                    else
+                    {
+                        dynamic parsedJson = JSON.DeserializeDynamic(stats.Data);
+                        <pre>@(JSON.SerializeDynamic(parsedJson, Options.PrettyPrint))</pre>
+                    }
+                </div>
             </div>
-        @if (stats?.Data == null)
-        {
-            <div style="text-align: center; padding: 20px" class="critical">
-                Error polling node
-            </div>
-        }
-        else
-        {
-            dynamic parsedJson = JSON.DeserializeDynamic(stats.Data);
-            var formatted = JSON.SerializeDynamic(parsedJson, new Options(true));
-            <div class="json-output">@formatted</div>
-        }
         </div>
     }
 </div>

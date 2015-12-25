@@ -11,7 +11,7 @@
             <span>Slave</span>
             break;
         default:
-            <span class="note">Unknown</span>
+            <span class="text-muted">Unknown</span>
             break;
     }
 }
@@ -24,11 +24,12 @@
 }
 @helper ServerRow (RedisInstance server, int nest = 0, long? toSync = null, string prevMaster = null) {
     var info = server.Info.SafeData();
-    var clients = server.Clients.SafeData();
-    <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group " : "")@(server.SlaveCount == 0 ? "last-of-group " : "") @server.RowClass()">
-        <td class="redis-connection-name">@server.ConnectionInfo.Name</td>
-        <td style="padding-left: @(20 * nest)px">@server.IconSpan() <a href="/redis/instance?node=@server.Host:@server.Port" class="node-name-link">@server.Host</a> <span class="note">(@server.Port@if (toSync > 0)
-{<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
+    <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group " : "")@server.RowClass()">
+        <td>@server.ConnectionInfo.Name</td>
+        <td style="padding-left: @(20*nest)px">
+            @server.IconSpan()
+            <a href="/redis/instance?node=@server.Host:@server.Port" class="@server.TextClass()">@server.Host</a>
+            <span class="text-muted small">(@server.Port@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
         </td>
         <td>
             @if (Current.User.IsExceptionAdmin)
@@ -45,30 +46,13 @@
 foreach (var s in server.SlaveConnections) {
   @:@s.IP:@s.Port (@AppCache.GetHostName(s.IP)) - @s.Status - Offset: @s.Offset.ToComma()
 }
-}">@server.SlaveCount @if(server.TotalSlaveCount > server.SlaveCount){<text> <span class="note">(@(server.TotalSlaveCount - server.SlaveCount))</span></text>}</td>
+}">@server.SlaveCount @if(server.TotalSlaveCount > server.SlaveCount){<text> <span class="text-muted small">(@(server.TotalSlaveCount - server.SlaveCount))</span></text>}</td>
         @if (info != null)
         {
             var stats = info.Stats;
-            <td title="Operations
-@stats.TotalCommandsProcessed.Pluralize("command") total
-@stats.InstantaneousOpsPerSec.Pluralize("operation") per second">@stats.TotalCommandsProcessed.ToComma() <span class="note">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
-            <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="note">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
-            <td title="@info.Clients.Connected.Pluralize("client") connected 
-@if (clients != null)
-{
-    try
-    {
-        var ips = clients.Select(c => c.Host).GroupBy(ip => ip);
-        foreach (var ip in ips.OrderBy(ipg => ipg.Key))
-        {
-            var name = server.GetServerName(ip.Key);
-
-@:@ip.Key@(name.HasValue() ? " (" + name + ")" : "") - @ip.Count().Pluralize("connection")
-    }
-    }
-    catch
-    { }                                                                      
-}">@info.Clients.Connected</td>
+            <td>@stats.TotalCommandsProcessed.ToComma() <span class="text-muted small">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
+            <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="text-muted small">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
+            <td>@info.Clients.Connected</td>
         } 
         else
         {
@@ -83,43 +67,25 @@ foreach (var s in server.SlaveConnections) {
     if (server.SlaveCount <= 0 || server.Replication == null) { return; }
     foreach (var s in server.SlaveInstances)
     {
-        if (s == null || s.Replication == null) { continue; }
+        if (s?.Replication == null) { continue; }
         @ServerRow(s, nest + 1, s.IsSlaving ? s.Replication.MastSyncLeftBytes : (s.Replication.SlaveReplicationOffset == 1 ? 0 : server.Replication.MasterReplicationOffset - s.Replication.SlaveReplicationOffset))
     }
 }
-<style>
-    .first-of-group:first-of-type td {
-        border-top: solid 1px transparent;
-    }
-    .first-of-group td {
-        border-top: solid 1px #CCC;
-    }
-    .node-group td {
-        padding-left: 4px;
-        padding-right: 4px;
-    }
-</style>
 @{
     var instances = Model.Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host);
     var masters = instances.Where(i => i.IsMaster).ToList();
     var slaving = instances.Where(i => i.IsSlaving).ToList();
     var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || i.Info.LastPollStatus == FetchStatus.Fail));
-    var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0);
-    var standAloneMasters = masters.Where(m => m.SlaveCount == 0);
+    var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0).ToList();
+    var standAloneMasters = masters.Where(m => m.SlaveCount == 0).ToList();
 }
 <div>
-    <div class="node-group" data-name="redis-overview">
+    <div class="js-refresh" data-name="redis-overview">
         @if (slaving.Any())
         {
-            <table class="cluster-dashboard striped-dashboard">
-                <thead class="node-header">
-                    <tr class="category-row">
-                        <th colspan="@(Model.AllVersionsMatch ? 7 : 8)">
-                            <h3>
-                                @MonitorStatus.Warning.IconSpan() @slaving.Count().Pluralize("Slaving Instance") @CommonVersionHeader()
-                            </h3>
-                        </th>
-                    </tr>
+            <h5 class="page-header">@MonitorStatus.Warning.IconSpan() @slaving.Count.Pluralize("Slaving Instance") <span class="small">@CommonVersionHeader()</span></h5>
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                <thead>
                     <tr>
                         <th>Name</th>
                         <th>Master</th>
@@ -139,41 +105,47 @@ foreach (var s in server.SlaveConnections) {
                             <td>@s.Name</td>
                             @if (master != null)
                             {
-                                <td>@master.IconSpan() <a href="?node=@master.Host:@master.Port" class="node-name-link">@master.Host</a> <span class="note">(@master.Port)</span></td>
+                                <td>
+                                    @master.IconSpan()
+                                    <a href="?node=@master.Host:@master.Port" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port)</span>
+                                </td>
                             }
                             else
                             {
-                                <td class="note">Not Found</td>
+                                <td class="text-muted">Not Found</td>
                             }
-                            <td>@s.IconSpan() <a href="?node=@s.Host:@s.Port" class="node-name-link">@s.Host</a> <span class="note">(@s.Port)</span></td>
+                            <td>
+                                @s.IconSpan()
+                                <a href="?node=@s.Host:@s.Port" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port)</span>
+                            </td>
                             @if (master != null)
                             {
-                                var sc = master.SlaveConnections != null ? master.SlaveConnections.FirstOrDefault(sci => s.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress))) : null;
+                                var sc = master.SlaveConnections?.FirstOrDefault(sci => s.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress)));
                                 if (sc != null)
                                 {
                                     <td>@sc.Status</td>
                                 }
                                 else
                                 {
-                                    <td class="note">unknown</td>
+                                    <td class="text-muted">unknown</td>
                                 }
                             }
                             else
                             {
-                                <td class="note">unknown</td>
+                                <td class="text-muted">unknown</td>
                             }
                             <td>@s.Replication.MasterLinkStatus</td>
-                            @if (s.Replication.MastSyncLeftBytes == -1)
+                            @switch (s.Replication.MastSyncLeftBytes)
                             {
-                                <td class="note">n/a</td>
-                            }
-                            else if (s.Replication.MastSyncLeftBytes == 0)
-                            {
-                                <td class="note">unknown</td>
-                            }
-                            else
-                            {
-                                <td title="@s.Replication.MastSyncLeftBytes.ToComma() bytes left to replicate">@s.Replication.MastSyncLeftBytes.ToHumanReadableSize()</td>
+                                case -1:
+                                    <td class="text-muted">n/a</td>
+                                    break;
+                                case 0:
+                                    <td class="text-muted">unknown</td>
+                                    break;
+                                default:
+                                    <td title="@s.Replication.MastSyncLeftBytes.ToComma() bytes left to replicate">@s.Replication.MastSyncLeftBytes.ToHumanReadableSize()</td>
+                                    break;
                             }
                             @if (!Model.AllVersionsMatch)
                             {
@@ -187,13 +159,9 @@ foreach (var s in server.SlaveConnections) {
         }
         @if (missing.Any())
         {
-            <table class="cluster-dashboard striped-dashboard">
-                <thead class="node-header">
-                    <tr class="category-row">
-                        <th colspan="5">
-                            <h3>@MonitorStatus.Critical.IconSpan() @missing.Count().Pluralize("Missing/Unknown Instance")</h3>
-                        </th>
-                    </tr>
+            <h5 class="page-header">@MonitorStatus.Critical.IconSpan() @missing.Count().Pluralize("Missing/Unknown Instance")</h5>
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                <thead>
                     <tr>
                         <th>Name</th>
                         <th>Host</th>
@@ -207,9 +175,12 @@ foreach (var s in server.SlaveConnections) {
                     {
                         <tr class="@m.RowClass()">
                             <td>@m.Name</td>
-                            <td>@m.IconSpan() <a href="#" class="node-name-link">@m.Host</a> <span class="note">(@m.Port)</span></td>
+                            <td>
+                                @m.IconSpan()
+                                <a href="#" class="@m.TextClass()">@m.Host</a> <span class="text-muted">(@m.Port)</span>
+                            </td>
                             <td>@ServerRole(m.Role)</td>
-                            <td title="@m.Info.ErrorMessage" class="note">@m.Info.ErrorMessage.TruncateWithEllipsis(100)</td>
+                            <td title="@m.Info.ErrorMessage" class="text-muted">@m.Info.ErrorMessage.TruncateWithEllipsis(100)</td>
                             <td>@m.Info.ToPollSpan()</td>
                         </tr>
                     }
@@ -218,23 +189,19 @@ foreach (var s in server.SlaveConnections) {
         }
         @if (mastersWithSlaves.Any())
         {
-            <table class="cluster-dashboard striped-dashboard">
-                <thead class="node-header">
-                    <tr class="category-row">
-                        <th colspan="@(Model.AllVersionsMatch ? 9 : 10)">
-                            <h3>
-                                @mastersWithSlaves.GetWorstStatus().IconSpan() @mastersWithSlaves.Count().Pluralize("Instance Group")
-                                <span class="cluster-info">(@((mastersWithSlaves.Count() + mastersWithSlaves.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
-                            </h3>
-                        </th>
-                    </tr>
+            <h5 class="page-header">
+                @mastersWithSlaves.GetWorstStatus().IconSpan() @mastersWithSlaves.Count.Pluralize("Group")
+                <span class="small">(@((mastersWithSlaves.Count + mastersWithSlaves.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
+            </h5>
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                <thead>
                     <tr>
                         <th>Name</th>
-                        <th>Host <span class="note">(port - behind)</span></th>
+                        <th>Host <span class="text-muted small">(port - behind)</span></th>
                         <th>Role</th>
                         <th>Slaves</th>
-                        <th title="Operations">Ops <span class="note">(/sec)</span></th>
-                        <th>Memory <span class="note">(used)</span></th>
+                        <th title="Operations">Ops <span class="text-muted small">(/sec)</span></th>
+                        <th>Memory <span class="text-muted small">(used)</span></th>
                         <th>Clients</th>
                         @if (!Model.AllVersionsMatch)
                         {
@@ -255,23 +222,19 @@ foreach (var s in server.SlaveConnections) {
         }
         @if (standAloneMasters.Any())
         {
-            <table class="cluster-dashboard striped-dashboard">
-                <tbody class="node-header">
-                    <tr class="category-row">
-                        <th colspan="9">
-                            <h3>
-                                @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count().Pluralize("Standalone")
-                                <span class="cluster-info">(All Masters)@CommonVersionHeader()</span>
-                            </h3>
-                        </th>
-                    </tr>
+            <h5 class="page-header">
+                @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count().Pluralize("Standalone")
+                <span class="small">(All Masters)@CommonVersionHeader()</span>
+            </h5>
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                <thead>
                     <tr>
                         <th>Name</th>
                         <th>Host</th>
                         <th>Role</th>
                         <th>Slaves</th>
-                        <th title="Operations">Ops <span class="note">(/sec)</span></th>
-                        <th>Memory <span class="note">(used)</span></th>
+                        <th title="Operations">Ops <span class="text-muted small">(/sec)</span></th>
+                        <th>Memory <span class="text-muted small">(used)</span></th>
                         <th>Clients</th>
                         @if (!Model.AllVersionsMatch)
                         {
@@ -279,7 +242,7 @@ foreach (var s in server.SlaveConnections) {
                         }
                         <th>As of</th>
                     </tr>
-                </tbody>
+                </thead>
                 <tbody>
                     @foreach (var m in standAloneMasters.OrderBy(m => m.Port).ThenBy(m => m.Name))
                     {

@@ -4,24 +4,20 @@
     Layout = null;
     this.SetPageTitle("PagerDuty Full Escalation");
 }
-
-<table class="node-dashboard main-dashboard" style="min-width: 600px;">
-<tbody class="node-header">
-<tr class="category-row">
-    <th colspan="8">
-        <h3>Full Escalation Schedule</h3>
-    </th>
-</tr>
-<tr>
-    <th>Name</th>
-    <th>Level</th>
-    <th>Email</th>
-    <th>Phone</th>
-</tr>
-@foreach (var a in Model.OrderBy(u => u.EscalationLevel))
-{
-    @Html.Partial("PagerDuty.OnCallRow", a)
-}
-</tbody>
+<table class="table table-striped table-hover table-condensed table-responsive text-nowrap" data-title="Full Escalation Schedule">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Level</th>
+            <th>Email</th>
+            <th>Phone</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var a in Model.OrderBy(u => u.EscalationLevel))
+        {
+            @Html.Partial("PagerDuty.OnCallRow", a)
+        }
+    </tbody>
 </table>
 

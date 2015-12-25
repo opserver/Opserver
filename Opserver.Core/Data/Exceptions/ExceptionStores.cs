@@ -11,10 +11,7 @@ namespace StackExchange.Opserver.Data.Exceptions
     {
         public const string AllExceptionsListKey = "Exceptions-GetAllErrors";
 
-        public static List<Application> Applications
-        {
-            get { return GetApplications(); }
-        }
+        public static List<Application> Applications => GetApplications();
 
         public static int TotalExceptionCount
         {
@@ -51,8 +48,8 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        public static List<ExceptionStore> Stores { get; private set; }
-        public static List<Application> ConfigApplications { get; private set; }
+        public static List<ExceptionStore> Stores { get; }
+        public static List<Application> ConfigApplications { get; }
 
         static ExceptionStores()
         {
@@ -67,23 +64,23 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public static Task<Error> GetError(string appName, Guid guid)
         {
-            return GetStores(appName).Select(async s => await s.GetError(guid)).FirstOrDefault(e => e != null);
+            return GetStores(appName).Select(async s => await s.GetErrorAsync(guid)).FirstOrDefault(e => e != null);
         }
 
-        public static async Task<T> Action<T>(string appName, Func<ExceptionStore, Task<T>> action)
+        public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
         {
             var result = default(T);
-            foreach(var a in GetApps(appName))
+            foreach (var s in GetApps(appName).Select(a => a.Store).Distinct())
             {
-                var aResult = await action(a.Store);
+                var aResult = await action(s);
                 if (typeof(T) == typeof(bool) && Convert.ToBoolean(aResult))
                 {
                     result = aResult;
                 }
-                if (a.Store != null)
+                if (s != null)
                 {
-                    a.Store.Applications.Purge();
-                    a.Store.ErrorSummary.Purge();
+                    s.Applications.Purge();
+                    s.ErrorSummary.Purge();
                 }
             }
             return result;
@@ -91,7 +88,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public static IEnumerable<Application> GetApps(string appName)
         {
-            return Applications.Where(a => a.Name == appName);
+            return Applications.Where(a => a.Name == appName || appName == null);
         }
 
         private static IEnumerable<ExceptionStore> GetStores(string appName)

@@ -3,15 +3,36 @@
 @{
     Layout = null;
 }
+@helper RenderTab(TopTab tab)
+{
+    if (tab.IsEnabled)
+    {
+        // Optimism!
+        using (MiniProfiler.Current.Step("Render Tab: " + tab.Name))
+        {
+            var status = tab.GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
+            var badgeCount = tab.GetBadgeCount?.Invoke();
+                    <li class="@(tab.IsCurrentTab ? "active" : null)">
+                        <a class="@(status.TextClass())" href="@tab.Url" title="@(tab.GetTooltip?.Invoke())">
+                            @tab.Name
+                            @if (badgeCount > 0)
+                            {
+                                <span class="badge" data-name="@tab.Name">@badgeCount.ToComma()</span>
+                            }
+                        </a>
+                    </li>
+        }
+    }
+}
 @if (!TopTabs.HideAll)
 {
     using (MiniProfiler.Current.Step("TopTabs"))
     {
-        <div class="top-tabs">
-            @foreach (var tab in TopTabs.Tabs.Values)
-            {
-                @tab.Render()
-            }
-        </div>
+                <ul class="nav navbar-nav navbar-right js-top-tabs">
+                    @foreach (var tab in TopTabs.Tabs.Values)
+                    {
+                        @RenderTab(tab)
+                    }
+                </ul>
     }
 }    

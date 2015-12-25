@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
 using StackExchange.Elastic;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
@@ -16,15 +15,15 @@ namespace StackExchange.Opserver.Data.Elastic
         string ISearchableNode.DisplayName => SettingsName;
         string ISearchableNode.Name => SettingsName;
         string ISearchableNode.CategoryName => "elastic";
-        private string SettingsName { get; }
+        public ElasticSettings.Cluster Settings { get; }
+        private string SettingsName => Settings.Name;
         public List<ElasticNode> SettingsNodes { get; set; }
         public ConnectionManager ConnectionManager { get; set; }
 
         public ElasticCluster(ElasticSettings.Cluster cluster) : base(cluster.Name)
         {
-            SettingsName = cluster.Name;
+            Settings = cluster;
             SettingsNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();
-            // TODO: Profiler
             ConnectionManager = new ConnectionManager(SettingsNodes.Select(n => n.Url), new ElasticProfilerProvider());
         }
 
@@ -132,13 +131,13 @@ namespace StackExchange.Opserver.Data.Elastic
         
         public Action<Cache<T>> UpdateFromElastic<T>() where T : ElasticDataObject, new()
         {
-            return UpdateCacheItem(description: "Elastic Fetch: " + SettingsName + ":" + typeof(T).Name,
-                                   getData: () =>
+            return UpdateCacheItem<T>(description: "Elastic Fetch: " + SettingsName + ":" + typeof(T).Name,
+                                   getData: async () =>
                                        {
+                                           // TODO: Refactor
                                            var result = new T();
-                                           result.PopulateFromConnections(ConnectionManager.GetClient());
-                                           // TODO: Make all of this actually async in the client
-                                           return Task.FromResult(result);
+                                           await result.PopulateFromConnections(ConnectionManager.GetClient());
+                                           return result;
                                        },
                                    addExceptionData:
                                        e =>

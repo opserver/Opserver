@@ -1,16 +1,44 @@
 ﻿@using StackExchange.Opserver.Data.SQL
 @{
     Layout = null;
-    var instances = SQLInstance.AllInstances;
+    var clusters = SQLCluster.AllClusters;
+    var standalone = SQLInstance.AllStandalone;
 }
-<div class="node-selector">
-    <div class="no-content">Please select a SQL server.</div>
-    @foreach (var i in instances)
+@helper RenderInstances(IEnumerable<SQLInstance> instances)
+{
+    foreach (var i in instances)
     {
         var props = i.ServerProperties.SafeData(true);
-        <a class="instance" href="?node=@i.Name.UrlEncode()">
+        <a class="list-group-item" href="?node=@i.Name.UrlEncode()">
             @i.IconSpan() @i.Name
-            <span class="version" title="@props.FullVersion">@props.MajorVersion</span>
+            <span class="badge" title="@props.FullVersion">@props.MajorVersion</span>
         </a>
     }
+}
+<div>
+    <h5 class="page-header">Please select a SQL instance.</h5>
+    <div class="row">
+        @foreach (var c in clusters)
+        {
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">@c.Name</div>
+                    <div class="panel-body small list-group">
+                        @RenderInstances(c.Nodes)
+                    </div>
+                </div>
+            </div>
+        }
+        @if (standalone.Any())
+        {
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Standalone</div>
+                    <div class="panel-body small list-group">
+                        @RenderInstances(standalone)
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
 </div>

@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Views.SQL
             if (db.IsSystemDatabase) return "system";
             if (db.State == DatabaseStates.Restoring) return "restoring";
 
-            return db.MonitorStatus.Class();
+            return db.TextClass();
         }
     }
 }

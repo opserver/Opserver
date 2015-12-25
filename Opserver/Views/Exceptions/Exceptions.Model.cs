@@ -23,6 +23,9 @@ namespace StackExchange.Opserver.Views.Exceptions
         public Error Exception { get; set; }
         public List<Application> Applications { get; set; }
         public List<Error> Errors { get; set; }
+        private int? _shownCount;
+        public int ShownCount { get { return _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value; } }
+
 
         public bool ClearLinkForVisibleOnly { get; set; }
 
@@ -34,22 +37,23 @@ namespace StackExchange.Opserver.Views.Exceptions
         public int LoadAsyncSize { get; set; }
 
         public bool ShowDeleted { get; set; }
-        public bool ShowAll { get { return SelectedLog.IsNullOrEmpty(); } }
+        public bool ShowAll => SelectedLog.IsNullOrEmpty();
         private int? _totalCount;
         public int TotalCount { get { return _totalCount ?? (_totalCount = Applications.Where(a => ShowAll || a.Name == SelectedLog).Sum(a => a.ExceptionCount)).Value; } }
+        public bool HasMore {  get { return TotalCount > ShownCount; } }
         public string Title
         {
             get
             {
                 if (Search.HasValue())
                 {
-                    return string.Format("{0} Search results ({1} exceptions) for '{2}'{3}", Errors.Count, Errors.Sum(e => e.DuplicateCount).ToComma(), Search, SelectedLog.HasValue() ? " in " + SelectedLog : "");
+                    return $"{Errors.Count} Search results ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) for '{Search}'{(SelectedLog.HasValue() ? " in " + SelectedLog : "")}";
                 }
                 if (Exception == null)
                 {
                     return TotalCount.Pluralize((SelectedLog + " Exception").Trim());
                 }
-                return string.Format("Most recent {0} similar entries ({1} exceptions) from {2}", Errors.Count, Errors.Sum(e => e.DuplicateCount).ToComma(), SelectedLog);
+                return $"Most recent {Errors.Count} similar entries ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) from {SelectedLog}";
             }
         }
     }

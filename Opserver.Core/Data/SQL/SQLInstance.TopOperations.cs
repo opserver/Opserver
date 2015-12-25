@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return new Cache<List<TopOperation>>
             {
-                CacheKey = GetCacheKey("TopOperations-" + (options?.GetHashCode() ?? 0)),
+                CacheKey = GetCacheKey("TopOperations-" + (options?.GetHashCode() ?? 0).ToString()),
                 CacheForSeconds = 15,
                 CacheStaleForSeconds = 5*60,
                 UpdateCache = UpdateFromSql("Top Operations", conn =>
@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Data.SQL
             string sql = string.Format(GetFetchSQL<TopOperation>(), clause, "");
             return new Cache<TopOperation>
                 {
-                    CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode() + "-" + statementStartOffset),
+                    CacheKey = GetCacheKey("TopOperation-" + planHandle.GetHashCode().ToString() + "-" + statementStartOffset.ToString()),
                     CacheForSeconds = 60,
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations",
@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Data.SQL
                 };
         }
 
-        public class TopOperation : ISQLVersionedObject
+        public class TopOperation : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 

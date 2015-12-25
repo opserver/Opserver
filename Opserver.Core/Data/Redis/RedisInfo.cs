@@ -27,19 +27,7 @@ namespace StackExchange.Opserver.Data.Redis
                 // key space
             }
         }
-
-        public RedisInfo()
-        {
-            Replication = new ReplicationInfo();
-            Clients = new ClientInfo();
-            Server = new ServerInfo();
-            Memory = new MemoryInfo();
-            Persistence = new PersistenceInfo();
-            Stats = new StatsInfo();
-            CPU = new CPUInfo();
-            Keyspace = new KeyspaceInfo();
-        }
-
+        
         public enum RedisInstanceRole
         {
             Master,
@@ -47,7 +35,7 @@ namespace StackExchange.Opserver.Data.Redis
             Unknown
         }
 
-        public ReplicationInfo Replication { get; internal set; }
+        public ReplicationInfo Replication { get; internal set; } = new ReplicationInfo();
         public class ReplicationInfo : RedisInfoSection
         {
             public RedisInstanceRole RedisInstanceRole
@@ -172,7 +160,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public ClientInfo Clients { get; internal set; }
+        public ClientInfo Clients { get; internal set; } = new ClientInfo();
         public class ClientInfo : RedisInfoSection
         {
             [RedisInfoProperty("connected_clients")]
@@ -186,7 +174,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public ServerInfo Server { get; internal set; }
+        public ServerInfo Server { get; internal set; } = new ServerInfo();
         public class ServerInfo : RedisInfoSection
         {
             private Version _version;
@@ -225,7 +213,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public MemoryInfo Memory { get; internal set; }
+        public MemoryInfo Memory { get; internal set; } = new MemoryInfo();
         public class MemoryInfo : RedisInfoSection
         {
             [RedisInfoProperty("used_memory")]
@@ -247,7 +235,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public PersistenceInfo Persistence { get; internal set; }
+        public PersistenceInfo Persistence { get; internal set; } = new PersistenceInfo();
         public class PersistenceInfo : RedisInfoSection
         {
             [RedisInfoProperty("loading")]
@@ -295,7 +283,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public StatsInfo Stats { get; internal set; }
+        public StatsInfo Stats { get; internal set; } = new StatsInfo();
         public class StatsInfo : RedisInfoSection
         {
             [RedisInfoProperty("total_connections_received")]
@@ -324,7 +312,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public CPUInfo CPU { get; internal set; }
+        public CPUInfo CPU { get; internal set; } = new CPUInfo();
         public class CPUInfo : RedisInfoSection
         {
             [RedisInfoProperty("used_cpu_sys")]
@@ -338,7 +326,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
 
-        public KeyspaceInfo Keyspace { get; internal set; }
+        public KeyspaceInfo Keyspace { get; internal set; } = new KeyspaceInfo();
         public class KeyspaceInfo : RedisInfoSection
         {   
             public Dictionary<int, KeyData> KeyData = new Dictionary<int, KeyData>();

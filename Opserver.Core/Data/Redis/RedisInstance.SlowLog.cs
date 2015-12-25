@@ -41,9 +41,9 @@ namespace StackExchange.Opserver.Data.Redis
                     UpdateCache = GetFromRedisAsync("SlowLog", async rc =>
                     {
                         //TODO: Remove when StackExchange.Redis gets profiling
-                        using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch))
+                        using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch.ToString()))
                         {
-                            return (await rc.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch)).ToList();
+                            return (await rc.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch).ConfigureAwait(false)).ToList();
                         }
                     })
                 });
@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 return _tieBreaker ?? (_tieBreaker = new Cache<string>
                 {
-                    CacheForSeconds = 5,
+                    CacheForSeconds = 10,
                     UpdateCache = GetFromRedisAsync("Tiebreaker", rc =>
                     {
                         using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))

@@ -81,7 +81,7 @@ namespace StackExchange.Opserver
                     return $"(<b>{item.Status}</b>)".AsHtml();
             }
         }
-
+        
         /// <summary>
         /// Returns an icon span representation of this MonitorStatus
         /// </summary>
@@ -90,33 +90,42 @@ namespace StackExchange.Opserver
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.IconSpan(StatusIndicator.UpClass);
+                    return StatusIndicator.IconSpanGood;
                 case MonitorStatus.Warning:
                 case MonitorStatus.Maintenance:
-                    return StatusIndicator.IconSpan(StatusIndicator.WarningClass);
+                    return StatusIndicator.IconSpanWarning;
                 case MonitorStatus.Critical:
-                    return StatusIndicator.IconSpan(StatusIndicator.DownClass);
+                    return StatusIndicator.IconSpanCritical;
                 default:
-                    return StatusIndicator.IconSpan(StatusIndicator.UnknownClass);
+                    return StatusIndicator.IconSpanUnknown;
             }
         }
 
         public static IHtmlString IconSpan(this IMonitorStatus status)
         {
             if (status == null)
-                return StatusIndicator.IconSpan(StatusIndicator.UnknownClass);
+                return @"<span class=""text-muted"">●</span>".AsHtml();
 
             switch (status.MonitorStatus)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.IconSpan(StatusIndicator.UpClass);
+                    return StatusIndicator.IconSpanGood;
                 case MonitorStatus.Warning:
                 case MonitorStatus.Maintenance:
-                    return StatusIndicator.IconSpan(StatusIndicator.WarningClass, status.MonitorStatusReason);
+                    var reason = status.MonitorStatusReason;
+                    return reason.HasValue()
+                        ? $@"<span class=""text-warning"" title=""{reason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanWarning;
                 case MonitorStatus.Critical:
-                    return StatusIndicator.IconSpan(StatusIndicator.DownClass, status.MonitorStatusReason);
+                    var cReason = status.MonitorStatusReason;
+                    return cReason.HasValue()
+                        ? $@"<span class=""text-danger"" title=""{cReason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanCritical;
                 default:
-                    return StatusIndicator.IconSpan(StatusIndicator.UnknownClass, status.MonitorStatusReason);
+                    var uReason = status.MonitorStatusReason;
+                    return uReason.HasValue()
+                        ? $@"<span class=""text-muted"" title=""{uReason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanUnknown;
             }
         }
 
@@ -134,42 +143,76 @@ namespace StackExchange.Opserver
                     return StatusIndicator.UnknownCustomSpam(text, tooltip);
             }
         }
-        
-        public static string Class(this MonitorStatus status)
+
+        public static string RawClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
+        public static string RawClass(this MonitorStatus status)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.UpClass;
+                    return "";
                 case MonitorStatus.Warning:
-                    return StatusIndicator.WarningClass;
+                    return "warning";
                 case MonitorStatus.Critical:
-                    return StatusIndicator.DownClass;
+                    return "danger";
                 default:
-                    return StatusIndicator.UnknownClass;
+                    return "muted";
             }
         }
 
-        public static string RowClass(this IMonitorStatus status)
-        {
-            return RowClass(status.MonitorStatus);
-        }
+        public static string RowClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
+        public static string RowClass(this MonitorStatus status) => RawClass(status);
 
-        public static string RowClass(this MonitorStatus status)
+        public static string TextClass(this IMonitorStatus status) => TextClass(status.MonitorStatus);
+        public static string TextClass(this MonitorStatus status, bool showGood = false)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return "good-row";
+                    return showGood ? "text-success" : "";
                 case MonitorStatus.Warning:
-                    return "warning-row";
+                    return "text-warning";
                 case MonitorStatus.Critical:
-                    return "critical-row";
+                    return "text-danger";
+                //case MonitorStatus.Maintenance:
                 default:
-                    return "unknown-row";
+                    return "text-muted";
             }
         }
-        
+
+        public static string BackgroundClass(this IMonitorStatus status) => BackgroundClass(status.MonitorStatus);
+        public static string BackgroundClass(this MonitorStatus status, bool showGood = true)
+        {
+            switch (status)
+            {
+                case MonitorStatus.Good:
+                    return showGood ? "bg-success" : "";
+                case MonitorStatus.Warning:
+                    return "bg-warning";
+                case MonitorStatus.Critical:
+                    return "bg-danger";
+                default:
+                    return "bg-muted";
+            }
+        }
+
+        public static string ProgressBarClass(this MonitorStatus status)
+        {
+            switch (status)
+            {
+                case MonitorStatus.Good:
+                    return "progress-bar-success";
+                case MonitorStatus.Unknown:
+                case MonitorStatus.Maintenance:
+                case MonitorStatus.Warning:
+                    return "progress-bar-warning";
+                case MonitorStatus.Critical:
+                    return "progress-bar-danger";
+                default:
+                    return "";
+            }
+        }
+
         public static IHtmlString ToPollSpan(this Cache cache, bool mini = true, bool lastSuccess = false)
         {
             if (cache == null)
@@ -274,20 +317,20 @@ namespace StackExchange.Opserver
 
             if (delta < 60)
             {
-                return ts.Seconds + "s" + (includeAgo ? " ago" : "");
+                return ts.Seconds.ToString() + "s" + (includeAgo ? " ago" : "");
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes + "m" + (includeAgo ? " ago" : "");
+                return ts.Minutes.ToString() + "m" + (includeAgo ? " ago" : "");
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours + "h" + (includeAgo ? " ago" : "");
+                return ts.Hours.ToString() + "h" + (includeAgo ? " ago" : "");
             }
             var days = ts.Days;
             if (days <= 2)
             {
-                return days + "d" + (includeAgo ? " ago" : "");
+                return days.ToString() + "d" + (includeAgo ? " ago" : "");
             }
             else if (days <= 330)
             {
@@ -307,17 +350,17 @@ namespace StackExchange.Opserver
 
             if (delta < 60)
             {
-                return ts.Seconds + "s";
+                return ts.Seconds.ToString() + "s";
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes + "m" + ((ts.Seconds > 0) ? " " + ts.Seconds + "s" : "");
+                return ts.Minutes.ToString() + "m" + ((ts.Seconds > 0) ? " " + ts.Seconds.ToString() + "s" : "");
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours + "h" + ((ts.Minutes > 0) ? " " + ts.Minutes + "m" : "");
+                return ts.Hours.ToString() + "h" + ((ts.Minutes > 0) ? " " + ts.Minutes.ToString() + "m" : "");
             }
-            return ts.Days + "d" + ((ts.Hours > 0) ? " " + ts.Hours + "h" : "");
+            return ts.Days.ToString() + "d" + ((ts.Hours > 0) ? " " + ts.Hours.ToString() + "h" : "");
         }
 
         /// <summary>
@@ -404,13 +447,13 @@ namespace StackExchange.Opserver
             var ts = new TimeSpan(0, 0, seconds);
             var sb = new StringBuilder();
             if (ts.Days > 0)
-                sb.AppendFormat("<b>{0}</b>d ", ts.Days);
+                sb.Append("<b>").Append(ts.Days.ToString()).Append("</b>d ");
             if (ts.Hours > 0)
-                sb.AppendFormat("<b>{0}</b>hr ", ts.Hours);
+                sb.Append("<b>").Append(ts.Hours.ToString()).Append("</b>hr ");
             if (ts.Minutes > 0)
-                sb.AppendFormat("<b>{0}</b>min ", ts.Minutes);
+                sb.Append("<b>").Append(ts.Minutes.ToString()).Append("</b>min ");
             if (ts.Seconds > 0 && ts.Days == 0)
-                sb.AppendFormat("<b>{0}</b>sec ", ts.Seconds);
+                sb.Append("<b>").Append(ts.Seconds.ToString()).Append("</b>sec ");
             return sb.ToString().AsHtml();
         }
 
@@ -430,8 +473,8 @@ namespace StackExchange.Opserver
 
             if (time < 1000)
             {
-                title = time + " milliseconds";
-                body = time + "ms";
+                title = time.ToString() + " milliseconds";
+                body = time.ToString() + "ms";
             }
             else if (time < 1000 * 500)
             {
@@ -458,12 +501,12 @@ namespace StackExchange.Opserver
         public static IHtmlString MicroUnit(this long unit)
         {
             const string format = "<span title='{0}'>{1}</span>";
-            var title = unit + "";
+            var title = unit.ToString();
             string body;
 
             if (unit < 1000)
             {
-                body = unit + "";
+                body = unit.ToString();
             }
             else if (unit < 1000 * 1000)
             {
@@ -484,8 +527,8 @@ namespace StackExchange.Opserver
         public static IHtmlString ToNoteIfNA(this string data)
         {
             return MvcHtmlString.Create(data == "n/a"
-                                            ? string.Concat(@"<span class=""note"">", data.HtmlEncode(), "</span>")
-                                            : data.HtmlEncode());
+                ? @"<span class=""text-muted"">n/a</span>"
+                : data.HtmlEncode());
         }
     }
 

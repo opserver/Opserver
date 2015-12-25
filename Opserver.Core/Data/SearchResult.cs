@@ -1,10 +1,10 @@
-﻿using Jil;
+﻿using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data
 {
     public class SearchResult<T> : SearchResult
     {
-        [JilDirective(Ignore = true)]
+        [IgnoreDataMember]
         public T Item { get; set; }
     }
 

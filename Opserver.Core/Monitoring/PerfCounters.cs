@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Monitoring
             //{
             //    var pc = new PerformanceCounter()
 
-            //    //return Query(machineName,
+            //    //return QueryAsync(machineName,
             //    //             "select Name, PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor",
             //    //             results => results.Select(mo => new SystemUtilization
             //    //             {
@@ -25,16 +25,16 @@ namespace StackExchange.Opserver.Monitoring
             //}
             public static Task<QueryResult<CPUUtilization>> GetCPUUtilization(string machineName)
             {
-                return Query(machineName,
+                return QueryAsync(machineName,
                              "select Name, PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor",
                              results => results.Select(mo => new CPUUtilization
                                  {
                                      Name = mo["Name"].ToString() == "_Total" ? "Total" : mo["Name"].ToString(),
-                                     Utilization = (UInt64) mo["PercentProcessorTime"]
+                                     Utilization = (ulong) mo["PercentProcessorTime"]
                                  }));
             }
 
-            private static async Task<QueryResult<T>> Query<T>(string machineName, string query, Func<IEnumerable<ManagementObject>, IEnumerable<T>> conversion)
+            private static async Task<QueryResult<T>> QueryAsync<T>(string machineName, string query, Func<IEnumerable<ManagementObject>, IEnumerable<T>> conversion)
             {
                 var timer = Stopwatch.StartNew();
 

@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public IncidentStatus Status { get; set; }
     }
 
-    public class Incident : IncidentMinimal
+    public class Incident : IncidentMinimal, IMonitorStatus
     {
         [DataMember(Name = "incident_number")]
         public int Number { get; set; }
@@ -87,6 +87,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             }
         }
+
+        // TODO: Implement
+        public string MonitorStatusReason => "Unknown";
     }
 
     public class Acknowledgement

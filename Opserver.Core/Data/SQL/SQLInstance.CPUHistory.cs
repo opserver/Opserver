@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 return _cpuHistoryLastHour ?? (_cpuHistoryLastHour = new Cache<List<SQLCPUEvent>>
                     {
-                        CacheForSeconds = 5*60,
+                        CacheForSeconds = RefreshInterval,
                         UpdateCache = UpdateFromSql("CPUHistoryLastHour", async conn =>
                             {
                                 var sql = GetFetchSQL<SQLCPUEvent>();
@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public int? CurrentCPUPercent { get; set; }
 
-        public class SQLCPUEvent : ISQLVersionedObject
+        public class SQLCPUEvent : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -37,8 +37,8 @@ namespace StackExchange.Opserver.Data.SQL
             public int ProcessUtilization { get; internal set; }
             public int SystemIdle { get; internal set; }
             public int ExternalProcessUtilization => 100 - SystemIdle - ProcessUtilization;
-
-            internal const string FetchSQL = @"
+            
+            public string GetFetchSQL(Version v) => @"
 Select Top (@maxEvents) 
 	   DateAdd(s, (timestamp - (osi.cpu_ticks / Convert(Float, (osi.cpu_ticks / osi.ms_ticks)))) / 1000, GETDATE()) AS EventTime,
 	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,
@@ -50,11 +50,6 @@ Select Top (@maxEvents)
 		   And record Like '%<SystemHealth>%') x
 	    Cross Join sys.dm_os_sys_info osi
 Order By timestamp Desc";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
         }
     }
 }

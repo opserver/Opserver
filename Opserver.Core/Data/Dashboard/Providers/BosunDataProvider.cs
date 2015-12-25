@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
 
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 60, 4 * 60 * 60));
+        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 60, 4 * 60 * 60));
 
         private string GetUrl(string path)
         {
@@ -132,7 +132,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public bool Success => Error.IsNullOrEmpty();
         }
 
-        public async Task<BosunApiResult<T>> GetFromBosun<T>(string url)
+        public async Task<BosunApiResult<T>> GetFromBosunAsync<T>(string url)
         {
             using (var wc = new WebClient())
             {
@@ -168,13 +168,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public async Task<List<Node>> GetAllNodes()
+        public async Task<List<Node>> GetAllNodesAsync()
         {
             using (MiniProfiler.Current.Step("Get Server Nodes"))
             { 
                 var nodes = new List<Node>();
 
-                var apiResponse = await GetFromBosun<Dictionary<string, BosunHost>>(GetUrl("api/host"));
+                var apiResponse = await GetFromBosunAsync<Dictionary<string, BosunHost>>(GetUrl("api/host"));
                 if (!apiResponse.Success) return nodes;
 
                 var hostsDict = apiResponse.Result;
@@ -322,17 +322,17 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id}&time=1d-ago";
         }
 
-        public override Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return GetRecent(node.Id, start, end, p => p?.CPU, Globals.CPU);
+            return GetRecentAsync(node.Id, start, end, p => p?.CPU, Globals.CPU);
         }
 
-        public override Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return GetRecent(node.Id, start, end, p => p?.Memory, Globals.MemoryUsed);
+            return GetRecentAsync(node.Id, start, end, p => p?.Memory, Globals.MemoryUsed);
         }
 
-        private async Task<List<GraphPoint>> GetRecent(
+        private async Task<List<GraphPoint>> GetRecentAsync(
             string id,
             DateTime? start,
             DateTime? end,
@@ -354,7 +354,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
-        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             if (IsApproximatelyLast24Hrs(start, end))
             {
@@ -378,7 +378,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
-        public override async Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var apiResponse = await GetMetric(
                 Globals.DiskUsed,
@@ -390,7 +390,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
-        public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var apiResponse = await GetMetric(
                 InterfaceMetricName(nodeInteface),

@@ -11,12 +11,15 @@
         $(function () { Status.Exceptions.init({ log: '@log', id: '@e.GUID', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: true }); });
     </script>
 }
-<div class="top-section error-bread-top">
-    <div class="error-header">
-        <a href="/exceptions">Exceptions</a> > <a href="/exceptions?log=@log.UrlEncode()">@e.ApplicationName</a> > <span class="error-title">@e.Message</span>
-    </div>
-</div>
-<div class="bottom-section">
+<h5 class="page-header">
+    <a href="/exceptions">Exceptions</a> 
+    <span class="text-muted">/</span> 
+    <a href="/exceptions?log=@log.UrlEncode()">@e.ApplicationName</a>
+    <span class="text-muted">/</span> 
+    @e.Type
+</h5>
+<p class="small text-danger">@e.Message</p>
+<div>
     @Html.Partial("Exceptions.Table", Model)
     <div class="no-content@(exceptions.Any() ? " hidden" : "")">No similar exceptions in @Model.SelectedLog</div>
 </div>

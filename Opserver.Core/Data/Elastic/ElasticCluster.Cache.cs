@@ -6,10 +6,8 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {
-        public static List<ElasticCluster> AllClusters
-        {
-            get { return _elasticClusters ?? (_elasticClusters = LoadElasticClusters()); }
-        }
+        public static List<ElasticCluster> AllClusters =>
+            _elasticClusters ?? (_elasticClusters = LoadElasticClusters());
 
         private static readonly object _loadLock = new object();
         private static List<ElasticCluster> _elasticClusters;

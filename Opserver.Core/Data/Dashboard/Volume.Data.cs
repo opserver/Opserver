@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         /// <returns>Volume usage data points</returns>
         public Task<List<GraphPoint>> GetVolumeUtilization(DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Node.DataProvider.GetUtilization(this, start, end, pointCount);
+            return Node.DataProvider.GetUtilizationAsync(this, start, end, pointCount);
         }
     }
 }

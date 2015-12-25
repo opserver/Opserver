@@ -6,29 +6,27 @@
     this.SetPageTitle("SQL Dashboard");
     this.SetTopNodes(SQLInstance.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? "/sql/instance" : null);
 }
-@helper TabLink(SQLViews view, string href, string name, bool includeParams = true)
-{
-    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? "?node=" + Model.CurrentInstance.Name : "")">@name</a>
-}
 @section head {
     <script>
         $(function() {
-            Status.Dashboard.init({ refresh: @(Model.Refresh) });
+            Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
             Status.SQL.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Name : "")' });
         });
     </script>
 }
-    <div class="tabs sub-tabs">
-        <div class="tabs-links">
-            @TabLink(SQLViews.Servers, "/sql/servers", "all servers", false)
-            @TabLink(SQLViews.Instance, "/sql/instance", "instance")
-            @TabLink(SQLViews.Top, "/sql/top", "top")
-            @TabLink(SQLViews.Active, "/sql/active", "active")
-            @TabLink(SQLViews.Connections, "/sql/connections", "connections")
-            @TabLink(SQLViews.Databases, "/sql/databases", "databases")
-        </div>
-    </div>
-<div class="dashboard-list">
+@helper TabLink(SQLViews view, string href, string name, bool includeParams = true)
+{
+    <li class="@(Model.View == view ? "active" : null)"><a href="@href@(includeParams && Model.CurrentInstance != null ? "?node=" + Model.CurrentInstance.Name.UrlEncode() : null)">@name</a></li>
+}
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(SQLViews.Servers, "/sql/servers", "all servers", false)
+    @TabLink(SQLViews.Instance, "/sql/instance", "instance")
+    @TabLink(SQLViews.Top, "/sql/top", "top")
+    @TabLink(SQLViews.Active, "/sql/active", "active")
+    @TabLink(SQLViews.Connections, "/sql/connections", "connections")
+    @TabLink(SQLViews.Databases, "/sql/databases", "databases")
+</ul>
+<div>
     @if (Model.View != SQLViews.Servers && Model.CurrentInstance == null)
     {
         @Html.Partial("Instance.Selector")

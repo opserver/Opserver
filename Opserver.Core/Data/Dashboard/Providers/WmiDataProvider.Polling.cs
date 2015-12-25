@@ -14,14 +14,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private partial class WmiNode
         {
-            public async Task<Node> PollNodeInfo()
+            public async Task<Node> PollNodeInfoAsync()
             {
                 try
                 {
                     // TODO: Check concurrency options for a Task.WaitAll
-                    await UpdateNodeData();
-                    await GetAllInterfaces();
-                    await GetAllVolumes();
+                    await UpdateNodeDataAsync();
+                    await GetAllInterfacesAsync();
+                    await GetAllVolumesAsync();
                     SetReferences();
                 }
                 catch (COMException e)
@@ -37,9 +37,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     // TODO: Check concurrency options for a Task.WaitAll
-                    await PollCpuUtilization();
-                    await PollMemoryUtilization();
-                    await PollNetworkUtilization();
+                    await PollCpuUtilizationAsync();
+                    await PollMemoryUtilizationAsync();
+                    await PollNetworkUtilizationAsync();
                 }
                 catch (COMException e)
                 {
@@ -49,7 +49,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return this;
             }
 
-            private async Task UpdateNodeData()
+            private async Task UpdateNodeDataAsync()
             {
                 const string machineQuery = @"select 
                 DNSHostName,
@@ -58,7 +58,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 from Win32_ComputerSystem";
                 using (var q = Wmi.Query(Name, machineQuery))
                 {
-                    var data = await q.GetFirstResult();
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
                     Model = data.Model;
@@ -77,7 +77,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResult();
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
                     LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
@@ -91,7 +91,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Status = NodeStatus.Active;
             }
 
-            private async Task GetAllInterfaces()
+            private async Task GetAllInterfacesAsync()
             {
                 //if (KernelVersion > WindowsKernelVersions.Windows2012And8)
                 //{
@@ -114,7 +114,7 @@ SELECT Name,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var data in await q.GetDynamicResult())
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         string id = $"{data.DeviceID}";
                         var i = Interfaces.FirstOrDefault(x => x.Id == id);
@@ -142,7 +142,7 @@ SELECT Name,
                 }
             }
 
-            private async Task GetAllVolumes()
+            private async Task GetAllVolumesAsync()
             {
                 const string query = @"
 SELECT Caption,
@@ -157,7 +157,7 @@ SELECT Caption,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var disk in await q.GetDynamicResult())
+                    foreach (var disk in await q.GetDynamicResultAsync())
                     {
                         var id = $"{disk.DeviceID}";
                         var v = Volumes.FirstOrDefault(x => x.Id == id);
@@ -185,7 +185,7 @@ SELECT Caption,
                 }
             }
             
-            private async Task PollCpuUtilization()
+            private async Task PollCpuUtilizationAsync()
             {
                 const string query = @"
 SELECT PercentProcessorTime 
@@ -194,7 +194,7 @@ SELECT PercentProcessorTime
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResult();
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
                 
@@ -208,7 +208,7 @@ SELECT PercentProcessorTime
                 }
             }
 
-            private async Task PollMemoryUtilization()
+            private async Task PollMemoryUtilizationAsync()
             {
                 const string query = @"
 SELECT AvailableKBytes 
@@ -216,7 +216,7 @@ SELECT AvailableKBytes
                 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResult();
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
 
@@ -244,7 +244,7 @@ SELECT AvailableKBytes
                         .Replace("#", "_").ToString());
             }
 
-            private async Task PollNetworkUtilization()
+            private async Task PollNetworkUtilizationAsync()
             {
                 const string query = @"
 SELECT Name,
@@ -264,7 +264,7 @@ SELECT Name,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var data in await q.GetDynamicResult())
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         if (data == null) continue;
                         var iface = Interfaces.FirstOrDefault(i => data.Name == GetCounterName(i.Name));

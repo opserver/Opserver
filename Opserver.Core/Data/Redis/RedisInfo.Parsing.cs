@@ -166,7 +166,7 @@ namespace StackExchange.Opserver.Data.Redis
                         if (long.TryParse(value, out l))
                         {
                             var ts = TimeSpan.FromSeconds(l);
-                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours}h {ts.Minutes}m {ts.Seconds}s)";
+                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours.ToString()}h {ts.Minutes.ToString()}m {ts.Seconds.ToString()}s)";
                         }
                         break;
                     case "last_save_time":

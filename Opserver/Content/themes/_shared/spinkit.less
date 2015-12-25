@@ -1,0 +1,233 @@
+﻿/*
+This CSS version of the awesome SpinKit by @tobiasahlin
+Source is in SCSS, so using CSS output for simplicity here
+
+The MIT License (MIT)
+Copyright (c) 2015 Tobias Ahlin
+Link to project: https://github.com/tobiasahlin/SpinKit
+*/
+
+/*
+ *  Usage: <div class="sk-folding-cube"><div></div><div></div><div></div><div></div></div>
+ */
+.sk-folding-cube {
+  width: 14px;
+  height: 14px;
+  vertical-align: baseline;
+  display: inline-block;
+  position: relative;
+  -webkit-transform: rotateZ(45deg);
+  transform: rotateZ(45deg);
+
+  > div {
+    float: left;
+    width: 50%;
+    height: 50%;
+    position: relative;
+    -webkit-transform: scale(1.1);
+    -ms-transform: scale(1.1);
+    transform: scale(1.1);
+
+    &:before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: @brand-primary;
+      -webkit-animation: sk-foldCubeAngle 2.4s infinite linear both;
+      animation: sk-foldCubeAngle 2.4s infinite linear both;
+      -webkit-transform-origin: 100% 100%;
+      -ms-transform-origin: 100% 100%;
+      transform-origin: 100% 100%;
+    }
+
+    &:nth-child(2) {
+      -webkit-transform: scale(1.1) rotateZ(90deg);
+      transform: scale(1.1) rotateZ(90deg);
+      &:before {
+        -webkit-animation-delay: 0.3s;
+        animation-delay: 0.3s;
+      }
+    }
+
+    &:nth-child(4) {
+      -webkit-transform: scale(1.1) rotateZ(180deg);
+      transform: scale(1.1) rotateZ(180deg);
+      &:before {
+        -webkit-animation-delay: 0.6s;
+        animation-delay: 0.6s;
+      }
+    }
+
+    &:nth-child(3) {
+      -webkit-transform: scale(1.1) rotateZ(270deg);
+      transform: scale(1.1) rotateZ(270deg);
+      &:before {
+        -webkit-animation-delay: 0.9s;
+        animation-delay: 0.9s;
+      }
+    }
+  }
+}
+
+.sk-foldCubeAngle-frames() {
+  0%, 10% {
+    -webkit-transform: perspective(140px) rotateX(-180deg);
+    transform: perspective(140px) rotateX(-180deg);
+    opacity: 0;
+  }
+
+  25%, 75% {
+    -webkit-transform: perspective(140px) rotateX(0deg);
+    transform: perspective(140px) rotateX(0deg);
+    opacity: 1;
+  }
+
+  90%, 100% {
+    -webkit-transform: perspective(140px) rotateY(180deg);
+    transform: perspective(140px) rotateY(180deg);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes sk-foldCubeAngle { .sk-foldCubeAngle-frames; }
+@keyframes sk-foldCubeAngle { .sk-foldCubeAngle-frames; }
+
+
+/*
+ *  Usage: <div class="sk-spinner sk-spinner-pulse"></div>
+ */
+.sk-spinner-pulse {
+  width: 14px;
+  height: 14px;
+  background-color: #333;
+  border-radius: 100%;
+  -webkit-animation: sk-pulseScaleOut 1s infinite ease-in-out;
+          animation: sk-pulseScaleOut 1s infinite ease-in-out; }
+
+
+.sk-pulseScaleOut-frames() {
+  0% {
+    -webkit-transform: scale(0);
+    transform: scale(0);
+  }
+  100% {
+    -webkit-transform: scale(1);
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+@-webkit-keyframes sk-pulseScaleOut { .sk-pulseScaleOut-frames; }
+@keyframes sk-pulseScaleOut { .sk-pulseScaleOut-frames; }
+
+.icon-pulse {
+  -webkit-animation: sk-pulseScaleOut 0.5s infinite ease-in-out;
+          animation: sk-pulseScaleOut 0.5s infinite ease-in-out; }
+
+
+/*
+ *  Usage: <div class="sk-rotating-plane"></div>
+ */
+.sk-rotating-plane {
+  width: 40px;
+  height: 40px;
+  background-color: #333;
+  margin: 40px auto;
+  -webkit-animation: sk-rotatePlane 1.2s infinite ease-in-out;
+          animation: sk-rotatePlane 1.2s infinite ease-in-out; }
+
+.sk-rotatePlane-frames() {
+  0% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+  }
+  100% {
+    -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+  }
+}
+
+@-webkit-keyframes sk-rotatePlane { .sk-rotatePlane-frames; }
+@keyframes sk-rotatePlane { .sk-rotatePlane-frames; }
+
+.icon-rotate {
+  -webkit-animation: sk-rotatePlane 1.2s infinite ease-in-out;
+          animation: sk-rotatePlane 1.2s infinite ease-in-out; }
+
+.sk-rotatePlaneFlip-frames() {
+  0% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+  50% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(180deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(180deg);
+  }
+  100% {
+    -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+  }
+}
+
+@-webkit-keyframes sk-rotatePlaneFlip { .sk-rotatePlaneFlip-frames; }
+@keyframes sk-rotatePlaneFlip { .sk-rotatePlaneFlip-frames; }
+
+.icon-rotate-flip {
+  -webkit-animation: sk-rotatePlaneFlip 1.2s infinite ease-in-out;
+          animation: sk-rotatePlaneFlip 1.2s infinite ease-in-out; }
+
+
+/*
+ *  Usage: <div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div>
+ */
+.sk-wave {
+  width: 25px;
+  height: 24px;
+  text-align: center;
+  font-size: 10px; 
+  > div {
+    background-color: @brand-primary;
+    margin-right: 1px;
+    height: 100%;
+    width: 4px;
+    display: inline-block;
+    -webkit-animation: sk-waveStretchDelay 1.2s infinite ease-in-out;
+            animation: sk-waveStretchDelay 1.2s infinite ease-in-out; 
+    &:nth-child(1) {
+      -webkit-animation-delay: -1.2s;
+              animation-delay: -1.2s; }
+    &:nth-child(2) {
+      -webkit-animation-delay: -1.1s;
+              animation-delay: -1.1s; }
+    &:nth-child(3) {
+      -webkit-animation-delay: -1s;
+              animation-delay: -1s; }
+    &:nth-child(4) {
+      -webkit-animation-delay: -0.9s;
+              animation-delay: -0.9s; }
+    &:nth-child(5) {
+      -webkit-animation-delay: -0.8s;
+              animation-delay: -0.8s; }
+  }
+}
+
+.sk-waveStretchDelay-frames() {
+  0%, 40%, 100% {
+    -webkit-transform: scaleY(0.6);
+    transform: scaleY(0.6);
+  }
+  20% {
+    -webkit-transform: scaleY(1);
+    transform: scaleY(1);
+  }
+}
+
+@-webkit-keyframes sk-waveStretchDelay { .sk-waveStretchDelay-frames; }
+@keyframes sk-waveStretchDelay { .sk-waveStretchDelay-frames; }

@@ -12,6 +12,7 @@ namespace StackExchange.Opserver
 
         public int OnCallToShow { get; set; }
         public int DaysToCache { get; set; }
+        public string HeaderTitle { get; set; }
         public string HeaderHtml { get; set; }
 
         public string PrimaryScheduleName { get; set; }

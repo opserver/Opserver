@@ -17,8 +17,8 @@ namespace StackExchange.Opserver.Data.SQL
 
             return new Cache<List<ActiveOperation>>
                 {
-                    CacheKey = GetCacheKey("ActiveOperations-" + options.GetHashCode()),
-                    CacheForSeconds = 5,
+                    CacheKey = GetCacheKey("ActiveOperations-" + options.GetHashCode().ToString()),
+                    CacheForSeconds = 10,
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("ActiveOperations", async conn => (await conn.QueryAsync<WhoIsActiveRow>(options.ToSQLQuery(), options, commandTimeout: 300))
                                                                                 .Select(row => new ActiveOperation(row))

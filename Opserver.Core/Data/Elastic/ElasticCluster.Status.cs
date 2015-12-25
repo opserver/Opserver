@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -7,10 +8,8 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterStatusInfo> _status;
-        public Cache<ClusterStatusInfo> Status
-        {
-            get { return _status ?? (_status = GetCache<ClusterStatusInfo>(10)); }
-        }
+        public Cache<ClusterStatusInfo> Status =>
+            _status ?? (_status = GetCache<ClusterStatusInfo>(Settings.RefreshIntervalSeconds));
 
         public IEnumerable<ShardState> TroubledShards
         {
@@ -21,10 +20,8 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             get
             {
-                return Status.Data != null && Status.Data.RoutingNodes != null
-                           ? Status.Data.RoutingNodes.Nodes.Values.SelectMany(i => i)
-                                          .Union(Status.Data.RoutingNodes.Unassigned)
-                           : Enumerable.Empty<ShardState>();
+                return Status.Data?.RoutingNodes?.Nodes.Values.SelectMany(i => i)
+                    .Union(Status.Data.RoutingNodes.Unassigned) ?? Enumerable.Empty<ShardState>();
             }
         }
 
@@ -37,18 +34,16 @@ namespace StackExchange.Opserver.Data.Elastic
                 {
                     if (!_monitorStatus.HasValue)
                     {
-                        _monitorStatus = RoutingNodes != null
-                                             ? RoutingNodes.Nodes.Values.SelectMany(n => n)
-                                                           .Union(RoutingNodes.Unassigned)
-                                                           .Select(i => i.GetMonitorStatus())
-                                                           .GetWorstStatus()
-                                             : MonitorStatus.Unknown;
+                        _monitorStatus = RoutingNodes?.Nodes.Values.SelectMany(n => n)
+                            .Union(RoutingNodes.Unassigned)
+                            .Select(i => i.GetMonitorStatus())
+                            .GetWorstStatus() ?? MonitorStatus.Unknown;
                     }
                     return _monitorStatus.Value;
                 }
             }
             // TODO: Implement
-            public string MonitorStatusReason { get { return null; } }
+            public string MonitorStatusReason => null;
 
             public RoutingNodesState RoutingNodes { get; private set; }
             public Dictionary<string, RoutingTableState.IndexShardsState> RoutingIndices { get; private set; }
@@ -56,9 +51,9 @@ namespace StackExchange.Opserver.Data.Elastic
             public string ClusterName { get; private set; }
             public Dictionary<string, NodeState> Nodes { get; private set; }
 
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
+            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawState = cli.GetClusterState();
+                var rawState = await cli.GetClusterStateAsync();
                 if (rawState.HasData)
                 {
                     var state = rawState.Data;

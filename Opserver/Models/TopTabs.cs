@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
-using System.Web.Mvc;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.CloudFlare;
 using StackExchange.Opserver.Data.Elastic;
@@ -10,9 +9,7 @@ using StackExchange.Opserver.Data.HAProxy;
 using StackExchange.Opserver.Data.PagerDuty;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models.Security;
-using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Models
 {
@@ -56,19 +53,30 @@ namespace StackExchange.Opserver.Models
 
             var s = Current.Settings;
 
-            AddTab(new TopTab("SQL", "/sql", 10, s.SQL) { GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus() });
-            AddTab(new TopTab("Redis", "/redis", 20, s.Redis) { GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus() });
-            AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic) { GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus() });
-            AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare) { GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus });
-            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty) { GetMonitorStatus = () => PagerDutyApi.Instance.MonitorStatus});
+            AddTab(new TopTab("SQL", "/sql", 10, s.SQL)
+            {
+                GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus()
+            });
+            AddTab(new TopTab("Redis", "/redis", 20, s.Redis)
+            {
+                GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus()
+            });
+            AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic)
+            {
+                GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus()
+            });
+            AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare)
+            {
+                GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
+            });
+            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty)
+            {
+                GetMonitorStatus = () => PagerDutyApi.Instance.MonitorStatus
+            });
             AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
             {
                 GetMonitorStatus = () => ExceptionStores.MonitorStatus,
-                GetText = () =>
-                {
-                    var exceptionCount = ExceptionStores.TotalExceptionCount;
-                    return $"<span class=\"count exception-count\">{exceptionCount.ToComma()}</span> {exceptionCount.Pluralize("Exception", false)}";
-                },
+                GetBadgeCount = () => ExceptionStores.TotalExceptionCount,
                 GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
             });
             AddTab(new TopTab("HAProxy", "/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
@@ -95,8 +103,8 @@ namespace StackExchange.Opserver.Models
         public ISecurableSection SecurableSection { get; set; }
         public Func<bool> GetIsEnabled { get; set; }
         public Func<MonitorStatus> GetMonitorStatus { get; set; }
-        public Func<string> GetText { get; set; }
         public Func<string> GetTooltip { get; set; }
+        public Func<int> GetBadgeCount { get; set; }
 
         public bool IsEnabled
         {
@@ -120,21 +128,6 @@ namespace StackExchange.Opserver.Models
             Order = order;
             SecurableSection = section;
         }
-
-        public IHtmlString Render()
-        {
-            if (!IsEnabled) return MvcHtmlString.Empty;
-
-            // Optimism!
-            using (MiniProfiler.Current.Step("Render Tab: " + Name))
-            {
-                var status = GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
-
-                return $@"<a class=""{(IsCurrentTab ? "selected " : "")}{status.GetDescription()}"" href=""{Url
-                        }"" title=""{GetTooltip?.Invoke()}"">{(GetText != null ? GetText() : Name)
-                        }</a>".AsHtml();
-            }
-        }
     }
 
     public interface ITopTab
@@ -144,7 +137,6 @@ namespace StackExchange.Opserver.Models
         int Order { get; set; }
         Func<bool> GetIsEnabled { get; set; }
         Func<MonitorStatus> GetMonitorStatus { get; set; }
-        Func<string> GetText { get; set; }
         Func<string> GetTooltip { get; set; }
     }
 }

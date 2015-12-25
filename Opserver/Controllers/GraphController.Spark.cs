@@ -125,7 +125,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 ChartType = SeriesChartType.Area,
                 XValueType = ChartValueType.DateTime,
-                Color = ColorTranslator.FromHtml("#c6d5e2"),
+                Color = ColorTranslator.FromHtml("#008cba"), // ColorTranslator.FromHtml("#c6d5e2"),
                 EmptyPointStyle = {Color = Color.Transparent, BackSecondaryColor = Color.Transparent}
             };
             chart.Series.Add(series);
@@ -156,7 +156,7 @@ namespace StackExchange.Opserver.Controllers
                     Maximum = DateTime.UtcNow.ToOADate(),
                     Minimum = SparkStart.ToOADate(),
                     MajorGrid = { Enabled = false },
-                    LineColor = ColorTranslator.FromHtml("#a3c0d7")
+                    LineColor = ColorTranslator.FromHtml("#008cba") // ColorTranslator.FromHtml("#a3c0d7")
                 }
             };
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -24,9 +25,9 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             public Dictionary<string, List<string>> Aliases { get; private set; }
 
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
+            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawAliases = cli.GetAliases();
+                var rawAliases = await cli.GetAliasesAsync();
                 if (rawAliases.HasData)
                 {
                     var result = rawAliases.Data.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0).ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList());

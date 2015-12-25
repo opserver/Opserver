@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
     public partial class HAProxyGroup : IMonitedService, ISearchableNode
     {
-        private static readonly object _insertLock = new object();
-
         public string DisplayName => Name;
         public string CategoryName => "HAProxy";
 
@@ -46,7 +43,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public override string ToString()
         {
-            return string.Concat(Name, " - ", Instances != null ? Instances.Count + " instances" : "");
+            return string.Concat(Name, " - ", Instances != null ? Instances.Count.ToString() + " instances" : "");
         }
         
         /// <summary>
@@ -54,6 +51,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         public static HAProxyGroup GetGroup(string name)
         {
+            // TODO Denormalize once, eliminate allocations
             return AllGroups.FirstOrDefault(e => string.Equals(e.Name, Environment.MachineName + ":" + name, StringComparison.InvariantCultureIgnoreCase))
                 ?? AllGroups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
@@ -68,7 +66,6 @@ namespace StackExchange.Opserver.Data.HAProxy
             return GetProxies(instances);
         }
 
-
         /// <summary>
         /// Gets the list of proxies for this group
         /// </summary>
@@ -80,19 +77,13 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         private static List<Proxy> GetProxies(List<HAProxyInstance> instances)
         {
-            var proxies = new List<Proxy>();
             using (MiniProfiler.Current.Step("HAProxy - GetProxies()"))
-                Parallel.ForEach(instances, i =>
-                {
-                    var result = i.Proxies.SafeData();
-                    if (result == null) return;
-                    lock (_insertLock)
-                    {
-                        proxies.AddRange(result);
-                    }
-                });
-            proxies = proxies.OrderBy(p => instances.IndexOf(p.Instance)).ToList();
-            return proxies;
+            {
+                return instances.AsParallel().SelectMany(i => i.Proxies.SafeData())
+                    .Where(p => p != null)
+                    .OrderBy(p => instances.IndexOf(p.Instance))
+                    .ToList();
+            }
         }
     }
 }

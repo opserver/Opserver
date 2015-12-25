@@ -53,7 +53,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
 
                 var staticDataCache = ProviderCache(
-                    () => node.PollNodeInfo(), 
+                    () => node.PollNodeInfoAsync(), 
                     _config.StaticDataTimeoutSeconds,
                     memberName: node.Name + "-Static");
                 node.Caches.Add(staticDataCache);

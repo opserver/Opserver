@@ -26,7 +26,7 @@
                         <th>Total Size</th>
                     </tr>
                 </thead>
-                <tbody class="node-group">
+                <tbody>
                     @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
                     {
                         <tr data-id="@t.Id" data-table="@(t.SchemaName).@(t.TableName)" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">

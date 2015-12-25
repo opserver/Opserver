@@ -30,9 +30,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
 
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodes, 10));
+        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 10));
 
-        public async Task<List<Node>> GetAllNodes()
+        public async Task<List<Node>> GetAllNodesAsync()
         {
             using (MiniProfiler.Current.Step("Get Server Nodes"))
             {
@@ -142,7 +142,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
                             : (a.ComponentName ?? "").Replace(" IIS App Pool", "");
                     }
 
-                    var ips = await GetNodeIPMap(conn);
+                    var ips = await GetNodeIPMapAsync(conn);
 
                     foreach (var n in nodes)
                     {
@@ -168,7 +168,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             public int InterfaceIndex { get; set; }
         }
 
-        public async Task<List<Tuple<string, IPAddress>>> GetNodeIPMap(DbConnection conn)
+        public async Task<List<Tuple<string, IPAddress>>> GetNodeIPMapAsync(DbConnection conn)
         {
             var ipList = await conn.QueryAsync<string, string, Tuple<string, string>>(
                 @"Select Cast(NodeID as varchar(50)) NodeID, IPAddress From NodeIPAddresses",
@@ -191,7 +191,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             return !Host.HasValue() ? null : $"{Host}Orion/NetPerfMon/NodeDetails.aspx?NetObject=N:{node.Id}";
         }
 
-        public override async Task<List<GraphPoint>> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
@@ -216,10 +216,10 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return (await UtilizationQuery<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override async Task<List<GraphPoint>> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', c.DateTime) as DateEpoch,
@@ -244,10 +244,10 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return (await UtilizationQuery<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
@@ -290,7 +290,7 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
             }
         }
 
-        public override async Task<List<GraphPoint>> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
@@ -315,10 +315,10 @@ Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
                           And v.VolumeID = @id)/@intervals) = 0
  Order By v.DateTime";
 
-            return (await UtilizationQuery<Volume.VolumeUtilization>(volume.Id, allSql, sampledSql, "v.DateTime", start, end, pointCount)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Volume.VolumeUtilization>(volume.Id, allSql, sampledSql, "v.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
-        public override async Task<List<DoubleGraphPoint>> GetUtilization(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
@@ -347,7 +347,7 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
                             And {dateRange})/@intervals) = 0
  Order By itd.DateTime";
 
-            return (await UtilizationQuery<Interface.InterfaceUtilization>(nodeInteface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
+            return (await UtilizationQueryAsync<Interface.InterfaceUtilization>(nodeInteface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
         }
 
         public Task<DbConnection> GetConnectionAsync()
@@ -366,7 +366,7 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
             return "1 = 1";
         }
 
-        private async Task<List<T>> UtilizationQuery<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount) where T : IGraphPoint
+        private async Task<List<T>> UtilizationQueryAsync<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount) where T : IGraphPoint
         {
             using (var conn = await GetConnectionAsync())
             {

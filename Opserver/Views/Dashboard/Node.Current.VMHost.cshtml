@@ -2,9 +2,6 @@
 @using StackExchange.Opserver.Views.Dashboard
 @model Node
 @{
-    var model = new DashboardModel
-        {
-            Nodes = Model.VMs
-        };
+    var model = new DashboardModel { Nodes = Model.VMs };
 }
 @Html.Partial("~/Views/Dashboard/Dashboard.Table.cshtml", model)

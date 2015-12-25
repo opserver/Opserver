@@ -10,9 +10,9 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30));
 
         private Cache<List<SQLConnectionInfo>> _connections;
-        public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(10));
+        public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(RefreshInterval));
 
-        public class SQLConnectionSummaryInfo : ISQLVersionedObject
+        public class SQLConnectionSummaryInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.SP2;
             
@@ -23,8 +23,8 @@ namespace StackExchange.Opserver.Data.SQL
             public int ConnectionCount { get; internal set; }
             public long TotalReads { get; internal set; }
             public long TotalWrites { get; internal set; }
-
-            internal const string FetchSQL = @"
+            
+            public string GetFetchSQL(Version v) => @"
 Select s.login_name LoginName,
        s.host_name HostName,
        s.transaction_isolation_level TransactionIsolationLevel,
@@ -36,14 +36,9 @@ Select s.login_name LoginName,
        Join sys.dm_exec_sessions s
          On c.most_recent_session_id = s.session_id
  Group By s.login_name, s.host_name, s.transaction_isolation_level";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
         }
 
-        public class SQLConnectionInfo : ISQLVersionedObject
+        public class SQLConnectionInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
             

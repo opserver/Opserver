@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Threading.Tasks;
 using Jil;
 using StackExchange.Elastic;
 
@@ -9,7 +11,7 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterNodeInfo> _nodes;
-        public Cache<ClusterNodeInfo> Nodes => _nodes ?? (_nodes = GetCache<ClusterNodeInfo>(20));
+        public Cache<ClusterNodeInfo> Nodes => _nodes ?? (_nodes = GetCache<ClusterNodeInfo>(Settings.RefreshIntervalSeconds));
 
         public string Name => Nodes.Data != null ? Nodes.Data.Name : "Unknown";
 
@@ -18,9 +20,10 @@ namespace StackExchange.Opserver.Data.Elastic
             public string Name { get; internal set; }
             public List<NodeInfoWrap> Nodes { get; internal set; }
 
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
+            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var infos = cli.GetClusterNodeInfo().Data;
+                var rawInfos = await cli.GetClusterNodeInfoAsync();
+                var infos = rawInfos.Data;
                 Name = infos.ClusterName;
                 if (infos.Nodes != null)
                 {
@@ -28,6 +31,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         {
                             GUID = node.Key,
                             Name = node.Value.Name,
+                            ShortName = node.Value.Name.Replace("-" + infos.ClusterName,""),
                             Hostname = node.Value.Hostname,
                             VersionString = node.Value.Version,
                             BuildString = node.Value.Build,
@@ -36,7 +40,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         }).OrderBy(node => node.Name).ToList();
                 }
 
-                var rawStats = cli.GetClusterNodeStats();
+                var rawStats = await cli.GetClusterNodeStatsAsync();
                 var stats = rawStats.Data;
                 if (stats != null)
                 {
@@ -81,6 +85,7 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             public string GUID { get; internal set; }
             public string Name { get; internal set; }
+            public string ShortName { get; internal set; }
             public string Hostname { get; internal set; }
             public string VersionString { get; internal set; }
             public string BuildString { get; internal set; }
@@ -93,7 +98,7 @@ namespace StackExchange.Opserver.Data.Elastic
             public string MonitorStatusReason => null;
 
             private Version _version;
-            [JilDirective(Ignore = true)]
+            [IgnoreDataMember]
             public Version Version => _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0"));
 
             public bool IsClient => GetAttribute("client") == "true";

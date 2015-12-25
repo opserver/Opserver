@@ -45,6 +45,17 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
+        /// Returns the toReturn parameter when this string is null/empty.
+        /// </summary>
+        public static string IsNullOrEmptyReturn(this string s, string toReturn)
+        {
+            if (s.HasValue())
+                return s;
+
+            return toReturn.HasValue() ? toReturn : "";
+        }
+
+        /// <summary>
         /// Returns the first non-null/non-empty parameter when this String is null/empty.
         /// </summary>
         public static string IsNullOrEmptyReturn(this string s, params string[] otherPossibleResults)
@@ -105,6 +116,15 @@ namespace StackExchange.Opserver
         /// A plurailizer that accepts the count, single and plural variants of the text
         /// </summary>
         public static string Pluralize(this int number, string single, string plural, bool includeNumber = true)
+        {
+            var numString = includeNumber ? number.ToComma() + " " : "";
+            return number == 1 ? numString + single : numString + plural;
+        }
+
+        /// <summary>
+        /// A plurailizer that accepts the count, single and plural variants of the text
+        /// </summary>
+        public static string Pluralize(this long number, string single, string plural, bool includeNumber = true)
         {
             var numString = includeNumber ? number.ToComma() + " " : "";
             return number == 1 ? numString + single : numString + plural;

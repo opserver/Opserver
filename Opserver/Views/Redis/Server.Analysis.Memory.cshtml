@@ -24,7 +24,7 @@
 
 <div class="node-summary redis-summary redis-infos-wrap">
     <table class="cluster-dashboard striped-dashboard">
-        <thead class="node-header" data-name="header-missing">
+        <thead>
             <tr class="category-row">
                 <th colspan="5">
                     <h3>
@@ -46,7 +46,7 @@
                 <th>Bytes (Total)</th>
             </tr>
         </thead>
-        <tbody class="node-group" data-name="body-missing">
+        <tbody>
             @if (Model.ErrorMessage.HasValue())
             {
                 <tr class="redis-error">
@@ -98,7 +98,7 @@
 @if (Model.TopKeys.Any())
 {
     <table class="cluster-dashboard striped-dashboard">
-        <thead class="node-header" data-name="header-missing">
+        <thead>
             <tr class="category-row">
                 <th colspan="5">
                     <div>Top Keys (by Size) for @Model.ConnectionInfo.Name</div>
@@ -112,7 +112,7 @@
                 <th>Bytes (Total)</th>
             </tr>
         </thead>
-        <tbody class="node-group" data-name="body-missing">
+        <tbody>
             @foreach (var tk in Model.TopKeys)
             {
                 <tr>

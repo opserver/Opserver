@@ -154,12 +154,12 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
-     Order By CreationDate Desc", new { search = '%' + searchText + '%', appName, max });
+     Order By CreationDate Desc", new { search = "%" + searchText + "%", appName, max });
         }
 
         public Task<int> DeleteAllErrors(string appName)
         {
-            return ExecTask($"DeleteAllErrors() (app: {appName}) for {Name}", @"
+            return ExecTaskAsync($"DeleteAllErrors() (app: {appName}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
@@ -169,7 +169,7 @@ Update Exceptions
 
         public Task<int> DeleteSimilarErrors(Error error)
         {
-            return ExecTask($"DeleteSimilarErrors('{error.GUID}') (app: {error.ApplicationName}) for {Name}", @"
+            return ExecTaskAsync($"DeleteSimilarErrors('{error.GUID.ToString()}') (app: {error.ApplicationName}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where ApplicationName = @ApplicationName
@@ -178,23 +178,22 @@ Update Exceptions
    And IsProtected = 0", new {error.ApplicationName, error.Message});
         }
 
-        public Task<int> DeleteErrors(string appName, List<Guid> ids)
+        public Task<int> DeleteErrors(List<Guid> ids)
         {
-            return ExecTask($"DeleteErrors({ids.Count} Guids) (app: {appName}) for {Name}", @"
+            return ExecTaskAsync($"DeleteErrors({ids.Count.ToString()} Guids) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
    And IsProtected = 0 
-   And ApplicationName = @appName
-   And GUID In @ids", new { appName, ids });
+   And GUID In @ids", new { ids });
         }
         
-        public async Task<Error> GetError(Guid guid)
+        public async Task<Error> GetErrorAsync(Guid guid)
         {
             try
             {
                 Error sqlError;
-                using (MiniProfiler.Current.Step("GetError() (guid: " + guid + ") for " + Name))
+                using (MiniProfiler.Current.Step("GetErrorAsync() (guid: " + guid.ToString() + ") for " + Name))
                 using (var c = await GetConnectionAsync())
                 {
                     sqlError = (await c.QueryAsync<Error>(@"
@@ -219,17 +218,17 @@ Update Exceptions
             }
         }
 
-        public async Task<bool> ProtectError(Guid guid)
+        public async Task<bool> ProtectErrorAsync(Guid guid)
         {
-              return await ExecTask($"ProtectError() (guid: {guid}) for {Name}", @"
+              return await ExecTaskAsync($"ProtectErrorAsync() (guid: {guid.ToString()}) for {Name}", @"
 Update Exceptions 
    Set IsProtected = 1, DeletionDate = Null
  Where GUID = @guid", new {guid}) > 0;
         }
 
-        public async Task<bool> DeleteError(Guid guid)
+        public async Task<bool> DeleteErrorAsync(Guid guid)
         {
-            return await ExecTask($"DeleteError() (guid: {guid}) for {Name}", @"
+            return await ExecTaskAsync($"DeleteErrorAsync() (guid: {guid.ToString()}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where GUID = @guid 
@@ -253,7 +252,7 @@ Update Exceptions
             }
         }
 
-        public async Task<int> ExecTask(string step, string sql, dynamic paramsObj)
+        public async Task<int> ExecTaskAsync(string step, string sql, dynamic paramsObj)
         {
             using (MiniProfiler.Current.Step(step))
             using (var c = await GetConnectionAsync())

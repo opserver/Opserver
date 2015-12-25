@@ -53,7 +53,7 @@ namespace StackExchange.Opserver.Data.Jira
             _jiraSettings = jiraSettings;
         }
 
-        public async Task<JiraCreateIssueResponse> CreateIssue(JiraAction action, Error error, string accountName)
+        public async Task<JiraCreateIssueResponse> CreateIssueAsync(JiraAction action, Error error, string accountName)
         {
 
             var url = GetUrl(action);
@@ -98,14 +98,14 @@ namespace StackExchange.Opserver.Data.Jira
 
             if (commentBody.HasValue())
             {
-                await Comment(action, result, commentBody).ConfigureAwait(false);
+                await CommentAsync(action, result, commentBody).ConfigureAwait(false);
             }
             
             result.Host = GetHost(action);
             return result;
         }
 
-        public async Task<string> Comment(JiraAction actions, JiraCreateIssueResponse createResponse, string comment)
+        public async Task<string> CommentAsync(JiraAction actions, JiraCreateIssueResponse createResponse, string comment)
         {
             var url = GetUrl(actions);
             var userName = GetUsername(actions);

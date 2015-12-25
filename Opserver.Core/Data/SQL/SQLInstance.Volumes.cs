@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.SQL
         private Cache<List<VolumeInfo>> _volumes;
         public Cache<List<VolumeInfo>> Volumes => _volumes ?? (_volumes = SqlCacheList<VolumeInfo>(10*60));
 
-        public class VolumeInfo : ISQLVersionedObject
+        public class VolumeInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2008R2.SP1;
 
@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data.SQL
             public decimal AvgReadStallMS { get; internal set; }
             public decimal AvgWriteStallMS { get; internal set; }
             
-            internal const string FetchSQL = @"
+            public string GetFetchSQL(Version v) => @"
 Select vs.volume_mount_point VolumeMountPoint, 
        vs.volume_id VolumeId, 
        vs.logical_volume_name LogicalVolumeName, 
@@ -47,12 +47,8 @@ Select vs.volume_mount_point VolumeMountPoint,
        vs.total_bytes,
        vs.available_bytes,
        vs.is_read_only,
-       vs.is_compressed";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
+       vs.is_compressed
+";
         }
     }
 }

@@ -51,15 +51,15 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string PrettyUsed => _sizeFormat(Used);
         public string PrettyAvailable => _sizeFormat(Available);
 
-        public string SpaceStatusClass
+        public MonitorStatus SpaceStatus
         {
             get
             {
                 if (PercentUsed > CriticalPercentUsed)
-                    return MonitorStatus.Critical.GetDescription();
+                    return MonitorStatus.Critical;
                 if (PercentUsed > WarningPercentUsed)
-                    return MonitorStatus.Warning.GetDescription();
-                return MonitorStatus.Good.GetDescription();
+                    return MonitorStatus.Warning;
+                return MonitorStatus.Good;
             }
         }
     }

@@ -12,45 +12,35 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode, ISearchableNode
     {
-        public string Name { get; internal set; }
+        public string Name => Settings.Name;
+        public int RefreshInterval => Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds;
         public string ObjectName { get; internal set; }
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
         protected string ConnectionString { get; set; }
-        public Version Version { get; internal set; }
-        public static Dictionary<Type, ISQLVersionedObject> VersionSingletons;
+        public Version Version { get; internal set; } = new Version(); // default to 0.0
+        protected SQLSettings.Instance Settings { get; }
 
-        static SQLInstance()
-        {
-            VersionSingletons = new Dictionary<Type, ISQLVersionedObject>();
-            foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(typeof(ISQLVersionedObject).IsAssignableFrom))
-            {
-                if (!type.IsClass) continue;
-                try
-                {
-                    VersionSingletons.Add(type, (ISQLVersionedObject)Activator.CreateInstance(type));
-                }
-                catch (Exception e)
-                {
-                    Current.LogException("Error creating ISQLVersionedObject lookup for " + type, e);
-                }
-            }
-        }
+        public static readonly Dictionary<Type, ISQLVersioned> VersionSingletons =
+            Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => typeof (ISQLVersioned).IsAssignableFrom(t) && t.IsClass)
+                .ToDictionary(type => type, type => (ISQLVersioned) Activator.CreateInstance(type));
 
-        public SQLInstance(string name, string connectionString, string objectName) : base(name)
+        public string GetFetchSQL<T>() where T : ISQLVersioned =>
+            VersionSingletons[typeof (T)].GetFetchSQL(Version);
+
+        public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
         {
-            Version = new Version(); // default to 0.0
-            Name = name;
+            Settings = settings;
             // TODO: Object Name regex for not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
-            ObjectName = objectName.IsNullOrEmptyReturn(objectName, "SQLServer");
-            ConnectionString = connectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", name));
+            // ...or ConnectionStringBuilder?
+            ObjectName = settings.ObjectName.IsNullOrEmptyReturn("SQLServer");
+            ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", settings.Name));
         }
 
         public static SQLInstance Get(string name)
         {
-            return name.IsNullOrEmpty()
-                       ? null
-                       : AllInstances.FirstOrDefault(i => i.Name.ToLower() == name.ToLower());
+            return AllInstances.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public override string NodeType => "SQL";
@@ -96,12 +86,6 @@ namespace StackExchange.Opserver.Data.SQL
             return Connection.GetOpenAsync(ConnectionString, connectionTimeout: timeout);
         }
 
-        public string GetFetchSQL<T>() where T : ISQLVersionedObject
-        {
-            ISQLVersionedObject lookup;
-            return VersionSingletons.TryGetValue(typeof (T), out lookup) ? lookup.GetFetchSQL(Version) : null;
-        }
-
         private string GetCacheKey(string itemName) { return $"SQL-Instance-{Name}-{itemName}"; }
 
         public Cache<List<T>> SqlCacheList<T>(int cacheSeconds,
@@ -110,7 +94,7 @@ namespace StackExchange.Opserver.Data.SQL
                                               [CallerMemberName] string memberName = "",
                                               [CallerFilePath] string sourceFilePath = "",
                                               [CallerLineNumber] int sourceLineNumber = 0) 
-            where T : class, ISQLVersionedObject
+            where T : class, ISQLVersioned
         {
             return new Cache<List<T>>(memberName, sourceFilePath, sourceLineNumber)
                 {
@@ -126,7 +110,7 @@ namespace StackExchange.Opserver.Data.SQL
                                           [CallerMemberName] string memberName = "",
                                           [CallerFilePath] string sourceFilePath = "",
                                           [CallerLineNumber] int sourceLineNumber = 0)
-            where T : class, ISQLVersionedObject
+            where T : class, ISQLVersioned
         {
             return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
                 {
@@ -149,9 +133,6 @@ namespace StackExchange.Opserver.Data.SQL
                                    addExceptionData: e => e.AddLoggedData("Server", Name));
         }
 
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
     }
 }

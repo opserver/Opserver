@@ -22,9 +22,6 @@ namespace StackExchange.Opserver.Data.Redis
 
         public List<IPAddress> IPAddresses => AppCache.GetHostAddresses(Host);
 
-        public override string ToString()
-        {
-            return $"{Name} ({Host}:{Port})";
-        }
+        public override string ToString() => $"{Name} ({Host}:{Port.ToString()})";
     }
 }

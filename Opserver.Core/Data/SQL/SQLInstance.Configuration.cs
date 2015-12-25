@@ -12,10 +12,10 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 return _configuration ?? (_configuration = new Cache<List<SQLConfigurationOption>>
                 {
-                    CacheForSeconds = 2*60,
+                    CacheForSeconds = RefreshInterval,
                     UpdateCache = UpdateFromSql("Configuration", async conn =>
                     {
-                        var result = await conn.QueryAsync<SQLConfigurationOption>(SQLConfigurationOption.FetchSQL);
+                        var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>());
                         foreach (var r in result)
                         {
                             int defaultVal;
@@ -31,8 +31,10 @@ namespace StackExchange.Opserver.Data.SQL
         private Dictionary<string, int> _configurationDefaults;
         public Dictionary<string, int> ConfigurationDefaults => _configurationDefaults ?? (_configurationDefaults = SQLConfigurationOption.GetDefaults(this));
 
-        public class SQLConfigurationOption
+        public class SQLConfigurationOption : ISQLVersioned
         {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
             public int ConfigurationId { get; set; }
             public string Name { get; set; }
             public string Description { get; set; }
@@ -46,7 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             public bool IsDefault => ValueInUse == Default || (Name == "min server memory (MB)" && ValueInUse == 16);
 
-            internal const string FetchSQL = @"
+            public string GetFetchSQL(Version v) => @"
  Select configuration_id ConfigurationId,
 		name Name,
 		description Description,
@@ -58,11 +60,6 @@ namespace StackExchange.Opserver.Data.SQL
 		is_advanced IsAdvanced
    From sys.configurations
 Order By is_advanced, name";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
 
             public static Dictionary<string, int> GetDefaults(SQLInstance i)
             {

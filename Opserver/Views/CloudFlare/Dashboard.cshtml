@@ -4,9 +4,7 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("CloudFlare Dashboard");
-    this.SetTopNodes(RailgunInstance.AllInstances,
-        "Railguns",
-        null);
+    this.SetTopNodes(RailgunInstance.AllInstances, "Railguns");
 }
 @section head {
     <script>
@@ -15,16 +13,12 @@
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+@helper TabLink(DashboardModel.Views view, string href, string name)
 {
-    <a class="@(Model.View == view ? "selected" : "")" href="@href">@name</a>
+    <li class="@(Model.View == view ? "active" : null)"><a href="@href">@name</a></li>
 }
-<div class="tabs sub-tabs">
-    <div class="tabs-links">
-        @TabLink(DashboardModel.Views.DNS, "/cloudflare/dns", "dns", false)
-        @TabLink(DashboardModel.Views.Railgun, "/cloudflare/railgun", "railgun", false)
-    </div>
-</div>
-<div class="dashboard-list">
-    @RenderBody()
-</div>
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(DashboardModel.Views.DNS, "/cloudflare/dns", "DNS")
+    @TabLink(DashboardModel.Views.Railgun, "/cloudflare/railgun", "Railgun")
+</ul>
+@RenderBody()

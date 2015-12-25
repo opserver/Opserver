@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.SQL
             return new Cache<List<SQLDatabaseTableInfo>>
                 {
                     CacheKey = GetCacheKey("TableInfo-" + databaseName),
-                    CacheForSeconds = 60,
+                    CacheForSeconds = RefreshInterval,
                     CacheStaleForSeconds = 5 * 60,
                     UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
                         {
@@ -47,7 +47,7 @@ namespace StackExchange.Opserver.Data.SQL
         private Cache<List<SQLDatabaseVLFInfo>> _databaseVLFs;
         public Cache<List<SQLDatabaseVLFInfo>> DatabaseVLFs => _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SQLDatabaseVLFInfo>(10 * 60, 60, affectsStatus: false));
 
-        public static List<string> SystemDatabaseNames = new List<string>
+        public static HashSet<string> SystemDatabaseNames = new HashSet<string>
             {
                 "master",
                 "model",
@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.SQL
                 "tempdb"
             };
 
-        public class SQLDatabaseInfo : ISQLVersionedObject, IMonitorStatus
+        public class SQLDatabaseInfo : ISQLVersioned, IMonitorStatus
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -189,16 +189,16 @@ From sys.databases db
                  Where type = 4
               Group By database_id) sti On db.database_id = sti.database_id {1}";
 
-            public string GetFetchSQL(Version version)
+            public string GetFetchSQL(Version v)
             {
-                if (version >= SQLServerVersions.SQL2012.RTM)
+                if (v >= SQLServerVersions.SQL2012.RTM)
                     return string.Format(FetchSQL, FetchSQL2012Columns, FetchSQL2012Joins);
 
                 return string.Format(FetchSQL, "", "");
             }
         }
 
-        public class SQLDatabaseBackupInfo : ISQLVersionedObject
+        public class SQLDatabaseBackupInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -283,7 +283,7 @@ Select db.database_id Id,
             }
         }
 
-        public class SQLDatabaseFileInfo : ISQLVersionedObject
+        public class SQLDatabaseFileInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -318,7 +318,7 @@ Select db.database_id Id,
                 {
                     if (FileGrowthRaw == 0) return "None";
 
-                    if (FileIsPercentGrowth) return FileGrowthRaw + "%";
+                    if (FileIsPercentGrowth) return FileGrowthRaw.ToString() + "%";
 
                     // Growth that's not percent-based is 8KB pages rounded to the nearest 64KB
                     return (FileGrowthRaw*8*1024).ToHumanReadableSize();
@@ -343,7 +343,7 @@ Select db.database_id Id,
                 }
             }
 
-            internal const string FetchSQL = @"
+            public string GetFetchSQL(Version v) => @"
 Select vs.volume_id VolumeId,
        vs.volume_mount_point VolumeMountPoint, 
        vs.logical_volume_name LogicalVolumeName,
@@ -369,14 +369,9 @@ Select vs.volume_id VolumeId,
          On fs.database_id = mf.database_id
          And fs.file_id = mf.file_id
        Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
         }
 
-        public class SQLDatabaseTableInfo : ISQLVersionedObject
+        public class SQLDatabaseTableInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -393,7 +388,7 @@ Select vs.volume_id VolumeId,
             public long FreeSpaceKB => TotalSpaceKB - UsedSpaceKB;
             public TableTypes TableType { get; internal set; }
 
-            internal const string FetchSQL = @"
+            public string GetFetchSQL(Version v) => @"
 Select t.object_id Id,
        s.name SchemaName,
        t.name TableName,
@@ -426,14 +421,9 @@ Select t.object_id Id,
  Where t.is_ms_shipped = 0
    And i.object_id > 255
 Group By t.object_id, t.Name, t.create_date, s.name";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
         }
 
-        public class SQLDatabaseColumnInfo : ISQLVersionedObject
+        public class SQLDatabaseColumnInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -476,7 +466,7 @@ Group By t.object_id, t.Name, t.create_date, s.name";
                             break;
                         case "decimal":
                         case "numeric":
-                            props.Add($"{DataType}({Scale},{Precision})");
+                            props.Add($"{DataType}({Scale.ToString()},{Precision.ToString()})");
                             break;
                         default:
                             props.Add(DataType);
@@ -486,43 +476,6 @@ Group By t.object_id, t.Name, t.create_date, s.name";
                     return string.Join(", ", props);
                 }
             }
-
-            internal const string FetchSQL = @"
-Select s.name [Schema],
-       t.name TableName,
-       c.column_id Position,
-       c.name ColumnName,
-       ty.name DataType,
-       c.is_nullable IsNullable,
-       (Case When ty.name In ('nchar', 'ntext','nvarchar') And c.max_length <> -1 Then c.max_length / 2 Else c.max_length End) MaxLength,
-       c.scale Scale,
-       c.precision Precision,
-       object_definition(c.default_object_id) ColumnDefault,
-       c.collation_name CollationName,
-       c.is_identity IsIdentity,
-       c.is_computed IsComputed,
-       c.is_filestream IsFileStream,
-       c.is_sparse IsSparse,
-       c.is_column_set IsColumnSet,
-       (Select Top 1 i.name
-          From sys.indexes i 
-               Join sys.index_columns ic On i.object_id = ic.object_id And i.index_id = ic.index_id
-         Where i.object_id = t.object_id
-           And ic.column_id = c.column_id
-           And i.is_primary_key = 1) PrimaryKeyConstraint,
-       object_name(fkc.constraint_object_id) ForeignKeyConstraint,
-       fs.name ForeignKeyTargetSchema,
-       ft.name ForeignKeyTargetTable,
-       fc.name ForeignKeyTargetColumn
-  From sys.columns c
-       Join sys.tables t On c.object_id = t.object_id
-       Join sys.schemas s On t.schema_id = s.schema_id
-       Join sys.types ty On c.user_type_id = ty.user_type_id
-       Left Join sys.foreign_key_columns fkc On fkc.parent_object_id = t.object_id And fkc.parent_column_id = c.column_id
-       Left Join sys.tables ft On fkc.referenced_object_id = ft.object_id
-       Left Join sys.schemas fs On ft.schema_id = fs.schema_id
-       Left Join sys.columns fc On fkc.referenced_object_id = fc.object_id And fkc.referenced_column_id = fc.column_id
-Order By 1, 2, 3";
 
 // For non-SQL later
 //            internal const string FetchSQL = @"
@@ -570,13 +523,45 @@ Order By 1, 2, 3";
 //         And c.COLUMN_NAME = kcu.COLUMN_NAME
 //Order By c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION";
 
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
+            public string GetFetchSQL(Version v) => @"
+Select s.name [Schema],
+       t.name TableName,
+       c.column_id Position,
+       c.name ColumnName,
+       ty.name DataType,
+       c.is_nullable IsNullable,
+       (Case When ty.name In ('nchar', 'ntext','nvarchar') And c.max_length <> -1 Then c.max_length / 2 Else c.max_length End) MaxLength,
+       c.scale Scale,
+       c.precision Precision,
+       object_definition(c.default_object_id) ColumnDefault,
+       c.collation_name CollationName,
+       c.is_identity IsIdentity,
+       c.is_computed IsComputed,
+       c.is_filestream IsFileStream,
+       c.is_sparse IsSparse,
+       c.is_column_set IsColumnSet,
+       (Select Top 1 i.name
+          From sys.indexes i 
+               Join sys.index_columns ic On i.object_id = ic.object_id And i.index_id = ic.index_id
+         Where i.object_id = t.object_id
+           And ic.column_id = c.column_id
+           And i.is_primary_key = 1) PrimaryKeyConstraint,
+       object_name(fkc.constraint_object_id) ForeignKeyConstraint,
+       fs.name ForeignKeyTargetSchema,
+       ft.name ForeignKeyTargetTable,
+       fc.name ForeignKeyTargetColumn
+  From sys.columns c
+       Join sys.tables t On c.object_id = t.object_id
+       Join sys.schemas s On t.schema_id = s.schema_id
+       Join sys.types ty On c.user_type_id = ty.user_type_id
+       Left Join sys.foreign_key_columns fkc On fkc.parent_object_id = t.object_id And fkc.parent_column_id = c.column_id
+       Left Join sys.tables ft On fkc.referenced_object_id = ft.object_id
+       Left Join sys.schemas fs On ft.schema_id = fs.schema_id
+       Left Join sys.columns fc On fkc.referenced_object_id = fc.object_id And fkc.referenced_column_id = fc.column_id
+Order By 1, 2, 3";
         }
 
-        public class SQLDatabaseVLFInfo : ISQLVersionedObject
+        public class SQLDatabaseVLFInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 

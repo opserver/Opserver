@@ -175,7 +175,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/protect"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> ExceptionsProtect(string log, Guid id)
         {
-            var success = await ExceptionStores.Action(log, s => s.ProtectError(id));
+            var success = await ExceptionStores.ActionAsync(log, s => s.ProtectErrorAsync(id));
             return success ? ExceptionCounts() : JsonError("Unable to protect, error was not found in the log");
         }
 
@@ -184,7 +184,7 @@ namespace StackExchange.Opserver.Controllers
         {
             // we don't care about success...if it's *already* deleted, that's fine
             // if we throw an exception trying to delete, that's another matter
-            await ExceptionStores.Action(log, s => s.DeleteError(id));
+            await ExceptionStores.ActionAsync(log, s => s.DeleteErrorAsync(id));
 
             return redirect ? Json(new { url = Url.Action("Exceptions", new { log }) }) : ExceptionCounts();
         }
@@ -192,7 +192,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> ExceptionsDeleteAll(string log)
         {
-            await ExceptionStores.Action(log, s => s.DeleteAllErrors(log));
+            await ExceptionStores.ActionAsync(log, s => s.DeleteAllErrors(log));
 
             return Json(new { url = Url.Action("Exceptions") });
         }
@@ -201,33 +201,35 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ExceptionsDeleteSimilar(string log, Guid id)
         {
             var e = await ExceptionStores.GetError(log, id);
-            await ExceptionStores.Action(e.ApplicationName, s => s.DeleteSimilarErrors(e));
+            await ExceptionStores.ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrors(e));
 
             return Json(new { url = Url.Action("Exceptions", new { log }) });
         }
 
         [Route("exceptions/delete-list"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsDeleteList(string log, Guid[] ids, bool returnCounts = false)
+        public async Task<ActionResult> ExceptionsDeleteList(Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
-            await ExceptionStores.Action(log, s => s.DeleteErrors(log, ids.ToList()));
+            await ExceptionStores.ActionAsync(null, s => s.DeleteErrors(ids.ToList()));
 
-            return returnCounts ? ExceptionCounts() : Json(new { url = Url.Action("Exceptions", new { log }) });
+            return returnCounts ? ExceptionCounts() : Json(new { url = Url.Action("Exceptions") });
         }
 
         [Route("exceptions/counts")]
         public ActionResult ExceptionCounts()
         {
-            return Json(
-                ExceptionStores.Applications.GroupBy(a => a.Name).Select(
-                    g =>
-                    new
-                        {
-                            Name = g.Key,
-                            ExceptionCount = g.Sum(a => a.ExceptionCount),
-                            MostRecent = g.Max(a => a.MostRecent)
-                        })
-                );
+            var apps = ExceptionStores.Applications.GroupBy(a => a.Name)
+                .ToDictionary(g => g.Key, g => new
+                {
+                    ExceptionCount = g.Sum(a => a.ExceptionCount),
+                    MostRecent = g.Max(a => a.MostRecent)
+                });
+
+            return Json(new
+            {
+                apps,
+                total = apps.Values.Sum(a => a.ExceptionCount)
+            });
         }
 
         [Route("exceptions/jiraactions"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
@@ -244,7 +246,7 @@ namespace StackExchange.Opserver.Controllers
             var user = Current.User;
             var action = JiraSettings.Actions.FirstOrDefault(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = await jiraClient.CreateIssue(action, e, user == null ? String.Empty : user.AccountName);
+            var result = await jiraClient.CreateIssueAsync(action, e, user == null ? String.Empty : user.AccountName);
 
             if (result.Key.IsNullOrWhiteSpace())
             {

@@ -1,13 +1,14 @@
 ﻿using System;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
     public abstract class ElasticDataObject
     {
-        public void PopulateFromConnections(SearchClient client)
+        public async Task PopulateFromConnections(SearchClient client)
         {
-            var response = RefreshFromConnection(client);
+            var response = await RefreshFromConnectionAsync(client);
 
             // Some implementations are raw
             if (response?.Exception == null) return;
@@ -22,6 +23,6 @@ namespace StackExchange.Opserver.Data.Elastic
             throw new Exception($"Failed to poll all elastic nodes for {GetType().Name}");
         }
 
-        public abstract ElasticResponse RefreshFromConnection(SearchClient cli);
+        public abstract Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli);
     }
 }

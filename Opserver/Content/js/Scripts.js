@@ -2,7 +2,7 @@
     Cookies.set('highDPI', 'true', { expires: 365 * 10, path: '/' });
 }
 
-window.Status = (function () {
+window.Status = (function() {
 
     var ajaxLoaders = {},
         registeredRefreshes = {};
@@ -28,9 +28,9 @@ window.Status = (function () {
             return;
         }
         var def = refreshData.func();
-        if (typeof (def.done) === "function") {
-            def.done(function () {
-                refreshData.timer = setTimeout(function () { execRefresh(refreshData); }, refreshData.interval);
+        if (typeof (def.done) === 'function') {
+            def.done(function() {
+                refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
             });
         }
 
@@ -47,10 +47,10 @@ window.Status = (function () {
                 r.timer = 0;
             }
             if (r.running) {
-                if (typeof (r.running.reject) === "function") {
+                if (typeof (r.running.reject) === 'function') {
                     r.running.reject();
                 }
-                if (typeof (r.running.abort) === "function") {
+                if (typeof (r.running.abort) === 'function') {
                     r.running.abort();
                 }
             }
@@ -94,45 +94,34 @@ window.Status = (function () {
         }
     }
 
-    function summaryPopup(url, options, noClose, onClose) {
-        var wrap = getPopup(noClose);
-        wrap.load(url, options, function () {
-            // TODO: refresh intervals via header
-            showSummaryPopup(onClose, 50);
-        });
-    }
+    function ajaxModal(loadingName, url, data) {
+        var modal = $('.js-summary-popup');
+        modal.unbind('show.bs.modal shown.bs.modal hide.bs.modal hidden.bs.modal loaded.bs.modal');
+        //modal.draggable({ handle: '.modal-header' });
+        var title = modal.find('.modal-title').text('Loading ' + loadingName + '...');
+        var body = modal.find('.modal-body').empty();
 
-    function getPopup(noClose) {
-        if (noClose) {
-            var current = $('.summary-popup:visible');
-            if (current.length) return current;
-        }
-        $.modal.close();
-        $('.summary-popup').remove();
-        return $('<div class="summary-popup" />').appendTo('#content');
-    }
-
-    function showSummaryPopup(onClose) {
-        $('.summary-popup').modal({
-            overlayClose: true,
-            autoResize: true,
-            maxWidth: '95%',
-            maxHeight: '95%', // height < 840 ? height - 40 : 800,
-            containerCss: { 'height': 'auto', 'width': 'auto' },
-            onShow: function (dialog) {
-                dialog.wrap.css('overflow', 'hidden');
-            },
-            onClose: function (dialog) {
-                if (onClose) onClose();
-                dialog.data.fadeOut('fast', function () {
-                    dialog.container.hide('fast', function () {
-                        $.modal.close();
-                    });
-                });
-                window.location.hash = '';
+        $.get(url, data, function (result) {
+            body.html(result);
+            var ajaxTitle = body.find('[data-title]').data('title');
+            if (ajaxTitle) {
+                title.text(ajaxTitle);
             }
+            modal.modal('show');
+            modal.bind('hidden.bs.modal', function() {
+                history.pushState('', document.title, window.location.pathname + window.location.search);
+            });
         });
-        resizePopup();
+        return modal;
+    }
+
+    function summaryPopup(url, options, noClose, onClose) {
+        //var wrap = getPopup(noClose);
+
+        //wrap.load(url, options, function() {
+        //    // TODO: refresh intervals via header
+        //    showSummaryPopup(onClose, 50);
+        //});
     }
 
     function resizePopup() {
@@ -163,7 +152,7 @@ window.Status = (function () {
 
         return;
     }
-    
+
     function hashChangeHandler() {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
@@ -176,17 +165,22 @@ window.Status = (function () {
         }
     }
 
+    function prependLoader(elem) {
+        var html = '<div class="sk-folding-cube"><div></div><div></div><div></div><div></div></div>';
+        $(html).prependTo(elem);
+    }
+
     $(window).on('hashchange', hashChangeHandler).on('resize', resizePopup);
-    $(function () {
+    $(function() {
         // individual sections add ajaxLoaders, delay running until after they're added on-load
         setTimeout(hashChangeHandler, 1);
     });
-    
+
     function prepTableSorter() {
         $.tablesorter.addParser({
             id: 'relativeDate',
-            is: function () { return false; },
-            format: function (s, table, cell) {
+            is: function() { return false; },
+            format: function(s, table, cell) {
                 var date = $(cell).find('.relativetime').attr('title'); // e.g. 2011-03-31 01:57:59Z
                 if (!date)
                     return 0;
@@ -198,24 +192,24 @@ window.Status = (function () {
         });
         $.tablesorter.addParser({
             id: 'commas',
-            is: function () { return false; },
-            format: function (s) {
+            is: function() { return false; },
+            format: function(s) {
                 return s.replace('$', '').replace(/,/g, '');
             },
             type: 'numeric'
         });
         $.tablesorter.addParser({
             id: 'dataVal',
-            is: function () { return false; },
-            format: function (s, table, cell) {
+            is: function() { return false; },
+            format: function(s, table, cell) {
                 return $(cell).data('val') || 0;
             },
             type: 'numeric'
         });
         $.tablesorter.addParser({
             id: 'cellText',
-            is: function () { return false; },
-            format: function (s, table, cell) {
+            is: function() { return false; },
+            format: function(s, table, cell) {
                 return $(cell).text();
             },
             type: 'text'
@@ -226,18 +220,21 @@ window.Status = (function () {
         Status.options = options;
 
         if (options.HeaderRefresh) {
-            Status.refresh.register("TopBar", function () {
+            Status.refresh.register('TopBar', function() {
                 return $.ajax('/top-refresh', {
                     data: { tab: Status.options.Tab }
                 }).done(function (html) {
-                    var tabs = $(html).filter('.top-tabs');
+                    var resp = $(html);
+                    var tabs = $('.js-top-tabs', resp);
                     if (tabs.length) {
-                        $('.top-tabs').replaceWith(tabs);
+                        $('.js-top-tabs').replaceWith(tabs);
                     }
-                    var issuesList = $(html).filter('.issues-list');
-                    var curList = $('.issues-list');
+                    var issuesList = $('.js-issues-button', resp);
+                    var curList = $('.js-issues-button');
                     if (issuesList.length) {
-                        var issueCount = issuesList.data('issue-count');
+                        // TODO: Fix replacement
+                        // Re-think what comes down here, plan for websockets
+                        var issueCount = issuesList.data('count');
                         // TODO: don't if hovering
                         if (issueCount > 0) {
                             if (!curList.children().length) {
@@ -247,7 +244,7 @@ window.Status = (function () {
                                 $('.issues-dropdown').html($('.issues-dropdown', issuesList).html());
                             }
                         } else {
-                            curList.fadeOut(function () {
+                            curList.fadeOut(function() {
                                 $(this).empty();
                             });
                         }
@@ -255,15 +252,15 @@ window.Status = (function () {
                 }).fail(Status.UI.ajaxError);
             }, Status.options.HeaderRefresh * 1000);
         }
-        
+
         var resizeTimer;
-        $(window).resize(function () {
+        $(window).resize(function() {
             clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(function () {
+            resizeTimer = setTimeout(function() {
                 $(this).trigger('resized');
             }, 100);
         });
-        $(document).on('click', '.reload-link', function (e) {
+        $(document).on('click', '.js-reload-link', function(e) {
             var data = {
                 type: $(this).data('type'),
                 uniqueKey: $(this).data('uk'),
@@ -272,21 +269,26 @@ window.Status = (function () {
             if (!data.type && (this.href || '#') !== '#') return;
             if (data.type && data.uniqueKey) {
                 // Node to refresh, do it
-                var link = $(this).addClass('reloading');
+                if ($(this).hasClass('active')) return;
+                var link = $(this).addClass('active');
+                link.find('.glyphicon').hide(); //.addClass('spin');
+                prependLoader(link);
                 link.find('.js-text')
                     .text('Polling...');
                 Status.refresh.pause();
                 $.post('/poll', data)
-                    .fail(function () {
+                    .fail(function() {
                         toastr.error('There was an error polling this node.', 'Polling',
                         {
                             positionClass: 'toast-top-right-spaced',
                             timeOut: 5 * 1000
                         });
                     }).done(function () {
-                        // TODO: Find nearest refresh parent after compartmentalization and refresh that node
-                        window.location.reload(true);
-                        //Status.refresh.resume();
+                        if (link.closest('.js-refresh').length) {
+                            Status.refresh.resume();
+                        } else {
+                            window.location.reload(true);
+                        }
                         //link.removeClass('reloading')
                         //    .find('.js-text')
                         //    .text('Poll Now');
@@ -295,30 +297,31 @@ window.Status = (function () {
                 window.location.reload(true);
             }
             e.preventDefault();
-        }).on('click', '.issues-button', function (e) {
-            $(this).parent('.issues-list').toggleClass('active');
-            e.preventDefault();
-        }).on('click', '.issues-list, .action-popup', function (e) {
-            e.stopPropagation();
         }).on({
-            'click': function () {
-                $('.issues-list').removeClass('active');
+            'click': function() {
                 $('.action-popup').remove();
             },
-            'show': function () {
+            'show': function() {
                 resumeRefresh();
             },
-            'hide': function () {
+            'hide': function() {
                 pauseRefresh();
             }
         });
+        $('.js-summary-popup').on('show.bs.modal', function() {
+            $(this).find('.modal-body').css({
+                width: 'auto',
+                height: 'auto',
+                'max-height': '100%'
+            });
+        });
         prepTableSorter();
+        prettyPrint();
     }
 
     return {
         init: init,
-        getPopup: getPopup,
-        showSummaryPopup: showSummaryPopup,
+        ajaxModal: ajaxModal,
         summaryPopup: summaryPopup,
         resizePopup: resizePopup,
         ajaxLoaders: ajaxLoaders,
@@ -349,66 +352,66 @@ Status.Dashboard = (function () {
     function applyFilter(filter) {
         Status.Dashboard.options.filter = filter = (filter || '').toLowerCase();
         if (!filter) {
-            $('.server-row[data-info], .node-group, .node-header').removeClass('hidden');
+            $('[data-search]').removeClass('hidden');
             return;
         }
-        $('.server-row[data-info]').each(function () {
-            var show = $(this).data('info').indexOf(filter) > -1;
-            $(this).toggleClass('hidden', !show); //[show ? 'show' : 'hide']()
+        $('[data-search]').each(function () {
+            var show = $(this).data('search').indexOf(filter) > -1;
+            $(this).toggleClass('hidden', !show);
         });
-        $('.node-group').each(function () {
-            var show = $('.server-row:not(.hidden)', this).length;
-            $(this).prev('.node-header').toggleClass('hidden', !show);
-        });
+        // TODO: Look at children cases, e.g. search for a category where children don't match
+        // Thoughts: they should include the category in their search strings and be covered
     }
 
     function init(options) {
         Status.Dashboard.options = options;
 
         if (options.refresh) {
-            Status.refresh.register("Dashboard", function () {
+            Status.refresh.register('Dashboard', function () {
                 return $.ajax(Status.Dashboard.options.refreshUrl || window.location.href, {
                     data: $.extend({}, Status.Dashboard.options.refreshData),
                     cache: false
                 }).done(function (html) {
-                    var serverGroups = $('.node-group[data-name], .node-header[data-name], .refresh-group[data-name]', html);
-                    $('.node-group[data-name], .node-header[data-name], .refresh-group[data-name]').each(function () {
+                    var resp = $(html);
+                    var refreshGroups = resp.find('.js-refresh[data-name]').add(resp.filter('.js-refresh[data-name]'));
+                    $('.js-refresh[data-name]').each(function () {
                         var name = $(this).data('name'),
-                            match = serverGroups.filter('[data-name="' + name + '"]');
+                            match = refreshGroups.filter('[data-name="' + name + '"]');
                         if (!match.length) {
                             console.log('Unable to find: ' + name + '.');
                         } else {
                             $(this).replaceWith(match);
                         }
                     });
-                    $('.cluster-sub-detail').replaceWith($(html).filter('.cluster-sub-detail'));
                     if (Status.Dashboard.options.filter)
                         applyFilter(Status.Dashboard.options.filter);
                     if (Status.Dashboard.options.afterRefresh)
                         Status.Dashboard.options.afterRefresh();
-                }).fail(function () { console.log(this, arguments); });
+                }).fail(function () {
+                    console.log('Failed to refresh', this, arguments);
+                });
             }, Status.Dashboard.options.refresh * 1000);
         }
 
-        $('.node-dashboard').on('click', '.dashboard-spark', function() {
+        $('.js-content').on('click', '.js-nodes .js-dashboard-spark', function() {
             var $this = $(this),
                 id = $this.data('id'),
                 title = $this.data('title'),
                 max = $this.closest('[data-max]').data('max'),
                 type = title.toLowerCase(),
                 row = $this.closest('tr'),
-                node = row.data('node') || row.find('.node-name-link').text(),
+                node = row.data('node'),
                 subtitle = $this.parent().data('subtitle') || node;
 
             switch (type) {
-            case 'cpu':
-                $('#dashboard-chart').empty().cpuGraph({ id: id, title: 'CPU Utilization', subtitle: subtitle, animate: true });
-                break;
-            case 'memory':
-                $('#dashboard-chart').empty().memoryGraph({ id: id, title: 'Memory Utilization', subtitle: subtitle, animate: true, max: max });
-                break;
-            default:
-                return;
+                case 'cpu':
+                    $('#dashboard-chart').empty().cpuGraph({ id: id, title: 'CPU Utilization', subtitle: subtitle, animate: true });
+                    break;
+                case 'memory':
+                    $('#dashboard-chart').empty().memoryGraph({ id: id, title: 'Memory Utilization', subtitle: subtitle, animate: true, max: max });
+                    break;
+                default:
+                    return;
             }
 
             $('#spark-detail').modal({
@@ -423,11 +426,11 @@ Status.Dashboard = (function () {
             });
         });
 
-        $(document).on('keyup', '.node-ddl, .top-filter input', function () {
+        $(document).on('keyup', '.js-filter', function () {
             applyFilter(this.value);
         });
         if (Status.Dashboard.options.filter)
-            $('.node-category-list .filter-box input').keyup();
+            $('.js-filter').keyup();
     }
 
     return {
@@ -457,7 +460,7 @@ Status.Dashboard.Server = (function () {
             });
             return false;
         }).on('submit', '.category-row form', function () {
-            $(this).appendLoading();
+            //TODO: Loading animation
             
             if (currentRequest) currentRequest.abort();
             currentRequest = $.get('/sql/top', $(this).serialize(), function (html) {
@@ -498,7 +501,7 @@ Status.Dashboard.Server = (function () {
         if ($('#cpu-graph').length) return;
 
         var container = '<div id="cpu-graph"><div class="cpu-total"><div id="cpu-total-graph" class="chart" data-title="Total CPU Utilization"></div></div></div>',
-            wrap = $(container).appendTo('.bottom-section'),
+            wrap = $(container).appendTo('.js-content'),
             liveGraph = $('#cpu-total-graph').lived3graph({
                 type: 'cpu',
                 width: 'auto',
@@ -570,31 +573,60 @@ Status.NodeSearch = (function () {
     function init(options) {
         Status.NodeSearch.options = options;
 
-        $('.node-ddl').on('click', function () {
+        var ac = $('.js-filter').on('click', function() {
             var val = $(this).val();
-            $(this).select().trigger('focus').removeClass('icon').val('');
-            setTimeout(function () {
+            $(this).select().autocomplete('search', '').removeClass('icon').val('');
+            setTimeout(function() {
                 var selected = $('.status-icon[data-host="' + val + '"]');
                 if (selected.length) {
                     var top = selected.closest('li').addClass('ac_over').position().top;
                     $('.ac_results ul').scrollTop(top);
                 }
             }, 0);
-        }).autocomplete(options.nodes, {
-            max: 500,
-            minChars: 0,
-            matchContains: true,
-            delay: 50,
-            formatItem: function (row) {
-                return '<span class="status-icon ' + row.sClass + ' icon" data-host="' + row.node + '">●</span> <span class="server-category-label">' + row.category + ':</span> <span class="' + row.sClass + '">' + row.name + '</span>';
-            },
-            formatResult: function (row) { return row.node; },
-            formatMatch: function (row) { return row.category + ': ' + row.node; }
-        }).result(function (e, data) {
-            $(this).addClass('left-icon ' + data.sClass).closest('form').submit();
-        }).keydown(function (e) {
-            return e.keyCode !== 13;
         });
+            //.autocomplete(options.nodes, {
+            //    max: 500,
+            //    minChars: 0,
+            //    matchContains: true,
+            //    delay: 50,
+            //    inputClass: "autocomplete-input",
+            //    resultsClass: "autocomplete-results",
+            //    loadingClass: "autocomplete-loading",
+            //    formatItem: function (row) {
+            //        return '<span class="status-icon ' + row.sClass + ' icon" data-host="' + row.node + '">●</span> <span class="text-muted">' + row.category + ':</span> <span class="' + row.sClass + '">' + row.name + '</span>';
+            //    },
+            //    formatResult: function (row) { return row.node; },
+            //    formatMatch: function (row) { return row.category + ': ' + row.node; }
+            //}).result(function (e, data) {
+            //    $(this).addClass('left-icon ' + data.sClass).closest('form').submit();
+            //}).keydown(function (e) {
+            //    return e.keyCode !== 13;
+            //});
+        var ai = ac.autocomplete({
+            minLength: 0,
+            delay: 25,
+            source: options.nodes,
+            appendTo: ac.parent(),
+            select: function(event, ui) {
+                $(this).addClass('left-icon ' + ui.item.icon).closest('form').submit();
+                return false;
+            }
+        }).autocomplete('instance');
+        ai._renderMenu = function (ul, items) {
+            var that = this;
+            $.each(items, function (index, item) {
+                that._renderItemData(ul, item);
+            });
+            $(ul).addClass('dropdown-menu navbar-list');
+        };
+        ai._renderItem = function(ul, item) {
+            var html = '<span class="' + item.icon + '" data-host="' + item.value + '">●</span> '
+                + '<span class="text-muted">' + item.category + ':</span> '
+                + '<span class="' + item.icon + '">' + item.label + '</span>';
+            return $('<li>').append('<a>' + html + '</a>').appendTo(ul);
+        };
+
+
         $('.server-search').on('click', '.js-show-all-down', function () {
             $(this).siblings('.hidden').removeClass('hidden').end().remove();
         });
@@ -624,14 +656,14 @@ Status.SQL = (function () {
             ag: pieces.length > 1 ? pieces[1] : null,
             node: pieces.length > 2 ? pieces[2] : null
         };
-        var wrap = Status.getPopup();
-        wrap.load('/sql/servers', $.extend({}, Status.Dashboard.options.refreshData, {
-            detailOnly: true
-        }), function () {
-            Status.showSummaryPopup(function () {
-                Status.Dashboard.options.refreshData = {};
-            }, 50);
-        });
+        //var wrap = Status.getPopup();
+        //wrap.load('/sql/servers', $.extend({}, Status.Dashboard.options.refreshData, {
+        //    detailOnly: true
+        //}), function () {
+        //    Status.showSummaryPopup(function () {
+        //        Status.Dashboard.options.refreshData = {};
+        //    }, 50);
+        //});
     }
 
     function loadPlan(val) {
@@ -639,63 +671,63 @@ Status.SQL = (function () {
             handle = parts[0],
             offset = parts.length > 1 ? parts[1] : null;
         $('.sql-server .plan-row[data-plan-handle="' + handle + '"]').addClass('selected');
-        var wrap = Status.getPopup();
-        wrap.load('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
-            $('.query-col').removeClass('loading');
-            Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
-            prettyPrint();
-            wrap.find('.sql-query-section .tabs-links').on('click', 'a', function () {
-                if ($(this).hasClass('selected')) return false;
-                $(this).addClass('selected').siblings().removeClass('selected');
-                var newDiv = $(this).data('div');
-                $('.sql-query-section .' + newDiv).show().siblings().not('.tabs').hide();
+        //var wrap = Status.getPopup();
+        //wrap.load('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
+        //    $('.query-col').removeClass('loading');
+        //    Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
+        //    prettyPrint();
+        //    wrap.find('.sql-query-section .tabs-links').on('click', 'a', function () {
+        //        if ($(this).hasClass('selected')) return false;
+        //        $(this).addClass('selected').siblings().removeClass('selected');
+        //        var newDiv = $(this).data('div');
+        //        $('.sql-query-section .' + newDiv).show().siblings().not('.tabs').hide();
 
-                Status.resizePopup();
+        //        Status.resizePopup();
 
-                $('.qp-root').drawQueryPlanLines();
-                return false;
-            });
-            var currentTt;
-            wrap.find('.qp-node').hover(function() {
-                var pos = $(this).offset();
-                var tt = $(this).find('.qp-tt');
-                currentTt = tt.clone();
-                currentTt.addClass('sql-query-tooltip')
-                    .appendTo(document.body)
-                    .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
-                    .show();
-            }, function() {
-                if (currentTt) currentTt.hide();
-            });
-            wrap.find('.handle-link a').on('click', function() {
-                if (!confirm('Are you sure you want to remove this plan from cache?'))
-                    return false;
+        //        $('.qp-root').drawQueryPlanLines();
+        //        return false;
+        //    });
+        //    var currentTt;
+        //    wrap.find('.qp-node').hover(function() {
+        //        var pos = $(this).offset();
+        //        var tt = $(this).find('.qp-tt');
+        //        currentTt = tt.clone();
+        //        currentTt.addClass('sql-query-tooltip')
+        //            .appendTo(document.body)
+        //            .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
+        //            .show();
+        //    }, function() {
+        //        if (currentTt) currentTt.hide();
+        //    });
+        //    wrap.find('.handle-link a').on('click', function() {
+        //        if (!confirm('Are you sure you want to remove this plan from cache?'))
+        //            return false;
 
-                var $link = $(this).addClass('loading');
-                $.ajax($link.attr('href'), {
-                    type: 'POST',
-                    success: function(data, status, xhr) {
-                        if (data === true) {
-                            window.location.hash = '';
-                            window.location.reload(true);
-                        } else {
-                            $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
-                        }
-                    },
-                    error: function(xhr) {
-                        $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
-                    }
-                });
-                return false;
-            });
-            wrap.find('.show-toggle').on('click', function (e) {
-                var grad = $(this).closest('.hide-gradient'),
-                    excerpt = grad.prev('.sql-query-excerpt');
-                excerpt.animate({ 'max-height': excerpt[0].scrollHeight }, 400, function () { $(window).resize(); });
-                grad.fadeOut(400);
-                e.preventDefault();
-            });
-        });
+        //        var $link = $(this).addClass('loading');
+        //        $.ajax($link.attr('href'), {
+        //            type: 'POST',
+        //            success: function(data, status, xhr) {
+        //                if (data === true) {
+        //                    window.location.hash = '';
+        //                    window.location.reload(true);
+        //                } else {
+        //                    $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
+        //                }
+        //            },
+        //            error: function(xhr) {
+        //                $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
+        //            }
+        //        });
+        //        return false;
+        //    });
+        //    wrap.find('.show-toggle').on('click', function (e) {
+        //        var grad = $(this).closest('.hide-gradient'),
+        //            excerpt = grad.prev('.sql-query-excerpt');
+        //        excerpt.animate({ 'max-height': excerpt[0].scrollHeight }, 400, function () { $(window).resize(); });
+        //        grad.fadeOut(400);
+        //        e.preventDefault();
+        //    });
+        //});
     }
     
     function init(options) {
@@ -756,7 +788,7 @@ Status.SQL = (function () {
             });
             return false;
         });
-        $('#content').on('click', '.ag-node', function() {
+        $(document).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
         });
     }
@@ -778,7 +810,7 @@ Status.Redis = (function () {
             }
         });
 
-        $('#content').on('click', '.js-redis-role-action', function (e) {
+        $(document).on('click', '.js-redis-role-action', function (e) {
             var link = this;
             Status.refresh.pause("Dashboard");
             $.get('redis/instance/actions/role', { node: $(this).data('node') }, function (data) {
@@ -801,61 +833,36 @@ Status.Redis = (function () {
 Status.Exceptions = (function () {
 
     function refreshCounts(data) {
-        if (!data.length) return;
-        var apps = {}, total = 0;
-        for (var i = 0; i < data.length; i++) {
-            apps[data[i].Name] = data[i];
-            total += data[i].ExceptionCount;
-        }
-        $('.top-server-list li a span').each(function () {
-            var app = apps[$(this).text()];
-            $(this)
-                .parent()
-                .attr('title', app ? (app.ExceptionCount + ' Exception' + (app.ExceptionCount === 1 ? '' : 's') + (app.MostRecent ? ', Last: ' + app.MostRecent : '')) : '0 Exceptions')
-                .siblings('span.count')
-                .text(app && app.ExceptionCount ? ' (' + app.ExceptionCount.toLocaleString() + ')' : '');
+        if (!data.apps && data.apps.length) return;
+        $('.badge-link-list li').each(function () {
+            var app = data.apps[$(this).data('name')];
+            $('.badge', this).text(app && app.ExceptionCount ? app.ExceptionCount.toLocaleString() : '');
         });
         if (Status.Exceptions.options.search) return;
         var log = Status.Exceptions.options.log;
         if (log) {
-            var count = apps[log].ExceptionCount;
-            $('.exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count !== 1 ? 's' : ''));
+            var count = data.apps[log].ExceptionCount;
+            $('.js-exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count !== 1 ? 's' : ''));
         } else {
-            $('.exception-title').text(total.toLocaleString() + ' Exception' + (total !== 1 ? 's' : ''));
+            $('.js-exception-title').text(total.toLocaleString() + ' Exception' + (data.total !== 1 ? 's' : ''));
         }
-        $('.tabs-links .count.exception-count').text(total);
+        $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.total.toLocaleString());
     }
 
     function init(options) {
         Status.Exceptions.options = options;
 
+        // TODO: Set refresh params
         function getLoadCount() {
             // If scrolled back to the top, load 500
             if ($(window).scrollTop() === 0) {
                 return 500;
             }
-            return Math.max($('.exceptions-dashboard tbody tr').length, 500);
+            return Math.max($('.js-exceptions tbody tr').length, 500);
         }
 
         if (options.refresh) {
-            Status.refresh.register("Status.Exceptions", function () {
-                return $.ajax(window.location.href, {
-                    data: { sort: options.sort, count: getLoadCount() },
-                    cache: false
-                }).done(function (html) {
-                    var newPage = $(html),
-                        newHeader = $('.top-server-list', newPage),
-                        newRows = $('.exceptions-dashboard > tbody > tr', newPage),
-                        newDB = $('.exceptions-dashboard', newPage),
-                        newCount = newDB.data('total-count'),
-                        newTitle = newDB.data('title');
-                    $('.exception-count').text((+newCount).toLocaleString());
-                    $('.exception-title').text(newTitle);
-                    if (newTitle) document.title = Status.options.SiteName ? newTitle + ' - ' + Status.options.SiteName : newTitle;
-                    $('.top-server-list').replaceWith(newHeader);
-                    $('.exceptions-dashboard tbody').empty().append(newRows);
-                }).fail(Status.UI.ajaxError);
-            }, Status.Exceptions.options.refresh * 1000);
+            Status.Dashboard.init({ refresh: Status.Exceptions.options.refresh });
         }
 
         var loadingMore = false,
@@ -867,18 +874,23 @@ Status.Exceptions = (function () {
             if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
                 // TODO: loading indicator
                 loadingMore = true;
-                $('.loading-more-spacer').show();
-                var lastGuid = $('.exceptions-dashboard tr.error').last().data('id');
+                $('.js-bottom-loader').show();
+                var lastGuid = $('.js-exceptions tr.js-error').last().data('id');
                 $.ajax('/exceptions/load-more', {
-                    data: { log: options.log, sort: options.sort, count: options.loadMore, prevLast: lastGuid },
+                    data: {
+                        log: options.log,
+                        sort: options.sort,
+                        count: options.loadMore,
+                        prevLast: lastGuid
+                    },
                     cache: false
                 }).done(function (html) {
                     var newRows = $(html).filter('tr');
-                    $('.exceptions-dashboard tbody').append(newRows);
-                    $('.loading-more-spacer').hide();
+                    $('.js-exceptions tbody').append(newRows);
+                    $('.js-bottom-loader').hide();
                     if (newRows.length < options.loadMore) {
                         allDone = true;
-                        $('.no-more').fadeIn();
+                        $('.js-bottom-no-more').fadeIn();
                     }
                     loadingMore = false;
                 });
@@ -886,61 +898,83 @@ Status.Exceptions = (function () {
         }
 
         if (options.loadMore) {
-            allDone = $('.exceptions-dashboard tbody tr.error').length < 250;
+            allDone = $('.js-exceptions tbody tr.js-error').length < 250;
             $(document).on('scroll exception-deleted', loadMore);
         }
 
-
-        // ajax the error deletion on the list page
-        $('.bottom-section').on('click', '.exceptions-dashboard a.delete-link', function () {
-            var jThis = $(this);
-
-            // if we're already deleted, bomb out early
-            if (jThis.closest('.error.deleted').length) return false;
-
-            // if we've "protected" this error, confirm the deletion
-            if (jThis.closest('tr.protected').length && !confirm('Really delete this protected error?')) return false;
-
-            var url = jThis.attr('href'),
+        function deleteError(elem) {
+            var jThis = $(elem),
+                url = jThis.attr('href'),
                 jRow = jThis.closest('tr'),
-                jCell = jThis.closest('td').addClass('loading');
+                jCell = jThis.closest('td');
+
+            $(elem).addClass('icon-rotate-flip');
+
+            if (!options.showingDeleted) {
+                jRow.hide();
+            }
 
             $.ajax({
                 type: 'POST',
                 data: { log: jRow.data('log') || options.log, id: jRow.data('id') },
-                context: this,
                 url: url,
                 success: function (data) {
                     if (options.showingDeleted) {
                         jThis.attr('title', 'Error is already deleted');
-                        jCell.removeClass('loading');
                         jRow.addClass('deleted');
-                        jCell.find('span.protected').replaceWith('<a title="Undelete and protect this error" class="protect-link" href="' + url.replace('/delete', '/protect') + '">&nbsp;P&nbsp;</a>');
+                        // TODO: Replace protected glyph here
+                        //jCell.find('span.protected').replaceWith('<a title="Undelete and protect this error" class="protect-link" href="' + url.replace('/delete', '/protect') + '">&nbsp;P&nbsp;</a>');
                     } else {
                         var table = jRow.closest('table');
                         if (!jRow.siblings().length) {
                             $('.clear-all-div').remove();
                             $('.no-content').fadeIn('fast');
                         }
-                        jRow.closest('tr').remove();
+                        jRow.remove();
                         table.trigger('update', [true]);
                         refreshCounts(data);
                         $(document).trigger('exception-deleted');
                     }
                 },
                 error: function (xhr) {
-                    $(this).attr('href', url);
+                    jThis.attr('href', url);
+                    jRow.show();
                     jCell.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred deleting');
+                },
+                complete: function () {
+                    jThis.removeClass('icon-rotate-flip');
                 }
             });
+        }
+
+
+        // ajax the error deletion on the list page
+        $(document).on('click', '.js-exceptions a.js-delete-link', function (e) {
+            var jThis = $(this);
+
+            // if we're already deleted, bomb out early
+            if (jThis.closest('.js-error.js-deleted').length) return false;
+
+            // if we've "protected" this error, confirm the deletion
+            if (jThis.closest('tr.js-protected').length && !e.ctrlKey) {
+                bootbox.confirm('Really delete this protected error?', function (result) {
+                    if (result) {
+                        deleteError(jThis[0]);
+                    }
+                });
+                return false;
+            }
+
+            deleteError(this);
             return false;
         });
 
         // ajax the protection on the list page
-        $('.bottom-section').on('click', '.exceptions-dashboard a.protect-link', function () {
+        $('.js-content').on('click', '.js-exceptions a.js-protect-link', function () {
             var url = $(this).attr('href'),
                 jRow = $(this).closest('tr'),
-                jCell = $(this).closest('td').addClass('loading');
+                jCell = $(this).closest('td');
+            $(this).addClass('icon-rotate-flip');
 
             $.ajax({
                 type: 'POST',
@@ -948,17 +982,18 @@ Status.Exceptions = (function () {
                 context: this,
                 url: url,
                 success: function (data) {
-                    $(this).siblings('.delete-link').attr('title', 'Delete this error')
-                           .end().replaceWith('<span title="This error is protected" class="protected"></span>');
-                    jRow.addClass('protected').removeClass('deleted');
+                    $(this).siblings('.js-delete-link').attr('title', 'Delete this error')
+                           .end()
+                           .replaceWith('<span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>');
+                    jRow.addClass('js-protected protected').removeClass('deleted');
                     refreshCounts(data);
                 },
                 error: function (xhr) {
-                    $(this).attr('href', url);
+                    $(this).attr('href', url).addClass('hover-pulsate');
                     jCell.errorPopupFromJSON(xhr, 'An error occurred protecting');
                 },
                 complete: function () {
-                    jCell.removeClass('loading');
+                    $(this).removeClass('icon-rotate-flip');
                 }
             });
             return false;
@@ -966,106 +1001,124 @@ Status.Exceptions = (function () {
         
         var lastSelected;
 
-        if (options.log) {
-            $('.bottom-section').on('click', '.exceptions-dashboard tbody td:nth-child(2), .exceptions-dashboard tbody td:nth-child(3)', function (e) {
-                var row = $(this).closest('tr');
-                row.toggleClass('selected');
-
-                if (e.shiftKey) {
-                    var index = row.index(),
-                        lastIndex = lastSelected.index();
-                    if (!e.ctrlKey) {
-                        row.siblings().andSelf().removeClass('selected');
-                    }
-                    row.parent()
-                       .children()
-                       .slice(Math.min(index, lastIndex), Math.max(index, lastIndex)).add(lastSelected).add(row)
-                       .addClass('selected');
-                    if (!e.ctrlKey) {
-                        lastSelected = row.first();
-                    }
-                } else if (e.ctrlKey) {
-                    lastSelected = row.first();
-                } else {
-                    if ($('.exceptions-dashboard tbody td').length > 2) {
-                        row.addClass('selected');
-                    }
-                    row.siblings().removeClass('selected');
-                    lastSelected = row.first();
-                }
-            });
-            $(document).keydown(function(e) {
-                if (e.keyCode === 46 || e.keyCode === 8) {
-                    var selected = $('.error.selected').not('.protected');
-                    if (selected.length > 0) {
-                        var ids = selected.map(function () { return $(this).data('id'); }).get();
-                        selected.children('.actions').addClass('loading');
-
-                        $.ajax({
-                            type: 'POST',
-                            context: this,
-                            traditional: true,
-                            data: { log: options.log, ids: ids, returnCounts: true },
-                            url: '/exceptions/delete-list',
-                            success: function (data) {
-                                var table = selected.closest('table');
-                                selected.remove();
-                                table.trigger('update', [true]);
-                                refreshCounts(data);
-                            },
-                            error: function (xhr) {
-                                selected.children('.actions').removeClass('loading');
-                                selected.last().children().first().errorPopupFromJSON(xhr, 'An error occurred clearing selected exceptions');
-                            }
-                        });
-                        return false;
-                    }
-                }
-                return true;
-            });
-        }
-
-        $('#content').on('click', 'a.clear-all-link', function () {
-            if (confirm('Really delete all non-protected errors?')) {
-                $(this).addClass('loading');
-
-                $.ajax({
-                    type: 'POST',
-                    context: this,
-                    data: { log: $(this).data('log') || options.log, id: $(this).data('id') || options.id },
-                    url: $(this).attr('href'),
-                    success: function (data) {
-                        window.location.href = data.url;
-                    },
-                    error: function (xhr) {
-                        $(this).removeClass('loading');
-                        $(this).parent().errorPopupFromJSON(xhr, 'An error occurred clearing this log');
-                    }
-                });
+        $('.js-content').on('click', '.js-exceptions tbody td', function (e) {
+            if ($(e.target).closest('a').length) {
+                return;
             }
+            var row = $(this).closest('tr');
+            row.toggleClass('active warning');
+
+            if (e.shiftKey) {
+                var index = row.index(),
+                    lastIndex = lastSelected.index();
+                if (!e.ctrlKey) {
+                    row.siblings().andSelf().removeClass('active warning');
+                }
+                row.parent()
+                    .children()
+                    .slice(Math.min(index, lastIndex), Math.max(index, lastIndex)).add(lastSelected).add(row)
+                    .addClass('active warning');
+                if (!e.ctrlKey) {
+                    lastSelected = row.first();
+                }
+                // TODO: Improve, possibly with a before/after unselectable style application
+                window.getSelection().removeAllRanges();
+            } else if (e.ctrlKey) {
+                lastSelected = row.first();
+            } else {
+                if ($('.js-exceptions tbody td').length > 2) {
+                    row.addClass('active warning');
+                }
+                row.siblings().removeClass('active warning');
+                lastSelected = row.first();
+            }
+        });
+
+        $(document).keydown(function(e) {
+            if (e.keyCode === 46 || e.keyCode === 8) {
+                var selected = $('.js-error.active').not('.js-protected');
+                if (selected.length > 0) {
+                    var ids = selected.map(function () { return $(this).data('id'); }).get();
+                    selected.find('.js-delete-link').addClass('icon-rotate-flip');
+
+                    if (!options.showingDeleted) {
+                        selected.hide();
+                    }
+
+                    $.ajax({
+                        type: 'POST',
+                        context: this,
+                        traditional: true,
+                        data: { ids: ids, returnCounts: true },
+                        url: '/exceptions/delete-list',
+                        success: function (data) {
+                            var table = selected.closest('table');
+                            selected.remove();
+                            table.trigger('update', [true]);
+                            refreshCounts(data);
+                        },
+                        error: function (xhr) {
+                            if (!options.showingDeleted) {
+                                selected.show();
+                            }
+                            selected.find('.js-delete-link').removeClass('icon-rotate-flip');
+                            selected.last().children().first().errorPopupFromJSON(xhr, 'An error occurred clearing selected exceptions');
+                        }
+                    });
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        $(document).on('click', 'a.js-clear-all', function () {
+            var jThis = $(this);
+            bootbox.confirm('Really delete all non-protected errors?', function(result) {
+                if (result) {
+                    jThis.find('.glyphicon').addClass('icon-rotate-flip');
+                    $.ajax({
+                        type: 'POST',
+                        data: {
+                            log: jThis.data('log') || options.log,
+                            id: jThis.data('id') || options.id
+                        },
+                        url: jThis.data('url'),
+                        success: function(data) {
+                            window.location.href = data.url;
+                        },
+                        error: function(xhr) {
+                            jThis.find('.glyphicon').removeClass('icon-rotate-flip');
+                            jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing this log');
+                        }
+                    });
+                }
+            });
             return false;
         });
 
-        $('a.clear-visible-link').on('click', function () {
-            if (confirm('Really delete all visible non-protected errors?')) {
-                var ids = $('.exceptions-dashboard tr.error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
-                $(this).addClass('loading');
+        $('a.js-clear-visible').on('click', function () {
+            var jThis = $(this);
+            bootbox.confirm('Really delete all non-protected errors?', function (result) {
+                if (result)
+                {
+                    var ids = $('.exceptions-dashboard tr.error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
+                    jThis.find('.glyphicon').addClass('icon-rotate-flip');
 
-                $.ajax({
-                    type: 'POST',
-                    context: this,
-                    traditional: true,
-                    data: { log: options.log, ids: ids },
-                    url: '/exceptions/delete-list',
-                    success: function (data) {
-                        window.location.href = data.url;
-                    },
-                    error: function (xhr) {
-                        $(this).removeClass('loading');
-                        $(this).parent().errorPopupFromJSON(xhr, 'An error occurred clearing visible exceptions');
-                    }
-                });
-            }
+                    $.ajax({
+                        type: 'POST',
+                        traditional: true,
+                        data: { log: options.log, ids: ids },
+                        url: '/exceptions/delete-list',
+                        success: function (data) {
+                            window.location.href = data.url;
+                        },
+                        error: function (xhr) {
+                            jThis.find('.glyphicon').removeClass('icon-rotate-flip');
+                            jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing visible exceptions');
+                        }
+                    });
+                }
+            });
             return false;
         });
 
@@ -1083,9 +1136,12 @@ Status.Exceptions = (function () {
         /* Error previews */
         if (options.enablePreviews) {
             var previewTimer = 0;
-            $('.bottom-section').on({
-                mouseenter: function () {
-                    var jThis = $(this).find('a.exception-link'),
+            $('.js-content').on({
+                mouseenter: function (e) {
+                    if ($(e.target).closest('td:first-child').length) {
+                        return;
+                    }
+                    var jThis = $(this).find('.js-exception-link'),
                         url = jThis.attr('href').replace('/detail', '/preview');
 
                     clearTimeout(previewTimer);
@@ -1098,13 +1154,13 @@ Status.Exceptions = (function () {
                             var errDiv = $('<div class="error-preview-popup" />').append(resp);
                             errDiv.appendTo(jThis.parent()).fadeIn('fast');
                         });
-                    }, 800);
+                    }, 400);
                 },
                 mouseleave: function () {
                     clearTimeout(previewTimer);
                     $('.error-preview-popup', this).fadeOut(125, function () { $(this).remove(); });
                 }
-            }, '.exceptions-dashboard .exception-cell');
+            }, '.js-exceptions tbody tr');
         }
 
         /* Error detail handlers*/
@@ -1183,138 +1239,71 @@ Status.Graphs = (function () {
         });
     }
 
-    function selectRange(range) {
-        Status.Graphs.options.selectedRange = range;
-        var ranges = Status.Graphs.options.ranges;
-        for (var i = 0; i < ranges.length; i++) {
-            if (ranges[i].text === range) {
-                Status.Graphs.options.start = ranges[i].start;
-            }
-        }
-
-        $('rect ~ text tspan').filter(function () {
-            return $(this).text() === range;
-        }).trigger('click');
-    }
-
     return {
         init: init,
-        selectRange: selectRange,
         count: 0
     };
 })();
 
 Status.HAProxy = (function () {
-    var refreshLink;
 
     function init(options) {
         Status.HAProxy.options = options;
 
         if (options.refresh) {
-            Status.refresh.register("Status.HAProxy", function () {
-                return $.ajax(window.location.pathname, {
-                    data: { group: Status.HAProxy.options.group, watch: Status.HAProxy.options.proxy }
-                }).done(function (html) {
-                    var proxies = $('.proxies-wrap, .dashboard-wrap', html);
-                    $('.proxies-wrap, .dashboard-wrap').replaceWith(proxies);
-                    refreshLink.detach();
-                    var header = $('.node-category-list.top-section', html);
-                    $('.node-category-list.top-section').replaceWith(header);
-                    $('.refresh-link').replaceWith(refreshLink);
-                }).fail(function (xhr) {
-                    toastr.error((xhr.responseText ? 'There was an error loading: ' + xhr.responseText : 'Unknwon error refreshing') + ' at ' + new Date(),
-                        "Problem refreshing",
-                        {
-                            positionClass: "toast-bottom-full-width",
-                            timeOut: (Status.HAProxy.options.refresh || 5) * 1000 - 1000
-                        });
-                });
-            }, (Status.HAProxy.options.refresh || 5) * 1000);
+            Status.Dashboard.init({ refresh: Status.HAProxy.options.refresh });
         }
 
-        refreshLink = $('.refresh-link');
-        
-        function stopRefresh() {
-            Status.refresh.pause();
-            refreshLink.text('Enable Refresh');
-        }
-        function startRefresh() {
-            Status.refresh.resume();
-            refreshLink.text('Disable Refresh');
-        }
-
-        refreshLink.on('click', function () {
-            if ($(this).text() === 'Disable Refresh') {
-                stopRefresh();
-            } else {
-                startRefresh();
-            }
-            return false;
-        });
-        
         // Admin Panel (security is server-side)
-        // Proxy level clicks
-        $('#content').on('click', '.haproxy-dashboard a.action-icon', function (e) {
-            var $this = $(this),
-                group = $this.data('group'),
-                proxy = $this.data('proxy'),
-                action = $this.data('action'),
-                server = $this.data('server');
-            
-            if ($this.hasClass('disabled')) return false;
-            
-            // if we're at the proxy level, prompt for confirmation
-            if (!server && !e.ctrlKey && !confirm('Are you sure you wish to ' + action.toLowerCase() + ' all of ' + proxy + '?'))
-                return false;
-            
-            $this.addClass('loading');
-            $.ajax({
-                type: 'POST',
-                data: { group: group, proxy: proxy, server: server, act: action }, //act: oh MVC
-                context: this,
-                url: '/haproxy/admin/proxy',
-                success: function (data) {
-                    if (data === true) {
-                        startRefresh();
-                    } else {
-                        stopRefresh();
+        $('.js-content').on('click', '.js-haproxy-action', function (e) {
+            var jThis = $(this),
+                data = {
+                    group: jThis.closest('[data-group]').data('group'),
+                    proxy: jThis.closest('[data-proxy]').data('proxy'),
+                    server: jThis.closest('[data-server]').data('server'),
+                    act: jThis.data('action')
+                };
+
+            function haproxyAction() {
+                jThis.addClass('icon-rotate-flip');
+                $.ajax({
+                    type: 'POST',
+                    data: data,
+                    url: '/haproxy/admin/action',
+                    success: function () {
+                        Status.refresh.run();
+                    },
+                    error: function () {
+                        jThis.removeClass('icon-rotate-flip').parent().errorPopup('An error occured while trying to ' + data.act + '.');
                     }
-                },
-                error: function () {
-                    $(this).removeClass('loading').parent().errorPopup('An error occured while trying to ' + action + '.');
-                }
-            });
-            return false;
-        });
+                });
+            }
 
-        $('#content').on('click', '.haproxy-dashboard-servers a.action-icon', function () {
-            var $this = $(this),
-                action = $this.data('action'),
-                group = $this.data('group'),
-                server = $this.data('server');
-            
-            if ($this.hasClass('disabled')) return false;
-
-            if (group && !confirm('Are you sure you with to ' + action.toLowerCase() + ' every server in ' + group + '?'))
-                return false;
-
-            $this.addClass('loading');
-            $.ajax({
-                type: 'POST',
-                data: { server: server, act: action, group: group }, //act: oh MVC
-                context: this,
-                url: '/haproxy/admin/' + (server ? 'server' : 'group'),
-                success: function (data) {
-                    if (data === true) {
-                        startRefresh();
-                    } else {
-                        stopRefresh();
+            function confirmAction(message) {
+                bootbox.confirm(message, function (result) {
+                    if (result) {
+                        haproxyAction();
                     }
-                },
-                error: function () {
-                    $(this).removeClass('loading').parent().errorPopup('An error occured while trying to ' + action + '.');
-                }
-            });
+                });
+                return false;
+            }
+            
+            if (jThis.hasClass('disabled')) return false;
+
+            // We're at the Tier level
+            if (data.group && !data.proxy && !data.server) {
+                return confirmAction('Are you sure you want to ' + data.act.toLowerCase() + ' every server in <b>' + data.group + '</b>?');
+            }
+            // We're at the Server level
+            if (!e.ctrlKey && !data.group && !data.proxy && data.server) {
+                return confirmAction('Are you sure you want to ' + data.act.toLowerCase() + ' <b>' + data.server + '</b> from all backends?');
+            }
+            // We're at the Proxy level
+            if (!e.ctrlKey && data.group && data.proxy && !data.server) {
+                return confirmAction('Are you sure you want to ' + data.act.toLowerCase() + ' all of <b>' + data.proxy + '</b>?');
+            }
+
+            haproxyAction();
             return false;
         });
     }
@@ -1336,7 +1325,7 @@ Status.HAProxy = (function () {
     }
     
     function commify(num) {
-        return (num + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,");
+        return (num + '').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,');
     }
     
     function getExtremes(array, series, min, max, stacked) {
@@ -1374,23 +1363,6 @@ Status.HAProxy = (function () {
 
     // Creating jQuery plguins...
     $.fn.extend({
-        loadingSpinner: function (wrap) {
-            this.html('<div class="graph-loading">Loading...<br /><img src="/Content/img/ajax-loader.gif" alt="Loading graph..." /></div>');
-            if (wrap) {
-                this.wrap(wrap);
-            }
-            return this;
-        },
-        appendSpinner: function () {
-            return this.append('<div class="graph-loading">Loading...<br /><img src="/Content/img/ajax-loader.gif" alt="Loading graph..." /></div>');
-        },
-        removeSpinner: function () {
-            this.find('.graph-loading').remove();
-            return this;
-        },
-        appendLoading: function () {
-            return this.append('<img src="/Content/img/loading.gif" alt="Loading..." />');
-        },
         inlinePopup: function (className, msg, callback, removeTimeout, clickDismiss) {
             $('.' + className).remove();
             var jDiv = $('<div class="' + className + '">' + msg + '</div>').appendTo(this);
@@ -1594,7 +1566,7 @@ Status.HAProxy = (function () {
             $.extend(params, options.params);
             
             options.width = options.width === 'auto' ? (chart.width() - 10) : options.width;
-            options.height = options.height === 'auto' ? (chart.height() - 40) : options.height;
+            options.height = options.height === 'auto' ? (chart.height() - 5) : options.height;
 
             for (var range in dateRanges) {
                 if (dateRanges.hasOwnProperty(range)) {

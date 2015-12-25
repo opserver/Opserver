@@ -10,7 +10,7 @@
     public string GetItemClass(Node s)
     {
         var prefix = s.IsVM ? "virtual-machine " : "";
-        return prefix + s.MonitorStatus.RowClass();
+        return prefix + s.RowClass();
     }
 }
 @helper Graph(Node s, string type)
@@ -20,9 +20,9 @@
         <div class="spark-no-data">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
+    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
 }
-<div class="item @s.MonitorStatus.Class() @GetItemClass(s)">
+<div class="item @s.TextClass() @GetItemClass(s)">
     <div class="server-name">
         @s.IconSpan()
         <a href="/dashboard/node?node=@s.PrettyName" class="node-name-link">@s.PrettyName</a>

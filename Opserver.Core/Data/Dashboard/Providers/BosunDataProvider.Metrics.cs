@@ -55,11 +55,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public async Task<BosunMetricResponse> RunTSDBQuery(TSDBQuery query, int? pointCount = null)
+        public async Task<BosunMetricResponse> RunTSDBQueryAsync(TSDBQuery query, int? pointCount = null)
         {
             var json = JSON.SerializeDynamic(query, Options.ExcludeNullsUtc);
-            var url = GetUrl($"api/graph?json={json}{(pointCount.HasValue ? "&autods=" + pointCount : "")}");
-            var apiResult = await GetFromBosun<BosunMetricResponse>(url);
+            var url = GetUrl($"api/graph?json={json}{(pointCount.HasValue ? "&autods=" + pointCount.ToString() : "")}");
+            var apiResult = await GetFromBosunAsync<BosunMetricResponse>(url);
             return apiResult.Result;
         }
 
@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             metricName = BosunMetric.GetDenormalized(metricName, host);
             var query = new TSDBQuery(start, end);
             query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName), tags);
-            return RunTSDBQuery(query, 1000);
+            return RunTSDBQueryAsync(query, 1000);
         }
 
         private Cache<IntervalCache> _dayCache;

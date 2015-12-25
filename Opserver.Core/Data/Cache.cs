@@ -16,15 +16,16 @@ namespace StackExchange.Opserver.Data
         public override bool ContainsData => DataBacker != null;
         public override object GetData() { return DataBacker; }
         public override Type Type => typeof (T);
+        private readonly object _pollLock = new object();
 
         private T DataBacker { get; set; }
         public T Data
         {
             get
             {
-                if (NeedsPoll)
+                if (_needsPoll)
                 {
-                    Poll();
+                    Poll(wait: true);
                 }
                 return DataBacker;
             }
@@ -37,7 +38,7 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         public MiniProfiler Profiler { get; set; }
 
-        public override int Poll(bool force = false)
+        public override int Poll(bool force = false, bool wait = false)
         {
             int result;
             if (CacheKey.HasValue())
@@ -46,44 +47,55 @@ namespace StackExchange.Opserver.Data
             }
             else
             {
-                if (force) NeedsPoll = true;
+                if (force) _needsPoll = true;
                 result = Update();
+                // If we're in need of cache and don't have it, then wait on the polling thread
+                if (wait && IsPolling)
+                {
+                    lock (_pollLock)
+                    {
+                        Monitor.Wait(_pollLock, 5000);
+                    }
+                }
             }
             return result;
         }
 
         private int Update()
         {
-            if (!NeedsPoll && !IsStale) return 0;
-
-            if (IsPolling) return 0;
-
-            var sw = Stopwatch.StartNew();
-            IsPolling = true;
-            try
+            if (!_needsPoll && !IsStale) return 0;
+            
+            lock (_pollLock)
             {
-                Interlocked.Increment(ref _pollsTotal);
-                UpdateCache(this);
-                LastPollStatus = LastSuccess.HasValue && LastSuccess == LastPoll
-                                     ? FetchStatus.Success
-                                     : FetchStatus.Fail;
-                NeedsPoll = false;
-                if (DataBacker != null)
-                    Interlocked.Increment(ref _pollsSuccessful);
-                return DataBacker != null ? 1 : 0;
-            }
-            catch (Exception e)
-            {
-                ErrorMessage = e.Message;
-                if (e.InnerException != null) ErrorMessage += "\n" + e.InnerException.Message;
-                LastPollStatus = FetchStatus.Fail;
-                return 0;
-            }
-            finally
-            {
-                IsPolling = false;
-                sw.Stop();
-                LastPollDuration = sw.Elapsed;
+                if (_isPolling) return 0;
+                var sw = Stopwatch.StartNew();
+                _isPolling = true;
+                try
+                {
+                    Interlocked.Increment(ref _pollsTotal);
+                    UpdateCache(this);
+                    LastPollStatus = LastSuccess.HasValue && LastSuccess == LastPoll
+                        ? FetchStatus.Success
+                        : FetchStatus.Fail;
+                    _needsPoll = false;
+                    if (DataBacker != null)
+                        Interlocked.Increment(ref _pollsSuccessful);
+                    return DataBacker != null ? 1 : 0;
+                }
+                catch (Exception e)
+                {
+                    ErrorMessage = e.Message;
+                    if (e.InnerException != null) ErrorMessage += "\n" + e.InnerException.Message;
+                    LastPollStatus = FetchStatus.Fail;
+                    return 0;
+                }
+                finally
+                {
+                    _isPolling = false;
+                    sw.Stop();
+                    LastPollDuration = sw.Elapsed;
+                    Monitor.PulseAll(_pollLock);
+                }
             }
         }
         
@@ -187,7 +199,7 @@ namespace StackExchange.Opserver.Data
 
         public override void Purge()
         {
-            NeedsPoll = true;
+            _needsPoll = true;
             Data = null;
             if (CacheKey.HasValue())
                 Current.LocalCache.Remove(CacheKey);
@@ -217,15 +229,16 @@ namespace StackExchange.Opserver.Data
         public virtual Type Type => typeof(Cache);
         public Guid UniqueId { get; private set; }
 
-        internal bool NeedsPoll = true;
-        private volatile bool _isPolling;
-        public bool IsPolling { get { return _isPolling; } internal set { _isPolling = value; } }
+        internal volatile bool _needsPoll = true;
+        protected volatile bool _isPolling;
+        public bool IsPolling => _isPolling;
         public bool IsStale => NextPoll < DateTime.UtcNow;
         public bool IsExpired => LastPoll.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow;
 
         protected long _pollsTotal, _pollsSuccessful;
         public long PollsTotal => _pollsTotal;
         public long PollsSuccessful => _pollsSuccessful;
+        // TODO: Convert to nullable, handle everywhere
         public DateTime LastPoll { get; internal set; }
 
         public DateTime NextPoll =>
@@ -236,6 +249,7 @@ namespace StackExchange.Opserver.Data
         public TimeSpan LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
         public FetchStatus LastPollStatus { get; set; }
+        public bool LastPollSuccessful => LastPollStatus == FetchStatus.Success;
         public MonitorStatus MonitorStatus
         {
             get
@@ -259,7 +273,7 @@ namespace StackExchange.Opserver.Data
         public virtual object GetData() { return null; }
         public string ErrorMessage { get; internal set; }
 
-        public virtual int Poll(bool force = false)
+        public virtual int Poll(bool force = false, bool wait = false)
         {
             return 0;
         }

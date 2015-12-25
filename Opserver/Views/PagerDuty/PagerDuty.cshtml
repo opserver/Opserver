@@ -3,12 +3,13 @@
 @{
     Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
+    var settings = Current.Settings.PagerDuty;
 }
 @helper GetOverrideAction(string incident = null, string status = null)
 {
-    if (Model.CurrentPagerDutyPerson != null&& Current.User.IsGlobalAdmin)
+    if (Model.CurrentPagerDutyPerson != null && Current.User.IsGlobalAdmin)
     {
-        @:<span class="top-right-info"><a href="#" class="js_override_action">Take on Call</a> (1hr)</span>
+        @:<span class="pull-right"><a href="#" class="js-override-action">Take on Call</a> (1hr)</span>
     }
 }
 
@@ -18,11 +19,11 @@
     switch (status)
     {
         case IncidentStatus.acknowledged:
-            <a href="#" class="js_incident_action" data-action="@IncidentStatus.resolved">Resolve</a>
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
             break;
         default:
-            <a href="#" class="js_incident_action" data-action="@IncidentStatus.acknowledged">Ack</a>
-            <a href="#" class="js_incident_action" data-action="@IncidentStatus.resolved">Resolve</a>
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.acknowledged">Ack</a>
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
             break;
     }
 }
@@ -32,14 +33,14 @@
         Status.Dashboard.init({ refresh: 5 });
         $(function() {
             $.extend(Status.ajaxLoaders, {
-                '#/pagerduty/incident/': function(val) {
-                    Status.summaryPopup('/pagerduty/incident/' + val);
+                '#/pagerduty/incident/': function (val) {
+                    Status.ajaxModal('Incident', '/pagerduty/incident/' + val);
                 },
                 '#/pagerduty/escalation/': function(val) {
-                    Status.summaryPopup('/pagerduty/escalation/' + val);
+                    Status.ajaxModal('Schedule', '/pagerduty/escalation/' + val);
                 }
             });
-            $(".js_incident_action").on('click', function(e) {
+            $(".js-incident-action").on('click', function(e) {
                 e.preventDefault();
                 $.post('/pagerduty/action/incident/updatestatus', {
                     'newStatus': $(this).data('action'),
@@ -48,7 +49,7 @@
                     Status.refresh.run();
                 });
             });
-            $(".js_override_action").on('click', function (e) {
+            $(".js-override-action").on('click', function (e) {
                 e.preventDefault();
                 $.post('/pagerduty/action/oncall/override').done(function () {
                     Status.refresh.run();
@@ -56,90 +57,52 @@
             });
         });
     </script>
-    <style>
-        .striped-dashboard {
-            width: 900px;
-        }
-        .incident-details {
-            min-width: 600px;
-        }
-        .incident-details .key {
-            color: #888;
-        }
-        .incident-details ul li {
-            padding: 2px 4px;
-        }
-        .incident-details ul li table {
-            margin: 10px 20px 5px 20px;
-            min-width: 560px;
-        }
-        .incident-details ul li table tr th {
-            font-weight: bold;
-            border-bottom: solid 1px #EEE;
-        }
-        .incident-details ul li table tr th, .incident-details ul li table tr td {
-            padding: 2px 5px;
-        }
-        .header-blurb {
-            width: 900px;
-            margin: 0 auto;
-        }
-        .header-blurb h3 {
-            padding-top: 8px;
-            font-size: 16px;
-        }
-        .header-blurb ol {
-            padding-left: 20px;
-            margin-bottom: 0.5em;
-        }
-        .header-blurb p {
-            margin-bottom: 0.5em;
-        }
-        .top-right-info {
-            margin-right: 0;
-        }
-    </style>
 }
 <div>
-    <div class="dashboard-list refresh-group" data-name="PagerDuty">
-        @if (Current.Settings.PagerDuty.HeaderHtml.HasValue())
-        {
-            <div class="header-blurb">@Current.Settings.PagerDuty.HeaderHtml.AsHtml()</div>
-        }
-        <table class="striped-dashboard">
-            <tbody>
-                <tr class="category-row">
-                    <th colspan="8">
-                        <h3>
-                            On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()
-                        </h3>
-                    </th>
-                </tr>
+    @if (settings.HeaderTitle.HasValue() || settings.HeaderHtml.HasValue())
+    {
+        <div class="panel panel-default">
+            @if (settings.HeaderTitle.HasValue())
+            {
+                <div class="panel-heading">
+                    @settings.HeaderTitle
+                </div>
+            }
+            @if (settings.HeaderHtml.HasValue())
+            {
+                <div class="panel-body small">
+                    @settings.HeaderHtml.AsHtml()
+                </div>
+            }
+        </div>
+    }
+    <div class="js-refresh-group" data-name="PagerDuty">
+        <h5 class="page-header">On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()</h5>
+        <table class="table table-striped table-hover table-condensed table-responsive text-nowrap">
+            <thead>
                 <tr>
                     <th>Name</th>
                     <th>Level</th>
                     <th>Email</th>
                     <th>Phone</th>
                 </tr>
-                @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
-                {
-                    @Html.Partial("PagerDuty.OnCallRow", a)
-                }
+            </thead>
+            <tbody>
+            @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
+            {
+                @Html.Partial("PagerDuty.OnCallRow", a)
+            }
             </tbody>
         </table>
 
         <div class="node-dashboard-separator half-width"></div>
 
-        <table class="striped-dashboard">
-            <tbody>
-                <tr class="category-row">
-                    <th colspan="8">
-                        <h3>
-                            Incidents: Last @Model.CachedDays Days
-                            @Helpers.PollNow(PagerDutyApi.Instance)
-                        </h3>
-                    </th>
-                </tr>
+        <h5 class="page-header">
+            Incidents: Last @Model.CachedDays Days
+            @Helpers.PollNow(PagerDutyApi.Instance)
+        </h5>
+        <table class="table table-striped table-hover table-condensed table-responsive text-nowrap">
+            <thead>
                 <tr>
                     <th>Id</th>
                     <th></th>
@@ -147,42 +110,42 @@
                     <th>Status</th>
                     <th>Summary</th>
                 </tr>
-            </tbody>
+            </thead>
             <tbody>
-                @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
-                {
-                    <tr class="server-row @i.MonitorStatus.RowClass()" data-incident="@i.Id">
-                        <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
-                        <td>@i.CreationDate.ToRelativeTimeSpan()</td>
-                        <td>@i.AffectedService.Name</td>
-                        <td>
-                            <span class="@i.MonitorStatus.Class()">@i.Status.GetDescription()</span>
-                            @if (i.LastChangedBy != null)
+            @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+            {
+                <tr class="server-row @i.MonitorStatus.RowClass()" data-incident="@i.Id">
+                    <td><a href="#/pagerduty/incident/detail/@i.Number">@i.Number</a></td>
+                    <td>@i.CreationDate.ToRelativeTimeSpan()</td>
+                    <td>@i.AffectedService.Name</td>
+                    <td>
+                        <span class="@i.TextClass()">@i.Status.GetDescription()</span>
+                        @if (i.LastChangedBy != null)
+                        {
+                            if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
                             {
-                                if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
-                                {
-                                    <span class="note">(@i.LastChangedBy.FullName)</span>
-                                    @GetIncidentAction(i.Status)
-                                }
-                                else
-                                {
-                                    <span class="note">(@i.LastChangedBy.FullName)</span>
-                                }
-
-                            }
-                            else if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
-                            {
+                                <span class="note">(@i.LastChangedBy.FullName)</span>
                                 @GetIncidentAction(i.Status)
                             }
-                        </td>
-                        <td>
-                            @if (i.SummaryData.Keys.Contains("subject"))
+                            else
                             {
-                                @i.SummaryData["subject"]
+                                <span class="note">(@i.LastChangedBy.FullName)</span>
                             }
-                        </td>
-                    </tr>
-                }
+
+                        }
+                        else if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
+                        {
+                            @GetIncidentAction(i.Status)
+                        }
+                    </td>
+                    <td>
+                        @if (i.SummaryData.Keys.Contains("subject"))
+                        {
+                            @i.SummaryData["subject"]
+                        }
+                    </td>
+                </tr>
+            }
             </tbody>
         </table>
     </div>

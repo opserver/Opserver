@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 return _info ?? (_info = new Cache<RedisInfo>
                 {
-                    CacheForSeconds = 5,
+                    CacheForSeconds = 10,
                     UpdateCache = GetFromRedisAsync("INFO", async rc =>
                     {
                         var server = rc.GetSingleServer();
@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data.Redis
                             //TODO: Remove when StackExchange.Redis gets profiling
                             using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
                         {
-                            infoStr = await server.InfoRawAsync();
+                            infoStr = await server.InfoRawAsync().ConfigureAwait(false);
                         }
                         ConnectionInfo.Features = server.Features;
                         var ri = RedisInfo.FromInfoString(infoStr);

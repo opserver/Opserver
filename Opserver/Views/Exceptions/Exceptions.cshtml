@@ -18,33 +18,48 @@
 }
 @section head {
     <script>
-        $(function () { Status.Exceptions.init({ refresh: 120, log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function() { Status.Exceptions.init({ refresh: 120, log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
-<div class="node-category-list top-section">
-    <ul class="top-server-list">
-        <li>Exception Logs: </li>
-        @{ var ac = Model.ShowAll ? @" class=""selected""" : ""; }
-        <li@(ac.AsHtml())><a href="/exceptions"><span>All</span></a></li>
+<div class="js-refresh" data-name="exceptions-header">
+    <h5 class="page-header">Exception Logs
+        @if (!Model.ShowAll)
+        {
+            @: <a class="pull-right" href="/exceptions">View All</a> 
+        }
+        @if (ExceptionStores.Stores?.Any() == true)
+        {
+            @Helpers.PollNow(ExceptionStores.Stores?.First().NodeType)
+        }
+    </h5>
+    <ul class="badge-link-list small">
         @foreach (var a in distinctApps)
         {
-            var cl = a.Name == log ? "selected" : null;
-            <li class="@cl.AsHtml()"><a href="/exceptions?log=@a.Name.UrlEncode()" title="@a.ExceptionCount.Pluralize("Exception")@(a.MostRecent.HasValue ? ", Last: " + a.MostRecent.ToRelativeTime() : "")"><span>@a.Name</span></a><span class="count">@(a.ExceptionCount > 0 ? " (" + a.ExceptionCount.ToComma() + ")" : "")</span></li>
+            <li class="@(a.Name == log ? "active" : null)" data-name="@a.Name">
+                <a href="/exceptions?log=@a.Name.UrlEncode()">@a.Name</a>
+                @if (a.ExceptionCount > 0)
+                {
+                    <span class="badge">@a.ExceptionCount.ToComma()</span>
+                }
+            </li>
         }
     </ul>
 </div>
-@if (ExceptionStores.Stores.Any(s => s.MonitorStatus == MonitorStatus.Good))
+@if (ExceptionStores.Stores?.Any(s => s.MonitorStatus == MonitorStatus.Good) ?? false)
 {
-    <div class="bottom-section">
+    <div class="js-refresh" data-name="exceptions-list">
         @Html.Partial("Exceptions.Table", Model)
-        <div class="no-content good@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
-        <div class="loading-more-spacer loading hidden"></div>
-        <div class="no-content no-more hidden">End of active exception log</div>
+        <div class="js-bottom-loader horizontal-load"><div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="js-bottom-no-exceptions no-content text-success@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
+        <div class="js-bottom-no-more no-content small@(Model.HasMore ? null : " hidden")">End of active exception log</div>
     </div>
 }
 else
 {
-    <div class="bottom-section">
-        <div class="no-content critical">Nothing to display, there was an error fetching from all exception stores</div>
+    <div class="js-refresh" data-name="exceptions-list">
+        <div class="alert alert-warning">
+            <h5>Nothing to display.</h5>
+            <p>There was an error fetching from all exception stores.</p>
+        </div>
     </div>
 }
