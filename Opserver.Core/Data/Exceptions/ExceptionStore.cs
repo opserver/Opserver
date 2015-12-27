@@ -40,9 +40,9 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public Action<Cache<T>> UpdateFromSql<T>(string opName, Func<Task<T>> getFromConnection) where T : class
         {
-            return UpdateCacheItem<T>("Exceptions Fetch: " + Name + ":" + opName,
-                                   getFromConnection,
-                                   addExceptionData: e => e.AddLoggedData("Server", Name));
+            return UpdateCacheItem("Exceptions Fetch: " + Name + ":" + opName,
+                getFromConnection,
+                addExceptionData: e => e.AddLoggedData("Server", Name));
         }
 
         private Cache<List<Application>> _applications;
@@ -94,7 +94,8 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 
         public List<Error> GetErrorSummary(int maxPerApp, string appName = null)
         {
-            var errors = ErrorSummary.SafeData(true);
+            var errors = ErrorSummary.Data;
+            if (errors == null) return new List<Error>();
             // specific application
             if (appName.HasValue())
             {
@@ -117,7 +118,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
         /// Get all current errors, possibly per application
         /// </summary>
         /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
-        public Task<List<Error>> GetAllErrors(int maxPerApp, string appName = null)
+        public Task<List<Error>> GetAllErrorsAsync(int maxPerApp, string appName = null)
         {
             return QueryListAsync<Error>($"GetAllErrors() for {Name} App: {(appName ?? "All")}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
@@ -129,7 +130,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
  Order By CreationDate Desc", new {maxPerApp, appName});
         }
 
-        public Task<List<Error>> GetSimilarErrors(Error error, int max)
+        public Task<List<Error>> GetSimilarErrorsAsync(Error error, int max)
         {
             return QueryListAsync<Error>($"GetSimilarErrors() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
@@ -148,7 +149,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
      Order By CreationDate Desc", new { max, start = error.CreationDate.AddMinutes(-5), end = error.CreationDate.AddMinutes(5) });
         }
 
-        public Task<List<Error>> FindErrors(string searchText, string appName, int max, bool includeDeleted)
+        public Task<List<Error>> FindErrorsAsync(string searchText, string appName, int max, bool includeDeleted)
         {
             return QueryListAsync<Error>($"FindErrors() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
@@ -157,7 +158,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
      Order By CreationDate Desc", new { search = "%" + searchText + "%", appName, max });
         }
 
-        public Task<int> DeleteAllErrors(string appName)
+        public Task<int> DeleteAllErrorsAsync(string appName)
         {
             return ExecTaskAsync($"DeleteAllErrors() (app: {appName}) for {Name}", @"
 Update Exceptions 
@@ -167,7 +168,7 @@ Update Exceptions
    And ApplicationName = @appName", new { appName });
         }
 
-        public Task<int> DeleteSimilarErrors(Error error)
+        public Task<int> DeleteSimilarErrorsAsync(Error error)
         {
             return ExecTaskAsync($"DeleteSimilarErrors('{error.GUID.ToString()}') (app: {error.ApplicationName}) for {Name}", @"
 Update Exceptions 
@@ -178,7 +179,7 @@ Update Exceptions
    And IsProtected = 0", new {error.ApplicationName, error.Message});
         }
 
-        public Task<int> DeleteErrors(List<Guid> ids)
+        public Task<int> DeleteErrorsAsync(List<Guid> ids)
         {
             return ExecTaskAsync($"DeleteErrors({ids.Count.ToString()} Guids) for {Name}", @"
 Update Exceptions 

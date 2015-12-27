@@ -11,13 +11,13 @@ namespace StackExchange.Opserver.Data.HAProxy
     public class HAProxyAdmin
     {
         public const string AllServersKey = "*";
-        private static readonly ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 3 };
+        private static readonly ParallelOptions ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 3 };
 
         public static bool PerformProxyAction(IEnumerable<Proxy> proxies, string serverName, Action action)
         {
             var result = true;
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s })).ToList();
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
+            Parallel.ForEach(matchingServers, ParallelOptions, pair =>
             {
                 // HAProxy will not drain a downed server, do the next best thing: MAINT
                 if (action == Action.drain && pair.Server.ProxyServerStatus == ProxyServerStatus.Down)
@@ -25,7 +25,11 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
-            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
+            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
+            {
+                // TODO: Parallel
+                p.Poll(true, true);
+            }
             return result;
         }
 
@@ -34,7 +38,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             if (server != null)
             {
                 var result = true;
-                Parallel.ForEach(proxy.Servers, _parallelOptions, s =>
+                Parallel.ForEach(proxy.Servers, ParallelOptions, s =>
                     {
                         result = result && PostAction(proxy, s, action);
                     });
@@ -55,11 +59,15 @@ namespace StackExchange.Opserver.Data.HAProxy
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == server).Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
+            Parallel.ForEach(matchingServers, ParallelOptions, pair =>
                 {
                     result = result && PostAction(pair.Proxy, pair.Server, action);
                 });
-            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
+            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
+            {
+                // TODO: Parallel
+                p.Poll(true, true);
+            }
             return result;
         }
 
@@ -71,11 +79,14 @@ namespace StackExchange.Opserver.Data.HAProxy
             var matchingServers = proxies.SelectMany(p => p.Servers.Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
+            Parallel.ForEach(matchingServers, ParallelOptions, pair =>
             {
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
-            matchingServers.Select(p => p.Proxy.Instance).Distinct().ForEach(p => p.Poll(true, true));
+            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
+            {
+                p.Poll(true, true);
+            }
             return result;
         }
 

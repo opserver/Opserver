@@ -32,10 +32,10 @@
                     @i.PrettyName
                 </td>
                 <td class="nowrap@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
-                <td data-val="@($"{i.InBps:F0}")">@i.PrettyIn()</td>
-                <td data-val="@($"{i.InBps:F0}")">@Graph(i, "in")</td>
-                <td data-val="@($"{i.OutBps:F0}")">@i.PrettyOut()</td>
-                <td data-val="@($"{i.OutBps:F0}")">@Graph(i, "out")</td>
+                <td data-val="@(i.InBps?.ToString("F0"))">@i.PrettyIn()</td>
+                <td data-val="@(i.InBps?.ToString("F0"))">@Graph(i, "in")</td>
+                <td data-val="@(i.OutBps?.ToString("F0"))">@i.PrettyOut()</td>
+                <td data-val="@(i.OutBps?.ToString("F0"))">@Graph(i, "out")</td>
             </tr>
         }
     </tbody>

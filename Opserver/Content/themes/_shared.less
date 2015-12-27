@@ -219,6 +219,8 @@ h4, h5, h6 {
   background: @value-block-background-color;
   border: solid 1px @value-block-border-color;
   margin: 2px 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
 
   &.bg-primary {
     .bg-primary;
@@ -252,7 +254,7 @@ h4, h5, h6 {
 
     > span {
       position: absolute;
-      top: 0;
+      top: 2px;
       left: 0;
       right: 0;
       color: white;
@@ -291,6 +293,11 @@ h4, h5, h6 {
 
 .error-stack {
   white-space: pre-wrap;
+  max-height: 90px;
+  overflow: hidden;
+  & + .error-stack {
+    margin-top: 20px;
+  }
 }
 
 .text-muted, table .text-muted, .table .text-muted {

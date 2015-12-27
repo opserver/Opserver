@@ -6,11 +6,10 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public class DashboardCategory
     {
-        private static List<DashboardCategory> _allCategories;
-        public static List<DashboardCategory> AllCategories
-        {
-            get { return _allCategories ?? (_allCategories = Current.Settings.Dashboard.Categories.Select(sc => new DashboardCategory(sc)).ToList()); }
-        }
+        public static List<DashboardCategory> AllCategories { get; } =
+            Current.Settings.Dashboard.Categories
+                .Select(sc => new DashboardCategory(sc))
+                .ToList();
 
         public static DashboardCategory Unknown { get; private set; }
 

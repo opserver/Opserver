@@ -142,7 +142,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         //}
         public List<CloudFlareDNSRecord> DNSRecords
         {
-            get { return CloudFlareAPI.Instance.DNSRecords.SafeData(true).Where(r => r.ZoneId == Id).ToList(); }
+            get { return CloudFlareAPI.Instance.DNSRecords.Data?.Where(r => r.ZoneId == Id).ToList() ?? new List<CloudFlareDNSRecord>(); }
         }
 
         public MonitorStatus MonitorStatus
@@ -242,6 +242,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
     public enum DNSRecordType
     {
+        // ReSharper disable InconsistentNaming
         A,
         AAAA,
         CNAME,
@@ -251,5 +252,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
         MX,
         NS,
         SPF
+        // ReSharper restore InconsistentNaming
     }
 }

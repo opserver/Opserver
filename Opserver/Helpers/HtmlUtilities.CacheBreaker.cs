@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Helpers
         /// <returns></returns>
         public static string GetCacheBreakerUrl(string path)
         {
-            return _cacheBreakerUrls.GetOrAdd(path, CalculateCacheBreakerUrl);
+            return _cacheBreakerUrls.GetOrAdd(path, s => CalculateCacheBreakerUrl(s));
         }
 
         internal static IEnumerable<KeyValuePair<string, string>> GetAllCacheBreakerUrls()
@@ -77,10 +77,10 @@ namespace StackExchange.Opserver.Helpers
             return hash.Substring(0, 12);
         }
 
-        private static String ToHex(byte[] buffer)
+        private static string ToHex(byte[] buffer)
         {
             var bits = buffer.Select(b => b.ToString("x2")).ToArray();
-            return String.Join("", bits);
+            return string.Join("", bits);
         }
     }
 }

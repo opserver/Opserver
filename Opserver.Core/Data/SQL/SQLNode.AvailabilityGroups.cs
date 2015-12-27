@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -18,12 +17,13 @@ namespace StackExchange.Opserver.Data.SQL
                     UpdateCache = UpdateFromSql(nameof(AvailabilityGroups), async conn =>
                     {
                         Func<string, string, PerfCounterRecord> getCounter = (cn, n) => GetPerfCounter("Availability Replica", cn, n);
-                        var sql = GetFetchSQL<AGInfo>() + "\n" +
-                                  GetFetchSQL<AGReplica>() + "\n" +
-                                  GetFetchSQL<AGClusterNetworkInfo>() + "\n" +
-                                  GetFetchSQL<AGDatabaseReplica>() + "\n" +
-                                  GetFetchSQL<AGListener>() + "\n" +
-                                  GetFetchSQL<AGLisenerIPAddress>();
+                        var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AvailabilityGroups), Version), k =>
+                            GetFetchSQL<AGInfo>(k.Item2) + "\n" +
+                            GetFetchSQL<AGReplica>(k.Item2) + "\n" +
+                            GetFetchSQL<AGDatabaseReplica>(k.Item2) + "\n" +
+                            GetFetchSQL<AGListener>(k.Item2) + "\n" +
+                            GetFetchSQL<AGLisenerIPAddress>(k.Item2)
+                            );
                         
                         List<AGInfo> ags;
                         using (var multi = await conn.QueryMultipleAsync(sql))

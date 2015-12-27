@@ -1,13 +1,12 @@
 ﻿@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Views.SQL
-@using ServerInfo = StackExchange.Opserver.Data.Dashboard.Node
 @model DashboardModel
 @{
     var i = Model.CurrentInstance;
     if (i == null) { return; }
     var connections = i.Connections;
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
-    var monitoredList = DashboardData.AllNodes.Select(si => si.Name.ToLower()).ToHashSet();
+    var monitoredList = new HashSet<string>(DashboardData.AllNodes.Select(si => si.Name.ToLower()));
 }
 <div class="bottom-sub-section">
     <div class="node-summary redis-summary">

@@ -16,12 +16,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() => null;
 
-        private static readonly List<Node> _allNodes = new List<Node>();
+        private static readonly List<Node> EmptyAllNodes = new List<Node>();
 
         public override IEnumerable<string> GetExceptions() { yield break; }
 
-        public override List<Node> AllNodes => _allNodes;
-        public override IEnumerable<Node> GetNodesByIP(IPAddress ip) => _allNodes;
+        public override List<Node> AllNodes => EmptyAllNodes;
+        public override IEnumerable<Node> GetNodesByIP(IPAddress ip) => EmptyAllNodes;
 
         public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<GraphPoint>());
         public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<GraphPoint>());

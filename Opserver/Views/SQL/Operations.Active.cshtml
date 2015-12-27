@@ -9,7 +9,7 @@
 }
 @helper SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label) {
     var val = (int) option;
-    <label><input type="radio" name="sleeping" value="@val" @(option ==  Model.ActiveSearchOptions.IncludeSleepingSessions ? "checked " : "")/> @label</label>
+    <label><input type="radio" name="sleeping" value="@val.ToString()" @(option ==  Model.ActiveSearchOptions.IncludeSleepingSessions ? "checked " : "")/> @label</label>
 }
 <div class="bottom-sub-section">
     @if (!i.ServerFeatures.SafeData(true).HasSPWhoIsActive)

@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Helpers
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
                 try
                 {
                     conn.Open();
@@ -48,14 +48,15 @@ namespace StackExchange.Opserver.Helpers
                 {
                     var csb = new SqlConnectionStringBuilder(connectionString);
                     var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
-                    throw new Exception(sqlException, e);
+                    throw new Exception(sqlException, e)
+                            .AddLoggedData("Timeout", conn.ConnectionTimeout.ToString());
                 }
                 setReadUncommitted(conn);
                 if (conn.State == ConnectionState.Connecting)
                 {
                     var b = new SqlConnectionStringBuilder { ConnectionString = connectionString };
 
-                    throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.Value.ToComma()} ms");
+                    throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.ToComma()} ms");
                 }
             }
             return conn;
@@ -81,7 +82,7 @@ namespace StackExchange.Opserver.Helpers
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
                 using (var tokenSource = new CancellationTokenSource())
                 {
                     tokenSource.CancelAfter(connectionTimeout.Value);

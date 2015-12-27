@@ -13,7 +13,7 @@
 @section head {
     <script> 
         Status.Dashboard.init({ refresh: false });
-        Status.Graphs.init({ start: @start, end: @end, subtitle: '@(s?.PrettyName)' });
+        Status.Graphs.init({ start: @start.ToString(), end: @end.ToString(), subtitle: '@(s?.PrettyName)' });
         $(function() { Status.Dashboard.Server.init({ nodeName: '@(s?.PrettyName)' }); });
     </script>
 }
@@ -107,7 +107,7 @@ else
                         @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
                         {
                             <div title="@v.Description @($"\n{v.Used:n0}") of @($"{v.Size:n0}") bytes used">
-                                @v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.FreeSpaceSpan()</span>
+                                @v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span>
                             </div>
                             <div class="progress">
                                 <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed)%"></div>

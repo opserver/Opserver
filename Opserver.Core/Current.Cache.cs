@@ -7,9 +7,6 @@
 
     public static class CoreCurrent
     {
-        public static Helpers.LocalCache LocalCache
-        {
-            get { return Current.LocalCache; }
-        }
+        public static Helpers.LocalCache LocalCache => Current.LocalCache;
     }
 }

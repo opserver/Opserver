@@ -64,7 +64,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public bool IsMaster => Role == RedisInfo.RedisInstanceRole.Master;
         public bool IsSlave => Role == RedisInfo.RedisInstanceRole.Slave;
-        public bool IsSlaving => IsSlave && (Replication.MasterLinkStatus != "up" || Info.SafeData(true).Replication?.MastSyncLeftBytes > 0);
+        public bool IsSlaving => IsSlave && (Replication.MasterLinkStatus != "up" || Info.Data?.Replication?.MastSyncLeftBytes > 0);
 
         public RedisInstance TopMaster
         {

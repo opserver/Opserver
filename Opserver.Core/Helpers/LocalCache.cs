@@ -5,17 +5,13 @@ namespace StackExchange.Opserver.Helpers
 {
     public class LocalCache
     {
-        private static MemoryCache _cache;
-        static LocalCache()
-        {
-            _cache = new MemoryCache("LocalCache");
-        }
+        private static readonly MemoryCache Cache = new MemoryCache("LocalCache");
 
-        protected object _lock = new object();
+        private readonly object _lock = new object();
         
         public bool Exists(string key)
         {
-            return _cache[key] != null;
+            return Cache[key] != null;
         }
 
         /// <summary>
@@ -23,7 +19,7 @@ namespace StackExchange.Opserver.Helpers
         /// </summary>
         public T Get<T>(string key)
         {
-            var o = _cache[key];
+            var o = Cache[key];
             if (o == null) return default(T);
             if (o is T)
                 return (T)o;
@@ -51,7 +47,7 @@ namespace StackExchange.Opserver.Helpers
             if (isSliding && durationSecs.HasValue)
                 policy.SlidingExpiration = TimeSpan.FromSeconds(durationSecs.Value);
             
-            _cache.Add(cacheKey, value, policy);
+            Cache.Add(cacheKey, value, policy);
         }
 
         /// <summary>
@@ -59,7 +55,7 @@ namespace StackExchange.Opserver.Helpers
         /// </summary>
         public void Remove(string key)
         {
-            _cache.Remove(key);
+            Cache.Remove(key);
         }
         
         public bool SetNXSync<T>(string key, T val)

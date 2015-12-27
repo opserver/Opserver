@@ -6,18 +6,18 @@ namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class RailgunInstance : PollNode, IEquatable<RailgunInstance>, ISearchableNode
     {
-        string ISearchableNode.DisplayName { get { return Host + ":" + Port + " - " + Name; } }
-        string ISearchableNode.Name { get { return Host + ":" + Port; } }
-        string ISearchableNode.CategoryName { get { return "CloudFlare"; } }
+        string ISearchableNode.DisplayName => Host + ":" + Port.ToString() + " - " + Name;
+        string ISearchableNode.Name => Host + ":" + Port.ToString();
+        string ISearchableNode.CategoryName => "CloudFlare";
 
         public CloudFlareSettings.Railgun Settings { get; internal set; }
-        public string Name { get { return Settings.Name; } }
-        public string Host { get { return Settings.Host; } }
-        public int Port { get { return Settings.Port; } }
+        public string Name => Settings.Name;
+        public string Host => Settings.Host;
+        public int Port => Settings.Port;
 
-        public override string NodeType { get { return "Railgun"; } }
-        public override int MinSecondsBetweenPolls { get { return 5; } }
-        
+        public override string NodeType => "Railgun";
+        public override int MinSecondsBetweenPolls => 5;
+
         public override IEnumerable<Cache> DataPollers
         {
             get { yield return Stats; }
@@ -49,7 +49,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
         public override string ToString()
         {
-            return string.Concat(Host, ": ", Port);
+            return Host + ":" + Port.ToString();
         }
     }
 }

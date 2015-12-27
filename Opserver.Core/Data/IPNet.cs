@@ -77,7 +77,7 @@ namespace StackExchange.Opserver.Data
         }
 
         // Prevent allocating an array for every address we split
-        private static readonly char[] _cidrSplit = new[] { '/' };
+        private static readonly char[] _cidrSplit = { '/' };
 
         public static bool TryParse(string ipOrCidr, out IPNet net)
         {

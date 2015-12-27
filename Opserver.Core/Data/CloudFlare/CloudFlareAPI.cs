@@ -10,6 +10,8 @@ namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class CloudFlareAPI : SinglePollNode<CloudFlareAPI>
     {
+        const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
+
         public CloudFlareSettings Settings { get; internal set; }
         public string Email => Settings.Email;
         public string APIKey => Settings.APIKey;
@@ -41,8 +43,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
             return UpdateCacheItem("CloudFlare - API: " + opName, () => get(this), logExceptions: true);
         }
         
-        const string apiBaseUrl = "https://api.cloudflare.com/client/v4/";
-
         /// <summary>
         /// Gets a response from the CloudFlare API via GET
         /// </summary>
@@ -53,7 +53,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         {
             using (var wc = GetWebClient())
             {
-                var url = new Uri($"{apiBaseUrl}{path}{(values != null ? "?" + values : "")}");
+                var url = new Uri($"{APIBaseUrl}{path}{(values != null ? "?" + values : "")}");
                 var rawResult = await wc.DownloadStringTaskAsync(url);
                 return JSON.Deserialize<CloudFlareResult<T>>(rawResult, JilOptions).Result;
             }
@@ -75,11 +75,11 @@ namespace StackExchange.Opserver.Data.CloudFlare
         /// <returns>The CloudFlare API response</returns>
         public T Delete<T>(string path, NameValueCollection values = null) => Action<T>("DELETE", path, values);
 
-        private T Action<T>(string method, string path, NameValueCollection values = null)
+        private T Action<T>(string method, string path, NameValueCollection values)
         {
             using (var wc = GetWebClient())
             {
-                var url = new Uri($"{apiBaseUrl}{path}");
+                var url = new Uri($"{APIBaseUrl}{path}");
                 var rawResult = wc.UploadValues(url, method, values);
                 var resultString = Encoding.ASCII.GetString(rawResult);
                 return JSON.Deserialize<T>(resultString, JilOptions);

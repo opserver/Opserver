@@ -30,65 +30,29 @@ namespace StackExchange.Opserver
         /// Answers true if this String is either null or empty.
         /// </summary>
         /// <remarks>I'm so tired of typing String.IsNullOrEmpty(s)</remarks>
-        public static bool IsNullOrEmpty(this string s)
-        {
-            return string.IsNullOrEmpty(s);
-        }
+        public static bool IsNullOrEmpty(this string s) => string.IsNullOrEmpty(s);
 
         /// <summary>
         /// Answers true if this String is neither null or empty.
         /// </summary>
         /// <remarks>I'm also tired of typing !String.IsNullOrEmpty(s)</remarks>
-        public static bool HasValue(this string s)
-        {
-            return !string.IsNullOrEmpty(s);
-        }
+        public static bool HasValue(this string s) => !string.IsNullOrEmpty(s);
 
         /// <summary>
         /// Returns the toReturn parameter when this string is null/empty.
         /// </summary>
-        public static string IsNullOrEmptyReturn(this string s, string toReturn)
-        {
-            if (s.HasValue())
-                return s;
-
-            return toReturn.HasValue() ? toReturn : "";
-        }
-
-        /// <summary>
-        /// Returns the first non-null/non-empty parameter when this String is null/empty.
-        /// </summary>
-        public static string IsNullOrEmptyReturn(this string s, params string[] otherPossibleResults)
-        {
-            if (s.HasValue())
-                return s;
-
-            if (otherPossibleResults == null)
-                return "";
-
-            foreach (var t in otherPossibleResults)
-            {
-                if (t.HasValue())
-                    return t;
-            }
-            return "";
-        }
+        public static string IsNullOrEmptyReturn(this string s, string toReturn) =>
+            s.HasValue()
+                ? s
+                : (toReturn.HasValue() ? toReturn : "");
 
         /// <summary>
         /// If this string ends in "toTrim", this will trim it once off the end
         /// </summary>
-        public static string TrimEnd(this string s, string toTrim)
-        {
-            return s != null && toTrim != null && s.EndsWith(toTrim) ? s.Substring(0, s.Length - toTrim.Length) : s;
-        }
-
-        /// <summary>
-        /// Returns the default value if given a default(T)
-        /// </summary>
-        public static T IfDefaultReturn<T>(this T val, T dDefault) where T: struct
-        {
-            return val.Equals(default(T)) ? dDefault : val;
-        }
+        public static string TrimEnd(this string s, string toTrim) =>
+            s == null || toTrim == null || !s.EndsWith(toTrim)
+                ? s
+                : s.Substring(0, s.Length - toTrim.Length);
 
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"
@@ -118,7 +82,9 @@ namespace StackExchange.Opserver
         public static string Pluralize(this int number, string single, string plural, bool includeNumber = true)
         {
             var numString = includeNumber ? number.ToComma() + " " : "";
-            return number == 1 ? numString + single : numString + plural;
+            return number == 1
+                ? numString + single
+                : numString + plural;
         }
 
         /// <summary>
@@ -127,44 +93,38 @@ namespace StackExchange.Opserver
         public static string Pluralize(this long number, string single, string plural, bool includeNumber = true)
         {
             var numString = includeNumber ? number.ToComma() + " " : "";
-            return number == 1 ? numString + single : numString + plural;
+            return number == 1
+                ? numString + single
+                : numString + plural;
         }
 
         /// <summary>
         /// Returns the pluralized version of 'noun' when required by 'number'.
         /// </summary>
-        public static string Pluralize(this string noun, int number, string pluralForm = null)
-        {
-            return number == 1 ? noun : pluralForm.IsNullOrEmptyReturn((noun ?? "") + "s");
-        }
-        
+        public static string Pluralize(this string noun, int number, string pluralForm = null) =>
+            number == 1
+                ? noun
+                : pluralForm.IsNullOrEmptyReturn((noun ?? "") + "s");
+
         /// <summary>
         /// force string to be maxlen or smaller
         /// </summary>
-        public static string Truncate(this string s, int maxLength)
-        {
-            if (s.IsNullOrEmpty()) return s;
-            return (s.Length > maxLength) ? s.Remove(maxLength) : s;
-        }
+        public static string Truncate(this string s, int maxLength) =>
+            s.IsNullOrEmpty()
+                ? s
+                : (s.Length > maxLength ? s.Remove(maxLength) : s);
 
-        public static string TruncateWithEllipsis(this string s, int maxLength)
-        {
-            if (s.IsNullOrEmpty()) return s;
-            if (s.Length <= maxLength) return s;
+        public static string TruncateWithEllipsis(this string s, int maxLength) =>
+            s.IsNullOrEmpty() || s.Length <= maxLength
+                ? s
+                : $"{Truncate(s, Math.Max(maxLength, 3) - 3)}...";
 
-            return $"{Truncate(s, Math.Max(maxLength, 3) - 3)}...";
-        }
-        public static string CleanCRLF(this string s)
-        {
-            if (string.IsNullOrWhiteSpace(s))
-                return s;
-            return s.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
-        }
+        public static string CleanCRLF(this string s) =>
+            string.IsNullOrWhiteSpace(s)
+                ? s
+                : s.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ");
 
-        public static string NormalizeForCache(this string s)
-        {
-            return s?.ToLower();
-        }
+        public static string NormalizeForCache(this string s) => s?.ToLower();
 
         public static string NormalizeHostOrFQDN(this string s, bool defaultToHttps = false)
         {
@@ -173,33 +133,21 @@ namespace StackExchange.Opserver
             return s.EndsWith("/") ? s : $"{s}/";
         }
 
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> items)
-        {
-            return new HashSet<T>(items);
-        }
+        public static bool HasData(this Cache cache) => cache != null && cache.ContainsData;
 
-        public static bool HasData(this Cache cache)
-        {
-            return cache != null && cache.ContainsData;
-        }
-        public static T SafeData<T>(this Cache<T> cache, bool emptyIfMissing = false) where T : class, new()
-        {
-            return cache?.Data ?? (emptyIfMissing ? new T() : null);
-        }
+        public static T SafeData<T>(this Cache<T> cache, bool emptyIfMissing = false) where T : class, new() =>
+            cache?.Data ?? (emptyIfMissing ? new T() : null);
 
-        public static IEnumerable<T> WithIssues<T>(this IEnumerable<T> items) where T : IMonitorStatus
-        {
-            return items.Where(i => i.MonitorStatus != MonitorStatus.Good);
-        }
+        public static IEnumerable<T> WithIssues<T>(this IEnumerable<T> items) where T : IMonitorStatus =>
+            items.Where(i => i.MonitorStatus != MonitorStatus.Good);
         
-        public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items)
-        {
-            var issues = items.WithIssues();
-            return issues.Any() ? string.Join(", ", issues.Select(i => i.MonitorStatusReason)) : null;
-        }
+        public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items) =>
+            string.Join(", ", items.WithIssues().Select(i => i.MonitorStatusReason));
 
         public static MonitorStatus GetWorstStatus(this IEnumerable<IMonitorStatus> ims, string cacheKey = null, int durationSeconds = 5)
         {
+            if (ims == null)
+                return MonitorStatus.Unknown;
             MonitorStatus? result = null;
             if (cacheKey.HasValue())
                 result = Current.LocalCache.Get<MonitorStatus?>(cacheKey);
@@ -274,9 +222,13 @@ namespace StackExchange.Opserver
             var comp = (compareTo ?? DateTime.UtcNow);
             if (asPlusMinus)
             {
-                return dt <= comp ? ToRelativeTimePastSimple(dt, comp, includeSign) : ToRelativeTimeFutureSimple(dt, comp, includeSign);
+                return dt <= comp
+                    ? ToRelativeTimeSimple(comp - dt, includeSign ? "-" : "")
+                    : ToRelativeTimeSimple(dt - comp, includeSign ? "+" : "");
             }
-            return dt <= comp ? ToRelativeTimePast(dt, comp, includeTime) : ToRelativeTimeFuture(dt, comp, includeTime);
+            return dt <= comp
+                ? ToRelativeTimePast(dt, comp, includeTime)
+                : ToRelativeTimeFuture(dt, comp, includeTime);
         }
         /// <summary>
         /// Returns a humanized string indicating how long ago something happened, eg "3 days ago".
@@ -300,15 +252,15 @@ namespace StackExchange.Opserver
             }
             if (delta < 60)
             {
-                return ts.Seconds == 1 ? "1 sec ago" : ts.Seconds + " secs ago";
+                return ts.Seconds == 1 ? "1 sec ago" : ts.Seconds.ToString() + " secs ago";
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes == 1 ? "1 min ago" : ts.Minutes + " mins ago";
+                return ts.Minutes == 1 ? "1 min ago" : ts.Minutes.ToString() + " mins ago";
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours == 1 ? "1 hour ago" : ts.Hours + " hours ago";
+                return ts.Hours == 1 ? "1 hour ago" : ts.Hours.ToString() + " hours ago";
             }
 
             var days = ts.Days;
@@ -318,7 +270,7 @@ namespace StackExchange.Opserver
             }
             if (days <= 2)
             {
-                return days + " days ago";
+                return days.ToString() + " days ago";
             }
             if (utcNow.Year == dt.Year)
             {
@@ -338,15 +290,15 @@ namespace StackExchange.Opserver
             }
             if (delta < 60)
             {
-                return ts.Seconds == 1 ? "in 1 second" : "in " + ts.Seconds + " seconds";
+                return ts.Seconds == 1 ? "in 1 second" : "in " + ts.Seconds.ToString() + " seconds";
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes == 1 ? "in 1 minute" : "in " + ts.Minutes + " minutes";
+                return ts.Minutes == 1 ? "in 1 minute" : "in " + ts.Minutes.ToString() + " minutes";
             }
             if (delta < 86400) // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours == 1 ? "in 1 hour" : "in " + ts.Hours + " hours";
+                return ts.Hours == 1 ? "in 1 hour" : "in " + ts.Hours.ToString() + " hours";
             }
 
             // use our own rounding so we can round the correct direction for future
@@ -357,7 +309,7 @@ namespace StackExchange.Opserver
             }
             if (days <= 10)
             {
-                return "in " + days + " day" + (days > 1 ? "s" : "");
+                return "in " + days.ToString() + " day" + (days > 1 ? "s" : "");
             }
             // if the date is in the future enough to be in a different year, display the year
             if (utcNow.Year == dt.Year)
@@ -366,38 +318,19 @@ namespace StackExchange.Opserver
             }
             return "on " + dt.ToString(includeTime ? @"MMM %d \'yy 'at' %H:mmm" : @"MMM %d \'yy");
         }
-
-        private static string ToRelativeTimePastSimple(DateTime dt, DateTime utcNow, bool includeSign)
+        
+        private static string ToRelativeTimeSimple(TimeSpan ts, string sign)
         {
-            TimeSpan ts = utcNow - dt;
-            var sign = includeSign ? "-" : "";
-            double delta = ts.TotalSeconds;
+            var delta = ts.TotalSeconds;
             if (delta < 1)
                 return "< 1 sec";
             if (delta < 60)
-                return sign + ts.Seconds + " sec" + (ts.Seconds == 1 ? "" : "s");
+                return sign + ts.Seconds.ToString() + " sec" + (ts.Seconds == 1 ? "" : "s");
             if (delta < 3600) // 60 mins * 60 sec
-                return sign + ts.Minutes + " min" + (ts.Minutes == 1 ? "" : "s");
+                return sign + ts.Minutes.ToString() + " min" + (ts.Minutes == 1 ? "" : "s");
             if (delta < 86400) // 24 hrs * 60 mins * 60 sec
-                return sign + ts.Hours + " hour" + (ts.Hours == 1 ? "" : "s");
-            return sign + ts.Days + " days";
-        }
-
-        private static string ToRelativeTimeFutureSimple(DateTime dt, DateTime utcNow, bool includeSign)
-        {
-            TimeSpan ts = dt - utcNow;
-            double delta = ts.TotalSeconds;
-            var sign = includeSign ? "+" : "";
-
-            if (delta < 1)
-                return "< 1 sec";
-            if (delta < 60)
-                return sign + ts.Seconds + " sec" + (ts.Seconds == 1 ? "" : "s");
-            if (delta < 3600) // 60 mins * 60 sec
-                return sign + ts.Minutes + " min" + (ts.Minutes == 1 ? "" : "s");
-            if (delta < 86400) // 24 hrs * 60 mins * 60 sec
-                return sign + ts.Hours + " hour" + (ts.Hours == 1 ? "" : "s");
-            return sign + ts.Days + " days";
+                return sign + ts.Hours.ToString() + " hour" + (ts.Hours == 1 ? "" : "s");
+            return sign + ts.Days.ToString() + " days";
         }
 
         /// <summary>
@@ -412,16 +345,6 @@ namespace StackExchange.Opserver
 
             var strings = props.Select(p => p.Name + ":" + p.GetValue(o, null));
             return string.Join(joinSeparator, strings);
-        }
-
-
-        public static IEnumerable<T> ForEach<T>(this IEnumerable<T> source, Action<T> action)
-        {
-            foreach (var item in source)
-            {
-                action(item);
-            }
-            return source;
         }
 
         public static string GetDescription<T>(this T? enumerationValue) where T : struct
@@ -445,27 +368,6 @@ namespace StackExchange.Opserver
             }
             return enumerationValue.ToString();
         }
-
-        public static int ToSecondsFromDays(this int representingDays)
-        {
-            return representingDays * 24 * 60 * 60;
-        }
-
-        /// <summary>
-        /// Returns true when the next number between 1 and 100 is less than or equal to 'percentChanceToOccur'.
-        /// </summary>
-        public static bool PercentChance(this Random random, int percentChanceToOccur)
-        {
-            return random.Next(1, 100) <= percentChanceToOccur;
-        }
-
-        /// <summary>
-        /// Adds the parameter items to this list.
-        /// </summary>
-        public static void AddAll<T>(this List<T> list, params T[] items)
-        {
-            list.AddRange(items);
-        }
         
         /// <summary>
         /// Converts a raw long into a readable size
@@ -483,7 +385,7 @@ namespace StackExchange.Opserver
         public static string ToComma(this int number, string valueIfZero = null)
         {
             if (number == 0 && valueIfZero != null) return valueIfZero;
-            return $"{number:n0}";
+            return number.ToString("n0");
         }
 
         public static string ToComma(this long? number, string valueIfZero = null)
@@ -494,7 +396,7 @@ namespace StackExchange.Opserver
         public static string ToComma(this long number, string valueIfZero = null)
         {
             if (number == 0 && valueIfZero != null) return valueIfZero;
-            return $"{number:n0}";
+            return number.ToString("n0");
         }
 
         public static string ToTimeStringMini(this TimeSpan span, int maxElements = 2)
@@ -538,7 +440,7 @@ namespace StackExchange.Opserver
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
-            return profiler?.Step($"{memberName} - {Path.GetFileName(sourceFilePath)}:{sourceLineNumber}");
+            return profiler?.Step($"{memberName} - {Path.GetFileName(sourceFilePath)}:{sourceLineNumber.ToString()}");
         }
 
         private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new ConcurrentDictionary<string, object>();
@@ -552,26 +454,26 @@ namespace StackExchange.Opserver
         // return true if this caller won the race to load whatever would go at key
         private static bool GotCompeteLock(LocalCache cache, string key)
         {
-            var competeKey = key + "-cload";
-
-            if (!cache.SetNXSync(competeKey, DateTime.UtcNow))
+            while (true)
             {
-                var x = cache.Get<DateTime>(competeKey);
-
-                // Somebody abandoned the lock, clear it and try again
-                if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5))
+                var competeKey = key + "-cload";
+                if (cache.SetNXSync(competeKey, DateTime.UtcNow))
                 {
-                    cache.Remove(competeKey);
-
-                    return GotCompeteLock(cache, key);
+                    // Got it!
+                    return true;
                 }
 
+                var x = cache.Get<DateTime>(competeKey);
+                // Did somebody abandoned the lock?
+                if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5))
+                {
+                    // Yep, clear it and try again
+                    cache.Remove(competeKey);
+                    continue;
+                }
                 // Lost the lock competition
                 return false;
             }
-
-            // winner, go do something expensive now
-            return true;
         }
 
         // called by a winner of CompeteToLoad, to make it so the next person to call CompeteToLoad will get true
@@ -694,9 +596,7 @@ namespace StackExchange.Opserver
         // In case there is some context we want here later...
         public class MicroContext : IDisposable
         {
-            void IDisposable.Dispose()
-            {
-            }
+            void IDisposable.Dispose() { }
         }
     }
 
@@ -757,21 +657,19 @@ namespace StackExchange.Opserver
 
         public static string GetStateDescription(this ShardState shard)
         {
-            if (shard != null)
+            switch (shard?.State)
             {
-                switch (shard.State)
-                {
-                    case ShardStates.Unassigned:
-                        return "The shard is not assigned to any node";
-                    case ShardStates.Initializing:
-                        return "The shard is initializing (probably recovering from either a peer shard or gateway)";
-                    case ShardStates.Started:
-                        return "The shard is started";
-                    case ShardStates.Relocating:
-                        return "The shard is in the process being relocated";
-                }
+                case ShardStates.Unassigned:
+                    return "The shard is not assigned to any node";
+                case ShardStates.Initializing:
+                    return "The shard is initializing (probably recovering from either a peer shard or gateway)";
+                case ShardStates.Started:
+                    return "The shard is started";
+                case ShardStates.Relocating:
+                    return "The shard is in the process being relocated";
+                default:
+                    return "Unknown";
             }
-            return "Unknown";
         }
 
         private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
@@ -796,13 +694,8 @@ namespace StackExchange.Opserver
     public static class IntToBytesExtension
     {
         private const int _precision = 2;
-        private static readonly IList<string> _units;
-
-        static IntToBytesExtension()
-        {
-            _units = new List<string> { "", "K", "M", "G", "T" };
-        }
-
+        private static readonly IList<string> Units = new List<string> { "", "K", "M", "G", "T" };
+        
         /// <summary>
         /// Formats the value as a filesize in bytes (KB, MB, etc.)
         /// </summary>
@@ -855,9 +748,9 @@ namespace StackExchange.Opserver
         {
             if (bytes < 1) return zero;
             var pow = Math.Floor((bytes > 0 ? Math.Log(bytes) : 0) / Math.Log(kiloSize));
-            pow = Math.Min(pow, _units.Count - 1);
+            pow = Math.Min(pow, Units.Count - 1);
             var value = bytes / Math.Pow(kiloSize, pow);
-            return value.ToString(pow == 0 ? "F0" : "F" + precision) + " " + _units[(int)pow] + unit;
+            return value.ToString(pow == 0 ? "F0" : "F" + precision.ToString()) + " " + Units[(int)pow] + unit;
         }
     }
 }

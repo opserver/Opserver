@@ -13,11 +13,11 @@
     /// </summary>
     public static class ViewDataKeys
     {
-        public const string PageTitle = "PageTitle";
-        public const string HeaderSubtitle = "HeaderSubtitle";
+        public const string PageTitle = nameof(PageTitle);
+        public const string HeaderSubtitle = nameof(HeaderSubtitle);
         public const string MainTab = "Tab";
-        public const string Error = "Error";
-        public const string QueryString = "QueryString";
-        public const string TopBoxOptions = "TopBoxOptions";
+        public const string Error = nameof(Error);
+        public const string QueryString = nameof(QueryString);
+        public const string TopBoxOptions = nameof(TopBoxOptions);
     }
 }

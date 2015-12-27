@@ -188,12 +188,6 @@
     <Content Include="Content\bootstrap\css\bootstrap.min.css" />
     <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\bootstrap\js\bootstrap.min.js" />
-    <Content Include="Content\Common.css">
-      <DependentUpon>Common.less</DependentUpon>
-    </Content>
-    <Content Include="Content\Common.min.css">
-      <DependentUpon>Common.less</DependentUpon>
-    </Content>
     <Content Include="Content\img\logo\full-dark.svg" />
     <Content Include="Content\img\logo\full.svg" />
     <Content Include="Content\img\logo\icon-128.png" />
@@ -224,7 +218,6 @@
     <Content Include="Content\themes\light\styles.min.css">
       <DependentUpon>styles.css</DependentUpon>
     </Content>
-    <Content Include="Content\Common.less" />
     <Content Include="App_Code\Helpers.cshtml" />
     <Content Include="Config\DashboardSettings.json.example" />
     <Content Include="Config\ElasticSettings.json.example" />

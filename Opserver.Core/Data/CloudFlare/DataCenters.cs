@@ -58,11 +58,11 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 var bytes = address.GetAddressBytes();
 
                 if (mr.CIDR >= 24)
-                    return "*.*.*." + bytes[3];
+                    return "*.*.*." + bytes[3].ToString();
                 if (mr.CIDR >= 16)
-                    return "*.*." + bytes[2] + "." + bytes[3];
+                    return "*.*." + bytes[2].ToString() + "." + bytes[3].ToString();
                 if (mr.CIDR >= 8)
-                    return "*." + bytes[1] + "." + bytes[2] + "." + bytes[3];
+                    return "*." + bytes[1].ToString() + "." + bytes[2].ToString() + "." + bytes[3].ToString();
 
                 return address.ToString();
             }

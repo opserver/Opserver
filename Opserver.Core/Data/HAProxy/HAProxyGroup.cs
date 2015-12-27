@@ -79,7 +79,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             using (MiniProfiler.Current.Step("HAProxy - GetProxies()"))
             {
-                return instances.AsParallel().SelectMany(i => i.Proxies.SafeData())
+                return instances.AsParallel().SelectMany(i => i.Proxies.Data ?? Enumerable.Empty<Proxy>())
                     .Where(p => p != null)
                     .OrderBy(p => instances.IndexOf(p.Instance))
                     .ToList();

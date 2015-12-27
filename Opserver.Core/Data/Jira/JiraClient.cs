@@ -219,7 +219,7 @@ namespace StackExchange.Opserver.Data.Jira
 
             public string BrowseUrl => Host.IsNullOrEmpty() || Key.IsNullOrEmpty()
                 ? string.Empty
-                : $"{Host.TrimEnd('/')}/browse/{Key}";
+                : $"{Host.TrimEnd(StringSplits.ForwardSlash)}/browse/{Key}";
         }
     }
 
@@ -236,7 +236,7 @@ namespace StackExchange.Opserver.Data.Jira
             if (baseUrl.IsNullOrEmpty())
                 throw new TypeInitializationException("StackExchange.Opserver.Data.Jira.JsonService", new ApplicationException("BaseUrl is required"));
 
-            BaseUrl = baseUrl.Trim().TrimEnd("/") + "/";
+            BaseUrl = baseUrl.Trim().TrimEnd(StringSplits.ForwardSlash) + "/";
         }
 
         private Uri GetUriForResource(string resource)
@@ -247,7 +247,7 @@ namespace StackExchange.Opserver.Data.Jira
             if (string.IsNullOrWhiteSpace(resource))
                 return new Uri(BaseUrl);
 
-            return new Uri(BaseUrl + resource.Trim().TrimStart('/'));
+            return new Uri(BaseUrl + resource.Trim().TrimStart(StringSplits.ForwardSlash));
         }
 
         private string GetBasicAuthzValue()

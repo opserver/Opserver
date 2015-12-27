@@ -1,4 +1,5 @@
 ﻿using StackExchange.Opserver.Data.SQL;
+using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Views.SQL
 {
@@ -9,7 +10,7 @@ namespace StackExchange.Opserver.Views.SQL
         public string ObjectName { get; set; }
         public Views View { get; set; }
 
-        // TODO: Remove for extensibility
+        // TODO: Remove for extensibility, create a dictionary instead and nameof()
         public enum Views
         {
             Tables,
@@ -21,12 +22,12 @@ namespace StackExchange.Opserver.Views.SQL
             Other
         }
 
-        public static string GetDatabaseClass(SQLInstance.SQLDatabaseInfo db)
+        public static string GetDatabaseClass(SQLInstance.Database db)
         {
-            if (db.IsSystemDatabase) return "system";
-            if (db.State == DatabaseStates.Restoring) return "restoring";
+            if (db.IsSystemDatabase) return "text-primary";
+            if (db.State == DatabaseStates.Restoring) return StatusIndicator.WarningClass;
 
-            return db.TextClass();
+            return db.MonitorStatus.TextClass(showGood: true);
         }
     }
 }

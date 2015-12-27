@@ -82,7 +82,7 @@
     <div class="col-md-@(isAdmin ? "9" : "12")">
         @if (Model.SelectedGroup != null && erroring.Any())
         {
-            <div class="alert-warning">
+            <div class="alert alert-warning">
                 <h5>There was an error querying HAProxy for status.</h5>
                 @foreach (var i in erroring)
                 {

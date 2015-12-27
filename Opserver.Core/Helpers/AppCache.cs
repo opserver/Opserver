@@ -4,7 +4,7 @@ using System.Net;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public static partial class AppCache
+    public static class AppCache
     {
         #region IP Cache
 

@@ -16,9 +16,11 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheForSeconds = Cluster.RefreshInterval,
                     UpdateCache = UpdateFromSql(nameof(AGClusterInfo), async conn =>
                     {
-                        var sql = GetFetchSQL<AGClusterState>() + "\n" +
-                                  GetFetchSQL<AGClusterMemberInfo>() + "\n" +
-                                  GetFetchSQL<AGClusterNetworkInfo>();
+                        var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Version), k =>
+                            GetFetchSQL<AGClusterState>(k.Item2) + "\n" +
+                            GetFetchSQL<AGClusterMemberInfo>(k.Item2) + "\n" +
+                            GetFetchSQL<AGClusterNetworkInfo>(k.Item2)
+                            );
 
                         AGClusterState state;
                         using (var multi = await conn.QueryMultipleAsync(sql))

@@ -1,53 +1,90 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
-        private Cache<List<SQLDatabaseInfo>> _databases;
-        public Cache<List<SQLDatabaseInfo>> Databases => _databases ?? (_databases = SqlCacheList<SQLDatabaseInfo>(5 * 60));
-
-        private Cache<List<SQLDatabaseBackupInfo>> _databaseBackups;
-        public Cache<List<SQLDatabaseBackupInfo>> DatabaseBackups => _databaseBackups ?? (_databaseBackups = SqlCacheList<SQLDatabaseBackupInfo>(5 * 60));
-
-        private Cache<List<SQLDatabaseFileInfo>> _databaseFiles;
-        public Cache<List<SQLDatabaseFileInfo>> DatabaseFiles => _databaseFiles ?? (_databaseFiles = SqlCacheList<SQLDatabaseFileInfo>(5 * 60));
-
-        public Cache<List<SQLDatabaseTableInfo>> GetTableInfo(string databaseName)
+        private Cache<List<Database>> _databases;
+        public Cache<List<Database>> Databases
         {
-            return new Cache<List<SQLDatabaseTableInfo>>
+            get
+            {
+                return _databases ?? (_databases = new Cache<List<Database>>
+                {
+                    CacheForSeconds = 5 * 60, // TODO: Revisit
+                    UpdateCache = UpdateFromSql(nameof(Databases), async conn =>
+                    {
+                        var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
+                            GetFetchSQL<Database>(k.Item2) + "\n" +
+                            GetFetchSQL<DatabaseBackup>(k.Item2) + "\n" +
+                            GetFetchSQL<DatabaseFile>(k.Item2) + "\n" +
+                            GetFetchSQL<DatabaseVLF>(k.Item2)
+                            );
+
+                        List<Database> dbs;
+                        using (var multi = await conn.QueryMultipleAsync(sql))
+                        {
+                            dbs = await multi.ReadAsync<Database>().AsList();
+                            var backups = await multi.ReadAsync<DatabaseBackup>().AsList();
+                            var files = await multi.ReadAsync<DatabaseFile>().AsList();
+                            var vlfs = await multi.ReadAsync<DatabaseVLF>().AsList();
+
+                            // Safe groups
+                            var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
+                            var fileLookup = files.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
+                            var vlfsLookup = vlfs.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.FirstOrDefault());
+
+                            foreach (var db in dbs)
+                            {
+                                List<DatabaseBackup> b;
+                                db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseBackup>();
+
+                                List<DatabaseFile> f;
+                                db.Files = fileLookup.TryGetValue(db.Id, out f) ? f : new List<DatabaseFile>();
+
+                                DatabaseVLF v;
+                                db.VLFCount = vlfsLookup.TryGetValue(db.Id, out v) ? v?.VLFCount : null;
+                            }
+                        }
+                        return dbs;
+                    })
+                });
+            }
+        }
+
+        public Cache<List<DatabaseTable>> GetTableInfo(string databaseName)
+        {
+            return new Cache<List<DatabaseTable>>
                 {
                     CacheKey = GetCacheKey("TableInfo-" + databaseName),
                     CacheForSeconds = RefreshInterval,
                     CacheStaleForSeconds = 5 * 60,
                     UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
                         {
-                            var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseTableInfo>()}";
-                            return conn.QueryAsync<SQLDatabaseTableInfo>(sql);
+                            var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseTable>()}";
+                            return conn.QueryAsync<DatabaseTable>(sql);
                         })
                 };
         }
 
-        public Cache<List<SQLDatabaseColumnInfo>> GetColumnInfo(string databaseName)
+        public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName)
         {
-            return new Cache<List<SQLDatabaseColumnInfo>>
+            return new Cache<List<DatabaseColumn>>
             {
                 CacheKey = GetCacheKey("ColumnInfo-" + databaseName),
                 CacheForSeconds = 5 * 60,
                 CacheStaleForSeconds = 30 * 60,
                 UpdateCache = UpdateFromSql("Column Info for " + databaseName, conn =>
                 {
-                    var sql = $"Use [{databaseName}]; {GetFetchSQL<SQLDatabaseColumnInfo>()}";
-                    return conn.QueryAsync<SQLDatabaseColumnInfo>(sql);
+                    var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseColumn>()}";
+                    return conn.QueryAsync<DatabaseColumn>(sql);
                 })
             };
         }
 
-        private Cache<List<SQLDatabaseVLFInfo>> _databaseVLFs;
-        public Cache<List<SQLDatabaseVLFInfo>> DatabaseVLFs => _databaseVLFs ?? (_databaseVLFs = SqlCacheList<SQLDatabaseVLFInfo>(10 * 60, 60, affectsStatus: false));
-
-        public static HashSet<string> SystemDatabaseNames = new HashSet<string>
+        public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
             {
                 "master",
                 "model",
@@ -55,7 +92,7 @@ namespace StackExchange.Opserver.Data.SQL
                 "tempdb"
             };
 
-        public class SQLDatabaseInfo : ISQLVersioned, IMonitorStatus
+        public class Database : ISQLVersioned, IMonitorStatus
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -116,7 +153,7 @@ namespace StackExchange.Opserver.Data.SQL
             public bool IsSystemDatabase => (_isSystemDatabase ?? (_isSystemDatabase = SystemDatabaseNames.Contains(Name))).Value;
             public string Name { get; internal set; }
             public DatabaseStates State { get; internal set; }
-            public CompatabilityLevels CompatbilityLevel { get; internal set; }
+            public CompatabilityLevels CompatibilityLevel { get; internal set; }
             public RecoveryModels RecoveryModel { get; internal set; }
             public PageVerifyOptions PageVerifyOption { get; internal set; }
             public LogReuseWaits LogReuseWait { get; internal set; }
@@ -135,6 +172,10 @@ namespace StackExchange.Opserver.Data.SQL
             public double TextIndexSizeMB { get; internal set; }
             public double? LogSizeMB { get; internal set; }
             public double? LogSizeUsedMB { get; internal set; }
+
+            public List<DatabaseBackup> Backups { get; internal set; }
+            public List<DatabaseFile> Files { get; internal set; }
+            public int? VLFCount { get; internal set; }
 
             public double? LogPercentUsed => LogSizeMB > 0 ? 100 * LogSizeUsedMB / LogSizeMB : null;
 
@@ -187,7 +228,7 @@ From sys.databases db
      Left Join (Select database_id, Sum(Cast(size As Bigint)) TextIndexSize 
                   From sys.master_files 
                  Where type = 4
-              Group By database_id) sti On db.database_id = sti.database_id {1}";
+              Group By database_id) sti On db.database_id = sti.database_id {1};";
 
             public string GetFetchSQL(Version v)
             {
@@ -198,11 +239,11 @@ From sys.databases db
             }
         }
 
-        public class SQLDatabaseBackupInfo : ISQLVersioned
+        public class DatabaseBackup : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
-            public int Id { get; internal set; }
+            public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
 
             public DateTime? LastBackupStartDate { get; internal set; }
@@ -222,7 +263,7 @@ From sys.databases db
             public string LastFullBackupPhysicalDeviceName { get; internal set; }
 
             internal const string FetchSQL = @"
-Select db.database_id Id,
+Select db.database_id DatabaseId,
        db.name Name, 
        lb.type LastBackupType,
        lb.backup_start_date LastBackupStartDate,
@@ -283,7 +324,7 @@ Select db.database_id Id,
             }
         }
 
-        public class SQLDatabaseFileInfo : ISQLVersioned
+        public class DatabaseFile : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -371,7 +412,49 @@ Select vs.volume_id VolumeId,
        Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs";
         }
 
-        public class SQLDatabaseTableInfo : ISQLVersioned
+        public class DatabaseVLF : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
+            public int DatabaseId { get; internal set; }
+            public string DatabaseName { get; internal set; }
+            public int VLFCount { get; internal set; }
+
+            internal const string FetchSQL = @"
+Create Table #VLFCounts (DatabaseId int, DatabaseName sysname, VLFCount int);
+Create Table #vlfTemp (
+    RecoveryUnitId int,
+    FileId int, 
+    FileSize nvarchar(255), 
+    StartOffset nvarchar(255), 
+    FSeqNo nvarchar(255), 
+    Status int, 
+    Parity int, 
+    CreateLSN nvarchar(255)
+);
+
+Declare @sql nvarchar(max);
+Set @sql = '';
+Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
+  Insert #VLFCounts Select ' + Cast(database_id as nvarchar(10)) + ',''' + name + ''', Count(*) From #vlfTemp;
+  Truncate Table #vlfTemp;'
+  From sys.databases
+  Where state <> 6; -- Skip OFFLINE databases as they cause errors
+
+Exec sp_executesql @sql;
+Select * From #VLFCounts;
+Drop Table #VLFCounts;
+Drop Table #vlfTemp;";
+
+            public string GetFetchSQL(Version v)
+            {
+                if (v < SQLServerVersions.SQL2012.RTM)
+                    return FetchSQL.Replace("RecoveryUnitId int,", "");
+                return FetchSQL;
+            }
+        }
+
+        public class DatabaseTable : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -423,7 +506,7 @@ Select t.object_id Id,
 Group By t.object_id, t.Name, t.create_date, s.name";
         }
 
-        public class SQLDatabaseColumnInfo : ISQLVersioned
+        public class DatabaseColumn : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
@@ -561,47 +644,5 @@ Select s.name [Schema],
 Order By 1, 2, 3";
         }
 
-        public class SQLDatabaseVLFInfo : ISQLVersioned
-        {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
-
-            public int DatabaseId { get; internal set; }
-            public string DatabaseName { get; internal set; }
-            public int VLFCount { get; internal set; }
-
-            internal const string FetchSQL = @"
-Create Table #VLFCounts (DatabaseId int, DatabaseName sysname, VLFCount int);
-Create Table #vlfTemp (
-    RecoveryUnitId int,
-    FileId int, 
-    FileSize nvarchar(255), 
-    StartOffset nvarchar(255), 
-    FSeqNo nvarchar(255), 
-    Status int, 
-    Parity int, 
-    CreateLSN nvarchar(255)
-);
-
-Declare @sql nvarchar(max);
-Set @sql = '';
-Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
-  Insert #VLFCounts Select ' + Cast(database_id as nvarchar(10)) + ',''' + name + ''', Count(*) From #vlfTemp;
-  Truncate Table #vlfTemp;'
-  From sys.databases
-  Where state <> 6; -- Skip OFFLINE databases as they cause errors
-
-Exec sp_executesql @sql;
-Select * From #VLFCounts;
-Drop Table #VLFCounts;
-Drop Table #vlfTemp;";
-
-            public string GetFetchSQL(Version v)
-            {
-                if (v < SQLServerVersions.SQL2012.RTM)
-                    return FetchSQL.Replace("RecoveryUnitId int,", "");
-                return FetchSQL;
-            }
-        }
-        
     }
 }

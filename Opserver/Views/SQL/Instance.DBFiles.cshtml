@@ -2,7 +2,7 @@
 @model StackExchange.Opserver.Data.SQL.SQLInstance
 @{
     Layout = null;
-    var files = Model.DatabaseFiles.SafeData(true).OrderBy(f => f.PhysicalName);
+    var files = Model.Databases.Data?.SelectMany(db => db.Files).OrderBy(f => f.PhysicalName);
     var volumes = files.GroupBy(p => p.VolumeMountPoint);
 }
 @functions

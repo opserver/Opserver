@@ -229,6 +229,7 @@ window.Status = (function() {
                     if (tabs.length) {
                         $('.js-top-tabs').replaceWith(tabs);
                     }
+                    // TODO: Just replace issues completely if not expanded, otherwise skip when expanded
                     var issuesList = $('.js-issues-button', resp);
                     var curList = $('.js-issues-button');
                     if (issuesList.length) {
@@ -285,6 +286,9 @@ window.Status = (function() {
                         });
                     }).done(function () {
                         if (link.closest('.js-refresh').length) {
+                            // TODO: Refresh only this section, not all others
+                            // Possibly pause refresh on refreshing sections via an upfront
+                            // .closest('.js-refresh').addClass()
                             Status.refresh.resume();
                         } else {
                             window.location.reload(true);

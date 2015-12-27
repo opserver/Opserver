@@ -192,7 +192,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> ExceptionsDeleteAll(string log)
         {
-            await ExceptionStores.ActionAsync(log, s => s.DeleteAllErrors(log));
+            await ExceptionStores.ActionAsync(log, s => s.DeleteAllErrorsAsync(log));
 
             return Json(new { url = Url.Action("Exceptions") });
         }
@@ -201,7 +201,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ExceptionsDeleteSimilar(string log, Guid id)
         {
             var e = await ExceptionStores.GetError(log, id);
-            await ExceptionStores.ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrors(e));
+            await ExceptionStores.ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrorsAsync(e));
 
             return Json(new { url = Url.Action("Exceptions", new { log }) });
         }
@@ -210,7 +210,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ExceptionsDeleteList(Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
-            await ExceptionStores.ActionAsync(null, s => s.DeleteErrors(ids.ToList()));
+            await ExceptionStores.ActionAsync(null, s => s.DeleteErrorsAsync(ids.ToList()));
 
             return returnCounts ? ExceptionCounts() : Json(new { url = Url.Action("Exceptions") });
         }

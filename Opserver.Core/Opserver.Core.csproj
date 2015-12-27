@@ -241,6 +241,7 @@
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />
     <Compile Include="Data\IPNet.cs" />
     <Compile Include="Helpers\LocalCache.cs" />
+    <Compile Include="Helpers\Singleton.cs" />
     <Compile Include="Helpers\WindowsKernelVersions.cs" />
     <Compile Include="ISeachableNode.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.cs" />

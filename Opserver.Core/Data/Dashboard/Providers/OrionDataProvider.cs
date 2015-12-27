@@ -164,6 +164,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
 
         private class OrionIPMap
         {
+            // TODO: IPNet conversion, currently we lack subnet data that is available
             public int NodeID { get; set; }
             public int InterfaceIndex { get; set; }
         }

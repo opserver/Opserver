@@ -58,7 +58,7 @@ namespace StackExchange.Opserver.Helpers
     /// <summary>
     /// Specifies that an action method constrained by a class-level <see cref="OnlyAllowAttribute"/> can authorize additional <see cref="Roles"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method)]
     public class AlsoAllowAttribute : Attribute
     {
         public Roles Roles { get; set; }
@@ -70,13 +70,5 @@ namespace StackExchange.Opserver.Helpers
 
             Roles = roles;
         }
-    }
-
-    /// <summary>
-    /// Shortcut for [Allow(Roles.Developer)]
-    /// </summary>
-    public class AdminOnlyAttribute : OnlyAllowAttribute
-    {
-        public AdminOnlyAttribute() : base(Roles.GlobalAdmin) { }
     }
 }

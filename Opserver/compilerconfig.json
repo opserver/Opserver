@@ -1,18 +1,12 @@
-﻿[
-  {
-    "outputFile": "Content/Styles.css",
-    "inputFile": "Content/Styles.less",
-    "minify": {
-      "enabled": true
-    },
-    "sourceMap": true
-  },
+[
   {
     "outputFile": "Content/themes/dark/styles.css",
-    "inputFile": "Content/themes/dark/styles.less"
+    "inputFile": "Content/themes/dark/styles.less",
+    "sourceMap": false
   },
   {
     "outputFile": "Content/themes/light/styles.css",
-    "inputFile": "Content/themes/light/styles.less"
+    "inputFile": "Content/themes/light/styles.less",
+    "sourceMap": false
   }
 ]

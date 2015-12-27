@@ -15,29 +15,19 @@ namespace StackExchange.Opserver.Helpers
         public static IHtmlString IconSpanUnknown = $@"<span class=""{UnknownClass}"">●</span>".AsHtml();
 
 
-        public static IHtmlString UpCustomSpam(string text, string tooltip = null)
-        {
-            return CustomSpan(UpClass, text, tooltip);
-        }
+        public static IHtmlString UpCustomSpam(string text, string tooltip = null) => 
+            CustomSpan(UpClass, text, tooltip);
 
-        public static IHtmlString DownCustomSpam(string text, string tooltip = null)
-        {
-            return CustomSpan(DownClass, text, tooltip);
-        }
+        public static IHtmlString DownCustomSpam(string text, string tooltip = null) => 
+            CustomSpan(DownClass, text, tooltip);
 
-        public static IHtmlString WarningCustomSpam(string text, string tooltip = null)
-        {
-            return CustomSpan(WarningClass, text, tooltip);
-        }
+        public static IHtmlString WarningCustomSpam(string text, string tooltip = null) => 
+            CustomSpan(WarningClass, text, tooltip);
 
-        public static IHtmlString UnknownCustomSpam(string text, string tooltip = null)
-        {
-            return CustomSpan(UnknownClass, text, tooltip);
-        }
+        public static IHtmlString UnknownCustomSpam(string text, string tooltip = null) => 
+            CustomSpan(UnknownClass, text, tooltip);
 
-        private static IHtmlString CustomSpan(string className, string text, string tooltip)
-        {
-            return ($@"<span class=""{className}""{(tooltip.HasValue() ? " title=\"" + tooltip.HtmlEncode() + "\"" : "")}>{text}</span>").AsHtml();
-        }
+        private static IHtmlString CustomSpan(string className, string text, string tooltip) => 
+            $@"<span class=""{className}""{(tooltip.HasValue() ? " title=\"" + tooltip.HtmlEncode() + "\"" : "")}>{text}</span>".AsHtml();
     }
 }

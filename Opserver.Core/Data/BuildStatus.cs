@@ -42,15 +42,10 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        public static DateTime LastFetch
-        {
-            get { return _lastFetch; }
-        }
+        public static DateTime LastFetch => _lastFetch;
 
-        public static bool HasCachePrimed
-        {
-            get { return _lastFetch >= DateTime.UtcNow.AddSeconds(-Current.Settings.TeamCity.BuildFetchIntervalSeconds); }
-        }
+        public static bool HasCachePrimed =>
+            _lastFetch >= DateTime.UtcNow.AddSeconds(-Current.Settings.TeamCity.BuildFetchIntervalSeconds);
 
         public static List<BuildConfig> Configs
         {

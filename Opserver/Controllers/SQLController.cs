@@ -135,7 +135,7 @@ namespace StackExchange.Opserver.Controllers
 
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.Data.QueryPlan));
 
-            return File(ms, "text/xml", $"QueryPlan-{Math.Abs(handle.GetHashCode())}.sqlplan");
+            return File(ms, "text/xml", $"QueryPlan-{Math.Abs(handle.GetHashCode()).ToString()}.sqlplan");
         }
 
         [Route("sql/active")]

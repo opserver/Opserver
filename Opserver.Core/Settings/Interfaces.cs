@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace StackExchange.Opserver
+﻿namespace StackExchange.Opserver
 {
     public interface ISecurableSection
     {

@@ -7,20 +7,11 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisInstance
     {
-        public static List<RedisInstance> AllInstances => _redisInstances ?? (_redisInstances = LoadRedisServerInfos());
-
-        private static readonly object _loadLock = new object();
-        private static List<RedisInstance> _redisInstances;
-        private static List<RedisInstance> LoadRedisServerInfos()
-        {
-            lock (_loadLock)
-            {
-                if (_redisInstances != null) return _redisInstances;
-
-                return RedisConnectionInfo.AllConnections.Select(rci => new RedisInstance(rci))
-                                          .Where(rsi => rsi.TryAddToGlobalPollers()).ToList();
-            }
-        }
+        public static List<RedisInstance> AllInstances { get; } =
+            RedisConnectionInfo.AllConnections
+                .Select(rci => new RedisInstance(rci))
+                .Where(rsi => rsi.TryAddToGlobalPollers())
+                .ToList();
 
         public static RedisInstance GetInstance(RedisConnectionInfo info)
         {

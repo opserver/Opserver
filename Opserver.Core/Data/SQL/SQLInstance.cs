@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
@@ -20,14 +20,13 @@ namespace StackExchange.Opserver.Data.SQL
         protected string ConnectionString { get; set; }
         public Version Version { get; internal set; } = new Version(); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
+        
+        protected static readonly ConcurrentDictionary<Tuple<string, Version>, string> QueryLookup =
+            new ConcurrentDictionary<Tuple<string, Version>, string>();
 
-        public static readonly Dictionary<Type, ISQLVersioned> VersionSingletons =
-            Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => typeof (ISQLVersioned).IsAssignableFrom(t) && t.IsClass)
-                .ToDictionary(type => type, type => (ISQLVersioned) Activator.CreateInstance(type));
-
-        public string GetFetchSQL<T>() where T : ISQLVersioned =>
-            VersionSingletons[typeof (T)].GetFetchSQL(Version);
+        public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
+        public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() =>
+            Singleton<T>.Instance.GetFetchSQL(v);
 
         public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
         {
@@ -53,9 +52,6 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return ServerProperties;
                 yield return Configuration;
                 yield return Databases;
-                yield return DatabaseBackups;
-                yield return DatabaseFiles;
-                yield return DatabaseVLFs;
                 yield return CPUHistoryLastHour;
                 yield return JobSummary;
                 yield return PerfCounters;
@@ -81,10 +77,7 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
         /// </summary>
-        protected Task<DbConnection> GetConnectionAsync(int timeout = 5000)
-        {
-            return Connection.GetOpenAsync(ConnectionString, connectionTimeout: timeout);
-        }
+        protected Task<DbConnection> GetConnectionAsync(int timeout = 5000) => Connection.GetOpenAsync(ConnectionString, connectionTimeout: timeout);
 
         private string GetCacheKey(string itemName) { return $"SQL-Instance-{Name}-{itemName}"; }
 
@@ -94,7 +87,7 @@ namespace StackExchange.Opserver.Data.SQL
                                               [CallerMemberName] string memberName = "",
                                               [CallerFilePath] string sourceFilePath = "",
                                               [CallerLineNumber] int sourceLineNumber = 0) 
-            where T : class, ISQLVersioned
+            where T : class, ISQLVersioned, new()
         {
             return new Cache<List<T>>(memberName, sourceFilePath, sourceLineNumber)
                 {
@@ -110,7 +103,7 @@ namespace StackExchange.Opserver.Data.SQL
                                           [CallerMemberName] string memberName = "",
                                           [CallerFilePath] string sourceFilePath = "",
                                           [CallerLineNumber] int sourceLineNumber = 0)
-            where T : class, ISQLVersioned
+            where T : class, ISQLVersioned, new()
         {
             return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
                 {

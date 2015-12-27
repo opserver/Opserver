@@ -45,14 +45,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
             if (_scheduleCache == null)
             {
                 var result = new List<OnCallAssignment>();
-                var overrides = PrimaryScheduleOverrides.SafeData(true);
+                var overrides = PrimaryScheduleOverrides?.Data;
                 if (!OnCallUsers.HasData()) return result;
                 foreach (var p in OnCallUsers.Data)
                 {
                     if (p.Schedule == null) continue;
                     for (var i = 0; i < p.Schedule.Count; i++)
                     {
-                        var isOverride = overrides.Any(o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == p.Id);
+                        var isOverride = overrides?.Any(o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == p.Id) ?? false;
                         result.Add(new OnCallAssignment { Person = p, Schedule = p.Schedule[i], IsOverride = isOverride });
                     }
                 }

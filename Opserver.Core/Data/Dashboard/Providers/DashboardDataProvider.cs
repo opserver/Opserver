@@ -88,13 +88,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             [CallerLineNumber] int sourceLineNumber = 0)
             where T : class
         {
+            // ReSharper disable ExplicitCallerInfoArgument
             return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
-                {
-                    AffectsNodeStatus = affectsStatus,
-                    CacheForSeconds = cacheSeconds,
-                    CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromProvider(typeof (T).Name + "-List", fetch)
-                };
+            {
+                AffectsNodeStatus = affectsStatus,
+                CacheForSeconds = cacheSeconds,
+                CacheFailureForSeconds = cacheFailureSeconds,
+                UpdateCache = UpdateFromProvider(typeof (T).Name + "-List", fetch)
+            };
+            // ReSharper restore ExplicitCallerInfoArgument
         }
 
         public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<Task<T>> fetch) where T : class

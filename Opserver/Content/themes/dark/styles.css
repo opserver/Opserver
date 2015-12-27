@@ -7976,6 +7976,8 @@ h6.page-header {
   background: #36414b;
   border: solid 1px #2c343d;
   margin: 2px 0;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 .value-block.bg-primary {
   color: #fff;
@@ -8027,7 +8029,7 @@ a.value-block.bg-danger:focus {
 }
 .value-block .progress > span {
   position: absolute;
-  top: 0;
+  top: 2px;
   left: 0;
   right: 0;
   color: white;
@@ -8284,6 +8286,11 @@ a.value-block.bg-danger:focus {
 }
 .error-stack {
   white-space: pre-wrap;
+  max-height: 90px;
+  overflow: hidden;
+}
+.error-stack + .error-stack {
+  margin-top: 20px;
 }
 .text-muted,
 table .text-muted,

@@ -34,10 +34,12 @@ namespace StackExchange.Opserver.Data.SQL
         {
             foreach (var ms in base.GetMonitorStatus())
                 yield return ms;
-            yield return AvailabilityGroups.SafeData(true)
-                                           .Where(ag => ag.LocalReplica != null)
-                                           .Select(ag => ag.LocalReplica)
-                                           .GetWorstStatus();
+            var worstAG = AvailabilityGroups?.Data?
+                .Where(ag => ag.LocalReplica != null)
+                .Select(ag => ag.LocalReplica)
+                .GetWorstStatus();
+            if (worstAG.HasValue)
+                yield return worstAG.Value;
         }
 
         public int ClusterVotes => AGClusterMember.Votes.GetValueOrDefault(0);

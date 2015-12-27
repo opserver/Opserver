@@ -28,15 +28,19 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        public static IEnumerable<Issue> GetIssues()
+        public static List<Issue> GetIssues()
         {
-            // TODO: Better Ordering
-            return _issueProviders
-                .SelectMany(p => p.GetIssues())
-                .OrderByDescending(i => i.IsService)
-                .ThenByDescending(i => i.MonitorStatus)
-                .ThenByDescending(i => i.Date)
-                .ThenBy(i => i.Title);
+            return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
+            {
+                // TODO: Better Ordering
+                return _issueProviders
+                    .SelectMany(p => p.GetIssues())
+                    .OrderByDescending(i => i.IsService)
+                    .ThenByDescending(i => i.MonitorStatus)
+                    .ThenByDescending(i => i.Date)
+                    .ThenBy(i => i.Title)
+                    .ToList();
+            }, 60, 4*60*60);
         }
     }
 

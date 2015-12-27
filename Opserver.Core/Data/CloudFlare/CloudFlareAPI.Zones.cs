@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
         public CloudFlareZone GetZoneFromHost(string host)
         {
-            return Zones.SafeData(true).FirstOrDefault(z => host.EndsWith(z.Name));
+            return Zones.Data?.FirstOrDefault(z => host.EndsWith(z.Name));
         }
 
         public CloudFlareZone GetZoneFromUrl(string url)

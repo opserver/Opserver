@@ -88,15 +88,15 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
             var paramTypes = paramTypeList.Groups[1].Value.Split(StringSplits.Comma).Select(p => p.Split(StringSplits.Space));
 
-            queryPlan.ParameterList.ForEach(p =>
+            foreach (var p in queryPlan.ParameterList)
+            {
+                var paramType = paramTypes.FirstOrDefault(pt => pt[0] == p.Column);
+                if (paramType != null)
                 {
-                    var paramType = paramTypes.FirstOrDefault(pt => pt[0] == p.Column);
-                    if (paramType != null)
-                    {
-                        result.AppendFormat(declareFormat, p.Column, paramType[1], p.ParameterCompiledValue)
-                              .AppendLine();
-                    }
-                });
+                    result.AppendFormat(declareFormat, p.Column, paramType[1], p.ParameterCompiledValue)
+                          .AppendLine();
+                }
+            }
             return result.Length > 0 ? result.Insert(0, "-- Compiled Params\n").ToString() : "";
         }
     }

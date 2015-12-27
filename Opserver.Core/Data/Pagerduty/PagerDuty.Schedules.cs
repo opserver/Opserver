@@ -13,11 +13,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-                var data = AllSchedules.SafeData(true);
+                var data = AllSchedules.Data;
                 // Many people likely have 1 schedule, or the primary is #1,
                 // so we make some assumptions here with no setting present.
-                return data.FirstOrDefault(s => s.Name == Settings.PrimaryScheduleName) ??
-                       data.FirstOrDefault();
+                return data?.FirstOrDefault(s => s.Name == Settings.PrimaryScheduleName) ??
+                       data?.FirstOrDefault();
             }
         }
 

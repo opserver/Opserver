@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Controllers
         
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
-            _betweenInitializeAndActionExecuting = _startStep("Initialize");
+            _betweenInitializeAndActionExecuting = _startStep(nameof(Initialize));
             base.Initialize(requestContext);
         }
 
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
             if (!filterContext.IsChildAction)
             {
                 _stopStep(_betweenInitializeAndActionExecuting);
-                _betweenActionExecutingAndExecuted = _startStep("OnActionExecuting");
+                _betweenActionExecutingAndExecuted = _startStep(nameof(OnActionExecuting));
                 TopTabs.CurrentTab = TopTab;
             }
 
@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.Controllers
             if (!filterContext.IsChildAction)
             {
                 _stopStep(_betweenActionExecutingAndExecuted);
-                _betweenActionExecutedAndResultExecuting = _startStep("OnActionExecuted");
+                _betweenActionExecutedAndResultExecuting = _startStep(nameof(OnActionExecuted));
             }
             base.OnActionExecuted(filterContext);
         }
@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Controllers
             if (!filterContext.IsChildAction)
             {
                 _stopStep(_betweenActionExecutedAndResultExecuting);
-                _betweenResultExecutingAndExecuted = _startStep("OnResultExecuting");
+                _betweenResultExecutingAndExecuted = _startStep(nameof(OnResultExecuting));
             }
             base.OnResultExecuting(filterContext);
         }
@@ -70,7 +70,7 @@ namespace StackExchange.Opserver.Controllers
         {
             _stopStep(_betweenResultExecutingAndExecuted);
 
-            using (MiniProfiler.Current.Step("OnResultExecuted"))
+            using (MiniProfiler.Current.Step(nameof(OnResultExecuted)))
             {
                 base.OnResultExecuted(filterContext);
             }

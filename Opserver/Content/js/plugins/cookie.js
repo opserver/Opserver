@@ -1,5 +1,5 @@
 ﻿/*!
- * JavaScript Cookie v2.0.3
+ * JavaScript Cookie v2.0.4
  * https://github.com/js-cookie/js-cookie
  *
  * Copyright 2006, 2015 Klaus Hartl & Fagner Brack
@@ -54,8 +54,12 @@
                      }
                  } catch (e) { }
 
-                 value = encodeURIComponent(String(value));
-                 value = value.replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+                 if (!converter.write) {
+                     value = encodeURIComponent(String(value))
+                         .replace(/%(23|24|26|2B|3A|3C|3E|3D|2F|3F|40|5B|5D|5E|60|7B|7D|7C)/g, decodeURIComponent);
+                 } else {
+                     value = converter.write(value, key);
+                 }
 
                  key = encodeURIComponent(String(key));
                  key = key.replace(/%(23|24|26|2B|5E|60|7C)/g, decodeURIComponent);
@@ -92,7 +96,7 @@
                  }
 
                  try {
-                     cookie = converter && converter(cookie, name) || cookie.replace(rdecode, decodeURIComponent);
+                     cookie = converter.read ? converter.read(cookie, name) : converter(cookie, name) || cookie.replace(rdecode, decodeURIComponent);
 
                      if (this.json) {
                          try {
@@ -133,5 +137,5 @@
          return api;
      }
 
-     return init();
+     return init(function () { });
  }));

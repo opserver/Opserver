@@ -25,6 +25,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public double? Used { get; internal set; }
         public double? Available { get; internal set; }
         public float? PercentUsed { get; internal set; }
+        public float? PercentFree => 100 - PercentUsed;
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement

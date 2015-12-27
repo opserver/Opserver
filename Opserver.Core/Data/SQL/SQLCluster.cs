@@ -14,18 +14,17 @@ namespace StackExchange.Opserver.Data.SQL
         
         public List<SQLNode.AGInfo> AvailabilityGroups
         {
-            get { return Nodes.SelectMany(n => n.AvailabilityGroups.SafeData(true).Where(ag => ag.IsPrimaryReplica)).ToList(); }
+            get { return Nodes.SelectMany(n => n.AvailabilityGroups.Data?.Where(ag => ag.IsPrimaryReplica) ?? Enumerable.Empty<SQLNode.AGInfo>()).ToList(); }
         }
         
         public IEnumerable<SQLNode.AGInfo> GetAvailabilityGroups(string node, string agName)
         {
             Func<SQLNode.AGInfo, bool> agMatch = ag => agName.IsNullOrEmpty() || ag.Name == agName;
 
-            if (node.HasValue())
-                return Nodes.Where(n => string.Equals(n.Name, node))
-                            .SelectMany(n => n.AvailabilityGroups.SafeData(true).Where(agMatch));
-
-            return Nodes.SelectMany(n => n.AvailabilityGroups.SafeData(true).Where(agMatch));
+            return (node.HasValue()
+                ? Nodes.Where(n => string.Equals(n.Name, node))
+                : Nodes)
+                .SelectMany(n => n.AvailabilityGroups.Data?.Where(agMatch) ?? Enumerable.Empty<SQLNode.AGInfo>());
         }
 
         public MonitorStatus MonitorStatus => Nodes.GetWorstStatus("SQLCluster-" + Name);

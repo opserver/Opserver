@@ -189,7 +189,7 @@ namespace StackExchange.Opserver.Data.SQL
 
     public enum LogReuseWaits : byte
     {
-        Nothing = 0,
+        [Description("None")] Nothing = 0,
         [Description("Checkpoint")] Checkpoint = 1,
         [Description("Log Backup")] LogBackup = 2,
         [Description("Active Backup or Restore")] ActiveBackupOrRestore = 3,
