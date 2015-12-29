@@ -17,12 +17,12 @@ namespace StackExchange.Opserver.Data.SQL
                     .ToList()
                 : new List<SQLInstance>();
 
+        private static List<SQLInstance> _allInstances; 
         /// <summary>
         /// All SQL Instances, including those in clusters
         /// </summary>
-        public static List<SQLInstance> AllInstances { get; } =
-            SQLCluster.AllClusters.SelectMany(n => n.Nodes).Union(AllStandalone).ToList();
-
+        public static List<SQLInstance> AllInstances =>
+            _allInstances ?? (_allInstances = SQLCluster.AllClusters.SelectMany(n => n.Nodes).Union(AllStandalone).ToList());
 
         public static bool IsSQLServer(string server)
         {
