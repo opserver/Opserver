@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             metricName = BosunMetric.GetDenormalized(metricName, host);
             var query = new TSDBQuery(start, end);
             query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName), tags);
-            return RunTSDBQueryAsync(query, 1000);
+            return RunTSDBQueryAsync(query, 500);
         }
 
         private Cache<IntervalCache> _dayCache;
