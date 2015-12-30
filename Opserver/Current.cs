@@ -32,20 +32,6 @@ namespace StackExchange.Opserver
         public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         /// <summary>
-        /// Whether to render chart images at double resolution or not
-        /// </summary>
-        /// <remarks>Long-term, this will need updating to observe the pixel ratio which will grow to higher than 2 as displays improve</remarks>
-        public static bool IsHighDPI
-        {
-            get
-            {
-                // HACK, Hackity hack hack hack, but it works for now.
-                var cookie = Request.Cookies["highDPI"];
-                return cookie != null && cookie.Value == "true";
-            }
-        }
-
-        /// <summary>
         /// Gets if the current request is for a mobile view
         /// </summary>
         public static bool IsMobile => new HttpContextWrapper(Context).GetOverriddenBrowser().IsMobileDevice;

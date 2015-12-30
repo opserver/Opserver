@@ -115,7 +115,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(node?.GetInterfaceUtilizationHistory(@interface), start, end).ToList());
         }
 
-        private static IEnumerable<TResult> FilterHistory<T, TResult>(List<T> list, DateTime? start, DateTime? end) where T : IGraphPoint, TResult, new()
+        private static IEnumerable<TResult> FilterHistory<T, TResult>(List<T> list, DateTime? start, DateTime? end) where T : GraphPoint, TResult, new()
         {
             if (list == null)
                 return Enumerable.Empty<TResult>();

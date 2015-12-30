@@ -105,15 +105,6 @@ namespace StackExchange.Opserver
                 MiniProfiler.Stop();
         }
 
-        public override string GetVaryByCustomString(HttpContext context, string arg)
-        {
-            if (arg.ToLower() == "highDPI")
-            {
-                return Current.IsHighDPI.ToString();
-            }
-            return base.GetVaryByCustomString(context, arg);
-        }
-
         private static void GetCustomErrorData(Exception ex, HttpContext context, Dictionary<string, string> data)
         {
             // everything below needs a context

@@ -2,7 +2,7 @@
 {
     public interface IGraphPoint
     {
-        long DateEpoch { get; set; }
+        long DateEpoch { get; }
     }
 
     public class GraphPoint : IGraphPoint

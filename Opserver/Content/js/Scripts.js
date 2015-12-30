@@ -1,8 +1,4 @@
-﻿if (window.devicePixelRatio >= 2) {
-    Cookies.set('highDPI', 'true', { expires: 365 * 10, path: '/' });
-}
-
-window.Status = (function() {
+﻿window.Status = (function() {
 
     var ajaxLoaders = {},
         registeredRefreshes = {};
