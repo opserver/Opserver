@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Controllers
             var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
 
             var chart = GetChart(height, width);
-            chart.BackColor = alt ? AltRouteBackground : Color.White;
+            chart.BackColor = alt ? AltRouteBackground : System.Drawing.Color.White;
             var area = GetRouteChartArea(alt);
             if (dataPoints.Count >= 2)
             {
@@ -83,7 +83,7 @@ namespace StackExchange.Opserver.Controllers
             var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
 
             var chart = GetChart(height, width);
-            chart.BackColor = alt ? AltRouteBackground : Color.White;
+            chart.BackColor = alt ? AltRouteBackground : System.Drawing.Color.White;
             var area = GetRouteChartArea(alt);
             if (dataPoints.Count >= 2)
             {
@@ -172,7 +172,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var area = new ChartArea("area")
             {
-                BackColor = alt ? AltRouteBackground : Color.White,
+                BackColor = alt ? AltRouteBackground : System.Drawing.Color.White,
                 Position = new ElementPosition(0, 0, 100, 100),
                 InnerPlotPosition = new ElementPosition(0, 0, 100, 100),
                 AxisY =

@@ -16,6 +16,9 @@ namespace StackExchange.Opserver.Controllers
         private const int SparkHours = 24;
         private static DateTime SparkStart => DateTime.UtcNow.AddHours(-SparkHours);
         private const int SparkPoints = 500;
+        // TODO: Change to based on theme
+        private static string Color => "#008cba";
+        private static string AxisColor => "#f6f6f6";
 
         [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
@@ -76,7 +79,6 @@ namespace StackExchange.Opserver.Controllers
 
         private FileResult SparkSVG<T>(IEnumerable<T> points, long max, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
         {
-            const string color = "#008cba";
             const int height = 50,
                       width = SparkPoints;
             long nowEpoch = DateTime.UtcNow.ToEpochTime(),
@@ -86,9 +88,9 @@ namespace StackExchange.Opserver.Controllers
 
             var sb = new StringBuilder().AppendFormat(@"
 <svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"">
-  <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{2}"" stroke-width=""1"" />
+  <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{3}"" stroke-width=""1"" />
   <g fill=""{2}"" stroke=""none"">
-    <path d=""M0 50 ", width.ToString(), height.ToString(), color);
+    <path d=""M0 50 ", width.ToString(), height.ToString(), Color, AxisColor);
             foreach (var p in points)
             {
                 sb.Append("L")

@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
         {
             return new Chart
                        {
-                           BackColor = Color.Transparent,
+                           BackColor = System.Drawing.Color.Transparent,
                            Width = Unit.Pixel(width ?? Current.ViewSettings.SummaryChartWidth),
                            Height = Unit.Pixel(height ?? Current.ViewSettings.SummaryChartHeight),
                            AntiAliasing = AntiAliasingStyles.All,
