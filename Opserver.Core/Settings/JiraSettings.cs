@@ -8,16 +8,9 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Actions.Any();
 
-        public List<JiraAction> Actions { get; set; }
+        public List<JiraAction> Actions { get; set; } = new List<JiraAction>();
 
-        public List<string> Applications { get; set; }
-
-
-        public JiraSettings()
-        {
-            Actions = new List<JiraAction>();
-            Applications = new List<string>();
-        }
+        public List<string> Applications { get; set; } = new List<string>();
 
         /// <summary>
         /// Default url for all actions
@@ -39,8 +32,7 @@ namespace StackExchange.Opserver
         /// Default project key for all actions
         /// </summary>
         public string DefaultProjectKey { get; set; }
-
-
+        
         public List<JiraAction> GetActionsForApplication(string application)
         {
             var isValidApp = Applications.Any(a => a.Equals(application, StringComparison.OrdinalIgnoreCase));
@@ -53,21 +45,13 @@ namespace StackExchange.Opserver
 
             return actions;
         }
-
-
     }
 
     public class JiraAction : ISettingsCollectionItem<JiraAction>
     {
-        public List<JiraComponent> Components { get; set; }
+        public List<JiraComponent> Components { get; set; } = new List<JiraComponent>();
 
-        public List<string> Applications { get; set; }
-
-        public JiraAction()
-        {
-            Components = new List<JiraComponent>();
-            Applications = new List<string>();
-        }
+        public List<string> Applications { get; set; } = new List<string>();
 
         public int Id => GetHashCode();
 

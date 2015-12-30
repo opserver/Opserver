@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace StackExchange.Opserver
 {
@@ -7,23 +6,7 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Url.HasValue();
 
-        private Dictionary<string, List<string>> _serverMaps;
-        public Dictionary<string, List<string>> ServerMaps
-        {
-            get { return _serverMaps; }
-            set
-            {
-                _serverMaps = value;
-                ServerMapsChanged(this, value);
-            }
-        }
-        public event EventHandler<Dictionary<string, List<string>>> ServerMapsChanged = delegate { };
-
-        public TeamCitySettings()
-        {
-            // Defaults
-            BuildFetchIntervalSeconds = 30;
-        }
+        public Dictionary<string, List<string>> ServerMaps { get; set; }
 
         /// <summary>
         /// Url for the TeamCity Server
@@ -43,6 +26,6 @@ namespace StackExchange.Opserver
         /// <summary>
         /// How many seconds to cache builds for before fetching for new ones, defaults to 30
         /// </summary>
-        public int BuildFetchIntervalSeconds { get; set; }
+        public int BuildFetchIntervalSeconds { get; set; } = 30;
     }
 }

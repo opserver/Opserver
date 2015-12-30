@@ -8,22 +8,14 @@ namespace StackExchange.Opserver
 
         public string APIKey { get; set; }
         public string APIBaseUrl { get; set; }
-        public List<EmailMapping> UserNameMap { get; set; } 
+        public List<EmailMapping> UserNameMap { get; set; } = new List<EmailMapping>();
 
-        public int OnCallToShow { get; set; }
-        public int DaysToCache { get; set; }
+        public int OnCallToShow { get; set; } = 2;
+        public int DaysToCache { get; set; } = 60;
         public string HeaderTitle { get; set; }
         public string HeaderHtml { get; set; }
 
         public string PrimaryScheduleName { get; set; }
-
-        public PagerDutySettings()
-        {
-            // Defaults
-            OnCallToShow = 2;
-            DaysToCache = 60;
-            UserNameMap = new List<EmailMapping>();
-        }
     }
 
     public class EmailMapping

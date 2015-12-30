@@ -10,27 +10,14 @@ namespace StackExchange.Opserver
         /// <summary>
         /// elastic search clusters to monitor
         /// </summary>
-        public List<Cluster> Clusters { get; set; }
-
-        public ElasticSettings()
-        {
-            Clusters = new List<Cluster>();
-        }
+        public List<Cluster> Clusters { get; set; } = new List<Cluster>();
 
         public class Cluster : ISettingsCollectionItem<Cluster>
         {
-            public Cluster()
-            {
-                // Defaults
-                RefreshIntervalSeconds = 60;
-                DownRefreshIntervalSeconds = 5;
-                Nodes = new List<string>();
-            }
-
             /// <summary>
             /// Nodes in this cluster
             /// </summary>
-            public List<string> Nodes { get; set; }
+            public List<string> Nodes { get; set; } = new List<string>();
 
             /// <summary>
             /// The machine name for this SQL cluster
@@ -42,12 +29,12 @@ namespace StackExchange.Opserver
             /// <summary>
             /// How many seconds before polling this cluster for status again
             /// </summary>
-            public int RefreshIntervalSeconds { get; set; }
+            public int RefreshIntervalSeconds { get; set; } = 120;
 
             /// <summary>
             /// How many seconds before polling this cluster for status again, if the cluster status is not green
             /// </summary>
-            public int DownRefreshIntervalSeconds { get; set; }
+            public int DownRefreshIntervalSeconds { get; set; } = 10;
 
             public bool Equals(Cluster other)
             {

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Jil;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic

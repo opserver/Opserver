@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace StackExchange.Opserver
@@ -8,39 +7,15 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Servers.Any();
 
-        public List<Server> Servers { get; set; }
+        public List<Server> Servers { get; set; } = new List<Server>();
 
-        private Server _allServers;
-        public Server AllServers
-        {
-            get { return _allServers; }
-            set
-            {
-                _allServers = value;
-                AllServersChanged(this, value);
-            }
-        }
-        public event EventHandler<Server> AllServersChanged = delegate { };
-        
-        public Server Defaults { get; set; }
+        public Server AllServers { get; set; } = new Server();
 
-        public RedisSettings()
-        {
-            Servers = new List<Server>();
-            AllServers = new Server();
-            Defaults = new Server();
-        }
+        public Server Defaults { get; set; } = new Server();
 
         public class Server : ISettingsCollectionItem<Server>
         {
-            public List<Instance> Instances { get; set; }
-
-            public Server()
-            {
-                // Defaults
-                RefreshIntervalSeconds = 10;
-                Instances = new List<Instance>();
-            }
+            public List<Instance> Instances { get; set; } = new List<Instance>();
 
             /// <summary>
             /// The machine name for this Redis server - used to match against the dashboard
@@ -55,7 +30,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// How many seconds before polling this cluster for status again
             /// </summary>
-            public int RefreshIntervalSeconds { get; set; }
+            public int RefreshIntervalSeconds { get; set; } = 30;
 
             public bool Equals(Server other)
             {
@@ -92,13 +67,6 @@ namespace StackExchange.Opserver
 
         public class Instance : ISettingsCollectionItem<Instance>
         {
-            public Instance()
-            {
-                // Defaults
-                Port = 6379;
-                AnalysisRegexes = new Dictionary<string, string>();
-            }
-
             /// <summary>
             /// The machine name for this node
             /// </summary>
@@ -107,7 +75,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// Connection for for this node
             /// </summary>
-            public int Port { get; set; }
+            public int Port { get; set; } = 6379;
 
             /// <summary>
             /// The password for this node
@@ -117,7 +85,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage
             /// </summary>
-            public Dictionary<string, string> AnalysisRegexes { get; set; }
+            public Dictionary<string, string> AnalysisRegexes { get; set; } = new Dictionary<string, string>();
 
             public bool Equals(Instance other)
             {

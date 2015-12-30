@@ -9,21 +9,13 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Providers.Any();
 
-        public List<Category> Categories { get; set; }
-        
-        public ProvidersSettings Providers { get; set; }
+        public List<Category> Categories { get; set; } = new List<Category>();
 
-        public List<NodeSettings> PerNodeSettings { get; set; }
+        public ProvidersSettings Providers { get; set; } = new ProvidersSettings();
 
-        public bool ShowOther { get; set; }
+        public List<NodeSettings> PerNodeSettings { get; set; } = new List<NodeSettings>();
 
-        public DashboardSettings()
-        {
-            Categories = new List<Category>();
-            Providers = new ProvidersSettings();
-            PerNodeSettings = new List<NodeSettings>();
-            ShowOther = true;
-        }
+        public bool ShowOther { get; set; } = true;
 
         public NodeSettings GetNodeSettings(string node, Category c)
         {

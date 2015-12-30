@@ -7,19 +7,10 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Stores.Any();
 
-        public List<Store> Stores { get; set; }
+        public List<Store> Stores { get; set; } = new List<Store>();
 
-        public List<string> Applications { get; set; }
+        public List<string> Applications { get; set; } = new List<string>();
         
-        public ExceptionsSettings()
-        {
-            // Defaults
-            RecentSeconds = 600;
-            EnablePreviews = true;
-            Applications = new List<string>();
-            Stores = new List<Store>();
-        }
-
         /// <summary>
         /// How many exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
         /// </summary>
@@ -33,7 +24,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// How many seconds a error is considered "recent"
         /// </summary>
-        public int RecentSeconds { get; set; }
+        public int RecentSeconds { get; set; } = 600;
 
         /// <summary>
         /// How many recent exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
@@ -48,15 +39,10 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Default maximum timeout in milliseconds before giving up on an sources
         /// </summary>
-        public bool EnablePreviews { get; set; }
+        public bool EnablePreviews { get; set; } = true;
 
         public class Store : ISettingsCollectionItem<Store>
         {
-            public Store()
-            {
-                PollIntervalSeconds = 5*60;
-            }
-
             /// <summary>
             /// The name that appears for this store, used as a key for applications
             /// </summary>
@@ -72,7 +58,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// How often to poll this store
             /// </summary>
-            public int PollIntervalSeconds { get; set; }
+            public int PollIntervalSeconds { get; set; } = 300;
 
             /// <summary>
             /// Connection string for this store's database

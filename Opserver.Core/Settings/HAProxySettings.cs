@@ -8,31 +8,12 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Instances.Any() || Groups.Any();
 
-        public List<Group> Groups { get; set; }
+        public List<Group> Groups { get; set; } = new List<Group>();
 
-        public List<Instance> Instances { get; set; }
+        public List<Instance> Instances { get; set; } = new List<Instance>();
 
-        private Dictionary<string, string> _aliases;
-        public Dictionary<string, string> Aliases
-        {
-            get { return _aliases; }
-            private set
-            {
-                _aliases = value;
-                AliasesChanged(this, value);
-            }
-        }
-        public event EventHandler<Dictionary<string, string>> AliasesChanged = delegate { };
-
-        public HAProxySettings()
-        {
-            // Defaults
-            QueryTimeoutMs = 60*1000;
-            Groups = new List<Group>();
-            Instances = new List<Instance>();
-            Aliases = new Dictionary<string, string>();
-        }
-
+        public Dictionary<string, string> Aliases { get; private set; } = new Dictionary<string, string>();
+        
         public InstanceSettings GetInstanceSettings(Instance instance, Group group)
         {
             // Grab setting from node, then category, then global
@@ -75,19 +56,14 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Default maximum timeout in milliseconds before giving up on an instance, defaults to 60,000ms
         /// </summary>
-        public int QueryTimeoutMs { get; set; }
+        public int QueryTimeoutMs { get; set; } = 60 * 1000;
 
         public class Group : ISettingsCollectionItem<Group>, IInstanceSettings
         {
             /// <summary>
             /// Instances in this group
             /// </summary>
-            public List<Instance> Instances { get; set; }
-
-            public Group()
-            {
-                Instances = new List<Instance>();
-            }
+            public List<Instance> Instances { get; set; } = new List<Instance>();
             
             /// <summary>
             /// The name that appears for this group

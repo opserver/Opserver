@@ -6,8 +6,8 @@ namespace StackExchange.Opserver
     public class CloudFlareSettings : Settings<CloudFlareSettings>
     {
         public override bool Enabled => (Email.HasValue() && APIKey.HasValue()) || Railguns.Any();
-        public List<Railgun> Railguns { get; set; }
-        public List<DataCenter> DataCenters { get; set; }
+        public List<Railgun> Railguns { get; set; } = new List<Railgun>();
+        public List<DataCenter> DataCenters { get; set; } = new List<DataCenter>();
 
         /// <summary>
         /// Email for the CloudFlare account
@@ -19,21 +19,8 @@ namespace StackExchange.Opserver
         /// </summary>
         public string APIKey { get; set; }
 
-        public CloudFlareSettings()
-        {
-            Railguns = new List<Railgun>();
-            DataCenters = new List<DataCenter>();
-        }
-
         public class Railgun : ISettingsCollectionItem<Railgun>
         {
-            public Railgun()
-            {
-                // Defaults
-                RefreshIntervalSeconds = 30;
-                Port = 24088;
-            }
-
             /// <summary>
             /// The name of this railgun instance
             /// </summary>
@@ -47,7 +34,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// Connection port for this instance
             /// </summary>
-            public int Port { get; set; }
+            public int Port { get; set; } = 24088;
 
             /// <summary>
             /// Unused currently
@@ -57,7 +44,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// How many seconds before polling the railgun status endpoint for status again
             /// </summary>
-            public int RefreshIntervalSeconds { get; set; }
+            public int RefreshIntervalSeconds { get; set; } = 30;
 
             public bool Equals(Railgun other)
             {
@@ -92,9 +79,7 @@ namespace StackExchange.Opserver
                 }
             }
         }
-
-
-
+        
         public class DataCenter : ISettingsCollectionItem<DataCenter>
         {
             /// <summary>
@@ -105,18 +90,12 @@ namespace StackExchange.Opserver
             /// <summary>
             /// The IP ranges for this data center, in CIDR format
             /// </summary>
-            public List<string> Ranges { get; set; }
+            public List<string> Ranges { get; set; } = new List<string>();
 
             /// <summary>
             /// The masked IP ranges for this data center, in CIDR format
             /// </summary>
-            public List<string> MaskedRanges { get; set; }
-
-            public DataCenter()
-            {
-                Ranges = new List<string>();
-                MaskedRanges = new List<string>();
-            }
+            public List<string> MaskedRanges { get; set; } = new List<string>();
 
             public bool Equals(DataCenter other)
             {
