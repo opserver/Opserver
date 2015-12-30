@@ -65,12 +65,12 @@ Last Run Message: @j.LastRunMessage">
                             }
                             else
                             {
-                                <td colspan="4" class="spark-no-data">no run history found</td>   
+                                <td colspan="4" class="text-muted">no run history found</td>   
                             }
                             <td class="@(j.IsEnabled ? "good" : "warning")">@(j.IsEnabled ? "Yes" : "No")</td>
                             @if (Current.User.IsInRole(Roles.SQLAdmin))
                             {
-                                <td><a href="#" class="sql-toggle-agent-job" data-guid="@j.JobId" data-enable="@(j.IsEnabled ? "false" : "true")">@(j.IsEnabled ? "disable" : "enable")</a></td>
+                                <td><a href="#" class="sql-toggle-agent-job" data-guid="@j.JobId.ToString()" data-enable="@(j.IsEnabled ? "false" : "true")">@(j.IsEnabled ? "disable" : "enable")</a></td>
                             }
                         </tr>
                     }

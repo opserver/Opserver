@@ -86,8 +86,7 @@ namespace StackExchange.Opserver.Controllers
                  divisor = max/50,
                  range = (nowEpoch - startEpoch)/width;
 
-            var sb = new StringBuilder().AppendFormat(@"
-<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"">
+            var sb = new StringBuilder().AppendFormat(@"<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
   <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{3}"" stroke-width=""1"" />
   <g fill=""{2}"" stroke=""none"">
     <path d=""M0 50 ", width.ToString(), height.ToString(), Color, AxisColor);

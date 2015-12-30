@@ -5,7 +5,7 @@
 {
     if (i.IsUnwatched)
     {
-        <div class="spark-no-data text-muted">No Data Available</div>
+        <div class="text-muted">No Data Available</div>
         return;
     }
     <img class="js-dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-nid="@Model.Id" data-iid="@i.Id" data-name="@i.PrettyName" />

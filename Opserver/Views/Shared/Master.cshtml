@@ -22,7 +22,7 @@
                     {
                         label = n.DisplayName,
                         value = n.Name,
-                        icon = n.MonitorStatus.TextClass(),
+                        icon = n.MonitorStatus.TextClass(showGood: true),
                         category = n.CategoryName
                     }).OrderBy(n => n.category).ThenBy(n => n.label);
                 @:Status.NodeSearch.init({ nodes: @Json.Encode(serverJson).AsHtml() });

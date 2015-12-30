@@ -17,12 +17,12 @@
 {
     if (!DashboardData.HasData)
     {
-        <div class="spark-no-data">No Data Available</div>
+        <div class="text-muted">No Data Available</div>
         return;
     }
-    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
+    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
 }
-<div class="item @s.TextClass() @GetItemClass(s)">
+<div class="item dashboard @s.TextClass() @GetItemClass(s)">
     <div class="server-name">
         @s.IconSpan()
         <a href="/dashboard/node?node=@s.PrettyName" class="node-name-link">@s.PrettyName</a>

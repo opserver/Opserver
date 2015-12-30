@@ -28,13 +28,13 @@
         <td>@server.ConnectionInfo.Name</td>
         <td style="padding-left: @(20*nest)px">
             @server.IconSpan()
-            <a href="/redis/instance?node=@server.Host:@server.Port" class="@server.TextClass()">@server.Host</a>
-            <span class="text-muted small">(@server.Port@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
+            <a href="/redis/instance?node=@server.Host:@server.Port.ToString()" class="@server.TextClass()">@server.Host</a>
+            <span class="text-muted small">(@server.Port.ToString()@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
         </td>
         <td>
             @if (Current.User.IsExceptionAdmin)
             {
-                <a href="#" class="js-redis-role-action" data-node="@server.Host:@server.Port">@ServerRole(server.Role)</a>
+                <a href="#" class="js-redis-role-action" data-node="@server.Host:@server.Port.ToString()">@ServerRole(server.Role)</a>
             }
             else
             {
@@ -44,19 +44,19 @@
         <td title="@server.SlaveCount.Pluralize("direct slave"), @server.TotalSlaveCount.ToComma() total
 @if (server.SlaveConnections != null) {
 foreach (var s in server.SlaveConnections) {
-  @:@s.IP:@s.Port (@AppCache.GetHostName(s.IP)) - @s.Status - Offset: @s.Offset.ToComma()
+  @:@s.IP:@s.Port.ToString() (@AppCache.GetHostName(s.IP)) - @s.Status - Offset: @s.Offset.ToComma()
 }
-}">@server.SlaveCount @if(server.TotalSlaveCount > server.SlaveCount){<text> <span class="text-muted small">(@(server.TotalSlaveCount - server.SlaveCount))</span></text>}</td>
+}">@server.SlaveCount.ToComma() @if(server.TotalSlaveCount > server.SlaveCount){<text> <span class="text-muted small">(@((server.TotalSlaveCount - server.SlaveCount).ToComma())</span></text>}</td>
         @if (info != null)
         {
             var stats = info.Stats;
             <td>@stats.TotalCommandsProcessed.ToComma() <span class="text-muted small">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
             <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="text-muted small">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
-            <td>@info.Clients.Connected</td>
+            <td>@info.Clients.Connected.ToComma()</td>
         } 
         else
         {
-            <td colspan="4" class="spark-no-data">No data available</td>
+            <td colspan="4" class="text-muted">No data available</td>
         }
         @if (!Model.AllVersionsMatch)
         {
@@ -75,7 +75,7 @@ foreach (var s in server.SlaveConnections) {
     var instances = Model.Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host);
     var masters = instances.Where(i => i.IsMaster).ToList();
     var slaving = instances.Where(i => i.IsSlaving).ToList();
-    var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || i.Info.LastPollStatus == FetchStatus.Fail));
+    var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || i.Info.LastPollStatus == FetchStatus.Fail)).ToList();
     var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0).ToList();
     var standAloneMasters = masters.Where(m => m.SlaveCount == 0).ToList();
 }
@@ -107,7 +107,7 @@ foreach (var s in server.SlaveConnections) {
                             {
                                 <td>
                                     @master.IconSpan()
-                                    <a href="?node=@master.Host:@master.Port" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port)</span>
+                                    <a href="?node=@master.Host:@master.Port.ToString()" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port.ToString())</span>
                                 </td>
                             }
                             else
@@ -116,7 +116,7 @@ foreach (var s in server.SlaveConnections) {
                             }
                             <td>
                                 @s.IconSpan()
-                                <a href="?node=@s.Host:@s.Port" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port)</span>
+                                <a href="?node=@s.Host:@s.Port.ToString()" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port.ToString())</span>
                             </td>
                             @if (master != null)
                             {
@@ -159,7 +159,7 @@ foreach (var s in server.SlaveConnections) {
         }
         @if (missing.Any())
         {
-            <h5 class="page-header">@MonitorStatus.Critical.IconSpan() @missing.Count().Pluralize("Missing/Unknown Instance")</h5>
+            <h5 class="page-header">@MonitorStatus.Critical.IconSpan() @missing.Count.Pluralize("Missing/Unknown Instance")</h5>
             <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
                 <thead>
                     <tr>
@@ -177,7 +177,7 @@ foreach (var s in server.SlaveConnections) {
                             <td>@m.Name</td>
                             <td>
                                 @m.IconSpan()
-                                <a href="#" class="@m.TextClass()">@m.Host</a> <span class="text-muted">(@m.Port)</span>
+                                <a href="#" class="@m.TextClass()">@m.Host</a> <span class="text-muted">(@m.Port.ToString())</span>
                             </td>
                             <td>@ServerRole(m.Role)</td>
                             <td title="@m.Info.ErrorMessage" class="text-muted">@m.Info.ErrorMessage.TruncateWithEllipsis(100)</td>
@@ -223,7 +223,7 @@ foreach (var s in server.SlaveConnections) {
         @if (standAloneMasters.Any())
         {
             <h5 class="page-header">
-                @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count().Pluralize("Standalone")
+                @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count.Pluralize("Standalone")
                 <span class="small">(All Masters)@CommonVersionHeader()</span>
             </h5>
             <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">

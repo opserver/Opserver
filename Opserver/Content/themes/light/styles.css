@@ -7923,6 +7923,11 @@ h6.page-header {
 .table > tbody > tr.category-row h5 span.pull-right .text-muted.small {
   margin-top: 6px;
 }
+.dashboard img {
+  min-width: 50px;
+  width: 100%;
+  height: 20px;
+}
 .reload-link:focus {
   text-decoration: none;
 }

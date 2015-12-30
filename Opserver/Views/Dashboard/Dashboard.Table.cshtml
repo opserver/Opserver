@@ -14,15 +14,15 @@
 {
     if (DashboardData.HasData)
     {
-        <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type"/>
+        <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-title="@type"/>
     }
     else
     {
-        <div class="spark-no-data text-muted">No Data Available</div>
+        <div class="text-muted">No Data Available</div>
     }
 }
 <div>
-    <div class="js-refresh" data-name="dashboard-overview">
+    <div class="js-refresh dashboard" data-name="dashboard-overview">
         @if (!Model.Nodes.Any())
         {
             var errors = Model.ErrorMessages;
