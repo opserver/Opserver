@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("debug"), AllowAnonymous]
         public ActionResult Debug()
         {
-            var sb = new StringBuilder()
+            var sb = StringBuilderCache.Get()
                 .AppendFormat("Request IP: {0}\n", Current.RequestIP)
                 .AppendFormat("Request User: {0}\n", Current.User.AccountName)
                 .AppendFormat("Request Roles: {0}\n", Current.User.RawRoles)
@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Controllers
             sb.AppendLine()
               .AppendLine("Polling Info:")
               .AppendLine(ps.GetPropertyNamesAndValues());
-            return TextPlain(sb);
+            return TextPlain(sb.ToStringRecycle());
         }
 
 

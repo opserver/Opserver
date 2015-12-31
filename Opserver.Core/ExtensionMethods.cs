@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -401,7 +400,7 @@ namespace StackExchange.Opserver
 
         public static string ToTimeStringMini(this TimeSpan span, int maxElements = 2)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             var elems = 0;
             Action<string, int> add = (s, i) =>
                 {
@@ -419,7 +418,7 @@ namespace StackExchange.Opserver
 
             if (sb.Length == 0) sb.Append("0");
 
-            return sb.ToString().Trim();
+            return sb.ToStringRecycle().Trim();
         }
         
         /// <summary>

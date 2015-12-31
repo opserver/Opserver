@@ -52,7 +52,8 @@
     readonly Dictionary<Item, Proxy> statMapping = new Dictionary<Item, Proxy>();
     public string CombinedStat(string title, IEnumerable<Item> stats, Func<Item, string> getter)
     {
-        var sb = new StringBuilder(title)
+        var sb = StringBuilderCache.Get()
+                .Append(title)
                 .Append(':')
                 .AppendLine();
         foreach (var s in stats)
@@ -63,7 +64,7 @@
               .Append('\n');
         }
         sb.Length -= 1;
-        return sb.ToString();
+        return sb.ToStringRecycle();
     }
 
     public string GetRowClass(StatusType type)

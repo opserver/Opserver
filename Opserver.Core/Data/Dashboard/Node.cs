@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Text;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -69,7 +68,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_searchString == null)
                 {
-                    var result = new StringBuilder();
+                    var result = StringBuilderCache.Get();
                     const string delim = "-";
                     result.Append(MachineType)
                           .Append(delim)
@@ -96,7 +95,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                         result.Append(delim)
                               .Append(string.Join(",", VMs));
 
-                    _searchString = result.ToString().ToLower();
+                    _searchString = result.ToStringRecycle().ToLower();
                 }
                 return _searchString;
             }

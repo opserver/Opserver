@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
@@ -15,7 +14,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             {
                 if (BatchSequence == null) return new List<BaseStmtInfoType>();
                 return BatchSequence.SelectMany(bs =>
-                        bs.SelectMany(b => b.Items != null ? b.Items.SelectMany(bst => bst.Statements) : null)
+                        bs.SelectMany(b => b.Items?.SelectMany(bst => bst.Statements))
                     ).ToList();
             }
         }
@@ -23,9 +22,6 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
     public partial class BaseStmtInfoType
     {
-        //public string Params { get; }
-        //public string ToString() { }
-
         public virtual IEnumerable<BaseStmtInfoType> Statements
         {
             get { yield return this; }
@@ -80,9 +76,9 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
         private string GetDeclareStatement(QueryPlanType queryPlan)
         {
-            if (queryPlan == null || queryPlan.ParameterList == null || !queryPlan.ParameterList.Any()) return "";
+            if (queryPlan?.ParameterList == null || !queryPlan.ParameterList.Any()) return "";
 
-            var result = new StringBuilder();
+            var result = StringBuilderCache.Get();
             var paramTypeList = paramRegex.Match(StatementText);
             if (!paramTypeList.Success) return "";
 
@@ -97,7 +93,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
                           .AppendLine();
                 }
             }
-            return result.Length > 0 ? result.Insert(0, "-- Compiled Params\n").ToString() : "";
+            return result.Length > 0 ? result.Insert(0, "-- Compiled Params\n").ToStringRecycle() : result.ToStringRecycle();
         }
     }
 
@@ -108,11 +104,11 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 yield return this;
-                if (Then != null && Then.Statements != null)
+                if (Then?.Statements != null)
                 {
                     foreach (var s in Then.Statements.Items) yield return s;
                 }
-                if (Else != null && Else.Statements != null)
+                if (Else?.Statements != null)
                 {
                     foreach (var s in Else.Statements.Items) yield return s;
                 }

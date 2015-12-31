@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using StackExchange.Profiling;
 using StackExchange.Redis;
 
@@ -14,11 +13,11 @@ namespace StackExchange.Opserver.Data.Redis
             var endpoints = connection.GetEndPoints(configuredOnly: true);
             if (endpoints.Length == 1) return connection.GetServer(endpoints[0]);
 
-            var sb = new StringBuilder("expected one endpoint, got ").Append(endpoints.Length).Append(": ");
+            var sb = StringBuilderCache.Get().Append("expected one endpoint, got ").Append(endpoints.Length).Append(": ");
             foreach (var ep in endpoints)
                 sb.Append(ep).Append(", ");
             sb.Length -= 2;
-            throw new InvalidOperationException(sb.ToString());
+            throw new InvalidOperationException(sb.ToStringRecycle());
         }
     }
     public partial class RedisInstance

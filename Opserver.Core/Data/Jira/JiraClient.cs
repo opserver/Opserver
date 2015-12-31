@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -163,7 +164,7 @@ namespace StackExchange.Opserver.Data.Jira
             Func<string, bool> isHidden = k => DefaultHttpKeys.Contains(k);
             var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             sb.AppendLine("h3." + title);
             sb.AppendLine("{noformat}");
             foreach (var k in allKeys.Where(k => !isHidden(k)))
@@ -179,33 +180,33 @@ namespace StackExchange.Opserver.Data.Jira
             }
 
             sb.AppendLine("{noformat}");
-            return sb.ToString();
+            return sb.ToStringRecycle();
         }
 
         private string RenderDescription(Error error, string accountName)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             sb.AppendLine("{noformat}");
             if (accountName.HasValue())
             {
                 sb.AppendFormat("Reporter Account Name: {0}\r\n", accountName);
             }
-            sb.AppendFormat("Error Guid: {0}\r\n", error.GUID);
+            sb.AppendFormat("Error Guid: {0}\r\n", error.GUID.ToString());
             sb.AppendFormat("App. Name: {0}\r\n", error.ApplicationName);
             sb.AppendFormat("Machine Name: {0}\r\n", error.MachineName);
             sb.AppendFormat("Host: {0}\r\n", error.Host);
-            sb.AppendFormat("Created On (UTC): {0}\r\n", error.CreationDate);
+            sb.AppendFormat("Created On (UTC): {0}\r\n", error.CreationDate.ToString(CultureInfo.CurrentCulture));
             sb.AppendFormat("Url: {0}\r\n", error.Url);
             sb.AppendFormat("HTTP Method: {0}\r\n", error.HTTPMethod);
             sb.AppendFormat("IP Address: {0}\r\n", error.IPAddress);
-            sb.AppendFormat("Count: {0}\r\n", error.DuplicateCount);
+            sb.AppendFormat("Count: {0}\r\n", error.DuplicateCount.ToString());
 
             sb.AppendLine("{noformat}");
             sb.AppendLine("{noformat}");
             sb.AppendLine(error.Detail);
             sb.AppendLine("{noformat}");
 
-            return sb.ToString();
+            return sb.ToStringRecycle();
         }
 
         public class JiraCreateIssueResponse

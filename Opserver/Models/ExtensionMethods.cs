@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Web;
 using System.Web.Mvc;
 using System.Xml;
@@ -26,7 +25,7 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString ToQueryString(this SQLInstance.TopSearchOptions options, bool leadingAmp = false)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
 
             // TODO: Refactor all of this to proper classes
             // For example, this is called in a loop and running the same code n times for no reason
@@ -40,7 +39,7 @@ namespace StackExchange.Opserver.Models
             if (sb.Length <= 0) return MvcHtmlString.Empty;
 
             if (leadingAmp) sb.Insert(0, "&");
-            return sb.ToString(0, sb.Length - 1).AsHtml();
+            return sb.ToStringRecycle(0, sb.Length - 1).AsHtml();
         }
     }
 
@@ -119,7 +118,7 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString NetworkTextSummary(this Node info)
         {
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
             sb.AppendFormat("Interfaces ({0} total):", info.Interfaces.Count.ToString()).AppendLine();
             foreach (var i in info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps))
@@ -128,35 +127,35 @@ namespace StackExchange.Opserver.Models
                     (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
                     i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
             }
-            return sb.ToString().AsHtml();
+            return sb.ToStringRecycle().AsHtml();
         }
 
         public static IHtmlString ApplicationCPUTextSummary(this Node info)
         {
             if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool CPU: {0} %\n", info.Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)).ToString(CultureInfo.CurrentCulture));
             sb.AppendLine("App Pools:");
             foreach (var a in info.Apps.OrderBy(a => a.NiceName))
             {
                 sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
             }   
-            return sb.ToString().AsHtml();
+            return sb.ToStringRecycle().AsHtml();
         }
 
         public static IHtmlString ApplicationMemoryTextSummary(this Node info)
         {
             if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
 
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool Memory: {0}\n", info.Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
             sb.AppendLine("App Pools:");
             foreach (var a in info.Apps.OrderBy(a => a.NiceName))
             {
                 sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
             }
-            return sb.ToString().AsHtml();
+            return sb.ToStringRecycle().AsHtml();
         }
     }
 

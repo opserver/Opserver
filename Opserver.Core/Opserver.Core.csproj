@@ -380,6 +380,7 @@
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
+    <Compile Include="StringBuilderCache.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>
   <ItemGroup>

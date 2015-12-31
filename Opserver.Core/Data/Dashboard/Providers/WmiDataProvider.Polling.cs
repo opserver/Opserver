@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Monitoring;
 
@@ -236,12 +235,14 @@ SELECT AvailableKBytes
             private static string GetCounterName(string original)
             {
                 return CounterLookup.GetOrAdd(original,
-                    k => new StringBuilder(k)
+                    k => StringBuilderCache.Get()
+                        .Append(k)
                         .Replace("\\", "_")
                         .Replace("/", "_")
                         .Replace("(", "[")
                         .Replace(")", "]")
-                        .Replace("#", "_").ToString());
+                        .Replace("#", "_")
+                        .ToStringRecycle());
             }
 
             private async Task PollNetworkUtilizationAsync()

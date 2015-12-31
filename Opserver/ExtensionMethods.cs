@@ -271,14 +271,14 @@ namespace StackExchange.Opserver
         public static string ToReadableString(this TimeSpan span)
         {
             var dur = span.Duration();
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             if (dur.Days > 0) sb.AppendFormat("{0:0} day{1}, ", span.Days, span.Days == 1 ? "" : "s");
             if (dur.Hours > 0) sb.AppendFormat("{0:0} hour{1}, ", span.Hours, span.Hours == 1 ? "" : "s");
             if (dur.Minutes > 0) sb.AppendFormat("{0:0} minute{1}, ", span.Minutes, span.Minutes == 1 ? "" : "s");
             if (dur.Seconds > 0) sb.AppendFormat("{0:0} second{1}, ", span.Seconds, span.Seconds == 1 ? "" : "s");
 
             if (sb.Length >= 2) sb.Length -= 2;
-            return sb.ToString().IsNullOrEmptyReturn("0 seconds");
+            return sb.ToStringRecycle().IsNullOrEmptyReturn("0 seconds");
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace StackExchange.Opserver
         {
             if (seconds == 0) return MvcHtmlString.Empty;
             var ts = new TimeSpan(0, 0, seconds);
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             if (ts.Days > 0)
                 sb.Append("<b>").Append(ts.Days.ToString()).Append("</b>d ");
             if (ts.Hours > 0)
@@ -454,7 +454,7 @@ namespace StackExchange.Opserver
                 sb.Append("<b>").Append(ts.Minutes.ToString()).Append("</b>min ");
             if (ts.Seconds > 0 && ts.Days == 0)
                 sb.Append("<b>").Append(ts.Seconds.ToString()).Append("</b>sec ");
-            return sb.ToString().AsHtml();
+            return sb.ToStringRecycle().AsHtml();
         }
 
         public static IHtmlString ToYesNo(this int number)
