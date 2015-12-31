@@ -7853,6 +7853,7 @@ li.L9 {
 }
 .nav-tabs {
   font-size: 12px;
+  margin-bottom: 9.5px;
 }
 .navbar-toggle {
   padding: 6px 10px;
@@ -7934,19 +7935,22 @@ h6.page-header {
 .table > tbody > tr.category-row h5 span.pull-right .text-muted.small {
   margin-top: 6px;
 }
-.dashboard img {
+.table-dashboard img {
   min-width: 50px;
   width: 100%;
   height: 20px;
 }
 .dashboard-chart {
   height: 400px;
-  display: flex;
+  position: relative;
 }
 .dashboard-chart .loader {
-  margin: auto auto;
-  width: 400px;
+  position: absolute;
+  width: 100px;
   height: 80px;
+  top: 50%;
+  left: 50%;
+  margin: -40px 0 0 -50px;
 }
 .dashboard-chart .loader.sk-wave > div {
   width: 10px;

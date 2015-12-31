@@ -46,7 +46,8 @@ namespace StackExchange.Opserver.Data.Dashboard
                 {"Microsoft Network Adapter Multiplexor Driver", "Microsoft Team"},
                 {"Quad Port Server Adapter", "Quad Port SA"},
                 {"Microsoft Load Balancing/Failover Provider", "Microsoft LB/FP"},
-                {"Microsoft Load Balancing", "Microsoft LB"}
+                {"Microsoft Load Balancing", "Microsoft LB"},
+                {"Intel(R) Ethernet", "Intel" }
             };
 
         private string _prettyName;

@@ -22,7 +22,7 @@
     }
 }
 <div>
-    <div class="js-refresh dashboard" data-name="dashboard-overview">
+    <div class="js-refresh" data-name="dashboard-overview">
         @if (!Model.Nodes.Any())
         {
             var errors = Model.ErrorMessages;
@@ -39,7 +39,7 @@
         }
         else
         {
-            <table class="table table-striped table-responsive table-middle table-super-condensed text-nowrap js-nodes">
+            <table class="table table-striped table-responsive table-middle table-super-condensed table-dashboard text-nowrap js-nodes">
                 @foreach (var g in categories)
                 {
                     var c = g.Key;

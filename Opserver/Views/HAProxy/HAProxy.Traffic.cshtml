@@ -11,11 +11,6 @@
         function htmlEncode(s) {
             return document.createElement('div').appendChild(document.createTextNode(s)).parentNode.innerHTML;
         }
-            
-        function getHost(s) {
-            s = s || '';
-            return s.indexOf('api.') == 0 ? s.substr(4) : s;
-        }
 
         $("#host").click(function () {
             $(this).select();  
@@ -24,12 +19,12 @@
             matchContains: true,
             delay: 100,
             formatItem: function (row) {
-                    return '<img src="//' + getHost(row.host) + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
+                    return '<img src="//' + row.host + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
             },
             formatResult: function (row) { return htmlEncode(row.host); },
             formatMatch: function (row) { return row.host; }
         }).result(function (e, data) {
-            $(this).css("background", 'url("//' + getHost(data.host) + '/favicon.ico") no-repeat')
+            $(this).css("background", 'url("//' + data.host + '/favicon.ico") no-repeat')
                     .closest("form").submit();
         }).keydown(function(e) {
             return e.keyCode != 13;
@@ -58,9 +53,8 @@
     }
     <div class="history-graph-wrap"><div id="hits-container" class="history-graph" style="height: 420px;"></div></div>
     <script>
-        Status.Graphs.init({ start: @start, end: @end });
         $(function() {
-            $('#hits-container').haproxyGraph({ title: 'HAProxy Traffic', subtitle: '@subtitle', params: { host: '@Model.Host' } });
+            $('#hits-container').haproxyGraph({ title: 'HAProxy Traffic', subtitle: '@subtitle', params: { host: '@Model.Host', start: @start.ToString(), end: @end.ToString() } });
             $(document).on('click', '.route-row', function () {
                 if ($('#route-graph').length) return;
                 var route = $(this).data('route'),
@@ -124,7 +118,7 @@
     @helper RouteTimePart(string label, decimal? ms)
     {
         if (ms.GetValueOrDefault() == 0) {return;}
-        <span class="time">@label <span class="value">@string.Format("{0:n1}", ms)</span> ms</span>}
+        <span class="time">@label <span class="value">@(ms?.ToString("n1"))</span> ms</span>}
     <table>
         <thead>
             <tr>

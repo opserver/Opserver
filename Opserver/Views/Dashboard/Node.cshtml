@@ -7,14 +7,13 @@
     
     this.SetPageTitle((s != null ? s.PrettyName + " " : "") + "Status");
     this.SetTopNodes(DashboardData.AllNodes, "Dashboard", Model.CurrentNode);
-    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
 }
 @section head {
-    <script> 
-        Status.Dashboard.init({ refresh: false });
-        Status.Graphs.init({ start: @start.ToString(), end: @end.ToString() });
-        $(function() { Status.Dashboard.Server.init({ nodeName: '@(s?.PrettyName)' }); });
+    <script>
+        $(function () {
+            Status.Dashboard.init({ refresh: false });
+            Status.Dashboard.Server.init({ nodeName: '@(s?.PrettyName)' });
+        });
     </script>
 }
 @if (s == null)
@@ -154,7 +153,7 @@ if (Model.StatusTypes.Count() > 1)
          }
      </ul>
  }
-    <div>
+<div data-node="@Model.CurrentNode.PrettyName">
     @if (Model.CurrentStatusType != CurrentStatusTypes.None)
     {
         @Html.Partial("Node.Current." + Model.CurrentStatusType, s)

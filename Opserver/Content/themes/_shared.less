@@ -63,6 +63,7 @@
 }
 .nav-tabs {
   font-size: 12px;
+  margin-bottom: 9.5px;
 }
 .navbar-toggle {
   padding: 6px 10px;
@@ -153,7 +154,7 @@ h4, h5, h6 {
   }
 }
 
-.dashboard {
+.table-dashboard {
   img {
     min-width: 50px;
     width: 100%;
@@ -162,11 +163,14 @@ h4, h5, h6 {
 }
 .dashboard-chart {
   height: 400px;
-  display: flex;
+  position: relative;
   .loader {
-    margin: auto auto;
-    width: 400px;
+    position: absolute;
+    width: 100px;
     height: 80px;
+    top: 50%;
+    left: 50%;
+    margin: -40px 0 0 -50px;
     &.sk-wave>div {
         width: 10px;
         margin-right: 5px;

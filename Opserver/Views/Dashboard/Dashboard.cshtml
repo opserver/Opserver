@@ -4,14 +4,11 @@
 @{
     this.SetPageTitle("Dashboard");
     this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: "/dashboard/node");
-    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
 }
 @section head {
     <script>
     $(function() {
         Status.Dashboard.init({ refresh: 60, filter: '@(Model.Filter)' });
-        Status.Graphs.init({ start: @start, end: @end });
     });
     </script>}
 <div>

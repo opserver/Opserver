@@ -335,6 +335,7 @@
         summaryPopup: summaryPopup,
         resizePopup: resizePopup,
         ajaxLoaders: ajaxLoaders,
+        graphCount: 0,
         refresh: {
             register: registerRefresh,
             pause: pauseRefresh,
@@ -403,11 +404,12 @@ Status.Dashboard = (function () {
             }, Status.Dashboard.options.refresh * 1000);
         }
 
-        $('.js-content').on('click', '.js-nodes .js-dashboard-spark', function() {
+        $('.js-content').on('click', '.js-dashboard-spark', function() {
             var $this = $(this),
                 id = $this.data('id'),
+                iid = $this.data('iid'),
                 node = $this.closest('[data-node]').data('node'),
-                subtitle = $this.parent().data('subtitle') || node;
+                subtitle = $this.closest('[data-subtitle]').data('subtitle') || node;
 
             function popup(title) {
                 bootbox.dialog({
@@ -435,6 +437,15 @@ Status.Dashboard = (function () {
                         width: 858,
                         animate: true,
                         max: $this.closest('[data-max]').data('max')
+                    });
+                    return;
+                case 'network':
+                    popup(node + ': Network Utilization (' + subtitle + ')');
+                    $('#dashboard-popup').appendWaveLoader().networkGraph({
+                        id: id,
+                        iid: iid,
+                        width: 858,
+                        animate: true
                     });
                     return;
                 default:
@@ -492,24 +503,15 @@ Status.Dashboard.Server = (function () {
             liveDashboard(start);
             return false;
         });
-        setupInterfaces();
-    }
-    
-    function setupInterfaces() {
-        var titleRow = $('table.interface-dashboard > thead tr.category-row').remove();
-        
-        $('table.interface-dashboard').tablesorter({
+        $('table.js-interfaces').tablesorter({
             headers: {
-                0: { sorter: false },
-                1: { sorter: 'dataVal' },
+                1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                 2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                 3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                 4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                6: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                5: { sorter: 'dataVal', sortInitialOrder: 'desc' }
             }
         });
-        titleRow.prependTo($('table.interface-dashboard > thead '));
     }
     
     function liveDashboard(startValue) {
@@ -1240,27 +1242,6 @@ Status.Exceptions = (function () {
     };
 })();
 
-Status.Graphs = (function () {
-    function init(options) {
-        Status.Graphs.options = options;
-
-        $(function () {
-            $('.sub-tabs').on('click', 'a', function (e) {
-                var range = $(this).data('range');
-                if (e.ctrlKey || e.shiftKey || range === 'now' || !range) { return true; }
-                $(this).addClass('selected').siblings().removeClass('selected');
-                Status.Graphs.selectRange(range);
-                return false;
-            });
-        });
-    }
-
-    return {
-        init: init,
-        count: 0
-    };
-})();
-
 Status.HAProxy = (function () {
 
     function init(options) {
@@ -1351,9 +1332,6 @@ Status.HAProxy = (function () {
                 min = 0;
                 max = d3.max(array, function (p) {
                     return d3.sum(series, function (s) { return p[s.name]; });
-                    //var pointMax = 0;
-                    //series.forEach(function (s) { pointMax += p[s.name] || 0; });
-                    //return pointMax;
                 });
             } else {
                 series.forEach(function (s) {
@@ -1394,6 +1372,12 @@ Status.HAProxy = (function () {
         prependWaveLoader: function () {
             return this.prepend(waveHtml);
         },
+        appendError: function(title, message) {
+            return this.append('<div class="alert alert-warning"><h5>' + title + '</h5><p>' + message + '</p></div>');
+        },
+        prependError: function (title, message) {
+            return this.prepend('<div class="alert alert-warning"><h5>' + title + '</h5><p>' + message + '</p></div>');
+        },
         inlinePopup: function (className, msg, callback, removeTimeout, clickDismiss) {
             $('.' + className).remove();
             var jDiv = $('<div class="' + className + '">' + msg + '</div>').appendTo(this);
@@ -1424,50 +1408,41 @@ Status.HAProxy = (function () {
             return this.errorPopup(msg);
         },
         cpuGraph: function (options) {
-            return this.addClass('chart').d3graph(
-                $.extend(true, {}, {
+            return this.d3graph({
                     type: 'cpu',
                     series: [{ name: 'value', label: 'CPU' }],
                     yAxis: {
                         tickLines: true,
                         tickFormat: function (d) { return d + '%'; }
                     },
-                    showBuilds: true,
-                    width: 'auto',
-                    height: 'auto',
                     max: 100,
                     leftMargin: 40,
                     areaTooltipFormat: function (value) { return '<label>CPU: </label><b>' + value.toFixed(2) + '%</b>'; }
-                }, options));
+                }, options);
         },
         memoryGraph: function (options) {
-            return this.addClass('chart').d3graph(
-                $.extend(true, {}, {
+            return this.d3graph({
                     type: 'memory',
                     series: [{ name: 'value', label: 'Memory' }],
                     yAxis: {
                         tickLines: true,
                         tickFormat: function (d) { return Status.helpers.bytesToSize(d * 1024 * 1024, true, 'GB'); }
                     },
-                    showBuilds: true,
-                    width: 'auto',
-                    height: 'auto',
                     leftMargin: 60,
                     max: this.data('max'),
                     areaTooltipFormat: function (value) { return '<label>Memory: </label><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
-                }, options));
+                }, options);
         },
         networkGraph: function (options) {
-            return this.addClass('chart').d3graph({
+            return this.d3graph({
                 type: 'network',
                 series: [
                     { name: 'main_in', label: 'In' },
                     { name: 'main_out', label: 'Out', direction: 'down' }
                 ],
-                width: 'auto',
                 min: 'auto',
                 leftMargin: 60,
-                areaTooltipFormat: function (value, series, name) { return '<span class="label">Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>'; },
+                areaTooltipFormat: function (value, series, name) { return '<label>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </label><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>'; },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
                 }
@@ -1475,21 +1450,19 @@ Status.HAProxy = (function () {
         },   
         haproxyGraph: function (options) {
             var comma = d3.format(',');
-            return this.addClass('chart').d3graph({
+            return this.d3graph({
                 type: 'haproxy',
                 subtype: 'traffic',
-                noAjaxZoom: true,
+                ajaxZoom: false,
                 series: [
                     { name: 'main_hits', label: 'Total' },
                     { name: 'main_pages', label: 'Pages' }
                 ],
-                width: 'auto',
-                height: 380,
                 min: 'auto',
                 leftMargin: 80,
-                areaTooltipFormat: function (value, series, name) { return '<span class="label">Hits (<span class="series-' + name + '">' + series + '</span>): </span><b>' + comma(value) + '</b>'; },
+                areaTooltipFormat: function (value, series, name) { return '<label>Hits (<span class="series-' + name + '">' + series + '</span>): </label><b>' + comma(value) + '</b>'; },
                 yAxis: {
-                    tickFormat: comma // function (d) { return comma(d); }
+                    tickFormat: comma
                 }
             }, options);
         },
@@ -1497,7 +1470,7 @@ Status.HAProxy = (function () {
             return this.d3graph({
                 type: 'haproxy',
                 subtype: 'route-performance',
-                noAjaxZoom: true,
+                ajaxZoom: false,
                 stacked: true,
                 subtitle: route,
                 interpolation: 'linear',
@@ -1516,16 +1489,15 @@ Status.HAProxy = (function () {
                     { name: 'hits', label: 'Hits', color: 'rgb(116, 196, 118)', width: 2 }
                 ],
                 rightMargin: 70,
-                width: 1000,
                 min: 'auto',
                 leftMargin: 60,
                 rightAreaTooltipFormat: function (value, series, name, color) {
-                    return '<span class="label">' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
-                        + '<span class="series-' + name + '">' + series + '</span>: </span><b>' + Status.helpers.commify(value) + '</b>';
+                    return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
+                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + '</b>';
                 },
                 areaTooltipFormat: function (value, series, name, color) {
-                    return '<span class="label">' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
-                        + '<span class="series-' + name + '">' + series + '</span>: </span><b>' + Status.helpers.commify(value) + ' <span class="note">ms</span></b>';
+                    return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
+                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + ' <span class="note">ms</span></b>';
                 },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.commify(d) + ' ms'; }
@@ -1536,8 +1508,7 @@ Status.HAProxy = (function () {
         d3graph: function (options, addOptions) {
             var defaults = {
                 series: [{ name: 'value', label: 'Main' }],
-                showBuilds: false,
-                noAjaxZoom: false,
+                ajaxZoom: true,
                 stacked: false,
                 autoColors: false,
                 dateRanges: true,
@@ -1546,24 +1517,24 @@ Status.HAProxy = (function () {
                 id: this.data('id'),
                 title: this.data('title'),
                 subtitle: this.data('subtitle'),
-                start: this.data('start') || Status.Graphs.options && Status.Graphs.options.start,
-                end: this.data('end') || Status.Graphs.options && Status.Graphs.options.end,
-                width: 660,
-                height: 300,
+                start: this.data('start'),
+                end: this.data('end'),
+                width: 'auto',
+                height: 'auto',
                 max: 'auto',
                 min: 0
             };
-            if (Status.Graphs && Status.Graphs.options) {
-                options = $.extend({}, Status.Graphs.options, options, addOptions);
-            }
-            options = $.extend({}, defaults, options);
+            options = $.extend(true, {}, defaults, options, addOptions);
+
+            this.addClass('chart');
 
             var minDate, maxDate,
                 topBrushArea, bottomBrushArea,
                 dataLoaded,
                 curWidth, curHeight, curData,
                 chart = this,
-                endDate = options.end ? new Date(options.end) : new Date(),
+                //startDate = options.start ? new Date(options.start) : (function (d) { d.setDate(d.getDate() - 1); return d })(new Date), // default to 24hr ago: 
+                //endDate = options.end ? new Date(options.end) : new Date(), // default to now
                 buildTooltip = $('<div class="build-tooltip chart-tooltip" />').appendTo(chart),
                 areaTooltip = $('<div class="area-tooltip chart-tooltip" />').appendTo(chart),
                 series = options.series,
@@ -1574,8 +1545,8 @@ Status.HAProxy = (function () {
                 x, x2, y, yr, y2,
                 xAxis, xAxis2, yAxis, yrAxis,
                 brush, brush2,
-                clipId = 'clip' + Status.Graphs.count++,
-                gradientId = 'gradient-' + Status.Graphs.count,
+                clipId = 'clip' + Status.graphCount++,
+                gradientId = 'gradient-' + Status.graphCount,
                 svg, focus, context, clip,
                 currentArea,
                 refreshTimer,
@@ -1585,8 +1556,8 @@ Status.HAProxy = (function () {
             
             if (options.id) params.id = options.id;
             if (options.iid) params.iid = options.iid;
-            if (options.start) params.start = options.start / 1000;
-            if (options.end) params.end = options.end / 1000;
+            if (options.start) params.start = (new Date(options.start).getTime() / 1000).toFixed(0);
+            if (options.end) params.end = (new Date(options.end).getTime() / 1000).toFixed(0);
             $.extend(params, options.params);
             
             options.width = options.width === 'auto' ? (chart.width() - 10) : options.width;
@@ -1678,7 +1649,7 @@ Status.HAProxy = (function () {
             }
             
             function drawPrimaryGraphs(data) {
-                x.domain(options.noAjaxZoom ? [Status.Graphs.options.start || minDate, Status.Graphs.options.end || maxDate] : d3.extent(data.points.map(function (d) { return d.date; })));
+                x.domain(options.ajaxZoom ? d3.extent(data.points.map(function (d) { return d.date; })) : [minDate, maxDate]);
                 x2.domain(d3.extent(data.summary.map(function (d) { return d.date; })));
                 y2.domain(getExtremes(data.summary, series, options.min, options.max));
 
@@ -1838,7 +1809,7 @@ Status.HAProxy = (function () {
             }
 
             function drawBuilds(data) {
-                if (!options.showBuilds || !data.builds) return;
+                if (!data.builds) return;
                 
                 focus.append('svg:g')
                     .attr('class', 'build-dots')
@@ -1932,7 +1903,7 @@ Status.HAProxy = (function () {
                     date = x.invert(pos[0]),
                     bisector = d3.bisector(function(d) { return d.date; }).left,
                     tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="note">UTC</span></div>',
-                    data = options.noAjaxZoom ? curData.summary : curData.points,
+                    data = options.ajaxZoom ? curData.points : curData.summary,
                     index = bisector(data, date, 1), // bisect the curData array to get the index of the hovered date
                     dateBefore = data[Math.max(index - 1, 0)], // get the date before the hover
                     dateAfter = data[Math.min(index, data.length - 1)], // and the date after
@@ -1979,7 +1950,6 @@ Status.HAProxy = (function () {
 
                 areaTooltip.html(tooltip)
                     .css({ left: pos[0] + 80, top: pos[1] + 60 });
-                    //.css({ left: pos[0] - (areaTooltip.width() / 2), top: pos[1] - areaTooltip.height() - 20 });
 
                 currentArea.attr('transform', 'translate(' + (pos[0]) + ', 0)');
             }
@@ -2005,24 +1975,26 @@ Status.HAProxy = (function () {
 
             // lay it all out soon as possible
             drawElements();
-            
-            $.getJSON(urlPath, params, function (data) {
+
+            $.getJSON(urlPath, params).done(function(data) {
                 postProcess(data);
                 prepSeries();
                 drawPrimaryGraphs(data);
                 drawBuilds(data);
                 dataLoaded = true;
                 chart.find('.loader').hide();
-                
+
                 // set the initial summary brush to reflect what was loaded up top
                 brush2.extent(x.domain())(bottomBrushArea);
 
                 if (options.showBuilds && !data.builds) {
-                    $.getJSON('/graph/builds/json', params, function (bData) {
+                    $.getJSON('/graph/builds/json', params, function(bData) {
                         postProcess(bData);
                         drawBuilds(bData);
                     });
                 }
+            }).fail(function () {
+                chart.prependError('Error', 'Could not load graph');
             });
 
             function postProcess(data) {
@@ -2035,7 +2007,7 @@ Status.HAProxy = (function () {
                     }
                 }
 
-                if (options.noAjaxZoom && !data.points)
+                if (!options.ajaxZoom && !data.points)
                     data.points = data.summary;
 
                 if (!curData) curData = {};
@@ -2067,7 +2039,7 @@ Status.HAProxy = (function () {
                     end = Math.round(newBounds[1] / 1000);
 
                 // load low-res summary view quickly
-                if (!options.noAjaxZoom) {
+                if (options.ajaxZoom) {
                     if (options.stacked) {
                         focus.selectAll('.area')
                             .datum(curData.summary);
@@ -2088,13 +2060,7 @@ Status.HAProxy = (function () {
                 x.domain(newBounds);
                 clearBuilds();
 
-                if (options.noAjaxZoom) {
-                    curData.points = curData.summary.filter(function (p) {
-                        var t = p.date.getTime();
-                        return start <= t && t <= end;
-                    });
-                    rescaleYAxis(curData, true);
-                } else {
+                if (options.ajaxZoom) {
                     //refresh with high-res goodness
                     clearTimeout(refreshTimer);
                     refreshTimer = setTimeout(function () {
@@ -2110,11 +2076,19 @@ Status.HAProxy = (function () {
                             drawBuilds(newData);
                         });
                     }, timerDelay || 50);
+                } else {
+                    curData.points = curData.summary.filter(function (p) {
+                        var t = p.date.getTime();
+                        return start <= t && t <= end;
+                    });
+                    rescaleYAxis(curData, true);
                 }
 
                 // redraw
                 if (options.stacked) {
-                    focus.selectAll('.area').attr('d', function (d) { return stackArea(d.values); });
+                    focus.selectAll('.area').attr('d', function(d) {
+                        return stackArea(d.values);
+                    });
                 } else {
                     series.forEach(function (s) {
                         focus.select('path.area.series-' + s.name)
@@ -2131,21 +2105,15 @@ Status.HAProxy = (function () {
             
             return this
                 .removeClass('cpu-chart memory-chart network-chart')
-                .addClass(options.type + (options.subtype ? '-' + options.subtype : '') + '-chart')
-                .on('click', 'button', function () {
-                    var start = $(this).data('start'),
-                        end = endDate.getTime();
-                    brush2.extent([new Date(Math.max(start.getTime(), minDate)), new Date(Math.min(end, maxDate))])(bottomBrushArea); //set the range and redraw
-                    redrawMain(brush2.extent());
-                });
+                .addClass(options.type + (options.subtype ? '-' + options.subtype : '') + '-chart');
         },
-        lived3graph: function(options, addOptions) {
+        lived3graph: function(options) {
             var defaults = {
                 series: [{ name: 'value', label: 'Main' }],
                 leftMargin: 40,
                 id: this.data('id'),
-                start: this.data('start') || Status.Graphs.options.start,
-                end: this.data('end') || Status.Graphs.options.end,
+                start: this.data('start'),
+                end: this.data('end'),
                 title: this.data('title'),
                 subtitle: this.data('subtitle'),
                 slideDurationMs: 1000,
@@ -2155,9 +2123,6 @@ Status.HAProxy = (function () {
                 max: 'auto',
                 min: 0
             };
-            if (Status.Graphs && Status.Graphs.options) {
-                options = $.extend({}, Status.Graphs.options, options, addOptions);
-            }
             options = $.extend({}, defaults, options);
 
             var curWidth, curHeight,
@@ -2175,7 +2140,7 @@ Status.HAProxy = (function () {
                 margin, width, height,
                 x, y, xAxis, yAxis,
                 svg, focus, clip,
-                clipId = 'clip' + Status.Graphs.count++,
+                clipId = 'clip' + Status.graphCount++,
                 currentArea,
                 urlPath = '/dashboard/node/poll/' + options.type + (options.subtype ? '/' + options.subtype : ''),
                 params = $.extend({}, { id: options.id, start: options.start / 1000, end: options.end / 1000 }, options.params);

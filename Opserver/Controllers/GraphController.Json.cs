@@ -11,13 +11,16 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
     {
+        public DateTime DefaultStart => DateTime.UtcNow.AddDays(-1);
+        public DateTime DefaultEnd => DateTime.UtcNow;
+
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/cpu/json")]
-        public async Task<ActionResult> CPUJson(string id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> CPUJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var nodePoints = await node.GetCPUUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
+            var nodePoints = await node.GetCPUUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (nodePoints == null) return JsonNotFound();
 
             return Json(new
@@ -31,23 +34,23 @@ namespace StackExchange.Opserver.Controllers
                     {
                         date = p.DateEpoch, 
                         value = p.Value ?? 0
-                    }) : null,
-                builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                                                                {
-                                                                    date = b.StartDate.ToEpochTime(true),
-                                                                    text = GetFlagTooltip(b),
-                                                                    link = b.WebUrl
-                                                                })
+                    }) : null
+                //builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
+                //                                                {
+                //                                                    date = b.StartDate.ToEpochTime(true),
+                //                                                    text = GetFlagTooltip(b),
+                //                                                    link = b.WebUrl
+                //                                                })
             });
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/memory/json")]
-        public async Task<ActionResult> MemoryJson(string id, long start, long end, bool? summary = false)
+        public async Task<ActionResult> MemoryJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var detailPoints = await node.GetMemoryUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
+            var detailPoints = await node.GetMemoryUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (detailPoints == null) return JsonNotFound();
 
             return Json(new
@@ -61,23 +64,23 @@ namespace StackExchange.Opserver.Controllers
                     {
                         date = p.DateEpoch,
                         value = (int)(p.Value / 1024 / 1024 ?? 0)
-                    }) : null,
-                builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                {
-                    date = b.StartDate.ToEpochTime(true),
-                    text = GetFlagTooltip(b),
-                    link = b.WebUrl
-                })
+                    }) : null
+                //builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
+                //{
+                //    date = b.StartDate.ToEpochTime(true),
+                //    text = GetFlagTooltip(b),
+                //    link = b.WebUrl
+                //})
             });
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;iid;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/network/json")]
-        public async Task<ActionResult> NetworkJson(string id, string iid, long start, long end, bool? summary = false)
+        public async Task<ActionResult> NetworkJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
         {
             var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return JsonNotFound();
-            var traffic = await iface.GetUtilization(start.ToDateTime(), end.ToDateTime(), 1000);
+            var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (traffic == null) return JsonNotFound();
 
             var anyTraffic = traffic.Any();
