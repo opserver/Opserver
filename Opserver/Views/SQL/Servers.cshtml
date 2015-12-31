@@ -98,7 +98,7 @@
                     <th>Node</th>
                     <th>CPU</th>
                     <th class="text-muted">(Last Hour)</th>
-                    <th title="Memory">Mem</th>
+                    <th>Memory</th>
                     <th>Databases</th>
                     <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
                     <th>Batches<span class="text-muted">/sec</span></th>
@@ -127,8 +127,6 @@
         </table>
     }
 
-    <div class="node-dashboard-separator"></div>
-
     <div>
         <div class="ag-container refresh-group" data-name="ag-summary">
             @foreach (var c in Model.Clusters)
@@ -143,8 +141,10 @@
 
     @if (Model.CurrentCluster != null)
     {
-        <div class="summary-popup">
-            @Html.Partial("Servers.ClusterDetail", Model)
+        <div class="hidden">
+            <div class="js-refresh" data-name="sql-@Model.CurrentCluster.Name">
+                @Html.Partial("Servers.ClusterDetail", Model)
+            </div>
         </div>
     }
 </div>

@@ -32,12 +32,12 @@
     <script>
         Status.Dashboard.init({ refresh: 5 });
         $(function() {
-            $.extend(Status.ajaxLoaders, {
+            Status.loaders.register({
                 '#/pagerduty/incident/': function (val) {
-                    Status.ajaxModal('Incident', '/pagerduty/incident/' + val);
+                    Status.popup('/pagerduty/incident/' + val);
                 },
                 '#/pagerduty/escalation/': function(val) {
-                    Status.ajaxModal('Schedule', '/pagerduty/escalation/' + val);
+                    Status.popup('/pagerduty/escalation/' + val);
                 }
             });
             $(".js-incident-action").on('click', function(e) {

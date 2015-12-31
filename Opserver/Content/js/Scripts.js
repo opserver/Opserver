@@ -1,6 +1,6 @@
 ﻿window.Status = (function() {
 
-    var ajaxLoaders = {},
+    var loadersList = {},
         registeredRefreshes = {};
 
     function registerRefresh(name, callback, interval, paused) {
@@ -90,34 +90,46 @@
         }
     }
 
-    function ajaxModal(loadingName, url, data) {
-        var modal = $('.js-summary-popup');
-        modal.unbind('show.bs.modal shown.bs.modal hide.bs.modal hidden.bs.modal loaded.bs.modal');
-        //modal.draggable({ handle: '.modal-header' });
-        var title = modal.find('.modal-title').text('Loading ' + loadingName + '...');
-        var body = modal.find('.modal-body').empty();
+    var currentDialog = null;
 
-        $.get(url, data, function (result) {
-            body.html(result);
-            var ajaxTitle = body.find('[data-title]').data('title');
-            if (ajaxTitle) {
-                title.text(ajaxTitle);
-            }
-            modal.modal('show');
-            modal.bind('hidden.bs.modal', function() {
-                history.pushState('', document.title, window.location.pathname + window.location.search);
-            });
-        });
-        return modal;
+    function closePopup() {
+        if (currentDialog) {
+            var dialog = currentDialog;
+            currentDialog = null;
+            dialog.modal('hide');
+        }
     }
 
-    function summaryPopup(url, options, noClose, onClose) {
-        //var wrap = getPopup(noClose);
+    function popup(url, options, noClose, onClose) {
+        closePopup();
 
-        //wrap.load(url, options, function() {
-        //    // TODO: refresh intervals via header
-        //    showSummaryPopup(onClose, 50);
-        //});
+        var dialog = currentDialog = bootbox.dialog({
+            message: '<div id="dashboard-popup" class="js-summary-popup"></div>',
+            title: 'Loading...',
+            size: 'large',
+            backdrop: true,
+            onEscape: function () { }
+        });
+        dialog.on('hide.bs.modal', function () {
+            var l = window.location;
+            if ('pushState' in history) {
+                history.pushState('', document.title, l.pathname + l.search);
+                hashChangeHandler();
+            } else {
+                l.hash = '';
+            }
+        });
+
+        // TODO: refresh intervals via header
+        $('.js-summary-popup')
+            .appendWaveLoader()
+            .load(url, options, function() {
+                var titleElem = $(this).find('[data-title]');
+                if (titleElem) {
+                    $(this).closest('.modal-content').find('.modal-title').text(titleElem.data('title'));
+                }
+            });
+        return dialog;
     }
 
     function resizePopup() {
@@ -152,18 +164,25 @@
     function hashChangeHandler() {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
-            for (var h in ajaxLoaders) {
-                if (ajaxLoaders.hasOwnProperty(h) && hash.indexOf(h) === 0) {
+            for (var h in loadersList) {
+                if (loadersList.hasOwnProperty(h) && hash.indexOf(h) === 0) {
                     var val = hash.replace(h, '');
-                    ajaxLoaders[h](val);
+                    loadersList[h](val);
                 }
             }
         }
+        if (!hash) {
+            closePopup();
+        }
+    }
+
+    function registerLoaders(loaders) {
+        $.extend(loadersList, loaders);
     }
 
     $(window).on('hashchange', hashChangeHandler).on('resize', resizePopup);
     $(function() {
-        // individual sections add ajaxLoaders, delay running until after they're added on-load
+        // individual sections add via Status.loaders.register(), delay running until after they're added on-load
         setTimeout(hashChangeHandler, 1);
     });
 
@@ -318,23 +337,18 @@
                 pauseRefresh();
             }
         });
-        $('.js-summary-popup').on('show.bs.modal', function() {
-            $(this).find('.modal-body').css({
-                width: 'auto',
-                height: 'auto',
-                'max-height': '100%'
-            });
-        });
         prepTableSorter();
         prettyPrint();
     }
 
     return {
         init: init,
-        ajaxModal: ajaxModal,
-        summaryPopup: summaryPopup,
+        popup: popup,
         resizePopup: resizePopup,
-        ajaxLoaders: ajaxLoaders,
+        loaders: {
+            list: loadersList,
+            register: registerLoaders
+        },
         graphCount: 0,
         refresh: {
             register: registerRefresh,
@@ -344,7 +358,6 @@
             registered: registeredRefreshes
         }
     };
-
 })();
 
 Status.UI = (function () {
@@ -426,8 +439,7 @@ Status.Dashboard = (function () {
                     popup(node + ': CPU Utilization');
                     $('#dashboard-popup').appendWaveLoader().cpuGraph({
                         id: id,
-                        width: 858,
-                        animate: true
+                        width: 858
                     });
                     return;
                 case 'memory':
@@ -435,7 +447,6 @@ Status.Dashboard = (function () {
                     $('#dashboard-popup').appendWaveLoader().memoryGraph({
                         id: id,
                         width: 858,
-                        animate: true,
                         max: $this.closest('[data-max]').data('max')
                     });
                     return;
@@ -444,8 +455,7 @@ Status.Dashboard = (function () {
                     $('#dashboard-popup').appendWaveLoader().networkGraph({
                         id: id,
                         iid: iid,
-                        width: 858,
-                        animate: true
+                        width: 858
                     });
                     return;
                 default:
@@ -556,10 +566,10 @@ Status.Elastic = (function () {
     function init(options) {
         Status.Elastic.options = options;
 
-        $.extend(Status.ajaxLoaders, {
+        Status.loaders.register({
             '#/elastic/summary/': function (val) {
                 Status.Dashboard.options.refreshData = { popup: val };
-                Status.summaryPopup('/elastic/node/summary/' + val, options, false, function() {
+                Status.popup('/elastic/node/summary/' + val, options, false, function () {
                     Status.Dashboard.options.refreshData = {};
                 });
             },
@@ -574,7 +584,7 @@ Status.Elastic = (function () {
                     index: parts[0],
                     popup: parts[1]
                 };
-                Status.summaryPopup('/elastic/index/summary/' + parts[1], reqOptions, false, function () {
+                Status.popup('/elastic/index/summary/' + parts[1], reqOptions, false, function () {
                     Status.Dashboard.options.refreshData = {};
                 });
             }
@@ -674,14 +684,7 @@ Status.SQL = (function () {
             ag: pieces.length > 1 ? pieces[1] : null,
             node: pieces.length > 2 ? pieces[2] : null
         };
-        //var wrap = Status.getPopup();
-        //wrap.load('/sql/servers', $.extend({}, Status.Dashboard.options.refreshData, {
-        //    detailOnly: true
-        //}), function () {
-        //    Status.showSummaryPopup(function () {
-        //        Status.Dashboard.options.refreshData = {};
-        //    }, 50);
-        //});
+        Status.popup('/sql/servers', $.extend({}, Status.Dashboard.options.refreshData, { detailOnly: true }));
     }
 
     function loadPlan(val) {
@@ -751,14 +754,14 @@ Status.SQL = (function () {
     function init(options) {
         Status.SQL.options = options;
         
-        $.extend(Status.ajaxLoaders, {
+        Status.loaders.register({
             '#/cluster/': loadCluster,
             '#/plan/': loadPlan,
             '#/sql/summary/': function (val) {
-                Status.summaryPopup('/sql/instance/summary/' + val, { node: Status.SQL.options.node });
+                Status.popup('/sql/instance/summary/' + val, { node: Status.SQL.options.node });
             },
             '#/db/': function(val) {
-                Status.summaryPopup('/sql/db/' + val, { node: Status.SQL.options.node }, true);
+                Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, true);
             }
         });        
         
@@ -794,7 +797,7 @@ Status.SQL = (function () {
                 },
                 success: function (data, status, xhr) {
                     if (data === true) {
-                        Status.summaryPopup('/sql/instance/summary/jobs', { node: Status.SQL.options.node }, true);
+                        Status.popup('/sql/instance/summary/jobs', { node: Status.SQL.options.node }, true);
                         Status.resizePopup();
                     } else {
                         $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred toggling this job.');
@@ -822,15 +825,15 @@ Status.Redis = (function () {
     function init(options) {
         Status.Redis.options = options;
 
-        $.extend(Status.ajaxLoaders, {
+        Status.loaders.register({
             '#/redis/summary/': function(val) {
-                Status.summaryPopup('/redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
+                Status.popup('/redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
             }
         });
 
         $(document).on('click', '.js-redis-role-action', function (e) {
             var link = this;
-            Status.refresh.pause("Dashboard");
+            Status.refresh.pause('Dashboard');
             $.get('redis/instance/actions/role', { node: $(this).data('node') }, function (data) {
                 $(link).parent().actionPopup(data);
             });
