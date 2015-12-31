@@ -422,12 +422,11 @@ Status.Dashboard = (function () {
             switch ($this.data('type')) {
                 case 'cpu':
                     popup(node + ': CPU Utilization');
-                    $('#dashboard-popup').appendWaveLoader()
-                    //    .cpuGraph({
-                    //    id: id,
-                    //    width: 858,
-                    //    animate: true
-                    //});
+                    $('#dashboard-popup').appendWaveLoader().cpuGraph({
+                        id: id,
+                        width: 858,
+                        animate: true
+                    });
                     return;
                 case 'memory':
                     popup(node + ': Memory Utilization (' + subtitle + ')');
