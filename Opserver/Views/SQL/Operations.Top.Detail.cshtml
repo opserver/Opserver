@@ -20,14 +20,10 @@
     else
     {
         var plan = op.GetShowPlanXML();
+        <h5>Details for operation on @s.Name:</h5>
         <div class="sql-plan-detail">
             <table>
                 <thead>
-                    <tr class="category-row">
-                        <th colspan="10">
-                            <h3>Details for operation on @s.Name:</h3>
-                        </th>
-                    </tr>
                     <tr class="section-head-row">
                         <th colspan="2">CPU</th>
                         <th colspan="2">Reads</th>
@@ -173,7 +169,7 @@
                                                 </div>
                                             </div>
                                         }
-                                        @if (ss != null && ss.QueryPlan != null)
+                                        @if (ss?.QueryPlan != null)
                                         {
                                             if (ss.QueryPlan.NonParallelPlanReason.HasValue())
                                             {
@@ -205,29 +201,26 @@
                                                 </div>
                                             }*@
                                     </div>
-                                    @if (ss != null && ss.QueryPlan != null)
+                                    @if (ss?.QueryPlan?.MissingIndexes != null)
                                     {
-                                        if (ss.QueryPlan.MissingIndexes != null)
+                                        <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="note">(according to SQL Server, don't blindly apply these)</span></div>
+                                        foreach (var mi in ss.QueryPlan.MissingIndexes)
                                         {
-                                            <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Count().Pluralize("Missing Index", "Missing Indexes") <span class="note">(according to SQL Server, don't blindly apply these)</span></div>
-                                            foreach (var mi in ss.QueryPlan.MissingIndexes)
-                                            {
-                                                <div class="index-details">
-                                                    <span class="note">(Impact: @mi.Impact)</span>
-                                                    @foreach (var index in mi.MissingIndex)
-                                                    {
-                                                        var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
-                                                        var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
-                                                        <span>
-                                                            @string.Format("{0}.{1}.{2}", index.Database, index.Schema, index.Table) (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
-                                                            @if (include.Any())
-                                                            {
-                                                                @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
-                                                            }
-                                                        </span>
-                                                    }
-                                                </div>
-                                            }
+                                            <div class="index-details">
+                                                <span class="note">(Impact: @mi.Impact)</span>
+                                                @foreach (var index in mi.MissingIndex)
+                                                {
+                                                    var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
+                                                    var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
+                                                    <span>
+                                                        @($"{index.Database}.{index.Schema}.{index.Table}") (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        @if (include.Any())
+                                                        {
+                                                            @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        }
+                                                    </span>
+                                                }
+                                            </div>
                                         }
                                     }
                                 </div>

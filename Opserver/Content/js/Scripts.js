@@ -100,7 +100,7 @@
         }
     }
 
-    function popup(url, options, noClose, onClose) {
+    function popup(url, options, onLoad, onClose) {
         closePopup();
 
         var dialog = currentDialog = bootbox.dialog({
@@ -128,6 +128,7 @@
                 if (titleElem) {
                     $(this).closest('.modal-content').find('.modal-title').text(titleElem.data('title'));
                 }
+                if (onLoad) onLoad.call(this);
             });
         return dialog;
     }
@@ -692,63 +693,62 @@ Status.SQL = (function () {
             handle = parts[0],
             offset = parts.length > 1 ? parts[1] : null;
         $('.sql-server .plan-row[data-plan-handle="' + handle + '"]').addClass('selected');
-        //var wrap = Status.getPopup();
-        //wrap.load('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
-        //    $('.query-col').removeClass('loading');
-        //    Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
-        //    prettyPrint();
-        //    wrap.find('.sql-query-section .tabs-links').on('click', 'a', function () {
-        //        if ($(this).hasClass('selected')) return false;
-        //        $(this).addClass('selected').siblings().removeClass('selected');
-        //        var newDiv = $(this).data('div');
-        //        $('.sql-query-section .' + newDiv).show().siblings().not('.tabs').hide();
+        Status.popup('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
+            $('.query-col').removeClass('loading');
+            Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
+            prettyPrint();
+            $(this).find('.sql-query-section .tabs-links').on('click', 'a', function () {
+                if ($(this).hasClass('selected')) return false;
+                $(this).addClass('selected').siblings().removeClass('selected');
+                var newDiv = $(this).data('div');
+                $('.sql-query-section .' + newDiv).show().siblings().not('.tabs').hide();
 
-        //        Status.resizePopup();
+                Status.resizePopup();
 
-        //        $('.qp-root').drawQueryPlanLines();
-        //        return false;
-        //    });
-        //    var currentTt;
-        //    wrap.find('.qp-node').hover(function() {
-        //        var pos = $(this).offset();
-        //        var tt = $(this).find('.qp-tt');
-        //        currentTt = tt.clone();
-        //        currentTt.addClass('sql-query-tooltip')
-        //            .appendTo(document.body)
-        //            .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
-        //            .show();
-        //    }, function() {
-        //        if (currentTt) currentTt.hide();
-        //    });
-        //    wrap.find('.handle-link a').on('click', function() {
-        //        if (!confirm('Are you sure you want to remove this plan from cache?'))
-        //            return false;
+                $('.qp-root').drawQueryPlanLines();
+                return false;
+            });
+            var currentTt;
+            $(this).find('.qp-node').hover(function () {
+                var pos = $(this).offset();
+                var tt = $(this).find('.qp-tt');
+                currentTt = tt.clone();
+                currentTt.addClass('sql-query-tooltip')
+                    .appendTo(document.body)
+                    .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
+                    .show();
+            }, function() {
+                if (currentTt) currentTt.hide();
+            });
+            $(this).find('.handle-link a').on('click', function () {
+                if (!confirm('Are you sure you want to remove this plan from cache?'))
+                    return false;
 
-        //        var $link = $(this).addClass('loading');
-        //        $.ajax($link.attr('href'), {
-        //            type: 'POST',
-        //            success: function(data, status, xhr) {
-        //                if (data === true) {
-        //                    window.location.hash = '';
-        //                    window.location.reload(true);
-        //                } else {
-        //                    $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
-        //                }
-        //            },
-        //            error: function(xhr) {
-        //                $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
-        //            }
-        //        });
-        //        return false;
-        //    });
-        //    wrap.find('.show-toggle').on('click', function (e) {
-        //        var grad = $(this).closest('.hide-gradient'),
-        //            excerpt = grad.prev('.sql-query-excerpt');
-        //        excerpt.animate({ 'max-height': excerpt[0].scrollHeight }, 400, function () { $(window).resize(); });
-        //        grad.fadeOut(400);
-        //        e.preventDefault();
-        //    });
-        //});
+                var $link = $(this).addClass('loading');
+                $.ajax($link.attr('href'), {
+                    type: 'POST',
+                    success: function(data, status, xhr) {
+                        if (data === true) {
+                            window.location.hash = '';
+                            window.location.reload(true);
+                        } else {
+                            $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
+                        }
+                    },
+                    error: function(xhr) {
+                        $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred removing this plan from cache.');
+                    }
+                });
+                return false;
+            });
+            $(this).find('.show-toggle').on('click', function (e) {
+                var grad = $(this).closest('.hide-gradient'),
+                    excerpt = grad.prev('.sql-query-excerpt');
+                excerpt.animate({ 'max-height': excerpt[0].scrollHeight }, 400, function () { $(window).resize(); });
+                grad.fadeOut(400);
+                e.preventDefault();
+            });
+        });
     }
     
     function init(options) {
