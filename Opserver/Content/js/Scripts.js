@@ -161,11 +161,6 @@
         }
     }
 
-    function prependLoader(elem) {
-        var html = '<div class="sk-folding-cube"><div></div><div></div><div></div><div></div></div>';
-        $(html).prependTo(elem);
-    }
-
     $(window).on('hashchange', hashChangeHandler).on('resize', resizePopup);
     $(function() {
         // individual sections add ajaxLoaders, delay running until after they're added on-load
@@ -260,18 +255,16 @@
         $(document).on('click', '.js-reload-link', function(e) {
             var data = {
                 type: $(this).data('type'),
-                uniqueKey: $(this).data('uk'),
+                key: $(this).data('uk'),
                 guid: $(this).data('guid')
             };
             if (!data.type && (this.href || '#') !== '#') return;
-            if (data.type && data.uniqueKey) {
+            if (data.type && data.key) {
                 // Node to refresh, do it
                 if ($(this).hasClass('active')) return;
-                var link = $(this).addClass('active');
-                link.find('.glyphicon').hide(); //.addClass('spin');
-                prependLoader(link);
-                link.find('.js-text')
-                    .text('Polling...');
+                var link = $(this).addClass('active').prependDiamondLoader();
+                link.find('.glyphicon').hide();
+                link.find('.js-text').text('Polling...');
                 Status.refresh.pause();
                 $.post('/poll', data)
                     .fail(function() {
@@ -297,6 +290,23 @@
                 window.location.reload(true);
             }
             e.preventDefault();
+        }).on('click', '.js-poll-now', function () {
+            var type = $(this).data('type'),
+                key = $(this).data('key');
+
+            if (type && key) {
+                $(this).text('').prependWaveLoader();
+                $.ajax('/poll', {
+                    data: {
+                        type: type,
+                        key: key,
+                        guid: $(this).data('id')
+                    }
+                }).done(function() {
+                    window.location.reload(true);
+                });
+            }
+            return false;
         }).on({
             'click': function() {
                 $('.action-popup').remove();
@@ -396,34 +406,41 @@ Status.Dashboard = (function () {
         $('.js-content').on('click', '.js-nodes .js-dashboard-spark', function() {
             var $this = $(this),
                 id = $this.data('id'),
-                title = $this.data('title'),
-                max = $this.closest('[data-max]').data('max'),
-                type = title.toLowerCase(),
-                row = $this.closest('tr'),
-                node = row.data('node'),
+                node = $this.closest('[data-node]').data('node'),
                 subtitle = $this.parent().data('subtitle') || node;
 
-            switch (type) {
+            function popup(title) {
+                bootbox.dialog({
+                    message: '<div id="dashboard-popup" class="dashboard-chart"></div>',
+                    title: title,
+                    size: 'large',
+                    backdrop: true,
+                    onEscape: function () { }
+                });
+            }
+
+            switch ($this.data('type')) {
                 case 'cpu':
-                    $('#dashboard-chart').empty().cpuGraph({ id: id, title: 'CPU Utilization', subtitle: subtitle, animate: true });
-                    break;
+                    popup(node + ': CPU Utilization');
+                    $('#dashboard-popup').appendWaveLoader()
+                    //    .cpuGraph({
+                    //    id: id,
+                    //    width: 858,
+                    //    animate: true
+                    //});
+                    return;
                 case 'memory':
-                    $('#dashboard-chart').empty().memoryGraph({ id: id, title: 'Memory Utilization', subtitle: subtitle, animate: true, max: max });
-                    break;
+                    popup(node + ': Memory Utilization (' + subtitle + ')');
+                    $('#dashboard-popup').appendWaveLoader().memoryGraph({
+                        id: id,
+                        width: 858,
+                        animate: true,
+                        max: $this.closest('[data-max]').data('max')
+                    });
+                    return;
                 default:
                     return;
             }
-
-            $('#spark-detail').modal({
-                overlayClose: true,
-                onClose: function(dialog) {
-                    dialog.data.fadeOut('fast', function() {
-                        dialog.container.hide('fast', function() {
-                            $.modal.close();
-                        });
-                    });
-                }
-            });
         });
 
         $(document).on('keyup', '.js-filter', function () {
@@ -1361,8 +1378,23 @@ Status.HAProxy = (function () {
         tooltipTimeFormat: d3.time.format.utc('%A, %b %d %H:%M')
     };
 
+    var waveHtml = '<div class="sk-wave loader"><div></div><div></div><div></div><div></div><div></div></div>',
+        diamondHtml = '<div class="sk-folding-cube loader"><div></div><div></div><div></div><div></div></div>';
+
     // Creating jQuery plguins...
     $.fn.extend({
+        appendDiamondLoader: function () {
+            return this.append(diamondHtml);
+        },
+        appendWaveLoader: function () {
+            return this.append(waveHtml);
+        },
+        prependDiamondLoader: function () {
+            return this.prepend(diamondHtml);
+        },
+        prependWaveLoader: function () {
+            return this.prepend(waveHtml);
+        },
         inlinePopup: function (className, msg, callback, removeTimeout, clickDismiss) {
             $('.' + className).remove();
             var jDiv = $('<div class="' + className + '">' + msg + '</div>').appendTo(this);
@@ -1406,7 +1438,7 @@ Status.HAProxy = (function () {
                     height: 'auto',
                     max: 100,
                     leftMargin: 40,
-                    areaTooltipFormat: function (value) { return '<span class="label">CPU: </span><b>' + value.toFixed(2) + '%</b>'; }
+                    areaTooltipFormat: function (value) { return '<label>CPU: </label><b>' + value.toFixed(2) + '%</b>'; }
                 }, options));
         },
         memoryGraph: function (options) {
@@ -1423,7 +1455,7 @@ Status.HAProxy = (function () {
                     height: 'auto',
                     leftMargin: 60,
                     max: this.data('max'),
-                    areaTooltipFormat: function (value) { return '<span class="label">Memory: </span><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
+                    areaTooltipFormat: function (value) { return '<label>Memory: </label><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
                 }, options));
         },
         networkGraph: function (options) {
@@ -1533,13 +1565,6 @@ Status.HAProxy = (function () {
                 curWidth, curHeight, curData,
                 chart = this,
                 endDate = options.end ? new Date(options.end) : new Date(),
-                dateRanges = dateRanges ? {
-                    'Day': new Date((endDate.getTime() - 24 * 60 * 60 * 1000)),
-                    'Week': new Date((endDate.getTime() - 7 * 24 * 60 * 60 * 1000)),
-                    'Month': new Date(new Date(endDate).setMonth(endDate.getMonth() - 1)),
-                    '6 Months': new Date(new Date(endDate).setMonth(endDate.getMonth() - 6))
-                } : {},
-                rangeSelections = $('<div class="range-selection" />').appendTo(chart),
                 buildTooltip = $('<div class="build-tooltip chart-tooltip" />').appendTo(chart),
                 areaTooltip = $('<div class="area-tooltip chart-tooltip" />').appendTo(chart),
                 series = options.series,
@@ -1567,12 +1592,6 @@ Status.HAProxy = (function () {
             
             options.width = options.width === 'auto' ? (chart.width() - 10) : options.width;
             options.height = options.height === 'auto' ? (chart.height() - 5) : options.height;
-
-            for (var range in dateRanges) {
-                if (dateRanges.hasOwnProperty(range)) {
-                    $('<button />', { data: { start: dateRanges[range] } }).text(range).appendTo(rangeSelections);
-                }
-            }
 
             if (options.title) {
                 var titleDiv = $('<div class="chart-title"/>').text(options.title).prependTo(chart);
@@ -1994,6 +2013,7 @@ Status.HAProxy = (function () {
                 drawPrimaryGraphs(data);
                 drawBuilds(data);
                 dataLoaded = true;
+                chart.find('.loader').hide();
                 
                 // set the initial summary brush to reflect what was loaded up top
                 brush2.extent(x.domain())(bottomBrushArea);

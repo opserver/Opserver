@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -17,6 +18,15 @@ namespace StackExchange.Opserver.Data
         public override object GetData() { return DataBacker; }
         public override Type Type => typeof (T);
         private readonly object _pollLock = new object();
+
+        public override string InventoryDescription
+        {
+            get
+            {
+                var tmp = DataBacker;
+                return tmp == null ? null : ((tmp as IList)?.Count.Pluralize("item") ?? "1 Item");
+            }
+        }
 
         private T DataBacker { get; set; }
         public T Data
@@ -272,6 +282,7 @@ namespace StackExchange.Opserver.Data
         public virtual bool ContainsData => false;
         public virtual object GetData() { return null; }
         public string ErrorMessage { get; internal set; }
+        public virtual string InventoryDescription => null;
 
         public virtual int Poll(bool force = false, bool wait = false)
         {

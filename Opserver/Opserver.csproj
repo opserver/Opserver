@@ -326,7 +326,6 @@
     <Content Include="Content\js\plugins\toastr.js" />
     <Content Include="Content\js\plugins\isotope.js" />
     <Compile Include="Controllers\AdminController.cs" />
-    <Compile Include="Controllers\CacheController.cs" />
     <Compile Include="Controllers\DataController.cs" />
     <Compile Include="Controllers\CloudFlareController.cs" />
     <Compile Include="Controllers\HubController.cs" />

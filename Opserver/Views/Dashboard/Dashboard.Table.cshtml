@@ -14,7 +14,7 @@
 {
     if (DashboardData.HasData)
     {
-        <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-title="@type"/>
+        <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type"/>
     }
     else
     {
@@ -58,12 +58,9 @@
                             </tr>
                             <tr>
                                 <th>Node</th>
-                                <th>CPU</th>
-                                <th></th>
-                                <th>Memory</th>
-                                <th></th>
-                                <th>Network</th>
-                                <th></th>
+                                <th colspan="2">CPU</th>
+                                <th colspan="2">Memory</th>
+                                <th colspan="2">Network</th>
                             </tr>
                         </tbody>
                         <tbody>
@@ -75,7 +72,7 @@
                                     <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
                                 </td>
                                 <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
-                                <td>@Graph(n, "CPU")</td>
+                                <td>@Graph(n, "cpu")</td>
                                 <td title="@n.ApplicationMemoryTextSummary()">
                                     @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
                                     {
@@ -84,9 +81,9 @@
                                         </div>
                                     }
                                 </td>
-                                <td data-max="@(n.TotalMemory/1024/1024)" data-subtitle="@n.PrettyName - @(n.TotalMemory.GetValueOrDefault(0).ToSize())">@Graph(n, "Memory")</td>
+                                <td data-max="@((n.TotalMemory/1024/1024).ToString())" data-subtitle="@(n.TotalMemory.GetValueOrDefault(0).ToSize())">@Graph(n, "memory")</td>
                                 <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
-                                <td><a href="/dashboard/node?node=@n.PrettyName&view=@CurrentStatusTypes.Interfaces">@Graph(n, "Network")</a></td>
+                                <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "Network")</a></td>
                             </tr>
                         }
                         </tbody>

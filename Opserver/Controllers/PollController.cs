@@ -12,24 +12,24 @@ namespace StackExchange.Opserver.Controllers
     public class PollController : StatusController
     {
         [Route("poll")]
-        public ActionResult JsonNodes(string type, string[] uniqueKey, Guid? guid = null)
+        public ActionResult JsonNodes(string type, string[] key, Guid? guid = null)
         {
             if (type.IsNullOrEmpty())
                 return JsonError("type is missing");
-            if (!(uniqueKey?.Any() ?? false))
-                return JsonError("uniqueKey is missing");
+            if (!(key?.Any() ?? false))
+                return JsonError("key is missing");
             try
             {
-                if (uniqueKey.Length > 1)
+                if (key.Length > 1)
                 {
                     bool result = true;
-                    Parallel.ForEach(uniqueKey, k =>
+                    Parallel.ForEach(key, k =>
                     {
                         result &= PollingEngine.Poll(type, k, guid, sync: true);
                     });
                     return Json(result);
                 }
-                var pollResult = PollingEngine.Poll(type, uniqueKey[0], guid, sync: true);
+                var pollResult = PollingEngine.Poll(type, key[0], guid, sync: true);
                 return Json(pollResult);
             }
             catch (Exception e)

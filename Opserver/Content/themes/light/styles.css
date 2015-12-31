@@ -7912,9 +7912,20 @@ h6.page-header {
 .page-header a.pull-right + a.pull-right:after {
   content: "|";
   color: #eeeeee;
+  display: inline-block;
 }
 .page-header .pull-right {
   font-size: 0.9em;
+}
+.actions a + a:before {
+  content: "| ";
+  color: #6f6f6f;
+  opacity: 0.4;
+  display: inline-block;
+}
+.actions .sk-wave {
+  display: inline-block;
+  height: 8px;
 }
 .table > tbody > tr.category-row h5 .pull-right {
   font-size: 0.9em;
@@ -7927,6 +7938,19 @@ h6.page-header {
   min-width: 50px;
   width: 100%;
   height: 20px;
+}
+.dashboard-chart {
+  height: 400px;
+  display: flex;
+}
+.dashboard-chart .loader {
+  margin: auto auto;
+  width: 400px;
+  height: 80px;
+}
+.dashboard-chart .loader.sk-wave > div {
+  width: 10px;
+  margin-right: 5px;
 }
 .reload-link:focus {
   text-decoration: none;
@@ -8460,4 +8484,13 @@ dt {
 }
 .well-condensed:last-child {
   margin-bottom: 0;
+}
+/* Cache Dashboard */
+tr.cache-sub-item td:first-child {
+  padding-left: 15px;
+}
+.table > tbody > tr.cache-item > th:nth-child(4),
+.table > tbody > tr.cache-item > th:nth-child(5),
+.table > tbody > tr.cache-item > th:nth-child(6) {
+  font-weight: normal;
 }
