@@ -56,7 +56,7 @@
                         </div>
                         <div class="filters">
                             <form class="filter-form" action="" method="GET">
-                                <input type="hidden" name="node" value="@Model.CurrentInstance.Name"/>
+                                <input type="hidden" name="text-muted" value="@Model.CurrentInstance.Name"/>
                                 <div class="filters-header">Filters</div>
                                 <div class="filter">
                                     <label>Include Details: <input type="checkbox" @(Model.ActiveSearchOptions.GetAdditionalInfo ? "checked " : "") name="details" value="true"/></label>
@@ -94,7 +94,7 @@
                             <ul>
                                 @helper BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked){
                                 <li>
-                                    Session: <a href="#spid-@op.SessionId">@op.SessionId</a>
+                                    Session: <a href="#spid-@op.SessionId.ToString()">@op.SessionId.ToString()</a>
                                     @if (blocked[op].Any())
                                     {
                                         <ul>
@@ -103,7 +103,7 @@
                                         {
                                             @BlockingTree(b, blocked)
                                         }
-                                    </ul>
+                                        </ul>
                                     }
                                 </li>
                                 }
@@ -140,51 +140,53 @@
                     <tbody>
                         @foreach (var w in data)
                         {
-                            <tr id="spid-@w.SessionId">
+                            <tr id="spid-@w.SessionId.ToString()">
                                 <td>
-                                    @w.SessionId
+                                    @w.SessionId.ToString()
                                 </td>
                                 <td title="@w.Duration.ToReadableString()">@w.Duration.ToTimeStringMini()</td>
                                 <td>
-                                    <div><span class="note">CPU:</span> @w.CPU.ToComma()</div>
-                                    <div><span class="note">Reads:</span> @w.Reads.ToComma()</div>
+                                    <div><span class="text-muted">CPU:</span> @w.CPU.ToComma()</div>
+                                    <div><span class="text-muted">Reads:</span> @w.Reads.ToComma()</div>
                                     @if (w.PhysicalReads > 0)
                                     {
-                                        <div><span class="note">PhysReads:</span> @w.PhysicalReads.ToComma()</div>
+                                        <div><span class="text-muted">PhysReads:</span> @w.PhysicalReads.ToComma()</div>
                                     }
-                                    <div><span class="note">Writes:</span> @w.Writes.ToComma()</div>
+                                    <div><span class="text-muted">Writes:</span> @w.Writes.ToComma()</div>
                                 </td>
                                 <td colspan="2">
                                     @if (w.TempDBCurrent > 0)
                                     {
-                                        <div><span class="note">Temp (Pages):</span> @w.TempDBCurrent.ToComma()</div>
+                                        <div><span class="text-muted">Temp (Pages):</span> @w.TempDBCurrent.ToComma()</div>
                                     }
                                     @if (w.TempDBAllocations > 0)
                                     {
-                                        <div><span class="note">Temp (Writes):</span> @w.TempDBAllocations.ToComma()</div>
+                                        <div><span class="text-muted">Temp (Writes):</span> @w.TempDBAllocations.ToComma()</div>
                                     }
                                     @if (w.WaitInfo.HasValue())
                                     {
                                         <div>
-                                            <span class="note">Waits:</span><br /> @w.WaitInfo
+                                            <span class="text-muted">Waits:</span><br /> @w.WaitInfo
                                         </div>
                                     }
                                     @if (w.BlockingSessionId.HasValue)
                                     {
-                                        <div><a href="#spid-@w.BlockingSessionId"><span class="note">Blocked By:</span> @w.BlockingSessionId</a></div>
+                                        <div>
+                                            <a href="#spid-@w.BlockingSessionId"><span class="text-muted">Blocked By:</span> @w.BlockingSessionId</a>
+                                        </div>
                                     }
                                 </td>
                                 <td title="@w.WaitInfo
-                                % complete @(w.PercentComplete.HasValue ? w.PercentComplete.ToString() : "Unknown") ">
+                                % complete @(w.PercentComplete?.ToString() ?? "Unknown") ">
                                     @w.Status
                                     @if (w.PercentComplete.HasValue)
                                     {
-                                        <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="note">% done</span></div>
+                                        <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="text-muted">% done</span></div>
                                     }
                                 </td>
                                 <td title="Program: @w.ProgramName">
                                     <div>
-                                        <span class="note">Host:</span>
+                                        <span class="text-muted">Host:</span>
                                         @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
                                         {
                                             <a href="/dashboard/node?node=@w.HostName.UrlEncode()" class="node-name-link">@w.HostName</a>
@@ -194,16 +196,16 @@
                                             @w.HostName
                                         }
                                     </div>
-                                    <div><span class="note">DB:</span> @w.DatabaseName</div>
-                                    <div><span class="note">Login:</span> @w.LoginName</div>
+                                    <div><span class="text-muted">DB:</span> @w.DatabaseName</div>
+                                    <div><span class="text-muted">Login:</span> @w.LoginName</div>
                                 </td>
-                                <td><div class="sql-block-wrap"><pre class="sql-block prettyprint lang-sql">@w.SqlText</pre></div></td>
+                                <td><div class="sql-block-wrap"><pre class="pre-code prettyprint lang-sql">@w.SqlText</pre></div></td>
                             </tr>
                         }
                         @if (!data.Any())
                         {
                             <tr>
-                                <td colspan="11"><div class="none-active">There are no active operations at the moment.</div></td>
+                                <td colspan="11"><div class="text-muted">There are no active operations at the moment.</div></td>
                             </tr>
                         }
                     </tbody>
