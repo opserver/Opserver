@@ -10,7 +10,10 @@
 {
     @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
 }
-<div class="sql-plan-wrap" data-title="Details for operation on @s.Name@(op != null ? ": " + op.CompiledOnDatabase : null)">
+<h4 class="modal-title">
+    Details for operation on @s.Name@(op != null ? ": " + op.CompiledOnDatabase : null)
+</h4>
+<div class="sql-plan-wrap">
     @if (op == null)
     {
         <div class="alert alert-warning">

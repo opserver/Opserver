@@ -20,7 +20,7 @@
         <div class="text-muted">No Data Available</div>
         return;
     }
-    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
+    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
 }
 <div class="item dashboard @s.TextClass() @GetItemClass(s)">
     <div class="server-name">

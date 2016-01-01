@@ -8354,6 +8354,9 @@ h6.page-header {
 .panel-condensed .value-block:last-child {
   margin-bottom: 0;
 }
+.json-pretty {
+  white-space: pre-wrap;
+}
 .modal-huge {
   width: calc(100% - 60px);
 }

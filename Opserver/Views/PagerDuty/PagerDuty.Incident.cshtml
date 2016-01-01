@@ -3,40 +3,63 @@
     Layout = null;
     this.SetPageTitle("PagerDuty Incident Email");
     var i = Model.Incident;
-    var acked = i.AcknowledgedBy != null && i.AcknowledgedBy.Any() ? "List" : "Nobody";
     var isSubjectOnly = i.SummaryData?.Count == 1 && i.SummaryData.ContainsKey("subject");
 }
-<div class="incident-details" data-title="Incident: @i.Number">
-    <dl>
-        @if (isSubjectOnly)
-        {
-            <dt>Subject</dt>
-            <dd>@i.SummaryData["subject"]</dd>
-        }
-        <dt>Service</dt>
-        <dd>@i.AffectedService.Name</dd>
-
-        <dt>Link</dt>
-        <dd><a href="@i.Uri" target="_blank">@(i.Uri.Split('/').Last())</a></dd>
-
-        <dt>Status</dt>
-        <dd class="@i.TextClass()">@i.Status.GetDescription()</dd>
-
-        <dt>Acknowledged By</dt>
-        <dd>@acked</dd>
-
-        @if (i.ResolvedBy != null)
-        {
-            <dt>Resolved By</dt>
-            <dd>@i.ResolvedBy.FullName</dd>
-        }
-
-        @if (i.LastChangedBy != null)
-        {
-            <dt>Last Change</dt>
-            <dd>@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()</dd>
-        }
-    </dl>
+<h4 class="modal-title">
+    Incident: @i.Number.ToString()
+</h4>
+<div class="incident-details">
+    @if (isSubjectOnly)
+    {
+        <div class="row small">
+            <div class="value-block col-md-12">
+                @i.SummaryData["subject"]
+                <label>Subject</label>
+            </div>
+        </div>
+    }
+    <div class="row small">
+        <div class="value-block col-md-6">
+            @i.AffectedService.Name
+            <label>Service</label>
+        </div>
+        <div class="value-block col-md-6">
+            <a href="@i.Uri" target="_blank">@(i.Uri.Split('/').Last())</a>
+            <label>Link</label>
+        </div>
+    </div>
+    <div class="row small">
+        <div class="value-block col-md-4">
+            @if (i.AcknowledgedBy?.Any() ?? false)
+            {
+                @(i.AcknowledgedBy.First().AckPerson?.FullName)
+            }
+            else
+            {
+                <span class="text-muted">Not Ackonwledged</span>
+            }
+            <label>Acknowledged By</label>
+        </div>
+        <div class="value-block col-md-4 @i.MonitorStatus.BackgroundClass()">
+            @(i.ResolvedBy?.FullName)
+            @if (i.ResolvedBy == null)
+            {
+                <span class="text-muted">Unresolved</span>
+            }
+            <label>Resolved By</label>
+        </div>
+        <div class="value-block col-md-4">
+            @if (i.LastChangedBy != null)
+            {
+                @:@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()
+            }
+            else
+            {
+                <span class="text-muted">No Changes</span>
+            }
+            <label>Last Change</label>
+        </div>
+    </div>
     @if (!isSubjectOnly && i.SummaryData != null && i.SummaryData.Any())
     {
         <table>
@@ -57,7 +80,7 @@
         </table>
     }
     <h4 class="page-header">Incident Log</h4>
-    <table class="table table-striped table-hover table-responsive text-nowrap">
+    <table class="table table-striped table-hover table-responsive text-nowrap table-super-condensed">
         <thead>
             <tr>
                 <th>Time</th>

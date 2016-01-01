@@ -124,10 +124,11 @@
         // TODO: refresh intervals via header
         $('.js-summary-popup')
             .appendWaveLoader()
-            .load(url, options, function() {
-                var titleElem = $(this).find('[data-title]');
+            .load(url, options, function () {
+                var titleElem = $(this).findWithSelf('h4.modal-title');
+                console.log(titleElem);
                 if (titleElem) {
-                    $(this).closest('.modal-content').find('.modal-title').text(titleElem.data('title'));
+                    $(this).closest('.modal-content').find('.modal-header .modal-title').replaceWith(titleElem);
                 }
                 if (onLoad) onLoad.call(this);
             });
@@ -1334,6 +1335,9 @@ Status.HAProxy = (function () {
 
     // Creating jQuery plguins...
     $.fn.extend({
+        findWithSelf: function (selector) {
+            return this.find(selector).andSelf().filter(selector);
+        },
         appendDiamondLoader: function () {
             return this.append(diamondHtml);
         },
