@@ -91,36 +91,32 @@ namespace StackExchange.Opserver.Data.HAProxy
             var fetchUrl = Url + ";csv";
             using (MiniProfiler.Current.CustomTiming("http", fetchUrl, "GET"))
             {
-                string csv;
                 var req = (HttpWebRequest) WebRequest.Create(fetchUrl);
                 req.Credentials = new NetworkCredential(User, Password);
                 if (QueryTimeoutMs.HasValue)
                     req.Timeout = QueryTimeoutMs.Value;
-                using (var resp = await req.GetResponseAsync())
+                using (var resp = await req.GetResponseAsync().ConfigureAwait(false))
                 using (var rs = resp.GetResponseStream())
                 {
                     if (rs == null) return null;
-                    using (var sr = new StreamReader(rs))
-                    {
-                        csv = sr.ReadToEnd();
-                    }
+                    return await ParseHAProxyStats(rs).ConfigureAwait(false);
                 }
-                return ParseHAProxyStats(csv);
             }
         }
 
-        private List<Proxy> ParseHAProxyStats(string input)
+        private async Task<List<Proxy>> ParseHAProxyStats(Stream stream)
         {
-            if (string.IsNullOrEmpty(input)) return new List<Proxy>();
-            var lines = input.Split(StringSplits.NewLine);
-
             var stats = new List<Item>();
-            foreach (var l in lines)
+            using (var sr = new StreamReader(stream))
             {
-                //Skip the header
-                if (string.IsNullOrEmpty(l) || l.StartsWith("#")) continue;
-                //Collect each stat line as we go, group later
-                stats.Add(Item.FromLine(l));
+                while (sr.Peek() >= 0)
+                {
+                    var l = await sr.ReadLineAsync();
+                    //Skip the header
+                    if (string.IsNullOrEmpty(l) || l.StartsWith("#")) continue;
+                    //Collect each stat line as we go, group later
+                    stats.Add(Item.FromLine(l));
+                }
             }
             var result = stats.GroupBy(s => s.UniqueProxyId).Select(g => new Proxy
             {
