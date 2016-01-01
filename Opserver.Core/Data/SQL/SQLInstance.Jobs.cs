@@ -15,19 +15,19 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Enables or disables an agent job
         /// </summary>
-        public async Task<bool> ToggleJobAsync(Guid jobId, bool enabled)
+        public Task<bool> ToggleJobAsync(Guid jobId, bool enabled)
         {
-            return await ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
         }
 
-        public async Task<bool> StartJobAsync(Guid jobId)
+        public Task<bool> StartJobAsync(Guid jobId)
         {
-            return await ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
         }
 
-        public async Task<bool> StopJobAsync(Guid jobId)
+        public Task<bool> StopJobAsync(Guid jobId)
         {
-            return await ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
         }
 
         private async Task<bool> ExecJobActionAsync(Func<DbConnection, Task<int>> action)

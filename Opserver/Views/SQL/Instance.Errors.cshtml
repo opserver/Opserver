@@ -2,59 +2,62 @@
 @{
     Layout = null;
     const int errorMinutesToGet = 6 * 60;
+    var ts = TimeSpan.FromMinutes(errorMinutesToGet);
     var errors = Model.GetErrorLog(errorMinutesToGet);
     var data = errors.SafeData(true);
 }
-    <div class="summary-dashboard">
-        <h3><a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Errors last @errorMinutesToGet.Pluralize("minute")
-            <span class="top-right-info">Updated @errors.ToPollSpan()</span>
-        </h3>
-        <div class="dashboard-description">You clicked on Errors/sec, which is query errors. The below is a list of SQL Server's recent error log entries, which may not show the query errors. <br />However, if you're looking to troubleshoot errors, you would want to see this list anyway just to check.</div>
-    @if (data.Any())
-    {
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Process</th>
-                        <th>Message</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @for (int i = 0; i < data.Count; i++)
+<h4 class="modal-title" title="Updated @errors.LastPoll.ToRelativeTime()">
+    Errors last @ts.ToReadableString()
+</h4>
+<div class="alert alert-warning">
+    <p>You clicked on Errors/sec, which is query errors. The below is a list of SQL Server's recent error log entries, which may not show the query errors.</p>
+    <p>However, if you're looking to troubleshoot errors, you would want to see this list anyway just to check.</p>
+</div>
+<div class="dashboard-description">
+</div>
+@if (data.Any())
+{
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Process</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (var i = 0; i < data.Count; i++)
+            {
+                var e = data[i];
+                <tr>
+                    <td class="text-nowrap">@e.LogDate.ToRelativeTimeSpan()</td>
+                    <td class="text-nowrap">@e.ProcessInfo</td>
+                    <td>
+                        @e.Text
+                    @if (e.ProcessInfo.StartsWith("spid"))
                     {
-                        var e = data[i];
-                        <tr>
-                            <td style="white-space: nowrap;">@e.LogDate.ToRelativeTimeSpan()</td>
-                            <td style="white-space: nowrap;">@e.ProcessInfo</td>
-                            <td>@e.Text
-                            @if (e.ProcessInfo.StartsWith("spid"))
-                            {
-                                while ( i < data.Count && data[i].LogDate == e.LogDate && data[i].ProcessInfo == e.ProcessInfo)
-                                {
-                                    <br/>@data[i].Text
-                                    i++;
-                                }
-                            }
-                            </td>
-                        </tr>
-                        if (i > 500 && data.Count > 501)
+                        while (i < data.Count && data[i].LogDate == e.LogDate && data[i].ProcessInfo == e.ProcessInfo)
                         {
-                            <tr class="total-row">
-                                <td colspan="3" class="no-content">
-                                    There are @(data.Count.ToComma()) errors in the last @errorMinutesToGet.Pluralize("minute"), showing the most recent 500.
-                                </td>
-                            </tr>
-                            break;
+                            <br />@data[i].Text
+                            i++;
                         }
                     }
-                </tbody>
-            </table>
-        </div>
-    }
-    else
-    {
-        <div class="no-content">No errors available from the last @errorMinutesToGet.Pluralize("minute")</div>
-    }
-    </div>
+                </td>
+            </tr>
+                if (i > 500 && data.Count > 501)
+                {
+                    <tr class="total-row">
+                        <td colspan="3" class="no-content">
+                            There are @(data.Count.ToComma()) errors in the last @errorMinutesToGet.Pluralize("minute"), showing the most recent 500.
+                        </td>
+                    </tr>
+                    break;
+                }
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No errors available from the last @errorMinutesToGet.Pluralize("minute")</div>
+}

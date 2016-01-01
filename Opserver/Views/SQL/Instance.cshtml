@@ -35,7 +35,8 @@
                             <div class="value-block col-md-3 col-sm-6">
                                 @pd.MachineName
                                 <label>
-                                    Server @if (pd.IsVM){<text>(VM)</text>}
+                                    Server @if (pd.IsVM)
+                                    {<text>(VM)</text>}
                                 </label>
                             </div>
                             <div class="value-block col-md-3 col-sm-6">
@@ -64,7 +65,9 @@
                                 var dbStatus = dbs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @dbStatus.BackgroundClass()">
                                     @SQLHelpers.HealthDescription(i, dbs)
-                                    <label>@dbs.Count.Pluralize("Database", includeNumber: false)</label>
+                                    <label>
+                                        @dbs.Count.Pluralize("Database", includeNumber: false)
+                                    </label>
                                 </div>
                             }
                             @if (i.JobSummary.Data?.Any() ?? false)
@@ -73,13 +76,14 @@
                                 var running = jobs.Count(j => j.IsRunning);
                                 var jobStatus = jobs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @jobStatus.BackgroundClass()">
-                                    <a href="#/sql/summary/jobs">@SQLHelpers.HealthDescription(i, jobs, unknownIsHealthy: true)</a>
+                                    @SQLHelpers.HealthDescription(i, jobs, unknownIsHealthy: true)
                                     <label>
                                         @jobs.Count.Pluralize("Job", includeNumber: false)
                                         @if (running > 0)
-                                            {
+                                        {
                                             @:- <span class="text-success">@running.ToComma() running</span>
-                                            }
+                                        }
+                                        <span class="text-muted">(<a href="#/sql/summary/jobs">view</a>)</span>
                                     </label>
                                 </div>
                             }
@@ -110,7 +114,7 @@
                             @if (pd.PhysicalMemoryBytes > 0)
                             {
                                 var clerks = i.MemoryClerkSummary.SafeData(true);
-                            <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
+                                <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
 Virtual: @pd.VirtualMemoryBytes.ToComma() (@pd.VirtualMemoryBytes.ToSize())
 SQL Server Used: @pd.CommittedBytes.ToComma() (@pd.CommittedBytes.ToSize())
 SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToSize())
@@ -120,38 +124,41 @@ Top Users:
 {
     <text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)</text>
 }">
-                                <div class="progress">
-                                    <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.ToString())%;"></div>
-                                    <span>
-                                        @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
-                                        <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
-                                    </span>
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.ToString())%;"></div>
+                                        <span>
+                                            @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
+                                            <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
+                                        </span>
+                                    </div>
+                                    <label>Memory</label>
                                 </div>
-                                <label>Memory</label>
-                            </div>
                                 if (clerks.Any())
                                 {
                                     var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
                                     var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
                                     if (buffer != null)
                                     {
-                            <div class="value-block col-md-3">
-                                @buffer.UsedBytes.ToSize()
-                                <label>Buffer Pool</label>
-                            </div>
+                                        <div class="value-block col-md-3">
+                                            @buffer.UsedBytes.ToSize()
+                                            <label>Buffer Pool</label>
+                                        </div>
                                     }
                                     if (plans != null)
                                     {
-                            <div class="value-block col-md-3">
-                                @plans.UsedBytes.ToSize()
-                                <label>Plan Cache</label>
-                            </div>
+                                        <div class="value-block col-md-3">
+                                            @plans.UsedBytes.ToSize()
+                                            <label>Plan Cache</label>
+                                        </div>
                                     }
                                 }
                             }
                             <div class="value-block col-md-3 col-sm-6">
-                                <a href="#/sql/summary/connections">@pd.ConnectionCount.ToComma()</a>
-                                <label>Connections</label>
+                                @pd.ConnectionCount.ToComma()
+                                <label>
+                                    Connections
+                                    <span class="text-muted">(<a href="#/sql/summary/connections">view</a>)</span>
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -183,19 +190,19 @@ Top Users:
                             <div class="panel-body small">
                                 @foreach (var v in volumes)
                                 {
-                                    var percentUsed = 100*(v.TotalBytes - v.AvailableBytes)/(float) v.TotalBytes;
-                                <div class="value-block col-md-@(volumes.Count == 1 ? "12" : "6") col-sm-6" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
+                                    var percentUsed = 100 * (v.TotalBytes - v.AvailableBytes) / (float)v.TotalBytes;
+                                    <div class="value-block col-md-@(volumes.Count == 1 ? "12" : "6") col-sm-6" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
 Total: @v.TotalBytes.ToComma() bytes (@v.TotalBytes.ToSize())
 Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
 Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
 Avgerage Read Stall: @v.AvgReadStallMS.ToString(CultureInfo.CurrentCulture) ms
 Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms">
-                                    <div class="progress">
-                                        <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.CurrentCulture)%;"></div>
-                                        <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.CurrentCulture)%;"></div>
+                                            <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
+                                        </div>
+                                        <label><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></label>
                                     </div>
-                                    <label><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></label>
-                                </div>
                                 }
                             </div>
                         </div>
@@ -289,7 +296,13 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                 @counter.CalculatedValue.ToString("#,##0.###") <span class="text-muted">/sec</span> @suffix
             }
             <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
-            <label>@label</label>
+            <label>
+                @label
+                @if (url.HasValue())
+                {
+                    <span class="text-muted">(<a href="@url">view</a>)</span>
+                }
+            </label>
         </div>
     }
 }
@@ -308,11 +321,11 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                 <div class="panel panel-default">
                     <div class="panel-heading">Memory & Storage</div>
                     <div class="panel-body small">
-@helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+                        @helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+                        {
+var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+if (counter != null)
 {
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter != null)
-    {
         <div class="value-block col-md-3 col-sm-6">
             @if (url.HasValue())
             {
@@ -326,7 +339,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
             }
             <label>@label</label>
         </div>
-    }
+}
 }
                         @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
                         @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
@@ -342,16 +355,16 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                 <div class="panel panel-default">
                     <div class="panel-heading">Cache</div>
                     <div class="panel-body small">
-@helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
+                        @helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
+                        {
+var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+if (counter != null)
 {
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter != null)
-    {
         <div class="value-block col-md-4 col-sm-6">
             @counter.CalculatedValue.ToString("#,##0.###") @suffix
             <label>@label</label>
         </div>
-    }
+}
 }
                         @{
                             Func<string, string, string, string> getCacheSize = (o, c, j) =>
@@ -372,7 +385,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                         @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
                     </div>
                 </div>
-            }
+                            }
         </div>
     </div>
 
@@ -422,7 +435,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                                 <tr>
                                     <th>AlwaysOn Replication</th>
                                     <th>Bytes</th>
-                                    <th title="Total since last restart" class="note">Total</th>
+                                    <th title="Total since last restart" class="text-muted">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -457,7 +470,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                             <tr>
                                 <th>Category</th>
                                 <th>/sec</th>
-                                <th title="Total since last restart" class="note">Total</th>
+                                <th title="Total since last restart" class="text-muted">Total</th>
                             </tr>
                         </thead>
                         <tbody>

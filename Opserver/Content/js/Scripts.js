@@ -756,32 +756,43 @@ Status.SQL = (function () {
         }).on('click', '.filters, .filters-current', function (e) {
             e.stopPropagation();
         });
-        $(document).on('click', function () {
-            $('.filters').toggle(false);
-        }).on('click', '.sql-toggle-agent-job', function () {
-            var $link = $(this).addClass('loading');
-            $.ajax('/sql/toggle-agent-job', {
+        function agentAction(link, route, errMessage) {
+            var origText = link.text();
+            var $link = link.text('').prependWaveLoader();
+            $.ajax('/sql/' + route, {
                 type: 'POST',
                 data: {
                     node: Status.SQL.options.node,
-                    guid: $(this).data('guid'),
-                    enable: $(this).data('enable')
+                    guid: link.closest('[data-guid]').data('guid'),
+                    enable: link.data('enable')
                 },
                 success: function (data, status, xhr) {
                     if (data === true) {
                         Status.popup('/sql/instance/summary/jobs', { node: Status.SQL.options.node }, true);
-                        Status.resizePopup();
                     } else {
-                        $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred toggling this job.');
+                        $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                     }
                 },
                 error: function (xhr) {
-                    $link.removeClass('loading').errorPopupFromJSON(xhr, 'An error occurred toggling this job.');
+                    $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                 }
             });
             return false;
-        });
-        $(document).on('click', '.ag-node', function() {
+        }
+        $(document).on('click', function () {
+            $('.filters').toggle(false);
+        }).on('click', '.js-sql-job-action', function () {
+            var link = $(this);
+            switch (link.data('action')) {
+                case 'toggle':
+                    return agentAction($(this), 'toggle-agent-job', 'An error occurred toggling this job.');
+                case 'start':
+                    return agentAction($(this), 'start-agent-job', 'An error occurred starting this job.');
+                case 'stop':
+                    return agentAction($(this), 'stop-agent-job', 'An error occurred stopping this job.');
+            }
+            return false;
+        }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
         });
     }
@@ -1469,13 +1480,14 @@ Status.HAProxy = (function () {
                 rightMargin: 70,
                 min: 'auto',
                 leftMargin: 60,
+                // TODO: Style except for BG color in .less
                 rightAreaTooltipFormat: function (value, series, name, color) {
                     return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
                         + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + '</b>';
                 },
                 areaTooltipFormat: function (value, series, name, color) {
                     return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
-                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + ' <span class="note">ms</span></b>';
+                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + ' <span class="text-muted">ms</span></b>';
                 },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.commify(d) + ' ms'; }
@@ -1880,7 +1892,7 @@ Status.HAProxy = (function () {
                 var pos = d3.mouse(this),
                     date = x.invert(pos[0]),
                     bisector = d3.bisector(function(d) { return d.date; }).left,
-                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="note">UTC</span></div>',
+                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">UTC</span></div>',
                     data = options.ajaxZoom ? curData.points : curData.summary,
                     index = bisector(data, date, 1), // bisect the curData array to get the index of the hovered date
                     dateBefore = data[Math.max(index - 1, 0)], // get the date before the hover
@@ -2258,7 +2270,7 @@ Status.HAProxy = (function () {
                 var pos = d3.mouse(this),
                     date = x.invert(pos[0]),
                     bisector = d3.bisector(function (d) { return d.date; }).left,
-                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="note">UTC</span></div>';
+                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">UTC</span></div>';
 
                 // align the moons! or at least the series hover dots
                 series.forEach(function (s) {
