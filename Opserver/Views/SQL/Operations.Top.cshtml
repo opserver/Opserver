@@ -12,15 +12,15 @@
 {
     @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
 }
-@helper SortLink(SQLInstance.TopSorts sort, string title, string cssClasses = "") {
-    <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")@(cssClasses.HasValue() ? " " + cssClasses : "")">
+@helper SortLink(SQLInstance.TopSorts sort, string title) {
+    <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
     @if(sort == Model.TopSearchOptions.Sort)
     {
         <span class="current-sort" title="@sort.GetDescription()">@title</span>
     } 
     else
     {
-        <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptions.ToQueryString(true))@(Model.Detailed ? "&detailed=true" : "")" title="Sort by @sort.GetDescription()">@title</a>
+        <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptions.ToQueryString(true))" title="Sort by @sort.GetDescription()">@title</a>
     }
     </th>
 }
@@ -31,13 +31,18 @@
 <div>
     @if (errorMessage.HasValue())
     {
-        <div class="sql-server sql-error">
-            <span class="error-label">There was an error fetching server status from @i.Name:</span>
-            @errorMessage
+        <h5 class="page-header">
+            Unknown Operations on @i.Name
+        </h5>
+        <div class="alert alert-danger">
+            <h5>There was an error fetching server status from @i.Name:</h5>
+            <p class="error-stack">
+                @errorMessage
+            </p>
         </div>
     } else
     {
-        <div class="sql-server">
+        <div>
             <h5 class="page-header">Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
                 <div class="filters-wrap" style="display: none;">
                     <div class="filters-current">
@@ -91,50 +96,31 @@
                     </div>
                 </div>
             </h5>
-            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive table-row-actions">
                 <thead>
                     <tr class="sort-row sort-category">
-                        <th colspan="@(Model.Detailed ? "4" : "3")">CPU</th>
-                        <th colspan="@(Model.Detailed ? "3" : "2")">Time</th>
-                        <th colspan="@(Model.Detailed ? "3" : "2")">Reads</th>
-                        @if (Model.Detailed)
-                        {
-                    <th colspan="2">Rows</th>}
-                        <th colspan="@(Model.Detailed ? "3" : "2")">Execs</th>
-                        <th colspan="@(Model.Detailed ? "2" : "1")">Time</th>
+                        <th colspan="3">CPU</th>
+                        <th colspan="2">Time</th>
+                        <th colspan="2">Reads</th>
+                        <th colspan="2">Execs</th>
+                        <th>Time</th>
                         <th colspan="2">Query Info</th>
                     </tr>
                     <tr class="sort-row">
-                        @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg", "number-col first-of-sort")
-                        @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min", "number-col")
-                        @SortLink(SQLInstance.TopSorts.TotalCPU, "Total", "number-col")
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.PercentCPU, "%")}
+                        @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg")
+                        @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min")
+                        @SortLink(SQLInstance.TopSorts.TotalCPU, "Total")
 
-                        @SortLink(SQLInstance.TopSorts.AvgDuration, "Avg", "number-col first-of-sort")
-                        @SortLink(SQLInstance.TopSorts.TotalDuration, "Total", "number-col")
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.PercentDuration, "%")}
+                        @SortLink(SQLInstance.TopSorts.AvgDuration, "Avg")
+                        @SortLink(SQLInstance.TopSorts.TotalDuration, "Total")
 
-                        @SortLink(SQLInstance.TopSorts.AvgReads, "Reads (Avg)", "number-col first-of-sort")
-                        @SortLink(SQLInstance.TopSorts.TotalReads, "Reads (Total)", "number-col")
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.PercentReads, "% Reads")}
+                        @SortLink(SQLInstance.TopSorts.AvgReads, "Reads (Avg)")
+                        @SortLink(SQLInstance.TopSorts.TotalReads, "Reads (Total)")
 
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.AvgReturnedRows, "Avg", "number-col first-of-sort")}
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.TotalReturnedRows, "Total", "number-col")}
-
-                        @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs", "number-col first-of-sort")
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.PercentExecutions, "% Execs")}
-                        @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min", "number-col")
-
-                        @if (Model.Detailed)
-                        {@SortLink(SQLInstance.TopSorts.PlanCreationTime, "Created")}
-                        @SortLink(SQLInstance.TopSorts.LastExecutionTime, "Last Exec", "first-of-sort")
-                        <th class="first-of-sort">Database</th>
+                        @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs")
+                        @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min")
+                        @SortLink(SQLInstance.TopSorts.LastExecutionTime, "Last Exec")
+                        <th>Database</th>
                         <th>Query</th>
                     </tr>
                 </thead>
@@ -142,36 +128,15 @@
                     @foreach (var o in topOps)
                     {
                         <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
-                            <td class="number-col">@o.AvgCPU.ToComma()µs</td>
-                            <td class="number-col">@o.AvgCPUPerMinute.ToComma()µs</td>
-                            <td class="number-col">@ReadableTime(o.TotalCPU / 1000)</td>
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.PercentCPU.ToString("0.00")</td>}
-                            <td class="number-col">@ReadableTime(o.AvgDuration)</td>
-                            <td class="number-col">@ReadableTime(o.TotalDuration)</td>
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.PercentDuration.ToString("0.00")</td>}
-                            <td class="number-col">@o.AvgReads.ToComma()</td>
-                            <td class="number-col">@o.TotalReads.ToComma()</td>
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.PercentReads.ToString("0.00")</td>}
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.AvgReturnedRows.ToString("0.00")</td>}
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.TotalReturnedRows.ToComma()</td>}
-                            <td class="number-col">@o.ExecutionCount.ToComma()</td>
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.PercentExecutions.ToString("0.00")</td>}
-                            <td class="number-col">@o.ExecutionsPerMinute.ToString("0.00")</td>
-                            @if (Model.Detailed)
-                            {
-                        <td>@o.PlanCreationTime.ToRelativeTimeSpan()</td>}
+                            <td>@o.AvgCPU.ToComma()µs</td>
+                            <td>@o.AvgCPUPerMinute.ToComma()µs</td>
+                            <td>@ReadableTime(o.TotalCPU / 1000)</td>
+                            <td>@ReadableTime(o.AvgDuration)</td>
+                            <td>@ReadableTime(o.TotalDuration)</td>
+                            <td>@o.AvgReads.ToComma()</td>
+                            <td>@o.TotalReads.ToComma()</td>
+                            <td>@o.ExecutionCount.ToComma()</td>
+                            <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
                             <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
                             <td>@o.CompiledOnDatabase</td>
                             <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
@@ -180,7 +145,7 @@
                     @if (!topOps.Any())
                     {
                         <tr>
-                            <td colspan="@(Model.Detailed ? "19" : "12")"><div class="none-active">There are no operations in the plan cache on this server.</div></td>
+                            <td colspan="12"><div class="none-active">There are no operations in the plan cache on this server.</div></td>
                         </tr>
                     }
                 </tbody>

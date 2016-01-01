@@ -7,6 +7,5 @@ namespace StackExchange.Opserver.Views.SQL
     {
         public SQLInstance.TopSearchOptions TopSearchOptions { get; set; }
         public List<SQLInstance.TopOperation> TopOperations { get; set; }
-        public bool Detailed { get; set; }
     }
 }

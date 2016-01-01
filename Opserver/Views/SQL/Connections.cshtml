@@ -12,13 +12,16 @@
     <div class="node-summary redis-summary">
         @if (connections.LastPollStatus == FetchStatus.Fail)
         {
-            <div class="sql-server sql-error">
-                <span class="error-label">There was an error fetching server status from @i.Name:</span>
-                @connections.ErrorMessage
-                @Helpers.PollNow(i, i.Connections)
+            <h5 class="page-header">
+                Unknown connections on @i.Name
+                @Helpers.PollNow(i)
+            </h5>
+            <div class="alert alert-danger">
+                <h5>There was an error fetching server status from @i.Name:</h5>
+                <p class="error-stack">@connections.ErrorMessage</p>
             </div>
         } else {
-            <div class="sql-server">
+            <div>
                 <h5 class="page-header">
                     @connections.Data.Count.Pluralize("Current active connection") on @i.Name:
                     @Helpers.PollNow(i)

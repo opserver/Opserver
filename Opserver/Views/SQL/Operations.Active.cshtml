@@ -28,14 +28,15 @@
         <div class="node-summary redis-summary">
         @if (activeOps.LastPollStatus == FetchStatus.Fail)
         {
-            <div class="sql-server sql-error">
-                <span class="error-label">There was an error fetching server status from @i.Name:</span>
-                @activeOps.ErrorMessage
+            <h5>Unknown active queries on @i.Name</h5>
+            <div class="alert alert-danger">
+                <h5>There was an error fetching server status from @i.Name:</h5>
+                <p class="error-stack">@activeOps.ErrorMessage</p>
             </div>
         } else
         {
             var data = activeOps.SafeData(true);
-            <div class="sql-server">
+            <div>
                 <h5 class="page-header">Current active queries on @i.Name:
                     <div class="filters-wrap" style="display: none;">
                         <div class="filters-current">

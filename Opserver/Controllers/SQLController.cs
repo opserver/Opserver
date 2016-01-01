@@ -86,16 +86,14 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 5 * 1, VaryByParam = "node;sort;options", VaryByContentEncoding = "gzip;deflate")]
         [Route("sql/top")]
-        public ActionResult Top(string node, SQLInstance.TopSearchOptions options, bool? detailed = false)
+        public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
         {
             var i = SQLInstance.Get(node);
             options.SetDefaults();
-
-
+            
             var vd = new OperationsTopModel
             {
                 View = SQLViews.Top,
-                Detailed = detailed.GetValueOrDefault(),
                 CurrentInstance = i,
                 TopSearchOptions = options
             };

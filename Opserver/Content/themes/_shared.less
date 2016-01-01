@@ -19,6 +19,8 @@
 @nav-link-padding: 5px 10px;
 @panel-body-padding: 5px;
 @headings-small-color: @label-muted-color;
+@modal-title-padding: 10px;
+@modal-inner-padding: 10px;
 
 @miniprofiler-top-margin: 40px;
 
@@ -161,8 +163,8 @@ h4, h5, h6 {
     height: 20px;
   }
 }
-.dashboard-chart {
-  height: 400px;
+.modal-loader {
+  min-height: 200px;
   position: relative;
   .loader {
     position: absolute;
@@ -176,6 +178,9 @@ h4, h5, h6 {
         margin-right: 5px;
     }
   }
+}
+.dashboard-chart {
+  height: 400px;
 }
 
 .reload-link {
@@ -240,6 +245,12 @@ h4, h5, h6 {
   }
 }
 
+.table-row-actions {
+  tbody > tr {
+    cursor: pointer;
+  }
+}
+
 .panel {
   margin-bottom: @padding-small-vertical;
 
@@ -250,6 +261,29 @@ h4, h5, h6 {
   &.panel-default > .panel-heading {
     border: none;
   }
+}
+.panel-condensed {
+  .panel-body {
+    padding: 1px;
+  }
+  .value-block {
+    margin: 1px 0;
+    padding: 0;
+    label {
+      margin-bottom: 0;
+      font-size: 0.9em;
+    }
+    &:first-child {
+      margin-top: 0;
+    }
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.modal-huge {
+  width: ~"calc(100% - 60px)";
 }
 
 .value-block {

@@ -104,7 +104,7 @@
         closePopup();
 
         var dialog = currentDialog = bootbox.dialog({
-            message: '<div id="dashboard-popup" class="js-summary-popup"></div>',
+            message: '<div id="dashboard-popup" class="modal-loader js-summary-popup"></div>',
             title: 'Loading...',
             size: 'large',
             backdrop: true,
@@ -118,6 +118,7 @@
             } else {
                 l.hash = '';
             }
+            if (onClose) onClose.call(this);
         });
 
         // TODO: refresh intervals via header
@@ -427,7 +428,7 @@ Status.Dashboard = (function () {
 
             function popup(title) {
                 bootbox.dialog({
-                    message: '<div id="dashboard-popup" class="dashboard-chart"></div>',
+                    message: '<div id="dashboard-popup" class="dashboard-chart modal-loader"></div>',
                     title: title,
                     size: 'large',
                     backdrop: true,
@@ -479,36 +480,9 @@ Status.Dashboard = (function () {
 
 Status.Dashboard.Server = (function () {
 
-    var currentRequest;
-
     function init(options) {
         Status.Dashboard.Server.options = options;
 
-        $('.sql-server').on('click', '.sortable a', function() {
-            var query = $(this).attr('href'),
-                fullUrl = '/sql/top' + query;
-
-            $(this).closest('th').addClass('loading').siblings().removeClass('loading');
-            if (currentRequest) currentRequest.abort();
-            currentRequest = $.get(fullUrl, function(html) {
-                var newTable = $('.sql-server .node-dashboard', html);
-                if (newTable.length) {
-                    $('.sql-server .node-dashboard').replaceWith(newTable);
-                }
-            });
-            return false;
-        }).on('submit', '.category-row form', function () {
-            //TODO: Loading animation
-            
-            if (currentRequest) currentRequest.abort();
-            currentRequest = $.get('/sql/top', $(this).serialize(), function (html) {
-                var newTable = $('.sql-server .node-dashboard', html);
-                if (newTable.length) {
-                    $('.sql-server .node-dashboard').replaceWith(newTable);
-                }
-            });
-            return false;
-        });
         $('.realtime-cpu').on('click', function () {
             var start = +$(this).parent().siblings('.total-cpu-percent').text().replace(' %','');
             liveDashboard(start);
@@ -692,22 +666,15 @@ Status.SQL = (function () {
         var parts = val.split('/'),
             handle = parts[0],
             offset = parts.length > 1 ? parts[1] : null;
-        $('.sql-server .plan-row[data-plan-handle="' + handle + '"]').addClass('selected');
-        Status.popup('/sql/top/detail', { node: Status.SQL.options.node, handle: handle, offset: offset }, function() {
-            $('.query-col').removeClass('loading');
-            Status.showSummaryPopup(function () { $('.plan-row.selected').removeClass('selected'); });
+        $('.plan-row[data-plan-handle="' + handle + '"]').addClass('info');
+        Status.popup('/sql/top/detail', {
+            node: Status.SQL.options.node,
+            handle: handle,
+            offset: offset
+        }, function () {
+            $(this).closest('.modal-lg').removeClass('modal-lg').addClass('modal-huge');
             prettyPrint();
-            $(this).find('.sql-query-section .tabs-links').on('click', 'a', function () {
-                if ($(this).hasClass('selected')) return false;
-                $(this).addClass('selected').siblings().removeClass('selected');
-                var newDiv = $(this).data('div');
-                $('.sql-query-section .' + newDiv).show().siblings().not('.tabs').hide();
-
-                Status.resizePopup();
-
-                $('.qp-root').drawQueryPlanLines();
-                return false;
-            });
+            $('.qp-root').drawQueryPlanLines();
             var currentTt;
             $(this).find('.qp-node').hover(function () {
                 var pos = $(this).offset();
@@ -720,9 +687,11 @@ Status.SQL = (function () {
             }, function() {
                 if (currentTt) currentTt.hide();
             });
-            $(this).find('.handle-link a').on('click', function () {
-                if (!confirm('Are you sure you want to remove this plan from cache?'))
+            $(this).find('.js-remove-plan').on('click', function () {
+                if ($(this).hasClass('js-confirm')) {
+                    $(this).text('confirm?').removeClass('js-confirm');
                     return false;
+                }
 
                 var $link = $(this).addClass('loading');
                 $.ajax($link.attr('href'), {
@@ -748,6 +717,8 @@ Status.SQL = (function () {
                 grad.fadeOut(400);
                 e.preventDefault();
             });
+        }, function () {
+            $('.plan-row.selected').removeClass('info');
         });
     }
     
@@ -765,7 +736,7 @@ Status.SQL = (function () {
             }
         });        
         
-        $('.sql-server').on('click', '.plan-row', function() {
+        $('.js-content').on('click', '.plan-row[data-plan-handle]', function () {
             var $this = $(this),
                 handle = $this.data('plan-handle'),
                 offset = $this.data('offset');
