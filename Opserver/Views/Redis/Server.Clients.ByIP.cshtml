@@ -7,7 +7,7 @@
 }
 @if (clients != null)
 {
-    <div class="info-title">Client Summary <span class="note">(by IP)</span></div>
+    <div class="info-title">Client Summary <span class="text-muted">(by IP)</span></div>
     <div class="redis-client-summary">
         @{ var ips = clients.Select(c => c.Host).GroupBy(ip => ip); }
         @foreach (var ip in ips.OrderBy(ipg => ipg.Key))

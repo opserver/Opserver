@@ -185,7 +185,6 @@
       <DependentUpon>Servers.cshtml</DependentUpon>
     </Compile>
     <Content Include="Config\Readme.txt" />
-    <Content Include="Content\bootstrap\css\bootstrap.min.css" />
     <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Content\bootstrap\js\bootstrap.min.js" />
     <Content Include="Content\img\logo\full-dark.svg" />
@@ -646,7 +645,6 @@
     <Content Include="Views\SQL\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\img\se-stats.png" />
     <Content Include="Content\Login.css" />
     <Content Include="Content\js\Scripts.js" />
     <Content Include="favicon.ico" />

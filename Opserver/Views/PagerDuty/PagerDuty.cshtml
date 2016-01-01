@@ -124,12 +124,12 @@
                         {
                             if (@i.Status == IncidentStatus.triggered || @i.Status == IncidentStatus.acknowledged)
                             {
-                                <span class="note">(@i.LastChangedBy.FullName)</span>
+                                <span class="text-muted">(@i.LastChangedBy.FullName)</span>
                                 @GetIncidentAction(i.Status)
                             }
                             else
                             {
-                                <span class="note">(@i.LastChangedBy.FullName)</span>
+                                <span class="text-muted">(@i.LastChangedBy.FullName)</span>
                             }
 
                         }

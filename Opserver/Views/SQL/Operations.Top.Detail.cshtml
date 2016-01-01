@@ -185,7 +185,7 @@
                                     Statement
                                     @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
                                     {
-                                        <span class="note">
+                                        <span class="text-muted">
                                             @(statement.StatementSubTreeCostSpecified ? "cost: " + statement.StatementSubTreeCost : "")
                                             @(statement.StatementSubTreeCostSpecified && statement.StatementOptmLevel.HasValue() ? " - " : "")
                                             @(statement.StatementOptmLevel.HasValue() ? "optimization: " + statement.StatementOptmLevel : "")
@@ -210,12 +210,12 @@
                                                 @if (statement.QueryPlanHash.HasValue())
                                                 {
                                                     @statement.QueryPlanHash
-                                                    <span class="note">(plan)</span>
+                                                    <span class="text-muted">(plan)</span>
                                                 }
                                                 @if (statement.QueryHash.HasValue())
                                                 {
                                                     @statement.QueryHash
-                                                    <span class="note">(query)</span>
+                                                    <span class="text-muted">(query)</span>
                                                 }
                                             </div>
                                         </div>
@@ -247,11 +247,11 @@
                                 </div>
                                 @if (ss?.QueryPlan?.MissingIndexes != null)
                                 {
-                                    <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="note">(according to SQL Server, don't blindly apply these)</span></div>
+                                    <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="text-muted">(according to SQL Server, don't blindly apply these)</span></div>
                                     foreach (var mi in ss.QueryPlan.MissingIndexes)
                                     {
                                         <div class="index-details">
-                                            <span class="note">(Impact: @mi.Impact)</span>
+                                            <span class="text-muted">(Impact: @mi.Impact)</span>
                                             @foreach (var index in mi.MissingIndex)
                                             {
                                                 var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);

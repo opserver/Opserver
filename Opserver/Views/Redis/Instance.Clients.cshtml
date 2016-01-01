@@ -46,9 +46,9 @@
                         }
                         else
                         {
-                            <td class="note">none</td>
+                            <td class="text-muted">none</td>
                         }
-                        <td data-val="@((c.SubscriptionCount + c.PatternSubscriptionCount).ToString())">@c.SubscriptionCount.ToComma() <span class="note">(@c.PatternSubscriptionCount.ToComma())</span></td>
+                        <td data-val="@((c.SubscriptionCount + c.PatternSubscriptionCount).ToString())">@c.SubscriptionCount.ToComma() <span class="text-muted">(@c.PatternSubscriptionCount.ToComma())</span></td>
                         <td data-val="@c.AgeSeconds.ToString()">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
                         <td data-val="@c.IdleSeconds.ToString()">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
                         <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>

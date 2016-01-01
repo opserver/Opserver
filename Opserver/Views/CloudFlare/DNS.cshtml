@@ -77,7 +77,7 @@
             var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
             <tr class="@(r.Proxied ? "success" : null)">
                 <td class="@(r.Type == DNSRecordType.CNAME ? "text-warning" : null)">@r.Type</td>
-                <td><strong>@(r.Name != r.ZoneName ? r.Name.Replace(r.ZoneName, "") : r.Name)</strong>@if (r.Name != r.ZoneName){<span class="note">.@r.ZoneName</span>}</td>
+                <td><strong>@(r.Name != r.ZoneName ? r.Name.Replace(r.ZoneName, "") : r.Name)</strong>@if (r.Name != r.ZoneName){<span class="text-muted">.@r.ZoneName</span>}</td>
                 <td>
                     @switch (r.Type)
                     {
@@ -85,7 +85,7 @@
                             @r.Content
                             if (rootIPs != null && rootIPs.Any())
                             {
-                                <span class="note">(@string.Join(", ", masked))</span>
+                                <span class="text-muted">(@string.Join(", ", masked))</span>
                             }
                             break;
                         default:

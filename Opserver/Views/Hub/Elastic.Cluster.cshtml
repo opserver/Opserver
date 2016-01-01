@@ -37,15 +37,15 @@
                             }
                             else
                             {
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
                             }
-                            @if (n.Stats?.Process.Memory != null)
+                            @if (n.Stats?.Process?.Memory != null)
                             {
                                 <td>@n.Stats.Process.Memory.ResidentInBytes.ToSize("b")</td>
                             }
                             else
                             {
-                            <td class="note">n/a</td>
+                            <td class="text-muted">n/a</td>
                             }
                             <td>@c.HealthStatus.Data.Indices.Count.ToComma()</td>
                         </tr>
