@@ -8338,10 +8338,10 @@ h6.page-header {
   border: none;
 }
 .panel-condensed .panel-body {
-  padding: 1px;
+  padding: 2px;
 }
 .panel-condensed .value-block {
-  margin: 1px 0;
+  margin: 2px 1px;
   padding: 0;
 }
 .panel-condensed .value-block label {
