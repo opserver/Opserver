@@ -74,11 +74,11 @@ Select cluster_name ClusterName,
             public bool IsLocal { get; internal set; }
             
             public string GetFetchSQL(Version v) => @"
-select member_name MemberName,
+Select member_name MemberName,
        member_type Type,
        member_state State,
        number_of_quorum_votes Votes
-from sys.dm_hadr_cluster_members;";
+  From sys.dm_hadr_cluster_members;";
         }
 
         public class AGClusterNetworkInfo : ISQLVersioned
@@ -87,18 +87,24 @@ from sys.dm_hadr_cluster_members;";
             public string MemberName { get; internal set; }
             public string NetworkSubnetIP { get; internal set; }
             public string NetworkSubnetIPMask { get; internal set; }
-            public int? NetworkSubnetPrefixLength { get; internal set; }
+            public int NetworkSubnetPrefixLength { get; internal set; }
             public bool IsPublic { get; internal set; }
             public bool IsIPV4 { get; internal set; }
+            public bool IsLocal { get; internal set; }
+
+            private IPNet _networkIPNet;
+            public IPNet NetworkIPNet =>
+                _networkIPNet ?? (_networkIPNet = IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength));
 
             public string GetFetchSQL(Version v) => @"
-select member_name MemberName,
+Select member_name MemberName,
        network_subnet_ip NetworkSubnetIP,
        network_subnet_ipv4_mask NetworkSubnetIPMask,
        network_subnet_prefix_length NetworkSubnetPrefixLength,
        is_public IsPublic,
-       is_ipv4 IsIPV4
-  from sys.dm_hadr_cluster_networks;";
+       is_ipv4 IsIPV4,
+       Cast(Case When member_name = SERVERPROPERTY('MachineName') Then 1 Else 0 End as Bit) IsLocal
+  From sys.dm_hadr_cluster_networks;";
         }
     }
 }

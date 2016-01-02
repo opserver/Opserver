@@ -5,8 +5,71 @@
 @{
     var i = Model.CurrentInstance;
     if (i == null) { return; }
-    var enabledTraceFlags = i.TraceFlags.Data?.Where(tf => tf.Enabled)?.ToList();
+    var enabledTraceFlags = i.TraceFlags.Data?.Where(tf => tf.Enabled).ToList();
     var counters = Model.PerfCounters = i.PerfCounters.SafeData(true);
+}
+@helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+{
+    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+    if (counter == null)
+    {
+        return;
+    }
+    <div class="value-block col-md-3 col-sm-6">
+        @if (url.HasValue())
+        {
+            <a href="@url">
+                @(((long) counter.CalculatedValue*1024).ToSize())
+            </a>
+        }
+        else
+        {
+            @(((long) counter.CalculatedValue*1024).ToSize())
+        }
+        <label>@label</label>
+    </div>
+}
+@helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
+{
+    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+    if (counter == null)
+    {
+        return;
+    }
+    <div class="value-block col-md-4 col-sm-6">
+        @counter.CalculatedValue.ToString("#,##0.###") @suffix
+        <label>@label</label>
+    </div>
+}
+@helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3)
+{
+    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+    if (counter == null)
+    {
+        return;
+    }
+    <div class="value-block col-md-@cols.ToString() col-sm-6">
+        @if (url.HasValue())
+        {
+            <a href="@url">
+                @counter.CalculatedValue.ToString("#,##0.###") <span class="text-muted">/sec</span> @suffix
+            </a>
+        }
+        else
+        {
+            @counter.CalculatedValue.ToString("#,##0.###")
+            <span class="text-muted">/sec</span>
+            @suffix
+        }
+        <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
+        <label>
+            @label
+            @if (url.HasValue())
+            {
+                <span class="text-muted">(<a href="@url">view</a>)</span>
+            }
+        </label>
+    </div>
 }
 <div>
     <h5 class="page-header">
@@ -85,6 +148,13 @@
                                         }
                                         <span class="text-muted">(<a href="#/sql/summary/jobs">view</a>)</span>
                                     </label>
+                                </div>
+                            }
+                            @if (enabledTraceFlags?.Any() ?? false)
+                            {
+                                <div class="value-block col-md-12">
+                                    @string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))
+                                    <label>Trace Flags <span class="text-muted">(<a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">more info</a>)</span></label>
                                 </div>
                             }
                         </div>
@@ -228,6 +298,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                     </div>
 
                     var ags = ci.AvailabilityGroups.Data;
+                    var localNetworks = ci.AGClusterInfo.Data?.Networks?.Where(n => n.IsLocal);
                     if (ags?.Any() ?? false)
                     {
                         <div class="panel panel-default">
@@ -254,20 +325,25 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                                         </div>
                                         @foreach (var l in ag.Listeners)
                                         {
-                                            foreach (var a in l.Addresses)
+                                            foreach (var a in l.Addresses.Where(a => localNetworks?.Any(n => n.NetworkIPNet.Contains(a.IPNet)) ?? true))
                                             {
-                                                <div class="value-block col-md-3 col-sm-6 @a.BackgroundClass()">
-                                                    @a.IPAddress - @a.NetworkSubnetIP - @a.State
+                                                <div class="value-block col-md-3 col-sm-6 @a.BackgroundClass()" title="Subnet: @a.NetworkSubnetIP/@a.NetworkSubnetPrefixLength.ToString()">
+                                                    @a.IPAddress - @a.State
                                                     <label>@l.DnsName</label>
                                                 </div>
                                             }
                                         }
                                     </div>
                                 }
+                                <h6 class="page-header">Replication</h6>
+                                <div class="row">
+                                    @RenderPerSecCounter("Bytes from Replica", "Availability Replica", "Bytes Received from Replica/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Bytes to Replica", "Availability Replica", "Bytes Sent to Replica/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Bytes to Transport", "Availability Replica", "Bytes Sent to Transport/sec", "_Total", cols: 4)
+                                </div>
                             </div>
                         </div>
                     }
-                    var networks = ci.AGClusterInfo.Data?.Networks;
                 }
             }
         </div>
@@ -282,33 +358,6 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                             var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
                             var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? (compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
                         }
-@helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null)
-{
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter != null)
-    {
-        <div class="value-block col-md-3 col-sm-6">
-            @if (url.HasValue())
-            {
-                <a href="@url">
-                    @counter.CalculatedValue.ToString("#,##0.###") <span class="text-muted">/sec</span> @suffix
-                </a>
-            }
-            else
-            {
-                @counter.CalculatedValue.ToString("#,##0.###") <span class="text-muted">/sec</span> @suffix
-            }
-            <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
-            <label>
-                @label
-                @if (url.HasValue())
-                {
-                    <span class="text-muted">(<a href="@url">view</a>)</span>
-                }
-            </label>
-        </div>
-    }
-}
                         @RenderPerSecCounter("Batches", "SQL Statistics", "Batch Requests/sec", "", url: $"/sql/top?node={i.Name.UrlEncode()}&sort=ExecutionsPerMinute&LastRunSeconds=300")
                         @RenderPerSecCounter("Compilations", "SQL Statistics", "SQL Compilations/sec", "", suffix: compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
                         @RenderPerSecCounter("Re-Compilations", "SQL Statistics", "SQL Re-Compilations/sec", "")
@@ -324,26 +373,6 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                 <div class="panel panel-default">
                     <div class="panel-heading">Memory & Storage</div>
                     <div class="panel-body small">
-                        @helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
-                        {
-var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-if (counter != null)
-{
-        <div class="value-block col-md-3 col-sm-6">
-            @if (url.HasValue())
-            {
-                <a href="@url">
-                    @(((long)counter.CalculatedValue * 1024).ToSize())
-                </a>
-            }
-            else
-            {
-                @(((long)counter.CalculatedValue * 1024).ToSize())
-            }
-            <label>@label</label>
-        </div>
-}
-}
                         @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
                         @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
                         @RenderSizeCounter("Database Cache", "Memory Manager", "Database Cache Memory (KB)", "")
@@ -358,17 +387,6 @@ if (counter != null)
                 <div class="panel panel-default">
                     <div class="panel-heading">Cache</div>
                     <div class="panel-body small">
-                        @helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
-                        {
-var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-if (counter != null)
-{
-        <div class="value-block col-md-4 col-sm-6">
-            @counter.CalculatedValue.ToString("#,##0.###") @suffix
-            <label>@label</label>
-        </div>
-}
-}
                         @{
                             Func<string, string, string, string> getCacheSize = (o, c, j) =>
                             {
@@ -388,81 +406,10 @@ if (counter != null)
                         @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
                     </div>
                 </div>
-                            }
+            }
         </div>
     </div>
 
-    <div class="left-col">
-        <table>
-            @if (enabledTraceFlags?.Any() ?? false)
-            {
-                <tr>
-                    <td><a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">Trace Flags</a></td>
-                    <td>@string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))</td>
-                </tr>
-            }
-        </table>
-        @{
-            if (ci != null)
-            {
-                var ags = ci.AvailabilityGroups.SafeData(true);
-                var networks = ci.AGClusterInfo.Data?.Networks;
-                <div class="cluster-info section-wrap">
-                    @foreach (var ag in ags)
-                    {
-                        <div class="availability-group section-wrap collapsed">
-                            @if (ci.Cluster.Nodes.Any())
-                            {
-                                <div class="availability-group-nodes">
-                                    @foreach (var cn in ci.Cluster.Nodes.OrderByDescending(n => n.Name == ag.PrimaryReplica).ThenBy(n => n.Name))
-                                    {
-                                        var cnag = cn.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == ag.Name);
-                                        if (cnag == null)
-                                        {
-                                            continue;
-                                        }
-                                        <div class="availability-group-node@(cn == ci ? " current" : "")">
-                                            <span class="icon node @(cn.Name == ag.PrimaryReplica ? "master" : "slave")"></span>
-                                            @cn.MonitorStatus.Span("<a href=\"/sql/instance?node=" + cn.Name + "\">" + cn.Name + "</a>", cn.AGClusterMember.State.GetDescription())
-                                            <span class="icon database status-up"></span>@SQLHelpers.HealthDescriptionAGs(cn, cnag.LocalReplica?.Databases, minimal: true)
-                                        </div>
-                                    }
-                                </div>
-                            }
-                        </div>
-                    }
-                    @if (counters.Any())
-                    {
-                        <table class="performance-counters">
-                            <thead>
-                                <tr>
-                                    <th>AlwaysOn Replication</th>
-                                    <th>Bytes</th>
-                                    <th title="Total since last restart" class="text-muted">Total</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @RenderPerSecCounter("Bytes from Replica", "Availability Replica", "Bytes Received from Replica/sec", "_Total")
-                                @RenderPerSecCounter("Bytes to Replica", "Availability Replica", "Bytes Sent to Replica/sec", "_Total")
-                                @RenderPerSecCounter("Bytes to Transport", "Availability Replica", "Bytes Sent to Transport/sec", "_Total")
-                            </tbody>
-                        </table>
-                    }
-                    @if (networks?.Any() ?? false)
-                    {
-                        var groups = networks.GroupBy(n => new { n.NetworkSubnetIP, n.NetworkSubnetPrefixLength });
-                        foreach (var g in groups)
-                        {
-                            <div class="section-wrap third-wrap">
-                                <div class="network-range">@g.Key.NetworkSubnetIP/@g.Key.NetworkSubnetPrefixLength.ToString()</div>
-                                <div class="network-nodes">@string.Join(", ", g.Select(n => string.Format("<a href=\"/sql/instance?node={0}\" class=\"node-name-link\">{0}</a>", n.MemberName))).AsHtml()</div>
-                            </div>
-                        }
-                    }
-                </div>
-            }
-        }
-    </div>
     <div class="right-col">
         @if (counters.Any())
         {

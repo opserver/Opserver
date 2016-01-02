@@ -22,9 +22,11 @@ namespace StackExchange.Opserver.Data.SQL
             // TODO: IsLocal based on ClusterNetworks where MemberName = Server Name 
             // and ClusterNetwork bits match here ()
 
+            private IPNet _ipNet;
+            public IPNet IPNet => _ipNet ?? (_ipNet = IPNet.Parse(IPAddress, NetworkSubnetPrefixLength));
+
             private IPNet _networkIPNet;
-            public IPNet NetworkIPNet =>
-                _networkIPNet ?? (_networkIPNet = IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength));
+            public IPNet NetworkIPNet => _networkIPNet ?? (_networkIPNet = IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength));
 
             public MonitorStatus MonitorStatus
             {
@@ -55,8 +57,7 @@ Select listener_id ListenerId,
        network_subnet_prefix_length NetworkSubnetPrefixLength,
        network_subnet_ipv4_mask NetworkSubnetIPMask,
        state State
-  From sys.availability_group_listener_ip_addresses
-";
+  From sys.availability_group_listener_ip_addresses;";
         }
     }
 }

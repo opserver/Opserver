@@ -29,8 +29,7 @@ Select group_id GroupId,
        port Port,
        is_conformant IsConformant,
        ip_configuration_string_from_cluster IPConfigurationString
-  From sys.availability_group_listeners
-";
+  From sys.availability_group_listeners;";
         }
     }
 }
