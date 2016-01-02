@@ -8414,21 +8414,6 @@ a.value-block.bg-danger:focus {
 }
 .value-block .progress {
   margin-bottom: 2px;
-  height: 13px;
-  font-size: 10px;
-  font-weight: normal;
-  background-color: #666;
-}
-.value-block .progress > span {
-  position: absolute;
-  top: 2px;
-  left: 0;
-  right: 0;
-  color: white;
-  text-shadow: #000 1px 1px 2px;
-}
-.value-block .progress .smaller {
-  font-weight: lighter;
 }
 .value-block.col-xs-12 {
   width: 99%;
@@ -8675,6 +8660,27 @@ a.value-block.bg-danger:focus {
     margin-left: 0.5%;
     margin-right: 0.5%;
   }
+}
+.value-block .progress,
+.progress-embed {
+  height: 13px;
+  font-size: 10px;
+  font-weight: normal;
+  position: relative;
+  background-color: #666;
+}
+.value-block .progress > span,
+.progress-embed > span {
+  position: absolute;
+  left: 0;
+  right: 0;
+  color: white;
+  text-shadow: #000 1px 1px 2px;
+  text-align: center;
+}
+.value-block .progress .smaller,
+.progress-embed .smaller {
+  font-weight: lighter;
 }
 .error-stack {
   white-space: pre-wrap;

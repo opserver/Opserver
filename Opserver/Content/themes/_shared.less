@@ -317,7 +317,6 @@ h4, h5, h6 {
     .bg-danger;
   }
 
-
   label {
     color: @label-muted-color;
     display: block;
@@ -326,23 +325,6 @@ h4, h5, h6 {
 
   .progress {
     margin-bottom: 2px;
-    height: 13px;
-    font-size: 10px;
-    font-weight: normal;
-    background-color: @value-block-progress-background-color;
-
-    > span {
-      position: absolute;
-      top: 2px;
-      left: 0;
-      right: 0;
-      color: white;
-      text-shadow: #000 1px 1px 2px;
-    }
-
-    .smaller {
-      font-weight: lighter;
-    }
   }
 
   .loop-value-block-grid(xs);
@@ -368,6 +350,27 @@ h4, h5, h6 {
   }
 
   .loop-value-block-grid(@class, (@index - 1));
+}
+
+.value-block .progress, .progress-embed {
+  height: 13px;
+  font-size: 10px;
+  font-weight: normal;
+  position: relative;
+  background-color: @value-block-progress-background-color;
+
+  > span {
+    position: absolute;
+    left: 0;
+    right: 0;
+    color: white;
+    text-shadow: #000 1px 1px 2px;
+    text-align: center;
+  }
+
+  .smaller {
+    font-weight: lighter;
+  }
 }
 
 .error-stack {

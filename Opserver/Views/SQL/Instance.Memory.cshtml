@@ -4,41 +4,39 @@
     var types = Model.MemoryClerkSummary;
     var data = types.SafeData(true);
 }
-    <div class="summary-dashboard">
-        <h3><a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Memory Breakdown
-            
-            <span class="top-right-info">Updated @types.ToPollSpan()</span>
-        </h3>
-        @if (data.Any())
-        {
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Memory Clerk Type</th>
-                        <th>Description</th>
-                        <th colspan="2">Memory Used</th>
-                        <th colspan="2">% Used</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var t in data)
-                    {
-                        <tr>
-                            <td class="note">@t.ClerkType</td>
-                            <td>@t.Name</td>
-                            <td>@t.UsedBytes.ToSize()</td>
-                            <td class="note">@t.UsedBytes.Pluralize("byte")</td>
-                            <td style="width: 100px;"><div class="space-used" style="width: 100px; height: 5px"><div class="used good" style="width:@t.UsedPercent%"></div></div></td>
-                            <td class="@(t.UsedPercent >= 1 ? "bold" : "note")">@(t.UsedPercent.ToString("#0.###"))%</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-        }
-        else
-        {
-            <div class="no-content">No memory clerk information available</div>
-        }
-    </div>
+<h4 class="modal-title" title="Updated @types.LastPoll.ToRelativeTime()">
+    Memory Usage Details
+</h4>
+@if (data.Any())
+{
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Clerk Type</th>
+                <th>Memory Used</th>
+                <th>% Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in data)
+            {
+                <tr>
+                    <td>@t.Name</td>
+                    <td class="text-muted">@t.ClerkType</td>
+                    <td title="@t.UsedBytes.Pluralize("byte")">@t.UsedBytes.ToSize()</td>
+                    <td>
+                        <div class="progress-embed" style="min-width: 100px;">
+                            <div class="progress-bar" style="width: @t.UsedPercent.ToString("n2")%"></div>
+                            <span>@(t.UsedPercent.ToString("#0.###"))%</span>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No memory clerk information available</div>
+}
