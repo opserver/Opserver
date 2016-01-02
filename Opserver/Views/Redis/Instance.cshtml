@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Redis
+﻿@using System.Globalization
+@using StackExchange.Opserver.Data.Redis
 @using Roles = StackExchange.Opserver.Models.Roles
 @model StackExchange.Opserver.Views.Redis.DashboardModel
 @{
@@ -15,7 +16,7 @@
 </style>
 <div>
 <h5 class="page-header">
-    @i.IconSpan() @i.Host<span class="text-muted">: </span> @i.Port
+    @i.IconSpan() @i.Host<span class="text-muted">: </span> @i.Port.ToString()
     <small class="text-muted">(<a href="/redis/server?node=@i.Host">View Raw</a>)</small>
     @Helpers.PollNow(i)
 </h5>
@@ -23,7 +24,7 @@
     <div class="row js-refresh" data-name="instance-summary">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/redis/summary/config">view config</a> - <a href="/redis/instance/get-config/@i.Host-@i.Port-config.zip">download</a>)</span></div>
+                <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/redis/summary/config">view config</a> - <a href="/redis/instance/get-config/@i.Host-@i.Port.ToString()-config.zip">download</a>)</span></div>
                 <div class="panel-body small">
                     @{
                         var info = i.Info.SafeData(true);
@@ -43,8 +44,11 @@
                         <label>Uptime</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
-                        <a href="#/redis/summary/clients">@i.Clients.SafeData(true).Count.ToComma()</a>
-                        <label>Clients</label>
+                        @i.Clients.SafeData(true).Count.ToComma()
+                        <label>
+                            Clients
+                            <span class="text-muted">(<a href="#/redis/summary/clients">view</a>)</span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -72,7 +76,7 @@
                         <div class="value-block col-md-4">
                             @if (master != null)
                             {
-                                @:@master.Host:@master.Port
+                                @:@master.Host:@master.Port.ToString()
                             }
                             else
                             {
@@ -114,11 +118,11 @@
                             if (master != null)
                             {
                                 <div class="redis-instance">
-                                    @master.IconSpan() <a href="?node=@master.Host:@master.Port">@master.Host:@master.Port</a> <span class="text-muted">(Master)</span>
+                                    @master.IconSpan() <a href="?node=@master.Host:@master.Port.ToString()">@master.Host:@master.Port.ToString()</a> <span class="text-muted">(Master)</span>
                                 </div>
                             }
                             <div class="redis-instance">
-                                @i.IconSpan() <a href="?node=@i.Host:@i.Port">@i.Host:@i.Port</a> <span class="text-muted">(Current)</span>
+                                @i.IconSpan() <a href="?node=@i.Host:@i.Port.ToString()">@i.Host:@i.Port.ToString()</a> <span class="text-muted">(Current)</span>
                             </div>
                             var slaves = i.SlaveInstances;
                             if (slaves.Count > 0)
@@ -127,7 +131,7 @@
                                     @foreach (var s in slaves)
                                     {
                                         <div>
-                                            @s.IconSpan() <a href="?node=@s.Host:@s.Port">@s.Host:@s.Port</a> <span class="text-muted">(Slave)</span>
+                                            @s.IconSpan() <a href="?node=@s.Host:@s.Port.ToString()">@s.Host:@s.Port.ToString()</a> <span class="text-muted">(Slave)</span>
                                         </div>
                                     }
                                 </div>
@@ -157,7 +161,7 @@
                     </div>
 
                     <div class="value-block col-md-6">
-                        @info.Memory.MemoryFragmentationRatio
+                        @info.Memory.MemoryFragmentationRatio.ToString(CultureInfo.CurrentCulture)
                         <label>Fragmentation</label>
                     </div>
                     <div class="value-block col-md-6">
@@ -344,7 +348,7 @@
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Slow Log (<a class="top-right-nav" href="#/redis/summary/slow-log">View All</a>)</div>
+                <div class="panel-heading">Slow Log <span class="small text-muted">(<a class="top-right-nav" href="#/redis/summary/slow-log">View All</a>)</span></div>
                 <div class="panel-body small">
                     @if (i.SlowLog.HasData() && i.SlowLog.Data.Any())
                     {
@@ -359,7 +363,7 @@
                             <tbody>
                                 @foreach (var entry in i.SlowLog.Data.Take(40))
                                 {
-                                    <tr data-id="@entry.UniqueId">
+                                    <tr data-id="@entry.UniqueId.ToString()">
                                         <td>
                                             <a href="@entry.GetHelpUrl()" target="_blank">@entry.TraceDescription(50)</a>
                                         </td>
