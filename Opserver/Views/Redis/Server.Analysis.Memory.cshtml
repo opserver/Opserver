@@ -11,13 +11,37 @@
     }
 }
 <h5 class="page-header">
-    @Model.IconSpan() Memory Analysis of @Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port.ToString() (@Model.ConnectionInfo.Name)
-    <span class="text-muted small">
-        (Database @Model.Database.ToString())
-        - <span title="@(((int)Model.TotalTime.TotalMilliseconds).ToComma()) ms">Runtime: @Model.TotalTime.ToReadableString()</span>
-        - Run @Model.CreationDate.ToRelativeTimeSpan()
-    </span>
+    @Model.IconSpan() @Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port.ToString() (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()
     <a class="pull-right" href="/redis/analyze/memory/clear?node=@serverInfo.Host:@serverInfo.Port.ToString()&db=@Model.Database.ToString()">Re-run analysis</a>
+</h5>
+<div class="row small">
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.Count.ToComma()
+        <label>Keys</label>
+    </div>
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.TotalByteSize.ToHumanReadableSize()
+        <label>Size</label>
+    </div>
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.KeyByteSize.ToHumanReadableSize()
+        <label>Key Size</label>
+    </div>
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.ValueByteSize.ToHumanReadableSize()
+        <label>Value Size</label>
+    </div>
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.CreationDate.ToRelativeTimeSpan()
+        <label>Ran</label>
+    </div>
+    <div class="value-block col-md-2 col-sm-4 col-xs-6">
+        @Model.TotalTime.ToReadableString()
+        <label>Runtime</label>
+    </div>
+</div>
+<h5 class="page-header">
+    Memory Analysis
 </h5>
 <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
     <thead>
@@ -32,27 +56,31 @@
     <tbody>
         @if (Model.ErrorMessage.HasValue())
         {
-            <tr class="redis-error">
-                <td colspan="5">Error: @Model.ErrorMessage</td>
+            <tr>
+                <td colspan="5">
+                    <div class="alert alert-warning">
+                        <h5>Error</h5>
+                        <p>@Model.ErrorMessage</p>
+                    </div>
+                </td>
             </tr>
         }
         @foreach (var s in Model.KeyStats.OrderByDescending(s => s.Value.TotalByteSize))
         {
             var ks = s.Value;
-            if (s.Value.Count == 0)
+            if (s.Value.Count > 0)
             {
-                continue;
+                <tr>
+                    <td title="Regex: @s.Key.Regex.ToString()
+                        @TopKeys(s.Value) ">
+                        @s.Key.Name
+                    </td>
+                    <td>@ks.Count.ToComma()</td>
+                    <td>@ks.KeyByteSize.ToComma()</td>
+                    <td>@ks.ValueByteSize.ToComma()</td>
+                    <td>@ks.TotalByteSize.ToComma()</td>
+                </tr>
             }
-            <tr>
-                <td title="Regex: @s.Key.Regex.ToString()
-                    @TopKeys(s.Value) ">
-                    @s.Key.Name
-                </td>
-                <td>@ks.Count.ToComma()</td>
-                <td>@ks.KeyByteSize.ToComma()</td>
-                <td>@ks.ValueByteSize.ToComma()</td>
-                <td>@ks.TotalByteSize.ToComma()</td>
-            </tr>
         }
     </tbody>
     <tfoot>
