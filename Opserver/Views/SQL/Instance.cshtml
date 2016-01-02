@@ -41,7 +41,7 @@
         <label>@label</label>
     </div>
 }
-@helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3)
+@helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3, bool showTotal = true)
 {
     var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
     if (counter == null)
@@ -49,19 +49,13 @@
         return;
     }
     <div class="value-block col-md-@cols.ToString() col-sm-6">
-        @if (url.HasValue())
+        @counter.CalculatedValue.ToString("#,##0.###")
+        <span class="text-muted">/sec</span>
+        @suffix
+        @if (showTotal)
         {
-            <a href="@url">
-                @counter.CalculatedValue.ToString("#,##0.###") <span class="text-muted">/sec</span> @suffix
-            </a>
+            <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
         }
-        else
-        {
-            @counter.CalculatedValue.ToString("#,##0.###")
-            <span class="text-muted">/sec</span>
-            @suffix
-        }
-        <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
         <label>
             @label
             @if (url.HasValue())
@@ -71,7 +65,7 @@
         </label>
     </div>
 }
-<div>
+<div class="col-md-12 js-refresh" data-name="instance-summary">
     <h5 class="page-header">
         @i.IconSpan() @i.Name
         @Helpers.PollNow(i)
@@ -86,7 +80,7 @@
             }
         </div>
     }
-    <div class="row js-refresh" data-name="instance-summary">
+    <div class="row">
         <div class="col-md-6">
             @{
                 var pd = i.ServerProperties.Data;
@@ -289,7 +283,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                         <div class="panel-body small">
                             @foreach (var cn in ci.Cluster.Nodes)
                             {
-                                <div class="value-block col-md-3 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
+                                <div class="value-block col-md-4 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
                                     <a href="/sql/instance?node=@cn.Name">@cn.Name</a>
                                     <label>Replica</label>
                                 </div>
@@ -390,7 +384,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                         @{
                             Func<string, string, string, string> getCacheSize = (o, c, j) =>
                             {
-                                var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue * 8 * 1024;
+                                var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue*8*1024;
                                 return bytes.HasValue ? $"({bytes.Value.ToSize()})" : null;
                             };
                             var dbCacheBytes = getCacheSize("Buffer Manager", "Database pages", "");
@@ -406,55 +400,24 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                         @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
                     </div>
                 </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">Waits</div>
+                    <div class="panel-body small">
+                        @RenderPerSecCounter("Lock", "Wait Statistics", "Lock waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Log Buffer", "Wait Statistics", "Log buffer waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Log Write", "Wait Statistics", "Log write waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Network IO", "Wait Statistics", "Network IO waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Non-Page Latch", "Wait Statistics", "Non-Page latch waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Page IO Latch", "Wait Statistics", "Page IO latch waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Page Latch", "Wait Statistics", "Page latch waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Thread-safe Memory", "Wait Statistics", "Thread-safe memory objects waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Transaction Ownership", "Wait Statistics", "Transaction ownership waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Worker", "Wait Statistics", "Wait for the worker", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Workspace Sync", "Wait Statistics", "Workspace synchronization waits", "Waits started per second", showTotal: false)
+                        @RenderPerSecCounter("Memory Grant", "Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second", showTotal: false)                     
+                    </div>
+                </div>
             }
         </div>
-    </div>
-
-    <div class="right-col">
-        @if (counters.Any())
-        {
-            @*<div class="section-wrap">
-                    <div class="summary-section-header">Waits</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Category</th>
-                                <th>/sec</th>
-                                <th title="Total since last restart" class="text-muted">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        @RenderPerSecCounter("Wait Statistics", "Lock waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Log buffer waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Log write waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Network IO waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Non-Page latch waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Page IO latch waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Page latch waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Thread-safe memory objects waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Transaction ownership waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Wait for the worker", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Workspace synchronization waits", "Waits started per second")
-                        @RenderPerSecCounter("Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second")
-                        </tbody>
-                    </table>
-                </div>*@
-
-            @*<div class="section-wrap">
-                    <table>
-                        @SectionHeader("Performance")
-                        <tbody>
-                            @RenderCounter("General Statistics", "User Connections", "")
-                            @RenderCounter("General Statistics", "Connection Reset/sec", "")
-
-
-                            @RenderCounter("Latches", "Average Latch Wait Time (ms)", "")
-                            @RenderCounter("Latches", "Latch Waits/sec", "")
-
-                            @RenderCounter("Workload Group Stats", "Requests completed/sec", "default")
-                        </tbody>
-                    </table>
-                </div>*@
-        }
     </div>
 </div>
