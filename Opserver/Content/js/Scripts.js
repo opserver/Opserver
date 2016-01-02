@@ -280,7 +280,8 @@
                 key: $(this).data('uk'),
                 guid: $(this).data('guid')
             };
-            if (!data.type && (this.href || '#') !== '#') return;
+            if (!data.type && ($(this).attr('href') || '#') !== '#') return;
+            e.preventDefault();
             if (data.type && data.key) {
                 // Node to refresh, do it
                 if ($(this).hasClass('active')) return;
@@ -311,7 +312,6 @@
             } else {
                 window.location.reload(true);
             }
-            e.preventDefault();
         }).on('click', '.js-poll-now', function () {
             var type = $(this).data('type'),
                 key = $(this).data('key');
@@ -1409,7 +1409,7 @@ Status.HAProxy = (function () {
                     },
                     max: 100,
                     leftMargin: 40,
-                    areaTooltipFormat: function (value) { return '<label>CPU: </label><b>' + value.toFixed(2) + '%</b>'; }
+                    areaTooltipFormat: function (value) { return '<span>CPU: </span><b>' + value.toFixed(2) + '%</b>'; }
                 }, options);
         },
         memoryGraph: function (options) {
@@ -1422,7 +1422,7 @@ Status.HAProxy = (function () {
                     },
                     leftMargin: 60,
                     max: this.data('max'),
-                    areaTooltipFormat: function (value) { return '<label>Memory: </label><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
+                    areaTooltipFormat: function (value) { return '<span>Memory: </span><b>' + Status.helpers.bytesToSize(value * 1024 * 1024, true) + '</b>'; }
                 }, options);
         },
         networkGraph: function (options) {
@@ -1434,7 +1434,7 @@ Status.HAProxy = (function () {
                 ],
                 min: 'auto',
                 leftMargin: 60,
-                areaTooltipFormat: function (value, series, name) { return '<label>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </label><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>'; },
+                areaTooltipFormat: function (value, series, name) { return '<span>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>'; },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
                 }
@@ -1452,7 +1452,7 @@ Status.HAProxy = (function () {
                 ],
                 min: 'auto',
                 leftMargin: 80,
-                areaTooltipFormat: function (value, series, name) { return '<label>Hits (<span class="series-' + name + '">' + series + '</span>): </label><b>' + comma(value) + '</b>'; },
+                areaTooltipFormat: function (value, series, name) { return '<span>Hits (<span class="series-' + name + '">' + series + '</span>): </span><b>' + comma(value) + '</b>'; },
                 yAxis: {
                     tickFormat: comma
                 }
@@ -1526,10 +1526,8 @@ Status.HAProxy = (function () {
                 dataLoaded,
                 curWidth, curHeight, curData,
                 chart = this,
-                //startDate = options.start ? new Date(options.start) : (function (d) { d.setDate(d.getDate() - 1); return d })(new Date), // default to 24hr ago: 
-                //endDate = options.end ? new Date(options.end) : new Date(), // default to now
-                buildTooltip = $('<div class="build-tooltip chart-tooltip" />').appendTo(chart),
-                areaTooltip = $('<div class="area-tooltip chart-tooltip" />').appendTo(chart),
+                buildTooltip = $('<div class="build-tooltip chart-tooltip small" />').appendTo(chart),
+                areaTooltip = $('<div class="area-tooltip chart-tooltip small" />').appendTo(chart),
                 series = options.series,
                 rightSeries = options.rightSeries,
                 leftPalette = options.autoColors === true ? options.leftPalette || 'PuBu' : (options.autoColors || null),
@@ -1918,7 +1916,7 @@ Status.HAProxy = (function () {
                             ? d3.interpolate(dateBefore[s.name], dateAfter[s.name])(through)
                             : val,
                             cPos = (s.direction === 'down' ? -1 : 1) * fakeVal;
-                        tooltip += (options.rightAreaTooltipFormat || areaTooltipFormat)(val, s.label, s.name, gc ? gc(s, i) : null) + '<br/>';
+                        tooltip += (options.rightAreaTooltipFormat || areaTooltipFormat)(val, s.label, s.name, gc ? gc(s, i) : null);
                         currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + yr(cPos) + ')');
                     });
                 }
@@ -1932,7 +1930,7 @@ Status.HAProxy = (function () {
                     var cPos = (s.direction === 'down' ? -1 : 1)
                         * (options.stacked ? runningTotal : fakeVal);
 
-                    tooltipRows.push(options.areaTooltipFormat(val, s.label, s.name, gc ? gc(s, i) : null) + '<br/>');
+                    tooltipRows.push(options.areaTooltipFormat(val, s.label, s.name, gc ? gc(s, i) : null));
                     currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + y(cPos) + ')');
                 });
 
@@ -2283,7 +2281,7 @@ Status.HAProxy = (function () {
                         dateAfter = data[index],         // and the date after
                         d = dateBefore && date - dateBefore.date > dateAfter && dateAfter.date - date ? dateAfter : dateBefore; // pick the nearest
 
-                    tooltip += options.areaTooltipFormat(d[s.name], s.label, s.name) + '<br/>';
+                    tooltip += options.areaTooltipFormat(d[s.name], s.label, s.name);
                     currentArea.select('circle.series-' + s.name).attr('transform', 'translate(0, ' + y(s.direction === 'down' ? -d[s.name] : d[s.name]) + ')');
                 });
                 

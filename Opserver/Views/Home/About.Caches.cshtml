@@ -23,7 +23,7 @@
     <span class="pull-right">
         <a href="?refresh=@(Model.AutoRefresh ? "false" : "true")">@(Model.AutoRefresh ? "Disable" : "Enable") Auto Refresh</a>
         <span class="text-muted"> | </span>
-        <a href="javascript:window.location.reload();">Reload</a> 
+        <a href="#" class="js-reload-link">Reload</a> 
     </span>
 </h5>
 <div class="js-refresh" data-name="caches">
