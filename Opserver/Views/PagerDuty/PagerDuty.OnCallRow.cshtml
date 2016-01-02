@@ -2,7 +2,20 @@
 @model OnCallAssignment
 <tr class="@Model.RowClass()" title="@Model.MonitorStatusReason">
     <td class="name">@Model.Person.FullName</td>
-    <td class="@(Model.IsPrimary ? "bold" : null)">@Model.EscalationLevelDescription @if (Model.IsOverride){<text>(<b class="critical">Override</b>)</text>}</td>
+    <td>
+        @if (Model.IsPrimary)
+        {
+            <strong>@Model.EscalationLevelDescription</strong>
+        }
+        else
+        {
+            @Model.EscalationLevelDescription
+        }
+        @if (Model.IsOverride)
+        {
+            <span class="text-muted">(<strong class="text-danger">Override</strong>)</span>
+        }
+    </td>
     <td><a href="mailto:@Model.Person.Email">@Model.Person.Email</a></td>
     <td>@Model.Person.Phone</td>
 </tr>

@@ -1,7 +1,7 @@
 ﻿@model StackExchange.Opserver.Views.PagerDuty.PagerDutyIncidentModel
 @{
     Layout = null;
-    this.SetPageTitle("PagerDuty Incident Email");
+    this.SetPageTitle("PagerDuty Incident Detail");
     var i = Model.Incident;
     var isSubjectOnly = i.SummaryData?.Count == 1 && i.SummaryData.ContainsKey("subject");
 }
@@ -62,7 +62,7 @@
     </div>
     @if (!isSubjectOnly && i.SummaryData != null && i.SummaryData.Any())
     {
-        <table>
+        <table class="table table-striped table-hover table-responsive text-nowrap table-super-condensed">
             <thead>
                 <tr>
                     <th colspan="2">Summary</th>
@@ -79,7 +79,7 @@
             </tbody>
         </table>
     }
-    <h4 class="page-header">Incident Log</h4>
+    <h5 class="page-header">Incident Log</h5>
     <table class="table table-striped table-hover table-responsive text-nowrap table-super-condensed">
         <thead>
             <tr>
