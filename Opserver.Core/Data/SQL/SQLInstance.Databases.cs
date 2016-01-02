@@ -349,8 +349,8 @@ Select db.database_id DatabaseId,
             public long StallWriteMs { get; internal set; }
             public long NumWrites { get; internal set; }
 
-            public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / NumReads;
-            public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / NumWrites;
+            public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / (double)NumReads;
+            public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / (double)NumWrites;
             public long FileSizeBytes => FileSizePages*8*1024;
 
             public string GrowthDescription

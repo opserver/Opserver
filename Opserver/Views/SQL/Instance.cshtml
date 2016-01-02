@@ -170,7 +170,7 @@ Top Users:
                     {
                         var cols = services?.Count % 3 == 0 ? "4" : "3";
                         <div class="panel panel-default">
-                            <div class="panel-heading">Volumes</div>
+                            <div class="panel-heading">Services</div>
                             <div class="panel-body small">
                                 @foreach (var s in services)
                                 {
@@ -189,7 +189,7 @@ Top Users:
                     if (volumes?.Any() ?? false)
                     {
                         <div class="panel panel-default">
-                            <div class="panel-heading">Volumes</div>
+                            <div class="panel-heading">Volumes <span class="text-muted small">(<a href="#/sql/summary/db-files">view files</a>)</span></div>
                             <div class="panel-body small">
                                 @foreach (var v in volumes)
                                 {
@@ -204,7 +204,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                                             <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.CurrentCulture)%;"></div>
                                             <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
                                         </div>
-                                        <label><a href="#/sql/summary/db-files">@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</a></label>
+                                        <label>@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</label>
                                     </div>
                                 }
                             </div>
