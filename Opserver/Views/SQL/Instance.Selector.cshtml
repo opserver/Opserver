@@ -15,30 +15,28 @@
         </a>
     }
 }
-<div>
-    <h5 class="page-header">Please select a SQL instance.</h5>
-    <div class="row">
-        @foreach (var c in clusters)
-        {
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">@c.Name</div>
-                    <div class="panel-body small list-group">
-                        @RenderInstances(c.Nodes)
-                    </div>
+<h5 class="page-header">Please select a SQL instance.</h5>
+<div class="row">
+    @foreach (var c in clusters)
+    {
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">@c.Name</div>
+                <div class="panel-body small list-group">
+                    @RenderInstances(c.Nodes)
                 </div>
             </div>
-        }
-        @if (standalone.Any())
-        {
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Standalone</div>
-                    <div class="panel-body small list-group">
-                        @RenderInstances(standalone)
-                    </div>
+        </div>
+    }
+    @if (standalone.Any())
+    {
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">Standalone</div>
+                <div class="panel-body small list-group">
+                    @RenderInstances(standalone)
                 </div>
             </div>
-        }
-    </div>
+        </div>
+    }
 </div>
