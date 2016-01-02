@@ -10,100 +10,68 @@
 @:@tk.Value (@tk.Key.ToComma() bytes)
     }
 }
-@helper RenderSlaves(RedisInstance serverInfo, int nest = 0)
-{
-    if (serverInfo.SlaveCount <= 0) { return; }
-    foreach (var ci in serverInfo.SlaveInstances)
-    {
-        <li style="padding-left: @(nest * 20)px">@ci.IconSpan() <a href="/redis/analyze/memory?node=@ci.Host:@ci.Port&db=@Model.Database" class="node-name-link">@ci.Host</a> <span class="note">(@ci.Port)</span></li>
-        @RenderSlaves(ci, ++nest)
-    }
-}
-@functions {
-}
-
-<div class="node-summary redis-summary redis-infos-wrap">
-    <table class="cluster-dashboard striped-dashboard">
-        <thead>
-            <tr class="category-row">
-                <th colspan="5">
-                    <h3>
-                        @Model.IconSpan() Memory Analysis of @Model.ConnectionInfo.Name
-                        <span class="cluster-info">
-                            (@Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port - Database @Model.Database)
-                            - <span title="@(((int)Model.TotalTime.TotalMilliseconds).ToComma()) ms">Runtime: @Model.TotalTime.ToReadableString()</span>
-                            - Run @Model.CreationDate.ToRelativeTimeSpan()
-                        </span>
-                        <a style="float: right;" href="/redis/analyze/memory/clear?node=@serverInfo.Host:@serverInfo.Port&db=@Model.Database">Re-run analysis</a>
-                    </h3>
-                </th>
+<h5 class="page-header">
+    @Model.IconSpan() Memory Analysis of @Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port.ToString() (@Model.ConnectionInfo.Name)
+    <span class="text-muted small">
+        (Database @Model.Database.ToString())
+        - <span title="@(((int)Model.TotalTime.TotalMilliseconds).ToComma()) ms">Runtime: @Model.TotalTime.ToReadableString()</span>
+        - Run @Model.CreationDate.ToRelativeTimeSpan()
+    </span>
+    <a class="pull-right" href="/redis/analyze/memory/clear?node=@serverInfo.Host:@serverInfo.Port.ToString()&db=@Model.Database.ToString()">Re-run analysis</a>
+</h5>
+<table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+    <thead>
+        <tr>
+            <th>Key Pattern</th>
+            <th>Count</th>
+            <th>Bytes (Key)</th>
+            <th>Bytes (Value)</th>
+            <th>Bytes (Total)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.ErrorMessage.HasValue())
+        {
+            <tr class="redis-error">
+                <td colspan="5">Error: @Model.ErrorMessage</td>
             </tr>
+        }
+        @foreach (var s in Model.KeyStats.OrderByDescending(s => s.Value.TotalByteSize))
+        {
+            var ks = s.Value;
+            if (s.Value.Count == 0)
+            {
+                continue;
+            }
             <tr>
-                <th>Key Pattern</th>
-                <th>Count</th>
-                <th>Bytes (Key)</th>
-                <th>Bytes (Value)</th>
-                <th>Bytes (Total)</th>
+                <td title="Regex: @s.Key.Regex.ToString()
+                    @TopKeys(s.Value) ">
+                    @s.Key.Name
+                </td>
+                <td>@ks.Count.ToComma()</td>
+                <td>@ks.KeyByteSize.ToComma()</td>
+                <td>@ks.ValueByteSize.ToComma()</td>
+                <td>@ks.TotalByteSize.ToComma()</td>
             </tr>
-        </thead>
-        <tbody>
-            @if (Model.ErrorMessage.HasValue())
-            {
-                <tr class="redis-error">
-                    <td colspan="5">Error: @Model.ErrorMessage</td>
-                </tr>
-            }
-            @if (serverInfo.IsMaster && serverInfo.SlaveCount > 0 && Model.KeyStats.Count == 1)
-            {
-                <tr class="option-row">
-                    <td colspan="5">
-                        <div class="alternative-masters">
-                            Run on one of these slaves instead?
-                            <ul>
-                                @RenderSlaves(serverInfo)
-                            </ul>
-                        </div>
-                    </td>
-                </tr>
-            }
-            @foreach (var s in Model.KeyStats.OrderByDescending(s => s.Value.TotalByteSize))
-            {
-                var ks = s.Value;
-                if (s.Value.Count == 0)
-                {
-                    continue;
-                }
-                <tr>
-                    <td title="Regex: @s.Key.Regex.ToString()
-                        @TopKeys(s.Value) ">
-                        @s.Key.Name
-                    </td>
-                    <td>@ks.Count.ToComma()</td>
-                    <td>@ks.KeyByteSize.ToComma()</td>
-                    <td>@ks.ValueByteSize.ToComma()</td>
-                    <td>@ks.TotalByteSize.ToComma()</td>
-                </tr>
-            }
-        </tbody>
-        <tfoot>
-            <tr class="total-row">
-                <td><b>Total</b></td>
-                <td>@Model.Count.ToComma()</td>
-                <td>@Model.KeyByteSize.ToHumanReadableSize()</td>
-                <td>@Model.ValueByteSize.ToHumanReadableSize()</td>
-                <td>@Model.TotalByteSize.ToHumanReadableSize()</td>
-            </tr>
-        </tfoot>
-    </table>
+        }
+    </tbody>
+    <tfoot>
+        <tr class="total-row">
+            <td><b>Total</b></td>
+            <td>@Model.Count.ToComma()</td>
+            <td>@Model.KeyByteSize.ToHumanReadableSize()</td>
+            <td>@Model.ValueByteSize.ToHumanReadableSize()</td>
+            <td>@Model.TotalByteSize.ToHumanReadableSize()</td>
+        </tr>
+    </tfoot>
+</table>
 @if (Model.TopKeys.Any())
 {
-    <table class="cluster-dashboard striped-dashboard">
+    <h5 class="page-header">
+        Top Keys (by Size)
+    </h5>
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
         <thead>
-            <tr class="category-row">
-                <th colspan="5">
-                    <div>Top Keys (by Size) for @Model.ConnectionInfo.Name</div>
-                </th>
-            </tr>
             <tr>
                 <th>Category</th>
                 <th>Key</th>
@@ -126,4 +94,3 @@
         </tbody>
     </table>
 }
-</div>
