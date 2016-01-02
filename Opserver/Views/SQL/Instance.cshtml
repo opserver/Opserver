@@ -261,7 +261,7 @@ Top Users:
                         <div class="panel panel-default">
                             <div class="panel-heading">Volumes <span class="text-muted small">(<a href="#/sql/summary/db-files">view files</a>)</span></div>
                             <div class="panel-body small">
-                                @foreach (var v in volumes)
+                                @foreach (var v in volumes.OrderBy(v => v.VolumeId))
                                 {
                                     var percentUsed = 100 * (v.TotalBytes - v.AvailableBytes) / (float)v.TotalBytes;
                                     <div class="value-block col-md-@(volumes.Count == 1 ? "12" : "6") col-sm-6" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
