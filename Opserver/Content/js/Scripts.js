@@ -611,9 +611,12 @@ Status.NodeSearch = (function () {
             delay: 25,
             source: options.nodes,
             appendTo: ac.parent(),
-            select: function(event, ui) {
-                $(this).addClass('left-icon ' + ui.item.icon).closest('form').submit();
-                return false;
+            messages: {
+                noResults: '',
+                results: function () { }
+            },
+            select: function (event, ui) {
+                $(this).val(ui.item.value).closest('form').submit();
             }
         }).autocomplete('instance');
         ai._renderMenu = function (ul, items) {
@@ -624,10 +627,10 @@ Status.NodeSearch = (function () {
             $(ul).addClass('dropdown-menu navbar-list');
         };
         ai._renderItem = function(ul, item) {
-            var html = '<span class="' + item.icon + '" data-host="' + item.value + '">●</span> '
+            var html = '<span class="' + item.icon + '">●</span> '
                 + '<span class="text-muted">' + item.category + ':</span> '
-                + '<span class="' + item.icon + '">' + item.label + '</span>';
-            return $('<li>').append('<a>' + html + '</a>').appendTo(ul);
+                + item.label;
+            return $('<li>').data('data-value', item.value).append('<a>' + html + '</a>').appendTo(ul);
         };
 
 
