@@ -736,7 +736,9 @@ Status.SQL = (function () {
                 Status.popup('/sql/instance/summary/' + val, { node: Status.SQL.options.node });
             },
             '#/db/': function(val) {
-                Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, true);
+                Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, function() {
+                    $(this).closest('.modal-lg').removeClass('modal-lg').addClass('modal-huge');
+                });
             }
         });        
         

@@ -8192,6 +8192,36 @@ li.L9 {
 .navbar-list > li > a {
   padding: 5px 10px;
 }
+.navbar-left > a {
+  display: block;
+  line-height: 28px;
+  border-bottom: solid 1px #eee;
+  text-align: center;
+  font-size: 12px;
+}
+.navbar-left > a:hover {
+  background-color: #3d85b0;
+  color: #fff;
+  text-decoration: none;
+}
+.navbar-left > a.disabled {
+  cursor: none;
+}
+.navbar-left > a.disabled:hover {
+  background-color: #fff;
+  color: #4E5D6C;
+  text-decoration: none;
+}
+.navbar-left > a:first-child {
+  border-top: solid 1px #eee;
+}
+.navbar-left > a.active {
+  background-color: #3d85b0;
+  color: #fff;
+}
+.navbar-left > a.active:hover {
+  text-decoration: none;
+}
 h4,
 .h4,
 h5,

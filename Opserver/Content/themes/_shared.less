@@ -93,6 +93,39 @@
   }
 }
 
+.navbar-left {
+  > a {
+    display: block;
+    line-height: 28px;
+    border-bottom: solid 1px #eee;
+    text-align: center;
+    font-size: 12px;
+    &:hover {
+      background-color: #3d85b0;
+      color: #fff;
+      text-decoration: none;
+    }
+    &.disabled {
+      cursor: none;
+      &:hover {
+        background-color: #fff;
+        color: @text-muted;
+        text-decoration: none;
+      }
+    }
+    &:first-child {
+      border-top: solid 1px #eee;
+    }
+    &.active {
+      background-color: #3d85b0;
+      color: #fff;
+      &:hover {
+        text-decoration: none;
+      }
+    }
+  }
+}
+
 h4, .h4,
 h5, .h5,
 h6, .h6 {

@@ -3,7 +3,6 @@
 @{
     Layout = null;
     var s = Model.Instance;
- 
     var columns = s.GetColumnInfo(Model.Database);
 }
 <style>
@@ -11,12 +10,12 @@
         background-color: #3d85b0;
         padding: 0 5px;
     }
-     .table-columns p {
-         background-color: white;
-         line-height: 18px;
-         padding-left: 24px;
-         position: relative;
-     }
+    .table-columns p {
+        background-color: white;
+        line-height: 18px;
+        padding-left: 24px;
+        position: relative;
+    }
     .table-columns p .data-type {
         font-size: 12px;
     }
@@ -31,6 +30,7 @@
     .status-pimary-key {
         color: #fac38d !important;
     }
+
     .status-foreign-key {
         color: #bbb !important;
     }
@@ -39,17 +39,17 @@
         left: 300px;
     }
 </style>
-<div class="table-columns">
-    @if (columns.LastPollStatus == FetchStatus.Fail || columns.Data == null)
-    {
-        <div class="sql-server sql-error">
-            <span class="error-label">There was an error fetching column info from @s.Name for @Model.Database</span>
-            @columns.ErrorMessage
-        </div>
-    } else
-    {
-        var tableColumns = columns.Data.Where(c => c.Schema + "." + c.TableName == Model.ObjectName).OrderBy(c => c.Position);
-        foreach (var c in tableColumns)
+@if (columns.LastPollStatus == FetchStatus.Fail || columns.Data == null)
+{
+    <div class="alert alert-warning">
+        <h5>There was an error fetching column info from @s.Name for @Model.Database</h5>
+        <p class="error-stack">@columns.ErrorMessage</p>
+    </div>
+}
+else
+{
+    <div class="table-columns">
+        @foreach (var c in columns.Data.Where(c => c.Schema + "." + c.TableName == Model.ObjectName).OrderBy(c => c.Position))
         {
             <p class="@(c.PrimaryKeyConstraint.HasValue() ? "primary-key" : "") @(c.ForeignKeyConstraint.HasValue() ? "foreign-key" : "")">
                 @if (c.PrimaryKeyConstraint.HasValue())
@@ -64,18 +64,19 @@
                 @if (c.ForeignKeyConstraint.HasValue())
                 {
                     <span class="foreign-key-info">
-                        <span class="note">
-                            @c.ForeignKeyConstraint to
-                            <a href="#/db/@Model.Database/tables/@(c.ForeignKeyTargetSchema).@(c.ForeignKeyTargetTable)">
-                                @(c.ForeignKeyTargetSchema).<span class="normal">@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)</span>
-                            </a>
-                        </span>
+                    <span class="note">
+                        @c.ForeignKeyConstraint to
+                        <a href="#/db/@Model.Database/tables/@(c.ForeignKeyTargetSchema).@(c.ForeignKeyTargetTable)">
+                            @(c.ForeignKeyTargetSchema).<span class="normal">@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)</span>
+                        </a>
                     </span>
+                </span>
                 }
             </p>
         }
+    </div>
 
-        @*<table>
+    @*<table>
             <thead>
                 <tr>
                     <th></th>
@@ -96,7 +97,7 @@
                             }
                             @if (c.PrimaryKeyConstraint.HasValue() && c.ForeignKeyConstraint.HasValue())
                             {
-                                @:, 
+                                @:,
                             }
                             @if (c.ForeignKeyConstraint.HasValue())
                             {
@@ -115,5 +116,4 @@
                 }
             </tbody>
         </table>*@
-    }
-</div>
+}
