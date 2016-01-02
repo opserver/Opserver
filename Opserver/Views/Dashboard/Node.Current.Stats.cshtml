@@ -1,7 +1,4 @@
 ﻿@model StackExchange.Opserver.Data.Dashboard.Node
-@{
-    var n = Model;
-}
 <div class="row">
     <div class="col-md-6">
         <div class="panel panel-default">
@@ -13,20 +10,18 @@
     </div>
     <div class="col-md-6">
         <div class="panel panel-default">
-            <div class="panel-heading">Memory Utilization <span cass="muted">(@(n.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
+            <div class="panel-heading">Memory Utilization <span cass="text-muted">(@(Model.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
             <div class="panel-body">
-                <div class="history-graph" id="memory-container" data-max="@(n.TotalMemory/1024/1024)"></div>
+                <div class="history-graph" id="memory-container" data-max="@((Model.TotalMemory/1024/1024)?.ToString())"></div>
             </div>
         </div>
     </div>
 </div>
 <script>
-    $('#cpu-container').cpuGraph({ id: '@n.Id', realtime: true });
-    $('#memory-container').memoryGraph({ id: '@n.Id' });
+    $('#cpu-container').cpuGraph({ id: '@Model.Id', realtime: true });
+    $('#memory-container').memoryGraph({ id: '@Model.Id' });
 </script>
-@if (n.Interfaces.Any())
+@if (Model.Interfaces.Any())
 {
-    <div style="padding-top: 20px; clear: both;">
-        @Html.Partial("Node.Current.Interfaces", Model)
-    </div>
+    @Html.Partial("Node.Current.Interfaces", Model)
 }
