@@ -153,6 +153,6 @@
 <div data-node="@Model.CurrentNode.PrettyName">
     @if (Model.CurrentStatusType != CurrentStatusTypes.None)
     {
-        @Html.Partial("Node.Current." + Model.CurrentStatusType, s)
+        @Html.Partial("Node." + Model.CurrentStatusType, s)
     }
 </div>
