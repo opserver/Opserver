@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Microsoft")]
 [assembly: AssemblyProduct("StackExchange.Opserver")]
-[assembly: AssemblyCopyright("Copyright © Stack Exchange 2013")]
+[assembly: AssemblyCopyright("Copyright © Stack Exchange 2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
