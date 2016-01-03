@@ -62,11 +62,9 @@
                                 <th colspan="2">Memory</th>
                                 <th colspan="2">Network</th>
                             </tr>
-                        </tbody>
-                        <tbody>
                         @foreach (var n in nodes.OrderBy(n => n.PrettyName))
                         {
-                            <tr class="@n.RowClass() server-row@(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                            <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
                                 <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @n.LastSync.ToRelativeTime()">
                                     @n.IconSpan()
                                     <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>

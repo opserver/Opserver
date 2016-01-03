@@ -113,7 +113,7 @@
         <tbody>
         @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
         {
-            <tr class="server-row @i..RowClass()" data-incident="@i.Id">
+            <tr class="@i.RowClass()" data-incident="@i.Id">
                 <td><a href="#/pagerduty/incident/detail/@i.Number.ToString()">@i.Number.ToString()</a></td>
                 <td>@i.CreationDate.ToRelativeTimeSpan()</td>
                 <td>@i.AffectedService.Name</td>
