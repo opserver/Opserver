@@ -11,10 +11,6 @@
                       log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
 
     var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
-    
-    if (Current.IsMobile) {
-        distinctApps = distinctApps.Where(a => a.ExceptionCount > 0); // filter out 0s for mobile
-    }
 }
 @section head {
     <script>

@@ -2,7 +2,6 @@
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Web;
-using System.Web.WebPages;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -30,12 +29,7 @@ namespace StackExchange.Opserver
         /// Is the current request ajax? Determined by checking the X-Requested-With header
         /// </summary>
         public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-        /// <summary>
-        /// Gets if the current request is for a mobile view
-        /// </summary>
-        public static bool IsMobile => new HttpContextWrapper(Context).GetOverriddenBrowser().IsMobileDevice;
-
+        
         /// <summary>
         /// Gets the current user from the request
         /// </summary>

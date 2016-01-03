@@ -463,9 +463,6 @@
     <Compile Include="Models\Security\SecurityProvider.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Current.cs" />
-    <Compile Include="Current.ViewSettings.cs">
-      <DependentUpon>Current.cs</DependentUpon>
-    </Compile>
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -659,7 +656,6 @@
     <Content Include="Views\SQL\_ViewStart.cshtml" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Content\Login.css" />
     <Content Include="Content\js\Scripts.js" />
     <Content Include="favicon.ico" />
     <Content Include="Global.asax" />

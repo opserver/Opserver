@@ -9,13 +9,13 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController : StatusController
     {   
-        private static Chart GetChart(int? height = null, int? width = null)
+        private static Chart GetChart(int height, int width)
         {
             return new Chart
                        {
                            BackColor = System.Drawing.Color.Transparent,
-                           Width = Unit.Pixel(width ?? Current.ViewSettings.SummaryChartWidth),
-                           Height = Unit.Pixel(height ?? Current.ViewSettings.SummaryChartHeight),
+                           Width = Unit.Pixel(width),
+                           Height = Unit.Pixel(height),
                            AntiAliasing = AntiAliasingStyles.All,
                            TextAntiAliasingQuality = TextAntiAliasingQuality.High,
                            Palette = ChartColorPalette.None

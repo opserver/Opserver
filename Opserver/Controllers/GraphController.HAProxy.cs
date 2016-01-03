@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 20 * 60, VaryByParam = "route;days;host;height;width;alt", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/route-hits")]
-        public async Task<ActionResult> HAProxyRouteHits(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
+        public async Task<ActionResult> HAProxyRouteHits(string route, int days, string host, int height = 70, int width = 300, bool alt = false)
         {
             var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
 
@@ -78,7 +78,7 @@ namespace StackExchange.Opserver.Controllers
 
         //[OutputCache(Duration = 20 * 60, VaryByParam = "route;days;host;height;width;alt", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/route-performance")]
-        public async Task<ActionResult> HaProxyRoutePerformance(string route, int days, string host, int? height = 70, int? width = 300, bool alt = false)
+        public async Task<ActionResult> HaProxyRoutePerformance(string route, int days, string host, int height = 70, int width = 300, bool alt = false)
         {
             var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
 

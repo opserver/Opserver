@@ -5,10 +5,7 @@ namespace StackExchange.Opserver
     public partial class Current
     {
         private static SecurityProvider _security;
-        public static SecurityProvider Security
-        {
-            get { return _security ?? (_security = GetSecurityProvider()); }
-        }
+        public static SecurityProvider Security => _security ?? (_security = GetSecurityProvider());
 
         private static SecurityProvider GetSecurityProvider()
         {

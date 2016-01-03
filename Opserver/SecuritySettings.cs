@@ -62,34 +62,19 @@ namespace StackExchange.Opserver
 
             public T this[int index] => BaseGet(index) as T;
 
-            protected override ConfigurationElement CreateNewElement()
-            {
-                return new T();
-            }
+            protected override ConfigurationElement CreateNewElement() => new T();
 
-            protected override object GetElementKey(ConfigurationElement element)
-            {
-                return ((T)element).Name;
-            }
+            protected override object GetElementKey(ConfigurationElement element) => ((T)element).Name;
 
-            public void Add(T item)
-            {
-                BaseAdd(item);
-            }
+            public void Add(T item) => BaseAdd(item);
 
             public override ConfigurationElementCollectionType CollectionType => ConfigurationElementCollectionType.BasicMapAlternate;
 
             protected override string ElementName => typeof(T).Name;
 
-            protected override bool IsElementName(string elementName)
-            {
-                return (elementName == typeof(T).Name);
-            }
+            protected override bool IsElementName(string elementName) => elementName == typeof(T).Name;
 
-            public bool Any()
-            {
-                return Count > 0;
-            }
+            public bool Any() => Count > 0;
 
             private List<T> _all;
             public List<T> All => _all ?? (_all = this.Cast<T>().ToList());
