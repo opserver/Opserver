@@ -8908,3 +8908,6 @@ tr.cache-sub-item td:first-child {
 .table > tbody > tr.cache-item > th:nth-child(6) {
   font-weight: normal;
 }
+.ui-helper-hidden-accessible {
+  display: none;
+}

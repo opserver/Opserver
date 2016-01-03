@@ -8901,6 +8901,9 @@ tr.cache-sub-item td:first-child {
 .table > tbody > tr.cache-item > th:nth-child(6) {
   font-weight: normal;
 }
+.ui-helper-hidden-accessible {
+  display: none;
+}
 .navbar-default .badge {
   background-color: #fff;
   color: #4E5D6C;
