@@ -5,7 +5,7 @@
 @{
     var s = Model.CurrentNode;
     
-    this.SetPageTitle((s != null ? s.PrettyName + " " : "") + "Status");
+    this.SetPageTitle((s?.PrettyName ?? "Unknown Node") + " Status");
     this.SetTopNodes(DashboardData.AllNodes, "Dashboard", Model.CurrentNode);
 }
 @section head {
@@ -18,108 +18,107 @@
 }
 @if (s == null)
 {
-    <div style="padding: 40px 20px; text-align: center; font-size: 20px;">Node not found.</div>
+    <div class="no-content">Node not found.</div>
+    return;
 }
-else
-{
-    <h5>
-        <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
-        @s.PrettyName
-        @if (s.IsVM)
-        {
-            @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
-        }
-        @if (s.ManagementUrl.HasValue())
-        {
-            <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
-        }
-    </h5>
-    <div class="panel panel-default">
-        <div class="panel-body small">
-            <div class="row">
-                <div class="col-md-4">
-                    <dl>
-                        @if (s.Manufacturer.HasValue())
-                        {
-                            <dt>Model</dt>
-                            <dd>
-                                @s.Manufacturer @s.Model
-                                @if (s.ServiceTag.HasValue())
-                                {
-                                    @: - <b>@s.ServiceTag</b>
-                                }
-                            </dd>
-                        }
-                        <dt>Type</dt>
-                        <dd>@s.MachineType</dd>
-
-                        <dt>CPU</dt>
-                        <dd title="@s.ApplicationCPUTextSummary()">
-                            @s.CPUStatusSpan()
-                            @if (s.IsRealTimePollable)
-                            {
-                                <span class="text-muted">(<a href="#" class="js-realtime-cpu">realtime</a>)</span>
-                            }
-                        </dd>
-
-                        <dt>Memory</dt>
-                        <dd title="@s.ApplicationMemoryTextSummary()">@s.MemoryStatusSpan()</dd>
-
-                        <dt>Network</dt>
-                        <dd title="@s.NetworkTextSummary()">@s.PrettyTotalNetwork()</dd>
-                    </dl>
-                </div>
-                <div class="col-md-4">
-                    <dl>
-                        <dt>Last Boot</dt>
+<h5>
+    <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
+    @s.PrettyName
+    @if (s.IsVM)
+    {
+        @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
+    }
+    @if (s.ManagementUrl.HasValue())
+    {
+        <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
+    }
+</h5>
+<div class="panel panel-default">
+    <div class="panel-body small">
+        <div class="row">
+            <div class="col-md-4">
+                <dl>
+                    @if (s.Manufacturer.HasValue())
+                    {
+                        <dt>Model</dt>
                         <dd>
-                            @if (s.LastBoot == DateTime.MinValue)
+                            @s.Manufacturer @s.Model
+                            @if (s.ServiceTag.HasValue())
                             {
-                                <span class="text-warning">Unknown</span>
-                            }
-                            else
-                            {
-                                @: @s.LastBoot.ToRelativeTimeSpan()
-                                <span class="text-muted">(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
+                                @: - <b>@s.ServiceTag</b>
                             }
                         </dd>
+                    }
+                    <dt>Type</dt>
+                    <dd>@s.MachineType</dd>
 
-                        <dt>Last Poll</dt>
-                        <dd>@s.LastUpdatedSpan()</dd>
-
-                        @if (s.PollIntervalSeconds.HasValue)
+                    <dt>CPU</dt>
+                    <dd title="@s.ApplicationCPUTextSummary()">
+                        @s.CPUStatusSpan()
+                        @if (s.IsRealTimePollable)
                         {
-                            <dt>Poll Interval</dt>
-                            <dd>@(s.PollInterval?.ToReadableString())</dd>
+                            <span class="text-muted">(<a href="#" class="js-realtime-cpu">realtime</a>)</span>
                         }
+                    </dd>
 
-                        <dt>Monitor</dt>
-                        <dd title="All IPs: @(s.IPs != null ? $"\n{string.Join("\n", s.IPs)}" : null)">@s.Ip</dd>
+                    <dt>Memory</dt>
+                    <dd title="@s.ApplicationMemoryTextSummary()">@s.MemoryStatusSpan()</dd>
 
-                    </dl>
-                </div>
-                @if (s.Volumes != null)
-                {
-                    <div class="col-md-4">
-                        @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
-                        {
-                            <div title="@v.Description @($"\n{v.Used:n0}") of @($"{v.Size:n0}") bytes used">
-                                @v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span>
-                            </div>
-                            <div class="progress">
-                                <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed)%"></div>
-                            </div>
-                        }
-                    </div>
-                }
+                    <dt>Network</dt>
+                    <dd title="@s.NetworkTextSummary()">@s.PrettyTotalNetwork()</dd>
+                </dl>
             </div>
+            <div class="col-md-4">
+                <dl>
+                    <dt>Last Boot</dt>
+                    <dd>
+                        @if (s.LastBoot == DateTime.MinValue)
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        else
+                        {
+                            @: @s.LastBoot.ToRelativeTimeSpan()
+                            <span class="text-muted">(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
+                        }
+                    </dd>
+
+                    <dt>Last Poll</dt>
+                    <dd>@s.LastUpdatedSpan()</dd>
+
+                    @if (s.PollIntervalSeconds.HasValue)
+                    {
+                        <dt>Poll Interval</dt>
+                        <dd>@(s.PollInterval?.ToReadableString())</dd>
+                    }
+
+                    <dt>Monitor</dt>
+                    <dd title="All IPs: @(s.IPs != null ? $"\n{string.Join("\n", s.IPs)}" : null)">@s.Ip</dd>
+
+                </dl>
+            </div>
+            @if (s.Volumes != null)
+            {
+                <div class="col-md-4">
+                    @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
+                    {
+                        <div title="@v.Description @($"\n{v.Used:n0}") of @($"{v.Size:n0}") bytes used">
+                            @v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed)%"></div>
+                        </div>
+                    }
+                </div>
+            }
         </div>
     </div>
+</div>
 @helper SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
 {
     <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.GetDescription()</a></li>
 }
-if (Model.StatusTypes.Count() > 1)
+@if (Model.StatusTypes.Count() > 1)
 { // only show nav if there's actual nav - save the vertical space on stats-only nodes
      <ul class="nav nav-tabs">
          @foreach (var st in Model.StatusTypes.OrderBy(i => i))
@@ -150,11 +149,10 @@ if (Model.StatusTypes.Count() > 1)
              }
          }
      </ul>
- }
+}
 <div data-node="@Model.CurrentNode.PrettyName">
     @if (Model.CurrentStatusType != CurrentStatusTypes.None)
     {
         @Html.Partial("Node.Current." + Model.CurrentStatusType, s)
     }
 </div>
-}
