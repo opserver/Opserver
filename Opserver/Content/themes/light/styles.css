@@ -8251,6 +8251,10 @@ h5.page-header,
 h6.page-header {
   padding-bottom: 4px;
 }
+.vertical-align {
+  display: flex;
+  align-items: center;
+}
 .page-header {
   margin: 10px 0 5px;
 }
@@ -8269,6 +8273,19 @@ h6.page-header {
 }
 .page-header .pull-right {
   font-size: 0.9em;
+}
+.page-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px;
+  padding-top: 10px;
+  font-size: 12px;
+  background: #333333;
+  color: #fff;
+}
+.page-footer > .row {
+  width: 100%;
 }
 .actions a + a:before {
   content: "| ";

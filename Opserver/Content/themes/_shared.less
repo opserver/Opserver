@@ -143,6 +143,11 @@ h4, h5, h6 {
   }
 }
 
+.vertical-align {
+    display: flex;
+    align-items: center;
+}
+
 .page-header {
   margin: 10px 0 5px;
 
@@ -163,6 +168,20 @@ h4, h5, h6 {
   .pull-right {
     font-size: 0.9em;
   }
+}
+
+.page-footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    padding-top: 10px;
+    font-size: 12px;
+    background: @gray-dark;
+    color: @navbar-default-color;
+    > .row {
+      width: 100%;
+    }
 }
 
 .actions {
