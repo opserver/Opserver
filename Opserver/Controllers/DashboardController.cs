@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
                 {
                     Nodes = DashboardData.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
-                    ErrorMessages = DashboardData.ProviderExceptions,
+                    ErrorMessages = DashboardData.ProviderExceptions.ToList(),
                     Filter = filter
                 };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
