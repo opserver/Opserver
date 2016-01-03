@@ -13,15 +13,9 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public static List<Application> Applications => GetApplications();
 
-        public static int TotalExceptionCount
-        {
-            get { return Applications.Sum(a => a.ExceptionCount); }
-        }
+        public static int TotalExceptionCount => Applications.Sum(a => a.ExceptionCount);
 
-        public static int TotalRecentExceptionCount
-        {
-            get { return Applications.Sum(a => a.RecentExceptionCount); }
-        }
+        public static int TotalRecentExceptionCount => Applications.Sum(a => a.RecentExceptionCount);
 
         public static MonitorStatus MonitorStatus
         {

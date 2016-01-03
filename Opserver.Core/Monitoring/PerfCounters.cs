@@ -11,18 +11,6 @@ namespace StackExchange.Opserver.Monitoring
     {
         public class Windows
         {
-            //public static QueryResult<SystemUtilization> GetSystemUtilization(string machineName)
-            //{
-            //    var pc = new PerformanceCounter()
-
-            //    //return QueryAsync(machineName,
-            //    //             "select Name, PercentProcessorTime from Win32_PerfFormattedData_PerfOS_Processor",
-            //    //             results => results.Select(mo => new SystemUtilization
-            //    //             {
-            //    //                 Name = mo["Name"].ToString() == "_Total" ? "Total" : mo["Name"].ToString(),
-            //    //                 Utilization = (UInt64)mo["PercentProcessorTime"]
-            //    //             }));
-            //}
             public static Task<QueryResult<CPUUtilization>> GetCPUUtilization(string machineName)
             {
                 return QueryAsync(machineName,

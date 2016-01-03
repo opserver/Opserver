@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Monitoring
     {
         public static Dictionary<Oid, AsnType> Walk(string ip, string oid, int port = 161, int timeout = 2000, int retries = 1)
         {
-            var snmp = new SimpleSnmp(ip, port, "s3cur3", timeout, retries);
+            var snmp = new SimpleSnmp(ip, port, "secure", timeout, retries);
             return snmp.Walk(SnmpVersion.Ver2, oid);
         }
 

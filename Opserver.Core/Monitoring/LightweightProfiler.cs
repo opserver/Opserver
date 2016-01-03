@@ -12,9 +12,9 @@ namespace StackExchange.Opserver.Monitoring
         /// <summary>
         /// Can be a full <see cref="MiniProfiler"/>.
         /// </summary>
-        readonly IDbProfiler _wrapped;
+        private readonly IDbProfiler _wrapped;
 
-        readonly Stopwatch _sw = new Stopwatch();
+        private readonly Stopwatch _sw = new Stopwatch();
         private readonly string _category; // future use for multiples
         public LightweightProfiler(IDbProfiler wrapped, string category)
         {

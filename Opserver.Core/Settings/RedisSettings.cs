@@ -13,7 +13,7 @@ namespace StackExchange.Opserver
 
         public Server Defaults { get; set; } = new Server();
 
-        public class Server : ISettingsCollectionItem<Server>
+        public class Server : ISettingsCollectionItem
         {
             public List<Instance> Instances { get; set; } = new List<Instance>();
 
@@ -31,41 +31,9 @@ namespace StackExchange.Opserver
             /// How many seconds before polling this cluster for status again
             /// </summary>
             public int RefreshIntervalSeconds { get; set; } = 30;
-
-            public bool Equals(Server other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return Instances.SequenceEqual(other.Instances)
-                    && string.Equals(Name, other.Name) 
-                    && string.Equals(Description, other.Description) 
-                    && RefreshIntervalSeconds == other.RefreshIntervalSeconds;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Server) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = 0;
-                    foreach (var i in Instances)
-                        hashCode = (hashCode*397) ^ i.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
-                    return hashCode;
-                }
-            }
         }
 
-        public class Instance : ISettingsCollectionItem<Instance>
+        public class Instance : ISettingsCollectionItem
         {
             /// <summary>
             /// The machine name for this node
@@ -86,33 +54,6 @@ namespace StackExchange.Opserver
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage
             /// </summary>
             public Dictionary<string, string> AnalysisRegexes { get; set; } = new Dictionary<string, string>();
-
-            public bool Equals(Instance other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name)
-                       && Port == other.Port;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Instance) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    // TODO: Regexes should move
-                    int hashCode = Name?.GetHashCode() ?? 0;
-                    hashCode = (hashCode*397) ^ Port;
-                    return hashCode;
-                }
-            }
         }
     }
 }

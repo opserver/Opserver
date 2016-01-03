@@ -22,7 +22,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public string DefaultConnectionString { get; set; }
 
-        public class Cluster : ISettingsCollectionItem<Cluster>
+        public class Cluster : ISettingsCollectionItem
         {
             public List<Instance> Nodes { get; set; } = new List<Instance>();
             
@@ -40,49 +40,9 @@ namespace StackExchange.Opserver
             /// How many seconds before polling a node for status again
             /// </summary>
             public int? RefreshIntervalSeconds { get; set; }
-
-            public bool Equals(Cluster other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return Nodes.SequenceEqual(other.Nodes)
-                       && string.Equals(Name, other.Name)
-                       && string.Equals(Description, other.Description);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Cluster) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = 0;
-                    foreach (var n in Nodes)
-                        hashCode = (hashCode*397) ^ n.GetHashCode();
-                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
-                    return hashCode;
-                }
-            }
-
-            public static bool operator ==(Cluster left, Cluster right)
-            {
-                return Equals(left, right);
-            }
-
-            public static bool operator !=(Cluster left, Cluster right)
-            {
-                return !Equals(left, right);
-            }
         }
 
-        public class Instance : ISettingsCollectionItem<Instance>
+        public class Instance : ISettingsCollectionItem
         {
             /// <summary>
             /// The machine name for this SQL instance
@@ -103,29 +63,6 @@ namespace StackExchange.Opserver
             /// How many seconds before polling this node for status again
             /// </summary>
             public int? RefreshIntervalSeconds { get; set; }
-
-            public bool Equals(Instance other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name) && string.Equals(ConnectionString, other.ConnectionString) && string.Equals(ObjectName, other.ObjectName);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Instance) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    return ((Name?.GetHashCode() ?? 0)*397) ^ (ConnectionString?.GetHashCode() ?? 0);
-                }
-            }
         }
     }
 }

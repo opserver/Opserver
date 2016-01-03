@@ -88,7 +88,7 @@ Select CreationDate,
 
         public static async Task<List<RouteHit>> GetTopPageRotuesAsync(int lastNdays, string host = null)
         {
-            var cacheKey = "top-page-routes-" + lastNdays + "-" + host;
+            var cacheKey = "top-page-routes-" + lastNdays.ToString() + "-" + host;
             var results = Current.LocalCache.Get<List<RouteHit>>(cacheKey);
 
             if (results == null)

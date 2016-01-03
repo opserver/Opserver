@@ -11,19 +11,12 @@ namespace StackExchange.Opserver.Data.Elastic
         public Cache<ClusterStatusInfo> Status =>
             _status ?? (_status = GetCache<ClusterStatusInfo>(Settings.RefreshIntervalSeconds));
 
-        public IEnumerable<ShardState> TroubledShards
-        {
-            get { return ShardStates.Where(s => s.State != "STARTED"); }
-        }
+        public IEnumerable<ShardState> TroubledShards =>
+            ShardStates.Where(s => s.State != "STARTED");
 
-        public IEnumerable<ShardState> ShardStates
-        {
-            get
-            {
-                return Status.Data?.RoutingNodes?.Nodes.Values.SelectMany(i => i)
-                    .Union(Status.Data.RoutingNodes.Unassigned) ?? Enumerable.Empty<ShardState>();
-            }
-        }
+        public IEnumerable<ShardState> ShardStates =>
+            Status.Data?.RoutingNodes?.Nodes.Values.SelectMany(i => i)
+                .Union(Status.Data.RoutingNodes.Unassigned) ?? Enumerable.Empty<ShardState>();
 
         public class ClusterStatusInfo : ElasticDataObject, IMonitorStatus
         {

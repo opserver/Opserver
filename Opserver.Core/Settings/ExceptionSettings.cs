@@ -41,7 +41,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public bool EnablePreviews { get; set; } = true;
 
-        public class Store : ISettingsCollectionItem<Store>
+        public class Store : ISettingsCollectionItem
         {
             /// <summary>
             /// The name that appears for this store, used as a key for applications
@@ -64,36 +64,6 @@ namespace StackExchange.Opserver
             /// Connection string for this store's database
             /// </summary>
             public string ConnectionString { get; set; }
-
-            public bool Equals(Store other)
-            {
-                return string.Equals(Name, other.Name)
-                       && string.Equals(Description, other.Description)
-                       && QueryTimeoutMs == other.QueryTimeoutMs
-                       && PollIntervalSeconds == other.PollIntervalSeconds
-                       && string.Equals(ConnectionString, other.ConnectionString);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != GetType()) return false;
-                return Equals((Store) obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = Name?.GetHashCode() ?? 0;
-                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
-                    hashCode = (hashCode*397) ^ PollIntervalSeconds;
-                    hashCode = (hashCode*397) ^ (ConnectionString?.GetHashCode() ?? 0);
-                    return hashCode;
-                }
-            }
         }
     }
 }

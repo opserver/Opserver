@@ -19,7 +19,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public string APIKey { get; set; }
 
-        public class Railgun : ISettingsCollectionItem<Railgun>
+        public class Railgun : ISettingsCollectionItem
         {
             /// <summary>
             /// The name of this railgun instance
@@ -45,42 +45,9 @@ namespace StackExchange.Opserver
             /// How many seconds before polling the railgun status endpoint for status again
             /// </summary>
             public int RefreshIntervalSeconds { get; set; } = 30;
-
-            public bool Equals(Railgun other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name)
-                    && string.Equals(Host, other.Host)
-                    && string.Equals(Description, other.Description)
-                    && Port == other.Port
-                    && RefreshIntervalSeconds == other.RefreshIntervalSeconds;
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((Railgun)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = 0;
-                    hashCode = (hashCode*397) ^ (Name?.GetHashCode() ?? 0);
-                    hashCode = (hashCode * 397) ^ (Host?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ (Description?.GetHashCode() ?? 0);
-                    hashCode = (hashCode*397) ^ RefreshIntervalSeconds;
-                    hashCode = (hashCode*397) ^ Port;
-                    return hashCode;
-                }
-            }
         }
         
-        public class DataCenter : ISettingsCollectionItem<DataCenter>
+        public class DataCenter : ISettingsCollectionItem
         {
             /// <summary>
             /// The name for this data center
@@ -96,35 +63,6 @@ namespace StackExchange.Opserver
             /// The masked IP ranges for this data center, in CIDR format
             /// </summary>
             public List<string> MaskedRanges { get; set; } = new List<string>();
-
-            public bool Equals(DataCenter other)
-            {
-                if (ReferenceEquals(null, other)) return false;
-                if (ReferenceEquals(this, other)) return true;
-                return string.Equals(Name, other.Name)
-                       && Ranges.SequenceEqual(other.Ranges)
-                       && MaskedRanges.SequenceEqual(other.MaskedRanges);
-            }
-
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((DataCenter)obj);
-            }
-
-            public override int GetHashCode()
-            {
-                unchecked
-                {
-                    int hashCode = 0;
-                    foreach (var r in Ranges)
-                        hashCode = (hashCode * 397) ^ r.GetHashCode();
-                    hashCode = (hashCode * 397) ^ (Name?.GetHashCode() ?? 0);
-                    return hashCode;
-                }
-            }
         }
     }
 }

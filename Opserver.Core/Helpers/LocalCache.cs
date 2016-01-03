@@ -5,7 +5,7 @@ namespace StackExchange.Opserver.Helpers
 {
     public class LocalCache
     {
-        private static readonly MemoryCache Cache = new MemoryCache("LocalCache");
+        private static readonly MemoryCache Cache = new MemoryCache(nameof(LocalCache));
 
         private readonly object _lock = new object();
         

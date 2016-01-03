@@ -47,9 +47,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
             return Host == other.Host && Port == other.Port;
         }
 
-        public override string ToString()
-        {
-            return Host + ":" + Port.ToString();
-        }
+        public override string ToString() => Host + ":" + Port.ToString();
     }
 }

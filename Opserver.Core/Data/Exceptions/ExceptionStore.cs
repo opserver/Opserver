@@ -262,9 +262,7 @@ Update Exceptions
             }
         }
 
-        private Task<DbConnection> GetConnectionAsync()
-        {
-            return Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeout);
-        }
+        private Task<DbConnection> GetConnectionAsync() =>
+            Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeout);
     }
 }

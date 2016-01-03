@@ -12,8 +12,8 @@ namespace StackExchange.Opserver.Data.Elastic
 
             // Some implementations are raw
             if (response?.Exception == null) return;
-            string lastErrorMessage = response.Exception.Message;
-            Exception lastException = response.Exception;
+            var lastErrorMessage = response.Exception.Message;
+            var lastException = response.Exception;
 
             // Failed to poll all nodes
             if (lastErrorMessage.HasValue())

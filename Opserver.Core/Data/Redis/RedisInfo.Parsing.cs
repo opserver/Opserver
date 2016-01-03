@@ -179,19 +179,19 @@ namespace StackExchange.Opserver.Data.Redis
                     case "master_sync_left_bytes":
                         if (long.TryParse(value, out l))
                         {
-                            return $"{l:n0} bytes";
+                            return l.ToString("n0") + " bytes";
                         }
                         break;
                     case "used_memory_rss":
                         if (long.TryParse(value, out l))
                         {
-                            return $"{l} ({l.ToSize(precision: 1)})";
+                            return $"{l.ToString()} ({l.ToSize(precision: 1)})";
                         }
                         break;
                     default:
                         if (!_dontFormatList.Any(label.Contains) && long.TryParse(value, out l))
                         {
-                            return $"{l:n0}";
+                            return l.ToString("n0");
                         }
                         break;
                 }

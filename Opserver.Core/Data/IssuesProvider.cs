@@ -6,11 +6,11 @@ namespace StackExchange.Opserver.Data
 {
     public class IssueProvider
     {
-        private static readonly List<IIssuesProvider> _issueProviders;
+        private static readonly List<IIssuesProvider> IssueProviders;
 
         static IssueProvider()
         {
-            _issueProviders = new List<IIssuesProvider>();
+            IssueProviders = new List<IIssuesProvider>();
             var providers = AppDomain.CurrentDomain.GetAssemblies()
                                      .SelectMany(s => s.GetTypes())
                                      .Where(typeof (IIssuesProvider).IsAssignableFrom);
@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data
                 if (!p.IsClass) continue;
                 try
                 {
-                    _issueProviders.Add((IIssuesProvider) Activator.CreateInstance(p));
+                    IssueProviders.Add((IIssuesProvider) Activator.CreateInstance(p));
                 }
                 catch (Exception e)
                 {
@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Data
             return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
             {
                 // TODO: Better Ordering
-                return _issueProviders
+                return IssueProviders
                     .SelectMany(p => p.GetIssues())
                     .OrderByDescending(i => i.IsService)
                     .ThenByDescending(i => i.MonitorStatus)

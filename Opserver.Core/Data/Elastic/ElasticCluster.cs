@@ -29,10 +29,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
         private sealed class ElasticProfilerProvider : IProfilerProvider
         {
-            public IProfiler GetProfiler()
-            {
-                return new LightweightProfiler(MiniProfiler.Current, "elastic");
-            }
+            public IProfiler GetProfiler() => new LightweightProfiler(MiniProfiler.Current, "elastic");
         }
 
         public class ElasticNode
@@ -76,7 +73,7 @@ namespace StackExchange.Opserver.Data.Elastic
                     Host = hostAndPort;
                     Port = DefaultElasticPort;
                 }
-                Url = $"http://{Host}:{Port}/";
+                Url = $"http://{Host}:{Port.ToString()}/";
             }
         }
 
@@ -97,15 +94,13 @@ namespace StackExchange.Opserver.Data.Elastic
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (HealthStatus.Data != null && HealthStatus.Data.Indices != null)
+            if (HealthStatus.Data?.Indices != null)
                 yield return HealthStatus.Data.Indices.GetWorstStatus();
             yield return DataPollers.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()
         {
-            if (HealthStatus.Data != null && HealthStatus.Data.Indices != null)
-                return HealthStatus.Data.Indices.GetReasonSummary();
-            return null;
+            return HealthStatus.Data?.Indices?.GetReasonSummary();
         }
 
         // TODO: Poll down nodes faster?
@@ -131,18 +126,19 @@ namespace StackExchange.Opserver.Data.Elastic
         
         public Action<Cache<T>> UpdateFromElastic<T>() where T : ElasticDataObject, new()
         {
-            return UpdateCacheItem<T>(description: "Elastic Fetch: " + SettingsName + ":" + typeof(T).Name,
-                                   getData: async () =>
-                                       {
-                                           // TODO: Refactor
-                                           var result = new T();
-                                           await result.PopulateFromConnections(ConnectionManager.GetClient());
-                                           return result;
-                                       },
-                                   addExceptionData:
-                                       e =>
-                                       e.AddLoggedData("Cluster", SettingsName)
-                                        .AddLoggedData("Type", typeof (T).Name));
+            return UpdateCacheItem(
+                description: "Elastic Fetch: " + SettingsName + ":" + typeof (T).Name,
+                getData: async () =>
+                {
+                    // TODO: Refactor
+                    var result = new T();
+                    await result.PopulateFromConnections(ConnectionManager.GetClient());
+                    return result;
+                },
+                addExceptionData:
+                    e =>
+                        e.AddLoggedData("Cluster", SettingsName)
+                            .AddLoggedData("Type", typeof (T).Name));
         }
 
         public override string ToString()

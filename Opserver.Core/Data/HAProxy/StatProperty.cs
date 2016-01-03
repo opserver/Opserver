@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         #region Static Collection
 
         //Load properties to parse initially on load
-        public static List<StatProperty> AllOrdered = StatProperty.GetAll();
+        public static List<StatProperty> AllOrdered = GetAll();
 
         private static List<StatProperty> GetAll()
         {

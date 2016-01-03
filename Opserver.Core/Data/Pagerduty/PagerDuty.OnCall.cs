@@ -151,7 +151,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 case null:
                     return "Unknown";
                 default:
-                    return level + "th";
+                    return level.ToString() + "th";
             }
         }
 

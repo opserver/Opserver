@@ -78,7 +78,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Category that a server belongs to
         /// </summary>
-        public class Category : INodeSettings, ISettingsCollectionItem<Category>
+        public class Category : INodeSettings, ISettingsCollectionItem
         {
             /// <summary>
             /// The name that appears for this category
@@ -144,7 +144,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Addtional per-node settings
         /// </summary>
-        public class NodeSettings : INodeSettings, ISettingsCollectionItem<NodeSettings>
+        public class NodeSettings : INodeSettings, ISettingsCollectionItem
         {
             string ISettingsCollectionItem.Name => Pattern;
 

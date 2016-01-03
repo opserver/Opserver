@@ -9,9 +9,9 @@ namespace StackExchange.Opserver.Data
 {
     public class IPNet
     {
-        public IPAddress IPAddress { get; private set; }
-        public IPAddress Subnet { get; private set; }
-        public int CIDR { get; private set; }
+        public IPAddress IPAddress { get; }
+        public IPAddress Subnet { get; }
+        public int CIDR { get; }
         public AddressFamily AddressFamily => IPAddress.AddressFamily;
 
         private TinyIPAddress? _tinyIPAddress { get; set; }
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Data
 
         public override string ToString()
         {
-            return string.Concat(IPAddress, "/", CIDR);
+            return string.Concat(IPAddress, "/", CIDR.ToString());
         }
 
         public bool Contains(IPAddress ip)
@@ -76,9 +76,6 @@ namespace StackExchange.Opserver.Data
             CIDR = cidr ?? (subnet == null ? GetBitLength(ip.AddressFamily) : TSubnet.NumberOfSetBits);
         }
 
-        // Prevent allocating an array for every address we split
-        private static readonly char[] _cidrSplit = { '/' };
-
         public static bool TryParse(string ipOrCidr, out IPNet net)
         {
             try { net = Parse(ipOrCidr); return true; }
@@ -86,7 +83,7 @@ namespace StackExchange.Opserver.Data
         }
         public static IPNet Parse(string ipOrCidr)
         {
-            var parts = ipOrCidr.Split(_cidrSplit);
+            var parts = ipOrCidr.Split(StringSplits.ForwardSlash);
             if (parts.Length == 2)
             {
                 int cidr;
@@ -128,18 +125,19 @@ namespace StackExchange.Opserver.Data
         }
         public static IPNet Parse(string ip, string subnet)
         {
-            IPAddress ipAddr, subnetAddr;
+            IPAddress ipAddr;
             if (IPAddress.TryParse(ip, out ipAddr))
             {
+                IPAddress subnetAddr;
                 if (IPAddress.TryParse(subnet, out subnetAddr))
                 {
                     if (!TinyIPAddress.FromIPAddress(subnetAddr).Value.IsValidSubnet)
-                        throw new IPNetParseException("Error parsing subnet mask Address from IP: '{0}' is not a valid subnet", subnet);
+                        throw new IPNetParseException("Error parsing subnet mask Address from IP: '" + subnet + "' is not a valid subnet");
                     return new IPNet(ipAddr, subnetAddr);
                 }
-                throw new IPNetParseException("Error parsing subnet mask from IP: '{0}'", subnet);
+                throw new IPNetParseException("Error parsing subnet mask from IP: '" + subnet + "'");
             }
-            throw new IPNetParseException("Error parsing IP Address from IP: '{0}'", ip);
+            throw new IPNetParseException("Error parsing IP Address from IP: '" + ip + "'");
         }
 
         public static IPAddress ToNetmask(AddressFamily addressFamily, int cidr)
@@ -177,7 +175,7 @@ namespace StackExchange.Opserver.Data
         /// Private IP Ranges reserved for internal use by ARIN
         /// These are not routable on the global internet
         /// </summary>
-        private static List<IPNet> ReservedPrivateRanges = new List<IPNet>
+        private static readonly List<IPNet> ReservedPrivateRanges = new List<IPNet>
             {
                 Parse("10.0.0.0/8"),
                 Parse("172.16.0.0/12"),

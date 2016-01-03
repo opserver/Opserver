@@ -61,10 +61,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             Settings = Current.Settings.HAProxy.GetInstanceSettings(instance, group);
         }
 
-        public void PurgeCache()
-        {
-            Proxies.Purge();
-        }
+        public void PurgeCache() => Proxies.Purge();
 
         private Cache<List<Proxy>> _proxies;
         public Cache<List<Proxy>> Proxies
@@ -131,10 +128,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             return result;
         }
 
-        public override string ToString()
-        {
-            return string.Concat(Name, ": ", Url);
-        }
+        public override string ToString() => string.Concat(Name, ": ", Url);
 
         #region Test Data
 

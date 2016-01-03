@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 {
     public partial class CloudFlareAPI : SinglePollNode<CloudFlareAPI>
     {
-        const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
+        private const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
 
         public CloudFlareSettings Settings { get; internal set; }
         public string Email => Settings.Email;
@@ -86,9 +86,8 @@ namespace StackExchange.Opserver.Data.CloudFlare
             }
         }
 
-        private WebClient GetWebClient(string contentType = "application/json")
-        {
-            return new WebClient
+        private WebClient GetWebClient(string contentType = "application/json") =>
+            new WebClient
             {
                 Headers =
                 {
@@ -97,7 +96,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
                     ["Content-Type"] = contentType
                 }
             };
-        }
 
         public override string ToString() => string.Concat("CloudFlare API: ", Email);
     }

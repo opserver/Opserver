@@ -246,7 +246,7 @@ namespace StackExchange.Opserver.Controllers
             var user = Current.User;
             var action = JiraSettings.Actions.FirstOrDefault(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = await jiraClient.CreateIssueAsync(action, e, user == null ? String.Empty : user.AccountName);
+            var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName);
 
             if (result.Key.IsNullOrWhiteSpace())
             {
@@ -256,16 +256,13 @@ namespace StackExchange.Opserver.Controllers
                     message = "Can not create issue"
                 });
             }
-            else
-            {
-                return Json(new
-                {
-                    success = true,
-                    issueKey = result.Key,
-                    browseUrl = result.BrowseUrl
-                });
-            }
 
+            return Json(new
+            {
+                success = true,
+                issueKey = result.Key,
+                browseUrl = result.BrowseUrl
+            });
         }
     }
 }

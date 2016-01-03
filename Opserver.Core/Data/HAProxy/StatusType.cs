@@ -1,6 +1,6 @@
 ﻿namespace StackExchange.Opserver.Data.HAProxy
 {
-    public enum StatusType : int
+    public enum StatusType
     {
         Frontend = 0,
         Backend = 1,

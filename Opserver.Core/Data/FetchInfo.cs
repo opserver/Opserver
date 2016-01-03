@@ -9,21 +9,21 @@ namespace StackExchange.Opserver.Data
         public Exception Exception { get; set; }
         public string ExceptionMessage { get; set; }
 
-        public static FetchInfo Success()
-        {
-            return new FetchInfo {DateTime = DateTime.UtcNow, Status = FetchStatus.Success};
-        }
+        public static FetchInfo Success() =>
+            new FetchInfo
+            {
+                DateTime = DateTime.UtcNow,
+                Status = FetchStatus.Success
+            };
 
-        public static FetchInfo Fail(string exceptionMessage, Exception exception)
-        {
-            return new FetchInfo
-                       {
-                           DateTime = DateTime.UtcNow,
-                           Status = FetchStatus.Fail,
-                           ExceptionMessage = exceptionMessage,
-                           Exception = exception
-                       };
-        }
+        public static FetchInfo Fail(string exceptionMessage, Exception exception) =>
+            new FetchInfo
+            {
+                DateTime = DateTime.UtcNow,
+                Status = FetchStatus.Fail,
+                ExceptionMessage = exceptionMessage,
+                Exception = exception
+            };
 
         public MonitorStatus MonitorStatus
         {
