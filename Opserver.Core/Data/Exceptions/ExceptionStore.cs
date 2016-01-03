@@ -13,6 +13,8 @@ namespace StackExchange.Opserver.Data.Exceptions
     {
         public const int PerAppSummaryCount = 1000;
 
+        public override string ToString() => "Store: " + Settings.Name;
+
         private int? QueryTimeout => Settings.QueryTimeoutMs;
         public string Name => Settings.Name;
         public string Description => Settings.Description;
