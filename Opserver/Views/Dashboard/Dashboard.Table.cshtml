@@ -4,10 +4,10 @@
 @using StackExchange.Opserver.Views.Dashboard
 @model DashboardModel
 @{
-    // TODO: Toastr
     Layout = null;
     var categories = Model.Nodes
                           .GroupBy(n => n.Category)
+                          .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
                           .OrderBy(g => g.Key.Index);
 }
 @helper Graph(Node s, string type)
@@ -21,73 +21,66 @@
         <div class="text-muted">No Data Available</div>
     }
 }
-<div>
-    <div class="js-refresh" data-name="dashboard-overview">
-        @if (!Model.Nodes.Any())
+<div class="js-refresh" data-name="dashboard-overview">
+    @if (!Model.Nodes.Any())
+    {
+        var errors = Model.ErrorMessages;
+        <div class="no-content">No nodes available</div>
+        if (errors.Any())
         {
-            var errors = Model.ErrorMessages;
-            <div class="no-content">No nodes available</div>
-            if (errors.Any())
-            {
-                <script>
-                    @foreach (var e in errors)
-                    {
-                        @:toastr.warning('@HttpUtility.JavaScriptStringEncode(e)', null, { positionClass: "toast-bottom-full-width", timeOut: 60 * 1000 });
-                    }
-                </script>
-            }
-        }
-        else
-        {
-            <table class="table table-striped table-responsive table-middle table-super-condensed table-dashboard text-nowrap js-nodes">
-                @foreach (var g in categories)
+            <script>
+                @foreach (var e in errors)
                 {
-                    var c = g.Key;
-                    var nodes = g;
-                    if (!nodes.Any() || (c == DashboardCategory.Unknown && !Current.Settings.Dashboard.ShowOther))
-                    {
-                        continue;
-                    }
-                    using (MiniProfiler.Current.Step("Category: " + c.Name))
-                    {
-                        <tbody>
-                            <tr class="category-row">
-                                <th colspan="7">
-                                    <h5>@c.Name</h5>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th>Node</th>
-                                <th colspan="2">CPU</th>
-                                <th colspan="2">Memory</th>
-                                <th colspan="2">Network</th>
-                            </tr>
-                        @foreach (var n in nodes.OrderBy(n => n.PrettyName))
-                        {
-                            <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
-                                <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @n.LastSync.ToRelativeTime()">
-                                    @n.IconSpan()
-                                    <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
-                                </td>
-                                <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
-                                <td>@Graph(n, "cpu")</td>
-                                <td title="@n.ApplicationMemoryTextSummary()">
-                                    @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
-                                    {
-                                        <div class="progress" style="width: 215px;">
-                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed)%"></div>
-                                        </div>
-                                    }
-                                </td>
-                                <td data-max="@((n.TotalMemory/1024/1024).ToString())" data-subtitle="@(n.TotalMemory.GetValueOrDefault(0).ToSize())">@Graph(n, "memory")</td>
-                                <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
-                                <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "Network")</a></td>
-                            </tr>
-                        }
-                        </tbody>
-                    }
+                    @:toastr.warning('@HttpUtility.JavaScriptStringEncode(e)', null, { positionClass: "toast-bottom-full-width", timeOut: 60 * 1000 });
                 }
-            </table>
+            </script>
         }
-    </div>
+    }
+    else
+    {
+        <table class="table table-striped table-responsive table-middle table-super-condensed table-dashboard text-nowrap js-nodes">
+            @foreach (var g in categories)
+            {
+                var c = g.Key;
+                using (MiniProfiler.Current.Step("Category: " + c.Name))
+                {
+                    <tbody>
+                        <tr class="category-row">
+                            <th colspan="7">
+                                <h5>@c.Name</h5>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th>Node</th>
+                            <th colspan="2">CPU</th>
+                            <th colspan="2">Memory</th>
+                            <th colspan="2">Network</th>
+                        </tr>
+                    @foreach (var n in g.OrderBy(n => n.PrettyName))
+                    {
+                        <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @n.LastSync.ToRelativeTime()">
+                                @n.IconSpan()
+                                <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
+                            </td>
+                            <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
+                            <td>@Graph(n, "cpu")</td>
+                            <td title="@n.ApplicationMemoryTextSummary()">
+                                @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
+                                {
+                                    <div class="progress" style="width: 215px;">
+                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed)%"></div>
+                                    </div>
+                                }
+                            </td>
+                            <td data-max="@((n.TotalMemory/1024/1024).ToString())" data-subtitle="@(n.TotalMemory.GetValueOrDefault(0).ToSize())">@Graph(n, "memory")</td>
+                            <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
+                            <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "Network")</a></td>
+                        </tr>
+                    }
+                    </tbody>
+                }
+            }
+        </table>
+    }
 </div>

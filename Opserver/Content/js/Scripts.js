@@ -379,11 +379,15 @@ Status.Dashboard = (function () {
     function applyFilter(filter) {
         Status.Dashboard.options.filter = filter = (filter || '').toLowerCase();
         if (!filter) {
-            $('[data-search]').removeClass('hidden');
+            $('[data-search]').closest('tbody').andSelf().removeClass('hidden');
             return;
         }
         $('[data-search]').each(function () {
             var show = $(this).data('search').indexOf(filter) > -1;
+            $(this).toggleClass('hidden', !show);
+        });
+        $('[data-search]').closest('tbody').each(function () {
+            var show = $('td:visible', this).length;
             $(this).toggleClass('hidden', !show);
         });
         // TODO: Look at children cases, e.g. search for a category where children don't match
