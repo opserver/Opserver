@@ -22,21 +22,19 @@
 }
 else
 {
+    <h5>
+        <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
+        @s.PrettyName
+        @if (s.IsVM)
+        {
+            @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
+        }
+        @if (s.ManagementUrl.HasValue())
+        {
+            <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
+        }
+    </h5>
     <div class="panel panel-default">
-        <div class="panel-heading">
-            <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
-            <b>
-                @s.PrettyName
-                @if (s.IsVM)
-                {
-                    @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
-                }
-            </b>
-            @if (s.ManagementUrl.HasValue())
-            {
-                <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
-            }
-        </div>
         <div class="panel-body small">
             <div class="row">
                 <div class="col-md-4">
