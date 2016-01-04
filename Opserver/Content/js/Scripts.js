@@ -287,8 +287,10 @@
             var type = $(this).data('type'),
                 key = $(this).data('key');
 
+            if ($(this).hasClass('disabled')) { return false; }
+
             if (type && key) {
-                $(this).text('').prependWaveLoader();
+                $(this).text('').prependWaveLoader().addClass('disabled');
                 $.ajax('/poll', {
                     data: {
                         type: type,
@@ -300,6 +302,20 @@
                 });
             }
             return false;
+        }).on('click', '.js-poll-all', function (e) {
+            e.preventDefault();
+            var $link = $(this);
+            if ($link.hasClass('disabled')) { return; }
+
+            bootbox.confirm('Are you sure you want to force poll all nodes?', function(result) {
+                if (result) {
+                    $link.text('').prependWaveLoader().addClass('disabled');
+                    $.post('/poll/all')
+                        .done(function() {
+                            window.location.reload(true);
+                        });
+                }
+            });
         }).on({
             'click': function() {
                 $('.action-popup').remove();
@@ -795,10 +811,61 @@ Status.Redis = (function () {
                 Status.popup('/redis/instance/actions/' + val);
             }
         });
-        
-        $('<div class="expand">show all</div>').click(function () {
-            $(this).prev().removeClass('collapsed').end().remove();
-        }).insertAfter($('.collapsed .info-line:nth-child(4)').parent());
+
+        function runAction(link, options) {
+            var action = $(link).data('action'),
+                node = $(link).closest('.js-redis-actions').data('node'),
+                confirmMessage = options && options.confirmMessage || $(link).data('confirm');
+
+            function innerRun() {
+                $.post('redis/instance/actions/' + node + '/' + action, options && options.data)
+                 .done(options && options.onComplete || function () {
+                     Status.refresh.run();
+                     bootbox.hideAll();
+                 });
+            }
+            if (confirmMessage) {
+                bootbox.confirm(confirmMessage, function (result) {
+                    if (result) {
+                        innerRun();
+                    }
+                });
+            } else {
+                innerRun();
+            }
+        }
+        $(document).on('change', '.js-redis-role-new-master', function () {
+            $('button.js-redis-role-slave').prop('disabled', this.value.length === 0);
+        }).on('click', '.js-instance-action', function (e) {
+            e.preventDefault();
+            runAction(this);
+        }).on('click', '.js-redis-role-slave', function (e) {
+            var modal = $(this).closest('.js-redis-actions'),
+                node = modal.data('node'),
+                newMaster = $('[name=newMaster]', modal).val();
+            e.preventDefault();
+            runAction(this, {
+                confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
+                data: {
+                    newMaster: newMaster
+                }
+            });
+        }).on('click', '.js-redis-key-purge', function (e) {
+            var modal = $(this).closest('.js-redis-actions'),
+                key = $('[name=key]', modal).val();
+            e.preventDefault();
+            runAction(this, {
+                data: {
+                    db: $('[name=database]', modal).val(),
+                    key: key
+                },
+                onComplete: function (result) {
+                    bootbox.alert(result
+                        ? 'Keys removed: ' + result.removed
+                        : 'Error removing keys');
+                }
+            });
+        });
     }
 
     return {

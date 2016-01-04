@@ -36,8 +36,13 @@ namespace StackExchange.Opserver
 
         private static void RegisterBundles(BundleCollection bundles)
         {
-            bundles.Add(new ScriptBundle("~/scripts/plugins.js").IncludeDirectory("~/Content/js/plugins", "*.js"));
-            bundles.Add(new ScriptBundle("~/scripts/scripts.js").Include("~/Content/js/Scripts*"));
+            bundles.Add(
+                new ScriptBundle("~/scripts/plugins.js")
+                    .Include("~/Content/bootstrap/js/bootstrap.min.js")
+                    .IncludeDirectory("~/Content/js/plugins", "*.js"));
+            bundles.Add(
+                new ScriptBundle("~/scripts/scripts.js")
+                    .Include("~/Content/js/Scripts*"));
         }
 
         public override void Init()

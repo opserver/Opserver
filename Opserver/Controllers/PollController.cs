@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Controllers
     public class PollController : StatusController
     {
         [Route("poll")]
-        public ActionResult JsonNodes(string type, string[] key, Guid? guid = null)
+        public ActionResult PollNodes(string type, string[] key, Guid? guid = null)
         {
             if (type.IsNullOrEmpty())
                 return JsonError("type is missing");
@@ -35,6 +35,20 @@ namespace StackExchange.Opserver.Controllers
             catch (Exception e)
             {
                 return JsonError("Error polling node: " + e.Message);
+            }
+        }
+
+        [Route("poll/all"), HttpPost, OnlyAllow(Roles.GlobalAdmin)]
+        public ActionResult PollDown()
+        {
+            try
+            {
+                PollingEngine.PollAll(true, true);
+                return Json(true);
+            }
+            catch (Exception e)
+            {
+                return JsonError("Error polling all nodes: " + e.Message);
             }
         }
     }

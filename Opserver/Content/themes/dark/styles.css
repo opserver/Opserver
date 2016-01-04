@@ -8168,9 +8168,6 @@ li.L9 {
   margin-top: 5px;
   margin-bottom: 5px;
 }
-.navbar .navbar-form .form-control {
-  padding: 2px 6px;
-}
 .nav-tabs {
   font-size: 12px;
   margin-bottom: 9.5px;
@@ -8285,14 +8282,16 @@ h6.page-header {
 .page-footer > .row {
   width: 100%;
 }
-.actions a + a:before {
+.actions a + a:before,
+.page-header .pull-right a + a:before {
   content: "| ";
   color: #555555;
   opacity: 0.4;
   display: inline-block;
   padding-right: 3px;
 }
-.actions .sk-wave {
+.actions .sk-wave,
+.page-header .pull-right .sk-wave {
   display: inline-block;
   height: 8px;
 }

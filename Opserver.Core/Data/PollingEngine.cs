@@ -143,14 +143,14 @@ namespace StackExchange.Opserver.Data
             }
         }
         
-        public static void PollAll()
+        public static void PollAll(bool force = false, bool sync = false)
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
-                Parallel.ForEach(AllPollNodes, i => i.Poll());
+                Parallel.ForEach(AllPollNodes, i => i.Poll(force, sync));
             }
             catch (Exception e)
             {
