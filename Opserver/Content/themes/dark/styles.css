@@ -8162,7 +8162,7 @@ li.L9 {
   padding-bottom: 7px;
 }
 .navbar .navbar-nav > li > a .badge {
-  vertical-align: bottom;
+  vertical-align: baseline;
 }
 .navbar .navbar-form {
   margin-top: 5px;

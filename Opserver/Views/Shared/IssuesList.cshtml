@@ -47,21 +47,9 @@
 }
 @if (issues.Any())
 {
-    <li class="dropdown js-issues-botton" data-count="@issues.Count.ToString()">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><span class="badge alert-@issues.GetWorstStatus().RawClass()">@issues.Count.ToComma()</span> <span class="caret"></span></a>
-        <ul class="dropdown-menu navbar-list" role="menu">
-            @foreach (var i in issues)
-            {
+            <ul class="nav navbar-nav">
                 <li>
-                    <a href="@GetLink(i)">
-                        <span>@i.IconSpan() @i.Title</span>
-                        @if (i.Description.HasValue())
-                        {
-                            <div class="text-muted" title="@i.Description">@i.Description.Truncate(100)</div>
-                        }
-                    </a>
+                    <a href="#" class="js-issues-botton" data-count="@issues.Count.ToString()"><span class="badge alert-@issues.GetWorstStatus().RawClass()">@issues.Count.ToComma()</span></a>
                 </li>
-            }
-        </ul>
-    </li>
+            </ul>
 }
