@@ -146,11 +146,11 @@
                             <table class="nvp">
                                 <tr>
                                     <td class="name">Hits:</td>
-                                    <td class="value">@string.Format("{0:n0}", @r.Hits)</td>
+                                    <td class="value">@(r.Hits?.ToString("n0"))</td>
                                 </tr>
                                 <tr>
                                     <td class="name">Avg Total (Last 24):</td>
-                                    <td class="value">@string.Format("{0:n0} ms", @r.AvgTr24Hrs)</td>
+                                    <td class="value">@(r.AvgTr24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                                 <tr>
                                     <td class="name">Avg Breakdown (Last 24):</td>
@@ -165,13 +165,13 @@
                                 </tr>
                                 <tr>
                                     <td class="name">Avg SQL (Last 24):</td>
-                                    <td class="value">@string.Format("{0:n0} ms", @r.AvgSqlDurationMs24Hrs)</td>
+                                    <td class="value">@(r.AvgSqlDurationMs24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                             </table>
                         </div>                
                     </td>
-                    <td><img src="/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
-                    <td><img src="/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>
+                    @*<td><img src="/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
+                    <td><img src="/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>*@
                 </tr>
                 if (i++ >= maxTopRoutesToShow) { break; }
             }
