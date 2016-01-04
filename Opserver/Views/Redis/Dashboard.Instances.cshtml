@@ -25,22 +25,19 @@
 @helper ServerRow (RedisInstance server, int nest = 0, long? toSync = null, string prevMaster = null) {
     var info = server.Info.SafeData();
     <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group " : "")@server.RowClass()">
-        <td>@server.ConnectionInfo.Name</td>
+        <td>
+            @if (Current.User.IsRedisAdmin)
+            {
+                <a href="#/redis/actions/@server.HostAndPort" class="hover-pulsate"><span class="glyphicon glyphicon-cog"></span></a>
+            }
+            @server.ConnectionInfo.Name
+        </td>
         <td style="padding-left: @((20*nest).ToString())px">
             @server.IconSpan()
-            <a href="/redis/instance?node=@server.Host:@server.Port.ToString()" class="@server.TextClass()">@server.Host</a>
+            <a href="/redis/instance?node=@server.HostAndPort" class="@server.TextClass()">@server.Host</a>
             <span class="text-muted small">(@server.Port.ToString()@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
         </td>
-        <td>
-            @if (Current.User.IsExceptionAdmin)
-            {
-                <a href="#" class="js-redis-role-action" data-node="@server.Host:@server.Port.ToString()">@ServerRole(server.Role)</a>
-            }
-            else
-            {
-                @ServerRole(server.Role)
-            }
-        </td>
+        <td>@ServerRole(server.Role)</td>
         <td title="@server.SlaveCount.Pluralize("direct slave"), @server.TotalSlaveCount.ToComma() total
 @if (server.SlaveConnections != null) {
 foreach (var s in server.SlaveConnections) {
@@ -108,7 +105,7 @@ foreach (var s in server.SlaveConnections) {
                         {
                             <td>
                                 @master.IconSpan()
-                                <a href="?node=@master.Host:@master.Port.ToString()" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port.ToString())</span>
+                                <a href="?node=@master.HostAndPort" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port.ToString())</span>
                             </td>
                         }
                         else
@@ -117,7 +114,7 @@ foreach (var s in server.SlaveConnections) {
                         }
                         <td>
                             @s.IconSpan()
-                            <a href="?node=@s.Host:@s.Port.ToString()" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port.ToString())</span>
+                            <a href="?node=@s.HostAndPort" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port.ToString())</span>
                         </td>
                         @if (master != null)
                         {

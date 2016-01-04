@@ -12,6 +12,8 @@
 @font-family-serif: serif;
 
 @line-height-base: 1.3;
+@line-height-small: 1.0;
+@form-group-margin-bottom: 10px;
 @panel-heading-padding: 2px @padding-small-horizontal;
 @navbar-height: 40px;
 @navbar-margin-bottom: 10px;
@@ -196,6 +198,15 @@ h4, h5, h6 {
     display: inline-block;
     height: 8px;
   }
+}
+
+.form-group-sm {
+  select.form-control {
+    padding: 0;
+  }
+}
+.label-inline {
+  line-height: 22px;
 }
 
 .table > tbody > tr.category-row h5 {
@@ -612,6 +623,11 @@ dt {
   &:last-child {
     margin-bottom: 0;
   }
+}
+
+.ul-tree, .ul-tree ul {
+  list-style-type: none;
+  padding-left: @padding-base-horizontal;
 }
 
 /* Cache Dashboard */

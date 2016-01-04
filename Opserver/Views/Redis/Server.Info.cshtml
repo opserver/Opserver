@@ -29,7 +29,7 @@
 <div class="info-section collapsed">
     @foreach (var l in ks.KeyData)
     {
-<div class="info-line"><span class="label">DB @l.Key</span>: <span class="value">@l.Value.Keys.ToComma()</span> <span class="text-muted">keys</span> <span class="value">@l.Value.Expires.ToComma()</span> <span class="note">exp</span>@if(Current.User.IsInRole(Roles.RedisAdmin)){ <span class="note">(<a href="/redis/analyze/memory?node=@info.Host:@info.Port&db=@l.Key" class="node-name-link">analyze</a>)</span>}</div>
+<div class="info-line"><span class="label">DB @l.Key</span>: <span class="value">@l.Value.Keys.ToComma()</span> <span class="text-muted">keys</span> <span class="value">@l.Value.Expires.ToComma()</span> <span class="note">exp</span>@if(Current.User.IsInRole(Roles.RedisAdmin)){ <span class="note">(<a href="/redis/analyze/memory?node=@info.HostAndPort&db=@l.Key.ToString()" class="node-name-link">analyze</a>)</span>}</div>
     }
 </div>
             } 

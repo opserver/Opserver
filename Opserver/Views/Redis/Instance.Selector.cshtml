@@ -17,8 +17,8 @@
                         @foreach (var i in g)
                         {
                             var info = i.Info.SafeData(true);
-                            <a class="list-group-item" href="?node=@i.Host.UrlEncode():@i.Port.ToString()">
-                                @i.IconSpan() @i.Host:@i.Port.ToString()
+                            <a class="list-group-item" href="?node=@i.HostAndPort">
+                                @i.IconSpan() @i.HostAndPort
                                 <span class="badge">@(info.Server.Version.Major > 0 ? info.Server.Version.ToString() : null)</span>
                             </a>
                         }

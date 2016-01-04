@@ -135,35 +135,6 @@
         return dialog;
     }
 
-    function resizePopup() {
-        var container = $('#simplemodal-container');
-        if (!container.length) return;
-
-        var active = $('.sql-bottom-active');
-        if (!active.length) {
-            $(window).trigger('resize.simplemodal');
-            return;
-        }
-
-        container.css('height', 'auto');
-        active.css({ 'overflow-y': 'visible', 'height': 'auto' });
-
-        var maxHeight = $(window).height() * 0.90;
-        if (container.height() > maxHeight) {
-            container.css('height', maxHeight + 'px');
-        }
-
-        var visibleHeight = $('.simplemodal-wrap').height() - active.position().top;
-        if (active[0].scrollHeight > visibleHeight) {
-            active.css({ 'overflow-y': 'scroll', 'height': visibleHeight - 5 + 'px' });
-        } else {
-            active.css({ 'overflow-y': 'visible', 'height': visibleHeight + 'px' });
-        }
-        $.modal.setPosition();
-
-        return;
-    }
-
     function hashChangeHandler() {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
@@ -183,7 +154,7 @@
         $.extend(loadersList, loaders);
     }
 
-    $(window).on('hashchange', hashChangeHandler).on('resize', resizePopup);
+    $(window).on('hashchange', hashChangeHandler);
     $(function() {
         // individual sections add via Status.loaders.register(), delay running until after they're added on-load
         setTimeout(hashChangeHandler, 1);
@@ -347,7 +318,6 @@
     return {
         init: init,
         popup: popup,
-        resizePopup: resizePopup,
         loaders: {
             list: loadersList,
             register: registerLoaders
@@ -820,16 +790,10 @@ Status.Redis = (function () {
         Status.loaders.register({
             '#/redis/summary/': function(val) {
                 Status.popup('/redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
+            },
+            '#/redis/actions/': function (val) {
+                Status.popup('/redis/instance/actions/' + val);
             }
-        });
-
-        $(document).on('click', '.js-redis-role-action', function (e) {
-            var link = this;
-            Status.refresh.pause('Dashboard');
-            $.get('redis/instance/actions/role', { node: $(this).data('node') }, function (data) {
-                $(link).parent().actionPopup(data);
-            });
-            e.preventDefault();
         });
         
         $('<div class="expand">show all</div>').click(function () {

@@ -16,23 +16,22 @@ namespace StackExchange.Opserver.Controllers
             return PerformInstanceAction(node, i => i.KillClientAsync(address));
         }
 
-        [Route("redis/instance/actions/role"), HttpGet, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult RoleActions(string node)
+        [Route("redis/instance/actions/{node}"), OnlyAllow(Roles.RedisAdmin)]
+        public ActionResult InstanceActions(string node)
         {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();
 
-            return View("Dashboard.RoleActions", i);
+            return View("Instance.Actions", i);
         }
 
-        [Route("redis/instance/actions/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public ActionResult PromoteToMaster(string node)
         {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             var oldMaster = i.Master;
-
             try
             {
                 var message = i.PromoteToMaster();
@@ -46,19 +45,36 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        [Route("redis/instance/actions/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/key-purge"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public async Task<ActionResult> KeyPurge(string node, int db, string key)
+        {
+            var i = RedisInstance.GetInstance(node);
+            if (i == null) return JsonNotFound();
+            
+            try
+            {
+                var removed = await i.KeyPurge(db, key);
+                return Json(new {removed});
+            }
+            catch (Exception ex)
+            {
+                return JsonError(ex.Message);
+            }
+        }
+
+        [Route("redis/instance/actions/{node}/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public Task<ActionResult> SlaveServer(string node, string newMaster)
         {
             return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
         }
 
-        [Route("redis/instance/actions/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public Task<ActionResult> SetTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.SetSERedisTiebreakerAsync());
         }
 
-        [Route("redis/instance/actions/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public Task<ActionResult> ClearTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.ClearSERedisTiebreakerAsync());

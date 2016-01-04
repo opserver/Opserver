@@ -11,8 +11,8 @@
     }
 }
 <h5 class="page-header">
-    @Model.IconSpan() @Model.ConnectionInfo.Host:@Model.ConnectionInfo.Port.ToString() (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()
-    <a class="pull-right" href="/redis/analyze/memory/clear?node=@serverInfo.Host:@serverInfo.Port.ToString()&db=@Model.Database.ToString()">Re-run analysis</a>
+    @Model.IconSpan() @serverInfo.HostAndPort (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()
+    <a class="pull-right" href="/redis/analyze/memory/clear?node=@serverInfo.HostAndPort&db=@Model.Database.ToString()">Re-run analysis</a>
 </h5>
 <div class="row small">
     <div class="value-block col-md-2 col-sm-4 col-xs-6">

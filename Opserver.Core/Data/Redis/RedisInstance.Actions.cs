@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Data.Redis
             var newMasterInstance = GetInstance(address);
             if (newMasterInstance != null)
             {
-                await (newMasterInstance?.PublishSERedisReconfigureAsync()).ConfigureAwait(false);
+                await newMasterInstance.PublishSERedisReconfigureAsync().ConfigureAwait(false);
             }
             return true;
         }
@@ -33,6 +33,19 @@ namespace StackExchange.Opserver.Data.Redis
                 _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
                 return log.ToString();
             }
+        }
+
+        /// <summary>
+        /// Get the keys matching a pattern from this instance
+        /// </summary>
+        public async Task<int> KeyPurge(int db, string key)
+        {
+            if (db == -1)
+            {
+                // All databases...
+                // TODO: This, maybe.
+            }
+            return await _connection.GetDatabase(db).KeyDeleteAsync(key).ConfigureAwait(false) ? 1 : 0;
         }
 
         /// <summary>

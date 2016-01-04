@@ -12,8 +12,8 @@ namespace StackExchange.Opserver.Data.Redis
     public partial class RedisInstance : PollNode, IEquatable<RedisInstance>, ISearchableNode
     {
         // TODO: Per-Instance searchability, sub-nodes
-        string ISearchableNode.DisplayName => Host + ":" + Port.ToString() + " - " + Name;
-        string ISearchableNode.Name => Host + ":" + Port.ToString();
+        string ISearchableNode.DisplayName => HostAndPort + " - " + Name;
+        string ISearchableNode.Name => HostAndPort;
         string ISearchableNode.CategoryName => "Redis";
 
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
@@ -25,6 +25,9 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string Password => ConnectionInfo.Password;
         public int Port => ConnectionInfo.Port;
+
+        private string _hostAndPort;
+        public string HostAndPort => _hostAndPort ?? (_hostAndPort = Host + ":" + Port.ToString());
 
         // Redis is spanish for WE LOVE DANGER, I think.
         protected override TimeSpan BackoffDuration => TimeSpan.FromSeconds(5);
@@ -152,10 +155,7 @@ namespace StackExchange.Opserver.Data.Redis
             return Host == other.Host && Port == other.Port;
         }
 
-        public override string ToString()
-        {
-            return string.Concat(Host, ": ", Port.ToString());
-        }
+        public override string ToString() => HostAndPort;
 
         public RedisMemoryAnalysis GetDatabaseMemoryAnalysis(int database, bool runIfMaster = false)
         {

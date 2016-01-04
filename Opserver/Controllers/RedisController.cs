@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Controllers
                 CurrentRedisServer = node,
                 Refresh = true
             };
-            return View("AllServers", vd);
+            return View("Dashboard.Instances", vd);
         }
 
         [Route("redis/server")]

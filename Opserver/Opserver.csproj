@@ -397,7 +397,7 @@
     <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml">
       <DependentUpon>Exceptions.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\Redis\Dashboard.RoleActions.cshtml" />
+    <Content Include="Views\Redis\Instance.Actions.cshtml" />
     <Content Include="Views\Elastic\_ViewStart.cshtml" />
     <Content Include="Views\Redis\Instance.Clients.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
@@ -608,7 +608,7 @@
     <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
     <Content Include="Views\Hub\Index.cshtml" />
     <Content Include="Views\Redis\Dashboard.cshtml" />
-    <Content Include="Views\Redis\AllServers.cshtml" />
+    <Content Include="Views\Redis\Dashboard.Instances.cshtml" />
     <Content Include="Views\Redis\Server.Info.cshtml" />
     <Content Include="Views\Redis\Server.Clients.cshtml" />
     <Content Include="Views\Redis\Server.Clients.ByIP.cshtml" />

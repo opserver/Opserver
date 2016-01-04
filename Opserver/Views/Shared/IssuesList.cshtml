@@ -29,7 +29,7 @@
         var redisInstance = i as Issue<RedisInstance>;
         if (redisInstance?.Item != null)
         {
-            return $"/redis/instance?node={redisInstance.Item.Host}:{redisInstance.Item.Port.ToString()}";
+            return $"/redis/instance?node={redisInstance.Item.HostAndPort}";
         }
         var elasticCluster = i as Issue<ElasticCluster>;
         if (elasticCluster?.Item != null)

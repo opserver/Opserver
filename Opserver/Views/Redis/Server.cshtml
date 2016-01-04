@@ -18,7 +18,7 @@
                         <div class="server-name">
                             @if (info.Name.HasValue())
                             {
-                                @:<span title="Redis server on @info.Host:@info.Port (@info.Name)">@info.Name <b>:@info.Port</b></span>
+                                @:<span title="Redis server on @info.HostAndPort (@info.Name)">@info.Name <b>:@info.Port</b></span>
                             }
                             else
                             {

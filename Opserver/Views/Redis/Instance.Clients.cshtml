@@ -9,7 +9,7 @@
 </h4>
 @if (clients.Any())
 {
-    <table class="clients-table table table-striped table-responsive table-super-condensed table-hover" data-node="@Model.Host:@Model.Port.ToString()">
+    <table class="clients-table table table-striped table-responsive table-super-condensed table-hover" data-node="@Model.HostAndPort">
         <thead>
             <tr>
                 <th>Address</th>

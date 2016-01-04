@@ -1,0 +1,196 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@model RedisInstance
+@{
+    Layout = null;
+    var i = Model;
+    var slaveOptions = i.RecommendedMasterTargets.GroupBy(s => s.Name).ToList();
+}
+<h4 class="modal-title">
+    Actions for @i.HostAndPort <span class="text-muted">(@i.Name)</span>
+</h4>
+@helper RenderTolopogy(RedisInstance i)
+{
+    if (i == null)
+    {
+        return;
+    }
+    <li>
+        @if (i.HostAndPort == Model.HostAndPort)
+        {
+            <strong>
+                @i.IconSpan() @i.HostAndPort
+            </strong>
+        }
+        else
+        {
+            @:@i.IconSpan() @i.HostAndPort
+        }
+        <span class="text-muted">(@i.Name)</span>
+        @if (i.SlaveConnections.Any())
+        {
+            <ul>
+                @foreach (var sc in i.SlaveConnections)
+                {
+                    @RenderTolopogy(sc.GetServer())
+                }
+            </ul>
+        }
+    </li>
+}
+<div class="js-redis-actions" data-node="@i.HostAndPort">
+    <div class="row small">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Topology - @i.RoleDescription with @i.SlaveCount.Pluralize("slave")</div>
+                <div class="panel-body">
+                    <ul class="ul-tree">
+                        @RenderTolopogy(i.TopMaster)
+                    </ul>
+                    <h6 class="page-header">Actions</h6>
+                    <div>
+                        @if (i.IsSlave)
+                        {
+                            <div class="form-group form-group-sm">
+                                <label class="control-label label-inline">Promote to Master <span class="text-muted">(this will deslave the instance)</span></label>
+                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="'Are you sure you deslave @i.HostAndPort and make it a master?'">Promote / Deslave</button>
+                            </div>
+                        }
+                        @if (i.IsMaster)
+                        {
+                            <div class="form-group form-group-sm">
+                                <label class="control-label">StackExchange.Redis Tiebreakers</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="@(i.Tiebreaker.Data ?? "not set")" disabled="disabled"/>
+                                    <span class="input-group-btn">
+                                        @if (i.Tiebreaker.Data == i.HostAndPort)
+                                        {
+                                            <button class="btn btn-sm btn-warning js-instance-action" data-action="clear-tiebreaker">Clear</button>
+                                        }
+                                        @if (i.Tiebreaker.Data.IsNullOrEmpty())
+                                        {
+                                            <button class="btn btn-sm btn-primary js-instance-action" data-action="set-tiebreaker">Set</button>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        @if (slaveOptions.Any())
+                        {
+                            <div class="form-group form-group-sm">
+                                <div class="input-group">
+                                    <select name="newMaster" class="form-control js-redis-role-new-master">
+                                        <option value="" disabled selected hidden>Choose a master to slave to...</option>
+                                        @foreach (var g in slaveOptions)
+                                        {
+                                            <optgroup label="@g.Key">
+                                                @foreach (var s in g)
+                                                {
+                                                    <option value="@s.HostAndPort">@s.HostAndPort</option>
+                                                }
+                                            </optgroup>
+                                        }
+                                    </select>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-sm btn-primary js-redis-role-slave" data-action="slave-to" disabled="disabled">Slave</button>
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (i.IsMaster)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">Keys</div>
+                    <div class="panel-body">
+                        <div class="form-group form-group-sm">
+                            <label class="control-label">Database & Key</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select name="database" class="form-control js-redis-database">
+                                        @foreach (var db in i.Info.Data?.Keyspace.KeyData.Keys ?? Enumerable.Empty<int>())
+                                        {
+                                            <option value="@db.ToString()">@db.ToString()</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="key" placeholder="Key to purge..." />
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-sm btn-danger js-redis-key-purge" data-action="key-purge">Purge</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    $(function () {
+        function runAction(link, options) {
+            var action = $(link).data('action'),
+                node = $(link).closest('.js-redis-actions').data('node'),
+                confirmMessage = options && options.confirmMessage || $(link).data('confirm');
+
+            function innerRun() {
+                $.post('redis/instance/actions/' + node +'/' + action, options && options.data)
+                 .done(options && options.onComplete || function () {
+                    Status.refresh.run();
+                    bootbox.hideAll();
+                });
+            }
+            if (confirmMessage) {
+                bootbox.confirm(confirmMessage, function (result) {
+                    if (result) {
+                        innerRun();
+                    }
+                });
+            } else {
+                innerRun();
+            }
+        }
+        $('.js-redis-role-new-master').on('change', function () {
+            $('button.js-redis-role-slave').prop('disabled', this.value.length === 0);
+        });
+        $('.js-instance-action').on('click', function (e) {
+            runAction(this);
+            e.preventDefault();
+        });
+        $('.js-redis-role-slave').on('click', function (e) {
+            var modal = $(this).closest('.js-redis-actions'),
+                node = modal.data('node'),
+                newMaster = $('[name=newMaster]', modal).val();
+            runAction(this, {
+                confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
+                data: {
+                    newMaster: newMaster
+                }
+            });
+            e.preventDefault();
+        });
+        $('.js-redis-key-purge').on('click', function (e) {
+            var modal = $(this).closest('.js-redis-actions'),
+                key = $('[name=key]', modal).val();
+            runAction(this, {
+                data: {
+                    db: $('[name=database]', modal).val(),
+                    key: key
+                },
+                onComplete: function (result) {
+                    bootbox.alert(result
+                        ? 'Keys removed: ' + result.removed
+                        : 'Error removing keys');
+                }
+            });
+            e.preventDefault();
+        });
+    });
+</script>
