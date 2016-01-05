@@ -226,15 +226,32 @@ FROM (SELECT TOP (@MaxResultCount)
             public int? Database { get; set; }
 
             public static TopSearchOptions Default => new TopSearchOptions().SetDefaults();
+            
+            private int DefaultMinExecs = 25;
+            private int DefaultLastRunSeconds = 24 * 60 * 60;
+            private int DefaultMaxResultCount = 100;
 
             public TopSearchOptions SetDefaults()
             {
                 Sort = Sort ?? TopSorts.AvgCPUPerMinute;
-                MinExecs = MinExecs ?? 25;
-                LastRunSeconds = LastRunSeconds ?? 24*60*60;
+                MinExecs = MinExecs ?? DefaultMinExecs;
+                LastRunSeconds = LastRunSeconds ?? DefaultLastRunSeconds;
                 MinLastRunDate = MinLastRunDate ?? DateTime.UtcNow.AddDays(-1);
-                MaxResultCount = MaxResultCount ?? 100;
+                MaxResultCount = MaxResultCount ?? DefaultMaxResultCount;
                 return this;
+            }
+
+            public bool IsNonDefault
+            {
+                get
+                {
+                    if (MinExecs != DefaultMinExecs) return true;
+                    if (LastRunSeconds != DefaultLastRunSeconds) return true;
+                    if (MaxResultCount != DefaultMaxResultCount) return true;
+                    if (Database.HasValue) return true;
+                    if (Search.HasValue()) return true;
+                    return false;
+                }
             }
 
             public string ToSQLWhere()

@@ -88,15 +88,8 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/top")]
         public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
         {
-            var i = SQLInstance.Get(node);
-            options.SetDefaults();
-            
-            var vd = new OperationsTopModel
-            {
-                View = SQLViews.Top,
-                CurrentInstance = i,
-                TopSearchOptions = options
-            };
+            var vd = GetOperationsModel(node, options);
+            var i = vd.CurrentInstance;
 
             if (i != null)
             {
@@ -106,6 +99,26 @@ namespace StackExchange.Opserver.Controllers
             }
 
             return View("Operations.Top", vd);
+        }
+
+        [Route("sql/top/filters")]
+        public ActionResult TopFilters(string node, SQLInstance.TopSearchOptions options)
+        {
+            var vd = GetOperationsModel(node, options);
+            return View("Operations.Top.Filters", vd);
+        }
+
+        private OperationsTopModel GetOperationsModel(string node, SQLInstance.TopSearchOptions options)
+        {
+            var i = SQLInstance.Get(node);
+            options.SetDefaults();
+
+            return new OperationsTopModel
+            {
+                View = SQLViews.Top,
+                CurrentInstance = i,
+                TopSearchOptions = options
+            };
         }
 
         [Route("sql/top/detail")]

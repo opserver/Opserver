@@ -8301,6 +8301,15 @@ h6.page-header {
 .label-inline {
   line-height: 22px;
 }
+.radio.pull-left + .radio.pull-left {
+  margin-left: 15px;
+}
+.modal-footer .btn {
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 1;
+  border-radius: 0;
+}
 .table > tbody > tr.category-row h5 .pull-right {
   font-size: 0.9em;
 }

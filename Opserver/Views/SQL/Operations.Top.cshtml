@@ -12,148 +12,102 @@
 {
     @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
 }
-@helper SortLink(SQLInstance.TopSorts sort, string title) {
+@helper SortLink(SQLInstance.TopSorts sort, string title)
+{
     <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
-    @if(sort == Model.TopSearchOptions.Sort)
-    {
-        <span class="current-sort" title="@sort.GetDescription()">@title</span>
-    } 
-    else
-    {
-        <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptions.ToQueryString(true))" title="Sort by @sort.GetDescription()">@title</a>
-    }
+        @if (sort == Model.TopSearchOptions.Sort)
+        {
+            <span class="current-sort" title="@sort.GetDescription()">@title</span>
+        }
+        else
+        {
+            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptions.ToQueryString(true))" title="Sort by @sort.GetDescription()">@title</a>
+        }
     </th>
 }
-@helper RunInLast(DashboardModel.LastRunInterval interval, string label) {
-    var secs = (int)interval;
-    <label><input type="radio" name="LastRunSeconds" value="@secs.ToString()" @(secs == Model.TopSearchOptions.LastRunSeconds ? "checked " : "")/> @label</label>
+@helper RunInLast(DashboardModel.LastRunInterval interval, string label)
+{
+    var secs = (int) interval;
+    var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
+    <label class="">
+        <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
+    </label>
 }
-<div>
-    @if (errorMessage.HasValue())
-    {
-        <h5 class="page-header">
-            Unknown Operations on @i.Name
-        </h5>
-        <div class="alert alert-danger">
-            <h5>There was an error fetching server status from @i.Name:</h5>
-            <p class="error-stack">
-                @errorMessage
-            </p>
-        </div>
-    } else
-    {
-        <div>
-            <h5 class="page-header">Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
-                <div class="filters-wrap" style="display: none;">
-                    <div class="filters-current">
-                        <span class="filter-label">Min Execs: </span><span class="filter-value">@Model.TopSearchOptions.MinExecs</span>
-                        @if (Model.TopSearchOptions.MinExecsPerMin.HasValue)
-                        {
-                            <span class="filter-label">Min Execs/min: </span><span class="filter-value">@Model.TopSearchOptions.MinExecsPerMin</span>
-                        }
-                        @if (Model.TopSearchOptions.LastRunSeconds.HasValue)
-                        {
-                            <span class="filter-label">Run in the last: </span><span class="filter-value">@TimeSpan.FromSeconds((double) Model.TopSearchOptions.LastRunSeconds).ToReadableString()</span>
-                        }
-                        @if (Model.TopSearchOptions.Search.HasValue())
-                        {
-                            <span class="filter-label">Search: </span><span class="filter-value">@Model.TopSearchOptions.Search</span>
-                        }
-                    </div>
-                    <div class="filters">
-                        <form class="filter-form" action="" method="GET">
-                            <input type="hidden" name="node" value="@Model.CurrentInstance.Name"/>
-                            <input type="hidden" name="sort" value="@Model.TopSearchOptions.Sort.ToString()"/>
-                            <div class="filters-header">Filters</div>
-                            <div class="filter">
-                                Min Executions: <input style="width: 50px;" type="text" value="@Model.TopSearchOptions.MinExecs" name="minExecs" title="show only queries with a minimum of this many executions"/>
-                            </div>
-                            <div class="filter">
-                                Min Executions/min: <input style="width: 50px;" type="text" value="@Model.TopSearchOptions.MinExecsPerMin" name="minExecsPerMin" title="show only queries with a minimum of this many executions"/>
-                            </div>
-                            <div class="filter">
-                                Run in the last:
-                                @RunInLast(DashboardModel.LastRunInterval.Week, "Week")
-                                @RunInLast(DashboardModel.LastRunInterval.Day, "Day")
-                                @RunInLast(DashboardModel.LastRunInterval.Hour, "Hour")
-                                @RunInLast(DashboardModel.LastRunInterval.FiveMinutes, "5 Minutes")
-                            </div>
-                            <div class="filter">
-                                Search: <input style="width: 250px;" type="text" value="@Model.TopSearchOptions.Search" name="search" title="string to search for in the query text" placeholder="Search Text (warning: may be slow)"/>
-                            </div>
-                            <div class="filter">
-                                Database:
-                                <select style="width: 240px;" name="database">
-                                    <option value="" @(Model.TopSearchOptions.Database.HasValue ? "" : "selected ")>All Databases</option>
-                                    @foreach (var db in Model.CurrentInstance.Databases.SafeData(true).OrderBy(db => !db.IsSystemDatabase).ThenBy(db => db.Name))
-                                    {
-                                        <option value="@db.Id" @(Model.TopSearchOptions.Database == db.Id ? "selected " : "")>@db.Name</option>
-                                    }
-                                </select>
-                            </div>
-                            <button class="submit-button" type="submit">Apply</button>
-                        </form>
-                    </div>
-                </div>
-                <span class="pull-right">
-                    @*<span class="text-muted"> | </span>*@
-                    <a href="#" class="js-reload-link">Reload</a>
-                </span>
-            </h5>
-            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive table-row-actions">
-                <thead>
-                    <tr class="sort-row sort-category">
-                        <th colspan="3">CPU</th>
-                        <th colspan="2">Time</th>
-                        <th colspan="2">Reads</th>
-                        <th colspan="2">Execs</th>
-                        <th>Time</th>
-                        <th colspan="2">Query Info</th>
-                    </tr>
-                    <tr class="sort-row">
-                        @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg")
-                        @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min")
-                        @SortLink(SQLInstance.TopSorts.TotalCPU, "Total")
+@if (errorMessage.HasValue())
+{
+    <h5 class="page-header">
+        Unknown Operations on @i.Name
+    </h5>
+    <div class="alert alert-danger">
+        <h5>There was an error fetching server status from @i.Name:</h5>
+        <p class="error-stack">
+            @errorMessage
+        </p>
+    </div>
+}
+else
+{
+    <h5 class="page-header">
+        Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
+        <span class="pull-right">
+            <a href="#/sql/top/filters" class="hover-pulsate@(Model.TopSearchOptions.IsNonDefault ? " text-warning" : "")"><span class="glyphicon glyphicon-filter"></span></a>
+            <a href="#" class="js-reload-link">Reload</a>
+        </span>
+    </h5>
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive table-row-actions">
+        <thead>
+            <tr class="sort-row sort-category">
+                <th colspan="3">CPU</th>
+                <th colspan="2">Time</th>
+                <th colspan="2">Reads</th>
+                <th colspan="2">Execs</th>
+                <th>Time</th>
+                <th colspan="2">Query Info</th>
+            </tr>
+            <tr class="sort-row">
+                @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg")
+                @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min")
+                @SortLink(SQLInstance.TopSorts.TotalCPU, "Total")
 
-                        @SortLink(SQLInstance.TopSorts.AvgDuration, "Avg")
-                        @SortLink(SQLInstance.TopSorts.TotalDuration, "Total")
+                @SortLink(SQLInstance.TopSorts.AvgDuration, "Avg")
+                @SortLink(SQLInstance.TopSorts.TotalDuration, "Total")
 
-                        @SortLink(SQLInstance.TopSorts.AvgReads, "Reads (Avg)")
-                        @SortLink(SQLInstance.TopSorts.TotalReads, "Reads (Total)")
+                @SortLink(SQLInstance.TopSorts.AvgReads, "Reads (Avg)")
+                @SortLink(SQLInstance.TopSorts.TotalReads, "Reads (Total)")
 
-                        @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs")
-                        @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min")
-                        @SortLink(SQLInstance.TopSorts.LastExecutionTime, "Last Exec")
-                        <th>Database</th>
-                        <th>Query</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var o in topOps)
-                    {
-                        <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
-                            <td>@o.AvgCPU.ToComma()µs</td>
-                            <td>@o.AvgCPUPerMinute.ToComma()µs</td>
-                            <td>@ReadableTime(o.TotalCPU / 1000)</td>
-                            <td>@ReadableTime(o.AvgDuration)</td>
-                            <td>@ReadableTime(o.TotalDuration)</td>
-                            <td>@o.AvgReads.ToComma()</td>
-                            <td>@o.TotalReads.ToComma()</td>
-                            <td>@o.ExecutionCount.ToComma()</td>
-                            <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
-                            <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
-                            <td>@o.CompiledOnDatabase</td>
-                            <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
-                        </tr>
-                    }
-                    @if (!topOps.Any())
-                    {
-                        <tr>
-                            <td colspan="12"><div class="none-active">There are no operations in the plan cache on this server.</div></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    }
-</div>
+                @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs")
+                @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min")
+                @SortLink(SQLInstance.TopSorts.LastExecutionTime, "Last Exec")
+                <th>Database</th>
+                <th>Query</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var o in topOps)
+        {
+            <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
+                <td>@o.AvgCPU.ToComma()µs</td>
+                <td>@o.AvgCPUPerMinute.ToComma()µs</td>
+                <td>@ReadableTime(o.TotalCPU/1000)</td>
+                <td>@ReadableTime(o.AvgDuration)</td>
+                <td>@ReadableTime(o.TotalDuration)</td>
+                <td>@o.AvgReads.ToComma()</td>
+                <td>@o.TotalReads.ToComma()</td>
+                <td>@o.ExecutionCount.ToComma()</td>
+                <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
+                <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
+                <td>@o.CompiledOnDatabase</td>
+                <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
+            </tr>
+        }
+        @if (!topOps.Any())
+        {
+            <tr>
+                <td colspan="12">
+                    <div class="none-active">There are no operations in the plan cache on this server.</div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
