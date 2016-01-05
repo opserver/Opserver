@@ -1,4 +1,4 @@
-@using StackExchange.Opserver.Models
+﻿@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsTopModel
@@ -10,7 +10,7 @@
 }
 @helper ReadableTime(long microSeconds)
 {
-    @TimeSpan.FromMilliseconds(microSeconds / 1000).ToTimeStringMini()
+    @TimeSpan.FromMilliseconds(microSeconds / 1000d).ToTimeStringMini()
 }
 @helper SortLink(SQLInstance.TopSorts sort, string title)
 {
