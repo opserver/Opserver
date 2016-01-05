@@ -29,7 +29,7 @@
 {
     var secs = (int) interval;
     var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
-    <label class="">
+    <label>
         <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
     </label>
 }

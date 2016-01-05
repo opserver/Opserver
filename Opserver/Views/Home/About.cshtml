@@ -24,25 +24,34 @@
 @helper EnabledLabel(string text, bool enabled) {
     <span class="label label-@(enabled ? "success" : "default")">@text</span>
 }
-<h4 class="page-header">@SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span></h4>
-<p></p>
+<h5 class="page-header">
+    @SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span>
+</h5>
 <div class="row">
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Info</div>
-            <div class="panel-body">
-                <dl>
-                    <dt>App Revision</dt>
-                    <dd>@rev</dd>
-                    <dt>Last Built/Changed (UTC)</dt>
-                    <dd>@buildDate.ToZuluTime()</dd>
-                    <dt>Running since</dt>
-                    <dd>@GlobalApplication.StartDate.ToUniversalTime().ToZuluTime() <span class="text-muted">(@GlobalApplication.StartDate.ToRelativeTimeSpan())</span></dd>
-                    <dt>Current server</dt>
-                    <dd>@Environment.MachineName</dd>
-                    <dt>Get-Set Cache</dt>
-                    <dd><strong>Sync: @cacheStats.Item1.ToComma()</strong>, <strong>Async: @cacheStats.Item2.ToComma()</strong>, <strong>Async (error): @cacheStats.Item3.ToComma()</strong></dd>
-                </dl>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4">
+                    @rev
+                    <label>App Version</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @buildDate.ToRelativeTimeSpan()
+                    <label>Last Built</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @GlobalApplication.StartDate.ToRelativeTimeSpan()
+                    <label>Uptime</label>
+                </div>
+                <div class="value-block col-xs-6">
+                    @Environment.MachineName
+                    <label>Server</label>
+                </div>
+                <div class="value-block col-xs-6">
+                    Sync: @cacheStats.Item1.ToComma(), Async: @cacheStats.Item2.ToComma(), Errored: @cacheStats.Item3.ToComma()
+                    <label>Get-Set Cache</label>
+                </div>
             </div>
         </div>
         <div class="panel panel-default">
@@ -62,30 +71,34 @@
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Polling</div>
-            <div class="panel-body">
-                <dl>
-                    <dt>Started</dt>
-                    <dd>@pollingInfo.StartTime.ToRelativeTimeSpan()</dd>
-                    <dt>Last Poll</dt>
-                    <dd>@pollingInfo.LastPollAll.ToRelativeTimeSpan()</dd>
-                    <dt>Thread</dt>
-                    <dd class="@(pollingInfo.IsAlive ? "" : "text-danger")">@pollingInfo.IconSpan() @(pollingInfo.IsAlive ? "Alive" : "Dead")</dd>
-                </dl>
-                <ul class="list-group">
-                    <li class="list-group-item">
-                        <span class="badge">@pollingInfo.TotalPollers.ToComma()</span>
-                        Pollers
-                    </li>
-                    <li class="list-group-item">
-                        <span class="badge">@pollingInfo.TotalPollIntervals.ToComma()</span>
-                        Poll Intervals
-                    </li>
-                    <li class="list-group-item">
-                        <span class="badge">@pollingInfo.TotalPollers.ToComma()</span>
-                        Caches <span class="text-muted">(<a href="/about/caches">click to view</a>)</span>
-                    </li>
-                </ul>
-                <h5><span class="badge">@pollingInfo.NodeCount.ToComma()</span> Nodes</h5>
+            <div class="panel-body small">
+                <div class="row">
+                    <div class="value-block col-xs-4 @(pollingInfo.BackgroundClass())">
+                        @(pollingInfo.IsAlive ? "Alive" : "Dead")
+                        <label>Thread</label>
+                    </div>
+                    <div class="value-block col-xs-4">
+                        @pollingInfo.StartTime.ToRelativeTimeSpan()
+                        <label>Started</label>
+                    </div>
+                    <div class="value-block col-xs-4">
+                        @pollingInfo.LastPollAll.ToRelativeTimeSpan()
+                        <label>Last Poll</label>
+                    </div>
+                    <div class="value-block col-xs-4">
+                        @pollingInfo.TotalPollers.ToComma()
+                        <label>Pollers</label>
+                    </div>
+                    <div class="value-block col-xs-4">
+                        @pollingInfo.TotalPollIntervals.ToComma()
+                        <label>Poll Intervals</label>
+                    </div>
+                    <div class="value-block col-xs-4">
+                        @pollingInfo.TotalPollers.ToComma()
+                        <label>Caches <span class="text-muted">(<a href="/about/caches">view</a>)</span></label>
+                    </div>
+                </div>
+                <h5 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h5>
                 <ul class="list-group">
                     @foreach (var ng in pollingInfo.NodeBreakdown)
                     {
@@ -101,12 +114,21 @@
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Security</div>
-            <div class="panel-body">
+            <div class="panel-body small">
+                <div class="value-block col-xs-4 @((SecuritySettings.Current.Enabled ? MonitorStatus.Good : MonitorStatus.Warning).BackgroundClass())">
+                    @(SecuritySettings.Current.Enabled ? "Enabled" : "Disabled")
+                    <label>Security</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @Current.User.AccountName
+                    <label>Current User</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @Current.RequestIP
+                    <label>Request IP</label>
+                </div>
+                
                 <dl>
-                    <dt>Security</dt>
-                    <dd>@EnabledSpan(SecuritySettings.Current.Enabled)</dd>
-                    <dt>Current User</dt>
-                    <dd>@Current.User.AccountName</dd>
                     <dt>Current Roles</dt>
                     <dd>
                         @if (Current.User.IsGlobalAdmin)
@@ -118,8 +140,6 @@
                             @Current.User.Role
                         }
                     </dd>
-                    <dt>Request IP</dt>
-                    <dd>@Current.RequestIP</dd>
                     <dt>Internal Networks</dt>
                     <dd>@Current.Security.InternalNetworks.Count</dd>
                     <dt>Admins</dt>
@@ -140,7 +160,7 @@
                 <div class="panel-body">
                     @foreach (var p in DashboardData.DataProviders)
                     {
-                        <h5>@p.IconSpan() @p.Name</h5>
+                        <h5 class="page-header">@p.IconSpan() @p.Name</h5>
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <span class="badge">@p.AllNodes.Count.ToComma()</span>
@@ -164,72 +184,61 @@
             </div>
         }
     </div>
-</div>
+    @helper SQLInstanceList(SQLInstance instance)
+    {
+var props = instance.ServerProperties.SafeData(true);
+var features = instance.ServerFeatures.SafeData();
+    <li class="list-group-item" title="Features:
+@if (features == null)
+{
+@:Error Fetching Features
+}
+else
+{
+<text>
+sp_WhoIsActive: @features.HasSPWhoIsActive.ToString()
+sp_Blitz: @features.HasSPBlitz.ToString()
+sp_BlitzIndex: @features.HasSPBlitzIndex.ToString()
+sp_AskBrent: @features.HasSPAskBrent.ToString()
+</text>
+}">
+        @instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
+    </li>
+}
+    @if (s.SQL.Enabled)
+    {
+        var clusters = SQLCluster.AllClusters;
+        var instances = SQLInstance.AllStandalone;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@instances.GetWorstStatus().RawClass(showGood: true)">
+                <div class="panel-heading">SQL Instances</div>
+                <div class="panel-body small">
+                    <h5 class="page-header">@clusters.Count.Pluralize("Availability Group Cluster")</h5>
+                    @foreach (var cluster in clusters)
+                    {
+                        <h6>@cluster.IconSpan() @cluster.Name</h6>
+                        <ul class="list-group">
+                            @foreach (var node in cluster.Nodes)
+                            {
+                                @SQLInstanceList(node)
+                            }
+                        </ul>
+                    }
 
+                    <h5 class="page-header">@instances.Count.Pluralize("Standalone Node")</h5>
+                    <ul class="list-group">
+                        @foreach (var instance in instances)
+                        {
+                            @SQLInstanceList(instance)
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 <div class="about">
     <section class="per-section-props">
-        @helper SQLInstanceList(SQLInstance instance)
-        {
-            var props = instance.ServerProperties.SafeData(true);
-            var features = instance.ServerFeatures.SafeData();
-            <li>
-                @instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
-                <ul class="sub-list">
-                    <li>
-                        Features:
-                        @if (features == null)
-                        {
-                            <span class="warning">Error Fetching Features</span>
-                        }
-                        else
-                        {
-                            <ul class="sub-list">
-                                <li>sp_WhoIsActive: <span class="value">@features.HasSPWhoIsActive</span></li>
-                                <li>sp_Blitz: <span class="value">@features.HasSPBlitz</span></li>
-                                <li>sp_BlitzIndex: <span class="value">@features.HasSPBlitzIndex</span></li>
-                                <li>sp_AskBrent: <span class="value">@features.HasSPAskBrent</span></li>
-                            </ul>
-                        }
-                    </li>
-                </ul>
-            </li>
-        }
-        @if (s.SQL.Enabled)
-        {
-            var clusters = SQLCluster.AllClusters;
-            var instances = SQLInstance.AllStandalone;
-            <header class="properties">@instances.GetWorstStatus().IconSpan() SQL Instances</header>
-            <section class="properties">
-                <ul>
-                    <li>
-                        Clusters:
-                        <ul class="sub-list">
-                            @foreach (var cluster in clusters)
-                            {
-                                <li>
-                                    @cluster.IconSpan() <span class="value">@cluster.Name</span>
-                                    <ul class="sub-list">
-                                        @foreach (var node in cluster.Nodes)
-                                        {
-                                            @SQLInstanceList(node)
-                                        }
-                                    </ul>
-                                </li>
-                            }
-                        </ul>
-                    </li>
-                    <li>
-                        Standalone nodes:
-                        <ul class="sub-list">
-                            @foreach (var instance in instances)
-                            {
-                                @SQLInstanceList(instance)
-                            }
-                        </ul>
-                    </li>
-                </ul>
-            </section>
-        }
         @if (s.Exceptions.Enabled)
         {
             var apps = ExceptionStores.Applications;

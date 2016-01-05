@@ -144,12 +144,12 @@ namespace StackExchange.Opserver
         }
 
         public static string RawClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
-        public static string RawClass(this MonitorStatus status)
+        public static string RawClass(this MonitorStatus status, bool showGood = false)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return "";
+                    return showGood ? "success" : "";
                 case MonitorStatus.Warning:
                     return "warning";
                 case MonitorStatus.Critical:
