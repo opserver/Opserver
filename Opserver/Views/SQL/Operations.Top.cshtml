@@ -1,4 +1,4 @@
-﻿@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsTopModel
@@ -8,9 +8,9 @@
     var errorMessage = Model.ErrorMessage;
     if (i == null) { return; }
 }
-@helper ReadableTime(long ms)
+@helper ReadableTime(long microSeconds)
 {
-    @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
+    @TimeSpan.FromMilliseconds(microSeconds / 1000).ToTimeStringMini()
 }
 @helper SortLink(SQLInstance.TopSorts sort, string title)
 {
@@ -88,7 +88,7 @@ else
             <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
                 <td>@o.AvgCPU.ToComma()µs</td>
                 <td>@o.AvgCPUPerMinute.ToComma()µs</td>
-                <td>@ReadableTime(o.TotalCPU/1000)</td>
+                <td>@ReadableTime(o.TotalCPU)</td>
                 <td>@ReadableTime(o.AvgDuration)</td>
                 <td>@ReadableTime(o.TotalDuration)</td>
                 <td>@o.AvgReads.ToComma()</td>
