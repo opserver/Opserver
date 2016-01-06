@@ -95,15 +95,11 @@ namespace StackExchange.Opserver.Controllers
 
             return View("NoConfiguration");
         }
-
-        [Route("change-view")]
-        public RedirectResult SwitchView(bool mobile)
+        
+        [Route("no-config")]
+        public ViewResult NoConfig()
         {
-            if (Request.Browser.IsMobileDevice == mobile)
-                HttpContext.ClearOverriddenBrowser();
-            else
-                HttpContext.SetOverriddenBrowser(mobile ? BrowserOverride.Mobile : BrowserOverride.Desktop);
-            return Redirect(Request.UrlReferrer.PathAndQuery);
+            return View("NoConfiguration");
         }
 
         [Route("404")]
@@ -129,6 +125,13 @@ namespace StackExchange.Opserver.Controllers
 
             Response.StatusCode = (int)HttpStatusCode.Forbidden;
             return View("~/Views/Shared/AccessDenied.cshtml");
+        }
+
+        [Route("error")]
+        public ActionResult ErrorPage()
+        {
+            Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            return View("Error");
         }
 
         public void SetTitle(string title)

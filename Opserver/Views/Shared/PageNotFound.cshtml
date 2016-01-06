@@ -1,5 +1,14 @@
 ﻿@model StackExchange.Opserver.Views.Shared.PageNotFoundModel
-<div class="center-container">
-    <h1>@Model.Title.IsNullOrEmptyReturn("404 - Not Found")</h1>
-    <div class="desc">@Model.Message.IsNullOrEmptyReturn("The page you were looking for could not be found.")</div>
+@{
+    this.SetPageTitle("404 - Not Found");
+}
+<div class="row">
+    <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 100px">
+        <h2>
+            <span class="text-info glyphicon glyphicon-question-sign"></span> @Model.Title.IsNullOrEmptyReturn("404 - Not Found")
+        </h2>
+        <p>
+            @Model.Message.IsNullOrEmptyReturn("The page you were looking for could not be found.")
+        </p>
+    </div>
 </div>

@@ -1,9 +1,24 @@
-﻿<div class="center-container wide">
-    <h1>Uh oh! No Configuration!</h1>
-    <div class="desc" style="padding-top: 20px;">
-        No configuration data was found, meaning no opserver sections are configured or enabled, or you have no roles assigned to you.  <br/><br/>
-        See the Readme.txt in the /config directory and .example files for examples of a basic JSON configuration...or you can implement your own provider to get settings from anywhere. <br/><br/>
-        If you are using AD authentication, be sure to set the ViewGroups or AdminGroups settings in the web.config or in the section configuration. <br/><br/>
-        You can also browse to @Html.ActionLink("About", "About") to see how you have been authenticated and what monitors have been enabled.
+﻿@{
+    this.SetPageTitle("No configuration");
+}
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1" style="margin-top: 100px">
+        <h2 class="text-center">
+            <span class="text-warning glyphicon glyphicon-question-sign"></span> Uh no! No Configuration found!
+        </h2>
+        <p>
+            No configuration data was found. This means no Opserver sections are configured/enabled or you have no roles assigned to you.
+        </p>
+        <p>
+            See the <code>Readme.txt</code> in /config and <code>*.example</code> files for examples of a basic JSON configuration...or you can implement your own provider to get settings from anywhere.
+        </p>
+        <p>
+            If you are using AD authentication, set the <strong>ViewGroups</strong> or <strong>AdminGroups</strong> settings in the <code>web.config</code> or in the section-specific configuration.
+        </p>
+        <p>
+            You can also browse to @Html.ActionLink("/about", "About") to see how you have been authenticated and what monitors have been enabled.
+        </p>    
     </div>
 </div>
+
+

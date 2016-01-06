@@ -435,7 +435,6 @@
     </Compile>
     <Compile Include="Controllers\HAProxyController.cs" />
     <Compile Include="Controllers\LoginController.cs" />
-    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\GraphController.cs" />
     <Compile Include="Controllers\GraphController.HAProxy.cs">
       <DependentUpon>GraphController.cs</DependentUpon>
