@@ -7798,10 +7798,6 @@ li.L9 {
 .error-detail {
   background-color: #ffffcc;
 }
-.pre-code {
-  font-size: 12px;
-  word-wrap: normal;
-}
 .error-preview-popup {
   position: absolute;
   background: #fff;
@@ -8746,6 +8742,15 @@ a.value-block.bg-danger:focus {
 .value-block .progress .smaller,
 .progress-embed .smaller {
   font-weight: lighter;
+}
+.pre-code {
+  font-size: 12px;
+  word-wrap: normal;
+}
+.pre-limited {
+  max-width: 550px;
+  max-height: 100px;
+  overflow: auto;
 }
 .error-stack {
   white-space: pre-wrap;

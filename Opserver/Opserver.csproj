@@ -589,6 +589,9 @@
     <Content Include="Views\SQL\Instance.DBFiles.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\SQL\Operations.Active.Filters.cshtml">
+      <DependentUpon>Operations.Active.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\SQL\Operations.Top.Filters.cshtml">
       <DependentUpon>Operations.Top.cshtml</DependentUpon>
     </Content>

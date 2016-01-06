@@ -150,24 +150,28 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/active")]
-        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options,
-                                   SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions? sleeping = null,
-                                   bool? system = false,
-                                   bool? details = false)
+        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options)
         {
-            if (sleeping.HasValue) options.IncludeSleepingSessions = sleeping.Value;
-            if (system.HasValue) options.IncludeSystemSessions = system.Value;
-            if (details.HasValue) options.GetAdditionalInfo = details.Value;
+            var vd = GetOperationsActiveModel(node, options);
+            return View("Operations.Active", vd);
+        }
 
+        [Route("sql/active/filters")]
+        public ActionResult ActiveFilters(string node, SQLInstance.ActiveSearchOptions options)
+        {
+            var vd = GetOperationsActiveModel(node, options);
+            return View("Operations.Active.Filters", vd);
+        }
+
+        private OperationsActiveModel GetOperationsActiveModel(string node, SQLInstance.ActiveSearchOptions options)
+        {
             var i = SQLInstance.Get(node);
-
-            var vd = new OperationsActiveModel
+            return new OperationsActiveModel
             {
                 View = SQLViews.Active,
                 CurrentInstance = i,
                 ActiveSearchOptions = options
             };
-            return View("Operations.Active", vd);
         }
 
         [Route("sql/connections")]

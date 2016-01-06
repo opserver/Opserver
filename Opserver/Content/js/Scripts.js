@@ -732,6 +732,16 @@ Status.SQL = (function () {
     
     function init(options) {
         Status.SQL.options = options;
+
+        var filterOptions = {
+            modalClass: 'modal-md',
+            buttons: {
+                "Apply Filters": function (e) {
+                    $(this).find('form').submit();
+                    return false;
+                }
+            }
+        }
         
         Status.loaders.register({
             '#/cluster/': loadCluster,
@@ -740,15 +750,10 @@ Status.SQL = (function () {
                 Status.popup('/sql/instance/summary/' + val, { node: Status.SQL.options.node });
             },
             '#/sql/top/filters': function () {
-                Status.popup('/sql/top/filters' + window.location.search, null, {
-                    modalClass: 'modal-md',
-                    buttons: {
-                        "Apply Filters": function (e) {
-                            $(this).find('form').submit();
-                            return false;
-                        }
-                    }
-                });
+                Status.popup('/sql/top/filters' + window.location.search, null, filterOptions);
+            },
+            '#/sql/active/filters': function () {
+                Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
             },
             '#/db/': function(val) {
                 Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
