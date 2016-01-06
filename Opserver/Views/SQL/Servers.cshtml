@@ -127,16 +127,14 @@
         </table>
     }
 
-    <div>
-        <div class="ag-container refresh-group" data-name="ag-summary">
-            @foreach (var c in Model.Clusters)
+    <div class="ag-container refresh-group row" data-name="ag-summary">
+        @foreach (var c in Model.Clusters)
+        {
+            foreach (var ag in c.AvailabilityGroups)
             {
-                foreach (var ag in c.AvailabilityGroups)
-                {
-                    @Html.Partial("Servers.AvailabilityGroup", ag)
-                }
+                @Html.Partial("Servers.AvailabilityGroup", ag)
             }
-        </div>
+        }
     </div>
 
     @if (Model.CurrentCluster != null)

@@ -161,7 +161,7 @@
                 }
                 @if (c.SettingsNodes.Count > ns.Nodes.Count)
                 {
-                    <tr class="critical-row centered">
+                    <tr class="danger text-center">
                         <td colspan="12">@((c.SettingsNodes.Count - ns.Nodes.Count).Pluralize("node")) currently missing of (@string.Join(", ", c.SettingsNodes.Select(s => s))).</td>
                     </tr>
                 }
