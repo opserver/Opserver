@@ -8,7 +8,7 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi
+    public partial class PagerDutyAPI
     {
         // TODO: We need to able able to handle when people have more than one on call schedule
         public PagerDutyPerson PrimaryOnCall
@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             CacheForSeconds = 60*60,
             UpdateCache = UpdateCacheItem(
-                description: "On Call info",
+                description: nameof(OnCallUsers),
                 getData: GetOnCallUsers,
                 logExceptions: true
                 )

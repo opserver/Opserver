@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                 return _applications ?? (_applications = new Cache<List<Application>>
                     {
                         CacheForSeconds = Settings.PollIntervalSeconds,
-                        UpdateCache = UpdateFromSql("Applications-List",
+                        UpdateCache = UpdateFromSql(nameof(Applications),
                             async () =>
                             {
                                 var result = (await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
@@ -81,7 +81,7 @@ Select ApplicationName as Name,
                 return _errorSummary ?? (_errorSummary = new Cache<List<Error>>
                 {
                     CacheForSeconds = Settings.PollIntervalSeconds,
-                    UpdateCache = UpdateFromSql("Error-Summary-List",
+                    UpdateCache = UpdateFromSql(nameof(ErrorSummary),
                         () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
@@ -122,7 +122,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
         /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
         public Task<List<Error>> GetAllErrorsAsync(int maxPerApp, string appName = null)
         {
-            return QueryListAsync<Error>($"GetAllErrors() for {Name} App: {(appName ?? "All")}", @"
+            return QueryListAsync<Error>($"{nameof(GetAllErrorsAsync)}() for {Name} App: {appName ?? "All"}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
 		From Exceptions
@@ -134,7 +134,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 
         public Task<List<Error>> GetSimilarErrorsAsync(Error error, int max)
         {
-            return QueryListAsync<Error>($"GetSimilarErrors() for {Name}", @"
+            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where ApplicationName = @ApplicationName
@@ -142,9 +142,9 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
      Order By CreationDate Desc", new {max, error.ApplicationName, error.Message});
         }
 
-        public Task<List<Error>> GetSimilarErrorsInTime(Error error, int max)
+        public Task<List<Error>> GetSimilarErrorsInTimeAsync(Error error, int max)
         {
-            return QueryListAsync<Error>($"GetSimilarErrorsInTime() for {Name}", @"
+            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsInTimeAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where CreationDate Between @start and @end
@@ -153,7 +153,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 
         public Task<List<Error>> FindErrorsAsync(string searchText, string appName, int max, bool includeDeleted)
         {
-            return QueryListAsync<Error>($"FindErrors() for {Name}", @"
+            return QueryListAsync<Error>($"{nameof(FindErrorsAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
@@ -162,7 +162,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 
         public Task<int> DeleteAllErrorsAsync(string appName)
         {
-            return ExecTaskAsync($"DeleteAllErrors() (app: {appName}) for {Name}", @"
+            return ExecTaskAsync($"{nameof(DeleteAllErrorsAsync)}() (app: {appName}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
@@ -172,7 +172,7 @@ Update Exceptions
 
         public Task<int> DeleteSimilarErrorsAsync(Error error)
         {
-            return ExecTaskAsync($"DeleteSimilarErrors('{error.GUID.ToString()}') (app: {error.ApplicationName}) for {Name}", @"
+            return ExecTaskAsync($"{nameof(DeleteSimilarErrorsAsync)}('{error.GUID.ToString()}') (app: {error.ApplicationName}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where ApplicationName = @ApplicationName
@@ -183,7 +183,7 @@ Update Exceptions
 
         public Task<int> DeleteErrorsAsync(List<Guid> ids)
         {
-            return ExecTaskAsync($"DeleteErrors({ids.Count.ToString()} Guids) for {Name}", @"
+            return ExecTaskAsync($"{nameof(DeleteErrorsAsync)}({ids.Count.ToString()} Guids) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
@@ -196,7 +196,7 @@ Update Exceptions
             try
             {
                 Error sqlError;
-                using (MiniProfiler.Current.Step("GetErrorAsync() (guid: " + guid.ToString() + ") for " + Name))
+                using (MiniProfiler.Current.Step(nameof(GetErrorAsync) + "() (guid: " + guid.ToString() + ") for " + Name))
                 using (var c = await GetConnectionAsync())
                 {
                     sqlError = (await c.QueryAsync<Error>(@"
@@ -223,7 +223,7 @@ Update Exceptions
 
         public async Task<bool> ProtectErrorAsync(Guid guid)
         {
-              return await ExecTaskAsync($"ProtectErrorAsync() (guid: {guid.ToString()}) for {Name}", @"
+              return await ExecTaskAsync($"{nameof(ProtectErrorAsync)}() (guid: {guid.ToString()}) for {Name}", @"
 Update Exceptions 
    Set IsProtected = 1, DeletionDate = Null
  Where GUID = @guid", new {guid}) > 0;
@@ -231,7 +231,7 @@ Update Exceptions
 
         public async Task<bool> DeleteErrorAsync(Guid guid)
         {
-            return await ExecTaskAsync($"DeleteErrorAsync() (guid: {guid.ToString()}) for {Name}", @"
+            return await ExecTaskAsync($"{nameof(DeleteErrorAsync)}() (guid: {guid.ToString()}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where GUID = @guid 

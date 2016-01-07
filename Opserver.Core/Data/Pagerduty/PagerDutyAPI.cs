@@ -10,7 +10,7 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi : SinglePollNode<PagerDutyApi>
+    public partial class PagerDutyAPI : SinglePollNode<PagerDutyAPI>
     {
         internal static Options JilOptions = new Options(
             dateFormat: DateTimeFormat.ISO8601,
@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             );
 
         public PagerDutySettings Settings { get; internal set; }
-        public override string NodeType => "PagerDutyAPI";
+        public override string NodeType => nameof(PagerDutyAPI);
         public override int MinSecondsBetweenPolls => 3600;
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
             yield return MonitorStatus.Good;
         }
-        protected override string GetMonitorStatusReason() { return ""; }
+        protected override string GetMonitorStatusReason() => "";
         public string APIKey => Settings.APIKey;
 
         public override IEnumerable<Cache> DataPollers
@@ -48,12 +48,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
         
-        public Action<Cache<T>> GetFromPagerDutyAsync<T>(string opName, Func<PagerDutyApi, Task<T>> getFromPD) where T : class
+        public Action<Cache<T>> GetFromPagerDutyAsync<T>(string opName, Func<PagerDutyAPI, Task<T>> getFromPD) where T : class
         {
             return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromPD(this), logExceptions:true);
         }
 
-        public PagerDutyApi()
+        public PagerDutyAPI()
         {
             Settings = Current.Settings.PagerDuty;
             CacheItemFetched += (sender, args) => { _scheduleCache = null; };

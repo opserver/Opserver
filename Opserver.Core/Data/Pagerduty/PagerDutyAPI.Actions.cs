@@ -6,7 +6,7 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi
+    public partial class PagerDutyAPI
     {
         public async Task<List<Incident>> UpdateIncidentStatusAsync(string incidentId, PagerDutyPerson person, IncidentStatus newStatus)
         {

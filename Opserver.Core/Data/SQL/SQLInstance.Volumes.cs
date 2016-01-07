@@ -47,8 +47,7 @@ Select vs.volume_mount_point VolumeMountPoint,
        vs.total_bytes,
        vs.available_bytes,
        vs.is_read_only,
-       vs.is_compressed
-";
+       vs.is_compressed;";
         }
     }
 }

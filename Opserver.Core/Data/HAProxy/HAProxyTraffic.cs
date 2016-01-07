@@ -24,8 +24,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
             if (results == null)
             {
-                const string sql =
-                    @"
+                const string sql = @"
 Select Host
   From Log_Summary_Daily
  Where CreationDate > GETUTCDATE() - 15

@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data
                     {
                         if (_lastFetch < DateTime.UtcNow.AddSeconds(-Current.Settings.TeamCity.BuildFetchIntervalSeconds))
                         {
-                            using (MiniProfiler.Current.Step("Get Builds since " + _lastFetch))
+                            using (MiniProfiler.Current.Step("Get Builds since " + _lastFetch.ToString()))
                             {
                                 var c = GetClient();
                                 // grab all new builds with some overlap

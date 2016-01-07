@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Data.Redis
                 return _info ?? (_info = new Cache<RedisInfo>
                 {
                     CacheForSeconds = 10,
-                    UpdateCache = GetFromRedisAsync("INFO", async rc =>
+                    UpdateCache = GetFromRedisAsync(nameof(Info), async rc =>
                     {
                         var server = rc.GetSingleServer();
                         string infoStr;

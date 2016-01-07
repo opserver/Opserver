@@ -7,7 +7,7 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi
+    public partial class PagerDutyAPI
     {
         public PagerDutySchedule PrimarySchedule
         {
@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             CacheForSeconds = 10 * 60,
             UpdateCache = UpdateCacheItem(
-                description: "Pager Duty Incidents",
+                description: nameof(AllSchedules),
                 getData: GetAllSchedulesAsync,
                 logExceptions: true
                 )
@@ -53,7 +53,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                        {
                            CacheForSeconds = 10*60,
                            UpdateCache = UpdateCacheItem(
-                               description: "Pager Duty Overrides",
+                               description: nameof(PrimaryScheduleOverrides),
                                getData: PrimarySchedule.GetOverridesAsync,
                                logExceptions: true
                                )
@@ -94,11 +94,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     user_id = pdPerson.Id
                 }
             };
-            var result = await PagerDutyApi.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
+            var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
                 getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
 
-            await PagerDutyApi.Instance.OnCallUsers.PollAsync(true);
-            await PagerDutyApi.Instance.PrimaryScheduleOverrides.PollAsync(true);
+            await PagerDutyAPI.Instance.OnCallUsers.PollAsync(true);
+            await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true);
             return result;
         }
         
@@ -107,8 +107,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
                     until = DateTime.UtcNow.AddDays(1).ToString("s");
 
-            return PagerDutyApi.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
-                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response.ToString(), PagerDutyApi.JilOptions).Overrides);
+            return PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
+                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response.ToString(), PagerDutyAPI.JilOptions).Overrides);
         }
     }
 

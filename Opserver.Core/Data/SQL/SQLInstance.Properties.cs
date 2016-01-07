@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
                 return _serverProperties ?? (_serverProperties = new Cache<SQLServerProperties>
                 {
                     CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql("Properties", async conn =>
+                    UpdateCache = UpdateFromSql(nameof(ServerProperties), async conn =>
                             {
                                 var result = (await conn.QueryAsync<SQLServerProperties>(SQLServerProperties.FetchSQL)).FirstOrDefault();
                                 if (result != null)

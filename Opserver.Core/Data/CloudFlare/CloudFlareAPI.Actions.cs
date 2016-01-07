@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         }
     }
 
-    public static partial class ZoneExtensions
+    public static class ZoneExtensions
     {
         private static readonly NameValueCollection _purgeAllParams = new NameValueCollection
         {

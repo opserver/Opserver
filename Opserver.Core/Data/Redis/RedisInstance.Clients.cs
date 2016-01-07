@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.Redis
                 return _clients ?? (_clients = new Cache<List<ClientInfo>>
                 {
                     CacheForSeconds = 60,
-                    UpdateCache = GetFromRedisAsync("Clients", async rc =>
+                    UpdateCache = GetFromRedisAsync(nameof(Clients), async rc =>
                     {
                         //TODO: Remove when StackExchange.Redis gets profiling
                         using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))

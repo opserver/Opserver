@@ -139,7 +139,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public static List<Error> GetAllErrors(string appName = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
-            using (MiniProfiler.Current.Step("GetAllErrorsAsync() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
+            using (MiniProfiler.Current.Step(nameof(GetAllErrors) + "() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
             {
                 var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, appName));
                 return GetSorted(allErrors, sort).ToList();
@@ -149,7 +149,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static async Task<List<Error>> GetSimilarErrorsAsync(Error error, bool byTime = false, int max = 200, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             if (error == null) return new List<Error>();
-            var errorFetches = GetStores(error.ApplicationName).Select(s => byTime ? s.GetSimilarErrorsInTime(error, max) : s.GetSimilarErrorsAsync(error, max));
+            var errorFetches = GetStores(error.ApplicationName).Select(s => byTime ? s.GetSimilarErrorsInTimeAsync(error, max) : s.GetSimilarErrorsAsync(error, max));
             var similarErrors = (await Task.WhenAll(errorFetches)).SelectMany(e => e);
             return GetSorted(similarErrors, sort).ToList();
         }
@@ -165,7 +165,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         
         private static List<Application> GetApplications()
         {
-            using (MiniProfiler.Current.Step("GetApplications() - All Stores"))
+            using (MiniProfiler.Current.Step(nameof(GetApplications) + "() - All Stores"))
             {
                 var apps = Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
                 if (!ConfigApplications.Any()) return apps;

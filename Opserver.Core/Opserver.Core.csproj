@@ -171,12 +171,22 @@
     <Compile Include="Data\IssuesProvider.cs" />
     <Compile Include="Data\Jira\JiraClient.cs" />
     <Compile Include="Data\PagerDuty\IncidentStatus.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.Actions.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.Incidents.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.Logs.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.OnCall.cs" />
-    <Compile Include="Data\PagerDuty\PagerDuty.Schedules.cs" />
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Actions.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.cs" />
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Incidents.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Logs.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.OnCall.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Schedules.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
       <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
     </Compile>

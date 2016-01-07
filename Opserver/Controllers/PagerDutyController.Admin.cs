@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Person Not Found for " + Current.User.AccountName);
 
-            var newIncident = await PagerDutyApi.Instance.UpdateIncidentStatusAsync(incident, pdUser, newStatus);
+            var newIncident = await PagerDutyAPI.Instance.UpdateIncidentStatusAsync(incident, pdUser, newStatus);
 
             return Json(newIncident?[0]?.Status == newStatus);
         }
@@ -24,11 +24,11 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Persoon Not Found for " + Current.User.AccountName);
 
-            var currentPrimarySchedule = PagerDutyApi.Instance.PrimarySchedule;
+            var currentPrimarySchedule = PagerDutyAPI.Instance.PrimarySchedule;
             if (currentPrimarySchedule == null)
-                return ContentNotFound(PagerDutyApi.Instance.Settings.PrimaryScheduleName.IsNullOrEmpty()
+                return ContentNotFound(PagerDutyAPI.Instance.Settings.PrimaryScheduleName.IsNullOrEmpty()
                     ? "PagerDuty PrimarySchedule is not defined (\"PrimaryScheduleName\" in config)."
-                    : "PagerDuty Schedule '" + PagerDutyApi.Instance.Settings.PrimaryScheduleName + "' not found.");
+                    : "PagerDuty Schedule '" + PagerDutyAPI.Instance.Settings.PrimaryScheduleName + "' not found.");
 
             start = start ?? DateTime.UtcNow;
             

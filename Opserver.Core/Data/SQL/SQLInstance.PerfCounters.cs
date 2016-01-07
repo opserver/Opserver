@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.SQL
                 return _perfCounters ?? (_perfCounters = new Cache<List<PerfCounterRecord>>
                     {
                         CacheForSeconds = RefreshInterval,
-                        UpdateCache = UpdateFromSql("PerfCounters", conn =>
+                        UpdateCache = UpdateFromSql(nameof(PerfCounters), conn =>
                             {
                                 var sql = GetFetchSQL<PerfCounterRecord>();
                                 return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});

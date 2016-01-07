@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 {
                     CacheForSeconds = 5*60,
                     CacheStaleForSeconds = 60*60,
-                    UpdateCache = CloudFlareFetch("Fetch Zones", api => api.Get<List<CloudFlareZone>>("zones"))
+                    UpdateCache = CloudFlareFetch(nameof(Zones), api => api.Get<List<CloudFlareZone>>("zones"))
                 });
             }
         }
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 {
                     CacheForSeconds = 5*60,
                     CacheStaleForSeconds = 60*60,
-                    UpdateCache = CloudFlareFetch("Fetch DNSRecords",
+                    UpdateCache = CloudFlareFetch(nameof(DNSRecords),
                         async api =>
                         {
                             var records = new List<CloudFlareDNSRecord>();
@@ -53,10 +53,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             }
         }
 
-        public CloudFlareZone GetZoneFromHost(string host)
-        {
-            return Zones.Data?.FirstOrDefault(z => host.EndsWith(z.Name));
-        }
+        public CloudFlareZone GetZoneFromHost(string host) => Zones.Data?.FirstOrDefault(z => host.EndsWith(z.Name));
 
         public CloudFlareZone GetZoneFromUrl(string url)
         {

@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
                 return _configuration ?? (_configuration = new Cache<List<SQLConfigurationOption>>
                 {
                     CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql("Configuration", async conn =>
+                    UpdateCache = UpdateFromSql(nameof(Configuration), async conn =>
                     {
                         var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>());
                         foreach (var r in result)

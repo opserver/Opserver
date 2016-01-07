@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Models
             });
             AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty)
             {
-                GetMonitorStatus = () => PagerDutyApi.Instance.MonitorStatus
+                GetMonitorStatus = () => PagerDutyAPI.Instance.MonitorStatus
             });
             AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
             {

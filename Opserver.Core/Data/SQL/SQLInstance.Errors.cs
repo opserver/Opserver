@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheKey = GetCacheKey("ErrorInfo-" + minutesAgo.ToString()),
                     CacheForSeconds = RefreshInterval,
                     CacheStaleForSeconds = 5*60,
-                    UpdateCache = UpdateFromSql("Error Log last " + minutesAgo.ToString() + " minutes", conn =>
+                    UpdateCache = UpdateFromSql(nameof(GetErrorLog) + "(" + minutesAgo.ToString() + " minutes)", conn =>
                         {
                             var sql = GetFetchSQL<SQLErrorLogInfo>();
                             return conn.QueryAsync<SQLErrorLogInfo>(sql, new {minutesAgo});

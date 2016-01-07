@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
                 return _waitStats ?? (_waitStats = new Cache<List<WaitStatRecord>>
                 {
                     CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql("WaitStats", conn =>
+                    UpdateCache = UpdateFromSql(nameof(WaitStats), conn =>
                     {
                         var sql = GetFetchSQL<WaitStatRecord>();
                         return conn.QueryAsync<WaitStatRecord>(sql, new { secondsBetween = 15 });

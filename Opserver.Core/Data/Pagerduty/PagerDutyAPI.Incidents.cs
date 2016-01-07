@@ -7,13 +7,13 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyApi
+    public partial class PagerDutyAPI
     {
         private Cache<List<Incident>> _incidents;
         public Cache<List<Incident>> Incidents => _incidents ?? (_incidents = new Cache<List<Incident>>
         {
             CacheForSeconds = 10 * 60,
-            UpdateCache = UpdateCacheItem("Pager Duty Incidents", GetIncidents, true)
+            UpdateCache = UpdateCacheItem(nameof(Incidents), GetIncidents, true)
         });
 
         private Task<List<Incident>> GetIncidents()
@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "number_of_escalations")]
         public int? NumberOfEscalations { get; set; }
         
-        public Task<List<LogEntry>> Logs => PagerDutyApi.Instance.GetIncidentEntriesAsync(Id);
+        public Task<List<LogEntry>> Logs => PagerDutyAPI.Instance.GetIncidentEntriesAsync(Id);
 
         public MonitorStatus MonitorStatus
         {

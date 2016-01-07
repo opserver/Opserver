@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public string Email => Settings.Email;
         public string APIKey => Settings.APIKey;
 
-        public override string NodeType => "CloudFlareAPI";
+        public override string NodeType => nameof(CloudFlareAPI);
         public override int MinSecondsBetweenPolls => 5;
 
         private static readonly Options JilOptions = Options.ISO8601;
