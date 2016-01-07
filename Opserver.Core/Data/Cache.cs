@@ -162,7 +162,7 @@ namespace StackExchange.Opserver.Data
             // TODO: Address pile-up on background refreshes
             if (refreshLockSuccess)
             {
-                new Task(async () =>
+                var task = new Task(async () =>
                 {
                     await loadSemaphore.WaitAsync();
                     try
@@ -175,13 +175,18 @@ namespace StackExchange.Opserver.Data
                         Current.LocalCache.Remove(CompeteKey);
                         loadSemaphore.Release();
                     }
-                }).ContinueWith(t =>
+                });
+                // Intentional background
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                task.ContinueWith(t =>
                 {
                     if (t.IsFaulted)
                     {
                         Current.LogException(t.Exception);
                     }
-                }).Start();
+                });
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
+                task.Start();
             }
             return 0;
         }
