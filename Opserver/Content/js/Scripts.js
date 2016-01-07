@@ -104,13 +104,14 @@
         closePopup();
 
         var dialog = currentDialog = bootbox.dialog({
-            message: '<div id="dashboard-popup" class="modal-loader js-summary-popup"></div>',
+            message: '<div class="modal-loader js-summary-popup"></div>',
             title: 'Loading...',
             size: 'large',
             backdrop: true,
             buttons: options && options.buttons,
             onEscape: function () { }
         });
+
         dialog.on('hide.bs.modal', function () {
             var l = window.location;
             if ('pushState' in history) {
@@ -389,6 +390,12 @@ Status.Dashboard = (function () {
 
     function init(options) {
         Status.Dashboard.options = options;
+        
+        Status.loaders.register({
+            '#/dashboard/graph/': function (val) {
+                Status.popup('/dashboard/graph/' + val);
+            }
+        });
 
         if (options.refresh) {
             Status.refresh.register('Dashboard', function () {
@@ -416,53 +423,7 @@ Status.Dashboard = (function () {
                 });
             }, Status.Dashboard.options.refresh * 1000);
         }
-
-        $('.js-content').on('click', '.js-dashboard-spark', function() {
-            var $this = $(this),
-                id = $this.data('id'),
-                iid = $this.data('iid'),
-                node = $this.closest('[data-node]').data('node'),
-                subtitle = $this.closest('[data-subtitle]').data('subtitle') || node;
-
-            function popup(title) {
-                bootbox.dialog({
-                    message: '<div id="dashboard-popup" class="dashboard-chart modal-loader"></div>',
-                    title: title,
-                    size: 'large',
-                    backdrop: true,
-                    onEscape: function () { }
-                });
-            }
-
-            switch ($this.data('type')) {
-                case 'cpu':
-                    popup(node + ': CPU Utilization');
-                    $('#dashboard-popup').appendWaveLoader().cpuGraph({
-                        id: id,
-                        width: 858
-                    });
-                    return;
-                case 'memory':
-                    popup(node + ': Memory Utilization (' + subtitle + ')');
-                    $('#dashboard-popup').appendWaveLoader().memoryGraph({
-                        id: id,
-                        width: 858,
-                        max: $this.closest('[data-max]').data('max')
-                    });
-                    return;
-                case 'network':
-                    popup(node + ': Network Utilization (' + subtitle + ')');
-                    $('#dashboard-popup').appendWaveLoader().networkGraph({
-                        id: id,
-                        iid: iid,
-                        width: 858
-                    });
-                    return;
-                default:
-                    return;
-            }
-        });
-
+        
         $(document).on('keyup', '.js-filter', function () {
             applyFilter(this.value);
         });
@@ -1501,7 +1462,9 @@ Status.HAProxy = (function () {
                 ],
                 min: 'auto',
                 leftMargin: 60,
-                areaTooltipFormat: function (value, series, name) { return '<span>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>'; },
+                areaTooltipFormat: function(value, series, name) {
+                    return '<span>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>';
+                },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
                 }
@@ -2034,7 +1997,7 @@ Status.HAProxy = (function () {
             // lay it all out soon as possible
             drawElements();
 
-            $.getJSON(urlPath, params).done(function(data) {
+            function handleData(data) {
                 postProcess(data);
                 prepSeries();
                 drawPrimaryGraphs(data);
@@ -2046,14 +2009,22 @@ Status.HAProxy = (function () {
                 brush2.extent(x.domain())(bottomBrushArea);
 
                 if (options.showBuilds && !data.builds) {
-                    $.getJSON('/graph/builds/json', params, function(bData) {
+                    $.getJSON('/graph/builds/json', params, function (bData) {
                         postProcess(bData);
                         drawBuilds(bData);
                     });
                 }
-            }).fail(function () {
-                chart.prependError('Error', 'Could not load graph');
-            });
+            }
+
+            if (options.data) {
+                handleData(options.data);
+            } else {
+                $.getJSON(urlPath, params)
+                    .done(handleData)
+                    .fail(function () {
+                        chart.prependError('Error', 'Could not load graph');
+                    });
+            }
 
             function postProcess(data) {
                 function process(name) {

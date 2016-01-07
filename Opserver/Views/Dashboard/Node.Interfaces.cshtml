@@ -7,7 +7,9 @@
         <div class="text-muted">No Data Available</div>
         return;
     }
-    <img class="js-dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id" alt="" data-id="@Model.Id" data-iid="@i.Id" data-type="network" data-subtitle="@i.PrettyName" />
+    <a href="#/dashboard/graph/@Model.Id.UrlEncode()/network/@i.Id">
+        <img class="js-dashboard-spark" src="/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id" alt="" />
+    </a>
 }
 <h5 class="page-header">@Model.Interfaces.Count.Pluralize("Network Interface")</h5>
 <table class="table table-striped table-middle table-super-condensed table-responsive table-dashboard text-nowrap js-interfaces">

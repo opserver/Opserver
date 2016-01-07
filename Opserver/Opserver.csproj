@@ -162,6 +162,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
+      <DependentUpon>Node.Graph.cshtml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Home\About.Model.cs">
       <DependentUpon>About.cshtml</DependentUpon>
     </Compile>
@@ -384,6 +387,9 @@
     <None Include="Help\SQL\WaitStats.md" />
     <Content Include="Views\CloudFlare\Railguns.cshtml" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />
+    <Content Include="Views\Dashboard\Node.Graph.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Dashboard\Node.Interfaces.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>

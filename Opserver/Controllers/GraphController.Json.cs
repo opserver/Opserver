@@ -11,8 +11,8 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
     {
-        public DateTime DefaultStart => DateTime.UtcNow.AddDays(-1);
-        public DateTime DefaultEnd => DateTime.UtcNow;
+        public static DateTime DefaultStart => DateTime.UtcNow.AddDays(-1);
+        public static DateTime DefaultEnd => DateTime.UtcNow;
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/cpu/json")]
@@ -20,28 +20,29 @@ namespace StackExchange.Opserver.Controllers
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var nodePoints = await node.GetCPUUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
-            if (nodePoints == null) return JsonNotFound();
+            var data = await CPUData(node, start, end, summary);
+            if (data == null) return JsonNotFound();
 
-            return Json(new
+            return Json(data);
+        }
+
+        public static async Task<object> CPUData(Node node, long? start = null, long? end = null, bool? summary = false)
+        {
+            var points = await node.GetCPUUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (points == null) return null;
+            return new
             {
-                points = nodePoints.Select(p => new
-                    {
-                        date = p.DateEpoch, 
-                        value = p.Value ?? 0
-                    }),
+                points = points.Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = p.Value ?? 0
+                }),
                 summary = summary.GetValueOrDefault(false) ? (await node.GetCPUUtilization(null, null, 2000)).Select(p => new
-                    {
-                        date = p.DateEpoch, 
-                        value = p.Value ?? 0
-                    }) : null
-                //builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                //                                                {
-                //                                                    date = b.StartDate.ToEpochTime(true),
-                //                                                    text = GetFlagTooltip(b),
-                //                                                    link = b.WebUrl
-                //                                                })
-            });
+                {
+                    date = p.DateEpoch,
+                    value = p.Value ?? 0
+                }) : null
+            };
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
@@ -50,28 +51,30 @@ namespace StackExchange.Opserver.Controllers
         {
             var node = DashboardData.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var detailPoints = await node.GetMemoryUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
-            if (detailPoints == null) return JsonNotFound();
+            var data = await MemoryData(node, start, end, summary);
+            if (data == null) return JsonNotFound();
 
-            return Json(new
+            return Json(data);
+        }
+
+        public static async Task<object> MemoryData(Node node, long? start = null, long? end = null, bool? summary = false)
+        {
+            var points = await node.GetMemoryUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (points == null) return null;
+
+            return new
             {
-                points = detailPoints.Select(p => new
-                    {
-                        date = p.DateEpoch,
-                        value = (int)(p.Value / 1024 / 1024 ?? 0)
-                    }),
+                points = points.Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = (int)(p.Value / 1024 / 1024 ?? 0)
+                }),
                 summary = summary.GetValueOrDefault(false) ? (await node.GetMemoryUtilization(null, null, 1000)).Select(p => new
-                    {
-                        date = p.DateEpoch,
-                        value = (int)(p.Value / 1024 / 1024 ?? 0)
-                    }) : null
-                //builds = !BuildStatus.HasCachePrimed ? null : GetBuilds(id, start, end).Select(b => new
-                //{
-                //    date = b.StartDate.ToEpochTime(true),
-                //    text = GetFlagTooltip(b),
-                //    link = b.WebUrl
-                //})
-            });
+                {
+                    date = p.DateEpoch,
+                    value = (int)(p.Value / 1024 / 1024 ?? 0)
+                }) : null
+            };
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;iid;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
@@ -80,33 +83,41 @@ namespace StackExchange.Opserver.Controllers
         {
             var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return JsonNotFound();
+            var data = await NetworkData(iface, start, end, summary);
+            if (data == null) return JsonNotFound();
+
+            return Json(data);
+        }
+        
+        public static async Task<object> NetworkData(Interface iface, long? start = null, long? end = null, bool? summary = false)
+        {
             var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
-            if (traffic == null) return JsonNotFound();
+            if (traffic == null) return null;
 
             var anyTraffic = traffic.Any();
 
-            return Json(new
+            return new
+            {
+                maximums = new
                 {
-                    maximums = new
-                        {
-                            main_in = anyTraffic ? traffic.Max(i => (int)i.Value.GetValueOrDefault(0)) : 0,
-                            main_out = anyTraffic ? traffic.Max(i => (int)i.BottomValue.GetValueOrDefault(0)) : 0
-                        },
-                    points = traffic.Select(i => new 
-                        {
-                            date = i.DateEpoch, 
-                            main_in = (int)(i.Value.GetValueOrDefault()),
-                            main_out = (int)(i.BottomValue.GetValueOrDefault())
-                        }),
-                    summary = summary.GetValueOrDefault()
-                                  ? (await iface.GetUtilization(null, null, 2000)).Select(i => new
-                                      {
-                                          date = i.DateEpoch,
-                                          main_in = (int)(i.Value.GetValueOrDefault()),
-                                          main_out = (int)(i.BottomValue.GetValueOrDefault())
-                                      })
-                                  : null
-                });
+                    main_in = anyTraffic ? traffic.Max(i => (int) i.Value.GetValueOrDefault(0)) : 0,
+                    main_out = anyTraffic ? traffic.Max(i => (int) i.BottomValue.GetValueOrDefault(0)) : 0
+                },
+                points = traffic.Select(i => new
+                {
+                    date = i.DateEpoch,
+                    main_in = (int) i.Value.GetValueOrDefault(),
+                    main_out = (int) i.BottomValue.GetValueOrDefault()
+                }),
+                summary = summary.GetValueOrDefault()
+                    ? (await iface.GetUtilization(null, null, 2000)).Select(i => new
+                    {
+                        date = i.DateEpoch,
+                        main_in = (int) i.Value.GetValueOrDefault(),
+                        main_out = (int) i.BottomValue.GetValueOrDefault()
+                    })
+                    : null
+            };
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;start;end", VaryByContentEncoding = "gzip;deflate")]

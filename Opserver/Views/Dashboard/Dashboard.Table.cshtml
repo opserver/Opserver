@@ -14,7 +14,9 @@
 {
     if (DashboardData.HasData)
     {
-        <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type"/>
+        <a href="#/dashboard/graph/@(s.Id.UrlEncode())/@type">
+            <img src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" />
+        </a>
     }
     else
     {
@@ -73,7 +75,7 @@
                                     </div>
                                 }
                             </td>
-                            <td data-max="@((n.TotalMemory/1024/1024).ToString())" data-subtitle="@(n.TotalMemory.GetValueOrDefault(0).ToSize())">@Graph(n, "memory")</td>
+                            <td>@Graph(n, "memory")</td>
                             <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
                             <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "Network")</a></td>
                         </tr>

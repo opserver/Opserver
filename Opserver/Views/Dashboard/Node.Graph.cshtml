@@ -1,0 +1,54 @@
+﻿@using StackExchange.Exceptional.Extensions
+@using StackExchange.Opserver.Views.Dashboard
+@model NodeGraphModel
+@{
+    Layout = null;
+}
+@if (Model.Node != null)
+{
+    <h4 class="modal-title">
+        @Model.Node.PrettyName: @Model.Title
+    </h4>
+    <div class="dashboard-chart js-dashboard-chart"></div>
+    switch (Model.Type)
+    {
+        case NodeGraphModel.KnownTypes.CPU:
+            <script>
+                $('.js-dashboard-chart').cpuGraph({
+                    id: '@Model.Node.Id',
+                    width: 858,
+                    data: @Model.GraphData.ToJson().AsHtml()
+                });
+            </script>
+            break;
+        case NodeGraphModel.KnownTypes.Memory:
+            <script>
+                $('.js-dashboard-chart').memoryGraph({
+                    id: '@Model.Node.Id',
+                    width: 858,
+                    max: @((Model.Node.TotalMemory/1024/1024).ToString()),
+                    data: @Model.GraphData.ToJson().AsHtml()
+                });
+            </script>
+            break;
+        case NodeGraphModel.KnownTypes.Network:
+            <script>
+                $('.js-dashboard-chart').networkGraph({
+                    id: '@Model.Node.Id',
+                    iid: '@Model.Interface.Id',
+                    width: 858,
+                    data: @Model.GraphData.ToJson().AsHtml()
+                });
+            </script>
+            break;
+    }
+}
+else
+{
+    <h4 class="modal-title">
+        Unknown node
+    </h4>
+    <div class="alert alert-warning">
+        <h5>Node not found</h5>
+    </div>
+}
