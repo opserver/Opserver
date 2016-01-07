@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         public const string AllServersKey = "*";
         private static readonly ParallelOptions ParallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 3 };
 
-        public static bool PerformProxyAction(IEnumerable<Proxy> proxies, string serverName, Action action)
+        public static async Task<bool> PerformProxyActionAsync(IEnumerable<Proxy> proxies, string serverName, Action action)
         {
             var result = true;
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s })).ToList();
@@ -25,53 +25,49 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
-            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
-            {
-                // TODO: Parallel
-                p.Poll(true, true);
-            }
+            var polls = matchingServers.Select(p => p.Proxy.Instance).Distinct().Select(p => p.PollAsync(true));
+            await Task.WhenAll(polls);
             return result;
         }
 
-        public static bool PerformProxyAction(Proxy proxy, Server server, Action action)
+        public static async Task<bool> PerformProxyActionAsync(Proxy proxy, Server server, Action action)
         {
             if (server != null)
             {
                 var result = true;
+                // TODO: Async
                 Parallel.ForEach(proxy.Servers, ParallelOptions, s =>
-                    {
-                        result = result && PostAction(proxy, s, action);
-                    });
-                proxy.Instance.Poll(true, true);
+                {
+                    result = result && PostAction(proxy, s, action);
+                });
+                await proxy.Instance.PollAsync(true);
                 return result;
             }
             else
             {
                 var result = PostAction(proxy, null, action);
-                proxy.Instance.Poll(true, true);
+                await proxy.Instance.PollAsync(true);
                 return result;
             }
         }
 
-        public static bool PerformServerAction(string server, Action action)
+        public static async Task<bool> PerformServerActionAsync(string server, Action action)
         {
             var proxies = HAProxyGroup.GetAllProxies();
             var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == server).Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
+            // TODO: Async
             Parallel.ForEach(matchingServers, ParallelOptions, pair =>
                 {
                     result = result && PostAction(pair.Proxy, pair.Server, action);
                 });
-            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
-            {
-                // TODO: Parallel
-                p.Poll(true, true);
-            }
+            var polls = matchingServers.Select(p => p.Proxy.Instance).Distinct().Select(p => p.PollAsync(true));
+            await Task.WhenAll(polls);
             return result;
         }
 
-        public static bool PerformGroupAction(string group, Action action)
+        public static async Task<bool> PerformGroupActionAsync(string group, Action action)
         {
             var haGroup = HAProxyGroup.GetGroup(group);
             if (haGroup == null) return false;
@@ -79,17 +75,17 @@ namespace StackExchange.Opserver.Data.HAProxy
             var matchingServers = proxies.SelectMany(p => p.Servers.Select(s => new { Proxy = p, Server = s })).ToList();
 
             var result = true;
+            // TODO: Async
             Parallel.ForEach(matchingServers, ParallelOptions, pair =>
             {
                 result = result && PostAction(pair.Proxy, pair.Server, action);
             });
-            foreach (var p in matchingServers.Select(p => p.Proxy.Instance).Distinct())
-            {
-                p.Poll(true, true);
-            }
+            var polls = matchingServers.Select(p => p.Proxy.Instance).Distinct().Select(p => p.PollAsync(true));
+            await Task.WhenAll(polls);
             return result;
         }
 
+        // TODO: Async
         private static bool PostAction(Proxy p, Server server, Action action)
         {
             var instance = p.Instance;

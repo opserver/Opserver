@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public ActionResult PromoteToMaster(string node)
+        public async Task<ActionResult> PromoteToMaster(string node)
         {
             var i = RedisInstance.GetInstance(node);
             if (i == null) return JsonNotFound();
@@ -35,8 +35,9 @@ namespace StackExchange.Opserver.Controllers
             try
             {
                 var message = i.PromoteToMaster();
-                i.Poll(true);
-                oldMaster?.Poll(true);
+                await i.PollAsync(true);
+                if (oldMaster != null)
+                    await oldMaster.PollAsync(true);
                 return Json(new { message });
             }
             catch (Exception ex)
@@ -88,7 +89,7 @@ namespace StackExchange.Opserver.Controllers
             try
             {
                 var success = await action(i);
-                if (poll) i.Poll(true);
+                if (poll) await i.PollAsync(true);
                 return Json(new { success });
             }
             catch (Exception ex)

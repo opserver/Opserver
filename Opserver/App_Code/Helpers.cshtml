@@ -10,11 +10,11 @@
 }
 @helper PollNow(PollNode n, Cache c = null)
 {
-    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c?.UniqueId.ToString())" title="Updated @n.LastPoll.ToZuluTime()"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c?.UniqueId.ToString())" title="Updated @(n.LastPoll?.ToZuluTime())"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
 }
 @helper PollNow(PollNode n, params Cache[] c)
 {
-    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(Json.Encode(c.Select(i => i.UniqueId)))" title="Updated @n.LastPoll.ToZuluTime()"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(Json.Encode(c.Select(i => i.UniqueId)))" title="Updated @(n.LastPoll?.ToZuluTime())"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
 }
 @helper PollNow(IEnumerable<PollNode> nodes)
 { 

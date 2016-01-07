@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Controllers
     public class PollController : StatusController
     {
         [Route("poll")]
-        public ActionResult PollNodes(string type, string[] key, Guid? guid = null)
+        public async Task<ActionResult> PollNodes(string type, string[] key, Guid? guid = null)
         {
             if (type.IsNullOrEmpty())
                 return JsonError("type is missing");
@@ -20,17 +20,9 @@ namespace StackExchange.Opserver.Controllers
                 return JsonError("key is missing");
             try
             {
-                if (key.Length > 1)
-                {
-                    bool result = true;
-                    Parallel.ForEach(key, k =>
-                    {
-                        result &= PollingEngine.Poll(type, k, guid, sync: true);
-                    });
-                    return Json(result);
-                }
-                var pollResult = PollingEngine.Poll(type, key[0], guid, sync: true);
-                return Json(pollResult);
+                var polls = key.Select(k => PollingEngine.PollAsync(type, k, guid));
+                var results = await Task.WhenAll(polls);
+                return Json(results.Aggregate(true, (current, r) => current & r));
             }
             catch (Exception e)
             {
@@ -39,11 +31,11 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("poll/all"), HttpPost, OnlyAllow(Roles.GlobalAdmin)]
-        public ActionResult PollDown()
+        public async Task<ActionResult> PollDown()
         {
             try
             {
-                PollingEngine.PollAll(true, true);
+                await PollingEngine.PollAllAsync(true);
                 return Json(true);
             }
             catch (Exception e)

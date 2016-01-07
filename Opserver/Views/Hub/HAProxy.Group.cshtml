@@ -6,7 +6,7 @@
     var downInstances = g.Instances.Where(i => !i.Proxies.LastPollSuccessful);
 }
 <div class="item haproxy-item @g.TextClass()">
-    <div class="server-name" title="Last Updated: @g.Instances.Max(i => i.LastPoll).ToRelativeTime()">
+    <div class="server-name" title="Last Updated: @(g.Instances.Max(i => i.LastPoll)?.ToRelativeTime())">
         @g.IconSpan()
         <a href="/haproxy?group=@g.Name" class="node-name-link">@g.Name</a>
         <span class="category">@(proxies.Count.Pluralize("proxy"))</span>
@@ -15,7 +15,7 @@
         @foreach (var i in downInstances)
         {
             <div>
-                @i.MonitorStatus.IconSpan() @i.Name: @i.MonitorStatus.Span($"Last check failed ({i.LastPoll.ToRelativeTime()})")
+                @i.MonitorStatus.IconSpan() @i.Name: @i.MonitorStatus.Span($"Last check failed ({i.LastPoll?.ToRelativeTime()})")
             </div>
         }
         @if (proxies.Any())

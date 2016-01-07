@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Data.Redis
             var result = await _connection.GetDatabase()
                 .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
                 .ConfigureAwait(false);
-            Tiebreaker.Poll(true);
+            await Tiebreaker.PollAsync(true);
             return result;
         }
 
@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data.Redis
             var result = await _connection.GetDatabase()
                 .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
                 .ConfigureAwait(false);
-            Tiebreaker.Poll(true);
+            await Tiebreaker.PollAsync(true);
             return result;
         }
 

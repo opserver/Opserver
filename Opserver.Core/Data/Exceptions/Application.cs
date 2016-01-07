@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                        {
                            Name = Name,
                            ExceptionCount = ExceptionCount,
-                           MostRecent = MostRecent.ToRelativeTime()
+                           MostRecent = MostRecent?.ToRelativeTime()
                        };
         }
     }

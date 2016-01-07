@@ -47,7 +47,7 @@
                 <th title="@pnType.FullName">@pn.IconSpan() @pnType.Name</th>
                 <th>@pn.UniqueKey</th>
                 <th>@pn</th>
-                <th>@pn.LastPoll.ToRelativeTimeSpanMini() <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
+                <th>@(pn.LastPoll?.ToRelativeTimeSpanMini()) <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
                 <th>
                     @if (isIdle)
                     {
@@ -88,13 +88,13 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
                         </small>
                     </td>
                     <td>
-                        @if (p.LastPoll == DateTime.MinValue)
+                        @if (p.LastPoll == null)
                         {
                             <span class="critical light">Never</span>
                         }
                         else
                         {
-                            @:@p.ToPollSpan() <span class="text-muted small">(@p.LastPollDuration.ToTimeStringMini())</span>
+                            @:@p.ToPollSpan() <span class="text-muted small">(@(p.LastPollDuration?.ToTimeStringMini()))</span>
                         }
                     </td>
                     <td class="@(p.IsPolling ? "text-success" : "text-muted small")">(@(p.IsPolling ? "active" : "idle"))</td>

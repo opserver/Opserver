@@ -21,7 +21,7 @@
         @if (cache.LastPoll > cache.LastSuccess)
         {
             <p class="error-stack">
-                Query failed, showing info from: @cache.LastSuccess.ToRelativeTimeSpanMini()
+                Query failed, showing info from: @(cache.LastSuccess?.ToRelativeTimeSpanMini())
             </p>
         }
     </div>

@@ -74,7 +74,7 @@
                             <td><a href="/sql/databases?node=@n.Name.UrlEncode()">@SQLHelpers.HealthDescription(n, cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
                             @ConnectionsCell(n)
                             @BatchesCell(n)
-                            <td>@cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime)).ToRelativeTimeSpan()</td>
+                            <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
                             <td>@n.LastFetch.ToPollSpan()</td>
                         </tr>
                     }

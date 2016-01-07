@@ -97,8 +97,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             var result = await PagerDutyApi.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
                 getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
 
-            PagerDutyApi.Instance.OnCallUsers.Poll(true);
-            PagerDutyApi.Instance.PrimaryScheduleOverrides.Poll(true);
+            await PagerDutyApi.Instance.OnCallUsers.PollAsync(true);
+            await PagerDutyApi.Instance.PrimaryScheduleOverrides.PollAsync(true);
             return result;
         }
         

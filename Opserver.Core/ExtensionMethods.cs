@@ -205,17 +205,6 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Returns a unix Epoch time if given a value, and null otherwise.
-        /// </summary>
-        public static long? ToEpochTime(this DateTime? dt)
-        {
-            return
-                dt.HasValue ?
-                    (long?)ToEpochTime(dt.Value) :
-                    null;
-        }
-
-        /// <summary>
         /// Converts to Date given an Epoch time
         /// </summary>
         public static DateTime ToDateTime(this long epoch)
@@ -239,16 +228,6 @@ namespace StackExchange.Opserver
             return dt <= comp
                 ? ToRelativeTimePast(dt, comp, includeTime)
                 : ToRelativeTimeFuture(dt, comp, includeTime);
-        }
-        /// <summary>
-        /// Returns a humanized string indicating how long ago something happened, eg "3 days ago".
-        /// For future dates, returns when this DateTime will occur from DateTime.UtcNow.
-        /// If this DateTime is null, returns empty string.
-        /// </summary>
-        public static string ToRelativeTime(this DateTime? dt, bool includeTime = true)
-        {
-            if (dt == null) return "";
-            return ToRelativeTime(dt.Value, includeTime);
         }
 
         private static string ToRelativeTimePast(DateTime dt, DateTime utcNow, bool includeTime = true)

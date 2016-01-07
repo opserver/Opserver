@@ -4,7 +4,7 @@
     var types = Model.MemoryClerkSummary;
     var data = types.SafeData(true);
 }
-<h4 class="modal-title" title="Updated @types.LastPoll.ToRelativeTime()">
+<h4 class="modal-title" title="Updated @(types.LastPoll?.ToRelativeTime())">
     Memory Usage Details
 </h4>
 @if (data.Any())

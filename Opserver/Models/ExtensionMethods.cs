@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Models
             {
                 addClass = MonitorStatus.Warning.TextClass();
             }
-            return info.LastSync.ToRelativeTimeSpan(addClass);
+            return info.LastSync?.ToRelativeTimeSpan(addClass);
         }
 
         public static string PrettyTotalMemory(this Node info) => info.TotalMemory?.ToSize() ?? "";

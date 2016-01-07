@@ -6,7 +6,7 @@
     var errors = Model.GetErrorLog(errorMinutesToGet);
     var data = errors.SafeData(true);
 }
-<h4 class="modal-title" title="Updated @errors.LastPoll.ToRelativeTime()">
+<h4 class="modal-title" title="Updated @(errors.LastPoll?.ToRelativeTime())">
     Errors last @ts.ToReadableString()
 </h4>
 <div class="alert alert-warning">

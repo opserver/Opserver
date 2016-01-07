@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
@@ -41,31 +40,11 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Converts a unix Epoch to OLE Date, because whoever designed microsoft charting was retarded
-        /// </summary>
-        /// <param name="epoch">The unix epoch</param>
-        public static double ToOLEDate(this long epoch)
-        {
-            // OLE Dates are days since Dec 30th, 1899
-            // Epochs are seconds since Jan 1, 1970
-            // The diffrence in seconds is 2209161600 - so add it to the epoch and divide into days
-            return (epoch + 2209161600) / 60d / 60 / 24;
-        }
-
-        /// <summary>
         /// Title cases a string given the current culture
         /// </summary>
         public static string ToTitleCase(this string s)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
-        }
-
-        /// <summary>
-        /// Gets the count of lines in a string
-        /// </summary>
-        public static int LineCount(this string s)
-        {
-            return s.Count(c => c == '\n') + 1;
         }
 
         public static IHtmlString ToStatusSpan(this Data.HAProxy.Item item)
@@ -75,9 +54,9 @@ namespace StackExchange.Opserver
             switch (item.MonitorStatus)
             {
                 case MonitorStatus.Good:
-                    return $"({item.Status})".AsHtml();
+                    return ("(" + item.Status + ")").AsHtml();
                 default:
-                    return $"(<b>{item.Status}</b>)".AsHtml();
+                    return ("(<b>" + item.Status + "</b>)").AsHtml();
             }
         }
         
@@ -214,46 +193,28 @@ namespace StackExchange.Opserver
 
         public static IHtmlString ToPollSpan(this Cache cache, bool mini = true, bool lastSuccess = false)
         {
-            if (cache == null)
+            if (cache?.LastPoll == null)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
             if (lastSuccess)
-                return mini ? cache.LastSuccess.ToRelativeTimeSpanMini() : cache.LastSuccess.ToRelativeTimeSpan();
+                return mini ? cache.LastSuccess?.ToRelativeTimeSpanMini() : cache.LastSuccess?.ToRelativeTimeSpan();
             
             var lf = cache.LastPoll;
-            if (lf == DateTime.MinValue)
+            if (lf == null)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (!cache.LastPollSuccessful)
-                return MonitorStatus.Warning.Span(mini ? dateToUse.ToRelativeTime() : dateToUse.ToRelativeTimeMini(),
-                    $"Last Poll: {lf.ToZuluTime()} ({lf.ToRelativeTime()})\nError: {cache.ErrorMessage}");
+                return MonitorStatus.Warning.Span(mini ? dateToUse?.ToRelativeTime() : dateToUse?.ToRelativeTimeMini(),
+                    $"Last Poll: {lf?.ToZuluTime()} ({lf?.ToRelativeTime()})\nError: {cache.ErrorMessage}");
 
-            return mini ? lf.ToRelativeTimeSpanMini() : lf.ToRelativeTimeSpan();
-        }
-        
-        public static string ToDateOnlyString(this DateTime dt)
-        {
-            return dt.ToString("yyyy-MM-dd");
-        }
-
-        public static MvcHtmlString ToDateOnlySpanPretty(this DateTime dt, string cssClass)
-        {
-            return MvcHtmlString.Create($@"<span title=""{dt:u}"" class=""{cssClass}"">{ToDateOnlyStringPretty(dt, DateTime.UtcNow)}</span>");
+            return mini ? lf?.ToRelativeTimeSpanMini() : lf?.ToRelativeTimeSpan();
         }
 
         public static string ToDateOnlyStringPretty(this DateTime dt, DateTime? utcNow = null)
         {
             var now = utcNow ?? DateTime.UtcNow;
             return dt.ToString(now.Year != dt.Year ? @"MMM %d \'yy" : "MMM %d");
-        }
-
-        /// <summary>
-        /// Convert a nullable datetime to a zulu string
-        /// </summary>
-        public static string ToZuluTime(this DateTime? dt)
-        {
-            return !dt.HasValue ? string.Empty : ToZuluTime(dt.Value);
         }
 
         /// <summary>
@@ -284,27 +245,13 @@ namespace StackExchange.Opserver
         /// returns a html span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
         /// assumes time is *already* stored in UTC format!
         /// </summary>
-        public static IHtmlString ToRelativeTimeSpan(this DateTime dt)
-        {
-            return ToRelativeTimeSpan(dt, "relativetime");
-        }
-        public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssclass, bool asPlusMinus = false, DateTime? compareTo = null)
+        public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssClass = null, bool asPlusMinus = false, DateTime? compareTo = null)
         {
             // TODO: Make this a setting?
             // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo = compareTo ?? DateTime.UtcNow;
-            if (string.IsNullOrEmpty(cssclass))
-                return $@"<span title=""{dt:u}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
-            else
-                return string.Format(@"<span title=""{0:u}"" class=""{2}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo), cssclass).AsHtml();
+            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
         }
-        public static IHtmlString ToRelativeTimeSpan(this DateTime? dt, string cssclass = "")
-        {
-            return dt == null
-                       ? MvcHtmlString.Empty
-                       : ToRelativeTimeSpan(dt.Value, "relativetime" + (cssclass.HasValue() ? " " + cssclass : ""));
-        }
-
 
         /// <summary>
         /// returns a very *small* humanized string indicating how long ago something happened, eg "3d ago"
@@ -353,13 +300,13 @@ namespace StackExchange.Opserver
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes.ToString() + "m" + ((ts.Seconds > 0) ? " " + ts.Seconds.ToString() + "s" : "");
+                return ts.Minutes.ToString() + "m" + (ts.Seconds > 0 ? " " + ts.Seconds.ToString() + "s" : "");
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours.ToString() + "h" + ((ts.Minutes > 0) ? " " + ts.Minutes.ToString() + "m" : "");
+                return ts.Hours.ToString() + "h" + (ts.Minutes > 0 ? " " + ts.Minutes.ToString() + "m" : "");
             }
-            return ts.Days.ToString() + "d" + ((ts.Hours > 0) ? " " + ts.Hours.ToString() + "h" : "");
+            return ts.Days.ToString() + "d" + (ts.Hours > 0 ? " " + ts.Hours.ToString() + "h" : "");
         }
 
         /// <summary>
@@ -368,34 +315,21 @@ namespace StackExchange.Opserver
         /// </summary>
         public static IHtmlString ToRelativeTimeSpanMini(this DateTime dt, bool includeTimeForOldDates = true)
         {
-            return $@"<span title=""{dt:u}"" class=""relativetime"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
-        }
-        /// <summary>
-        /// returns AN HTML SPAN ELEMENT with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
-        /// assumes time is *already* stored in UTC format!
-        /// If this DateTime? is null, will return empty string.
-        /// </summary>
-        public static IHtmlString ToRelativeTimeSpanMini(this DateTime? dt, bool includeTimeForOldDates = true)
-        {
-            return dt == null
-                       ? MvcHtmlString.Empty
-                       : ToRelativeTimeSpanMini(dt.Value, includeTimeForOldDates);
+            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
         }
 
         /// <summary>
-        /// Mini rep - 1.1k allowed
+        /// Mini number, e.g. 1.1k
         /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
         public static string Mini(this int number)
         {
             if (number >= 1000000)
-                return $"{(double) number/1000000:0.0m}";
+                return ((double)number / 1000000).ToString("0.0m");
 
             if (number >= 1000)
-                return $"{(double) number/1000:0.#k}";
+                return ((double)number / 1000).ToString("0.#k");
 
-            return $"{number:#,##0}";
+            return number.ToString("#,##0");
         }
         /// <summary>
         /// Full representation of a number
@@ -404,7 +338,7 @@ namespace StackExchange.Opserver
         /// <returns></returns>
         public static string Full(this int number)
         {
-            return $"{number:#,##0}";
+            return number.ToString("#,##0");
         }
 
         /// <summary>
@@ -415,26 +349,12 @@ namespace StackExchange.Opserver
         public static string Micro(this int number)
         {
             if (number >= 1000000)
-                return $"{(double) number/1000000:0.0m}";
-
-            if (number >= 100000)
-                return $"{(double) number/1000:0k}";
-
-            if (number >= 10000)
-                return $"{(double) number/1000:0k}";
-
+                return ((double)number / 1000000).ToString("0.0m");
+            
             if (number >= 1000)
-                return $"{(double) number/1000:0k}";
+                return ((double)number / 1000).ToString("0k");
 
-            return $"{number:#,##0}";
-        }
-
-        /// <summary>
-        /// Adds the parameter items to this list.
-        /// </summary>
-        public static void AddAll<T>(this List<T> list, params T[] items)
-        {
-            list.AddRange(items);
+            return number.ToString("#,##0");
         }
 
         /// <summary>
@@ -456,44 +376,14 @@ namespace StackExchange.Opserver
             return sb.ToStringRecycle().AsHtml();
         }
 
-        public static IHtmlString ToYesNo(this int number)
+        private static readonly MvcHtmlString _yesHtml = MvcHtmlString.Create("Yes");
+        private static readonly MvcHtmlString _noHtml = MvcHtmlString.Create("No");
+
+        public static IHtmlString ToYesNo(this bool value)
         {
-            return MvcHtmlString.Create(number == 1 ? "Yes" : "No");
+            return value ? _yesHtml : _noHtml;
         }
-
-        /// <summary>
-        /// Micro representation of a time in millisecs 
-        /// </summary>
-        public static IHtmlString MicroTime(this long time)
-        {
-            const string format = "<span title='{0}'>{1}</span>";
-            string title;
-            string body;
-
-            if (time < 1000)
-            {
-                title = time.ToString() + " milliseconds";
-                body = time.ToString() + "ms";
-            }
-            else if (time < 1000 * 500)
-            {
-                title = $"{(double) time/1000:0.###}" + " seconds";
-                body = $"{(double) time/1000:0.#} secs";
-            }
-            else if (time < 1000 * 60 * 300)
-            {
-                title = $"{(double) time/(1000*60):0.###}" + " minutes";
-                body = $"{(double) time/(1000*60):0.#} mins";
-            }
-            else
-            {
-                title = $"{(double) time/(1000*60*60):0.###}" + " hours";
-                body = $"{(double) time/(1000*60*60):0.#} hours";
-            }
-
-            return string.Format(format, title, body).AsHtml();
-        }
-
+        
         /// <summary>
         /// Micro representation of a time in millisecs 
         /// </summary>
@@ -509,21 +399,21 @@ namespace StackExchange.Opserver
             }
             else if (unit < 1000 * 1000)
             {
-                body = $"{(double) unit/1000:0.##}K";
+                body = ((double)unit / 1000).ToString("0.##K");
             }
             else if (unit < 1000 * 1000 * 1000)
             {
-                body = $"{(double) unit/(1000*1000):0.###}M";
+                body = ((double)unit / (1000 * 1000)).ToString("0.###M");
             }
             else
             {
-                body = $"{(double) unit/(1000*1000*1000):0.###}B";
+                body = ((double)unit / (1000 * 1000 * 1000)).ToString("0.###B");
             }
 
             return string.Format(format, title, body).AsHtml();
         }
 
-        public static IHtmlString ToNoteIfNA(this string data)
+        public static IHtmlString ToMutedIfNA(this string data)
         {
             return MvcHtmlString.Create(data == "n/a"
                 ? @"<span class=""text-muted"">n/a</span>"

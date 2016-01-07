@@ -5,7 +5,7 @@
     var jobs = Model.JobSummary;
     var data = jobs.SafeData(true);
 }
-<h4 class="modal-title" title="Updated @jobs.LastPoll.ToRelativeTime()">
+<h4 class="modal-title" title="Updated @(jobs.LastPoll?.ToRelativeTime())">
     Agent Jobs
 </h4>
 @if (data.Any())
@@ -50,15 +50,15 @@ Last Run Message: @j.LastRunMessage">
                     @if (j.IsRunning)
                     {
                         <td>Running (@j.LastRunRequestedSource.GetDescription())</td>
-                        <td>@j.LastStartDate.ToRelativeTimeSpan()</td>
+                        <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td></td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
                     }
                     else if (j.LastRunStatus.HasValue)
                     {
                         <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.GetDescription().IsNullOrEmptyReturn("Unknown")) (@j.LastRunRequestedSource.GetDescription())</td>
-                        <td>@j.LastStartDate.ToRelativeTimeSpan()</td>
-                        <td>@j.LastStopDate.ToRelativeTimeSpan()</td>
+                        <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
+                        <td>@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
                     }
                     else

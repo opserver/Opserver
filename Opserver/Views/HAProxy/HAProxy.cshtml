@@ -48,7 +48,7 @@
                 var lastSuccess = g.Instances.Max(i => i.Proxies.LastSuccess);
                 var erroring = g.Instances.FirstOrDefault(i => i.Proxies.ErrorMessage.HasValue());
                 <li class="@(g == Model.SelectedGroup ? "active" : null)" data-name="@g.Name" title="@g.Name:
-Last Poll: @(lastPoll == DateTime.MinValue ? "Not yet polled" : lastPoll.ToRelativeTime())
+Last Poll: @(lastPoll?.ToRelativeTime() ?? "Not yet polled")
 Last Success: @(lastSuccess?.ToRelativeTime() ?? "never")@if (erroring != null) {
 @:Error: @(erroring.Proxies.ErrorMessage)
 }">

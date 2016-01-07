@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Ip { get; internal set; }
         public short? PollIntervalSeconds { get; internal set; }
 
-        public DateTime LastBoot { get; internal set; }
+        public DateTime? LastBoot { get; internal set; }
         public NodeStatus Status { get; internal set; }
 
         public short? CPULoad { get; internal set; }
@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public Version KernelVersion { get; internal set; }
         
         public string PrettyName => (Name ?? "").ToUpper();
-        public TimeSpan UpTime => DateTime.UtcNow - LastBoot;
+        public TimeSpan? UpTime => DateTime.UtcNow - LastBoot;
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
 
         // TODO: Implement

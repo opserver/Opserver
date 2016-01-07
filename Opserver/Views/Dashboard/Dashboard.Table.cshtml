@@ -59,7 +59,7 @@
                     @foreach (var n in g.OrderBy(n => n.PrettyName))
                     {
                         <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
-                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @n.LastSync.ToRelativeTime()">
+                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @(n.LastSync?.ToRelativeTime())">
                                 @n.IconSpan()
                                 <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
                             </td>
@@ -69,7 +69,7 @@
                                 @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
                                 {
                                     <div class="progress" style="width: 215px;">
-                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed)%"></div>
+                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.ToString())%"></div>
                                     </div>
                                 }
                             </td>

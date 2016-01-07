@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 httpMethod: "PUT",
                 data: data);
 
-            Incidents.Poll(true);
+            await Incidents.PollAsync(true);
 
             return result?.Incidents ?? new List<Incident>();
         }

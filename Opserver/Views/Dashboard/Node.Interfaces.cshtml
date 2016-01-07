@@ -26,7 +26,7 @@
         {
             <tr class="@i.RowClass()">
                 <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-                    last updated @i.LastSync.ToRelativeTime() " data-val="@i.Index.ToString()">
+                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@i.Index.ToString()">
                     @i.IconSpan()
                     @i.PrettyName
                 </td>

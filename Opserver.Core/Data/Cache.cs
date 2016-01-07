@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data
         public override bool ContainsData => DataBacker != null;
         public override object GetData() { return DataBacker; }
         public override Type Type => typeof (T);
-        private readonly object _pollLock = new object();
+        private readonly SemaphoreSlim pollSemaphoreSlim = new SemaphoreSlim(1);
 
         public override string InventoryDescription
         {
@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data
             {
                 if (_needsPoll)
                 {
-                    Poll(wait: true);
+                    PollAsync(wait: true).Wait();
                 }
                 return DataBacker;
             }
@@ -48,65 +48,61 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         public MiniProfiler Profiler { get; set; }
 
-        public override int Poll(bool force = false, bool wait = false)
+        public override async Task<int> PollAsync(bool force = false, bool wait = false)
         {
             int result;
             if (CacheKey.HasValue())
             {
-                result = CachePoll(force);
+                result = await CachePollAsync(force);
             }
             else
             {
                 if (force) _needsPoll = true;
-                result = Update();
+                result = await UpdateAsync();
                 // If we're in need of cache and don't have it, then wait on the polling thread
                 if (wait && IsPolling)
                 {
-                    lock (_pollLock)
-                    {
-                        Monitor.Wait(_pollLock, 5000);
-                    }
+                    await pollSemaphoreSlim.WaitAsync(5000);
                 }
             }
             return result;
         }
 
-        private int Update()
+        private async Task<int> UpdateAsync()
         {
             if (!_needsPoll && !IsStale) return 0;
-            
-            lock (_pollLock)
+
+            await pollSemaphoreSlim.WaitAsync();
+            if (_isPolling) return 0;
+            var sw = Stopwatch.StartNew();
+            _isPolling = true;
+            try
             {
-                if (_isPolling) return 0;
-                var sw = Stopwatch.StartNew();
-                _isPolling = true;
-                try
-                {
-                    Interlocked.Increment(ref _pollsTotal);
-                    UpdateCache(this);
-                    _needsPoll = false;
-                    if (DataBacker != null)
-                        Interlocked.Increment(ref _pollsSuccessful);
-                    return DataBacker != null ? 1 : 0;
-                }
-                catch (Exception e)
-                {
-                    var errorMessage = e.Message;
-                    if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
-                    SetFail(errorMessage);
-                    return 0;
-                }
-                finally
-                {
-                    _isPolling = false;
-                    sw.Stop();
-                    LastPollDuration = sw.Elapsed;
-                    Monitor.PulseAll(_pollLock);
-                }
+                Interlocked.Increment(ref _pollsTotal);
+                // TODO: Async
+                UpdateCache(this);
+                _needsPoll = false;
+                if (DataBacker != null)
+                    Interlocked.Increment(ref _pollsSuccessful);
+                return DataBacker != null ? 1 : 0;
+            }
+            catch (Exception e)
+            {
+                var errorMessage = e.Message;
+                if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
+                SetFail(errorMessage);
+                return 0;
+            }
+            finally
+            {
+                _isPolling = false;
+                sw.Stop();
+                LastPollDuration = sw.Elapsed;
+                pollSemaphoreSlim.Release();
             }
         }
-        
-        private int CachePoll(bool force)
+
+        private async Task<int> CachePollAsync(bool force)
         {
             // Cache is valid, nothing to do
             if (!force && !IsStale) return 0;
@@ -124,19 +120,25 @@ namespace StackExchange.Opserver.Data
             var lockKey = CacheKey;
             var cached = Current.LocalCache.Get<Cache<T>>(CacheKey);
             var loadLock = NullLocks.AddOrUpdate(lockKey, k => new object(), (k, old) => old);
+            var loadSemaphore = NullSlims.AddOrUpdate(lockKey, k => new SemaphoreSlim(1), (k, old) => old);
             if (cached == null)
             {
-                lock (loadLock)
+                await loadSemaphore.WaitAsync();
+                try
                 {
                     // See if we have the value cached
                     cached = Current.LocalCache.Get<Cache<T>>(CacheKey);
                     if (cached == null)
                     {
                         // No data, run this synchronously to get data
-                        var result = Update();
+                        var result = await UpdateAsync();
                         Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
                         return result;
                     }
+                }
+                finally
+                {
+                    loadSemaphore.Release();
                 }
             }
             // So we hit cache, copy stuff over
@@ -157,46 +159,50 @@ namespace StackExchange.Opserver.Data
                     Monitor.Exit(loadLock);
                 }
             }
+            // TODO: Address pile-up on background refreshes
             if (refreshLockSuccess)
             {
-                var task = new Task(() =>
+                new Task(async () =>
+                {
+                    await loadSemaphore.WaitAsync();
+                    try
                     {
-                        lock (loadLock)
-                        {
-                            try
-                            {
-                                Update();
-                                Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
-                            }
-                            finally
-                            {
-                                Current.LocalCache.Remove(CompeteKey);
-                            }
-                        }
-                    });
-                task.ContinueWith(t =>
+                        await UpdateAsync();
+                        Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
+                    }
+                    finally
                     {
-                        if (t.IsFaulted) Current.LogException(t.Exception);
-                    });
-                task.Start();
+                        Current.LocalCache.Remove(CompeteKey);
+                        loadSemaphore.Release();
+                    }
+                }).ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                    {
+                        Current.LogException(t.Exception);
+                    }
+                }).Start();
             }
             return 0;
         }
 
         private bool GotCompeteLock()
         {
-            if (!Current.LocalCache.SetNXSync(CompeteKey, DateTime.UtcNow))
+            while (true)
             {
-                var x = Current.LocalCache.Get<DateTime>(CompeteKey);
-                // Somebody abandoned the lock, clear it and try again
-                if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5))
+                if (!Current.LocalCache.SetNXSync(CompeteKey, DateTime.UtcNow))
                 {
-                    Current.LocalCache.Remove(CompeteKey);
-                    return GotCompeteLock();
+                    var x = Current.LocalCache.Get<DateTime>(CompeteKey);
+                    // Somebody abandoned the lock, clear it and try again
+                    if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5))
+                    {
+                        Current.LocalCache.Remove(CompeteKey);
+                        continue;
+                    }
+                    return false;
                 }
-                return false;
+                return true;
             }
-            return true;
         }
 
         public override void Purge()
@@ -217,7 +223,7 @@ namespace StackExchange.Opserver.Data
         }
     }
 
-    public class Cache : IMonitorStatus
+    public abstract class Cache : IMonitorStatus
     {
         /// <summary>
         /// Unique key for caching, only used for items that are on-demand, e.g. methods that have cache based on parameters
@@ -234,21 +240,18 @@ namespace StackExchange.Opserver.Data
         internal volatile bool _needsPoll = true;
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
-        public bool IsStale => NextPoll < DateTime.UtcNow;
-        public bool IsExpired => LastPoll.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow;
+        public bool IsStale => LastPoll?.AddSeconds(LastPollSuccessful
+            ? CacheForSeconds
+            : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)) < DateTime.UtcNow;
+        public bool IsExpired => LastPoll?.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow;
 
         protected long _pollsTotal, _pollsSuccessful;
         public long PollsTotal => _pollsTotal;
         public long PollsSuccessful => _pollsSuccessful;
         // TODO: Convert to nullable, handle everywhere
-        public DateTime LastPoll { get; internal set; }
+        public DateTime? LastPoll { get; internal set; }
 
-        public DateTime NextPoll =>
-            LastPoll.AddSeconds(LastPollSuccessful
-                ? CacheForSeconds
-                : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds));
-
-        public TimeSpan LastPollDuration { get; internal set; }
+        public TimeSpan? LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
         public bool LastPollSuccessful { get; internal set; }
         
@@ -270,7 +273,7 @@ namespace StackExchange.Opserver.Data
         {
             get
             {
-                if (LastPoll == DateTime.MinValue) return MonitorStatus.Unknown;
+                if (LastPoll == null ) return MonitorStatus.Unknown;
                 return LastPollSuccessful ? MonitorStatus.Good : MonitorStatus.Critical;
             }
         }
@@ -278,22 +281,20 @@ namespace StackExchange.Opserver.Data
         {
             get
             {
-                if (LastPoll == DateTime.MinValue) return "Never Polled";
-                return !LastPollSuccessful ? "Poll " + LastPoll.ToRelativeTime() + " failed: " + ErrorMessage : null;
+                if (LastPoll == null) return "Never Polled";
+                return !LastPollSuccessful ? "Poll " + LastPoll?.ToRelativeTime() + " failed: " + ErrorMessage : null;
             }
         }
 
         protected static readonly ConcurrentDictionary<string, object> NullLocks = new ConcurrentDictionary<string, object>();
+        protected static readonly ConcurrentDictionary<string, SemaphoreSlim> NullSlims = new ConcurrentDictionary<string, SemaphoreSlim>();
         
         public virtual bool ContainsData => false;
         public virtual object GetData() { return null; }
         public string ErrorMessage { get; internal set; }
         public virtual string InventoryDescription => null;
 
-        public virtual int Poll(bool force = false, bool wait = false)
-        {
-            return 0;
-        }
+        public abstract Task<int> PollAsync(bool force = false, bool wait = false);
 
         public virtual void Purge() { }
 
@@ -303,7 +304,8 @@ namespace StackExchange.Opserver.Data
         public string ParentMemberName { get; protected set; }
         public string SourceFilePath { get; protected set; }
         public int SourceLineNumber { get; protected set; }
-        public Cache([CallerMemberName] string memberName = "",
+
+        protected Cache([CallerMemberName] string memberName = "",
                      [CallerFilePath] string sourceFilePath = "",
                      [CallerLineNumber] int sourceLineNumber = 0)
         {

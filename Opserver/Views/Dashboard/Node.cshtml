@@ -72,13 +72,13 @@
                 <dl>
                     <dt>Last Boot</dt>
                     <dd>
-                        @if (s.LastBoot == DateTime.MinValue)
+                        @if (s.LastBoot == null)
                         {
                             <span class="text-warning">Unknown</span>
                         }
                         else
                         {
-                            @: @s.LastBoot.ToRelativeTimeSpan()
+                            @(s.LastBoot?.ToRelativeTimeSpan())
                             <span class="text-muted">(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
                         }
                     </dd>

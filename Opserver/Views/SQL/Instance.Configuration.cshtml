@@ -49,7 +49,7 @@
                     <td class="text-nowrap text-muted">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
                 </tr>
 }
-<h4 class="modal-title" title="Updated @configs.LastPoll.ToRelativeTime()">
+<h4 class="modal-title" title="Updated @(configs.LastPoll?.ToRelativeTime())">
     @Model.Name<span class="text-muted">:</span> Configuration
 </h4>
 @if (data?.Any() ?? false)

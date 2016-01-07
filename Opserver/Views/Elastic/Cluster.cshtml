@@ -1,5 +1,4 @@
-﻿@using System.Security.Cryptography
-@using StackExchange.Elastic
+﻿@using StackExchange.Elastic
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
@@ -44,7 +43,7 @@
                         <td>@n.Endpoint</td>
                         <td>@n.IsHealthy</td>
                         <td title="@(n.LastError?.Message)">@(n.LastError?.Message.TruncateWithEllipsis(60))</td>
-                        <td>@((n.LastPing ?? n.LastSeen).ToRelativeTimeSpan())</td>
+                        <td>@((n.LastPing ?? n.LastSeen)?.ToRelativeTimeSpan())</td>
                     </tr>
                 }
             </tbody>
@@ -97,11 +96,11 @@
                     var stats = n.Stats ?? new NodeStats();
                     var upTime = stats.JVM != null && stats.JVM.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
                     <tr class="@n.RowClass()">
-                        <td title="Up since @(upTime.HasValue ? upTime.ToZuluTime() + " (" + upTime.ToRelativeTime() + ")" : "(unknown)")">
+                        <td title="Up since @(upTime.HasValue ? upTime?.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
                             @n.IconSpan()
                             <a class="@n.TextClass()" href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                         </td>
-                        <td>@shards.Count().ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary) primary)</span></td>
+                        <td>@shards.Count().ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
                         @if (stats.Process?.CPU != null)
                         {
                             <td title="Process CPU: @stats.Process.CPU.Percent.ToComma()%

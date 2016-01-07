@@ -103,11 +103,11 @@ Used: @((db.LogSizeUsedMB.Value*1024*1024).ToSize())
                     }
                     @if (bkup?.LastBackupSizeBytes != null)
                     {
-                        <td data-val="@bkup.LastBackupStartDate.ToEpochTime().ToString()">@bkup.LastBackupStartDate.ToRelativeTimeSpan()</td>
-                        <td data-val="@bkup.LastFullBackupStartDate.ToEpochTime().ToString()" title="Backed up to: @bkup.LastFullBackupPhysicalDeviceName">
+                        <td data-val="@(bkup.LastBackupStartDate?.ToEpochTime().ToString())">@(bkup.LastBackupStartDate?.ToRelativeTimeSpan())</td>
+                        <td data-val="@(bkup.LastFullBackupStartDate?.ToEpochTime().ToString())" title="Backed up to: @bkup.LastFullBackupPhysicalDeviceName">
                             @if (bkup.LastFullBackupCompressedSizeBytes.HasValue)
                             {
-                                @bkup.LastFullBackupStartDate.ToRelativeTimeSpan()
+                                @(bkup.LastFullBackupStartDate?.ToRelativeTimeSpan())
                                 <span class="text-muted">(@(((double)bkup.LastFullBackupCompressedSizeBytes.Value).ToSize()))</span>
                             }
                         </td>

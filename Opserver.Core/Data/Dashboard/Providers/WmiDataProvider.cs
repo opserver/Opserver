@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
@@ -64,7 +65,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     memberName: node.Name + "-Dynamic"));
 
                 //Force update static host data, incuding os info, volumes, interfaces.
-                staticDataCache.Poll(true);
+                Task.WaitAll(staticDataCache.PollAsync(true));
 
                 nodesList.Add(node);
             }

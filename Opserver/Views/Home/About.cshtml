@@ -82,7 +82,7 @@
                         <label>Started</label>
                     </div>
                     <div class="value-block col-xs-4">
-                        @pollingInfo.LastPollAll.ToRelativeTimeSpan()
+                        @(pollingInfo.LastPollAll?.ToRelativeTimeSpan())
                         <label>Last Poll</label>
                     </div>
                     <div class="value-block col-xs-4">

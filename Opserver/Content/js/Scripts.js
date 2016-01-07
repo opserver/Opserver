@@ -172,7 +172,7 @@
             id: 'relativeDate',
             is: function() { return false; },
             format: function(s, table, cell) {
-                var date = $(cell).find('.relativetime').attr('title'); // e.g. 2011-03-31 01:57:59Z
+                var date = $(cell).find('.js-relative-time').attr('title'); // e.g. 2011-03-31 01:57:59Z
                 if (!date)
                     return 0;
 

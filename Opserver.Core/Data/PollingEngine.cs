@@ -137,20 +137,20 @@ namespace StackExchange.Opserver.Data
         private static void StartIndexLoop()
         {
             while (!_shuttingDown)
-            {
-                PollAll();
+            {   
+                PollAllAsync().Wait();
                 Thread.Sleep(1000);
             }
         }
         
-        public static void PollAll(bool force = false, bool sync = false)
+        public static async Task PollAllAsync(bool force = false)
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
-                Parallel.ForEach(AllPollNodes, i => i.Poll(force, sync));
+                await Task.WhenAll(AllPollNodes.Select(i => i.PollAsync(force)));
             }
             catch (Exception e)
             {
@@ -171,7 +171,7 @@ namespace StackExchange.Opserver.Data
         /// <param name="cacheGuid">If included, the specific cache to poll</param>
         /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
         /// <returns>Whether the poll was successful</returns>
-        public static bool Poll(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
+        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null)
         {
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
             if (node == null) return false;
@@ -179,10 +179,10 @@ namespace StackExchange.Opserver.Data
             if (cacheGuid.HasValue)
             {
                 var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
-                return cache != null && cache.Poll(true) > 0;
+                return cache != null && await cache.PollAsync(true) > 0;
             }
             // Polling an entire server
-            node.Poll(true, sync: sync);
+            await node.PollAsync(true);
             return true;
         }
         

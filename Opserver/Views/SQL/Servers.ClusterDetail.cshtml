@@ -45,10 +45,10 @@
                         }
                         else
                         {
-                            @db.LastSentTime.ToRelativeTimeSpan()
+                            @(db.LastSentTime?.ToRelativeTimeSpan())
                         }
                     </td>
-                    <td>@db.LastCommitTime.ToRelativeTimeSpan()</td>
+                    <td>@(db.LastCommitTime?.ToRelativeTimeSpan())</td>
                     <td>
                         @if (db.LogSendQueueSize.HasValue)
                         {
@@ -82,7 +82,7 @@
                             }
                         </span>
                     </td>
-                    <td>@db.LogSendETA.ToRelativeTimeSpan()</td>
+                    <td>@(db.LogSendETA?.ToRelativeTimeSpan())</td>
                 </tr>
                 if (db.MonitorStatus != MonitorStatus.Good)
                 {
@@ -119,7 +119,7 @@
                         }
                     </td>
                     <td>@(dbs.Sum(db => db.LogSendRateReal).GetValueOrDefault().ToComma()) <span class="text-muted">KBps</span></td>
-                    <td>@dbs.Max(db => db.LogSendETA).ToRelativeTimeSpan()</td>
+                    <td>@(dbs.Max(db => db.LogSendETA)?.ToRelativeTimeSpan())</td>
                 </tr>
             </tbody>
         }

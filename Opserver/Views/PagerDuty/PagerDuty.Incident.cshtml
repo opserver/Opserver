@@ -51,7 +51,7 @@
         <div class="value-block col-md-4">
             @if (i.LastChangedBy != null)
             {
-                @:@i.LastChangedBy.FullName - @i.LastChangedOn.ToRelativeTimeSpan()
+                @:@i.LastChangedBy.FullName - @(i.LastChangedOn?.ToRelativeTimeSpan())
             }
             else
             {
@@ -93,7 +93,7 @@
         @foreach (var l in Model.Logs)
         {
             <tr>
-                <td>@l.CreationTime.ToRelativeTimeSpan()</td>
+                <td>@(l.CreationTime?.ToRelativeTimeSpan())</td>
                 <td>@l.LogType.ToTitleCase()</td>
                 <td>@l.Detail.Message</td>
                 <td>@l.Note</td>

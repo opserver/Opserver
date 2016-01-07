@@ -86,9 +86,9 @@ namespace StackExchange.Opserver.Data
         public class CacheData
         {
             public string Name;
-            public DateTime LastPolled;
+            public DateTime? LastPolled;
             public DateTime? LastSuccess;
-            public double LastPollDurationMS;
+            public double? LastPollDurationMs;
             [JsonProperty(NullValueHandling = NullValueHandling.Ignore, DefaultValueHandling = DefaultValueHandling.Ignore)]
             public string LastPollError;
             public bool HasData;
@@ -100,9 +100,9 @@ namespace StackExchange.Opserver.Data
                 return new CacheData
                 {
                     Name = cache.ParentMemberName,
-                    LastPolled = cache.LastPoll,
+                    LastPolled = cache?.LastPoll,
                     LastSuccess = cache.LastSuccess,
-                    LastPollDurationMS = cache.LastPollDuration.TotalMilliseconds,
+                    LastPollDurationMs = cache.LastPollDuration?.TotalMilliseconds,
                     LastPollError = cache.ErrorMessage.HasValue() ? cache.ErrorMessage : null,
                     HasData = cache.HasData(),
                     Data = includeData ? cache.GetData() : null

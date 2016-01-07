@@ -5,7 +5,7 @@
     var nodes = c.Nodes.SafeData(true).Nodes;
 }
 <div class="item @c.TextClass()">
-    <div class="server-name" title="Last Updated: @c.LastPoll.ToRelativeTime()">
+    <div class="server-name" title="Last Updated: @(c.LastPoll?.ToRelativeTime())">
         @c.IconSpan()
         <a href="/elastic?node=@c.Name" class="node-name-link">@c.Name</a>
         <span class="category">@((nodes?.Count ?? 0).Pluralize("node"))</span>

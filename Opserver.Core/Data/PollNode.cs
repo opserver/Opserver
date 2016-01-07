@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Data
         protected Task _pollTask;
         public virtual string PollTaskStatus => _pollTask?.Status.ToString() ?? "Not running";
 
-        public virtual void Poll(bool force = false, bool sync = false)
+        public virtual async Task PollAsync(bool force = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
             {
@@ -137,10 +137,8 @@ namespace StackExchange.Opserver.Data
                 if (_isPolling) return;
                 _isPolling = true;
 
-                if (sync)
-                    InnerPoll(force);
-                else
-                    _pollTask = Task.Factory.StartNew(() => InnerPoll(force));
+                _pollTask = InnerPollAsync(force);
+                await _pollTask;
             }
         }
 
@@ -154,7 +152,7 @@ namespace StackExchange.Opserver.Data
         /// Called on a background thread for when this node is ACTUALLY polling
         /// This is not called if we're not due for a poll when the pass runs
         /// </summary>
-        private void InnerPoll(bool force = false)
+        private async Task InnerPollAsync(bool force = false)
         {
             var sw = Stopwatch.StartNew();
             try
@@ -167,11 +165,13 @@ namespace StackExchange.Opserver.Data
                 }
 
                 var polled = 0;
-                Parallel.ForEach(DataPollers, i =>
-                    {
-                        var pollerResult = i.Poll(force);
-                        Interlocked.Add(ref polled, pollerResult);
-                    });
+                var toPoll = DataPollers.Select(i => i.PollAsync(force));
+                var results = await Task.WhenAll(toPoll);
+                foreach (var r in results)
+                {
+                    Interlocked.Add(ref polled, r);
+                }
+                
                 LastPoll = DateTime.UtcNow;
                 Polled?.Invoke(this, new PollResultArgs {Polled = polled});
                 if (FirstPollRun != null)
