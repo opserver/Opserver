@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
 
-        public RailgunInstance(CloudFlareSettings.Railgun settings) : base(settings.Host + ":" + settings.Port)
+        public RailgunInstance(CloudFlareSettings.Railgun settings) : base(settings.Host + ":" + settings.Port.ToString())
         {
             Settings = settings;
         }
