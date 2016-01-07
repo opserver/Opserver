@@ -14,6 +14,10 @@
         refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
     }
 
+    function getRefresh(name) {
+        return registeredRefreshes[name];
+    }
+
     function runRefresh(name) {
         pauseRefresh(name);
         resumeRefresh(name);
@@ -305,8 +309,13 @@
                         key: key,
                         guid: $(this).data('id')
                     }
-                }).done(function() {
-                    window.location.reload(true);
+                }).done(function () {
+                    var name = $(this).closest('.js-refresh[data-name]').data('name');
+                    if (name) {
+                        Status.refresh.get('Dashboard').func(name);
+                    } else {
+                        window.location.reload(true);
+                    }
                 });
             }
             return false;
@@ -351,6 +360,7 @@
             register: registerRefresh,
             pause: pauseRefresh,
             resume: resumeRefresh,
+            get: getRefresh,
             run: runRefresh,
             registered: registeredRefreshes
         }
@@ -398,7 +408,7 @@ Status.Dashboard = (function () {
         });
 
         if (options.refresh) {
-            Status.refresh.register('Dashboard', function () {
+            Status.refresh.register('Dashboard', function (filter) {
                 return $.ajax(Status.Dashboard.options.refreshUrl || window.location.href, {
                     data: $.extend({}, Status.Dashboard.options.refreshData),
                     cache: false
@@ -408,6 +418,9 @@ Status.Dashboard = (function () {
                     $('.js-refresh[data-name]').each(function () {
                         var name = $(this).data('name'),
                             match = refreshGroups.filter('[data-name="' + name + '"]');
+                        if (filter && name !== filter) {
+                            return;
+                        }
                         if (!match.length) {
                             console.log('Unable to find: ' + name + '.');
                         } else {
@@ -418,7 +431,7 @@ Status.Dashboard = (function () {
                         applyFilter(Status.Dashboard.options.filter);
                     if (Status.Dashboard.options.afterRefresh)
                         Status.Dashboard.options.afterRefresh();
-                }).fail(function () {
+                }).continue(function () {
                     console.log('Failed to refresh', this, arguments);
                 });
             }, Status.Dashboard.options.refresh * 1000);
