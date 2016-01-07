@@ -8,7 +8,7 @@
 <h4 class="modal-title">
     Incident: @i.Number.ToString()
 </h4>
-<div class="incident-details">
+<div>
     @if (isSubjectOnly)
     {
         <div class="row small">
@@ -72,7 +72,7 @@
             @foreach (var s in i.SummaryData)
             {
                 <tr>
-                    <td class="bold">@s.Key</td>
+                    <td>@s.Key</td>
                     <td>@s.Value</td>
                 </tr>
             }

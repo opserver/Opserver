@@ -225,7 +225,7 @@ namespace StackExchange.Opserver
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
-            if (cache.LastPollStatus == FetchStatus.Fail)
+            if (!cache.LastPollSuccessful)
                 return MonitorStatus.Warning.Span(mini ? dateToUse.ToRelativeTime() : dateToUse.ToRelativeTimeMini(),
                     $"Last Poll: {lf.ToZuluTime()} ({lf.ToRelativeTime()})\nError: {cache.ErrorMessage}");
 

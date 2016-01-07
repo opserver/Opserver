@@ -15,100 +15,96 @@
 @section head {
 @if (Model.AutoRefresh)
 {
-    <script>Status.Dashboard.init({ refresh: 20 });</script>
+    <script>Status.Dashboard.init({ refresh: 10 });</script>
 }
 }
 <h5 class="page-header">
     Pollers
     <span class="pull-right">
         <a href="?refresh=@(Model.AutoRefresh ? "false" : "true")">@(Model.AutoRefresh ? "Disable" : "Enable") Auto Refresh</a>
-        <span class="text-muted"> | </span>
         <a href="#" class="js-reload-link">Reload</a>
-        <span class="text-muted"> | </span>
         <a href="#" class="js-poll-all">Poll All</a>
     </span>
 </h5>
-<div class="js-refresh" data-name="caches">
-    <table class="table table-hover table-responsive text-nowrap table-super-condensed">
-        <thead>
-            <tr>
-                <th>Type</th>
-                <th>Name</th>
-                <th>Summary</th>
-                <th>Last</th>
-                <th>Thread</th>
-                <th>Action</th>
+<table class="table table-hover table-responsive text-nowrap table-super-condensed">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Name</th>
+            <th>Summary</th>
+            <th>Last</th>
+            <th>Thread</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    @foreach (var pn in pollerNodes)
+    {
+        var pnType = pn.GetType();
+        var pollStatus = pn.PollTaskStatus;
+        var isIdle = pollStatus == "Not running";
+        <tbody class="js-refresh" data-name="Node-@pn.NodeType-@pn.UniqueKey">
+            <tr class="cache-item active @pn.RowClass()">
+                <th title="@pnType.FullName">@pn.IconSpan() @pnType.Name</th>
+                <th>@pn.UniqueKey</th>
+                <th>@pn</th>
+                <th>@pn.LastPoll.ToRelativeTimeSpanMini() <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
+                <th>
+                    @if (isIdle)
+                    {
+                        <span class="text-muted">(idle)</span>
+                    }
+                    else
+                    {
+                        <strong class="text-success">@pollStatus</strong>
+                    }
+                </th>
+                <th class="actions">
+                    <a href="/json/@pn.NodeType/@pn.UniqueKey">JSON</a>
+                    <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey">Poll All</a>
+                </th>
             </tr>
-        </thead>
-        <tbody>
-            @foreach (var pn in pollerNodes)
+            @foreach (var p in pn.DataPollers.OrderByWorst().ThenByDescending(p => p.IsPolling).ThenBy(p => p.ParentMemberName))
             {
-                var pnType = pn.GetType();
-                var pollStatus = pn.PollTaskStatus;
-                var isIdle = pollStatus == "Not running";
-                <tr class="cache-item active @pn.RowClass()">
-                    <th title="@pnType.FullName">@pn.IconSpan() @pnType.Name</th>
-                    <th>@pn.UniqueKey</th>
-                    <th>@pn</th>
-                    <th>@pn.LastPoll.ToRelativeTimeSpanMini() <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
-                    <th>
-                        @if (isIdle)
-                        {
-                            <span class="text-muted">(idle)</span>
-                        }
-                        else
-                        {
-                            <strong class="text-success">@pollStatus</strong>
-                        }
-                    </th>
-                    <th class="actions">
-                        <a href="/json/@pn.NodeType/@pn.UniqueKey">JSON</a>
-                        <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey">Poll All</a>
-                    </th>
-                </tr>
-                foreach (var p in pn.DataPollers.OrderByWorst().ThenByDescending(p => p.IsPolling).ThenBy(p => p.ParentMemberName))
-                {
-                    <tr class="cache-sub-item @p.RowClass()@(p.IsPolling ? " success" : null)">
-                        <td title="Type: @pn.NodeType
+                <tr class="cache-sub-item @p.RowClass()@(p.IsPolling ? " success" : null)">
+                    <td title="Type: @pn.NodeType
 Key: @pn.UniqueKey
 Property: @p.ParentMemberName
 Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
-                            <span title="@p.ErrorMessage">@p.IconSpan()</span> @p.Type.ReadableTypeDescription()
-                        </td>
-                        <td title="@p.ParentMemberName
+                        <span title="@p.ErrorMessage">@p.IconSpan()</span> @p.Type.ReadableTypeDescription()
+                    </td>
+                    <td title="@p.ParentMemberName
 @p.SourceFilePath @("@") line @p.SourceLineNumber.ToString()">@p.ParentMemberName</td>
-                        <td>
-                            @(p.InventoryDescription ?? "(empty)")
-                            @if (p.CacheKey.HasValue())
-                            {
-                                @:CacheKey: @p.CacheKey
-                            }
-                            <small>
-                                @if (!p.ContainsData){<span class="text-danger"> (No Data)</span>}
-                                @if (p.IsStale){<span class="text-warning"> (Stale)</span>}
-                                @if (p.CacheStaleForSeconds > 0 && p.IsExpired){<span class="text-danger"> (Expired)</span>}
-                                (@p.PollsTotal.Pluralize("poll"): @p.PollsSuccessful.ToComma() successful)
-                            </small>
-                        </td>
-                        <td>
-                            @if (p.LastPoll == DateTime.MinValue)
-                            {
-                                <span class="critical light">Never</span>
-                            }
-                            else
-                            {
-                                @:@p.ToPollSpan() <span class="text-muted small">(@p.LastPollDuration.ToTimeStringMini())</span>
-                            }
-                        </td>
-                        <td class="@(p.IsPolling ? "text-success" : "text-muted small")">(@(p.IsPolling ? "active" : "idle"))</td>
-                        <td class="actions">
-                            <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
-                            <a href="/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
-                            <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey" data-id="@p.UniqueId.ToString()">Poll</a>
-                        </td>
-                    </tr>
-                }
+                    <td>
+                        @(p.InventoryDescription ?? "(empty)")
+                        @if (p.CacheKey.HasValue())
+                        {
+                            @:CacheKey: @p.CacheKey
+                        }
+                        <small>
+                            @if (!p.ContainsData){<span class="text-danger"> (No Data)</span>}
+                            @if (p.IsStale){<span class="text-warning"> (Stale)</span>}
+                            @if (p.CacheStaleForSeconds > 0 && p.IsExpired){<span class="text-danger"> (Expired)</span>}
+                            (@p.PollsTotal.Pluralize("poll"): @p.PollsSuccessful.ToComma() successful)
+                        </small>
+                    </td>
+                    <td>
+                        @if (p.LastPoll == DateTime.MinValue)
+                        {
+                            <span class="critical light">Never</span>
+                        }
+                        else
+                        {
+                            @:@p.ToPollSpan() <span class="text-muted small">(@p.LastPollDuration.ToTimeStringMini())</span>
+                        }
+                    </td>
+                    <td class="@(p.IsPolling ? "text-success" : "text-muted small")">(@(p.IsPolling ? "active" : "idle"))</td>
+                    <td class="actions">
+                        <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
+                        <a href="/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
+                        <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey" data-id="@p.UniqueId.ToString()">Poll</a>
+                    </td>
+                </tr>
             }
         </tbody>
-    </table>
-</div>
+    }
+</table>

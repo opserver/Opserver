@@ -81,7 +81,7 @@ namespace StackExchange.Opserver.Data.Redis
                 yield break;
             }
             if (Role == RedisInfo.RedisInstanceRole.Unknown) yield return MonitorStatus.Critical;
-            if (Info.LastPollStatus == FetchStatus.Fail) yield return MonitorStatus.Warning;
+            if (!Info.LastPollSuccessful) yield return MonitorStatus.Warning;
             if (Replication == null)
             {
                 yield return MonitorStatus.Unknown;

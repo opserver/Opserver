@@ -11,7 +11,7 @@
 @section head {
     <script>
         $(function() {
-            Status.Dashboard.init({ refresh: @(Model.Refresh ? (Model.View == DashboardModel.Views.Shards ? 60 : 5) : 0) });
+            Status.Dashboard.init({ refresh: @((Model.Refresh ? (Model.View == DashboardModel.Views.Shards ? 60 : 5) : 0).ToString()) });
             @if (Model.Current != null)
             {
             @:Status.Elastic.init({ cluster: '@Model.Current.ClusterName', node: '@Model.Current.NodeName' });

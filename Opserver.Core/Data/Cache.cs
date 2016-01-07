@@ -84,9 +84,6 @@ namespace StackExchange.Opserver.Data
                 {
                     Interlocked.Increment(ref _pollsTotal);
                     UpdateCache(this);
-                    LastPollStatus = LastSuccess.HasValue && LastSuccess == LastPoll
-                        ? FetchStatus.Success
-                        : FetchStatus.Fail;
                     _needsPoll = false;
                     if (DataBacker != null)
                         Interlocked.Increment(ref _pollsSuccessful);
@@ -94,9 +91,9 @@ namespace StackExchange.Opserver.Data
                 }
                 catch (Exception e)
                 {
-                    ErrorMessage = e.Message;
-                    if (e.InnerException != null) ErrorMessage += "\n" + e.InnerException.Message;
-                    LastPollStatus = FetchStatus.Fail;
+                    var errorMessage = e.Message;
+                    if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
+                    SetFail(errorMessage);
                     return 0;
                 }
                 finally
@@ -201,11 +198,6 @@ namespace StackExchange.Opserver.Data
             }
             return true;
         }
-        
-        public override void PollBackground()
-        {
-            Task.Run(() => Poll());
-        }
 
         public override void Purge()
         {
@@ -252,20 +244,34 @@ namespace StackExchange.Opserver.Data
         public DateTime LastPoll { get; internal set; }
 
         public DateTime NextPoll =>
-            LastPoll.AddSeconds(LastPollStatus == FetchStatus.Fail
-                ? CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)
-                : CacheForSeconds);
+            LastPoll.AddSeconds(LastPollSuccessful
+                ? CacheForSeconds
+                : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds));
 
         public TimeSpan LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
-        public FetchStatus LastPollStatus { get; set; }
-        public bool LastPollSuccessful => LastPollStatus == FetchStatus.Success;
+        public bool LastPollSuccessful { get; internal set; }
+        
+        internal void SetSuccess()
+        {
+            LastSuccess = LastPoll = DateTime.UtcNow;
+            LastPollSuccessful = true;
+            ErrorMessage = "";
+        }
+
+        internal void SetFail(string errorMessage)
+        {
+            LastPoll = DateTime.UtcNow;
+            LastPollSuccessful = false;
+            ErrorMessage = errorMessage;
+        }
+
         public MonitorStatus MonitorStatus
         {
             get
             {
                 if (LastPoll == DateTime.MinValue) return MonitorStatus.Unknown;
-                return LastPollStatus == FetchStatus.Fail ? MonitorStatus.Critical : MonitorStatus.Good;
+                return LastPollSuccessful ? MonitorStatus.Good : MonitorStatus.Critical;
             }
         }
         public string MonitorStatusReason
@@ -273,7 +279,7 @@ namespace StackExchange.Opserver.Data
             get
             {
                 if (LastPoll == DateTime.MinValue) return "Never Polled";
-                return LastPollStatus == FetchStatus.Fail ? "Poll " + LastPoll.ToRelativeTime() + " failed: " + ErrorMessage : null;
+                return !LastPollSuccessful ? "Poll " + LastPoll.ToRelativeTime() + " failed: " + ErrorMessage : null;
             }
         }
 
@@ -288,8 +294,6 @@ namespace StackExchange.Opserver.Data
         {
             return 0;
         }
-
-        public virtual void PollBackground() { }
 
         public virtual void Purge() { }
 

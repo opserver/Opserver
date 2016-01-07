@@ -6,7 +6,7 @@
     var s = Model.Instance;
     var tables = s.GetTableInfo(Model.Database);
 }
-@if (tables.LastPollStatus == FetchStatus.Fail || tables.Data == null)
+@if (!tables.LastPollSuccessful || tables.Data == null)
 {
     <div class="alert alert-warning">
         <h5>There was an error fetching table info from @s.Name for @Model.Database</h5>
@@ -29,10 +29,10 @@
             {
                 <tr data-id="@t.Id.ToString()" data-table="@(t.SchemaName).@(t.TableName)" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
                     <td>
-                        <span class="note">@(t.SchemaName).</span><span>@t.TableName</span>
+                        <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
                         @if (t.TableType == TableTypes.Heap)
                         {
-                            <span class="note"> (Heap)</span>
+                            <span class="text-muted"> (Heap)</span>
                         }
                     </td>
                     <td data-val="@t.RowCount.ToString()">@t.RowCount.ToComma()</td>
@@ -55,7 +55,7 @@
             @if (tables.Data.Any())
             {
                 <tr class="total-row">
-                    <td><b>Total</b> <span class="note">(@tables.Data.Count.Pluralize("table"))</span></td>
+                    <td><b>Total</b> <span class="text-muted">(@tables.Data.Count.Pluralize("table"))</span></td>
                     <td>@(tables.Data.Sum(t => t.RowCount).ToComma())</td>
                     <td>@(tables.Data.Sum(t => t.IndexCount).ToComma())</td>
                     <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB) * 1024).ToSize().ToNoteIfNA())</td>

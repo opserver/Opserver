@@ -162,6 +162,7 @@
     </Compile>
     <Compile Include="Data\Elastic\ElasticDataObject.cs" />
     <Compile Include="Data\Elastic\ElasticIssues.cs" />
+    <Compile Include="Data\Elastic\ShardStates.cs" />
     <Compile Include="Data\Exceptions\ExceptionSorts.cs" />
     <Compile Include="Data\HAProxy\HAProxyGroup.Cache.cs">
       <DependentUpon>HAProxyGroup.cs</DependentUpon>
@@ -322,7 +323,6 @@
     <Compile Include="Data\Exceptions\Application.cs" />
     <Compile Include="Data\Exceptions\ExceptionStore.cs" />
     <Compile Include="Data\Exceptions\ExceptionStores.cs" />
-    <Compile Include="Data\FetchInfo.cs" />
     <Compile Include="Data\HAProxy\Backend.cs" />
     <Compile Include="Data\HAProxy\Frontend.cs" />
     <Compile Include="Data\HAProxy\HAProxyAdmin.cs" />

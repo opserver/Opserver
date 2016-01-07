@@ -40,11 +40,11 @@
     @dbs.GetWorstStatus().IconSpan() @(dbs?.Count.Pluralize("Database") ?? "No Databases") on @i.Name:
     @Helpers.PollNow(i, dbCache)
 </h5>
-@if (dbCache.LastPollStatus == FetchStatus.Fail)
+@if (!dbCache.LastPollSuccessful)
 {
     <div class="alert alert-danger">
         <h5>Error</h5>
-        @if (dbCache.LastPollStatus == FetchStatus.Fail)
+        @if (!dbCache.LastPollSuccessful)
         {
             <p class="error-stack">There was an error fetching server status from @i.Name: @dbCache.ErrorMessage</p>
         }

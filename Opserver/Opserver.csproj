@@ -404,6 +404,9 @@
     <Content Include="Views\Redis\Instance.Config.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Redis\Instance.Info.cshtml">
+      <DependentUpon>Instance.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Redis\Instance.SlowLog.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Content>
@@ -613,12 +616,7 @@
     <Content Include="Views\Hub\Index.cshtml" />
     <Content Include="Views\Redis\Dashboard.cshtml" />
     <Content Include="Views\Redis\Dashboard.Instances.cshtml" />
-    <Content Include="Views\Redis\Server.Info.cshtml" />
-    <Content Include="Views\Redis\Server.Clients.cshtml" />
-    <Content Include="Views\Redis\Server.Clients.ByIP.cshtml" />
-    <Content Include="Views\Redis\Server.cshtml" />
-    <Content Include="Views\Redis\Server.Analysis.Memory.cshtml" />
-    <Content Include="Views\Redis\Server.Clients.ByName.cshtml" />
+    <Content Include="Views\Redis\Instance.Analysis.Memory.cshtml" />
     <Content Include="Views\SQL\Databases.cshtml" />
     <Content Include="Views\SQL\Instance.Connections.cshtml">
       <DependentUpon>Instance.cshtml</DependentUpon>

@@ -221,8 +221,7 @@ namespace StackExchange.Opserver.Data
                         {
                             cache.Data = await getData();
                         }
-                        cache.LastSuccess = cache.LastPoll = DateTime.UtcNow;
-                        cache.ErrorMessage = "";
+                        cache.SetSuccess();
                         PollFailsInaRow = 0;
                     }
                     catch (Exception e)
@@ -239,14 +238,13 @@ namespace StackExchange.Opserver.Data
                             addExceptionData?.Invoke(e);
                             Current.LogException(e);
                         }
-                        cache.LastPoll = DateTime.UtcNow;
                         PollFailsInaRow++;
-                        cache.ErrorMessage = "Unable to fetch from " + NodeType + ": " + e.Message;
+                        var errorMessage = "Unable to fetch from " + NodeType + ": " + e.Message;
 #if DEBUG
-                        cache.ErrorMessage += " @ " + e.StackTrace;
+                        errorMessage += " @ " + e.StackTrace;
 #endif
-
-                        if (e.InnerException != null) cache.ErrorMessage += "\n" + e.InnerException.Message;
+                        if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
+                        cache.SetFail(errorMessage);
                     }
                     CacheItemFetched?.Invoke(this, EventArgs.Empty);
                     CachedMonitorStatus = null;

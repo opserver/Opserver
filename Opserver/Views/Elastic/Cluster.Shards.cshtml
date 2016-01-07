@@ -34,7 +34,7 @@
     <h5 class="page-header">
         @status.IconSpan() @c.HealthStatus.Data.Name: @shards.Count.Pluralize("Shard") @(Model.WarningsOnly ? "in trouble" : "") on @c.HealthStatus.Data.TotalNodeCount.Pluralize("node")
     </h5>
-    <table class="cluster-dashboard striped-dashboard">
+    <table class="table table-striped table-responsive table-middle table-super-condensed table-hover table-actions">
         <tbody>
             <tr>
                 <th></th>
@@ -62,20 +62,20 @@
                     <td>@s.GetMonitorStatus().IconSpan()</td>
                     <td>@c.GetIndexAliasedName(s.Index)</td>
                     <td>@s.GetPrettyState()</td>
-                    <td>@s.Shard</td>
-                    <td>@s.Primary</td>
+                    <td>@s.Shard.ToString()</td>
+                    <td>@(s.Primary ? "Yes" : "No")</td>
                     <td>@GetNodeName(s.Node, nodes)</td>
                     <td>@GetNodeName(s.RelocatingNode, nodes)</td>
                     @if (isAdmin)
                     {
-                        <td>
-                            @switch (s.GetPrettyState())
+                        <td class="actions">
+                            @switch (s.State)
                             {
-                                case "Unassigned":
-                                    <a href="/elastic/reroute/assign?index=@s.Index.UrlEncode()&shard=@s.Shard" class="background-post">Assign</a>
+                                case ShardStates.Unassigned:
+                                    <a href="/elastic/reroute/assign?index=@s.Index.UrlEncode()&shard=@s.Shard.ToString()">Assign</a>
                                     break;
-                                case "Initializing":
-                                <a href="/elastic/reroute/cancel?node=@s.Node.UrlEncode()&index=@s.Index.UrlEncode()&shard=@s.Shard" class="background-post">Cancel</a>
+                                case ShardStates.Initializing:
+                                    <a href="/elastic/reroute/cancel?node=@s.Node.UrlEncode()&index=@s.Index.UrlEncode()&shard=@s.Shard.ToString()">Cancel</a>
                                     break;
                             }
                         </td>
@@ -84,7 +84,11 @@
             }
             @if (shards.Count > maxTroubleShardsToShow)
             {
-                <tr><td colspan="@(isAdmin ? 8 : 7)" style="text-align: center">More than @(maxTroubleShardsToShow.ToComma()) in trouble.</td></tr>
+                <tr>
+                    <td colspan="@(isAdmin ? "8" : "7")" class="text-center">
+                        More than @(maxTroubleShardsToShow.ToComma()) in trouble.
+                    </td>
+                </tr>
             }
         </tbody>
     </table>

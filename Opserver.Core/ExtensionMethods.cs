@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Elastic;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
@@ -620,14 +621,6 @@ namespace StackExchange.Opserver
         {
             var config = BuildStatus.GetConfig(b.BuildTypeId);
             return config != null ? config.ProjectName : "Unknown build config";
-        }
-
-        public static class ShardStates
-        {
-            public const string Unassigned = "UNASSIGNED";
-            public const string Initializing = "INITIALIZING";
-            public const string Started = "STARTED";
-            public const string Relocating = "RELOCATING";
         }
 
         public static MonitorStatus GetMonitorStatus(this ShardState shard)

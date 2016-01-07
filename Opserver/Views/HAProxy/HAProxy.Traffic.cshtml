@@ -145,16 +145,16 @@
                         <div>
                             <table class="nvp">
                                 <tr>
-                                    <td class="name">Hits:</td>
-                                    <td class="value">@(r.Hits?.ToString("n0"))</td>
+                                    <td class="text-muted">Hits:</td>
+                                    <td>@(r.Hits?.ToString("n0"))</td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg Total (Last 24):</td>
-                                    <td class="value">@(r.AvgTr24Hrs?.ToString("n0")) ms</td>
+                                    <td class="text-muted">Avg Total (Last 24):</td>
+                                    <td>@(r.AvgTr24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg Breakdown (Last 24):</td>
-                                    <td class="node">
+                                    <td class="text-muted">Avg Breakdown (Last 24):</td>
+                                    <td>
                                         @r.AvgAspNetDurationMs24Hrs
                                         @r.AvgSqlDurationMs24Hrs
                                         @r.AvgRedisDurationMs24Hrs
@@ -164,8 +164,8 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg SQL (Last 24):</td>
-                                    <td class="value">@(r.AvgSqlDurationMs24Hrs?.ToString("n0")) ms</td>
+                                    <td class="text-muted">Avg SQL (Last 24):</td>
+                                    <td>@(r.AvgSqlDurationMs24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                             </table>
                         </div>                

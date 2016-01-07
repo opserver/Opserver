@@ -8,7 +8,7 @@
 }
 @section head {
     <script>
-        $(function () { Status.Exceptions.init({ log: '@log', id: '@e.GUID', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: true }); });
+        $(function () { Status.Exceptions.init({ log: '@log', id: '@e.GUID.ToString()', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: true }); });
     </script>
 }
 <h5 class="page-header">

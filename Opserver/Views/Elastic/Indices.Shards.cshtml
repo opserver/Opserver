@@ -11,7 +11,7 @@
 {
     if (node.IsNullOrEmpty())
     {
-        <span class="unknown">n/a</span>
+        <span class="text-muted">n/a</span>
         return;
     }
     ElasticCluster.NodeInfoWrap result;
@@ -27,7 +27,7 @@
         }
         return;
     }
-    <span class="unknown">@node</span>
+    <span class="text-muted">@node</span>
 }
 @try
 {
@@ -57,8 +57,8 @@
                         <td>@s.GetMonitorStatus().IconSpan()</td>
                         <td>@c.GetIndexAliasedName(s.Index)</td>
                         <td>@s.GetPrettyState()</td>
-                        <td>@s.Shard</td>
-                        <td>@s.Primary</td>
+                        <td>@s.Shard.ToString()</td>
+                        <td>@(s.Primary ? "Yes" : "No")</td>
                         <td>@GetNodeName(s.Node, nodes)</td>
                         <td>@GetNodeName(s.RelocatingNode, nodes)</td>
                     </tr>

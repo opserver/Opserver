@@ -1,7 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.PagerDuty
 @model OnCallAssignment
 <tr class="@Model.RowClass()" title="@Model.MonitorStatusReason">
-    <td class="name">@Model.Person.FullName</td>
+    <td>@Model.Person.FullName</td>
     <td>
         @if (Model.IsPrimary)
         {

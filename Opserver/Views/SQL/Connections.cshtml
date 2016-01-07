@@ -12,7 +12,7 @@
     @(connections.Data?.Count.Pluralize("Active connection") ?? "Unknown connections") on @i.Name:
     @Helpers.PollNow(i)
 </h5>
-@if (connections.LastPollStatus == FetchStatus.Fail)
+@if (!connections.LastPollSuccessful)
 {
     <div class="alert alert-danger">
         <h5>There was an error fetching server status from @i.Name:</h5>

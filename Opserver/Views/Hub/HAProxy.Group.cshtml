@@ -3,7 +3,7 @@
 @{
     var g = Model;
     var proxies = g.GetProxies();
-    var downInstances = g.Instances.Where(i => i.Proxies.LastPollStatus == FetchStatus.Fail);
+    var downInstances = g.Instances.Where(i => !i.Proxies.LastPollSuccessful);
 }
 <div class="item haproxy-item @g.TextClass()">
     <div class="server-name" title="Last Updated: @g.Instances.Max(i => i.LastPoll).ToRelativeTime()">
@@ -29,7 +29,7 @@
                         gr.Select(p =>
                             {
                                 var down = p.Servers.Where(s => s.ProxyServerStatus.IsBad());
-                                var summary = p.Instance.Name + ": " + p.Servers.Count;
+                                var summary = p.Instance.Name + ": " + p.Servers.Count.ToString();
                                 return down.Any()
                                            ? summary + ", " + MonitorStatus.Critical.Span(down.Count().ToComma() + " down")
                                            : summary;

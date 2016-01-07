@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("about/caches"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult AboutCaches(string filter, bool refresh = false)
+        public ActionResult AboutCaches(string filter, bool refresh = true)
         {
             var vd = new AboutModel
                 {

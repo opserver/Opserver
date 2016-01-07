@@ -5,26 +5,24 @@
                           .OrderBy(g => g.Key.Port)
                           .ThenBy(g => g.Key.Name);
 }
-<div>
-    <h5 class="page-header">Please select an Redis instance.</h5>
-    <div class="row">
-        @foreach (var g in groups)
-        {
-            <div class="col-md-3">
-                <div class="panel panel-default">
-                    <div class="panel-heading">@g.Key.Name - @g.Key.Port.ToString()</div>
-                    <div class="panel-body small list-group">
-                        @foreach (var i in g)
-                        {
-                            var info = i.Info.SafeData(true);
-                            <a class="list-group-item" href="?node=@i.HostAndPort">
-                                @i.IconSpan() @i.HostAndPort
-                                <span class="badge">@(info.Server.Version.Major > 0 ? info.Server.Version.ToString() : null)</span>
-                            </a>
-                        }
-                    </div>
+<h5 class="page-header">Please select a Redis instance.</h5>
+<div class="row">
+    @foreach (var g in groups)
+    {
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">@g.Key.Name - @g.Key.Port.ToString()</div>
+                <div class="panel-body small list-group">
+                    @foreach (var i in g)
+                    {
+                        var info = i.Info.SafeData(true);
+                        <a class="list-group-item" href="?node=@i.HostAndPort">
+                            @i.IconSpan() @i.HostAndPort
+                            <span class="badge">@(info.Server.Version.Major > 0 ? info.Server.Version.ToString() : null)</span>
+                        </a>
+                    }
                 </div>
             </div>
-        }
-    </div>
+        </div>
+    }
 </div>

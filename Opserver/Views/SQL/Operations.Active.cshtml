@@ -25,7 +25,7 @@ else
         activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
     }
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
-    if (activeOps.LastPollStatus == FetchStatus.Fail)
+    if (!activeOps.LastPollSuccessful)
     {
         <h5>Unknown active queries on @i.Name</h5>
         <div class="alert alert-danger">
