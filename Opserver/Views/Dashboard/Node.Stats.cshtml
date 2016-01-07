@@ -2,7 +2,13 @@
 <div class="row">
     <div class="col-md-6">
         <div class="panel panel-default">
-            <div class="panel-heading">CPU Utilization</div>
+            <div class="panel-heading">
+                CPU Utilization
+                @if (Model.IsRealTimePollable)
+                {
+                    <span class="text-muted">(<a href="#" class="js-realtime-cpu">realtime</a>)</span>
+                }
+            </div>
             <div class="panel-body">
                 <div class="history-graph" id="cpu-container"></div>
             </div>
