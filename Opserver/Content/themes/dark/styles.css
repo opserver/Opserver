@@ -2530,7 +2530,7 @@ input[type="checkbox"]:focus {
 }
 output {
   display: block;
-  padding-top: 9px;
+  padding-top: 19px;
   font-size: 15px;
   line-height: 1.3;
   color: #2B3E50;
@@ -2538,8 +2538,8 @@ output {
 .form-control {
   display: block;
   width: 100%;
-  height: 37px;
-  padding: 8px 12px;
+  height: 57px;
+  padding: 18px 12px;
   font-size: 15px;
   line-height: 1.3;
   color: #2B3E50;
@@ -2590,7 +2590,7 @@ input[type="search"] {
   input[type="time"].form-control,
   input[type="datetime-local"].form-control,
   input[type="month"].form-control {
-    line-height: 37px;
+    line-height: 57px;
   }
   input[type="date"].input-sm,
   input[type="time"].input-sm,
@@ -2679,8 +2679,8 @@ fieldset[disabled] .checkbox label {
   cursor: not-allowed;
 }
 .form-control-static {
-  padding-top: 9px;
-  padding-bottom: 9px;
+  padding-top: 19px;
+  padding-bottom: 19px;
   margin-bottom: 0;
   min-height: 34px;
 }
@@ -2767,7 +2767,7 @@ select[multiple].input-lg {
   position: relative;
 }
 .has-feedback .form-control {
-  padding-right: 46.25px;
+  padding-right: 71.25px;
 }
 .form-control-feedback {
   position: absolute;
@@ -2775,9 +2775,9 @@ select[multiple].input-lg {
   right: 0;
   z-index: 2;
   display: block;
-  width: 37px;
-  height: 37px;
-  line-height: 37px;
+  width: 57px;
+  height: 57px;
+  line-height: 57px;
   text-align: center;
   pointer-events: none;
 }
@@ -2953,11 +2953,11 @@ select[multiple].input-lg {
 .form-horizontal .checkbox-inline {
   margin-top: 0;
   margin-bottom: 0;
-  padding-top: 9px;
+  padding-top: 19px;
 }
 .form-horizontal .radio,
 .form-horizontal .checkbox {
-  min-height: 28px;
+  min-height: 38px;
 }
 .form-horizontal .form-group {
   margin-left: -5px;
@@ -2967,7 +2967,7 @@ select[multiple].input-lg {
   .form-horizontal .control-label {
     text-align: right;
     margin-bottom: 0;
-    padding-top: 9px;
+    padding-top: 19px;
   }
 }
 .form-horizontal .has-feedback .form-control-feedback {
@@ -2996,7 +2996,7 @@ select[multiple].input-lg {
   background-image: none;
   border: 1px solid transparent;
   white-space: nowrap;
-  padding: 8px 12px;
+  padding: 18px 12px;
   font-size: 15px;
   line-height: 1.3;
   border-radius: 0;
@@ -3925,7 +3925,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   vertical-align: middle;
 }
 .input-group-addon {
-  padding: 8px 12px;
+  padding: 18px 12px;
   font-size: 15px;
   font-weight: normal;
   line-height: 1;
@@ -4398,8 +4398,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   border-bottom: 1px solid transparent;
   -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.1);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 1px 0 rgba(255, 255, 255, 0.1);
-  margin-top: 1.5px;
-  margin-bottom: 1.5px;
+  margin-top: -8.5px;
+  margin-bottom: -8.5px;
 }
 @media (min-width: 768px) {
   .navbar-form .form-group {
@@ -4484,8 +4484,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   border-bottom-left-radius: 0;
 }
 .navbar-btn {
-  margin-top: 1.5px;
-  margin-bottom: 1.5px;
+  margin-top: -8.5px;
+  margin-bottom: -8.5px;
 }
 .navbar-btn.btn-sm {
   margin-top: 5px;
@@ -4747,7 +4747,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > li > span {
   position: relative;
   float: left;
-  padding: 8px 12px;
+  padding: 18px 12px;
   line-height: 1.3;
   text-decoration: none;
   color: #DF691A;
@@ -6825,7 +6825,7 @@ button.close {
   background-color: #c85e17;
 }
 .btn {
-  padding: 8px 12px;
+  padding: 18px 12px;
 }
 .btn-lg {
   padding: 16px 20px;
@@ -7770,10 +7770,6 @@ li.L9 {
 .page-header + .badge-link-list {
   margin-top: 0;
 }
-.table-exceptions > tbody > tr > td {
-  font-size: 11px;
-  padding: 4px 2px;
-}
 .table-exceptions > tbody > tr td:nth-child(1),
 .table-exceptions > tbody > tr td:nth-child(2),
 .table-exceptions > tbody > tr td:nth-child(6),
@@ -8134,6 +8130,7 @@ li.L9 {
   display: table-cell;
   padding-left: 15px;
 }
+/* Panel Layout Pages */
 .navbar {
   font-size: 12px;
   min-height: 34px;
@@ -8317,6 +8314,7 @@ h6.page-header {
   min-width: 50px;
   width: 100%;
   height: 20px;
+  max-width: 300px;
 }
 .modal-loader {
   min-height: 200px;
@@ -8383,14 +8381,44 @@ h6.page-header {
 .table-row-actions tbody > tr {
   cursor: pointer;
 }
+.row.inverse-panels {
+  background-color: #EBEBEB;
+  padding-top: 18px;
+}
+.row.inverse-panels .panel {
+  border: none;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+.row.inverse-panels .panel .panel-heading {
+  background: white;
+  font-weight: bold;
+  font-size: 120%;
+}
+.row.inverse-panels .panel .panel-body {
+  background: white;
+}
 .panel {
   margin-bottom: 8px;
+  -webkit-box-shadow: none;
+  box-shadow: none;
 }
 .panel .panel-heading {
-  padding: 3px 7px;
+  padding: 5px 9px;
 }
 .panel.panel-default > .panel-heading {
   border: none;
+}
+.panel .value-block {
+  font-size: 14px;
+}
+.panel .value-block label {
+  margin-top: 5px;
+  margin-bottom: 0;
+}
+.panel .value-block .small {
+  font-size: 11px;
+  color: #555555;
 }
 .panel-condensed .panel-body {
   padding: 2px;
@@ -8400,6 +8428,7 @@ h6.page-header {
   padding: 0;
 }
 .panel-condensed .value-block label {
+  margin-top: 5px;
   margin-bottom: 0;
   font-size: 0.9em;
 }
@@ -8418,9 +8447,6 @@ h6.page-header {
 .value-block {
   text-align: center;
   color: #fff;
-  font-weight: bold;
-  background: #36414b;
-  border: solid 1px #2c343d;
   margin: 2px 0;
   padding-top: 2px;
   padding-bottom: 2px;
@@ -8717,8 +8743,8 @@ a.value-block.bg-danger:focus {
 }
 .value-block .progress,
 .progress-embed {
-  height: 13px;
-  font-size: 10px;
+  height: 18px;
+  font-size: 12px;
   font-weight: normal;
   position: relative;
   background-color: #666;
@@ -8729,8 +8755,8 @@ a.value-block.bg-danger:focus {
   left: 0;
   right: 0;
   color: white;
-  text-shadow: #000 1px 1px 2px;
   text-align: center;
+  line-height: 19px;
 }
 .value-block .progress .smaller,
 .progress-embed .smaller {
@@ -8767,12 +8793,12 @@ table .text-muted,
 .table-super-condensed > thead > tr > th,
 .table-super-condensed > tbody > tr > th,
 .table-super-condensed > tfoot > tr > th {
-  padding: 4px 2px;
+  padding: 4px 3px;
 }
 .table-super-condensed > thead > tr > td,
 .table-super-condensed > tbody > tr > td,
 .table-super-condensed > tfoot > tr > td {
-  padding: 2px;
+  padding: 3px;
 }
 .table > tbody:first-child tr.category-row th,
 .table-striped > tbody:first-child tr.category-row th,
