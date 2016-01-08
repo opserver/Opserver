@@ -103,23 +103,20 @@ namespace StackExchange.Opserver.Data
             }
         }
         public string MonitorStatusReason { get; private set; }
-
-        public virtual Cache LastFetch
-        {
-            get { return DataPollers.OrderByDescending(p => p.LastPoll).First(); }
-        }
-
+        
         public DateTime? LastPoll { get; protected set; }
         public TimeSpan LastPollDuration { get; protected set; }
-        protected int PollFailsInaRow = 0;
+        protected int PollFailsInaRow;
+
+        public virtual Cache LastFetch { get; private set; }
 
         protected volatile bool _isPolling;
+        private volatile string _status;
         public bool IsPolling => _isPolling;
+        public virtual string PollTaskStatus => _status;
 
         public AutoResetEvent FirstPollRun = new AutoResetEvent(false);
 
-        protected Task _pollTask;
-        public virtual string PollTaskStatus => _pollTask?.Status.ToString() ?? "Not running";
 
         public virtual async Task PollAsync(bool force = false)
         {
@@ -137,8 +134,9 @@ namespace StackExchange.Opserver.Data
                 if (_isPolling) return;
                 _isPolling = true;
 
-                _pollTask = InnerPollAsync(force);
-                await _pollTask;
+                _status = "Poll Started";
+                await InnerPollAsync(force);
+                _status = "Poll Complete";
             }
         }
 
@@ -157,6 +155,7 @@ namespace StackExchange.Opserver.Data
             var sw = Stopwatch.StartNew();
             try
             {
+                _status = "InnerPoll Started";
                 if (Polling != null)
                 {
                     var ps = new PollStartArgs();
@@ -165,8 +164,11 @@ namespace StackExchange.Opserver.Data
                 }
 
                 var polled = 0;
+                _status = "DataPollers Queueing";
                 var toPoll = DataPollers.Select(i => i.PollAsync(force));
+                _status = "DataPollers Running";
                 var results = await Task.WhenAll(toPoll);
+                _status = "DataPollers Completed";
                 foreach (var r in results)
                 {
                     Interlocked.Add(ref polled, r);
@@ -188,7 +190,7 @@ namespace StackExchange.Opserver.Data
                 sw.Stop();
                 LastPollDuration = sw.Elapsed;
                 _isPolling = false;
-                _pollTask = null;
+                _status = "InnerPoll Complete";
             }
         }
 
@@ -248,6 +250,7 @@ namespace StackExchange.Opserver.Data
                     }
                     CacheItemFetched?.Invoke(this, EventArgs.Empty);
                     CachedMonitorStatus = null;
+                    LastFetch = cache;
                 }
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {

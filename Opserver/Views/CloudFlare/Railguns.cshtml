@@ -7,7 +7,7 @@
     {
         var stats = rg.Stats;
         <div class="col-md-4">
-            <div class="panel @(rg.LastFetch.LastPollSuccessful ? "panel-default" : "panel-danger")">
+            <div class="panel @(stats.LastPollSuccessful ? "panel-default" : "panel-danger")">
                 <div class="panel-heading">
                     @rg.Name <span class="text-muted small">(@rg.Stats.ToPollSpan())</span>
                 </div>
