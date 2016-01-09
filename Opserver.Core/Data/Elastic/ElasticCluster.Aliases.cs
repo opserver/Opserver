@@ -1,14 +1,27 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {
         private Cache<IndexAliasInfo> _aliases;
-        public Cache<IndexAliasInfo> Aliases => _aliases ?? (_aliases = GetCache<IndexAliasInfo>(5*60));
+        public Cache<IndexAliasInfo> Aliases => _aliases ?? (_aliases = new Cache<IndexAliasInfo>
+        {
+            CacheForSeconds = RefreshInterval,
+            UpdateCache = UpdateFromElastic(nameof(Aliases), async cli =>
+            {
+                var aliases = await cli.GetAliasesAsync().ConfigureAwait(false);
+                return new IndexAliasInfo
+                {
+                    Aliases = aliases.HasData
+                        ? aliases.Data
+                            .Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0)
+                            .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
+                        : new Dictionary<string, List<string>>()
+                };
+            })
+        });
 
         public string GetIndexAliasedName(string index)
         {
@@ -21,21 +34,9 @@ namespace StackExchange.Opserver.Data.Elastic
                        : index;
         }
 
-        public class IndexAliasInfo : ElasticDataObject
+        public class IndexAliasInfo
         {
-            public Dictionary<string, List<string>> Aliases { get; private set; }
-
-            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
-            {
-                var rawAliases = await cli.GetAliasesAsync().ConfigureAwait(false);
-                if (rawAliases.HasData)
-                {
-                    var result = rawAliases.Data.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0).ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList());
-                    Aliases = result;
-                }
-
-                return rawAliases;
-            }
+            public Dictionary<string, List<string>> Aliases { get; internal set; }
         }
     }
 }

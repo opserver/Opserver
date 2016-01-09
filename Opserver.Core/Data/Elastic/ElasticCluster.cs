@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using StackExchange.Elastic;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
@@ -12,8 +12,9 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster : PollNode, ISearchableNode, IMonitedService
     {
-        string ISearchableNode.DisplayName => SettingsName;
         string ISearchableNode.Name => SettingsName;
+        string ISearchableNode.DisplayName => SettingsName;
+        public int RefreshInterval => Settings.RefreshIntervalSeconds;
         string ISearchableNode.CategoryName => "elastic";
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;
@@ -111,39 +112,20 @@ namespace StackExchange.Opserver.Data.Elastic
         //                                        ? (int?)null
         //                                        : ConfigSettings.DownRefreshIntervalSeconds;
         //}
-
-        private Cache<T> GetCache<T>(int seconds,
-                                     [CallerMemberName] string memberName = "",
-                                     [CallerFilePath] string sourceFilePath = "",
-                                     [CallerLineNumber] int sourceLineNumber = 0) where T : ElasticDataObject, new()
-        {
-            return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
-                {
-                    CacheForSeconds = seconds,
-                    UpdateCache = UpdateFromElastic<T>()
-                };
-        }
         
-        public Action<Cache<T>> UpdateFromElastic<T>() where T : ElasticDataObject, new()
+        public Action<Cache<T>> UpdateFromElastic<T>(string opName, Func<SearchClient, Task<T>> getFromClient) where T : class, new()
         {
-            return UpdateCacheItem(
-                description: "Elastic Fetch: " + SettingsName + ":" + typeof (T).Name,
+            return UpdateCacheItem(description: "Elastic Fetch: " + SettingsName + ":" + typeof (T).Name,
                 getData: async () =>
                 {
-                    // TODO: Refactor
-                    var result = new T();
-                    await result.PopulateFromConnections(ConnectionManager.GetClient()).ConfigureAwait(false);
-                    return result;
+                    var cli = ConnectionManager.GetClient();
+                    return await getFromClient(cli).ConfigureAwait(false);
                 },
                 addExceptionData:
-                    e =>
-                        e.AddLoggedData("Cluster", SettingsName)
-                            .AddLoggedData("Type", typeof (T).Name));
+                    e => e.AddLoggedData("Cluster", SettingsName)
+                        .AddLoggedData("Type", typeof (T).Name));
         }
 
-        public override string ToString()
-        {
-            return SettingsName;
-        }
+        public override string ToString() => SettingsName;
     }
 }

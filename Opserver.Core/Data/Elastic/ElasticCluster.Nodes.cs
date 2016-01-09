@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -10,72 +9,75 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterNodeInfo> _nodes;
-        public Cache<ClusterNodeInfo> Nodes => _nodes ?? (_nodes = GetCache<ClusterNodeInfo>(Settings.RefreshIntervalSeconds));
+        public Cache<ClusterNodeInfo> Nodes => _nodes ?? (_nodes = new Cache<ClusterNodeInfo>
+        {
+            CacheForSeconds = RefreshInterval,
+            UpdateCache = UpdateFromElastic(nameof(Nodes), async cli =>
+            {
+                var infos = (await cli.GetClusterNodeInfoAsync().ConfigureAwait(false)).Data;
+                List<NodeInfoWrap> nodes = null;
+                if (infos.Nodes != null)
+                {
+                    nodes = infos.Nodes.Select(node => new NodeInfoWrap
+                    {
+                        GUID = node.Key,
+                        Name = node.Value.Name,
+                        ShortName = node.Value.Name.Replace("-" + infos.ClusterName, ""),
+                        Hostname = node.Value.Hostname,
+                        VersionString = node.Value.Version,
+                        BuildString = node.Value.Build,
+                        Attributes = node.Value.Attributes,
+                        Info = node.Value,
+                    }).OrderBy(node => node.Name).ToList();
+                }
+
+                var stats = (await cli.GetClusterNodeStatsAsync().ConfigureAwait(false)).Data;
+                if (stats?.Nodes != null)
+                {
+                    if (nodes == null)
+                    {
+                        nodes = new List<NodeInfoWrap>();
+                    }
+                    foreach (var ns in stats.Nodes)
+                    {
+                        var ni = nodes.FirstOrDefault(n => n.GUID == ns.Key);
+                        if (ni != null)
+                        {
+                            ni.Stats = ns.Value;
+                        }
+                        else
+                        {
+                            nodes.Add(new NodeInfoWrap
+                            {
+                                GUID = ns.Key,
+                                Name = ns.Value.Name,
+                                Hostname = ns.Value.Hostname,
+                                Stats = ns.Value
+                            });
+                        }
+                    }
+                    nodes = nodes.OrderBy(n => n.Name).ToList();
+                }
+                return new ClusterNodeInfo
+                {
+                    Name = stats?.ClusterName ?? infos?.ClusterName,
+                    Nodes = nodes
+                };
+            })
+        });
 
         public string Name => Nodes.Data != null ? Nodes.Data.Name : "Unknown";
 
-        public class ClusterNodeInfo : ElasticDataObject
+        public class ClusterNodeInfo
         {
             public string Name { get; internal set; }
             public List<NodeInfoWrap> Nodes { get; internal set; }
 
-            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
-            {
-                var rawInfos = await cli.GetClusterNodeInfoAsync().ConfigureAwait(false);
-                var infos = rawInfos.Data;
-                Name = infos.ClusterName;
-                if (infos.Nodes != null)
-                {
-                    Nodes = infos.Nodes.Select(node => new NodeInfoWrap
-                        {
-                            GUID = node.Key,
-                            Name = node.Value.Name,
-                            ShortName = node.Value.Name.Replace("-" + infos.ClusterName,""),
-                            Hostname = node.Value.Hostname,
-                            VersionString = node.Value.Version,
-                            BuildString = node.Value.Build,
-                            Attributes = node.Value.Attributes,
-                            Info = node.Value,
-                        }).OrderBy(node => node.Name).ToList();
-                }
-
-                var rawStats = await cli.GetClusterNodeStatsAsync().ConfigureAwait(false);
-                var stats = rawStats.Data;
-                if (stats != null)
-                {
-                    Name = stats.ClusterName;
-                    if (stats.Nodes != null)
-                    {
-                        foreach (var ns in stats.Nodes)
-                        {
-                            var ni = Nodes.FirstOrDefault(n => n.GUID == ns.Key);
-                            if (ni != null)
-                            {
-                                ni.Stats = ns.Value;
-                            }
-                            else
-                            {
-                                Nodes.Add(new NodeInfoWrap
-                                {
-                                    GUID = ns.Key,
-                                    Name = ns.Value.Name,
-                                    Hostname = ns.Value.Hostname,
-                                    Stats = ns.Value
-                                });
-                            }
-                        }
-                        Nodes = Nodes.OrderBy(n => n.Name).ToList();
-                    }
-                }
-                return rawStats;
-            }
-
             public NodeInfoWrap Get(string nameOrGuid)
             {
-                return
-                    Nodes?.FirstOrDefault(
-                        n => string.Equals(n.Name, nameOrGuid, StringComparison.InvariantCultureIgnoreCase)
-                             || string.Equals(n.GUID, nameOrGuid, StringComparison.InvariantCultureIgnoreCase));
+                return Nodes?.FirstOrDefault(
+                    n => string.Equals(n.Name, nameOrGuid, StringComparison.InvariantCultureIgnoreCase)
+                         || string.Equals(n.GUID, nameOrGuid, StringComparison.InvariantCultureIgnoreCase));
             }
         }
 

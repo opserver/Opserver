@@ -1,15 +1,61 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {
         private Cache<ClusterHealthStatusInfo> _healthStatus;
-        public Cache<ClusterHealthStatusInfo> HealthStatus => _healthStatus ?? (_healthStatus = GetCache<ClusterHealthStatusInfo>(Settings.RefreshIntervalSeconds));
+        public Cache<ClusterHealthStatusInfo> HealthStatus => _healthStatus ?? (_healthStatus = new Cache<ClusterHealthStatusInfo>
+        {
+            CacheForSeconds = RefreshInterval,
+            UpdateCache = UpdateFromElastic(nameof(HealthStatus), async cli =>
+            {
+                var health = (await cli.GetClusterHealthAsync().ConfigureAwait(false)).Data;
+                return new ClusterHealthStatusInfo
+                {
+                    Name = health?.ClusterName,
+                    TotalNodeCount = health.NumberOfNodes,
+                    DataNodeCount = health.NumberOfDataNodes,
+                    ActiveShards = health.ActiveShards,
+                    ActivePrimaryShards = health.ActivePrimaryShards,
+                    InitializingShards = health.InitializingShards,
+                    RelocatingShards = health.RelocatingShards,
+                    UnassignedShards = health.UnassignedShards,
+                    StringStatus = health.Status,
+                    Indices = health.Indices?.Select(i => new NodeIndexInfo
+                    {
+                        Name = i.Key,
+                        StringStatus = i.Value.Status,
+                        NumberOfShards = i.Value.NumberOfShards,
+                        NumberOfReplicas = i.Value.NumberOfReplicas,
+                        ActiveShards = i.Value.ActiveShards,
+                        ActivePrimaryShards = i.Value.ActivePrimaryShards,
+                        InitializingShards = i.Value.InitializingShards,
+                        RelocatingShards = i.Value.RelocatingShards,
+                        UnassignedShards = i.Value.UnassignedShards,
+                        Shards = i.Value.Shards.Select(s => new NodeIndexShardInfo
+                        {
+                            Name = s.Key,
+                            StringStatus = s.Value.Status,
+                            PrimaryActive = s.Value.PrimaryActive,
+                            ActiveShards = s.Value.ActiveShards,
+                            InitializingShards = s.Value.InitializingShards,
+                            RelocatingShards = s.Value.RelocatingShards,
+                            UnassignedShards = s.Value.UnassignedShards
+                        }).ToList()
+                    }).OrderBy(i =>
+                    {
+                        int j;
+                        return int.TryParse(i.Name, out j) ? j : 0;
+                    }).ToList() ?? new List<NodeIndexInfo>()
+                };
+            })
+        });
+
+
+        
 
         /// <summary>
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 
@@ -27,7 +73,7 @@ namespace StackExchange.Opserver.Data.Elastic
             }
         }
 
-        public class ClusterHealthStatusInfo : ElasticDataObject, IMonitorStatus
+        public class ClusterHealthStatusInfo : IMonitorStatus
         {
             public string Name { get; internal set; }
             public string StringStatus { get; internal set; }
@@ -59,56 +105,6 @@ namespace StackExchange.Opserver.Data.Elastic
                 }
             }
             public string MonitorStatusReason => "Cluster is " + StringStatus;
-
-            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
-            {
-                var rawHealth = await cli.GetClusterHealthAsync().ConfigureAwait(false);
-                if (rawHealth.HasData)
-                {
-                    var health = rawHealth.Data;
-                    Name = health.ClusterName;
-                    TotalNodeCount = health.NumberOfNodes;
-                    DataNodeCount = health.NumberOfDataNodes;
-                    ActiveShards = health.ActiveShards;
-                    ActivePrimaryShards = health.ActivePrimaryShards;
-                    InitializingShards = health.InitializingShards;
-                    RelocatingShards = health.RelocatingShards;
-                    UnassignedShards = health.UnassignedShards;
-                    StringStatus = health.Status;
-
-                    Indices = health.Indices.Select(i => new NodeIndexInfo
-                    {
-                        Name = i.Key,
-                        StringStatus = i.Value.Status,
-                        NumberOfShards = i.Value.NumberOfShards,
-                        NumberOfReplicas = i.Value.NumberOfReplicas,
-                        ActiveShards = i.Value.ActiveShards,
-                        ActivePrimaryShards = i.Value.ActivePrimaryShards,
-                        InitializingShards = i.Value.InitializingShards,
-                        RelocatingShards = i.Value.RelocatingShards,
-                        UnassignedShards = i.Value.UnassignedShards,
-                        Shards = i.Value.Shards.Select(s => new NodeIndexShardInfo
-                        {
-                            Name = s.Key,
-                            StringStatus = s.Value.Status,
-                            PrimaryActive = s.Value.PrimaryActive,
-                            ActiveShards = s.Value.ActiveShards,
-                            InitializingShards = s.Value.InitializingShards,
-                            RelocatingShards = s.Value.RelocatingShards,
-                            UnassignedShards = s.Value.UnassignedShards
-                        }).ToList()
-                    }).OrderBy(i =>
-                    {
-                        int j;
-                        return int.TryParse(i.Name, out j) ? j : 0;
-                    }).ToList();
-                }
-                else
-                {
-                    Indices = new List<NodeIndexInfo>();
-                }
-                return rawHealth;
-            }
         }
 
         public class NodeIndexInfo : IMonitorStatus

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -8,8 +7,22 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterStatusInfo> _status;
-        public Cache<ClusterStatusInfo> Status =>
-            _status ?? (_status = GetCache<ClusterStatusInfo>(Settings.RefreshIntervalSeconds));
+        public Cache<ClusterStatusInfo> Status => _status ?? (_status = new Cache<ClusterStatusInfo>
+        {
+            CacheForSeconds = RefreshInterval,
+            UpdateCache = UpdateFromElastic(nameof(Status), async cli =>
+            {
+                var state = (await cli.GetClusterStateAsync().ConfigureAwait(false)).Data;
+                return new ClusterStatusInfo
+                {
+                    ClusterName = state?.ClusterName,
+                    MasterNode = state?.MasterNode,
+                    Nodes = state?.Nodes,
+                    RoutingNodes = state?.RoutingNodes,
+                    RoutingIndices = state?.RoutingTable?.Indices
+                };
+            })
+        });
 
         public IEnumerable<ShardState> TroubledShards =>
             ShardStates.Where(s => s.State != "STARTED");
@@ -18,7 +31,7 @@ namespace StackExchange.Opserver.Data.Elastic
             Status.Data?.RoutingNodes?.Nodes.Values.SelectMany(i => i)
                 .Union(Status.Data.RoutingNodes.Unassigned) ?? Enumerable.Empty<ShardState>();
 
-        public class ClusterStatusInfo : ElasticDataObject, IMonitorStatus
+        public class ClusterStatusInfo : IMonitorStatus
         {
             private MonitorStatus? _monitorStatus;
             public MonitorStatus MonitorStatus
@@ -38,28 +51,11 @@ namespace StackExchange.Opserver.Data.Elastic
             // TODO: Implement
             public string MonitorStatusReason => null;
 
-            public RoutingNodesState RoutingNodes { get; private set; }
-            public Dictionary<string, RoutingTableState.IndexShardsState> RoutingIndices { get; private set; }
-            public string MasterNode { get; private set; }
-            public string ClusterName { get; private set; }
-            public Dictionary<string, NodeState> Nodes { get; private set; }
-
-            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
-            {
-                var rawState = await cli.GetClusterStateAsync().ConfigureAwait(false);
-                if (rawState.HasData)
-                {
-                    var state = rawState.Data;
-                    ClusterName = state.ClusterName;
-                    MasterNode = state.MasterNode;
-                    Nodes = state.Nodes;
-                    RoutingNodes = state.RoutingNodes;
-                    if (state.RoutingTable != null)
-                        RoutingIndices = state.RoutingTable.Indices;
-                }
-
-                return rawState;
-            }
+            public RoutingNodesState RoutingNodes { get; internal set; }
+            public Dictionary<string, RoutingTableState.IndexShardsState> RoutingIndices { get; internal set; }
+            public string MasterNode { get; internal set; }
+            public string ClusterName { get; internal set; }
+            public Dictionary<string, NodeState> Nodes { get; internal set; }
         }
     }
 }

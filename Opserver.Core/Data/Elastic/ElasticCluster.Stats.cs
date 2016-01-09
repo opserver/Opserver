@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using StackExchange.Elastic;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -7,32 +6,26 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterStatsInfo> _stats;
-        public Cache<ClusterStatsInfo> Stats =>
-            _stats ?? (_stats = GetCache<ClusterStatsInfo>(Settings.RefreshIntervalSeconds));
+        public Cache<ClusterStatsInfo> Stats => _stats ?? (_stats = new Cache<ClusterStatsInfo>
+        {
+            CacheForSeconds = RefreshInterval,
+            UpdateCache = UpdateFromElastic(nameof(Stats), async cli =>
+            {
+                var health = (await cli.GetIndexStatsAsync().ConfigureAwait(false)).Data;
+                return new ClusterStatsInfo
+                {
+                    GlobalStats = health?.All ?? new IndexStats(),
+                    Shards = health?.Shards ?? new ShardCountStats(),
+                    Indices = health?.Indices ?? new Dictionary<string, IndexStats>()
+                };
+            })
+        });
 
-        public class ClusterStatsInfo : ElasticDataObject
+        public class ClusterStatsInfo
         {
             public IndexStats GlobalStats { get; internal set; }
             public ShardCountStats Shards { get; internal set; }
             public Dictionary<string, IndexStats> Indices { get; internal set; }
-            
-            public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
-            {
-                var health = await cli.GetIndexStatsAsync().ConfigureAwait(false);
-                if (health.HasData)
-                {
-                    GlobalStats = health.Data.All;
-                    Shards = health.Data.Shards;
-                    Indices = health.Data.Indices;
-                }
-                else
-                {
-                    GlobalStats = new IndexStats();
-                    Shards = new ShardCountStats();
-                    Indices = new Dictionary<string, IndexStats>();
-                }
-                return health;
-            }
         }
     }
 }
