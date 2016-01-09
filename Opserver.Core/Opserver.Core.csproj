@@ -160,7 +160,6 @@
     <Compile Include="Data\Elastic\ElasticCluster.Status.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticDataObject.cs" />
     <Compile Include="Data\Elastic\ElasticIssues.cs" />
     <Compile Include="Data\Elastic\ShardStates.cs" />
     <Compile Include="Data\Exceptions\ExceptionSorts.cs" />
