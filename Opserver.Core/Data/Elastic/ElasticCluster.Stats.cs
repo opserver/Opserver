@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Data.Elastic
             
             public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var health = await cli.GetIndexStatsAsync();
+                var health = await cli.GetIndexStatsAsync().ConfigureAwait(false);
                 if (health.HasData)
                 {
                     GlobalStats = health.Data.All;

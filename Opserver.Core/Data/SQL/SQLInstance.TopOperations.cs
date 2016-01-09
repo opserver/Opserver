@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
+using Dapper;
 using StackExchange.Opserver.Data.SQL.QueryPlans;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -41,8 +42,8 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheForSeconds = 60,
                     CacheStaleForSeconds = 5*60,
                     UpdateCache = UpdateFromSql("Top Operations",
-                                                async conn =>
-                                                (await conn.QueryAsync<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1})).FirstOrDefault())
+                                                conn =>
+                                                conn.QueryFirstOrDefaultAsync<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1}))
                 };
         }
 

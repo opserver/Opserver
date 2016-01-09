@@ -54,16 +54,16 @@ namespace StackExchange.Opserver.Data
             int result;
             if (CacheKey.HasValue())
             {
-                result = await CachePollAsync(force);
+                result = await CachePollAsync(force).ConfigureAwait(false);
             }
             else
             {
                 if (force) _needsPoll = true;
-                result = await UpdateAsync();
+                result = await UpdateAsync().ConfigureAwait(false);
                 // If we're in need of cache and don't have it, then wait on the polling thread
                 if (wait && IsPolling)
                 {
-                    await _pollSemaphoreSlim.WaitAsync(5000);
+                    await _pollSemaphoreSlim.WaitAsync(5000).ConfigureAwait(false);
                 }
             }
             Interlocked.Decrement(ref PollingEngine._activePolls);
@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Data
             if (!_needsPoll && !IsStale) return 0;
 
             PollStatus = "Awaiting Semaphore";
-            await _pollSemaphoreSlim.WaitAsync();
+            await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             if (_isPolling) return 0;
             CurrentPollDuration = Stopwatch.StartNew();
             _isPolling = true;
@@ -133,7 +133,7 @@ namespace StackExchange.Opserver.Data
             var loadSemaphore = NullSlims.AddOrUpdate(lockKey, k => new SemaphoreSlim(1), (k, old) => old);
             if (cached == null)
             {
-                await loadSemaphore.WaitAsync();
+                await loadSemaphore.WaitAsync().ConfigureAwait(false);
                 try
                 {
                     // See if we have the value cached
@@ -141,7 +141,7 @@ namespace StackExchange.Opserver.Data
                     if (cached == null)
                     {
                         // No data, run this synchronously to get data
-                        var result = await UpdateAsync();
+                        var result = await UpdateAsync().ConfigureAwait(false);
                         Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
                         return result;
                     }
@@ -174,10 +174,10 @@ namespace StackExchange.Opserver.Data
             {
                 var task = new Task(async () =>
                 {
-                    await loadSemaphore.WaitAsync();
+                    await loadSemaphore.WaitAsync().ConfigureAwait(false);
                     try
                     {
-                        await UpdateAsync();
+                        await UpdateAsync().ConfigureAwait(false);
                         Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
                     }
                     finally

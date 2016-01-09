@@ -43,57 +43,57 @@ namespace StackExchange.Opserver
 
         public static async Task<int> ExecuteAsync(this DbConnection conn, string sql, dynamic param = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null, int? commandTimeout = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.ExecuteAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout: commandTimeout);
+                return await SqlMapper.ExecuteAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout: commandTimeout).ConfigureAwait(false);
             }
         }
 
         public static async Task<List<T>> QueryAsync<T>(this DbConnection conn, string sql, dynamic param = null, int? commandTimeout = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync<T>(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).AsList();
+                return await SqlMapper.QueryAsync<T>(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false).AsList();
             }
         }
 
         public static async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TReturn>(this DbConnection conn, string sql, Func<TFirst, TSecond, TReturn> map, dynamic param = null, IDbTransaction transaction = null, string splitOn = "Id", int? commandTimeout = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
             }
         }
 
         public static async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TReturn>(this DbConnection conn, string sql, Func<TFirst, TSecond, TThird, TReturn> map, dynamic param = null, IDbTransaction transaction = null, string splitOn = "Id", int? commandTimeout = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
             }
         }
 
         public static async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TReturn>(this DbConnection conn, string sql, Func<TFirst, TSecond, TThird, TFourth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, string splitOn = "Id", int? commandTimeout = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
             }
         }
 
         public static async Task<List<TReturn>> QueryAsync<TFirst, TSecond, TThird, TFourth, TFifth, TReturn>(this DbConnection conn, string sql, Func<TFirst, TSecond, TThird, TFourth, TFifth, TReturn> map, dynamic param = null, IDbTransaction transaction = null, string splitOn = "Id", int? commandTimeout = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
             }
         }
 
         public static async Task<SqlMapper.GridReader> QueryMultipleAsync(this DbConnection conn, string sql, dynamic param = null, IDbTransaction transaction = null, int? commandTimeout = null, CommandType? commandType = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
-            using (await conn.EnsureOpenAsync())
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryMultipleAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), param, transaction, commandTimeout, commandType);
+                return await SqlMapper.QueryMultipleAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), param, transaction, commandTimeout, commandType).ConfigureAwait(false);
             }
         }
 
@@ -108,7 +108,7 @@ namespace StackExchange.Opserver
                     await connection.OpenAsync().ConfigureAwait(false);
                     try
                     {
-                        await connection.SetReadUncommitted();
+                        await connection.SetReadUncommittedAsync().ConfigureAwait(false);
                         return new ConnectionCloser(connection);
                     }
                     catch
@@ -190,7 +190,7 @@ namespace StackExchange.Opserver
             return ret;
         }
         
-        public static async Task<int> SetReadUncommitted(this DbConnection connection)
+        public static async Task<int> SetReadUncommittedAsync(this DbConnection connection)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
             using (var cmd = connection.CreateCommand())

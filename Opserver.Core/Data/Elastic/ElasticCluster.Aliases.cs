@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawAliases = await cli.GetAliasesAsync();
+                var rawAliases = await cli.GetAliasesAsync().ConfigureAwait(false);
                 if (rawAliases.HasData)
                 {
                     var result = rawAliases.Data.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0).ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList());

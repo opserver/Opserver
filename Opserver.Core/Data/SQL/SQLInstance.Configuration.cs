@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheForSeconds = RefreshInterval,
                     UpdateCache = UpdateFromSql(nameof(Configuration), async conn =>
                     {
-                        var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>());
+                        var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>()).ConfigureAwait(false);
                         foreach (var r in result)
                         {
                             int defaultVal;

@@ -95,10 +95,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             };
             var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
-                getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData);
+                getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData).ConfigureAwait(false);
 
-            await PagerDutyAPI.Instance.OnCallUsers.PollAsync(true);
-            await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true);
+            await PagerDutyAPI.Instance.OnCallUsers.PollAsync(true).ConfigureAwait(false);
+            await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
             return result;
         }
         

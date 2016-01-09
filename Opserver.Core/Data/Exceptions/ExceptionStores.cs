@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static Task<Error> GetError(string appName, Guid guid)
         {
             // TODO: Parallel
-            return GetStores(appName).Select(async s => await s.GetErrorAsync(guid)).FirstOrDefault(e => e != null);
+            return GetStores(appName).Select(async s => await s.GetErrorAsync(guid).ConfigureAwait(false)).FirstOrDefault(e => e != null);
         }
 
         public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
@@ -63,7 +63,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             var result = default(T);
             foreach (var s in GetApps(appName).Select(a => a.Store).Distinct())
             {
-                var aResult = await action(s);
+                var aResult = await action(s).ConfigureAwait(false);
                 if (typeof(T) == typeof(bool) && Convert.ToBoolean(aResult))
                 {
                     result = aResult;
@@ -150,7 +150,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         {
             if (error == null) return new List<Error>();
             var errorFetches = GetStores(error.ApplicationName).Select(s => byTime ? s.GetSimilarErrorsInTimeAsync(error, max) : s.GetSimilarErrorsAsync(error, max));
-            var similarErrors = (await Task.WhenAll(errorFetches)).SelectMany(e => e);
+            var similarErrors = (await Task.WhenAll(errorFetches).ConfigureAwait(false)).SelectMany(e => e);
             return GetSorted(similarErrors, sort).ToList();
         }
 
@@ -159,7 +159,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             if (searchText.IsNullOrEmpty()) return new List<Error>();
             var stores = appName.HasValue() ? GetStores(appName) : Stores;
             var errorFetches = stores.Select(s => s.FindErrorsAsync(searchText, appName, max, includeDeleted));
-            var results = (await Task.WhenAll(errorFetches)).SelectMany(e => e);
+            var results = (await Task.WhenAll(errorFetches).ConfigureAwait(false)).SelectMany(e => e);
             return GetSorted(results, sort).ToList();
         }
         

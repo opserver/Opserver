@@ -138,7 +138,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 try
                 {
-                    using (var s = await wc.OpenReadTaskAsync(url))
+                    using (var s = await wc.OpenReadTaskAsync(url).ConfigureAwait(false))
                     using (var sr = new StreamReader(s))
                     {
                         var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
@@ -174,7 +174,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             { 
                 var nodes = new List<Node>();
 
-                var apiResponse = await GetFromBosunAsync<Dictionary<string, BosunHost>>(GetUrl("api/host"));
+                var apiResponse = await GetFromBosunAsync<Dictionary<string, BosunHost>>(GetUrl("api/host")).ConfigureAwait(false);
                 if (!apiResponse.Success) return nodes;
 
                 var hostsDict = apiResponse.Result;
@@ -350,7 +350,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 metricName,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
-                id);
+                id).ConfigureAwait(false);
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
@@ -373,7 +373,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 node.Id,
-                TagCombos.AllNetDirections);
+                TagCombos.AllNetDirections).ConfigureAwait(false);
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
@@ -385,7 +385,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 volume.NodeId,
-                TagCombos.AllDisks);
+                TagCombos.AllDisks).ConfigureAwait(false);
 
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
@@ -397,7 +397,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 nodeInteface.NodeId,
-                TagCombos.AllDirectionsForInterface(nodeInteface.Id));
+                TagCombos.AllDirectionsForInterface(nodeInteface.Id)).ConfigureAwait(false);
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }

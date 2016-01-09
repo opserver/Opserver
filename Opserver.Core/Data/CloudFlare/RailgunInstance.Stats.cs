@@ -16,8 +16,8 @@ namespace StackExchange.Opserver.Data.CloudFlare
         private async Task<string> GetStats(RailgunInstance i)
         {
             string json;
-            var req = (HttpWebRequest) WebRequest.Create($"http://{i.Host}:{i.Port}/");
-            using (var resp = await req.GetResponseAsync())
+            var req = (HttpWebRequest) WebRequest.Create($"http://{i.Host}:{i.Port.ToString()}/");
+            using (var resp = await req.GetResponseAsync().ConfigureAwait(false))
             using (var rs = resp.GetResponseStream())
             {
                 if (rs == null) return null;

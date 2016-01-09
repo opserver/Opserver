@@ -34,9 +34,9 @@ namespace StackExchange.Opserver.Data.SQL
         {
             try
             {
-                using (var conn = await GetConnectionAsync())
+                using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    await action(conn);
+                    await action(conn).ConfigureAwait(false);
                     JobSummary.Purge();
                     return true;
                 }

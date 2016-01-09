@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Data.SQL
                         UpdateCache = UpdateFromSql(nameof(ResourceHistory), async conn =>
                             {
                                 var sql = GetFetchSQL<ResourceEvent>();
-                                var result = (await conn.QueryAsync<ResourceEvent>(sql)).AsList();
+                                var result = (await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false)).AsList();
                                 CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
                                 return result;
                             })

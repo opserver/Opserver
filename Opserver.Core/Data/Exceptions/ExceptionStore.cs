@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
@@ -58,14 +59,14 @@ namespace StackExchange.Opserver.Data.Exceptions
                         UpdateCache = UpdateFromSql(nameof(Applications),
                             async () =>
                             {
-                                var result = (await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
+                                var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
 Select ApplicationName as Name, 
        Sum(DuplicateCount) as ExceptionCount,
 	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentExceptionCount,
 	   MAX(CreationDate) as MostRecent
   From Exceptions
  Where DeletionDate Is Null
- Group By ApplicationName", new {Current.Settings.Exceptions.RecentSeconds}));
+ Group By ApplicationName", new {Current.Settings.Exceptions.RecentSeconds}).ConfigureAwait(false);
                                 result.ForEach(a => { a.StoreName = Name; a.Store = this; });
                                 return result;
                          })
@@ -197,12 +198,12 @@ Update Exceptions
             {
                 Error sqlError;
                 using (MiniProfiler.Current.Step(nameof(GetErrorAsync) + "() (guid: " + guid.ToString() + ") for " + Name))
-                using (var c = await GetConnectionAsync())
+                using (var c = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    sqlError = (await c.QueryAsync<Error>(@"
+                    sqlError = await c.QueryFirstOrDefaultAsync<Error>(@"
     Select Top 1 * 
       From Exceptions 
-     Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout)).FirstOrDefault();
+     Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout).ConfigureAwait(false);
                 }
                 if (sqlError == null) return null;
 
@@ -226,7 +227,7 @@ Update Exceptions
               return await ExecTaskAsync($"{nameof(ProtectErrorAsync)}() (guid: {guid.ToString()}) for {Name}", @"
 Update Exceptions 
    Set IsProtected = 1, DeletionDate = Null
- Where GUID = @guid", new {guid}) > 0;
+ Where GUID = @guid", new {guid}).ConfigureAwait(false) > 0;
         }
 
         public async Task<bool> DeleteErrorAsync(Guid guid)
@@ -235,7 +236,7 @@ Update Exceptions
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where GUID = @guid 
-   And DeletionDate Is Null", new { guid }) > 0;
+   And DeletionDate Is Null", new { guid }).ConfigureAwait(false) > 0;
         }
 
         public async Task<List<T>> QueryListAsync<T>(string step, string sql, dynamic paramsObj)
@@ -243,9 +244,9 @@ Update Exceptions
             try
             {
                 using (MiniProfiler.Current.Step(step))
-                using (var c = await GetConnectionAsync())
+                using (var c = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    return await c.QueryAsync<T>(sql, paramsObj as object, commandTimeout: QueryTimeout);
+                    return await c.QueryAsync<T>(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
                 }
             }
             catch (Exception e)
@@ -258,9 +259,9 @@ Update Exceptions
         public async Task<int> ExecTaskAsync(string step, string sql, dynamic paramsObj)
         {
             using (MiniProfiler.Current.Step(step))
-            using (var c = await GetConnectionAsync())
+            using (var c = await GetConnectionAsync().ConfigureAwait(false))
             {
-                return await c.ExecuteAsync(sql, paramsObj as object, commandTimeout: QueryTimeout);
+                return await c.ExecuteAsync(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
             }
         }
 

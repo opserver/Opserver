@@ -176,7 +176,7 @@ namespace StackExchange.Opserver.Data
                 {
                     PollStatus = "DataPollers Queueing (Sync)";
                     var tasks = DataPollers
-                        .Where(p => p.ShouldPoll)
+                        .Where(p => force || p.ShouldPoll)
                         .Select(p => p.PollAsync(force))
                         .ToArray<Task>();
                     Task.WaitAll(tasks);
@@ -188,7 +188,7 @@ namespace StackExchange.Opserver.Data
                     foreach (var p in DataPollers)
                     {
                         // Cheap checks to eliminate many uncessary task creations
-                        if (!p.ShouldPoll) continue;
+                        if (!force && !p.ShouldPoll) continue;
                         // Kick off the poll and don't wait for it to continue;
 #pragma warning disable 4014
                         p.PollStatus = "Kicked off by Node";
@@ -261,7 +261,7 @@ namespace StackExchange.Opserver.Data
                         cache.PollStatus = "Fetching";
                         using (MiniProfiler.Current.Step("Data Fetch"))
                         {
-                            cache.Data = await getData();
+                            cache.Data = await getData().ConfigureAwait(false);
                         }
                         cache.PollStatus = "Fetch Complete";
                         cache.SetSuccess();

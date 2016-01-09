@@ -115,7 +115,7 @@ namespace StackExchange.Opserver.Data
             {
                 try
                 {
-                    StartIndexLoop();
+                    StartPollLoop();
                 }
                 catch (ThreadAbortException e)
                 {
@@ -137,7 +137,7 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        private static void StartIndexLoop()
+        private static void StartPollLoop()
         {
             while (!_shuttingDown)
             {
@@ -185,7 +185,7 @@ namespace StackExchange.Opserver.Data
             if (cacheGuid.HasValue)
             {
                 var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
-                return cache != null && await cache.PollAsync(true) > 0;
+                return cache != null && await cache.PollAsync(true).ConfigureAwait(false) > 0;
             }
             // Polling an entire server
             if (sync)

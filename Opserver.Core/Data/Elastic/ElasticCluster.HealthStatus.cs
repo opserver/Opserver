@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawHealth = await cli.GetClusterHealthAsync();
+                var rawHealth = await cli.GetClusterHealthAsync().ConfigureAwait(false);
                 if (rawHealth.HasData)
                 {
                     var health = rawHealth.Data;

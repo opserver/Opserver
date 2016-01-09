@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Monitoring
 
                 using (var q = Wmi.Query(machineName, query))
                 {
-                    var queryResults = (await q.Result).Cast<ManagementObject>();
+                    var queryResults = (await q.Result.ConfigureAwait(false)).Cast<ManagementObject>();
                     timer.Stop();
                     return new QueryResult<T>
                         {
