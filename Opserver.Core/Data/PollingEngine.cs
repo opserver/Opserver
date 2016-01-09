@@ -14,7 +14,8 @@ namespace StackExchange.Opserver.Data
         private static Thread _globalPollingThread;
         private static volatile bool _shuttingDown;
         private static readonly object _pollAllLock;
-        private static int _totalPollIntervals;
+        private static long _totalPollIntervals;
+        internal static long _activePolls;
         private static DateTime? _lastPollAll;
         private static DateTime _startTime;
 
@@ -82,7 +83,8 @@ namespace StackExchange.Opserver.Data
             public DateTime StartTime { get; internal set; }
             public DateTime? LastPollAll { get; internal set; }
             public bool IsAlive { get; internal set; }
-            public int TotalPollIntervals { get; internal set; }
+            public long TotalPollIntervals { get; internal set; }
+            public long ActivePolls { get; internal set; }
             public int NodeCount { get; internal set; }
             public int TotalPollers { get; internal set; }
             public List<Tuple<Type, int>> NodeBreakdown { get; internal set; }
@@ -99,6 +101,7 @@ namespace StackExchange.Opserver.Data
                     LastPollAll = _lastPollAll,
                     IsAlive = _globalPollingThread.IsAlive,
                     TotalPollIntervals = _totalPollIntervals,
+                    ActivePolls = _activePolls,
                     NodeCount = AllPollNodes.Count,
                     TotalPollers = AllPollNodes.Sum(n => n.DataPollers.Count()),
                     NodeBreakdown = AllPollNodes.GroupBy(n => n.GetType()).Select(g => Tuple.Create(g.Key, g.Count())).ToList(),
@@ -137,20 +140,23 @@ namespace StackExchange.Opserver.Data
         private static void StartIndexLoop()
         {
             while (!_shuttingDown)
-            {   
-                PollAllAsync().Wait();
+            {
+                PollAllAsync();
                 Thread.Sleep(1000);
             }
         }
         
-        public static async Task PollAllAsync(bool force = false)
+        public static void PollAllAsync(bool force = false)
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
-                await Task.WhenAll(AllPollNodes.Select(i => i.PollAsync(force)));
+                Parallel.ForEach(AllPollNodes, n =>
+                {
+                    n.PollAsync(force);
+                });
             }
             catch (Exception e)
             {
@@ -171,7 +177,7 @@ namespace StackExchange.Opserver.Data
         /// <param name="cacheGuid">If included, the specific cache to poll</param>
         /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
         /// <returns>Whether the poll was successful</returns>
-        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null)
+        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
         {
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
             if (node == null) return false;
@@ -182,7 +188,14 @@ namespace StackExchange.Opserver.Data
                 return cache != null && await cache.PollAsync(true) > 0;
             }
             // Polling an entire server
-            await node.PollAsync(true);
+            if (sync)
+            {
+                node.Poll(true);
+            }
+            else
+            {
+                node.PollAsync(true);
+            }
             return true;
         }
         

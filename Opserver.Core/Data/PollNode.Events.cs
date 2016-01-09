@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data
 
         public class PollResultArgs : EventArgs
         {
-            public int Polled { get; internal set; }
+            public int Queued { get; internal set; }
         }
 
         public class MonitorStatusArgs : EventArgs
