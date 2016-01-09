@@ -132,7 +132,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 {
                     // TODO: Refactor
                     var result = new T();
-                    await result.PopulateFromConnections(ConnectionManager.GetClient());
+                    await result.PopulateFromConnections(ConnectionManager.GetClient()).ConfigureAwait(false);
                     return result;
                 },
                 addExceptionData:

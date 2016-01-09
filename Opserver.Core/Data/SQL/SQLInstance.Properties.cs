@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -15,7 +16,7 @@ namespace StackExchange.Opserver.Data.SQL
                     CacheForSeconds = RefreshInterval,
                     UpdateCache = UpdateFromSql(nameof(ServerProperties), async conn =>
                             {
-                                var result = (await conn.QueryAsync<SQLServerProperties>(SQLServerProperties.FetchSQL)).FirstOrDefault();
+                                var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL).ConfigureAwait(false);
                                 if (result != null)
                                 {
                                     Version = result.ParsedVersion;

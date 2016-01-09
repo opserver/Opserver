@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.Elastic
     {
         public async Task PopulateFromConnections(SearchClient client)
         {
-            var response = await RefreshFromConnectionAsync(client);
+            var response = await RefreshFromConnectionAsync(client).ConfigureAwait(false);
 
             // Some implementations are raw
             if (response?.Exception == null) return;

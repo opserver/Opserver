@@ -108,7 +108,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             {
                 while (sr.Peek() >= 0)
                 {
-                    var l = await sr.ReadLineAsync();
+                    var l = await sr.ReadLineAsync().ConfigureAwait(false);
                     //Skip the header
                     if (string.IsNullOrEmpty(l) || l.StartsWith("#")) continue;
                     //Collect each stat line as we go, group later

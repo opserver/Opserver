@@ -24,9 +24,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             var result = await Instance.GetFromPagerDutyAsync("incidents",
                 response => JSON.Deserialize<IncidentResponse>(response.ToString(), JilOptions),
                 httpMethod: "PUT",
-                data: data);
+                data: data).ConfigureAwait(false);
 
-            await Incidents.PollAsync(true);
+            await Incidents.PollAsync(true).ConfigureAwait(false);
 
             return result?.Incidents ?? new List<Incident>();
         }

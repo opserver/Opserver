@@ -40,8 +40,7 @@
     @foreach (var pn in pollerNodes)
     {
         var pnType = pn.GetType();
-        var pollStatus = pn.PollTaskStatus;
-        var isIdle = pollStatus == "Not running";
+        var pollStatus = pn.PollStatus;
         <tbody class="js-refresh" data-name="Node-@pn.NodeType-@pn.UniqueKey">
             <tr class="cache-item active @pn.RowClass()">
                 <th title="@pnType.FullName">@pn.IconSpan() @pnType.Name</th>
@@ -49,13 +48,13 @@
                 <th>@pn</th>
                 <th>@(pn.LastPoll?.ToRelativeTimeSpanMini()) <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
                 <th>
-                    @if (isIdle)
+                    @if (pn.IsPolling)
                     {
-                        <span class="text-muted">(idle)</span>
+                        <strong class="text-success">@pollStatus</strong>
                     }
                     else
                     {
-                        <strong class="text-success">@pollStatus</strong>
+                        <span class="text-muted">@pollStatus</span>
                     }
                 </th>
                 <th class="actions">
@@ -97,7 +96,7 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
                             @:@p.ToPollSpan() <span class="text-muted small">(@(p.LastPollDuration?.ToTimeStringMini()))</span>
                         }
                     </td>
-                    <td class="@(p.IsPolling ? "text-success" : "text-muted small")">(@(p.IsPolling ? "active" : "idle"))</td>
+                    <td class="@(p.IsPolling ? "text-success small" : "text-muted small")">(@(p.PollStatus))</td>
                     <td class="actions">
                         <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
                         <a href="/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>

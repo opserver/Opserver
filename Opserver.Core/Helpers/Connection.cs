@@ -74,8 +74,8 @@ namespace StackExchange.Opserver.Helpers
 
             if (connectionTimeout.GetValueOrDefault(0) == 0)
             {
-                await conn.OpenAsync();
-                await conn.SetReadUncommitted();
+                await conn.OpenAsync().ConfigureAwait(false);
+                await conn.SetReadUncommittedAsync().ConfigureAwait(false);
             }
             else
             {
@@ -88,8 +88,8 @@ namespace StackExchange.Opserver.Helpers
                     tokenSource.CancelAfter(connectionTimeout.Value);
                     try
                     {
-                        await conn.OpenAsync(tokenSource.Token); // Throwing Null Refs
-                        await conn.SetReadUncommitted();
+                        await conn.OpenAsync(tokenSource.Token).ConfigureAwait(false); // Throwing Null Refs
+                        await conn.SetReadUncommittedAsync().ConfigureAwait(false);
                     }
                     catch (TaskCanceledException e)
                     {

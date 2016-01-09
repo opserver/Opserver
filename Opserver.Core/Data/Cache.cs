@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data
         public override bool ContainsData => DataBacker != null;
         public override object GetData() { return DataBacker; }
         public override Type Type => typeof (T);
-        private readonly SemaphoreSlim pollSemaphoreSlim = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _pollSemaphoreSlim = new SemaphoreSlim(1);
 
         public override string InventoryDescription
         {
@@ -50,37 +50,44 @@ namespace StackExchange.Opserver.Data
 
         public override async Task<int> PollAsync(bool force = false, bool wait = false)
         {
+            Interlocked.Increment(ref PollingEngine._activePolls);
             int result;
             if (CacheKey.HasValue())
             {
-                result = await CachePollAsync(force);
+                result = await CachePollAsync(force).ConfigureAwait(false);
             }
             else
             {
                 if (force) _needsPoll = true;
-                result = await UpdateAsync();
+                result = await UpdateAsync().ConfigureAwait(false);
                 // If we're in need of cache and don't have it, then wait on the polling thread
                 if (wait && IsPolling)
                 {
-                    await pollSemaphoreSlim.WaitAsync(5000);
+                    await _pollSemaphoreSlim.WaitAsync(5000).ConfigureAwait(false);
                 }
             }
+            Interlocked.Decrement(ref PollingEngine._activePolls);
             return result;
         }
 
         private async Task<int> UpdateAsync()
         {
+            PollStatus = "UpdateAsync";
             if (!_needsPoll && !IsStale) return 0;
 
-            await pollSemaphoreSlim.WaitAsync();
+            PollStatus = "Awaiting Semaphore";
+            await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             if (_isPolling) return 0;
-            var sw = Stopwatch.StartNew();
+            CurrentPollDuration = Stopwatch.StartNew();
             _isPolling = true;
+            bool errored = false;
             try
             {
                 Interlocked.Increment(ref _pollsTotal);
+                PollStatus = "UpdateCache";
                 // TODO: Async
                 UpdateCache(this);
+                PollStatus = "UpdateCache Complete";
                 _needsPoll = false;
                 if (DataBacker != null)
                     Interlocked.Increment(ref _pollsSuccessful);
@@ -91,14 +98,17 @@ namespace StackExchange.Opserver.Data
                 var errorMessage = e.Message;
                 if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
                 SetFail(errorMessage);
+                errored = true;
                 return 0;
             }
             finally
             {
+                CurrentPollDuration.Stop();
+                LastPollDuration = CurrentPollDuration.Elapsed;
                 _isPolling = false;
-                sw.Stop();
-                LastPollDuration = sw.Elapsed;
-                pollSemaphoreSlim.Release();
+                CurrentPollDuration = null;
+                _pollSemaphoreSlim.Release();
+                PollStatus = errored ? "Failed" : "Completed";
             }
         }
 
@@ -123,7 +133,7 @@ namespace StackExchange.Opserver.Data
             var loadSemaphore = NullSlims.AddOrUpdate(lockKey, k => new SemaphoreSlim(1), (k, old) => old);
             if (cached == null)
             {
-                await loadSemaphore.WaitAsync();
+                await loadSemaphore.WaitAsync().ConfigureAwait(false);
                 try
                 {
                     // See if we have the value cached
@@ -131,7 +141,7 @@ namespace StackExchange.Opserver.Data
                     if (cached == null)
                     {
                         // No data, run this synchronously to get data
-                        var result = await UpdateAsync();
+                        var result = await UpdateAsync().ConfigureAwait(false);
                         Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
                         return result;
                     }
@@ -164,10 +174,10 @@ namespace StackExchange.Opserver.Data
             {
                 var task = new Task(async () =>
                 {
-                    await loadSemaphore.WaitAsync();
+                    await loadSemaphore.WaitAsync().ConfigureAwait(false);
                     try
                     {
-                        await UpdateAsync();
+                        await UpdateAsync().ConfigureAwait(false);
                         Current.LocalCache.Set(CacheKey, this, CacheForSeconds + CacheStaleForSeconds);
                     }
                     finally
@@ -241,6 +251,8 @@ namespace StackExchange.Opserver.Data
         public bool AffectsNodeStatus { get; set; }
         public virtual Type Type => typeof(Cache);
         public Guid UniqueId { get; private set; }
+        
+        public bool ShouldPoll => _needsPoll || IsStale && !_isPolling;
 
         internal volatile bool _needsPoll = true;
         protected volatile bool _isPolling;
@@ -253,9 +265,9 @@ namespace StackExchange.Opserver.Data
         protected long _pollsTotal, _pollsSuccessful;
         public long PollsTotal => _pollsTotal;
         public long PollsSuccessful => _pollsSuccessful;
-        // TODO: Convert to nullable, handle everywhere
-        public DateTime? LastPoll { get; internal set; }
 
+        public Stopwatch CurrentPollDuration { get; protected set; }
+        public DateTime? LastPoll { get; internal set; }
         public TimeSpan? LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
         public bool LastPollSuccessful { get; internal set; }
@@ -273,6 +285,7 @@ namespace StackExchange.Opserver.Data
             LastPollSuccessful = false;
             ErrorMessage = errorMessage;
         }
+        public string PollStatus { get; internal set; }
 
         public MonitorStatus MonitorStatus
         {

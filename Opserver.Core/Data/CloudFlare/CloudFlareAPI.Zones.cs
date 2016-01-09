@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
                             if (data == null) return records;
                             foreach (var z in data)
                             {
-                                var zoneRecords = await api.Get<List<CloudFlareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams);
+                                var zoneRecords = await api.Get<List<CloudFlareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams).ConfigureAwait(false);
                                 records.AddRange(zoneRecords);
                             }
                             return records;

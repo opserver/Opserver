@@ -18,9 +18,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     // TODO: Check concurrency options for a Task.WaitAll
-                    await UpdateNodeDataAsync();
-                    await GetAllInterfacesAsync();
-                    await GetAllVolumesAsync();
+                    await UpdateNodeDataAsync().ConfigureAwait(false);
+                    await GetAllInterfacesAsync().ConfigureAwait(false);
+                    await GetAllVolumesAsync().ConfigureAwait(false);
                     SetReferences();
                 }
                 catch (COMException e)
@@ -36,9 +36,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     // TODO: Check concurrency options for a Task.WaitAll
-                    await PollCpuUtilizationAsync();
-                    await PollMemoryUtilizationAsync();
-                    await PollNetworkUtilizationAsync();
+                    await PollCpuUtilizationAsync().ConfigureAwait(false);
+                    await PollMemoryUtilizationAsync().ConfigureAwait(false);
+                    await PollNetworkUtilizationAsync().ConfigureAwait(false);
                 }
                 catch (COMException e)
                 {
@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 from Win32_ComputerSystem";
                 using (var q = Wmi.Query(Name, machineQuery))
                 {
-                    var data = await q.GetFirstResultAsync();
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
                         return;
                     Model = data.Model;
@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResultAsync();
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
                         return;
                     LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
@@ -113,7 +113,7 @@ SELECT Name,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync())
+                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         string id = $"{data.DeviceID}";
                         var i = Interfaces.FirstOrDefault(x => x.Id == id);
@@ -156,7 +156,7 @@ SELECT Caption,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var disk in await q.GetDynamicResultAsync())
+                    foreach (var disk in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         var id = $"{disk.DeviceID}";
                         var v = Volumes.FirstOrDefault(x => x.Id == id);
@@ -193,7 +193,7 @@ SELECT PercentProcessorTime
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResultAsync();
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
                         return;
                 
@@ -215,7 +215,7 @@ SELECT AvailableKBytes
                 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    var data = await q.GetFirstResultAsync();
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
                         return;
 
@@ -265,7 +265,7 @@ SELECT Name,
 
                 using (var q = Wmi.Query(Name, query))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync())
+                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         if (data == null) continue;
                         var iface = Interfaces.FirstOrDefault(i => data.Name == GetCounterName(i.Name));

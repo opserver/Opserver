@@ -5,6 +5,7 @@ using System.Data.Common;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Dapper;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
 
@@ -109,7 +110,7 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     CacheForSeconds = cacheSeconds,
                     CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromSql(typeof (T).Name + "-Single", async conn => (await conn.QueryAsync<T>(GetFetchSQL<T>())).FirstOrDefault())
+                    UpdateCache = UpdateFromSql(typeof (T).Name + "-Single", async conn => await conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()).ConfigureAwait(false))
                 };
         }
 
@@ -118,9 +119,9 @@ namespace StackExchange.Opserver.Data.SQL
             return UpdateCacheItem(description: "SQL Fetch: " + Name + ":" + opName,
                                    getData: async () =>
                                        {
-                                           using (var conn = await GetConnectionAsync())
+                                           using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                                            {
-                                               return await getFromConnection(conn);
+                                               return await getFromConnection(conn).ConfigureAwait(false);
                                            }
                                        },
                                    addExceptionData: e => e.AddLoggedData("Server", Name));

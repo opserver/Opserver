@@ -12,9 +12,9 @@ namespace StackExchange.Opserver.Data.SQL
         {
             try
             {
-                using (var conn = await GetConnectionAsync())
+                using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    return await conn.ExecuteAsync("DBCC FREEPROCCACHE (@planHandle);", new { planHandle });
+                    return await conn.ExecuteAsync("DBCC FREEPROCCACHE (@planHandle);", new { planHandle }).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)

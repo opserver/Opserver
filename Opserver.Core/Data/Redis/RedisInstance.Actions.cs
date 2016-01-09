@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.Redis
         public async Task<bool> SlaveToAsync(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
-            await _connection.GetSingleServer().SlaveOfAsync(newMaster);
+            await _connection.GetSingleServer().SlaveOfAsync(newMaster).ConfigureAwait(false);
             var newMasterInstance = GetInstance(address);
             if (newMasterInstance != null)
             {
@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Data.Redis
             var result = await _connection.GetDatabase()
                 .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
                 .ConfigureAwait(false);
-            await Tiebreaker.PollAsync(true);
+            await Tiebreaker.PollAsync(true).ConfigureAwait(false);
             return result;
         }
 
@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data.Redis
             var result = await _connection.GetDatabase()
                 .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
                 .ConfigureAwait(false);
-            await Tiebreaker.PollAsync(true);
+            await Tiebreaker.PollAsync(true).ConfigureAwait(false);
             return result;
         }
 

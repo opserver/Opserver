@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public override async Task<ElasticResponse> RefreshFromConnectionAsync(SearchClient cli)
             {
-                var rawInfos = await cli.GetClusterNodeInfoAsync();
+                var rawInfos = await cli.GetClusterNodeInfoAsync().ConfigureAwait(false);
                 var infos = rawInfos.Data;
                 Name = infos.ClusterName;
                 if (infos.Nodes != null)
@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         }).OrderBy(node => node.Name).ToList();
                 }
 
-                var rawStats = await cli.GetClusterNodeStatsAsync();
+                var rawStats = await cli.GetClusterNodeStatsAsync().ConfigureAwait(false);
                 var stats = rawStats.Data;
                 if (stats != null)
                 {

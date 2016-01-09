@@ -31,9 +31,9 @@ Select Host
  Group By Host
 Having Sum(Hits) > 5000
  Order By 1";
-                using (var conn = await Connection.GetOpenAsync(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString).ConfigureAwait(false))
                 {
-                    results = await conn.QueryAsync<string>(sql);
+                    results = await conn.QueryAsync<string>(sql).ConfigureAwait(false);
                 }
                 results.RemoveAll(h => !IsValidHost(h));
                 Current.LocalCache.Set(cacheKey, results, 5 * 60 * 60); // cache for 5 hours, this *very* rarely changes
@@ -70,9 +70,9 @@ Select CreationDate,
             var results = Current.LocalCache.Get<List<TrafficDay>>(cacheKey);
             if (results == null)
             {
-                using (var conn = await Connection.GetOpenAsync(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString).ConfigureAwait(false))
                 {
-                    results = await conn.QueryAsync<TrafficDay>(sql, new { host, start = startDate, end = endDate });
+                    results = await conn.QueryAsync<TrafficDay>(sql, new { host, start = startDate, end = endDate }).ConfigureAwait(false);
                     Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, that's the SQL recalc interval
                 }
             }
@@ -116,9 +116,9 @@ Select RouteName,
  Group By RouteName
  Order By Sum(Hits) Desc";
 
-                using (var conn = await Connection.GetOpenAsync(ConnectionString))
+                using (var conn = await Connection.GetOpenAsync(ConnectionString).ConfigureAwait(false))
                 {
-                    results = await conn.QueryAsync<RouteHit>(sql, new {lastNdays, host});
+                    results = await conn.QueryAsync<RouteHit>(sql, new {lastNdays, host}).ConfigureAwait(false);
                 }
                 Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, this only aggregates in sql once an hour
             }
@@ -151,9 +151,9 @@ Where ResponseCode = 200
 Group By CreationDate
 Order By CreationDate";
 
-            using (var conn = await Connection.GetOpenAsync(ConnectionString))
+            using (var conn = await Connection.GetOpenAsync(ConnectionString).ConfigureAwait(false))
             {
-                return await conn.QueryAsync<RouteData>(sql, new { routeName, host, lastNdays, server });
+                return await conn.QueryAsync<RouteData>(sql, new { routeName, host, lastNdays, server }).ConfigureAwait(false);
             }
         }
 

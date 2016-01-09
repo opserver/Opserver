@@ -31,11 +31,11 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("poll/all"), HttpPost, OnlyAllow(Roles.GlobalAdmin)]
-        public async Task<ActionResult> PollDown()
+        public ActionResult PollDown()
         {
             try
             {
-                await PollingEngine.PollAllAsync(true);
+                PollingEngine.PollAllAsync(true);
                 return Json(true);
             }
             catch (Exception e)

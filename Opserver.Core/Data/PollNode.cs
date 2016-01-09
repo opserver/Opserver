@@ -12,8 +12,7 @@ namespace StackExchange.Opserver.Data
 {
     public abstract partial class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
     {
-        private int _totalPolls;
-        private int _totalCachePolls;
+        private int _totalPolls, _totalCachePolls, _totalCacheQueues;
 
         public abstract int MinSecondsBetweenPolls { get; }
         public abstract string NodeType { get; }
@@ -103,25 +102,31 @@ namespace StackExchange.Opserver.Data
             }
         }
         public string MonitorStatusReason { get; private set; }
-
-        public virtual Cache LastFetch
-        {
-            get { return DataPollers.OrderByDescending(p => p.LastPoll).First(); }
-        }
-
+        
         public DateTime? LastPoll { get; protected set; }
         public TimeSpan LastPollDuration { get; protected set; }
-        protected int PollFailsInaRow = 0;
+        public Stopwatch CurrentPollDuration { get; protected set; }
+        protected int PollFailsInaRow;
+
+        public virtual Cache LastFetch { get; private set; }
 
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
+        public string PollStatus { get; protected set; }
 
         public AutoResetEvent FirstPollRun = new AutoResetEvent(false);
 
-        protected Task _pollTask;
-        public virtual string PollTaskStatus => _pollTask?.Status.ToString() ?? "Not running";
+        public virtual void Poll(bool force = false)
+        {
+            PollImpl(force, true);
+        }
 
-        public virtual async Task PollAsync(bool force = false)
+        public virtual void PollAsync(bool force = false)
+        {
+            PollImpl(force, false);
+        }
+        
+        protected virtual void PollImpl(bool force, bool wait)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
             {
@@ -132,13 +137,14 @@ namespace StackExchange.Opserver.Data
                 // If we're seeing a lot of poll failures in a row, back the hell off
                 if (!force && PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
                     return;
-                
+
                 // Prevent multiple poll threads for this node from running at once
                 if (_isPolling) return;
                 _isPolling = true;
 
-                _pollTask = InnerPollAsync(force);
-                await _pollTask;
+                PollStatus = "Poll Started";
+                InnerPollImpl(force, wait);
+                PollStatus = "Poll Complete";
             }
         }
 
@@ -152,11 +158,12 @@ namespace StackExchange.Opserver.Data
         /// Called on a background thread for when this node is ACTUALLY polling
         /// This is not called if we're not due for a poll when the pass runs
         /// </summary>
-        private async Task InnerPollAsync(bool force = false)
+        private void InnerPollImpl(bool force = false, bool sync = false)
         {
-            var sw = Stopwatch.StartNew();
+            CurrentPollDuration = Stopwatch.StartNew();
             try
             {
+                PollStatus = "InnerPoll Started";
                 if (Polling != null)
                 {
                     var ps = new PollStartArgs();
@@ -164,31 +171,64 @@ namespace StackExchange.Opserver.Data
                     if (ps.AbortPoll) return;
                 }
 
-                var polled = 0;
-                var toPoll = DataPollers.Select(i => i.PollAsync(force));
-                var results = await Task.WhenAll(toPoll);
-                foreach (var r in results)
+                int toPoll = 0;
+                if (sync)
                 {
-                    Interlocked.Add(ref polled, r);
+                    PollStatus = "DataPollers Queueing (Sync)";
+                    var tasks = DataPollers
+                        .Where(p => force || p.ShouldPoll)
+                        .Select(p => p.PollAsync(force))
+                        .ToArray<Task>();
+                    Task.WaitAll(tasks);
+                    PollStatus = "DataPollers Complete (Sync)";
                 }
-                
+                else
+                {
+                    PollStatus = "DataPollers Queueing";
+                    foreach (var p in DataPollers)
+                    {
+                        // Cheap checks to eliminate many uncessary task creations
+                        if (!force && !p.ShouldPoll) continue;
+                        // Kick off the poll and don't wait for it to continue;
+#pragma warning disable 4014
+                        p.PollStatus = "Kicked off by Node";
+                        Interlocked.Add(ref _totalCacheQueues, 1);
+                        p.PollAsync(force).ContinueWith(t =>
+                        {
+                            if (t.IsFaulted)
+                            {
+                                Current.LogException(t.Exception);
+                                PollStatus = "Faulted";
+                            }
+                            else
+                            {
+                                PollStatus = "Completed";
+                            }
+                            Interlocked.Add(ref _totalCachePolls, t.Result);
+                        }, TaskContinuationOptions.ExecuteSynchronously).ConfigureAwait(false);
+                        toPoll++;
+#pragma warning restore 4014
+                    }
+                    PollStatus = toPoll.ToComma() + " DataPollers Started";
+                }
+
                 LastPoll = DateTime.UtcNow;
-                Polled?.Invoke(this, new PollResultArgs {Polled = polled});
+                Polled?.Invoke(this, new PollResultArgs {Queued = toPoll});
                 if (FirstPollRun != null)
                 {
                     FirstPollRun.Set();
                     FirstPollRun = null;
                 }
-
-                Interlocked.Add(ref _totalCachePolls, polled);
+                
                 Interlocked.Increment(ref _totalPolls);
             }
             finally
             {
-                sw.Stop();
-                LastPollDuration = sw.Elapsed;
-                _isPolling = false;
-                _pollTask = null;
+                CurrentPollDuration.Stop();
+                LastPollDuration = CurrentPollDuration.Elapsed;
+                 _isPolling = false;
+                CurrentPollDuration = null;
+                PollStatus = "InnerPoll Complete";
             }
         }
 
@@ -208,6 +248,7 @@ namespace StackExchange.Opserver.Data
         {
             return async cache =>
             {
+                cache.PollStatus = "UpdateCacheItem";
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {
                     cache.Profiler = OpserverProfileProvider.CreateContextProfiler("Poll: " + description, cache.UniqueId);
@@ -217,10 +258,12 @@ namespace StackExchange.Opserver.Data
                     CacheItemFetching?.Invoke(this, EventArgs.Empty);
                     try
                     {
+                        cache.PollStatus = "Fetching";
                         using (MiniProfiler.Current.Step("Data Fetch"))
                         {
-                            cache.Data = await getData();
+                            cache.Data = await getData().ConfigureAwait(false);
                         }
+                        cache.PollStatus = "Fetch Complete";
                         cache.SetSuccess();
                         PollFailsInaRow = 0;
                     }
@@ -244,15 +287,18 @@ namespace StackExchange.Opserver.Data
                         errorMessage += " @ " + e.StackTrace;
 #endif
                         if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
+                        cache.PollStatus = "Fetch Failed";
                         cache.SetFail(errorMessage);
                     }
                     CacheItemFetched?.Invoke(this, EventArgs.Empty);
                     CachedMonitorStatus = null;
+                    LastFetch = cache;
                 }
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {
                     OpserverProfileProvider.StopContextProfiler();
                 }
+                cache.PollStatus = "UpdateCacheItem Complete";
             };
         }
 

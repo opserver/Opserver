@@ -26,13 +26,13 @@ namespace StackExchange.Opserver.Data.SQL
                             );
                         
                         List<AGInfo> ags;
-                        using (var multi = await conn.QueryMultipleAsync(sql))
+                        using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
                         {
-                            ags = await multi.ReadAsync<AGInfo>().AsList();
-                            var replicas = await multi.ReadAsync<AGReplica>().AsList();
-                            var databases = await multi.ReadAsync<AGDatabaseReplica>().AsList();
-                            var listeners = await multi.ReadAsync<AGListener>().AsList();
-                            var listenerIPs = await multi.ReadAsync<AGLisenerIPAddress>().AsList();
+                            ags = await multi.ReadAsync<AGInfo>().ConfigureAwait(false).AsList();
+                            var replicas = await multi.ReadAsync<AGReplica>().ConfigureAwait(false).AsList();
+                            var databases = await multi.ReadAsync<AGDatabaseReplica>().ConfigureAwait(false).AsList();
+                            var listeners = await multi.ReadAsync<AGListener>().ConfigureAwait(false).AsList();
+                            var listenerIPs = await multi.ReadAsync<AGLisenerIPAddress>().ConfigureAwait(false).AsList();
                             
                             // Databases to replicas...
                             foreach (var r in replicas)
