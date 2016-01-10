@@ -1,19 +1,19 @@
-﻿@using StackExchange.Elastic
+﻿@using StackExchange.Opserver.Data.Elastic
 @model StackExchange.Opserver.Views.Elastic.DashboardModel
 @{
     var c = Model.Current.Cluster;
     if (c == null) { return; }
     var hs = c.HealthStatus.SafeData(true);
     var warningsOnly = Model.WarningsOnly || Model.Current.WarningsOnly;
-    var indices = (warningsOnly ? c.TroubledIndexes : c.HealthStatus.Data.Indices).ToList();
-    var stats = c.Stats.SafeData(true);
+    var indices = (warningsOnly ? c.TroubledIndexes : c.HealthStatus.Data.Indices.Values).ToList();
+    var stats = c.IndexStats.SafeData(true);
 }
 <div class="js-refresh" data-name="elastic-indexes">
     @try
     {
         <h5 class="page-header">
             @c.IconSpan() @hs.Name: @indices.Count.Pluralize("Index") @(warningsOnly ? "in trouble" : "") on @hs.TotalNodeCount.Pluralize("node")
-            <span class="small">(Updated @c.Stats.ToPollSpan())</span>
+            <span class="small">(Updated @c.IndexStats.ToPollSpan())</span>
             @Helpers.PollNow(c)
         </h5>
         if (indices.Any())
@@ -40,7 +40,7 @@
                         return int.TryParse(i.Name, out j) ? j : 0;
                     }).ThenBy(i => i.Name))
                     {
-                        IndexStats iStats;
+                        ElasticCluster.IndexStatsInfo.IndexStats iStats;
                         stats.Indices.TryGetValue(i.Name, out iStats);
                         <tr class="@i.RowClass()">
                             <td>@i.IconSpan()</td>

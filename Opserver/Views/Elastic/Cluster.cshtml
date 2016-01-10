@@ -1,5 +1,4 @@
-﻿@using StackExchange.Elastic
-@using StackExchange.Opserver.Data.Elastic
+﻿@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -36,14 +35,14 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach (var n in c.ConnectionManager.AllNodes)
+                @foreach (var n in c.SettingsNodes)
                 {
                     <tr class="@(MonitorStatus.Critical.RowClass())">
                         <td>@(MonitorStatus.Critical.IconSpan())</td>
-                        <td>@n.Endpoint</td>
-                        <td>@n.IsHealthy</td>
-                        <td title="@(n.LastError?.Message)">@(n.LastError?.Message.TruncateWithEllipsis(60))</td>
-                        <td>@((n.LastPing ?? n.LastSeen)?.ToRelativeTimeSpan())</td>
+                        <td>@n.Url</td>
+                        <td class="text-muted">Unknown</td>
+                        @*<td title="@(n.LastError?.Message)">@(n.LastError?.Message.TruncateWithEllipsis(60))</td>
+                        <td>@((n.LastPing ?? n.LastSeen)?.ToRelativeTimeSpan())</td>*@
                     </tr>
                 }
             </tbody>
@@ -51,7 +50,7 @@
     }
     @foreach (var c in knownClusters)
     {
-        var ss = c.ShardStates;
+        var ss = c.AllShards;
         var hs = c.HealthStatus.SafeData(true);
         var ns = c.Nodes.SafeData(true);
         var attribs = new List<string> {ns.Nodes.Count.Pluralize("node"), ss.Count().Pluralize("shard")};
@@ -93,9 +92,9 @@
                     // Don't show client nodes such as logstash inserters in this view
                     if (n.IsClient) { continue; }
                     var shards = ss.Where(sh => sh.Node == n.GUID);
-                    var stats = n.Stats ?? new NodeStats();
-                    var upTime = stats.JVM != null && stats.JVM.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
-                    <tr class="@n.RowClass()">
+                    var stats = n.Stats;
+                    var upTime = stats?.JVM?.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
+                    <tr class="@n.RowClass()@(false ? " info" : null)">
                         <td title="Up since @(upTime.HasValue ? upTime?.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
                             @n.IconSpan()
                             <a class="@n.TextClass()" href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
@@ -155,7 +154,7 @@
                             <td class="text-muted">n/a</td>
                             <td class="text-muted">n/a</td>
                         }
-                        <td>@c.Status.ToPollSpan()</td>
+                        <td>@c.State.ToPollSpan()</td>
                     </tr>
                 }
                 @if (c.SettingsNodes.Count > ns.Nodes.Count)

@@ -7,14 +7,14 @@
     var maxTroubleShardsToShow = 250;
     var isAdmin = Current.User.IsInRole(Roles.ElasticAdmin);
 }
-@helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfoWrap> nodes)
+@helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfo> nodes)
 {
     if (node.IsNullOrEmpty())
     {
         <span class="unknown">n/a</span>
         return;
     }
-    ElasticCluster.NodeInfoWrap result;
+    ElasticCluster.NodeInfo result;
     if (nodes.TryGetValue(node, out result))
     {
         @result.Name
@@ -22,15 +22,15 @@
     }
     <span class="unknown">@node</span>
 }
-@foreach (var c in Model.Clusters.OrderByWorst(c => c.Status.Data?.MonitorStatus ?? MonitorStatus.Critical))
+@foreach (var c in Model.Clusters.OrderByWorst(c => c.State.Data?.MonitorStatus ?? MonitorStatus.Critical))
 {
-    var shards = (Model.WarningsOnly ? c.TroubledShards : c.ShardStates).ToList();
+    var shards = (Model.WarningsOnly ? c.TroubledShards : c.AllShards).ToList();
     if (!shards.Any() || c.Nodes.Data == null)
     {
         continue;
     }
     var nodes = c.Nodes.Data.Nodes.ToDictionary(n => n.GUID);
-    var status = shards.Select(s => s.GetMonitorStatus()).GetWorstStatus();
+    var status = shards.GetWorstStatus();
     <h5 class="page-header">
         @status.IconSpan() @c.HealthStatus.Data.Name: @shards.Count.Pluralize("Shard") @(Model.WarningsOnly ? "in trouble" : "") on @c.HealthStatus.Data.TotalNodeCount.Pluralize("node")
     </h5>
@@ -52,16 +52,16 @@
         </tbody>
         <tbody>
             @foreach (var s in shards.OrderByDescending(s => s.Node.HasValue() || s.RelocatingNode.HasValue())
-                .ThenByWorst(s => s.GetMonitorStatus())
+                .ThenByWorst(s => s.MonitorStatus)
                 .ThenBy(s => { int j; return int.TryParse(s.Index, out j) ? j : 0; })
                 .ThenBy(s => s.Shard)
                 .ThenByDescending(s => s.Primary)
                 .Take(maxTroubleShardsToShow))
             {
-                <tr class="@s.GetMonitorStatus().RowClass()">
-                    <td>@s.GetMonitorStatus().IconSpan()</td>
+                <tr class="@s.RowClass()">
+                    <td>@s.IconSpan()</td>
                     <td>@c.GetIndexAliasedName(s.Index)</td>
-                    <td>@s.GetPrettyState()</td>
+                    <td>@s.PrettyState</td>
                     <td>@s.Shard.ToString()</td>
                     <td>@(s.Primary ? "Yes" : "No")</td>
                     <td>@GetNodeName(s.Node, nodes)</td>

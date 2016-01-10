@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -9,16 +10,14 @@ namespace StackExchange.Opserver.Data.Elastic
         public Cache<IndexAliasInfo> Aliases => _aliases ?? (_aliases = new Cache<IndexAliasInfo>
         {
             CacheForSeconds = RefreshInterval,
-            UpdateCache = UpdateFromElastic(nameof(Aliases), async cli =>
+            UpdateCache = UpdateFromElastic(nameof(Aliases), async () =>
             {
-                var aliases = await cli.GetAliasesAsync().ConfigureAwait(false);
+                var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases").ConfigureAwait(false);
                 return new IndexAliasInfo
                 {
-                    Aliases = aliases.HasData
-                        ? aliases.Data
-                            .Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0)
-                            .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
-                        : new Dictionary<string, List<string>>()
+                    Aliases = aliases?.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0)
+                        .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
+                              ?? new Dictionary<string, List<string>>()
                 };
             })
         });
@@ -37,6 +36,12 @@ namespace StackExchange.Opserver.Data.Elastic
         public class IndexAliasInfo
         {
             public Dictionary<string, List<string>> Aliases { get; internal set; }
+        }
+
+        public class IndexAliasList
+        {
+            [DataMember(Name = "aliases")]
+            public Dictionary<string, object> Aliases { get; internal set; }
         }
     }
 }

@@ -7,7 +7,7 @@ using StackExchange.Profiling.Data;
 
 namespace StackExchange.Opserver.Monitoring
 {
-    public class LightweightProfiler : IDbProfiler, Elastic.IProfiler
+    public class LightweightProfiler : IDbProfiler
     {
         /// <summary>
         /// Can be a full <see cref="MiniProfiler"/>.
@@ -65,40 +65,5 @@ namespace StackExchange.Opserver.Monitoring
         }
 
         public bool IsActive => true;
-
-        IDisposable Elastic.IProfiler.Profile(string name, string command)
-        {
-            MiniProfiler profiler;
-            CustomTiming timing = null;
-            if ((profiler = MiniProfiler.Current) != null)
-            {
-                timing = profiler.CustomTiming("elastic", command, name);
-            }
-            return new InnerProfileObject(this, timing);
-        }
-        sealed class InnerProfileObject : IDisposable
-        {
-            private LightweightProfiler _parent;
-            private readonly IDisposable _timing;
-            public InnerProfileObject(LightweightProfiler parent, IDisposable timing)
-            {
-                if (parent != null)
-                {
-                    parent.Count++;
-                    parent._sw.Start();
-                }
-                _timing = timing;
-                _parent = parent;
-            }
-            void IDisposable.Dispose()
-            {
-                if (_parent != null)
-                {
-                    _parent._sw.Stop();
-                    _parent = null;
-                }
-                _timing?.Dispose();
-            }
-        }
     }
 }

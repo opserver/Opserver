@@ -1,4 +1,4 @@
-﻿@using StackExchange.Elastic
+﻿@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -32,7 +32,7 @@ Transport: @n.Stats.TransportAddress">
                         <label>Version</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
-                        @(c.Status?.Data?.MasterNode == n.GUID ? "Master" : "Slave")
+                        @(c.State?.Data?.MasterNode == n.GUID ? "Master" : "Slave")
                         <label>Role</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
@@ -95,7 +95,7 @@ Transport: @n.Stats.TransportAddress">
                 var uptime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
                 var gcTime = TimeSpan.FromMilliseconds(jvm.GC.CollectionTimeInMilliseconds);
                 <div class="panel panel-default">
-                    <div class="panel-heading">Java Virtual Machine <span class="small text-muted">(PID: @(cnd?.Info?.JVM.PID))</span></div>
+                    <div class="panel-heading">Java Virtual Machine <span class="small text-muted">(PID: @(cnd?.JVM.PID.ToString()))</span></div>
                     <div class="panel-body small">
                         <div class="value-block col-md-4 col-sm-6" title="@uptime.ToReadableString()">
                             @uptime.ToTimeStringMini(3)
@@ -127,7 +127,7 @@ Transport: @n.Stats.TransportAddress">
                             <label>GC Runs</label>
                         </div>
                         <div class="value-block col-md-3 col-sm-6">
-                            @(cnd?.Info?.JVM.Version)
+                            @(cnd?.JVM.Version)
                             <label>Version</label>
                         </div>
                     </div>
@@ -139,7 +139,7 @@ Transport: @n.Stats.TransportAddress">
                     <div class="panel-heading">Network</div>
                     <div class="panel-body small">
                         <div class="value-block col-md-3 col-sm-6">
-                            @(cnd?.Info?.Network?.PrimaryInterface?.Address)
+                            @(cnd?.Network?.PrimaryInterface?.Address)
                             <label>Address</label>
                         </div>
                         <div class="value-block col-md-3 col-sm-6">
@@ -191,7 +191,7 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                 <div class="panel-heading">Cluster Stats</div>
                 <div class="panel-body small">
                     @{
-                        var gs = c.Stats.Data?.GlobalStats;
+                        var gs = c.IndexStats.Data?.All;
                     }
                     @if (gs == null)
                     {
@@ -230,8 +230,8 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                 <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/summary/indices">View Detail</a>)</span></div>
                 <div class="panel-body small">
                     @{
-                        var indexes = c?.HealthStatus?.Data?.Indices;
-                        var indexStats = c.Stats.Data?.Indices;
+                        var indexes = c?.HealthStatus?.Data?.Indices?.Values;
+                        var indexStats = c.IndexStats.Data?.Indices;
                         if (indexStats?.Count > 0 && indexes != null && indexes.Any())
                         {
                             <table class="table table-striped table-hover table-super-condensed">
@@ -245,10 +245,10 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                 <tbody>
                                     @foreach (var i in indexes.OrderByWorst().ThenBy(i => { int j; return int.TryParse(i.Name, out j) ? j : 0; }).ThenBy(i => i.Name))
                                     {
-                                        IndexStats indexStat;
+                                        ElasticCluster.IndexStatsInfo.IndexStats indexStat;
                                         indexStats.TryGetValue(i.Name, out indexStat);
                                         var alias = c.GetIndexAliasedName(i.Name);
-                                        <tr title="Status: @i.StringStatus
+                                        <tr title="Status: @i.Status
 Name: @i.Name
 Alias: @(alias == i.Name ? "none" : alias)
 Shards: @i.NumberOfShards.ToComma()

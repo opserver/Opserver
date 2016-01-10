@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Views.Elastic
             public string ClusterName { get; set; }
             public string IndexName { get; set; }
             public ElasticCluster Cluster { get; set; }
-            public ElasticCluster.NodeInfoWrap Node { get; set; }
+            public ElasticCluster.NodeInfo Node { get; set; }
 
             public bool WarningsOnly { get; set; }
         }

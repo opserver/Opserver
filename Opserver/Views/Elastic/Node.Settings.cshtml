@@ -2,28 +2,28 @@
 @model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
 @{
     Layout = null;
-    var settings = Model.Node?.Info?.Settings ?? new Dictionary<string, dynamic>();
+    var settings = Model.Node?.Settings ?? new Dictionary<string, dynamic>();
 }
 <h4 class="modal-title">
-    <a href="/elastic/node?cluster=@Model.ClusterName&node=@Model.NodeName">@Model.ClusterName: @Model.NodeName</a><span class="text-muted">:</span> Settings
+    Node Settings
 </h4>
 @if (settings.Any())
 {
     <table class="table table-striped table-responsive table-super-condensed">
         <thead>
-            <tr>
-                <th>Setting</th>
-                <th>Value</th>
-            </tr>
+        <tr>
+            <th>Setting</th>
+            <th>Value</th>
+        </tr>
         </thead>
         <tbody>
-            @foreach (var s in settings.OrderBy(s => s.Key))
-            {
-                <tr>
-                    <td>@s.Key</td>
-                    <td class="json-pretty">@JSON.Serialize(s.Value, Options.ISO8601PrettyPrint)</td>
-                </tr>
-            }
+        @foreach (var s in settings.OrderBy(s => s.Key))
+        {
+            <tr>
+                <td>@s.Key</td>
+                <td class="json-pretty">@JSON.Serialize(s.Value, Options.ISO8601PrettyPrint)</td>
+            </tr>
+        }
         </tbody>
     </table>
 }

@@ -54,7 +54,13 @@ namespace StackExchange.Opserver.Controllers
                 case "settings":
                     return View("Node.Settings", vd);
                 case "indices":
-                    return View("Indices", vd);
+                    return View("Indices", new DashboardModel
+                    {
+                        Current = new DashboardModel.CurrentData
+                        {
+                            Cluster = vd.Cluster,
+                        }
+                    });
                 default:
                     return ContentNotFound("Unknown summary view requested");
             }

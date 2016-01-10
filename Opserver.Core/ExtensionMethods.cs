@@ -9,9 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using StackExchange.Elastic;
 using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
@@ -600,57 +598,6 @@ namespace StackExchange.Opserver
         {
             var config = BuildStatus.GetConfig(b.BuildTypeId);
             return config != null ? config.ProjectName : "Unknown build config";
-        }
-
-        public static MonitorStatus GetMonitorStatus(this ShardState shard)
-        {
-            switch (shard?.State)
-            {
-                case ShardStates.Unassigned:
-                    return MonitorStatus.Critical;
-                case ShardStates.Initializing:
-                    return MonitorStatus.Warning;
-                case ShardStates.Started:
-                    return MonitorStatus.Good;
-                case ShardStates.Relocating:
-                    return MonitorStatus.Maintenance;
-                default:
-                    return MonitorStatus.Unknown;
-            }
-        }
-
-        public static string GetPrettyState(this ShardState shard)
-        {
-            switch (shard?.State)
-            {
-                case ShardStates.Unassigned:
-                    return "Unassigned";
-                case ShardStates.Initializing:
-                    return "Initializing";
-                case ShardStates.Started:
-                    return "Started";
-                case ShardStates.Relocating:
-                    return "Relocating";
-                default:
-                    return "Unknown";
-            }
-        }
-
-        public static string GetStateDescription(this ShardState shard)
-        {
-            switch (shard?.State)
-            {
-                case ShardStates.Unassigned:
-                    return "The shard is not assigned to any node";
-                case ShardStates.Initializing:
-                    return "The shard is initializing (probably recovering from either a peer shard or gateway)";
-                case ShardStates.Started:
-                    return "The shard is started";
-                case ShardStates.Relocating:
-                    return "The shard is in the process being relocated";
-                default:
-                    return "Unknown";
-            }
         }
 
         private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
