@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.Elastic
         });
         
         public IEnumerable<ClusterStateInfo.ShardState> TroubledShards => AllShards.Where(s => s.State != "STARTED");
-        public List<ClusterStateInfo.ShardState> AllShards => State.Data.AllShards;
+        public List<ClusterStateInfo.ShardState> AllShards => State.Data?.AllShards ?? new List<ClusterStateInfo.ShardState>();
         
         public class ClusterStateInfo : IMonitorStatus
         {

@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Elastic
+﻿@using System.Collections.Specialized
+@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -11,7 +12,7 @@
 @section head {
     <script>
         $(function() {
-            Status.Dashboard.init({ refresh: @((Model.Refresh ? (Model.View == DashboardModel.Views.Shards ? 60 : 5) : 0).ToString()) });
+            Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
             @if (Model.Current != null)
             {
             @:Status.Elastic.init({ cluster: '@Model.Current.ClusterName', node: '@Model.Current.NodeName' });
@@ -19,22 +20,25 @@
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+@helper TabLink(DashboardModel.Views view, string href, string name, bool includeCluster = true, bool includeNode = false)
 {
-    var cc = Model.Current?.ClusterName;
-    var cs = Model.Current?.NodeName;
-    if (includeParams && cc != null && cs != null)
+    var nvc=  new NameValueCollection();
+    if (includeCluster && (Model.Current?.ClusterName.HasValue() ?? false))
     {
-        <li class="@(Model.View == view ? "active" : null)"><a href="@href?cluster=@cc.UrlEncode()&node=@cs.UrlEncode()">@name</a></li>
+        nvc.Add("cluster", Model.Current?.ClusterName);
     }
-    else
+    if (includeNode && (Model.Current?.NodeName.HasValue() ?? false))
     {
-        <li class="@(Model.View == view ? "active" : null)"><a href="@href">@name</a></li>
+        nvc.Add("node", Model.Current?.NodeName);
     }
+    var query = nvc.ToQueryString();
+
+    <li class="@(Model.View == view ? "active" : null)"><a href="@href@query">@name</a></li>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(DashboardModel.Views.Cluster, "/elastic", "clusters", false)
-    @TabLink(DashboardModel.Views.Node, "/elastic/node", "node")
+    @TabLink(DashboardModel.Views.AllClusters, "/elastic", "all clusters", false)
+    @TabLink(DashboardModel.Views.Cluster, "/elastic/cluster", "cluster")
+    @TabLink(DashboardModel.Views.Node, "/elastic/node", "node", includeNode: true)
     @TabLink(DashboardModel.Views.Indices, "/elastic/indices", "indices")
 </ul>
 <div>
@@ -42,7 +46,7 @@
     {
         @Html.Partial("Node.Selector")
     }
-    else if (Model.View == DashboardModel.Views.Indices && (Model.Current?.Cluster == null))
+    else if ((Model.View == DashboardModel.Views.Cluster || Model.View == DashboardModel.Views.Indices) && (Model.Current?.Cluster == null))
     {
         @Html.Partial("Cluster.Selector")
     }

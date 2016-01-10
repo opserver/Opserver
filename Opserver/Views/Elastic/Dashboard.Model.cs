@@ -9,10 +9,12 @@ namespace StackExchange.Opserver.Views.Elastic
         public CurrentData Current { get; set; }
         public bool WarningsOnly { get; set; }
         public Popups Popup { get; set; }
-        
-        public bool Refresh { get; set; }
+
+        //TODO: Global settings pre-websockets
+        public int Refresh { get; set; } = 10;
         public enum Views
         {
+            AllClusters,
             Cluster,
             Node,
             Indices,

@@ -9,7 +9,7 @@ using StackExchange.Opserver.Views.Elastic;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Elastic)]
-    public partial class ElasticController : StatusController
+    public class ElasticController : StatusController
     {
         protected override ISecurableSection SettingsSection => Current.Settings.Elastic;
 
@@ -21,9 +21,20 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
             {
                 Clusters = ElasticCluster.AllClusters,
-                Refresh = true,
-                View = DashboardModel.Views.Cluster,
+                View = DashboardModel.Views.AllClusters,
                 WarningsOnly = true
+            };
+            return View("AllClusters", vd);
+        }
+
+        [Route("elastic/cluster")]
+        public ActionResult Dashboard(string cluster)
+        {
+            var cd = GetCurrent(cluster);
+            var vd = new DashboardModel
+            {
+                Current = cd,
+                View = DashboardModel.Views.Cluster
             };
             return View("Cluster", vd);
         }
@@ -31,11 +42,10 @@ namespace StackExchange.Opserver.Controllers
         [Route("elastic/node")]
         public ActionResult Node(string cluster, string node, DashboardModel.Popups popup = DashboardModel.Popups.None)
         {
-            var cn = GetNode(cluster, node);
+            var cn = GetCurrent(cluster, node);
             var vd = new DashboardModel
                 {
                     Clusters = ElasticCluster.AllClusters,
-                    Refresh = true,
                     View = DashboardModel.Views.Node,
                     Current = cn,
                     Popup = popup
@@ -47,7 +57,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("elastic/node/summary/{type}")]
         public ActionResult NodeSummary(string cluster, string node, string type)
         {
-            var vd = GetNode(cluster, node);
+            var vd = GetCurrent(cluster, node);
 
             switch (type)
             {
@@ -69,7 +79,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("elastic/index/summary/{type}")]
         public ActionResult IndexSummary(string cluster, string node, string index, string type, string subtype)
         {
-            var vd = GetNode(cluster, node, index);
+            var vd = GetCurrent(cluster, node, index);
 
             switch (type)
             {
@@ -80,7 +90,7 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        private static DashboardModel.CurrentData GetNode(string cluster, string node = null, string index = null)
+        private static DashboardModel.CurrentData GetCurrent(string cluster, string node = null, string index = null)
         {
             // TODO: node string split to cluster
 
@@ -103,11 +113,10 @@ namespace StackExchange.Opserver.Controllers
         [Route("elastic/indices")]
         public ActionResult Indices(string cluster, string node, string guid)
         {
-            var current = GetNode(cluster, node ?? guid);
+            var current = GetCurrent(cluster, node ?? guid);
             var vd = new DashboardModel
                 {
                     Clusters = ElasticCluster.AllClusters,
-                    Refresh = true,
                     View = DashboardModel.Views.Indices,
                     Current = current
                 };
@@ -120,7 +129,7 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
             {
                 Clusters = ElasticCluster.AllClusters,
-                Refresh = true,
+                Refresh = 60,
                 View = DashboardModel.Views.Shards
             };
             return View("Cluster.Shards", vd);

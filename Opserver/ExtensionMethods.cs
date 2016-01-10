@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
@@ -206,9 +207,9 @@ namespace StackExchange.Opserver
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (!cache.LastPollSuccessful)
                 return MonitorStatus.Warning.Span(mini ? dateToUse?.ToRelativeTime() : dateToUse?.ToRelativeTimeMini(),
-                    $"Last Poll: {lf?.ToZuluTime()} ({lf?.ToRelativeTime()})\nError: {cache.ErrorMessage}");
+                    $"Last Poll: {lf.Value.ToZuluTime()} ({lf.Value.ToRelativeTime()})\nError: {cache.ErrorMessage}");
 
-            return mini ? lf?.ToRelativeTimeSpanMini() : lf?.ToRelativeTimeSpan();
+            return mini ? lf.Value.ToRelativeTimeSpanMini() : lf.Value.ToRelativeTimeSpan();
         }
 
         public static string ToDateOnlyStringPretty(this DateTime dt, DateTime? utcNow = null)
@@ -376,12 +377,12 @@ namespace StackExchange.Opserver
             return sb.ToStringRecycle().AsHtml();
         }
 
-        private static readonly MvcHtmlString _yesHtml = MvcHtmlString.Create("Yes");
-        private static readonly MvcHtmlString _noHtml = MvcHtmlString.Create("No");
+        private static readonly MvcHtmlString YesHtml = MvcHtmlString.Create("Yes");
+        private static readonly MvcHtmlString NoHtml = MvcHtmlString.Create("No");
 
         public static IHtmlString ToYesNo(this bool value)
         {
-            return value ? _yesHtml : _noHtml;
+            return value ? YesHtml : NoHtml;
         }
         
         /// <summary>
@@ -418,6 +419,24 @@ namespace StackExchange.Opserver
             return MvcHtmlString.Create(data == "n/a"
                 ? @"<span class=""text-muted"">n/a</span>"
                 : data.HtmlEncode());
+        }
+
+        public static string ToQueryString(this NameValueCollection nvc)
+        {
+            var sb = StringBuilderCache.Get();
+            sb.Append("?");
+            foreach (string key in nvc)
+            {
+                foreach (var value in nvc.GetValues(key))
+                {
+                    if (sb.Length > 1) sb.Append("&");
+                    sb.Append(HttpUtility.UrlEncode(key))
+                        .Append("=")
+                        .Append(HttpUtility.UrlEncode(value));
+                }
+            }
+            var result = sb.ToStringRecycle();
+            return result.Length > 1 ? result : "";
         }
     }
 

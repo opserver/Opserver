@@ -616,7 +616,7 @@
     </Content>
     <Content Include="Views\Home\Test.cshtml" />
     <Content Include="Views\Elastic\Dashboard.cshtml" />
-    <Content Include="Views\Elastic\Cluster.cshtml" />
+    <Content Include="Views\Elastic\AllClusters.cshtml" />
     <Content Include="Views\Elastic\Cluster.Shards.cshtml" />
     <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
     <Content Include="Views\Hub\Index.cshtml" />
@@ -661,6 +661,7 @@
     <Content Include="Views\Shared\NoConfiguration.cshtml" />
     <Content Include="Views\SQL\Servers.cshtml" />
     <Content Include="Views\SQL\_ViewStart.cshtml" />
+    <Content Include="Views\Elastic\Cluster.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />
