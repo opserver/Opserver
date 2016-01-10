@@ -88,34 +88,34 @@ namespace StackExchange.Opserver.Data.Elastic
 
             [DataMember(Name = "name")]
             public string Name { get; internal set; }
-            [DataMember(Name = "transport_address")]
-            public string TransportAddress { get; internal set; }
+            //[DataMember(Name = "transport_address")]
+            //public string TransportAddress { get; internal set; }
             [DataMember(Name = "host")]
             public string Hostname { get; internal set; }
             [DataMember(Name = "version")]
             public string VersionString { get; internal set; }
-            [DataMember(Name = "build")]
-            public string Build { get; internal set; }
+            //[DataMember(Name = "build")]
+            //public string Build { get; internal set; }
             [DataMember(Name = "attributes")]
             public Dictionary<string, string> Attributes { get; internal set; }
-            [DataMember(Name = "http_address")]
-            public string HttpAddress { get; internal set; }
+            //[DataMember(Name = "http_address")]
+            //public string HttpAddress { get; internal set; }
             [DataMember(Name = "settings")]
             public Dictionary<string, dynamic> Settings { get; internal set; }
-            [DataMember(Name = "os")]
-            public OSInfo OS { get; internal set; }
-            [DataMember(Name = "process")]
-            public ProcessInfo Process { get; internal set; }
+            //[DataMember(Name = "os")]
+            //public OSInfo OS { get; internal set; }
+            //[DataMember(Name = "process")]
+            //public ProcessInfo Process { get; internal set; }
             [DataMember(Name = "jvm")]
             public JVMInfo JVM { get; internal set; }
-            [DataMember(Name = "thread_pool")]
-            public Dictionary<string, ThreadPoolThreadInfo> ThreadPool { get; internal set; }
+            //[DataMember(Name = "thread_pool")]
+            //public Dictionary<string, ThreadPoolThreadInfo> ThreadPool { get; internal set; }
             [DataMember(Name = "network")]
             public NetworkInfo Network { get; internal set; }
-            [DataMember(Name = "transport")]
-            public TransportInfo Transport { get; internal set; }
-            [DataMember(Name = "http")]
-            public HTTPInfo HTTP { get; internal set; }
+            //[DataMember(Name = "transport")]
+            //public TransportInfo Transport { get; internal set; }
+            //[DataMember(Name = "http")]
+            //public HTTPInfo HTTP { get; internal set; }
 
             public class OSInfo
             {
