@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Data.Elastic
             public class RoutingTableState
             {
                 [DataMember(Name = "indices")]
-                public Dictionary<string, IndexShardsState> Indices { get; internal set; }
+                public Dictionary<string, IndexShardsState> Indexes { get; internal set; }
             }
 
             public class RoutingNodesState

@@ -7,29 +7,26 @@
     this.SetPageTitle("elasticsearch Dashboard");
     this.SetTopNodes(ElasticCluster.AllClusters,
         "elastic clusters",
-        Model.Current?.Cluster);
+        Model.CurrentCluster);
 }
 @section head {
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
-            @if (Model.Current != null)
-            {
-            @:Status.Elastic.init({ cluster: '@Model.Current.ClusterName', node: '@Model.Current.NodeName' });
-            }
+            Status.Elastic.init({ cluster: '@Model.CurrentClusterName', node: '@Model.CurrentNodeName' });
         });
     </script>
 }
 @helper TabLink(DashboardModel.Views view, string href, string name, bool includeCluster = true, bool includeNode = false)
 {
     var nvc=  new NameValueCollection();
-    if (includeCluster && (Model.Current?.ClusterName.HasValue() ?? false))
+    if (includeCluster && Model.CurrentClusterName.HasValue())
     {
-        nvc.Add("cluster", Model.Current?.ClusterName);
+        nvc.Add("cluster", Model.CurrentClusterName);
     }
-    if (includeNode && (Model.Current?.NodeName.HasValue() ?? false))
+    if (includeNode && Model.CurrentNodeName.HasValue())
     {
-        nvc.Add("node", Model.Current?.NodeName);
+        nvc.Add("node", Model.CurrentNodeName);
     }
     var query = nvc.ToQueryString();
 
@@ -39,14 +36,14 @@
     @TabLink(DashboardModel.Views.AllClusters, "/elastic", "all clusters", false)
     @TabLink(DashboardModel.Views.Cluster, "/elastic/cluster", "cluster")
     @TabLink(DashboardModel.Views.Node, "/elastic/node", "node", includeNode: true)
-    @TabLink(DashboardModel.Views.Indices, "/elastic/indices", "indices")
+    @TabLink(DashboardModel.Views.Indexes, "/elastic/indexes", "indexes")
 </ul>
 <div>
-    @if (Model.View == DashboardModel.Views.Node && (Model.Current?.Node == null))
+    @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))
     {
         @Html.Partial("Node.Selector")
     }
-    else if ((Model.View == DashboardModel.Views.Cluster || Model.View == DashboardModel.Views.Indices) && (Model.Current?.Cluster == null))
+    else if ((Model.View == DashboardModel.Views.Cluster || Model.View == DashboardModel.Views.Indexes) && (Model.CurrentCluster == null))
     {
         @Html.Partial("Cluster.Selector")
     }

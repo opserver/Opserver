@@ -514,30 +514,22 @@ Status.Elastic = (function () {
         Status.Elastic.options = options;
 
         Status.loaders.register({
-            '#/elastic/summary/': function (val) {
-                Status.Dashboard.options.refreshData = { popup: val };
-                Status.popup('/elastic/node/summary/' + val, options, {
-                    onClose: function() {
-                        Status.Dashboard.options.refreshData = {};
-                    }
+            '#/elastic/node/': function (val) {
+                Status.popup('/elastic/node/modal/' + val, {
+                    cluster: Status.Elastic.options.cluster,
+                    node: Status.Elastic.options.node
+                });
+            },
+            '#/elastic/cluster/': function (val) {
+                Status.popup('/elastic/cluster/modal/' + val, {
+                    cluster: Status.Elastic.options.cluster,
+                    node: Status.Elastic.options.node
                 });
             },
             '#/elastic/index/': function (val) {
                 var parts = val.split('/');
-                if (parts.length !== 2) {
-                    console.log('Unrecognized index string: ' + val);
-                    return;
-                }
                 var reqOptions = $.extend({}, options, { index: parts[0] });
-                Status.Dashboard.options.refreshData = {
-                    index: parts[0],
-                    popup: parts[1]
-                };
-                Status.popup('/elastic/index/summary/' + parts[1], reqOptions, {
-                    onClose: function() {
-                        Status.Dashboard.options.refreshData = {};
-                    }
-                });
+                Status.popup('/elastic/index/modal/' + parts[1], reqOptions);
             }
         });
     }

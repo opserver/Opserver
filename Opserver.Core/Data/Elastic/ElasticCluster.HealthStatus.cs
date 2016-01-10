@@ -26,8 +26,8 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             get
             {
-                return HealthStatus.Data?.Indices != null
-                    ? HealthStatus.Data.Indices.Values.Where(i => i.MonitorStatus != MonitorStatus.Good).OrderByWorst()
+                return HealthStatus.Data?.Indexes != null
+                    ? HealthStatus.Data.Indexes.Values.Where(i => i.MonitorStatus != MonitorStatus.Good).OrderByWorst()
                     : Enumerable.Empty<ClusterHealthInfo.IndexHealthInfo>();
             }
         }
@@ -39,9 +39,9 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public ClusterHealthInfo Prep()
             {
-                if (Indices != null)
+                if (Indexes != null)
                 {
-                    foreach (var i in Indices)
+                    foreach (var i in Indexes)
                     {
                         i.Value.Name = i.Key;
                         if (i.Value.Shards != null)
@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Data.Elastic
             public int UnassignedShards { get; internal set; }
 
             [DataMember(Name = "indices")]
-            public Dictionary<string, IndexHealthInfo> Indices { get; set; }
+            public Dictionary<string, IndexHealthInfo> Indexes { get; set; }
 
             public class IndexHealthInfo : IMonitorStatus
             {

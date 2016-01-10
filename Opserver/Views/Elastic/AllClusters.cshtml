@@ -124,12 +124,12 @@ if (nodes != null && nodes.Any())
                         }
                         @if (stats.Process != null)
                         {
-                            <td title="@c.HealthStatus.Data.Indices.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
-                                <a href="/elastic/indices?cluster=@c.Name&node=@n.Name">
-                                    @c.HealthStatus.Data.Indices.Count.ToComma()
-                                </a> <span class="text-muted">@(stats.Indices.Store.SizeInBytes > 0 ? "(" + stats.Indices.Store.SizeInBytes.ToSize() + ")" : "")</span>
+                            <td title="@c.HealthStatus.Data.Indexes.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
+                                <a href="/elastic/indexes?cluster=@c.Name">
+                                    @c.HealthStatus.Data.Indexes.Count.ToComma()
+                                </a> <span class="text-muted">@(stats.Indexes.Store.SizeInBytes > 0 ? "(" + stats.Indexes.Store.SizeInBytes.ToSize() + ")" : "")</span>
                             </td>
-                            <td>@stats.Indices.Search.QueryTotal.ToComma()</td>
+                            <td>@stats.Indexes.Search.QueryTotal.ToComma()</td>
                         }
                         else
                         {
@@ -168,14 +168,13 @@ if (nodes != null && nodes.Any())
     }
 </div>
 <div class="js-refresh" data-name="cluster-sub-detail">
-    @if (Model.Clusters.Any(c => c.TroubledIndexes.Any()))
+    @foreach (var c in Model.Clusters.Where(c => c.TroubledIndexes.Any()))
     {
-        <div class="node-dashboard-separator"></div>
-        @Html.Partial("Cluster.Indices", Model)
-    }
-    @if (Model.Clusters.Any(c => c.TroubledShards.Any()))
-    {
-        <div class="node-dashboard-separator"></div>
-        @Html.Partial("Cluster.Shards", Model)
+        <h5 class="page-header">
+            @c.IconSpan() @c.Name indexes with problems
+        </h5>
+        @Html.Partial("Indexes.Table", Model)
+        @Html.Partial("Shards.Table", Model)
+
     }
 </div>

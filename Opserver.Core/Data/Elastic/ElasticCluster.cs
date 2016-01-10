@@ -88,13 +88,13 @@ namespace StackExchange.Opserver.Data.Elastic
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (HealthStatus.Data?.Indices != null)
-                yield return HealthStatus.Data.Indices.Values.GetWorstStatus();
+            if (HealthStatus.Data?.Indexes != null)
+                yield return HealthStatus.Data.Indexes.Values.GetWorstStatus();
             yield return DataPollers.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()
         {
-            return HealthStatus.Data?.Indices?.Values.GetReasonSummary();
+            return HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
         }
 
         // TODO: Poll down nodes faster?

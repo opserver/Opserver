@@ -1,8 +1,8 @@
 ﻿@using Jil
-@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
+@model StackExchange.Opserver.Views.Elastic.DashboardModel
 @{
     Layout = null;
-    var settings = Model.Node?.Settings ?? new Dictionary<string, dynamic>();
+    var settings = Model.CurrentNode?.Settings ?? new Dictionary<string, dynamic>();
 }
 <h4 class="modal-title">
     Node Settings

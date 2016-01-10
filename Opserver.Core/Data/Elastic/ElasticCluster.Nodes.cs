@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Data.Elastic
             })
         });
 
-        public string Name => Nodes.Data != null ? Nodes.Data.Name : "Unknown";
+        public string Name => Nodes.HasData() ? Nodes.Data.Name : "Unknown";
 
         public class ClusterNodesInfo
         {
@@ -278,7 +278,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 [DataMember(Name = "hostname")]
                 public string Hostname { get; internal set; }
                 [DataMember(Name = "indices")]
-                public IndexStats Indices { get; internal set; }
+                public IndexStats Indexes { get; internal set; }
                 [DataMember(Name = "os")]
                 public OSStats OS { get; internal set; }
                 [DataMember(Name = "process")]

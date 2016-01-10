@@ -1,0 +1,14 @@
+﻿@model StackExchange.Opserver.Views.Elastic.DashboardModel
+@{
+    var c = Model.CurrentCluster;
+    if (c == null) { return; }
+    var indexes = c.HealthStatus.Data.Indexes.Values.ToList();
+}
+<div class="js-refresh" data-name="elastic-indexes">
+    <h5 class="page-header">
+        @c.IconSpan() @c.Name: @indexes.Count.Pluralize("Index") @(Model.WarningsOnly ? "in trouble" : "") on @(c.Nodes.Data?.Nodes?.Count.Pluralize("node"))
+        <span class="small">(Updated @c.IndexStats.ToPollSpan())</span>
+        @Helpers.PollNow(c)
+    </h5>
+    @{ Html.RenderPartial("Indexes.Table", Model); }
+</div>

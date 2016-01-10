@@ -2,9 +2,9 @@
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
-    var c = Model.Current.Cluster;
-    var n = Model.Current.Node;
-    if (n == null) { return; }
+    var c = Model.CurrentCluster;
+    var n = Model.CurrentNode;
+    if (c == null || n == null) { return; }
     var os = n.Stats.OS;
     var jvm = n.Stats.JVM;
     var fs = n.Stats.FileSystem;
@@ -13,14 +13,14 @@
 }
 <div>
     <h5 class="page-header">
-        <a href="/elastic">Elastic</a><span class="text-muted">:</span> @c.IconSpan() @c.Name<span class="text-muted">: </span> @n.ShortName
+        @c.IconSpan() @c.Name<span class="text-muted">: </span> @n.ShortName
         @Helpers.PollNow(c)
     </h5>
     <p></p>
     <div class="row js-refresh" data-name="node-summary">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/summary/settings">View Settings</a>)</span></div>
+                <div class="panel-heading">Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/node/settings">View Settings</a>)</span></div>
                 <div class="panel-body small">
                     <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
 Transport: @n.Stats.TransportAddress">
@@ -227,11 +227,11 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/summary/indices">View Detail</a>)</span></div>
+                <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/cluster/indexes">View Detail</a>)</span></div>
                 <div class="panel-body small">
                     @{
-                        var indexes = c?.HealthStatus?.Data?.Indices?.Values;
-                        var indexStats = c.IndexStats.Data?.Indices;
+                        var indexes = c?.HealthStatus?.Data?.Indexes?.Values;
+                        var indexStats = c.IndexStats.Data?.Indexes;
                         if (indexStats?.Count > 0 && indexes != null && indexes.Any())
                         {
                             <table class="table table-striped table-hover table-super-condensed">
@@ -286,9 +286,3 @@ Unassigned: @i.UnassignedShards.ToComma() ">
         </div>
     </div>
 </div>
-@switch (Model.Popup)
-{
-    case DashboardModel.Popups.Indices:
-        @Html.Partial("Indices", Model)
-        break;
-}

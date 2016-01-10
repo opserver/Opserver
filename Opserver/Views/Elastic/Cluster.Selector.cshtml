@@ -14,7 +14,7 @@
                         var nodeInfos = c.Nodes.SafeData(true).Nodes;
                         if (nodeInfos == null) { continue; }
                         var info = nodeInfos.FirstOrDefault();
-                        <a class="list-group-item" href="?cluster=@c.Name.UrlEncode()&guid=@c.Nodes.Data.Nodes.First().GUID">
+                        <a class="list-group-item" href="?cluster=@c.Name.UrlEncode()">
                             @c.IconSpan() @c.Name 
                             <span class="badge">@nodeInfos.Count.Pluralize("node") - @(info?.Version.ToString() ?? "")</span>
                         </a>

@@ -1,0 +1,91 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@model StackExchange.Opserver.Views.Elastic.DashboardModel
+@{
+    var c = Model.CurrentCluster;
+    if (c == null) { return; }
+    var indexes = Model.WarningsOnly
+        ? c.TroubledIndexes.ToList()
+        : c.HealthStatus.Data?.Indexes?.Values.ToList()
+          ?? new List<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>();
+    var stats = c.IndexStats.SafeData(true);
+}
+@if (indexes.Any())
+{
+    <table class="table table-striped table-hover table-responsive table-super-condensed">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Searches <span class="text-muted">(cur)</span></th>
+                <th>Docs <span class="text-muted">(deleted)</span></th>
+                <th>Size</th>
+                <th>Shards <span class="text-muted" title="Replicas">(repl)</span></th>
+                <th>Active <span class="text-muted" title="Primary Active Shards">(pri)</span></th>
+                <th title="Initializing">Init</th>
+                <th title="Relocating">Rel</th>
+                <th title="Unassigned">Un</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in indexes.OrderByWorst().ThenBy(i =>
+            {
+                int j;
+                return int.TryParse(i.Name, out j) ? j : 0;
+            }).ThenBy(i => i.Name))
+            {
+                ElasticCluster.IndexStatsInfo.IndexStats iStats;
+                stats.Indexes.TryGetValue(i.Name, out iStats);
+                <tr class="@i.RowClass()">
+                    <td>@i.IconSpan() @c.GetIndexAliasedName(i.Name)</td>
+                    @if (iStats != null)
+                    {
+                        <td>@(iStats.Total.Search.QueryTotal.ToComma()) <span class="text-muted">(@(iStats.Total.Search.QueryCurrent.ToComma()))</span></td>
+                        <td>@(iStats.Total.Documents.Count.ToComma()) <span class="text-muted">(@(iStats.Total.Documents.Deleted.ToComma()))</span></td>
+                        <td>@(iStats.Total.Store.SizeInBytes.ToSize("b"))</td>
+                    }
+                    else
+                    {
+                        <td colspan="3" class="text-muted">(no stats)</td>
+                    }
+                    <td>
+                        <a href="#/elastic/index/@i.Name/shards">@i.NumberOfShards.ToComma()</a>
+                        <span class="text-muted">(@i.NumberOfReplicas.ToComma())</span>
+                    </td>
+                    <td>
+                        <a href="#/elastic/index/@i.Name/shards">@i.ActiveShards.ToComma()</a>
+                        <span class="text-muted">(@i.ActivePrimaryShards.ToComma())</span>
+                    </td>
+                    <td>@i.InitializingShards.ToComma()</td>
+                    <td>@i.RelocatingShards.ToComma()</td>
+                    <td>@i.UnassignedShards.ToComma()</td>
+                </tr>
+            }
+            @if (!Model.WarningsOnly)
+            {
+                var indexStats = stats.Indexes?.Values;
+                <tr class="total-row">
+                    <td></td>
+                    <td><b>Total</b></td>
+                    @if (indexStats != null)
+                {
+                        <td>@(indexStats.Sum(i => i.Total.Search.QueryTotal).ToComma()) <span class="text-muted">(@(indexStats.Sum(i => i.Total.Search.QueryCurrent).ToComma()))</span></td>
+                        <td>@indexStats.Sum(i => i.Total.Documents.Count).ToComma() <span class="text-muted">(@indexStats.Sum(i => i.Total.Documents.Deleted).ToComma())</span></td>
+                        <td>@indexStats.Sum(i => i.Total.Store.SizeInBytes).ToSize("b")</td>
+                    }
+                    else
+                    {
+                        <td colspan="3" class="text-muted">(no stats)</td>
+                    }
+                    <td>@indexes.Sum(i => i.NumberOfShards).ToComma()  <span class="text-muted">(@indexes.Sum(i => i.NumberOfReplicas).ToComma())</span></td>
+                    <td>@indexes.Sum(i => i.ActiveShards).ToComma() <span class="text-muted">(@indexes.Sum(i => i.ActivePrimaryShards).ToComma())</span></td>
+                    <td>@indexes.Sum(i => i.InitializingShards).ToComma()</td>
+                    <td>@indexes.Sum(i => i.RelocatingShards).ToComma()</td>
+                    <td>@indexes.Sum(i => i.UnassignedShards).ToComma()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else if (!Model.WarningsOnly)
+{
+    <div class="no-content">No indexes found in the @c.Name cluster</div>
+}

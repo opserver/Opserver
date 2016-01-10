@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data.Elastic
             public IndexStats All { get; set; }
 
             [DataMember(Name = "indices")]
-            public Dictionary<string, IndexStats> Indices { get; set; }
+            public Dictionary<string, IndexStats> Indexes { get; set; }
 
             public class ShardCountStats
             {
