@@ -35,7 +35,7 @@ if (nodes != null && nodes.Any())
                 </tr>
             </thead>
             <tbody>
-                @foreach (var n in c.SettingsNodes)
+                @foreach (var n in c.KnownNodes)
                 {
                     <tr class="@(MonitorStatus.Critical.RowClass())">
                         <td>@(MonitorStatus.Critical.IconSpan())</td>
@@ -157,10 +157,10 @@ if (nodes != null && nodes.Any())
                         <td>@c.State.ToPollSpan()</td>
                     </tr>
                 }
-                @if (c.SettingsNodes.Count > ns.Nodes.Count)
+                @if (c.KnownNodes.Count > ns.Nodes.Count)
                 {
                     <tr class="danger text-center">
-                        <td colspan="12">@((c.SettingsNodes.Count - ns.Nodes.Count).Pluralize("node")) currently missing of (@string.Join(", ", c.SettingsNodes.Select(s => s))).</td>
+                        <td colspan="12">@((c.KnownNodes.Count - ns.Nodes.Count).Pluralize("node")) currently missing of (@string.Join(", ", c.KnownNodes.Select(s => s))).</td>
                     </tr>
                 }
             </tbody>

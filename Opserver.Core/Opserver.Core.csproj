@@ -150,6 +150,7 @@
     <Compile Include="Data\Elastic\ElasticCluster.IndexStats.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Elastic\ElasticCluster.KnownNodes.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Nodes.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>

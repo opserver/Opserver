@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
         public static bool IsElasticServer(string node)
         {
-            return AllClusters.Any(c => c.SettingsNodes.Any(sn => string.Equals(sn.Host, node, StringComparison.InvariantCultureIgnoreCase)));
+            return AllClusters.Any(c => c.KnownNodes.Any(sn => string.Equals(sn.Host, node, StringComparison.InvariantCultureIgnoreCase)));
         }
     }
 }

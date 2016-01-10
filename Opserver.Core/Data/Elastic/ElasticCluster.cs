@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
-using Jil;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -13,62 +9,16 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster : PollNode, ISearchableNode, IMonitedService
     {
         string ISearchableNode.Name => SettingsName;
-        string ISearchableNode.DisplayName => SettingsName;
+        string ISearchableNode.DisplayName => SettingsName; 
         public int RefreshInterval => Settings.RefreshIntervalSeconds;
         string ISearchableNode.CategoryName => "elastic";
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;
-        public List<ElasticNode> SettingsNodes { get; set; }
 
         public ElasticCluster(ElasticSettings.Cluster cluster) : base(cluster.Name)
         {
             Settings = cluster;
-            SettingsNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();
-        }
-        
-        public class ElasticNode
-        {
-            private const int DefaultElasticPort = 9200;
-
-            public string Host { get; set; }
-            public int Port { get; set; }
-
-            public string Url { get; set; }
-
-            public ElasticNode(string hostAndPort)
-            {
-                Uri uri;
-                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out uri))
-                {
-                    Url = uri.ToString();
-                    Host = uri.Host;
-                    Port = uri.Port;
-                    return;
-                }
-
-                var parts = hostAndPort.Split(StringSplits.Colon);
-                if (parts.Length == 2)
-                {
-                    Host = parts[0];
-                    int port;
-                    if (int.TryParse(parts[1], out port))
-                    {
-                        Port = port;
-                    }
-                    else
-                    {
-                        Current.LogException(new ConfigurationErrorsException(
-                            $"Invalid port specified for {parts[0]}: '{parts[1]}'"));
-                        Port = DefaultElasticPort;
-                    }
-                }
-                else
-                {
-                    Host = hostAndPort;
-                    Port = DefaultElasticPort;
-                }
-                Url = $"http://{Host}:{Port.ToString()}/";
-            }
+            KnownNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();
         }
 
         public override string NodeType => "elastic";
@@ -108,22 +58,12 @@ namespace StackExchange.Opserver.Data.Elastic
 
         public async Task<T> GetAsync<T>(string path) where T : class
         {
-            var wc = new WebClient();
             using(MiniProfiler.Current.CustomTiming("elastic", path))
-            foreach (var n in SettingsNodes)
+            foreach (var n in KnownNodes)
             {
-                try
-                {
-                    using (var rs = await wc.OpenReadTaskAsync(n.Url + path))
-                    using (var sr = new StreamReader(rs))
-                    {
-                        return JSON.Deserialize<T>(sr);
-                    }
-                }
-                catch
-                {
-                    // In the case of a 404, 500, etc - carry on to the next node
-                }
+                var result = await n.GetAsync<T>(path);
+                if (result != null)
+                    return result;
             }
             return null;
         }
