@@ -431,7 +431,7 @@ Status.Dashboard = (function () {
                         applyFilter(Status.Dashboard.options.filter);
                     if (Status.Dashboard.options.afterRefresh)
                         Status.Dashboard.options.afterRefresh();
-                }).continue(function () {
+                }).fail(function () {
                     console.log('Failed to refresh', this, arguments);
                 });
             }, Status.Dashboard.options.refresh * 1000);
