@@ -114,8 +114,8 @@ namespace StackExchange.Opserver.Data.Elastic
             public NetworkInfo Network { get; internal set; }
             //[DataMember(Name = "transport")]
             //public TransportInfo Transport { get; internal set; }
-            //[DataMember(Name = "http")]
-            //public HTTPInfo HTTP { get; internal set; }
+            [DataMember(Name = "http")]
+            public HTTPInfo HTTP { get; internal set; }
 
             public class OSInfo
             {
@@ -250,13 +250,16 @@ namespace StackExchange.Opserver.Data.Elastic
             public class HTTPInfo
             {
                 [DataMember(Name = "bound_address")]
-                public string BoundAddress { get; internal set; }
+                public dynamic BoundAddress { get; internal set; }
                 [DataMember(Name = "publish_address")]
                 public string PublishAddress { get; internal set; }
                 [DataMember(Name = "max_content_length")]
                 public string MaxContentLength { get; internal set; }
                 [DataMember(Name = "max_content_length_in_bytes")]
                 public long MaxContentLengthInBytes { get; internal set; }
+
+                // TODO: Pretty
+                public string PublishAddressPretty => PublishAddress;
             }
         }
 
@@ -515,12 +518,8 @@ namespace StackExchange.Opserver.Data.Elastic
 
                     public class BaseMemoryStats
                     {
-                        [DataMember(Name = "used")]
-                        public string Used { get; internal set; }
                         [DataMember(Name = "used_in_bytes")]
                         public long UsedInBytes { get; internal set; }
-                        [DataMember(Name = "free")]
-                        public string Free { get; internal set; }
                         [DataMember(Name = "free_in_bytes")]
                         public long FreeInBytes { get; internal set; }
                     }
@@ -531,14 +530,8 @@ namespace StackExchange.Opserver.Data.Elastic
                         public int FreePercent { get; internal set; }
                         [DataMember(Name = "used_percent")]
                         public int UsedPercent { get; internal set; }
-                        [DataMember(Name = "actual_free")]
-                        public string ActualFree { get; internal set; }
-                        [DataMember(Name = "actual_free_in_bytes")]
-                        public long ActualFreeInbytes { get; internal set; }
-                        [DataMember(Name = "actual_used")]
-                        public string ActualUsed { get; internal set; }
-                        [DataMember(Name = "actual_used_in_bytes")]
-                        public long ActualUsedInBytes { get; internal set; }
+                        [DataMember(Name = "total_in_bytes")]
+                        public long? TotalInBytes { get; internal set; }
                     }
                 }
 
@@ -557,16 +550,6 @@ namespace StackExchange.Opserver.Data.Elastic
                     {
                         [DataMember(Name = "percent")]
                         public int Percent { get; internal set; }
-                        [DataMember(Name = "sys")]
-                        public string System { get; internal set; }
-                        [DataMember(Name = "sys_in_millis")]
-                        public long SystemInMilliseconds { get; internal set; }
-                        [DataMember(Name = "user")]
-                        public string User { get; internal set; }
-                        [DataMember(Name = "user_in_millis")]
-                        public long UserInMilliseconds { get; internal set; }
-                        [DataMember(Name = "total")]
-                        public string Total { get; internal set; }
                         [DataMember(Name = "total_in_millis")]
                         public long TotalInMilliseconds { get; internal set; }
                     }
@@ -597,7 +580,9 @@ namespace StackExchange.Opserver.Data.Elastic
                     [DataMember(Name = "uptime_in_millis")]
                     public long UptimeInMilliseconds { get; internal set; }
                     [DataMember(Name = "load_average")]
-                    public float[] LoadAverage { get; internal set; }
+                    public dynamic LoadAverage { get; internal set; }
+
+                    public string LoadAverageString => LoadAverage?.ToString();
                 }
 
                 public class JVMStats : UptimeStats

@@ -5,10 +5,10 @@
     var c = Model.CurrentCluster;
     var n = Model.CurrentNode;
     if (c == null || n == null) { return; }
-    var os = n.Stats.OS;
-    var jvm = n.Stats.JVM;
-    var fs = n.Stats.FileSystem;
-    var transport = n.Stats.Transport;
+    var os = n.Stats?.OS;
+    var jvm = n.Stats?.JVM;
+    var fs = n.Stats?.FileSystem;
+    var transport = n.Stats?.Transport;
     var cnd = c?.Nodes.Data?.Nodes.FirstOrDefault(nd => nd.GUID == n.GUID);
 }
 <div>
@@ -23,7 +23,7 @@
                 <div class="panel-heading">Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/node/settings">View Settings</a>)</span></div>
                 <div class="panel-body small">
                     <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
-Transport: @n.Stats.TransportAddress">
+Transport: @n.Stats?.TransportAddress">
                         @c.Name
                         <label>Cluster</label>
                     </div>
@@ -46,11 +46,10 @@ Transport: @n.Stats.TransportAddress">
                 <div class="panel panel-default">
                     <div class="panel-heading">System</div>
                     <div class="panel-body small">
-                        @if (os.UptimeInMilliseconds > 0)
+                        @if (jvm?.UptimeInMilliseconds > 0)
                         {
                             // Yeah, this API is bugged in 1.4
-                            // TODO: Fix with matching fix in Elastic upgrade, I hope
-                            var upTime = TimeSpan.FromSeconds(os.UptimeInMilliseconds);
+                            var upTime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
                             <div class="value-block col-md-3 col-sm-6" title="@upTime.ToReadableString()">
                                 @upTime.ToTimeStringMini(3)
                                 <label>Uptime</label>
@@ -62,20 +61,20 @@ Transport: @n.Stats.TransportAddress">
                             <div class="value-block col-md-3 col-sm-6" title="System: @os.CPU.System.ToString()%, User: @os.CPU.User.ToString()%">
                                 <div class="progress">
                                     <div class="progress-bar" style="width: @percentCpu%;"></div>
-                                    <span>@percentCpu% @if (os.LoadAverage != null){<span class="smaller">(@string.Join(", ", os.LoadAverage))</span>}</span>
+                                    <span>@percentCpu% <span class="smaller">@os.LoadAverageString</span></span>
                                 </div>
                                 <label>CPU</label>
                             </div>
                         }
                         @if (os.Memory != null)
                         {
-                            var totalMemory = os.Memory.ActualFreeInbytes + os.Memory.ActualUsedInBytes;
-                            var percentMemoryUsed = 100 * os.Memory.ActualUsedInBytes / (decimal)totalMemory;
+                            var totalMemory = os.Memory.TotalInBytes ?? os.Memory.FreeInBytes + os.Memory.UsedInBytes;
+                            var percentMemoryUsed = os.Memory.UsedPercent;
                             var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString();
                             <div class="value-block col-md-3 col-sm-6">
                                 <div class="progress">
                                     <div class="progress-bar" style="width: @percentUsed%;"></div>
-                                    <span>@percentUsed% <span class="smaller">(@os.Memory.ActualUsedInBytes.ToSize(precision: 0) / @totalMemory.ToSize(precision: 0))</span></span>
+                                    <span>@percentUsed% <span class="smaller">(@os.Memory.UsedInBytes.ToSize(precision: 0) / @totalMemory.ToSize(precision: 0))</span></span>
                                 </div>
                                 <label>Memory</label>
                             </div>
@@ -139,7 +138,7 @@ Transport: @n.Stats.TransportAddress">
                     <div class="panel-heading">Network</div>
                     <div class="panel-body small">
                         <div class="value-block col-md-3 col-sm-6">
-                            @(cnd?.Network?.PrimaryInterface?.Address)
+                            @(n?.HTTP?.PublishAddressPretty)
                             <label>Address</label>
                         </div>
                         <div class="value-block col-md-3 col-sm-6">
@@ -204,14 +203,14 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                             <label>Docs</label>
                         </div>
                         <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Documents?.Deleted.ToComma())">
-                            @(gs.Total?.Documents?.Deleted.ToComma() ?? "Unknown")
+                            @(gs?.Total?.Documents?.Deleted.ToComma() ?? "Unknown")
                             <label>Deleted Docs</label>
                         </div>
                         <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Search?.QueryTotal.ToComma())">
                             @(gs?.Total?.Search?.QueryTotal.ToComma() ?? "Unknown")
                             <label>Searches</label>
                         </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Store.SizeInBytes.ToSize())">
+                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Store?.SizeInBytes.ToSize())">
                             @(gs?.Total?.Store?.SizeInBytes.ToSize() ?? "Unknown")
                             <label>Size</label>
                         </div>

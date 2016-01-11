@@ -58,7 +58,9 @@
                 <div class="panel-body small">
                     @foreach (var n in nodes)
                     {
+                        var jvm = n.Stats?.JVM;
                         var os = n.Stats?.OS;
+                        var proc = n.Stats?.Process;
                         var fs = n.Stats?.FileSystem;
                         var isMaster = c.State?.Data?.MasterNode == n.GUID;
                         var shards = c.AllShards.Where(sh => sh.Node == n.GUID).ToList();
@@ -77,10 +79,9 @@
                                 <span class="small text-muted">(@n.Version.ToString() - @n.GUID)</span>
                             </h6>
                             <div class="value-block col-md-2 col-sm-4 col-xs-6">
-                                @if (os.UptimeInMilliseconds > 0)
+                                @if (jvm?.UptimeInMilliseconds > 0)
                                 {
-                                    // TODO: Fix with matching fix in Elastic upgrade
-                                    var upTime = TimeSpan.FromSeconds(os.UptimeInMilliseconds);
+                                    var upTime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
                                     <span title="@upTime.ToReadableString()">
                                         @upTime.ToTimeStringMini(3)
                                     </span>
@@ -91,10 +92,10 @@
                                 }
                                 <label>Uptime</label>
                             </div>
-                            <div class="value-block col-md-2 col-sm-4 col-xs-6" title="System: @os.CPU.System.ToString()%, User: @os.CPU.User.ToString()%">
-                                @if (os.CPU != null)
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6" title="System: @os?.CPU.System.ToString()%, User: @os?.CPU.User.ToString()%">
+                                @if (proc?.CPU != null)
                                 {
-                                    var percentCpu = (100 - os.CPU.Idle).ToString();
+                                    var percentCpu = proc.CPU.Percent.ToString();
                                     <div class="progress">
                                         <div class="progress-bar" style="width: @percentCpu%;"></div>
                                         <span>@percentCpu%</span>
@@ -107,12 +108,11 @@
                                 <label>CPU</label>
                             </div>
                             <div class="value-block col-md-2 col-sm-4 col-xs-6">
-                                @if (os.Memory != null)
+                                @if (os?.Memory != null)
                                 {
-                                    var totalMemory = os.Memory.ActualFreeInbytes + os.Memory.ActualUsedInBytes;
-                                    var percentMemoryUsed = 100 * os.Memory.ActualUsedInBytes / (decimal)totalMemory;
+                                    var percentMemoryUsed = os.Memory.UsedPercent;
                                     var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString(CultureInfo.InvariantCulture);
-                                    <div class="progress">
+                                    <div class="progress" title="">
                                         <div class="progress-bar" style="width: @percentUsed%;"></div>
                                         <span>@percentUsed%</span>
                                     </div>
@@ -145,7 +145,7 @@
                                 <label>Shards</label>
                             </div>
                             <div class="value-block col-md-2 col-sm-4 col-xs-6">
-                                @(n?.Network?.PrimaryInterface?.Address)
+                                @(n?.HTTP?.PublishAddressPretty)
                                 <label>Listener</label>
                             </div>
                         </div>
