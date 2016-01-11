@@ -101,10 +101,6 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\SnmpSharpNet.0.9.4\lib\SnmpSharpNet.dll</HintPath>
     </Reference>
-    <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
-    </Reference>
     <Reference Include="StackExchange.Exceptional, Version=1.0.0.122, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\StackExchange.Exceptional.1.0.122\lib\StackExchange.Exceptional.dll</HintPath>
       <Private>True</Private>
