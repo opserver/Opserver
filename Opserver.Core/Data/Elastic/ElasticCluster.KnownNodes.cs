@@ -74,8 +74,9 @@ namespace StackExchange.Opserver.Data.Elastic
                         return JSON.Deserialize<T>(sr);
                     }
                 }
-                catch
+                catch (Exception e)
                 {
+                    Current.LogException(e);
                     // In the case of a 404, 500, etc - carry on to the next node
                 }
                 return null;

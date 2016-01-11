@@ -221,9 +221,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
                 catch (DeserializationException de)
                 {
-                    Current.LogException(
-                        de.AddLoggedData("Position", de.Position.ToString())
-                            .AddLoggedData("Snippet After", de.SnippetAfterError));
+                    Current.LogException(de);
                     return new BosunApiResult<T>
                     {
                         Error = $"Error deserializing response from bosun to {typeof (T).Name}: {de}. Details logged."

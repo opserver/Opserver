@@ -1,6 +1,7 @@
 ﻿using System;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.SettingsProviders;
+using Jil;
 
 namespace StackExchange.Opserver
 {
@@ -23,6 +24,15 @@ namespace StackExchange.Opserver
         public static void LogException(Exception ex, string key = null, int? reLogDelaySeconds = null)
         {
             if (!ShouldLog(key)) return;
+
+            var deserializationException = ex as DeserializationException;
+            if (deserializationException != null)
+            {
+                ex.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
+                  .AddLoggedData("Position", deserializationException.Position.ToString())
+                  .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
+            }
+
             ErrorStore.LogExceptionWithoutContext(ex, appendFullStackTrace: true);
             RecordLogged(key);
         }

@@ -269,13 +269,6 @@ namespace StackExchange.Opserver.Data
                     }
                     catch (Exception e)
                     {
-                        var deserializationException = e as DeserializationException;
-                        if (deserializationException != null)
-                        {
-                            e.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
-                             .AddLoggedData("Position", deserializationException.Position.ToString())
-                             .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
-                        }
                         if (logExceptions)
                         {
                             addExceptionData?.Invoke(e);
