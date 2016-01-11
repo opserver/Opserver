@@ -455,6 +455,12 @@ Status.Dashboard.Server = (function () {
     function init(options) {
         Status.Dashboard.Server.options = options;
 
+        Status.loaders.register({
+            '#/dashboard/summary/': function (val) {
+                Status.popup('/dashboard/node/summary/' + val, { node: Status.Dashboard.Server.options.node });
+            }
+        });
+
         $('.realtime-cpu').on('click', function () {
             var start = +$(this).parent().siblings('.total-cpu-percent').text().replace(' %','');
             liveDashboard(start);
@@ -482,7 +488,7 @@ Status.Dashboard.Server = (function () {
                 width: 'auto',
                 height: 250,
                 startValue: startValue,
-                params: { node: Status.Dashboard.Server.options.nodeName },
+                params: { node: Status.Dashboard.Server.options.node },
                 series: [{ name: 'total', label: 'CPU' }],
                 max: 100,
                 leftMargin: 30,

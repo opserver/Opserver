@@ -120,6 +120,7 @@
     <Compile Include="Data\Dashboard\DashboardData.cs" />
     <Compile Include="Data\Dashboard\DashboardIssues.cs" />
     <Compile Include="Data\Dashboard\GraphPoint.cs" />
+    <Compile Include="Data\Dashboard\HardwareSummary.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.Metrics.cs">
       <DependentUpon>BosunDataProvider.cs</DependentUpon>
@@ -150,7 +151,9 @@
     <Compile Include="Data\Elastic\ElasticCluster.IndexStats.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.KnownNodes.cs" />
+    <Compile Include="Data\Elastic\ElasticCluster.KnownNodes.cs">
+      <DependentUpon>ElasticCluster.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Elastic\ElasticCluster.Nodes.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>

@@ -60,6 +60,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public Dictionary<string, InterfaceInfo> Interfaces { get; set; }
             public List<IncidentInfo> OpenIncidents { get; set; }
             public Dictionary<string, ICMPInfo> ICMPData { get; set; }
+            public HardwareInfo Hardware { get; set; }
 
             public class CPUInfo
             {
@@ -120,6 +121,79 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 public bool DNSResolved { get; set; }
                 public float? RTTMS { get; set; }
             }
+
+            public class HardwareInfo
+            {
+                public Dictionary<string, MemoryModuleInfo> Memory { get; set; }
+                public Dictionary<string, ComponentInfo> ChassisComponents { get; set; }
+                public StorageInfo Storage { get; set; }
+                public Dictionary<string, TemperatureInfo> Temps { get; set; }
+                public Dictionary<string, PowerSupplyInfo> PowerSupplies { get; set; }
+                public BoardPowerInfo BoardPowerReading { get; set; }
+
+                public class ComponentInfo
+                {
+                    public string Status { get; set; }
+                }
+
+                public class MemoryModuleInfo : ComponentInfo
+                {
+                    public string Size { get; internal set; }
+                }
+
+                public class StorageInfo
+                {
+                    public Dictionary<string, ControllerInfo> Controllers { get; set; } 
+                    public Dictionary<string, PhysicalDiskInfo> PhysicalDisks { get; set; }
+                    public Dictionary<string, VirtualDiskInfo> VirtualDisks { get; set; }
+                    public Dictionary<string, ComponentInfo> Batteries { get; set; }
+
+                    public class ControllerInfo : ComponentInfo
+                    {
+                        public string Name { get; set; }
+                        public string SlotId { get; set; }
+                        public string State { get; set; }
+                        public string FirmwareVersion { get; set; }
+                        public string DriverVersion { get; set; }
+                    }
+
+                    public class PhysicalDiskInfo : ComponentInfo
+                    {
+                        public string Name { get; set; }
+                        public string Media { get; set; }
+                        public string Capacity { get; set; }
+                        public string VendorId { get; set; }
+                        public string ProductId { get; set; }
+                        public string Serial { get; set; }
+                        public string Part { get; set; }
+                        public string NegotatiedSpeed { get; set; }
+                        public string CapableSpeed { get; set; }
+                        public string SectorSize { get; set; }
+                    }
+
+                    public class VirtualDiskInfo : ComponentInfo
+                    {
+                        
+                    }
+                }
+
+                public class TemperatureInfo : ComponentInfo
+                {
+                    public double Celsius { get; set; }
+                }
+
+                public class PowerSupplyInfo : ComponentInfo
+                {
+                    public double Amps { get; set; }
+                    public double Volts { get; set; }
+                }
+
+                public class BoardPowerInfo
+                {
+                    public double Watts { get; set; }
+                }
+            }
+
         }
         // ReSharper restore CollectionNeverUpdated.Local
         // ReSharper restore ClassNeverInstantiated.Local
@@ -238,6 +312,143 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         //Apps = new List<Application>(),
                         //VMs = new List<Node>()
                     };
+                    var hs = new HardwareSummary();
+                    if (h.CPU?.Processors != null)
+                    {
+                        foreach (var p in h.CPU.Processors)
+                        {
+                            hs.Processors.Add(new HardwareSummary.ProcessorInfo
+                            {
+                                Name = p.Key,
+                                Description = p.Value
+                            });
+                        }
+                    }
+
+                    var hw = h.Hardware;
+                    if (hw != null)
+                    {
+                        if (hw.ChassisComponents != null)
+                        {
+                            foreach (var c in hw.ChassisComponents)
+                            {
+                                hs.Components.Add(new HardwareSummary.ComponentInfo
+                                {
+                                    Name = c.Key,
+                                    Status = c.Value.Status
+                                });
+                            }
+                        }
+                        if (hw.Memory != null)
+                        {
+                            foreach (var m in hw.Memory)
+                            {
+                                hs.MemoryModules.Add(new HardwareSummary.MemoryModuleInfo
+                                {
+                                    Name = m.Key,
+                                    Status = m.Value.Status,
+                                    Size = m.Value.Size
+                                });
+                            }
+                        }
+                        if (hw.Storage != null)
+                        {
+                            var s = new HardwareSummary.StorageInfo();
+                            if (hw.Storage.Controllers != null)
+                            {
+                                foreach (var c in hw.Storage.Controllers)
+                                {
+                                    s.Controllers.Add(new HardwareSummary.StorageInfo.ControllerInfo
+                                    {
+                                        Name = c.Value.Name,
+                                        Status = c.Value.Status,
+                                        State = c.Value.State,
+                                        SlotId = c.Value.SlotId,
+                                        FirmwareVersion = c.Value.FirmwareVersion,
+                                        DriverVersion = c.Value.DriverVersion
+                                    });
+                                }
+                            }
+                            if (hw.Storage.PhysicalDisks != null)
+                            {
+                                foreach (var d in hw.Storage.PhysicalDisks)
+                                {
+                                    s.PhysicalDisks.Add(new HardwareSummary.StorageInfo.PhysicalDiskInfo
+                                    {
+                                        Name = d.Value.Name,
+                                        CapableSpeed = d.Value.CapableSpeed,
+                                        Capacity = d.Value.Capacity,
+                                        Media = d.Value.Media,
+                                        NegotatiedSpeed = d.Value.NegotatiedSpeed,
+                                        Part = d.Value.Part,
+                                        ProductId = d.Value.ProductId,
+                                        SectorSize = d.Value.SectorSize,
+                                        Serial = d.Value.Serial,
+                                        Status = d.Value.Status,
+                                        VendorId = d.Value.VendorId
+                                    });
+                                }
+                            }
+                            if (hw.Storage.VirtualDisks != null)
+                            {
+                                foreach (var d in hw.Storage.VirtualDisks)
+                                {
+                                    s.VirtualDisks.Add(new HardwareSummary.StorageInfo.VirtualDiskInfo
+                                    {
+                                        Name = d.Key,
+                                        Status = d.Value.Status,
+                                        // TODO: Add to Bosun
+                                        // Size = d.Value.Size
+                                    });
+                                }
+                            }
+                            if (hw.Storage.Batteries != null)
+                            {
+                                foreach (var b in hw.Storage.Batteries)
+                                {
+                                    s.Batteries.Add(new HardwareSummary.ComponentInfo
+                                    {
+                                        Name = b.Key,
+                                        Status = b.Value.Status
+                                    });
+                                }
+                            }
+                            hs.Storage = s;
+                        }
+                        if (hw.PowerSupplies != null)
+                        {
+                            foreach (var ps in hw.PowerSupplies)
+                            {
+                                hs.PowerSupplies.Add(new HardwareSummary.PowerSupplyInfo
+                                {
+                                    Name = ps.Key,
+                                    Amps = ps.Value.Amps,
+                                    Status = ps.Value.Status,
+                                    Volts = ps.Value.Volts
+                                });
+                            }
+                        }
+                        if (hw.Temps != null)
+                        {
+                            foreach (var t in hw.Temps)
+                            {
+                                hs.Temps.Add(new HardwareSummary.TemperatureInfo
+                                {
+                                    Name = t.Key,
+                                    Status = t.Value.Status,
+                                    Celsius = t.Value.Celsius
+                                });
+                            }
+                        }
+                        if (hw.BoardPowerReading != null)
+                        {
+                            hs.BoardPowerReading = new HardwareSummary.BoardPowerInfo
+                            {
+                                Watts = hw.BoardPowerReading.Watts
+                            };
+                        }
+                        n.Hardware = hs;
+                    }
 
                     n.Interfaces.ForEach(i => i.IsTeam = i.TeamMembers.Any());
 

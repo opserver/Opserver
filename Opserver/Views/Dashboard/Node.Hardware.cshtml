@@ -1,0 +1,82 @@
+﻿@using StackExchange.Opserver.Data.Dashboard
+@model Node
+@{
+    Layout = null;
+    var h = Model.Hardware;
+}
+<h4 class="modal-title">
+    @Model.PrettyName Hardware
+</h4>
+<div class="row small">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Processors</div>
+            <div class="panel-body">
+                @foreach (var p in h.Processors)
+                {
+                    <div>@p.Name: @p.Description</div>
+                }
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Memory</div>
+            <div class="panel-body">
+                @{
+                    var banks = h.MemoryModules.GroupBy(m => m.Bank).ToList();
+                    var cols = banks.Count > 1 ? "6" : "12";
+                    foreach (var b in banks)
+                    {
+                        <div class="col-md-@cols">
+                            <h6>Bank @b.Key</h6>
+                            @foreach (var m in b.OrderBy(m => m.Label))
+                            {
+                                <div>@m.IconSpan() <span class="text-muted">@m.Name:</span> @m.Size</div>
+                            }
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Storage</div>
+            <div class="panel-body">
+                @if (h.Storage.Controllers.Any())
+                {
+                    foreach (var c in h.Storage.Controllers)
+                    {
+                        <h6>@c.IconSpan() @c.Name <span class="@c.MonitorStatus.TextClass(true)">(@c.State)</span></h6>
+                                <ul>
+                                    <li>Driver: @c.DriverVersion</li>
+                                    <li>Firmware: @c.FirmwareVersion</li>
+                                </ul>
+                    }
+                }
+                @if (h.Storage.VirtualDisks.Any())
+                {
+                    foreach (var d in h.Storage.VirtualDisks)
+                    {
+                        <h6>@d.IconSpan() Virtual Disk: @d.Name</h6>
+                    }
+                }
+                @if (h.Storage.PhysicalDisks.Any())
+                {
+                    foreach (var d in h.Storage.PhysicalDisks)
+                    {
+                        <h6>@d.IconSpan() @d.Name <span class="text-muted">(@d.Media)</span></h6>
+                                <ul>
+                                    <li>Id: @d.ProductId</li>
+                                    <li>Serial: @d.Serial</li>
+                                    <li>Capacity: @d.Capacity</li>
+                                    <li>Speed: @d.NegotatiedSpeed/@d.CapableSpeed</li>
+                                </ul>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+
+    </div>
+</div>

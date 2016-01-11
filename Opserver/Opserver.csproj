@@ -390,6 +390,9 @@
     <Content Include="Views\Dashboard\Node.Graph.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Dashboard\Node.Hardware.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Dashboard\Node.Interfaces.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>

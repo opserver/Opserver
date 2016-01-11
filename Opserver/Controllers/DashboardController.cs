@@ -38,6 +38,19 @@ namespace StackExchange.Opserver.Controllers
             return View("Node",vd);
         }
 
+        [Route("dashboard/node/summary/{type}")]
+        public ActionResult InstanceSummary(string node, string type)
+        {
+            var n = DashboardData.GetNodeByName(node);
+            switch (type)
+            {
+                case "hardware":
+                    return View("Node.Hardware", n);
+                default:
+                    return ContentNotFound("Unknown summary view requested");
+            }
+        }
+
         [Route("dashboard/graph/{node}/{type}")]
         [Route("dashboard/graph/{node}/{type}/{subId?}")]
         public async Task<ActionResult> NodeGraph(string node, string type, string subId)

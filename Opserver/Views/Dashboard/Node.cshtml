@@ -12,7 +12,7 @@
     <script>
         $(function () {
             Status.Dashboard.init({ refresh: false });
-            Status.Dashboard.Server.init({ nodeName: '@(s?.PrettyName)' });
+            Status.Dashboard.Server.init({ node: '@(s?.PrettyName)' });
         });
     </script>
 }
@@ -32,6 +32,9 @@
     {
         <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
     }
+    <span class="pull-right">
+        As of @s.LastUpdatedSpan()
+    </span>
 </h5>
 <div class="panel panel-default">
     <div class="panel-body small">
@@ -62,10 +65,7 @@
 
                     <dt>Network</dt>
                     <dd title="@s.NetworkTextSummary()">@s.PrettyTotalNetwork()</dd>
-                </dl>
-            </div>
-            <div class="col-md-4">
-                <dl>
+
                     <dt>Last Boot</dt>
                     <dd>
                         @if (s.LastBoot == null)
@@ -78,20 +78,19 @@
                             <span class="text-muted">(@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago)</span>
                         }
                     </dd>
-
-                    <dt>Last Poll</dt>
-                    <dd>@s.LastUpdatedSpan()</dd>
-
                     @if (s.PollIntervalSeconds.HasValue)
                     {
                         <dt>Poll Interval</dt>
                         <dd>@(s.PollInterval?.ToReadableString())</dd>
                     }
-
                     <dt>Monitor</dt>
                     <dd title="All IPs: @(s.IPs != null ? $"\n{string.Join("\n", s.IPs)}" : null)">@s.Ip</dd>
-
                 </dl>
+            </div>
+            <div class="col-md-4">
+                @if (s.Hardware != null)
+                {
+                }
             </div>
             @if (s.Volumes != null)
             {
