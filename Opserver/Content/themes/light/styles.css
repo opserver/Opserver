@@ -8363,12 +8363,11 @@ h6.page-header {
 }
 .profiler-results.profiler-left {
   position: absolute;
-  top: 40px;
+  top: 34px;
   border-bottom-right-radius: 10px;
-  display: none;
 }
 .profiler-results.profiler-left .profiler-result .profiler-button:not(.profiler-button-active) {
-  opacity: 0.0;
+  opacity: 0.1;
 }
 .profiler-results.profiler-left:hover .profiler-result .profiler-button {
   opacity: 1;
