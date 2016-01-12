@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data
             {
                 if (_needsPoll)
                 {
-                    PollAsync(wait: true).Wait();
+                    PollAsync(wait: true).Wait(10000);
                 }
                 return DataBacker;
             }
@@ -77,6 +77,7 @@ namespace StackExchange.Opserver.Data
 
             PollStatus = "Awaiting Semaphore";
             await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
+            if (!_needsPoll && !IsStale) return 0;
             if (_isPolling) return 0;
             CurrentPollDuration = Stopwatch.StartNew();
             _isPolling = true;
