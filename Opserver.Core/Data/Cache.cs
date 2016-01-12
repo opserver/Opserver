@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data
             {
                 if (_needsPoll)
                 {
-                    PollAsync(wait: true).Wait(10000);
+                    PollAsync().Wait(10000);
                 }
                 return DataBacker;
             }
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         public MiniProfiler Profiler { get; set; }
 
-        public override async Task<int> PollAsync(bool force = false, bool wait = false)
+        public override async Task<int> PollAsync(bool force = false)
         {
             Interlocked.Increment(ref PollingEngine._activePolls);
             int result;
@@ -60,11 +60,6 @@ namespace StackExchange.Opserver.Data
             {
                 if (force) _needsPoll = true;
                 result = await UpdateAsync().ConfigureAwait(false);
-                // If we're in need of cache and don't have it, then wait on the polling thread
-                if (wait && IsPolling)
-                {
-                    await _pollSemaphoreSlim.WaitAsync(5000).ConfigureAwait(false);
-                }
             }
             Interlocked.Decrement(ref PollingEngine._activePolls);
             return result;
@@ -313,7 +308,7 @@ namespace StackExchange.Opserver.Data
         public string ErrorMessage { get; internal set; }
         public virtual string InventoryDescription => null;
 
-        public abstract Task<int> PollAsync(bool force = false, bool wait = false);
+        public abstract Task<int> PollAsync(bool force = false);
 
         public virtual void Purge() { }
 
