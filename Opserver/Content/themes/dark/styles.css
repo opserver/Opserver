@@ -8957,6 +8957,10 @@ dt {
   list-style-type: none;
   padding-left: 12px;
 }
+.ul-plain {
+  list-style-type: none;
+  padding-left: 0;
+}
 /* Cache Dashboard */
 tr.cache-sub-item td:first-child {
   padding-left: 15px;

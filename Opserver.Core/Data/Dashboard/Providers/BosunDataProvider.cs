@@ -332,7 +332,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             {
                                 hs.Components.Add(new HardwareSummary.ComponentInfo
                                 {
-                                    Name = c.Key,
+                                    Name = c.Key.Replace("_"," "),
                                     Status = c.Value.Status
                                 });
                             }
@@ -432,7 +432,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             {
                                 hs.Temps.Add(new HardwareSummary.TemperatureInfo
                                 {
-                                    Name = t.Key,
+                                    Name = t.Key.Replace("_", " "),
                                     Status = t.Value.Status,
                                     Celsius = t.Value.Celsius
                                 });
