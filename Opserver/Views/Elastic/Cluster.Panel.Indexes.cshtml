@@ -1,0 +1,65 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@model ElasticCluster
+@{
+    Layout = null;
+    if (Model == null) { return; }
+    var indexes = Model.HealthStatus?.Data?.Indexes?.Values;
+    var indexStats = Model.IndexStats.Data?.Indexes;
+}
+<div class="panel panel-default">
+    <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/cluster/indexes">View Detail</a>)</span></div>
+    <div class="panel-body small">
+        @if (indexStats?.Count > 0 && (indexes?.Any() ?? false))
+        {
+            <table class="table table-striped table-hover table-super-condensed">
+                <thead>
+                    <tr>
+                        <th>Index</th>
+                        <th>Searches</th>
+                        <th>Docs <span class="text-muted">(Size) xCount</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var i in indexes.OrderByWorst().ThenBy(i =>
+                    {
+                        int j;
+                        return int.TryParse(i.Name, out j) ? j : 0;
+                    }).ThenBy(i => i.Name))
+                    {
+                        ElasticCluster.IndexStatsInfo.IndexStats indexStat;
+                        indexStats.TryGetValue(i.Name, out indexStat);
+                        var alias = Model.GetIndexAliasedName(i.Name);
+                        <tr title="Status: @i.Status
+Name: @i.Name
+Alias: @(alias == i.Name ? "none" : alias)
+Shards: @i.NumberOfShards.ToComma()
+Replicas: @i.NumberOfReplicas.ToComma()
+Active: @i.ActiveShards.ToComma()
+Active (Primary): @i.ActivePrimaryShards.ToComma()
+Initializing: @i.InitializingShards.ToComma()
+Relocating: @i.RelocatingShards.ToComma()
+Unassigned: @i.UnassignedShards.ToComma() ">
+                            <td>
+                                @i.IconSpan()
+                                <a href="#/elastic/index/@i.Name/shards" class="@i.TextClass()">@alias</a>
+                            </td>
+                            @if (indexStat != null)
+                            {
+                                <td>@indexStat.Total.Search.QueryTotal.ToComma()</td>
+                                        <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="text-muted">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas + 1)</span></span></td>
+                            }
+                            else
+                            {
+                                <td colspan="2" class="text-muted">(no stats)</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="no-content">No stats available for existing indexes.</div>
+        }
+    </div>
+</div>

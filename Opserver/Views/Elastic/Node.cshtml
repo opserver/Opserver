@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Views.Elastic
+﻿@using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
     var c = Model.CurrentCluster;
@@ -25,7 +24,10 @@
                     <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
 Transport: @n.Stats?.TransportAddress">
                         @c.Name
-                        <label>Cluster</label>
+                        <label>
+                            Cluster
+                            <span class="text-muted">(<a href="/elastic/cluster?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">view</a>)</span>
+                        </label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
                         @n.Version.ToString()
@@ -82,7 +84,7 @@ Transport: @n.Stats?.TransportAddress">
                         @if (os.Swap != null)
                         {
                             <div class="value-block col-md-3 col-sm-6" title="@os.Swap.FreeInBytes.ToSize() free">
-                                @os.Swap.UsedInBytes.ToSize() / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
+                                @os.Swap.UsedInBytes.ToSize(zero: "0") / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
                                 <label>Swap</label>
                             </div>
                         }
@@ -186,102 +188,8 @@ Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
             }
         </div>
         <div class="col-md-6">
-            <div class="panel panel-default">
-                <div class="panel-heading">Cluster Stats</div>
-                <div class="panel-body small">
-                    @{
-                        var gs = c.IndexStats.Data?.All;
-                    }
-                    @if (gs == null)
-                    {
-                        <div class="no-content">No Indexes Found</div>
-                    }
-                    else
-                    {
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Documents?.Count.ToComma())">
-                            @(gs?.Total?.Documents?.Count.ToComma() ?? "Unknown")
-                            <label>Docs</label>
-                        </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Documents?.Deleted.ToComma())">
-                            @(gs?.Total?.Documents?.Deleted.ToComma() ?? "Unknown")
-                            <label>Deleted Docs</label>
-                        </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Search?.QueryTotal.ToComma())">
-                            @(gs?.Total?.Search?.QueryTotal.ToComma() ?? "Unknown")
-                            <label>Searches</label>
-                        </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Store?.SizeInBytes.ToSize())">
-                            @(gs?.Total?.Store?.SizeInBytes.ToSize() ?? "Unknown")
-                            <label>Size</label>
-                        </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Indexing?.Total.ToComma())">
-                            @(gs?.Total?.Indexing?.Total.ToComma() ?? "Unknown")
-                            <label>Indexed</label>
-                        </div>
-                        <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs?.Primaries?.Get?.Total.ToComma())">
-                            @(gs?.Total?.Get?.Total.ToComma() ?? "Unknown")
-                            <label>Gets</label>
-                        </div>
-                    }
-                </div>
-            </div>
-            <div class="panel panel-default">
-                <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/cluster/indexes">View Detail</a>)</span></div>
-                <div class="panel-body small">
-                    @{
-                        var indexes = c?.HealthStatus?.Data?.Indexes?.Values;
-                        var indexStats = c.IndexStats.Data?.Indexes;
-                        if (indexStats?.Count > 0 && indexes != null && indexes.Any())
-                        {
-                            <table class="table table-striped table-hover table-super-condensed">
-                                <thead>
-                                    <tr>
-                                        <th>Index</th>
-                                        <th>Searches</th>
-                                        <th>Docs <span class="text-muted">(Size) xCount</span></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var i in indexes.OrderByWorst().ThenBy(i => { int j; return int.TryParse(i.Name, out j) ? j : 0; }).ThenBy(i => i.Name))
-                                    {
-                                        ElasticCluster.IndexStatsInfo.IndexStats indexStat;
-                                        indexStats.TryGetValue(i.Name, out indexStat);
-                                        var alias = c.GetIndexAliasedName(i.Name);
-                                        <tr title="Status: @i.Status
-Name: @i.Name
-Alias: @(alias == i.Name ? "none" : alias)
-Shards: @i.NumberOfShards.ToComma()
-Replicas: @i.NumberOfReplicas.ToComma()
-Active: @i.ActiveShards.ToComma()
-Active (Primary): @i.ActivePrimaryShards.ToComma()
-Initializing: @i.InitializingShards.ToComma()
-Relocating: @i.RelocatingShards.ToComma()
-Unassigned: @i.UnassignedShards.ToComma() ">
-                                            <td>
-                                                @i.IconSpan()
-                                                <a href="#/elastic/index/@i.Name/shards" class="@i.TextClass()">@alias</a>
-                                            </td>
-                                            @if (indexStat != null)
-                                            {
-                                                <td>@indexStat.Total.Search.QueryTotal.ToComma()</td>
-                                                <td>@indexStat.Primaries.Documents.Count.ToComma() <span class="text-muted">(@indexStat.Primaries.Store.SizeInBytes.ToSize()) <span title="@i.NumberOfReplicas.Pluralize("replica")">x@(i.NumberOfReplicas + 1)</span></span></td>
-                                            }
-                                            else
-                                            {
-                                                <td colspan="2" class="text-muted">(no stats)</td>
-                                            }
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                        }
-                        else
-                        {
-                            <div class="no-content">No stats available for existing indexes.</div>
-                        }
-                    }
-                </div>
-            </div>
+            @Html.Partial("Cluster.Panel.Stats", c)
+            @Html.Partial("Cluster.Panel.Indexes", c)
         </div>
     </div>
 </div>

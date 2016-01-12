@@ -398,6 +398,24 @@
     <Content Include="Views\Dashboard\Node.VMHost.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Elastic\Cluster.Indexes.cshtml">
+      <DependentUpon>Cluster.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Cluster.Selector.cshtml">
+      <DependentUpon>Cluster.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Cluster.Shards.cshtml">
+      <DependentUpon>Cluster.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Indexes.Table.cshtml">
+      <DependentUpon>Indexes.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Node.Selector.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Node.Settings.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml">
       <DependentUpon>Exceptions.cshtml</DependentUpon>
     </Content>
@@ -616,8 +634,6 @@
     <Content Include="Views\Home\Test.cshtml" />
     <Content Include="Views\Elastic\Dashboard.cshtml" />
     <Content Include="Views\Elastic\AllClusters.cshtml" />
-    <Content Include="Views\Elastic\Cluster.Shards.cshtml" />
-    <Content Include="Views\Elastic\Cluster.Indices.cshtml" />
     <Content Include="Views\Hub\Index.cshtml" />
     <Content Include="Views\Redis\Dashboard.cshtml" />
     <Content Include="Views\Redis\Dashboard.Instances.cshtml" />
@@ -644,11 +660,6 @@
     <Content Include="Views\SQL\Databases.Modal.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.Views.cshtml" />
     <Content Include="Views\Elastic\Node.cshtml" />
-    <Content Include="Views\Elastic\Node.Selector.cshtml" />
-    <Content Include="Views\Elastic\Node.Settings.cshtml" />
-    <Content Include="Views\Elastic\Indices.cshtml" />
-    <Content Include="Views\Elastic\Cluster.Selector.cshtml" />
-    <Content Include="Views\Elastic\Indices.Shards.cshtml" />
     <Content Include="Views\Redis\Instance.cshtml" />
     <Content Include="Views\Redis\Instance.Selector.cshtml" />
     <Content Include="Views\Shared\IssuesList.cshtml" />
@@ -661,6 +672,8 @@
     <Content Include="Views\SQL\Servers.cshtml" />
     <Content Include="Views\SQL\_ViewStart.cshtml" />
     <Content Include="Views\Elastic\Cluster.cshtml" />
+    <Content Include="Views\Elastic\Indexes.cshtml" />
+    <Content Include="Views\Elastic\Shards.Table.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />
