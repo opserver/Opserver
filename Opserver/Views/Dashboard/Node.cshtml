@@ -21,7 +21,7 @@
     <div class="no-content">Node not found.</div>
     return;
 }
-<h5>
+<h5 class="page-header">
     <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
     @s.PrettyName
     @if (s.IsVM)
@@ -32,14 +32,15 @@
     {
         <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
     }
-    <span class="pull-right">
+    <span class="pull-right small">
         As of @s.LastUpdatedSpan()
     </span>
 </h5>
-<div class="panel panel-default">
-    <div class="panel-body small">
-        <div class="row">
-            <div class="col-md-4">
+<div class="row small">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Info</div>
+            <div class="panel-body">
                 <dl>
                     @if (s.Manufacturer.HasValue())
                     {
@@ -87,16 +88,26 @@
                     <dd title="All IPs: @(s.IPs != null ? $"\n{string.Join("\n", s.IPs)}" : null)">@s.Ip</dd>
                 </dl>
             </div>
-            <div class="col-md-4">
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Hardware</div>
+            <div class="panel-body">
                 @if (s.Hardware != null)
                 {
-                    <a href="#/dashboard/summary/hardware">Hardware</a>
+                    <a href="#/dashboard/summary/hardware">View Hardware</a>
                 }
             </div>
-            @if (s.Volumes != null)
-            {
-                <div class="col-md-4">
-                    @foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Storage</div>
+            <div class="panel-body">
+                @if (s.Volumes != null)
+                {
+                    foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
                     {
                         <div title="@v.Description @($"\n{v.Used:n0}") of @($"{v.Size:n0}") bytes used">
                             @v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span>
@@ -105,8 +116,8 @@
                             <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed)%"></div>
                         </div>
                     }
-                </div>
-            }
+                }
+            </div>
         </div>
     </div>
 </div>
@@ -116,7 +127,7 @@
 }
 @if (Model.StatusTypes.Count() > 1)
 { // only show nav if there's actual nav - save the vertical space on stats-only nodes
-     <ul class="nav nav-tabs">
+     <ul class="nav nav-tabs nav-tabs-right">
          @foreach (var st in Model.StatusTypes.OrderBy(i => i))
          {
              switch (st)
