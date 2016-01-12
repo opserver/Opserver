@@ -366,6 +366,21 @@ h4, h5, h6 {
   
   .value-block {
     font-size: 14px;
+    &.small {
+      font-size: 12px;
+      padding-top: 0;
+      padding-bottom: 0;
+      label {
+        margin-top: 0;
+        font-size: 11px;
+      }
+      .progress {
+        height: 15px;
+        span {
+          line-height: 16px;
+        }
+      }
+    }
     label {
       margin-top: 5px;
       margin-bottom: 0;

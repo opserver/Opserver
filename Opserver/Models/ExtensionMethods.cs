@@ -83,11 +83,13 @@ namespace StackExchange.Opserver.Models
             return MonitorStatus.Good;
         }
 
-        public static IHtmlString MemoryStatusSpan(this Node info)
+        public static IHtmlString MemoryStatusSpan(this Node info, bool includePercent = true)
         {
             return info.MemoryUsed < 0 
                 ? MvcHtmlString.Empty
-                : $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()} ({info.PercentMemoryUsed?.ToString("n2")}%)</span>".AsHtml();
+                : includePercent 
+                    ? $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()} ({info.PercentMemoryUsed?.ToString("n2")}%)</span>".AsHtml()
+                    : $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()}</span>".AsHtml();
         }
 
         public static IHtmlString MemoryPercentStatusSpan(this Node info)

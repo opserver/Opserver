@@ -19,6 +19,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Name { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
+        public string MachineTypePretty => MachineType.Replace("Microsoft Windows ", "");
         public string Ip { get; internal set; }
         public short? PollIntervalSeconds { get; internal set; }
 

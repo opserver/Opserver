@@ -8412,6 +8412,21 @@ h6.page-header {
 .panel .value-block {
   font-size: 14px;
 }
+.panel .value-block.small {
+  font-size: 12px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.panel .value-block.small label {
+  margin-top: 0;
+  font-size: 11px;
+}
+.panel .value-block.small .progress {
+  height: 15px;
+}
+.panel .value-block.small .progress span {
+  line-height: 16px;
+}
 .panel .value-block label {
   margin-top: 5px;
   margin-bottom: 0;
