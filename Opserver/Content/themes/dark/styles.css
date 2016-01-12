@@ -8358,12 +8358,7 @@ h6.page-header {
   position: absolute;
   top: 34px;
   border-bottom-right-radius: 10px;
-}
-.profiler-results.profiler-left .profiler-result .profiler-button:not(.profiler-button-active) {
-  opacity: 0.1;
-}
-.profiler-results.profiler-left:hover .profiler-result .profiler-button {
-  opacity: 1;
+  display: none;
 }
 .side-scroll {
   width: 100%;

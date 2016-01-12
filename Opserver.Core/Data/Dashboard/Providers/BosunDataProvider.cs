@@ -208,6 +208,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public async Task<BosunApiResult<T>> GetFromBosunAsync<T>(string url)
         {
+            using (MiniProfiler.Current.Step("Bosun Fetch"))
+            using (MiniProfiler.Current.CustomTiming("bosun", url))
             using (var wc = new WebClient())
             {
                 try
@@ -216,7 +218,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     using (var sr = new StreamReader(s))
                     {
                         var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
-                        return new BosunApiResult<T> {Result = result};
+                        return new BosunApiResult<T> { Result = result };
                     }
                 }
                 catch (DeserializationException de)
@@ -224,7 +226,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     Current.LogException(de);
                     return new BosunApiResult<T>
                     {
-                        Error = $"Error deserializing response from bosun to {typeof (T).Name}: {de}. Details logged."
+                        Error = $"Error deserializing response from bosun to {typeof(T).Name}: {de}. Details logged."
                     };
                 }
                 catch (Exception e)
