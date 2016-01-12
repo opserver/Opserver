@@ -39,7 +39,13 @@
 <div class="row small">
     <div class="col-md-4 col-sm-6">
         <div class="panel panel-default">
-            <div class="panel-heading">Info</div>
+            <div class="panel-heading">
+                Info
+                @if (s.Hardware != null)
+                {
+                    <span class="text-muted">(<a href="#/dashboard/summary/hardware">view hardware</a>)</span>
+                }
+            </div>
             <div class="panel-body">
                 <div class="value-block small col-xs-6">
                     @s.Manufacturer
@@ -95,13 +101,6 @@
                     }
                     <label>Last Boot</label>
                 </div>
-
-                @if (s.Hardware != null)
-                {
-                    <div class="value-block small col-xs-12">
-                        <a href="#/dashboard/summary/hardware">View Hardware</a>
-                    </div>
-                }
             </div>
         </div>
     </div>
