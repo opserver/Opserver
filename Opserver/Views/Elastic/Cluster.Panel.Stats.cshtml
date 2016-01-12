@@ -6,18 +6,14 @@
 <div class="panel panel-default">
     <div class="panel-heading">Cluster Stats</div>
     <div class="panel-body small">
-        @if (gs?.Total?.Documents == null)
+        @if (gs?.Total?.Documents != null)
         {
-            <div class="no-content">No Indexes Found</div>
-        }
-        else
-        {
-            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Documents?.Count.ToComma())">
-                @(gs.Total?.Documents?.Count.ToComma() ?? "Unknown")
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Documents.Count.ToComma())">
+                @(gs.Total.Documents.Count.ToComma() ?? "Unknown")
                 <label>Docs</label>
             </div>
-            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Documents?.Deleted.ToComma())">
-                @(gs.Total?.Documents?.Deleted.ToComma() ?? "Unknown")
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Documents.Deleted.ToComma())">
+                @(gs.Total.Documents.Deleted.ToComma() ?? "Unknown")
                 <label>Deleted Docs</label>
             </div>
             <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Search?.QueryTotal.ToComma())">
@@ -36,6 +32,10 @@
                 @(gs.Total?.Get?.Total.ToComma() ?? "Unknown")
                 <label>Gets</label>
             </div>
+        }
+        else
+        {
+            <div class="no-content">No indexes found.</div>
         }
     </div>
 </div>
