@@ -401,6 +401,12 @@
     <Content Include="Views\Elastic\Cluster.Indexes.cshtml">
       <DependentUpon>Cluster.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Elastic\Cluster.Panel.Indexes.cshtml">
+      <DependentUpon>Cluster.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Elastic\Cluster.Panel.Stats.cshtml">
+      <DependentUpon>Cluster.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Elastic\Cluster.Selector.cshtml">
       <DependentUpon>Cluster.cshtml</DependentUpon>
     </Content>

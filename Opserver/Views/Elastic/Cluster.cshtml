@@ -55,7 +55,7 @@
                                 }
                                 <label>Uptime</label>
                             </div>
-                            <div class="value-block col-md-2 col-sm-4 col-xs-6" title="System: @os?.CPU.System.ToString()%, User: @os?.CPU.User.ToString()%">
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
                                 @if (proc?.CPU != null)
                                 {
                                     var percentCpu = proc.CPU.Percent.ToString();

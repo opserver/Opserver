@@ -1,10 +1,12 @@
-﻿@using StackExchange.Opserver.Views.Elastic
+﻿@using System.Globalization
+@using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
     var c = Model.CurrentCluster;
     var n = Model.CurrentNode;
     if (c == null || n == null) { return; }
     var os = n.Stats?.OS;
+    var proc = n.Stats?.Process;
     var jvm = n.Stats?.JVM;
     var fs = n.Stats?.FileSystem;
     var transport = n.Stats?.Transport;
@@ -43,54 +45,69 @@ Transport: @n.Stats?.TransportAddress">
                     </div>
                 </div>
             </div>
-            @if (os != null && (os.CPU != null || os.Memory != null || os.Swap != null))
-            {
-                <div class="panel panel-default">
-                    <div class="panel-heading">System</div>
-                    <div class="panel-body small">
+            <div class="panel panel-default">
+                <div class="panel-heading">System</div>
+                <div class="panel-body small">
+                    <div class="value-block col-md-3 col-sm-6">
                         @if (jvm?.UptimeInMilliseconds > 0)
                         {
-                            // Yeah, this API is bugged in 1.4
                             var upTime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
-                            <div class="value-block col-md-3 col-sm-6" title="@upTime.ToReadableString()">
+                            <span title="@upTime.ToReadableString()">
                                 @upTime.ToTimeStringMini(3)
-                                <label>Uptime</label>
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label>Uptime</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (proc?.CPU != null)
+                        {
+                            var percentCpu = proc.CPU.Percent.ToString();
+                            <div class="progress">
+                                <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                <span>@percentCpu%</span>
                             </div>
                         }
-                        @if (os.CPU != null)
+                        else
                         {
-                            var percentCpu = (100 - os.CPU.Idle).ToString();
-                            <div class="value-block col-md-3 col-sm-6" title="System: @os.CPU.System.ToString()%, User: @os.CPU.User.ToString()%">
-                                <div class="progress">
-                                    <div class="progress-bar" style="width: @percentCpu%;"></div>
-                                    <span>@percentCpu% <span class="smaller">@os.LoadAverageString</span></span>
-                                </div>
-                                <label>CPU</label>
-                            </div>
+                            <span class="text-warning">Unknown</span>
                         }
-                        @if (os.Memory != null)
+                        <label>CPU</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (os?.Memory != null)
                         {
-                            var totalMemory = os.Memory.TotalInBytes ?? os.Memory.FreeInBytes + os.Memory.UsedInBytes;
                             var percentMemoryUsed = os.Memory.UsedPercent;
-                            var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString();
-                            <div class="value-block col-md-3 col-sm-6">
-                                <div class="progress">
-                                    <div class="progress-bar" style="width: @percentUsed%;"></div>
-                                    <span>@percentUsed% <span class="smaller">(@os.Memory.UsedInBytes.ToSize(precision: 0) / @totalMemory.ToSize(precision: 0))</span></span>
-                                </div>
-                                <label>Memory</label>
+                            var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString(CultureInfo.InvariantCulture);
+                            <div class="progress" title="">
+                                <div class="progress-bar" style="width: @percentUsed%;"></div>
+                                <span>@percentUsed%</span>
                             </div>
                         }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label title="Memory Used">Memory</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6" title="@os.Swap.FreeInBytes.ToSize() free">
                         @if (os.Swap != null)
                         {
-                            <div class="value-block col-md-3 col-sm-6" title="@os.Swap.FreeInBytes.ToSize() free">
+                            <span>
                                 @os.Swap.UsedInBytes.ToSize(zero: "0") / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
-                                <label>Swap</label>
-                            </div>
+                            </span>
                         }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label>Swap</label>
                     </div>
                 </div>
-            }
+            </div>
             @if (jvm != null)
             {
                 var uptime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
