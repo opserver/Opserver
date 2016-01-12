@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             Settings = settings;
         }
 
-        public Action<Cache<T>> UpdateFromSql<T>(string opName, Func<Task<T>> getFromConnection) where T : class
+        public Func<Cache<T>, Task> UpdateFromSql<T>(string opName, Func<Task<T>> getFromConnection) where T : class
         {
             return UpdateCacheItem("Exceptions Fetch: " + Name + ":" + opName,
                 getFromConnection,

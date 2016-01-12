@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
         
-        public Action<Cache<T>> GetFromPagerDutyAsync<T>(string opName, Func<PagerDutyAPI, Task<T>> getFromPD) where T : class
+        public Func<Cache<T>, Task> GetFromPagerDutyAsync<T>(string opName, Func<PagerDutyAPI, Task<T>> getFromPD) where T : class
         {
             return UpdateCacheItem("PagerDuty - API: " + opName, () => getFromPD(this), logExceptions:true);
         }

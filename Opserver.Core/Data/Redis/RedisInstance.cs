@@ -139,7 +139,7 @@ namespace StackExchange.Opserver.Data.Redis
             return ConnectionMultiplexer.Connect(config);
         }
 
-        public Action<Cache<T>> GetFromRedisAsync<T>(string opName, Func<ConnectionMultiplexer, Task<T>> getFromConnection) where T : class
+        public Func<Cache<T>, Task> GetFromRedisAsync<T>(string opName, Func<ConnectionMultiplexer, Task<T>> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "Redis Fetch: " + Name + ":" + opName,
                                    getData: () => getFromConnection(Connection),

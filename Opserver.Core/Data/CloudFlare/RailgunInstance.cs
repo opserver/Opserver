@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = settings;
         }
 
-        public Action<Cache<T>> GetFromRailgun<T>(string opName, Func<RailgunInstance, Task<T>> getFromConnection) where T : class
+        public Func<Cache<T>, Task> GetFromRailgun<T>(string opName, Func<RailgunInstance, Task<T>> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "CloudFlare - Railgun Fetch: " + Name + ":" + opName,
                 getData: () => getFromConnection(this),

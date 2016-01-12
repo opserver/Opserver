@@ -22,8 +22,8 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     var hasOptions = options != null;
                     var sql = string.Format(GetFetchSQL<TopOperation>(),
-                        (hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : ""),
-                        (hasOptions ? options.ToSQLSearch() : ""));
+                        hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : "",
+                        hasOptions ? options.ToSQLSearch() : "");
                     sql = sql.Replace("query_plan AS QueryPlan,", "")
                              .Replace("CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp", "");
                     return conn.QueryAsync<TopOperation>(sql, options);

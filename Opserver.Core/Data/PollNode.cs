@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Jil;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
 
@@ -241,7 +240,7 @@ namespace StackExchange.Opserver.Data
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
         /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
-        protected Action<Cache<T>> UpdateCacheItem<T>(string description,
+        protected Func<Cache<T>, Task> UpdateCacheItem<T>(string description,
                                                       Func<Task<T>> getData,
                                                       bool logExceptions = false, // TODO: Settings
                                                       Action<Exception> addExceptionData = null) where T : class

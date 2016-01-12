@@ -114,7 +114,7 @@ namespace StackExchange.Opserver.Data.SQL
                 };
         }
 
-        public Action<Cache<T>> UpdateFromSql<T>(string opName, Func<DbConnection, Task<T>> getFromConnection) where T : class
+        public Func<Cache<T>, Task> UpdateFromSql<T>(string opName, Func<DbConnection, Task<T>> getFromConnection) where T : class
         {
             return UpdateCacheItem(description: "SQL Fetch: " + Name + ":" + opName,
                                    getData: async () =>

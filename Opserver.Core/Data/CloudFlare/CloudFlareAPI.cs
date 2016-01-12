@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = Current.Settings.CloudFlare;
         }
 
-        public Action<Cache<T>> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, Task<T>> get) where T : class
+        public Func<Cache<T>, Task> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, Task<T>> get) where T : class
         {
             return UpdateCacheItem("CloudFlare - API: " + opName, () => get(this), logExceptions: true);
         }

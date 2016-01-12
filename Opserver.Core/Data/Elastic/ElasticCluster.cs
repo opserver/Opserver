@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.Elastic
             return null;
         }
         
-        public Action<Cache<T>> UpdateFromElastic<T>(string opName, Func<Task<T>> get) where T : class, new()
+        public Func<Cache<T>, Task> UpdateFromElastic<T>(string opName, Func<Task<T>> get) where T : class, new()
         {
             return UpdateCacheItem(description: "Elastic Fetch: " + SettingsName + ":" + typeof (T).Name,
                 getData: get,

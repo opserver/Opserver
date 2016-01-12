@@ -99,7 +99,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             // ReSharper restore ExplicitCallerInfoArgument
         }
 
-        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<Task<T>> fetch) where T : class
+        public Func<Cache<T>, Task> UpdateFromProvider<T>(string opName, Func<Task<T>> fetch) where T : class
         {
             return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
                                    getData: fetch,

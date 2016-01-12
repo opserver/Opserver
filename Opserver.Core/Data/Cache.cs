@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data
             }
             internal set { DataBacker = value; }
         }
-        public Action<Cache<T>> UpdateCache { get; set; }
+        public Func<Cache<T>, Task> UpdateCache { get; set; }
 
         /// <summary>
         /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
@@ -85,8 +85,7 @@ namespace StackExchange.Opserver.Data
             {
                 Interlocked.Increment(ref _pollsTotal);
                 PollStatus = "UpdateCache";
-                // TODO: Async
-                UpdateCache(this);
+                await UpdateCache(this).ConfigureAwait(false);
                 PollStatus = "UpdateCache Complete";
                 _needsPoll = false;
                 if (DataBacker != null)
@@ -257,9 +256,10 @@ namespace StackExchange.Opserver.Data
         internal volatile bool _needsPoll = true;
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
-        public bool IsStale => LastPoll?.AddSeconds(LastPollSuccessful
-            ? CacheForSeconds
-            : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)) < DateTime.UtcNow;
+        public bool IsStale =>
+            (LastPoll?.AddSeconds(LastPollSuccessful
+                ? CacheForSeconds
+                : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds)) ?? DateTime.MinValue) < DateTime.UtcNow;
         public bool IsExpired => LastPoll?.AddSeconds(CacheForSeconds + CacheStaleForSeconds) < DateTime.UtcNow;
 
         protected long _pollsTotal, _pollsSuccessful;
