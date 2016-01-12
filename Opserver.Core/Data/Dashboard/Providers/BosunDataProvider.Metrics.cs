@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             metricName = BosunMetric.GetDenormalized(metricName, host);
             var query = new TSDBQuery(start, end);
-            query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName), tags);
+            query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName, host), tags);
             return RunTSDBQueryAsync(query, 500);
         }
 
@@ -146,8 +146,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private static class Suffixes
         {
-            public const string CPU = ".os.cpu";
-            public const string MemoryUsed = ".os.mem.used";
+            public const string CPU = "." + Globals.CPU;
         }
 
         public static class Tags
@@ -174,20 +173,25 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 => new Dictionary<string, string> {{Tags.Direction, "*"}, {Tags.IFace, ifaceId}};
         }
 
-        public static bool IsCounter(string metric)
+        public static bool IsCounter(string metric, string host)
         {
             if (metric.IsNullOrEmpty()) return false;
+            if (metric.StartsWith("__"))
+            {
+                metric = metric.Replace($"__{host}.", "");
+            }
             switch (metric)
             {
                 case Globals.CPU:
                 case Globals.NetBytes:
                 case Globals.NetBondBytes:
+                case Globals.NetOtherBytes:
+                case Globals.NetTunnelBytes:
+                case Globals.NetVirtualBytes:
                     return true;
+                default:
+                    return false;
             }
-            if (metric.EndsWith(Suffixes.CPU))
-                return true;
-
-            return false;
         }
 
         public static string InterfaceMetricName(Interface i)
@@ -214,9 +218,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 switch (metric)
                 {
                     case Globals.CPU:
-                        return $"__{host}{Suffixes.CPU}";
                     case Globals.MemoryUsed:
-                        return $"__{host}{Suffixes.MemoryUsed}";
+                    case Globals.NetBondBytes:
+                    case Globals.NetOtherBytes:
+                    case Globals.NetTunnelBytes:
+                    case Globals.NetVirtualBytes:
+                    case Globals.NetBytes:
+                        return $"__{host}.{metric}";
                 }
             }
             return metric;
