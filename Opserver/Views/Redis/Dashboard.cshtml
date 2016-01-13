@@ -8,13 +8,13 @@
 }
 @helper TabLink(RedisViews view, string href, string name, bool includeParams = true)
 {
-    <li class="@(Model.View == view ? "active" : "")"><a href="@href@(includeParams && Model.CurrentInstance != null ? $"?node={Model.CurrentInstance.Host}:{Model.CurrentInstance.Port}" : "")">@name</a></li>
+    <li class="@(Model.View == view ? "active" : null)"><a href="@href@(includeParams && Model.CurrentInstance != null ? $"?node={Model.CurrentInstance.HostAndPort}" : "")">@name</a></li>
 }
 @section head {
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh ? 5 : 0) });
-            Status.Redis.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Host : "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
+            Status.Redis.init({ node: '@(Model.CurrentInstance?.Host ?? "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
         });
     </script>
 }
