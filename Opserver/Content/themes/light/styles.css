@@ -8804,7 +8804,7 @@ table .text-muted,
 .table-super-condensed > thead > tr.first-of-group td,
 .table-super-condensed > tbody > tr.first-of-group td,
 .table-super-condensed > tfoot > tr.first-of-group td {
-  border-top: solid 1px #6f6f6f;
+  border-top: solid 1px rgba(78, 93, 108, 0.2);
 }
 .table-super-condensed > thead > tr > th,
 .table-super-condensed > tbody > tr > th,
