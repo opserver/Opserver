@@ -586,7 +586,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 node.Id,
                 TagCombos.AllNetDirections).ConfigureAwait(false);
 
-            return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
+            return JoinNetwork(apiResponse?.Series) ?? new List<DoubleGraphPoint>();
         }
 
         public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
