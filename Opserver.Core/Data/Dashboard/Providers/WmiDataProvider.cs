@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     memberName: node.Name + "-Dynamic"));
 
                 //Force update static host data, incuding os info, volumes, interfaces.
-                Task.WaitAll(staticDataCache.PollAsync(true).ConfigureAwait(false));
+                Task.WaitAll(staticDataCache.PollAsync(true));
 
                 nodesList.Add(node);
             }
