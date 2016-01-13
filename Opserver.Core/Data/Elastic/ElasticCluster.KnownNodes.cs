@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 var wc = new WebClient();
                 try
                 {
-                    using (var rs = await wc.OpenReadTaskAsync(Url + path))
+                    using (var rs = await wc.OpenReadTaskAsync(Url + path).ConfigureAwait(false))
                     using (var sr = new StreamReader(rs))
                     {
                         return JSON.Deserialize<T>(sr);

@@ -25,14 +25,6 @@ namespace StackExchange.Opserver
             return (List<T>)source;
         }
 
-        public static async Task<List<T>> AsList<T>(this Task<IEnumerable<T>> source)
-        {
-            var result = await source;
-            if (result != null && !(result is List<T>))
-                return Enumerable.ToList(result);
-            return (List<T>)result;
-        }
-
         public static async Task<List<T>> AsList<T>(this ConfiguredTaskAwaitable<IEnumerable<T>> source)
         {
             var result = await source;
@@ -53,7 +45,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync<T>(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false).AsList();
+                return await SqlMapper.QueryAsync<T>(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -61,7 +53,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -69,7 +61,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -77,7 +69,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -85,7 +77,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList();
+                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 

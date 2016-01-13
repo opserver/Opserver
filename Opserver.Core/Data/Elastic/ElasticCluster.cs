@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Data.Elastic
             using(MiniProfiler.Current.CustomTiming("elastic", path))
             foreach (var n in KnownNodes)
             {
-                var result = await n.GetAsync<T>(path);
+                var result = await n.GetAsync<T>(path).ConfigureAwait(false);
                 if (result != null)
                     return result;
             }

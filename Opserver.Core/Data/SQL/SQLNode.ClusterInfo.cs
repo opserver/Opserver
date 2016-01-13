@@ -28,8 +28,8 @@ namespace StackExchange.Opserver.Data.SQL
                             state = await multi.ReadFirstOrDefaultAsync<AGClusterState>().ConfigureAwait(false);
                             if (state != null)
                             {
-                                state.Members = await multi.ReadAsync<AGClusterMemberInfo>().ConfigureAwait(false).AsList();
-                                state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().ConfigureAwait(false).AsList();
+                                state.Members = await multi.ReadAsync<AGClusterMemberInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                                state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
                             }
                         }
                         if (state != null)

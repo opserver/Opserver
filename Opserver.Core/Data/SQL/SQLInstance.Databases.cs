@@ -24,12 +24,12 @@ namespace StackExchange.Opserver.Data.SQL
                             );
 
                         List<Database> dbs;
-                        using (var multi = await conn.QueryMultipleAsync(sql))
+                        using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
                         {
-                            dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList();
-                            var backups = await multi.ReadAsync<DatabaseBackup>().ConfigureAwait(false).AsList();
-                            var files = await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList();
-                            var vlfs = await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList();
+                            dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                            var backups = await multi.ReadAsync<DatabaseBackup>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                            var files = await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                            var vlfs = await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
 
                             // Safe groups
                             var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());

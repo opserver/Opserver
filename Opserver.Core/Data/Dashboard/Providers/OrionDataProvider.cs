@@ -281,7 +281,7 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
             
             if (!node.PrimaryInterfaces.Any()) return new List<DoubleGraphPoint>();
 
-            using (var conn = await GetConnectionAsync())
+            using (var conn = await GetConnectionAsync().ConfigureAwait(false))
             {
                 var result = await conn.QueryAsync<Interface.InterfaceUtilization>(
                     (pointCount.HasValue ? sampledSql : allSql)
