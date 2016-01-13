@@ -98,12 +98,15 @@ namespace StackExchange.Opserver.Data
             }
             finally
             {
-                CurrentPollDuration.Stop();
-                LastPollDuration = CurrentPollDuration.Elapsed;
-                _isPolling = false;
+                if (CurrentPollDuration != null)
+                {
+                    CurrentPollDuration.Stop();
+                    LastPollDuration = CurrentPollDuration.Elapsed;
+                }
                 CurrentPollDuration = null;
-                _pollSemaphoreSlim.Release();
+                _isPolling = false;
                 PollStatus = errored ? "Failed" : "Completed";
+                _pollSemaphoreSlim.Release();
             }
         }
 
