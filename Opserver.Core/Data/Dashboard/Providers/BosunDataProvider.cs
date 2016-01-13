@@ -22,6 +22,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             get
             {
                 yield return NodeCache;
+                yield return NodeMetricCache;
                 yield return DayCache;
             }
         }
@@ -35,6 +36,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private Cache<List<Node>> _nodeCache;
         public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 60, 4 * 60 * 60));
+
+
+        private Cache<Dictionary<string, List<string>>> _nodeMetricCache;
+        public Cache<Dictionary<string, List<string>>> NodeMetricCache => _nodeMetricCache ?? (_nodeMetricCache = ProviderCache(
+            async () =>
+            {
+                var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host")).ConfigureAwait(false);
+                return response.Result ?? new Dictionary<string, List<string>>();
+            }, 10 * 60, 4 * 60 * 60));
+        
 
         private string GetUrl(string path)
         {
@@ -461,60 +472,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
 
                 return nodes;
-
-                // Nodes
-                //    LastSync, 
-                //    Cast(Status as int) Status,
-                //    LastBoot,  
-                //    IP_Address as Ip, 
-                //    PollInterval as PollIntervalSeconds,
-                //    Cast(vmh.NodeID as varchar(50)) as VMHostID, 
-                //    Cast(IsNull(vh.HostID, 0) as Bit) IsVMHost,
-                //    IsNull(UnManaged, 0) as IsUnwatched, // Silence
-
-                // Interfaces
-                //       InterfaceIndex [Index],
-                //       LastSync,
-                //       Comments,
-                //       InterfaceAlias Alias,
-                //       IfName,
-                //       InterfaceTypeDescription TypeDescription,
-                //       IsNull(UnManaged, 0) as IsUnwatched,
-                //       UnManageFrom as UnwatchedFrom,
-                //       UnManageUntil as UnwatchedUntil,
-                //       Cast(Status as int) Status,
-                //       InPps,
-                //       OutPps,
-                //       InterfaceMTU as MTU,
-                //       InterfaceSpeed as Speed
-
-                // Volumes
-                //       LastSync,
-                //       VolumeIndex as [Index],
-                //       VolumeDescription as [Description],
-                //       VolumeType as Type,
-
-                // Applications
-                //Select Cast(com.ApplicationID as varchar(50)) as Id, 
-                //       Cast(NodeID as varchar(50)) as NodeId, 
-                //       app.Name as AppName, 
-                //       IsNull(app.Unmanaged, 0) as IsUnwatched,
-                //       app.UnManageFrom as UnwatchedFrom,
-                //       app.UnManageUntil as UnwatchedUntil,
-                //       com.Name as ComponentName, 
-                //       ccs.TimeStamp as LastUpdated,
-                //       pe.PID as ProcessID, 
-                //       ccs.ProcessName,
-                //       ccs.LastTimeUp, 
-                //       ccs.PercentCPU as CurrentPercentCPU,
-                //       ccs.PercentMemory as CurrentPercentMemory,
-                //       ccs.MemoryUsed as CurrentMemoryUsed,
-                //       ccs.VirtualMemoryUsed as CurrentVirtualMemoryUsed,
-                //       pe.AvgPercentCPU as PercentCPU, 
-                //       pe.AvgPercentMemory as PercentMemory, 
-                //       pe.AvgMemoryUsed as MemoryUsed, 
-                //       pe.AvgVirtualMemoryUsed as VirtualMemoryUsed,
-                //       pe.ErrorMessage
             }
         }
 
