@@ -72,13 +72,13 @@ namespace StackExchange.Opserver.Data
 
             PollStatus = "Awaiting Semaphore";
             await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
-            if (!_needsPoll && !IsStale) return 0;
-            if (_isPolling) return 0;
-            CurrentPollDuration = Stopwatch.StartNew();
-            _isPolling = true;
             bool errored = false;
             try
             {
+                if (!_needsPoll && !IsStale) return 0;
+                if (_isPolling) return 0;
+                CurrentPollDuration = Stopwatch.StartNew();
+                _isPolling = true;
                 Interlocked.Increment(ref _pollsTotal);
                 PollStatus = "UpdateCache";
                 await UpdateCache(this).ConfigureAwait(false);
