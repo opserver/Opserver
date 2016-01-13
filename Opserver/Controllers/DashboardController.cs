@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Controllers
                 switch (type)
                 {
                     case NodeGraphModel.KnownTypes.CPU:
-                        vd.Title = "CPU Utilization";
+                        vd.Title = "CPU Utilization (" + (n.PrettyName ?? "Unknown") + ")";
                         vd.GraphData = await GraphController.CPUData(n, summary: true);
                         break;
                     case NodeGraphModel.KnownTypes.Memory:
@@ -75,10 +75,18 @@ namespace StackExchange.Opserver.Controllers
                         vd.GraphData = await GraphController.MemoryData(n, summary: true);
                         break;
                     case NodeGraphModel.KnownTypes.Network:
-                        var i = vd.Node.GetInterface(subId);
-                        vd.Interface = i;
-                        vd.Title = "Network Utilization (" + (i?.PrettyName ?? "Unknown") + ")";
-                        vd.GraphData = await GraphController.NetworkData(i, summary: true);
+                        if (subId.HasValue())
+                        {
+                            var i = vd.Node.GetInterface(subId);
+                            vd.Interface = i;
+                            vd.Title = "Network Utilization (" + (i?.PrettyName ?? "Unknown") + ")";
+                            vd.GraphData = await GraphController.NetworkData(i, summary: true);
+                        }
+                        else
+                        {
+                            vd.Title = "Network Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                            vd.GraphData = await GraphController.NetworkData(n, summary: true);
+                        }
                         break;
                     case NodeGraphModel.KnownTypes.Volume:
                         var v = vd.Node.GetVolume(subId);

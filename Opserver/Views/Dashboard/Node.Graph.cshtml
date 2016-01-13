@@ -35,7 +35,7 @@
             <script>
                 $('.js-dashboard-chart').networkGraph({
                     id: '@Model.Node.Id',
-                    iid: '@Model.Interface.Id',
+                    iid: '@(Model.Interface?.Id)',
                     width: 858,
                     data: @Model.GraphData.ToJson().AsHtml()
                 });

@@ -89,6 +89,37 @@ namespace StackExchange.Opserver.Controllers
             return Json(data);
         }
         
+        public static async Task<object> NetworkData(Node n, long? start = null, long? end = null, bool? summary = false)
+        {
+            var traffic = await n.GetNetworkUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (traffic == null) return null;
+
+            var anyTraffic = traffic.Any();
+
+            return new
+            {
+                maximums = new
+                {
+                    main_in = anyTraffic ? traffic.Max(i => (int)i.Value.GetValueOrDefault(0)) : 0,
+                    main_out = anyTraffic ? traffic.Max(i => (int)i.BottomValue.GetValueOrDefault(0)) : 0
+                },
+                points = traffic.Select(i => new
+                {
+                    date = i.DateEpoch,
+                    main_in = (int)i.Value.GetValueOrDefault(),
+                    main_out = (int)i.BottomValue.GetValueOrDefault()
+                }),
+                summary = summary.GetValueOrDefault()
+                    ? (await n.GetNetworkUtilization(null, null, 2000)).Select(i => new
+                    {
+                        date = i.DateEpoch,
+                        main_in = (int)i.Value.GetValueOrDefault(),
+                        main_out = (int)i.BottomValue.GetValueOrDefault()
+                    })
+                    : null
+            };
+        }
+
         public static async Task<object> NetworkData(Interface iface, long? start = null, long? end = null, bool? summary = false)
         {
             var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
