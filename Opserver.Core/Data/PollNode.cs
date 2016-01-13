@@ -250,7 +250,7 @@ namespace StackExchange.Opserver.Data
                 cache.PollStatus = "UpdateCacheItem";
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {
-                    cache.Profiler = OpserverProfileProvider.CreateContextProfiler("Poll: " + description, cache.UniqueId);
+                    cache.Profiler = OpserverProfileProvider.CreateContextProfiler("Poll: " + description, cache.UniqueId, store: false);
                 }
                 using (MiniProfiler.Current.Step(description))
                 {

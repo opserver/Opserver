@@ -65,12 +65,14 @@ namespace StackExchange.Opserver.Monitoring
         /// </summary>
         /// <param name="name">The name of the profiler to create</param>
         /// <param name="id">The Id of the profiler</param>
-        public static MiniProfiler CreateContextProfiler(string name, Guid? id = null)
+        /// <param name="store">Whether to store this profiler normally (default), or prevent storage</param>
+        public static MiniProfiler CreateContextProfiler(string name, Guid? id = null, bool store = true)
         {
             var profiler = new MiniProfiler(name);
             SetProfilerActive(profiler);
             if (id.HasValue) profiler.Id = id.Value;
             CallContext.LogicalSetData(LocalContextKey, profiler);
+            if (!store) profiler.Storage = MiniProfilerNullStorage.Instance;
             return profiler;
         }
 

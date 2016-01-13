@@ -310,6 +310,7 @@
     </Compile>
     <Compile Include="Data\SQL\SQLServerVersions.cs" />
     <Compile Include="Monitoring\LightweightProfiler.cs" />
+    <Compile Include="Monitoring\MiniProfilerNullStorage.cs" />
     <Compile Include="Monitoring\OpserverProfileProvider.cs" />
     <Compile Include="Monitoring\PerfCounters.cs" />
     <Compile Include="Monitoring\SNMPUtils.cs" />
