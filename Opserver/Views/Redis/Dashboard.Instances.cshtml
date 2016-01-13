@@ -79,7 +79,10 @@ foreach (var s in server.SlaveConnections) {
 <div class="js-refresh" data-name="redis-overview">
     @if (slaving.Any())
     {
-        <h5 class="page-header">@MonitorStatus.Warning.IconSpan() @slaving.Count.Pluralize("Slaving Instance") <span class="small">@CommonVersionHeader()</span></h5>
+        <h5 class="page-header">
+            @MonitorStatus.Warning.IconSpan() @slaving.Count.Pluralize("Slaving Instance") <span class="small">@CommonVersionHeader()</span>
+            @Helpers.PollNow(slaving)
+        </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
                 <tr>
@@ -157,7 +160,10 @@ foreach (var s in server.SlaveConnections) {
     }
     @if (missing.Any())
     {
-        <h5 class="page-header">@MonitorStatus.Critical.IconSpan() @missing.Count.Pluralize("Missing/Unknown Instance")</h5>
+        <h5 class="page-header">
+            @MonitorStatus.Critical.IconSpan() @missing.Count.Pluralize("Missing/Unknown Instance")
+            @Helpers.PollNow(missing)
+        </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
                 <tr>
@@ -190,6 +196,7 @@ foreach (var s in server.SlaveConnections) {
         <h5 class="page-header">
             @mastersWithSlaves.GetWorstStatus().IconSpan() @mastersWithSlaves.Count.Pluralize("Group")
             <span class="small">(@((mastersWithSlaves.Count + mastersWithSlaves.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
+            @Helpers.PollNow(mastersWithSlaves.Union(mastersWithSlaves.SelectMany(s => s.GetAllSlavesInChain())))
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
@@ -223,6 +230,7 @@ foreach (var s in server.SlaveConnections) {
         <h5 class="page-header">
             @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count.Pluralize("Standalone")
             <span class="small">(All Masters)@CommonVersionHeader()</span>
+            @Helpers.PollNow(standAloneMasters)
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
