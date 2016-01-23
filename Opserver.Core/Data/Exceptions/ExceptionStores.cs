@@ -52,10 +52,11 @@ namespace StackExchange.Opserver.Data.Exceptions
             Current.Settings.Exceptions.Applications
                 .Select(a => new Application {Name = a}).ToList();
 
-        public static Task<Error> GetError(string appName, Guid guid)
+        public static async Task<Error> GetError(string appName, Guid guid)
         {
-            // TODO: Parallel
-            return GetStores(appName).Select(async s => await s.GetErrorAsync(guid).ConfigureAwait(false)).FirstOrDefault(e => e != null);
+            var stores = GetStores(appName);
+            var result = await Task.WhenAll(stores.Select(s => s.GetErrorAsync(guid)));
+            return result.FirstOrDefault(e => e != null);
         }
 
         public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
