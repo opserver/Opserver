@@ -26,12 +26,10 @@ namespace StackExchange.Opserver.Monitoring
             return contextProfiler;
         }
 
-        public override MiniProfiler Start(string sessionName = null)
-        {
 #pragma warning disable 618
-            return Start(ProfileLevel.Info, sessionName);
+        public override MiniProfiler Start(string sessionName = null) =>
+            Start(ProfileLevel.Info, sessionName);
 #pragma warning restore 618
-        }
 
         public override void Stop(bool discardResults)
         {
@@ -47,18 +45,14 @@ namespace StackExchange.Opserver.Monitoring
             }
         }
 
-        public override MiniProfiler GetCurrentProfiler()
-        {
-            return GetContextProfiler() ?? WebProfilerProvider.GetCurrentProfiler();
-        }
+        public override MiniProfiler GetCurrentProfiler() =>
+            GetContextProfiler() ?? WebProfilerProvider.GetCurrentProfiler();
 
         /// <summary>
         /// Gets the profiler from the current context - this could be for a task/poll or for an entire web request
         /// </summary>
-        public static MiniProfiler GetContextProfiler()
-        {
-            return CallContext.LogicalGetData(LocalContextKey) as MiniProfiler;
-        }
+        public static MiniProfiler GetContextProfiler() =>
+            CallContext.LogicalGetData(LocalContextKey) as MiniProfiler;
 
         /// <summary>
         /// Creates a new profiler for the current context, used for background tasks
