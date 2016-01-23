@@ -130,6 +130,17 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public override string ToString() => string.Concat(Name, ": ", Url);
 
+        public override int GetHashCode()
+        {
+            int key = 17;
+            unchecked
+            {
+                key = key * 23 + Name.GetHashCode();
+                key = key * 23 + Url.GetHashCode();
+            }
+            return key;
+        }
+
         #region Test Data
 
         /// <summary>
