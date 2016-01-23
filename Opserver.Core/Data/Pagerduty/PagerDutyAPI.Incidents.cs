@@ -87,9 +87,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             }
         }
-
-        // TODO: Implement
-        public string MonitorStatusReason => "Unknown";
+        
+        public string MonitorStatusReason => "Status is " + Status.GetDescription();
     }
 
     public class Acknowledgement
