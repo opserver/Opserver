@@ -202,11 +202,11 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public string ZoneId { get; private set; }
         [DataMember(Name = "zone_name")]
         public string ZoneName { get; private set; }
-        [DataMember(Name = "modified_on")]
-        public DateTimeOffset CreatedOn { get; private set; }
-        [DataMember(Name = "data")]
-        public DateTimeOffset ModifiedOn { get; private set; }
         [DataMember(Name = "created_on")]
+        public DateTimeOffset CreatedOn { get; private set; }
+        [DataMember(Name = "modified_on")]
+        public DateTimeOffset ModifiedOn { get; private set; }
+        [DataMember(Name = "data")]
         public object Data { get; private set; }
 
         public bool IsAutoTTL => TTL == 1; // 1 is auto in CloudFlare land
