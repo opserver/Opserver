@@ -11,13 +11,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private Cache<List<Node>> _nodeCache;
         public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 60, 4 * 60 * 60));
 
-        public Cache<Dictionary<string, List<string>>> NodeMetricCache => _nodeMetricCache;
-        private Cache<Dictionary<string, List<string>>> _nodeMetricCache = ProviderCache(
-            async () =>
-            {
-                var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host")).ConfigureAwait(false);
-                return response.Result ?? new Dictionary<string, List<string>>();
-            }, 10 * 60, 4 * 60 * 60);
+        private Cache<Dictionary<string, List<string>>> _nodeMetricCache;
+
+        public Cache<Dictionary<string, List<string>>> NodeMetricCache
+            => _nodeMetricCache ?? (_nodeMetricCache = ProviderCache(
+                async () =>
+                {
+                    var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host"))
+                        .ConfigureAwait(false);
+                    return response.Result ?? new Dictionary<string, List<string>>();
+                }, 10*60, 4*60*60));
 
         public async Task<List<Node>> GetAllNodesAsync()
         {
