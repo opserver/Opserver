@@ -60,6 +60,8 @@ namespace StackExchange.Opserver.Data.SQL
                 yield return ServerFeatures;
                 yield return TraceFlags;
                 yield return Volumes;
+                yield return Connections;
+                yield return ConnectionsSummary;
             }
         }
 
