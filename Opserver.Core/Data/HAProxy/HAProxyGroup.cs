@@ -37,7 +37,13 @@ namespace StackExchange.Opserver.Data.HAProxy
                     Name = instance.Name,
                     Description = instance.Description
                 };
-            Instances = new List<HAProxyInstance> {new HAProxyInstance(instance) {Group = this}};
+            Instances = new List<HAProxyInstance>
+            {
+                new HAProxyInstance(instance)
+                {
+                    Group = this
+                }
+            };
             Instances.ForEach(i => i.TryAddToGlobalPollers());
         }
 
@@ -51,9 +57,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         public static HAProxyGroup GetGroup(string name)
         {
-            // TODO Denormalize once, eliminate allocations
-            return AllGroups.FirstOrDefault(e => string.Equals(e.Name, Environment.MachineName + ":" + name, StringComparison.InvariantCultureIgnoreCase))
-                ?? AllGroups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
+            return AllGroups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
