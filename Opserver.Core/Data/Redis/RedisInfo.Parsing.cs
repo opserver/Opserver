@@ -61,7 +61,6 @@ namespace StackExchange.Opserver.Data.Redis
                 }
                 if (currentSection == null)
                 {
-                    //TODO: Take care of global pre-2.6 case here
                     continue;
                 }
 
