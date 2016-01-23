@@ -100,12 +100,12 @@ namespace StackExchange.Opserver.Data
                 return new CacheData
                 {
                     Name = cache.ParentMemberName,
-                    LastPolled = cache?.LastPoll,
+                    LastPolled = cache.LastPoll,
                     LastSuccess = cache.LastSuccess,
                     LastPollDurationMs = cache.LastPollDuration?.TotalMilliseconds,
                     LastPollError = cache.ErrorMessage.HasValue() ? cache.ErrorMessage : null,
                     HasData = cache.HasData(),
-                    Data = includeData ? cache.GetData() : null
+                    Data = includeData ? cache.InnerCache : null
                 };
             }
         }

@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data
         /// Returns if this cache has data - THIS WILL NOT TRIGGER A FETCH
         /// </summary>
         public override bool ContainsData => DataBacker != null;
-        public override object GetData() { return DataBacker; }
+        internal override object InnerCache => DataBacker;
         public override Type Type => typeof (T);
         private readonly SemaphoreSlim _pollSemaphoreSlim = new SemaphoreSlim(1);
 
@@ -29,6 +29,7 @@ namespace StackExchange.Opserver.Data
         }
 
         private T DataBacker { get; set; }
+        private Task<T> DataBackerTask { get; set; }
         public T Data
         {
             get
@@ -39,7 +40,21 @@ namespace StackExchange.Opserver.Data
                 }
                 return DataBacker;
             }
-            internal set { DataBacker = value; }
+        }
+
+        public async Task<T> GetDataAsync()
+        {
+            if (_needsPoll)
+            {
+                await PollAsync().ConfigureAwait(false);
+            }
+            return DataBacker;
+        }
+
+        public void SetData(T data)
+        {
+            DataBacker = data;
+            DataBackerTask = Task.FromResult(data);
         }
         public Func<Cache<T>, Task> UpdateCache { get; set; }
 
@@ -221,7 +236,7 @@ namespace StackExchange.Opserver.Data
         public override void Purge()
         {
             _needsPoll = true;
-            Data = null;
+            DataBacker = null;
             if (CacheKey.HasValue())
                 Current.LocalCache.Remove(CacheKey);
         }
@@ -307,7 +322,7 @@ namespace StackExchange.Opserver.Data
         protected static readonly ConcurrentDictionary<string, SemaphoreSlim> NullSlims = new ConcurrentDictionary<string, SemaphoreSlim>();
         
         public virtual bool ContainsData => false;
-        public virtual object GetData() { return null; }
+        internal virtual object InnerCache => null;
         public string ErrorMessage { get; internal set; }
         public virtual string InventoryDescription => null;
 

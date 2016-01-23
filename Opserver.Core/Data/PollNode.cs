@@ -260,7 +260,7 @@ namespace StackExchange.Opserver.Data
                         cache.PollStatus = "Fetching";
                         using (MiniProfiler.Current.Step("Data Fetch"))
                         {
-                            cache.Data = await getData().ConfigureAwait(false);
+                            cache.SetData(await getData().ConfigureAwait(false));
                         }
                         cache.PollStatus = "Fetch Complete";
                         cache.SetSuccess();
