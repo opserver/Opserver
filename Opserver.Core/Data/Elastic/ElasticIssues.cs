@@ -4,6 +4,8 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public class ElasticIssues : IIssuesProvider
     {
+        public string Name => "Elastic";
+
         public IEnumerable<Issue> GetIssues()
         {
             foreach (var c in ElasticCluster.AllClusters.WithIssues())

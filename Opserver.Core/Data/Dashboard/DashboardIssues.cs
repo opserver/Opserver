@@ -5,6 +5,8 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public class DashboardIssues : IIssuesProvider
     {
+        public string Name => "Dashboard";
+
         public IEnumerable<Issue> GetIssues()
         {
             var downNodes = DashboardData.AllNodes

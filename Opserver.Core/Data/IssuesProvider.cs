@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data
 {
@@ -30,23 +32,37 @@ namespace StackExchange.Opserver.Data
 
         public static List<Issue> GetIssues()
         {
-            return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
-            {
-                // TODO: Better Ordering
-                return IssueProviders
-                    .SelectMany(p => p.GetIssues())
-                    .OrderByDescending(i => i.IsService)
-                    .ThenByDescending(i => i.MonitorStatus)
-                    .ThenByDescending(i => i.Date)
-                    .ThenBy(i => i.Title)
-                    .ToList();
-            }, 60, 4*60*60);
+            using (MiniProfiler.Current.Step("GetIssues"))
+                return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
+                {
+                    var result = new List<Issue>();
+                    Parallel.ForEach(IssueProviders, p =>
+                    {
+                        List<Issue> pIssues;
+                        using (MiniProfiler.Current.Step("Issues: " + p.Name))
+                        {
+                            pIssues = p.GetIssues().ToList();
+                        }
+                        lock (result)
+                        {
+                            result.AddRange(pIssues);
+                        }
+                    });
+
+                    return result
+                        .OrderByDescending(i => i.IsService)
+                        .ThenByDescending(i => i.MonitorStatus)
+                        .ThenByDescending(i => i.Date)
+                        .ThenBy(i => i.Title)
+                        .ToList();
+                }, 60, 4*60*60);
         }
     }
 
 
     public interface IIssuesProvider
     {
+        string Name { get; }
         IEnumerable<Issue> GetIssues();
     }
 

@@ -5,6 +5,8 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public class SQLIssues : IIssuesProvider
     {
+        public string Name => "SQL";
+
         public IEnumerable<Issue> GetIssues()
         {
             foreach (var ag in SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups).WithIssues())

@@ -4,6 +4,8 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public class RedisIssues : IIssuesProvider
     {
+        public string Name => "Redis";
+
         public IEnumerable<Issue> GetIssues()
         {
             foreach (var i in RedisInstance.AllInstances.WithIssues())
