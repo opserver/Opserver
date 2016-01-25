@@ -279,6 +279,12 @@ namespace StackExchange.Opserver.Data.Redis
             Interlocked.Add(ref _valueByteSize, valueSize);
 
             lock (_lock) TopKeys.Add(valueSize, key);
+
+            // Capacity cap to prevent a memory leak, but only every so often because Array.Copy isn't cheap.
+            if (TopKeys.Count > 10000)
+            {
+                lock (_lock) TopKeys.Capacity = 50;
+            }
         }
 
         class DescLongCompare : IComparer<long>
