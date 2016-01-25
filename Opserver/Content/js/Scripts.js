@@ -912,13 +912,13 @@ Status.Exceptions = (function () {
         }
 
         var loadingMore = false,
-            allDone = false;
+            allDone = false,
+            lastSelected;
 
         function loadMore() {
             if (loadingMore || allDone) return;
 
             if ($(window).scrollTop() + $(window).height() > $(document).height() - 100) {
-                // TODO: loading indicator
                 loadingMore = true;
                 $('.js-bottom-loader').show();
                 var lastGuid = $('.js-exceptions tr.js-error').last().data('id');
@@ -993,7 +993,6 @@ Status.Exceptions = (function () {
             });
         }
 
-
         // ajax the error deletion on the list page
         $(document).on('click', '.js-exceptions a.js-delete-link', function (e) {
             var jThis = $(this);
@@ -1045,8 +1044,6 @@ Status.Exceptions = (function () {
             return false;
         });
         
-        var lastSelected;
-
         $('.js-content').on('click', '.js-exceptions tbody td', function (e) {
             if ($(e.target).closest('a').length) {
                 return;
@@ -1118,8 +1115,9 @@ Status.Exceptions = (function () {
         });
 
         $(document).on('click', 'a.js-clear-all', function () {
-            var jThis = $(this);
-            bootbox.confirm('Really delete all non-protected errors?', function(result) {
+            var jThis = $(this),
+                id = jThis.data('id') || options.id;
+            bootbox.confirm('Really delete all non-protected errors' + (id ? ' like this one' : '') + '?', function(result) {
                 if (result) {
                     jThis.find('.glyphicon').addClass('icon-rotate-flip');
                     $.ajax({
@@ -1142,7 +1140,7 @@ Status.Exceptions = (function () {
             return false;
         });
 
-        $('a.js-clear-visible').on('click', function () {
+        $(document).on('click', 'a.js-clear-visible', function () {
             var jThis = $(this);
             bootbox.confirm('Really delete all non-protected errors?', function (result) {
                 if (result)
@@ -1200,7 +1198,7 @@ Status.Exceptions = (function () {
                             var errDiv = $('<div class="error-preview-popup" />').append(resp);
                             errDiv.appendTo(jThis.parent()).fadeIn('fast');
                         });
-                    }, 400);
+                    }, 600);
                 },
                 mouseleave: function () {
                     clearTimeout(previewTimer);
