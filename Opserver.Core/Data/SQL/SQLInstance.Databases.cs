@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Data.SQL
                     {
                         var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
                             GetFetchSQL<Database>(k.Item2) + "\n" +
-                            GetFetchSQL<DatabaseBackup>(k.Item2) + "\n" +
+                            GetFetchSQL<DatabaseLastBackup>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseFile>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseVLF>(k.Item2)
                             );
@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.SQL
                         using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
                         {
                             dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                            var backups = await multi.ReadAsync<DatabaseBackup>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                            var backups = await multi.ReadAsync<DatabaseLastBackup>().ConfigureAwait(false).AsList().ConfigureAwait(false);
                             var files = await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList().ConfigureAwait(false);
                             var vlfs = await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
 
@@ -38,8 +38,8 @@ namespace StackExchange.Opserver.Data.SQL
 
                             foreach (var db in dbs)
                             {
-                                List<DatabaseBackup> b;
-                                db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseBackup>();
+                                List<DatabaseLastBackup> b;
+                                db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseLastBackup>();
 
                                 List<DatabaseFile> f;
                                 db.Files = fileLookup.TryGetValue(db.Id, out f) ? f : new List<DatabaseFile>();
@@ -54,34 +54,36 @@ namespace StackExchange.Opserver.Data.SQL
             }
         }
 
-        public Cache<List<DatabaseTable>> GetTableInfo(string databaseName)
-        {
-            return new Cache<List<DatabaseTable>>
-                {
-                    CacheKey = GetCacheKey("TableInfo-" + databaseName),
-                    CacheForSeconds = RefreshInterval,
-                    CacheStaleForSeconds = 5 * 60,
-                    UpdateCache = UpdateFromSql("Table Info for " + databaseName, conn =>
-                        {
-                            var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseTable>()}";
-                            return conn.QueryAsync<DatabaseTable>(sql);
-                        })
-                };
-        }
+        public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
+            Cache<List<DatabaseTable>>.WithKey(GetCacheKey("TableInfo-" + databaseName),
+                UpdateFromSql("Table Info for " + databaseName,
+                    conn =>
+                    {
+                        var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseTable>()}";
+                        return conn.QueryAsync<DatabaseTable>(sql);
+                    },
+                    logExceptions: true),
+                10, 5*60);
+
+        public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
+            Cache<List<DatabaseBackup>>.WithKey(
+                GetCacheKey("BackupInfo-" + databaseName),
+                UpdateFromSql("Backup Info for " + databaseName,
+                    conn => conn.QueryAsync<DatabaseBackup>(GetFetchSQL<DatabaseBackup>(), new {databaseName}),
+                    logExceptions: true),
+                RefreshInterval, 60);
+
 
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName)
         {
-            return new Cache<List<DatabaseColumn>>
-            {
-                CacheKey = GetCacheKey("ColumnInfo-" + databaseName),
-                CacheForSeconds = 5 * 60,
-                CacheStaleForSeconds = 30 * 60,
-                UpdateCache = UpdateFromSql("Column Info for " + databaseName, conn =>
+            return Cache<List<DatabaseColumn>>.WithKey(
+                GetCacheKey("ColumnInfo-" + databaseName),
+                UpdateFromSql("Column Info for " + databaseName, conn =>
                 {
                     var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseColumn>()}";
                     return conn.QueryAsync<DatabaseColumn>(sql);
-                })
-            };
+                }),
+                5*60, 30*60);
         }
 
         public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
@@ -173,7 +175,7 @@ namespace StackExchange.Opserver.Data.SQL
             public double? LogSizeMB { get; internal set; }
             public double? LogSizeUsedMB { get; internal set; }
 
-            public List<DatabaseBackup> Backups { get; internal set; }
+            public List<DatabaseLastBackup> Backups { get; internal set; }
             public List<DatabaseFile> Files { get; internal set; }
             public int? VLFCount { get; internal set; }
 
@@ -239,25 +241,27 @@ From sys.databases db
             }
         }
 
-        public class DatabaseBackup : ISQLVersioned
+        public class DatabaseLastBackup : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
-
+            
+            public char? LastBackupType { get; internal set; }
+            public string LastBackupTypeDescription => DatabaseBackup.GetTypeDescription(LastBackupType);
             public DateTime? LastBackupStartDate { get; internal set; }
             public DateTime? LastBackupFinishDate { get; internal set; }
-            public decimal? LastBackupSizeBytes { get; internal set; }
-            public decimal? LastBackupCompressedSizeBytes { get; internal set; }
+            public long? LastBackupSizeBytes { get; internal set; }
+            public long? LastBackupCompressedSizeBytes { get; internal set; }
             public MediaDeviceTypes? LastBackupMediaDeviceType { get; internal set; }
             public string LastBackupLogicalDeviceName { get; internal set; }
             public string LastBackupPhysicalDeviceName { get; internal set; }
 
             public DateTime? LastFullBackupStartDate { get; internal set; }
             public DateTime? LastFullBackupFinishDate { get; internal set; }
-            public decimal? LastFullBackupSizeBytes { get; internal set; }
-            public decimal? LastFullBackupCompressedSizeBytes { get; internal set; }
+            public long? LastFullBackupSizeBytes { get; internal set; }
+            public long? LastFullBackupCompressedSizeBytes { get; internal set; }
             public MediaDeviceTypes? LastFullBackupMediaDeviceType { get; internal set; }
             public string LastFullBackupLogicalDeviceName { get; internal set; }
             public string LastFullBackupPhysicalDeviceName { get; internal set; }
@@ -319,6 +323,72 @@ Select db.database_id DatabaseId,
                 if (v < SQLServerVersions.SQL2008.RTM)
                 {
                     return FetchSQL.Replace("compressed_backup_size,", "null compressed_backup_size,");
+                }
+                return FetchSQL;
+            }
+        }
+
+        public class DatabaseBackup : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            
+            public char? Type { get; internal set; }
+            public string TypeDescription => GetTypeDescription(Type);
+            public DateTime? StartDate { get; internal set; }
+            public DateTime? FinishDate { get; internal set; }
+            public long? SizeBytes { get; internal set; }
+            public long? CompressedSizeBytes { get; internal set; }
+            public MediaDeviceTypes? MediaDeviceType { get; internal set; }
+            public string LogicalDeviceName { get; internal set; }
+            public string PhysicalDeviceName { get; internal set; }
+
+            public static string GetTypeDescription(char? type)
+            {
+                switch (type)
+                {
+                    case 'D':
+                        return "Full";
+                    case 'I':
+                        return "Differential (DB)";
+                    case 'L':
+                        return "Log";
+                    case 'F':
+                        return "File/Filegroup";
+                    case 'G':
+                        return "Differential (File)";
+                    case 'P':
+                        return "Partial";
+                    case 'Q':
+                        return "Differential (Partial)";
+                    case null:
+                        return "";
+                    default:
+                        return "Unknown";
+                }
+            }
+
+            internal const string FetchSQL = @"
+Select Top 100
+       b.type Type,
+       b.backup_start_date StartDate,
+       b.backup_finish_date FinishDate,
+       b.backup_size SizeBytes,
+       b.compressed_backup_size CompressedSizeBytes,
+       bmf.device_type MediaDeviceType,
+       bmf.logical_device_name LogicalDeviceName,
+       bmf.physical_device_name PhysicalDeviceName
+  From msdb.dbo.backupset b
+       Left Join msdb.dbo.backupmediafamily bmf
+         On b.media_set_id = bmf.media_set_id And bmf.media_count = 1
+  Where b.database_name = @databaseName
+  Order By FinishDate Desc";
+
+            public string GetFetchSQL(Version v)
+            {
+                // Compressed backup info added in 2008
+                if (v < SQLServerVersions.SQL2008.RTM)
+                {
+                    return FetchSQL.Replace("b.compressed_backup_size", "null");
                 }
                 return FetchSQL;
             }

@@ -7,17 +7,14 @@ namespace StackExchange.Opserver.Data.SQL
     {
         public Cache<List<SQLErrorLogInfo>> GetErrorLog(int minutesAgo)
         {
-            return new Cache<List<SQLErrorLogInfo>>
+            return Cache<List<SQLErrorLogInfo>>.WithKey(
+                GetCacheKey("ErrorInfo-" + minutesAgo.ToString()),
+                UpdateFromSql(nameof(GetErrorLog) + "(" + minutesAgo.ToString() + " minutes)", conn =>
                 {
-                    CacheKey = GetCacheKey("ErrorInfo-" + minutesAgo.ToString()),
-                    CacheForSeconds = RefreshInterval,
-                    CacheStaleForSeconds = 5*60,
-                    UpdateCache = UpdateFromSql(nameof(GetErrorLog) + "(" + minutesAgo.ToString() + " minutes)", conn =>
-                        {
-                            var sql = GetFetchSQL<SQLErrorLogInfo>();
-                            return conn.QueryAsync<SQLErrorLogInfo>(sql, new {minutesAgo});
-                        })
-                };
+                    var sql = GetFetchSQL<SQLErrorLogInfo>();
+                    return conn.QueryAsync<SQLErrorLogInfo>(sql, new {minutesAgo});
+                }),
+                RefreshInterval, 5*60);
         }
 
         public class SQLErrorLogInfo : ISQLVersioned

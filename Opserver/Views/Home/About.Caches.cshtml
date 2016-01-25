@@ -75,10 +75,6 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
 @p.SourceFilePath @("@") line @p.SourceLineNumber.ToString()">@p.ParentMemberName</td>
                     <td>
                         @(p.InventoryDescription ?? "(empty)")
-                        @if (p.CacheKey.HasValue())
-                        {
-                            @:CacheKey: @p.CacheKey
-                        }
                         <small>
                             @if (!p.ContainsData){<span class="text-danger"> (No Data)</span>}
                             @if (p.IsStale){<span class="text-warning"> (Stale)</span>}

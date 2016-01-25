@@ -218,6 +218,9 @@ namespace StackExchange.Opserver.Controllers
                 case "tables":
                     vd.View = DatabasesModel.Views.Tables;
                     return View("Databases.Modal.Tables", vd);
+                case "backups":
+                    vd.View = DatabasesModel.Views.Backups;
+                    return View("Databases.Modal.Backups", vd);
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);

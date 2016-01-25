@@ -14,6 +14,7 @@ namespace StackExchange.Opserver.Views.SQL
         public enum Views
         {
             Tables,
+            Backups,
             Views,
             BlitzIndex,
             MissingIndexes,

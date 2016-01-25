@@ -116,7 +116,7 @@ namespace StackExchange.Opserver.Data.SQL
                 };
         }
 
-        public Func<Cache<T>, Task> UpdateFromSql<T>(string opName, Func<DbConnection, Task<T>> getFromConnection) where T : class
+        public Func<Cache<T>, Task> UpdateFromSql<T>(string opName, Func<DbConnection, Task<T>> getFromConnection, bool logExceptions = false) where T : class
         {
             return UpdateCacheItem(description: "SQL Fetch: " + Name + ":" + opName,
                                    getData: async () =>
@@ -126,7 +126,8 @@ namespace StackExchange.Opserver.Data.SQL
                                                return await getFromConnection(conn).ConfigureAwait(false);
                                            }
                                        },
-                                   addExceptionData: e => e.AddLoggedData("Server", Name));
+                                   addExceptionData: e => e.AddLoggedData("Server", Name),
+                                   logExceptions: logExceptions);
         }
 
         public override string ToString() => Name;

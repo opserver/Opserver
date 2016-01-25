@@ -447,6 +447,9 @@
     <Content Include="Views\PagerDuty\PagerDuty.EscFull.cshtml" />
     <Content Include="Views\PagerDuty\PagerDuty.OnCallRow.cshtml" />
     <Content Include="Views\Exceptions\Exceptions.Jira.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Backups.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml">
       <DependentUpon>Databases.Modal.Tables.cshtml</DependentUpon>
     </Content>

@@ -15,17 +15,12 @@ namespace StackExchange.Opserver.Data.SQL
             if (options == null)
                 throw new ArgumentNullException(nameof(options), "Active Operations requires options");
 
-            return new Cache<List<ActiveOperation>>
-            {
-                CacheKey = GetCacheKey("ActiveOperations-" + options.GetHashCode().ToString()),
-                CacheForSeconds = 10,
-                CacheStaleForSeconds = 5*60,
-                UpdateCache = UpdateFromSql(nameof(GetActiveOperations),
-                    async conn =>
-                        (await conn.QueryAsync<WhoIsActiveRow>(options.ToSQLQuery(), options, commandTimeout: 300).ConfigureAwait(false))
+            return Cache<List<ActiveOperation>>.WithKey(GetCacheKey("ActiveOperations-" + options.GetHashCode().ToString()),
+                UpdateFromSql(nameof(GetActiveOperations),
+                    async conn => (await conn.QueryAsync<WhoIsActiveRow>(options.ToSQLQuery(), options, commandTimeout: 300).ConfigureAwait(false))
                             .Select(row => new ActiveOperation(row))
-                            .ToList())
-            };
+                            .ToList()),
+                10, 5 * 60);
         }
 
         public class WhoIsActiveRow

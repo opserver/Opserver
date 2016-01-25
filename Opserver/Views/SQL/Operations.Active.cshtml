@@ -25,9 +25,9 @@ else
         activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
     }
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
-    if (!activeOps.LastPollSuccessful)
+    if (activeOps.ErrorMessage.HasValue())
     {
-        <h5>Unknown active queries on @i.Name</h5>
+        <h5 class="page-header">Unknown active queries on @i.Name</h5>
         <div class="alert alert-danger">
             <h5>There was an error fetching server status from @i.Name:</h5>
             <p class="error-stack">@activeOps.ErrorMessage</p>
