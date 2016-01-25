@@ -193,12 +193,16 @@ h4, h5, h6 {
 }
 
 .actions, .page-header .pull-right {
-  a + a:before {
+  a + a:not(.btn):before {
     content: "| ";
     color: @gray;  
     opacity: 0.4;
     display: inline-block;
     padding-right: 3px;
+  }
+  .btn-xs {
+    padding-top: 1px;
+    padding-bottom: 1px;
   }
   .sk-wave {
     display: inline-block;

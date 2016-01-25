@@ -36,7 +36,7 @@
 </text>}
 
 Category: @j.Category
-Created: @j.DateCreated (@j.DateCreated.ToRelativeTime())
+Created: @j.DateCreated.ToZuluTime()
                             
 Last Run Initiated by: @j.LastRunRequestedSource.GetDescription()
 Last Run Message: @j.LastRunMessage">
@@ -69,14 +69,21 @@ Last Run Message: @j.LastRunMessage">
                     @if (Current.User.IsInRole(Roles.SQLAdmin))
                     {
                         <td class="actions">
-                            <a href="#" class="js-sql-job-action" data-action="toggle" data-enable="@(j.IsEnabled ? "false" : "true")">@(j.IsEnabled ? "disable" : "enable")</a> 
-                            @if (!j.IsRunning)
+                            @if (j.IsEnabled)
                             {
-                                <a href="#" class="js-sql-job-action" data-action="start" data-guid="@j.JobId.ToString()">start job</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-warning" data-action="toggle" data-enable="false">disable</a>
                             }
                             else
                             {
-                                <a href="#" class="js-sql-job-action" data-action="stop" data-guid="@j.JobId.ToString()">stop job</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-success" data-action="toggle" data-enable="true">enable</a>
+                            }
+                            @if (!j.IsRunning)
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-primary" data-action="start" data-guid="@j.JobId.ToString()">start job</a>
+                            }
+                            else
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-danger" data-action="stop" data-guid="@j.JobId.ToString()">stop job</a>
                             }
                         </td>
                     }

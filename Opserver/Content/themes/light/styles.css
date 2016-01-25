@@ -8282,13 +8282,18 @@ h6.page-header {
 .page-footer > .row {
   width: 100%;
 }
-.actions a + a:before,
-.page-header .pull-right a + a:before {
+.actions a + a:not(.btn):before,
+.page-header .pull-right a + a:not(.btn):before {
   content: "| ";
   color: #6f6f6f;
   opacity: 0.4;
   display: inline-block;
   padding-right: 3px;
+}
+.actions .btn-xs,
+.page-header .pull-right .btn-xs {
+  padding-top: 1px;
+  padding-bottom: 1px;
 }
 .actions .sk-wave,
 .page-header .pull-right .sk-wave {
