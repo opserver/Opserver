@@ -106,13 +106,13 @@ namespace StackExchange.Opserver.Data.HAProxy
             var stats = new List<Item>();
             using (var sr = new StreamReader(stream))
             {
-                while (sr.Peek() >= 0)
+                string line;
+                while ((line = await sr.ReadLineAsync().ConfigureAwait(false)) != null)
                 {
-                    var l = await sr.ReadLineAsync().ConfigureAwait(false);
                     //Skip the header
-                    if (string.IsNullOrEmpty(l) || l.StartsWith("#")) continue;
+                    if (line.IsNullOrEmpty() || line.StartsWith("#")) continue;
                     //Collect each stat line as we go, group later
-                    stats.Add(Item.FromLine(l));
+                    stats.Add(Item.FromLine(line));
                 }
             }
             var result = stats.GroupBy(s => s.UniqueProxyId).Select(g => new Proxy
