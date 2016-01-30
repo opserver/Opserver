@@ -12,22 +12,36 @@
 }
 @helper Graph(Node s, string type)
 {
-    if (DashboardData.HasData)
-    {
+if (DashboardData.HasData)
+{
         <a href="#/dashboard/graph/@(s.Id.UrlEncode())/@type">
             <img src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" />
         </a>
-    }
-    else
-    {
+}
+else
+{
         <div class="text-muted">No Data Available</div>
-    }
+}
 }
 <div class="js-refresh" data-name="dashboard-overview">
     @if (!Model.Nodes.Any())
     {
         var errors = Model.ErrorMessages;
-        <div class="no-content">No nodes available</div>
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 100px">
+                @if (Model.IsStartingUp)
+                {
+                    <h5>No data, yet!</h5>
+                    <p class="text-muted">The initial poll is underway - you'll see nodes appear in just a moment.</p>
+                    <div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div>
+                    <script>Status.refresh.schedule(2000);</script>
+                }
+                else
+                {
+                    <p>No nodes available</p>
+                }
+            </div>
+        </div>
         if (errors.Any())
         {
             <script>
@@ -58,28 +72,28 @@
                             <th colspan="2">Memory</th>
                             <th colspan="2">Network</th>
                         </tr>
-                    @foreach (var n in g.OrderBy(n => n.PrettyName))
-                    {
-                        <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
-                            <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @(n.LastSync?.ToRelativeTime())">
-                                @n.IconSpan()
-                                <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
-                            </td>
-                            <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
-                            <td>@Graph(n, "cpu")</td>
-                            <td title="@n.ApplicationMemoryTextSummary()">
-                                @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
-                                {
-                                    <div class="progress" style="width: 215px;">
-                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.ToString())%"></div>
-                                    </div>
-                                }
-                            </td>
-                            <td>@Graph(n, "memory")</td>
-                            <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
-                            <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "network")</a></td>
-                        </tr>
-                    }
+                        @foreach (var n in g.OrderBy(n => n.PrettyName))
+                        {
+                            <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                                <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @(n.LastSync?.ToRelativeTime())">
+                                    @n.IconSpan()
+                                    <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
+                                </td>
+                                <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
+                                <td>@Graph(n, "cpu")</td>
+                                <td title="@n.ApplicationMemoryTextSummary()">
+                                    @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
+                                    {
+                                        <div class="progress" style="width: 215px;">
+                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.ToString())%"></div>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@Graph(n, "memory")</td>
+                                <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
+                                <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "network")</a></td>
+                            </tr>
+                        }
                     </tbody>
                 }
             }

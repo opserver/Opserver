@@ -8300,6 +8300,9 @@ h6.page-header {
   display: inline-block;
   height: 8px;
 }
+.text-center .sk-wave {
+  margin: 0 auto;
+}
 .form-group-sm select.form-control {
   padding: 0;
 }

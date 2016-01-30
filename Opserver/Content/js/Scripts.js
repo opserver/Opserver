@@ -23,6 +23,10 @@
         resumeRefresh(name);
     }
 
+    function scheduleRefresh(ms) {
+        return setTimeout(runRefresh, ms);
+    }
+
     function execRefresh(refreshData) {
         if (refreshData.paused) {
             return;
@@ -362,7 +366,8 @@
             resume: resumeRefresh,
             get: getRefresh,
             run: runRefresh,
-            registered: registeredRefreshes
+            registered: registeredRefreshes,
+            schedule: scheduleRefresh
         }
     };
 })();

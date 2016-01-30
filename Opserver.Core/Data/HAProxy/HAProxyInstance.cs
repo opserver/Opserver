@@ -61,8 +61,6 @@ namespace StackExchange.Opserver.Data.HAProxy
             Settings = Current.Settings.HAProxy.GetInstanceSettings(instance, group);
         }
 
-        public void PurgeCache() => Proxies.Purge();
-
         private Cache<List<Proxy>> _proxies;
         public Cache<List<Proxy>> Proxies
         {

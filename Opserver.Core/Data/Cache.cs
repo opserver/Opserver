@@ -29,35 +29,26 @@ namespace StackExchange.Opserver.Data
         }
 
         private T DataBacker { get; set; }
-        private Task<T> DataBackerTask { get; set; }
         public T Data
         {
             get
             {
-                if (_needsPoll || (CacheKey.HasValue() && IsStale))
+                // Only wait for stale caches that need a refresh in the background
+                // Really, this is going to exit quickly as the background refresh is kicked off.
+                if (CacheKey.HasValue() && IsStale)
                 {
-                    using (MiniProfiler.Current.Step("Cache Wait: " + UniqueId.ToString()))
+                    using (MiniProfiler.Current.Step("Cache Wait: " + CacheKey + ":" + UniqueId.ToString()))
                     {
-                        PollAsync().Wait(10000);
+                        PollAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                     }
                 }
                 return DataBacker;
             }
         }
 
-        public async Task<T> GetDataAsync()
-        {
-            if (_needsPoll)
-            {
-                await PollAsync().ConfigureAwait(false);
-            }
-            return DataBacker;
-        }
-
         public void SetData(T data)
         {
             DataBacker = data;
-            DataBackerTask = Task.FromResult(data);
         }
         public Func<Cache<T>, Task> UpdateCache { get; set; }
 
@@ -73,7 +64,7 @@ namespace StackExchange.Opserver.Data
             if (force) _needsPoll = true;
             if (CacheKey.HasValue())
             {
-                if (DataBacker == null && !LastPoll.HasValue)
+                if (force || (DataBacker == null && !LastPoll.HasValue))
                 {
                     // First fetch - just poll...
                     result = await UpdateAsync().ConfigureAwait(false);
@@ -138,14 +129,6 @@ namespace StackExchange.Opserver.Data
                 PollStatus = errored ? "Failed" : "Completed";
                 _pollSemaphoreSlim.Release();
             }
-        }
-        
-        public override void Purge()
-        {
-            _needsPoll = true;
-            DataBacker = null;
-            if (CacheKey.HasValue())
-                Current.LocalCache.Remove(CacheKey);
         }
 
         public static Cache<T> WithKey(
@@ -255,8 +238,6 @@ namespace StackExchange.Opserver.Data
         public virtual string InventoryDescription => null;
 
         public abstract Task<int> PollAsync(bool force = false);
-
-        public virtual void Purge() { }
 
         /// <summary>
         /// Info for monitoring the monitoring, debugging, etc.

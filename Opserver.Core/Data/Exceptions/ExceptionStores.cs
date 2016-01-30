@@ -62,6 +62,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
         {
             var result = default(T);
+            List<Task> toPoll = new List<Task>();
             foreach (var s in GetApps(appName).Select(a => a.Store).Distinct())
             {
                 var aResult = await action(s).ConfigureAwait(false);
@@ -71,10 +72,11 @@ namespace StackExchange.Opserver.Data.Exceptions
                 }
                 if (s != null)
                 {
-                    s.Applications.Purge();
-                    s.ErrorSummary.Purge();
+                    toPoll.Add(s.Applications.PollAsync(true));
+                    toPoll.Add(s.ErrorSummary.PollAsync(true));
                 }
             }
+            await Task.WhenAll(toPoll);
             return result;
         }
 

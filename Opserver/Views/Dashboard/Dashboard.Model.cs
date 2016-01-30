@@ -7,12 +7,7 @@ namespace StackExchange.Opserver.Views.Dashboard
     {
         public string Filter { get; set; }
         public List<string> ErrorMessages { get; set; }
-
-        private List<Node> _nodes;
-        public List<Node> Nodes
-        {
-            get { return _nodes ?? DashboardData.AllNodes; }
-            set { _nodes = value; }
-        }
+        public List<Node> Nodes { get; set; }
+        public bool IsStartingUp { get; set; }
     }
 }

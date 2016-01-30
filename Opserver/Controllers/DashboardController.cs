@@ -21,7 +21,8 @@ namespace StackExchange.Opserver.Controllers
                 {
                     Nodes = DashboardData.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
                     ErrorMessages = DashboardData.ProviderExceptions.ToList(),
-                    Filter = filter
+                    Filter = filter,
+                    IsStartingUp = DashboardData.AnyDoingFirstPoll
                 };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }

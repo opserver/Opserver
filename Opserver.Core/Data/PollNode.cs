@@ -171,7 +171,7 @@ namespace StackExchange.Opserver.Data
                 }
 
                 int toPoll = 0;
-                if (sync)
+                if (sync || FirstPollRun != null)
                 {
                     PollStatus = "DataPollers Queueing (Sync)";
                     var tasks = DataPollers
