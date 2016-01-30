@@ -304,7 +304,7 @@
                                 if (ips.Any())
                                 {
                                     <tr>
-                                        <th colspan="2" class="sub-header">Summary <span class="text-muted">(by IP)</span></th>
+                                        <th colspan="2" class="sub-header text-center">Summary <span class="text-muted">(by IP)</span></th>
                                     </tr>
                                     foreach (var ip in ips.OrderBy(ipg => ipg.Key))
                                     {
@@ -321,7 +321,7 @@
                                 if (names.Any())
                                 {
                                     <tr>
-                                        <th colspan="2" class="sub-header">Summary <span class="text-muted">(by name)</span></th>
+                                        <th colspan="2" class="sub-header text-center">Summary <span class="text-muted">(by name)</span></th>
                                     </tr>
                                     foreach (var name in names.OrderByDescending(n => n.Count()).ThenBy(n => n.Key))
                                     {
