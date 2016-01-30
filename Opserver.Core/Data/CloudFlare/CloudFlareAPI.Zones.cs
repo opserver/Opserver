@@ -40,7 +40,8 @@ namespace StackExchange.Opserver.Data.CloudFlare
                         async api =>
                         {
                             var records = new List<CloudFlareDNSRecord>();
-                            var data = Zones.Data; // Intentionally cause a load here, since by nature of caches we have a race
+                            await Zones.PollAsync(); // wait on zones to load first...
+                            var data = Zones.Data;
                             if (data == null) return records;
                             foreach (var z in data)
                             {
