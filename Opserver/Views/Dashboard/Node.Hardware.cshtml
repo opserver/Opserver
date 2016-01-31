@@ -36,7 +36,7 @@
                             <ul class="ul-plain">
                                 @foreach (var m in b.OrderBy(m => m.Label))
                                 {
-                                    <li>@m.IconSpan() <span class="text-muted">@m.Name:</span> @m.Size</li>
+                                    <li>@m.IconSpan() <span class="text-muted">@m.PrettyName:</span> @m.Size</li>
                                 }
                             </ul>
                         </div>
@@ -111,7 +111,7 @@
             </div>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">PowerSupplies</div>
+            <div class="panel-heading">Power Supplies</div>
             <div class="panel-body">
                     @foreach (var p in h.PowerSupplies)
                     {

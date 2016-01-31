@@ -37,6 +37,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public class MemoryModuleInfo : ComponentInfo
         {
             public string Size { get; internal set; }
+            public string PrettyName => Name?.Replace("DIMM_", "");
             private string _bank;
             public string Bank => _bank ?? (_bank = Name?.TrimEnd(StringSplits.Numbers));
             private int? _label;
