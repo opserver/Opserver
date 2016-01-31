@@ -4,6 +4,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
+using Jil;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
@@ -19,34 +20,27 @@ namespace StackExchange.Opserver
         /// <summary>
         /// returns Url Encoded string
         /// </summary>
-        public static string UrlEncode(this string s)
-        {
-            return s.HasValue() ? HttpUtility.UrlEncode(s) : s;
-        }
+        public static string UrlEncode(this string s) => s.HasValue() ? HttpUtility.UrlEncode(s) : s;
 
         /// <summary>
         /// Returns a url encoded string with any + converted to %20 for better query string transport.
         /// </summary>
-        public static string QueryStringEncode(this string s)
-        {
-            return s.HasValue() ? HtmlUtilities.QueryStringEncode(s) : s;
-        }
+        public static string QueryStringEncode(this string s) => s.HasValue() ? HtmlUtilities.QueryStringEncode(s) : s;
 
         /// <summary>
         /// returns Html Encoded string
         /// </summary>
-        public static string HtmlEncode(this string s)
-        {
-            return s.HasValue() ? HttpUtility.HtmlEncode(s) : s;
-        }
+        public static string HtmlEncode(this string s) => s.HasValue() ? HttpUtility.HtmlEncode(s) : s;
 
         /// <summary>
         /// Title cases a string given the current culture
         /// </summary>
-        public static string ToTitleCase(this string s)
-        {
-            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
-        }
+        public static string ToTitleCase(this string s) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
+
+        /// <summary>
+        /// Encodes an object as JSON for direct use without quote crazy
+        /// </summary>
+        public static IHtmlString ToJson(this object o) => JSON.Serialize(o).AsHtml();
 
         public static IHtmlString ToStatusSpan(this Data.HAProxy.Item item)
         {

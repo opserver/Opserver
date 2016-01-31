@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -32,10 +33,11 @@ namespace StackExchange.Opserver.Data.SQL
         public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
         {
             Settings = settings;
-            // TODO: Object Name regex for not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
-            // ...or ConnectionStringBuilder?
-            ObjectName = settings.ObjectName.IsNullOrEmptyReturn("SQLServer");
             ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", settings.Name));
+            // Grab the instance name for performance counters and such
+            var csb = new SqlConnectionStringBuilder(ConnectionString);
+            var parts = csb.DataSource?.Split(StringSplits.BackSlash);
+            ObjectName = parts?.Length == 2 ? "MSSQL$" + parts[1].ToUpper() : "SQLServer";
         }
 
         public static SQLInstance Get(string name)

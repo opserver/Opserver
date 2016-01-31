@@ -1,5 +1,4 @@
-﻿@using StackExchange.Exceptional.Extensions
-@using StackExchange.Opserver.Views.Dashboard
+﻿@using StackExchange.Opserver.Views.Dashboard
 @model NodeGraphModel
 @{
     Layout = null;
@@ -17,7 +16,7 @@
                 $('.js-dashboard-chart').cpuGraph({
                     id: '@Model.Node.Id',
                     width: 858,
-                    data: @Model.GraphData.ToJson().AsHtml()
+                    data: @Model.GraphData.ToJson()
                 });
             </script>
             break;
@@ -27,7 +26,7 @@
                     id: '@Model.Node.Id',
                     width: 858,
                     max: @((Model.Node.TotalMemory/1024/1024).ToString()),
-                    data: @Model.GraphData.ToJson().AsHtml()
+                    data: @Model.GraphData.ToJson()
                 });
             </script>
             break;
@@ -37,7 +36,7 @@
                     id: '@Model.Node.Id',
                     iid: '@(Model.Interface?.Id)',
                     width: 858,
-                    data: @Model.GraphData.ToJson().AsHtml()
+                    data: @Model.GraphData.ToJson()
                 });
             </script>
             break;
