@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             CacheForSeconds = RefreshInterval,
             UpdateCache = UpdateFromElastic(nameof(State), async () =>
-                await GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table/").ConfigureAwait(false))
+                await GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/").ConfigureAwait(false))
         });
         
         public IEnumerable<ClusterStateInfo.ShardState> TroubledShards => AllShards.Where(s => s.State != "STARTED");
