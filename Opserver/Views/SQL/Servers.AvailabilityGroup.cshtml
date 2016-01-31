@@ -76,7 +76,7 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
     Connection State: @r.ConnectedState
     Mode: @r.AvailabilityMode">
                         <div class="pull-right">
-                            <span class="glyphicon glyphicon-tasks"></span> @SQLHelpers.HealthDescriptionAGs(r.ReplicaNode, r.Databases, minimal: true)
+                            <span class="glyphicon glyphicon-tasks @(r.Databases.GetWorstStatus().TextClass())"></span> @SQLHelpers.HealthDescriptionAGs(r.ReplicaNode, r.Databases, minimal: true)
                         </div>
                         <div>
                             <span>
