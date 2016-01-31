@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Data.SQL
                 using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                 {
                     await action(conn).ConfigureAwait(false);
-                    await JobSummary.PollAsync(true);
+                    await JobSummary.PollAsync(true).ConfigureAwait(false);
                     return true;
                 }
             }
