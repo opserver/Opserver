@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -35,7 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public double? Speed { get; internal set; }
         public List<string> TeamMembers { get; set; }
 
-        public List<IPAddress> IPs { get; set; }
+        public List<IPNet> IPs { get; set; }
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement

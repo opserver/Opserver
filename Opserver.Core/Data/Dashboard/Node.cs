@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
+using System.Net.NetworkInformation;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -113,7 +113,9 @@ namespace StackExchange.Opserver.Data.Dashboard
         public Volume GetVolume(string id) => Volumes.FirstOrDefault(v => v.Id == id);
         public Application GetApp(string id) => Apps.FirstOrDefault(a => a.Id == id);
 
-        public List<IPAddress> IPs { get; internal set; }
+        private static readonly List<IPNet> EmptyIPs = new List<IPNet>(); 
+
+        public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
 
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
 

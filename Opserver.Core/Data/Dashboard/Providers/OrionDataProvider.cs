@@ -144,6 +144,11 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
 
                     var ips = await GetNodeIPMapAsync(conn).ConfigureAwait(false);
 
+                    foreach (var i in interfaces)
+                    {
+                        i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
+                    }
+
                     foreach (var n in nodes)
                     {
                         n.DataProvider = this;
@@ -151,7 +156,6 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         n.Interfaces = interfaces.Where(i => i.NodeId == n.Id).ToList();
                         n.Volumes = volumes.Where(v => v.NodeId == n.Id).ToList();
                         n.Apps = apps.Where(a => a.NodeId == n.Id).ToList();
-                        n.IPs = ips.Where(t => t.Item1 == n.Id).Select(t => t.Item2).ToList();
                         n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
                         n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
                         n.SetReferences();
@@ -162,27 +166,33 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
             }
         }
 
+        // ReSharper disable ClassNeverInstantiated.Local
         private class OrionIPMap
         {
-            // TODO: IPNet conversion, currently we lack subnet data that is available
-            public int NodeID { get; set; }
-            public int InterfaceIndex { get; set; }
+            public string InterfaceID { get; set; }
+            public string IPAddress { get; set; }
+            public string Subnet { get; set; }
+            public IPNet IPNet { get; set; }
         }
+        // ReSharper restore ClassNeverInstantiated.Local
 
-        public async Task<List<Tuple<string, IPAddress>>> GetNodeIPMapAsync(DbConnection conn)
+        private async Task<List<OrionIPMap>> GetNodeIPMapAsync(DbConnection conn)
         {
-            var ipList = await conn.QueryAsync<string, string, Tuple<string, string>>(
-                @"Select Cast(NodeID as varchar(50)) NodeID, IPAddress From NodeIPAddresses",
-                commandTimeout: QueryTimeoutMs,
-                map: Tuple.Create,
-                splitOn: "IPAddress").ConfigureAwait(false);
-
-            var result = new List<Tuple<string, IPAddress>>();
-            foreach (var entry in ipList)
+            var result = await conn.QueryAsync<OrionIPMap>(@"
+Select Cast(i.InterfaceID as varchar(50)) as InterfaceID, ipa.IPAddress, ipa.SubnetMask
+  From NodeIPAddresses ipa
+       Join Interfaces i 
+         On ipa.NodeID = i.NodeID
+         And ipa.InterfaceIndex = i.InterfaceIndex",
+                commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+            
+            foreach (var m in result)
             {
-                IPAddress addr;
-                if (!IPAddress.TryParse(entry.Item2, out addr)) continue;
-                result.Add(Tuple.Create(entry.Item1, addr));
+                IPNet net;
+                if (IPNet.TryParse(m.IPAddress, m.Subnet, out net))
+                {
+                    m.IPNet = net;
+                }
             }
             return result;
         }

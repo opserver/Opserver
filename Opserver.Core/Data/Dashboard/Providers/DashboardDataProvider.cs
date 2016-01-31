@@ -60,7 +60,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         
         public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip)
         {
-            return AllNodes.Where(n => n.IPs?.Contains(ip) == true);
+            return AllNodes.Where(n => n.IPs?.Any(i => i.Contains(ip)) == true);
         }
 
         public virtual string GetManagementUrl(Node node) { return null; }

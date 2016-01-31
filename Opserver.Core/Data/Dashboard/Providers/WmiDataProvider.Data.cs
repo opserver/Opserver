@@ -38,7 +38,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Volumes = new List<Volume>(3);
                 VMs = new List<Node>();
                 Apps = new List<Application>();
-                IPs = new List<IPAddress>();
+                // TODO: IPs on interfaces
+                //IPs = new List<IPNet>();
 
                 // TODO: Size for retention / interval and convert to limited list
                 MemoryHistory = new List<MemoryUtilization>(1024);

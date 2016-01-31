@@ -68,8 +68,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             IPs = hi.Value?.IPAddresses?.Select(ip =>
                             {
                                 IPNet result;
-                                return IPNet.TryParse(ip, out result) ? result.IPAddress : null;
-                            }).Where(ip => ip != null).ToList(),
+                                return IPNet.TryParse(ip, out result) ? result : null;
+                            }).Where(ip => ip != null).ToList() ?? new List<IPNet>(),
                             LastSync = hi.Value.StatsLastUpdated,
                             InBps = hi.Value.Inbps,
                             OutBps = hi.Value.Outbps,
