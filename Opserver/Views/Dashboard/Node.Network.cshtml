@@ -51,10 +51,10 @@
                         <div class="col-sm-4">
                             <div>Details</div>
                             <ul class="ul-tree">
+                                <li><span class="text-muted">Link Speed:</span> @i.PrettySpeed.ColorCode()</li>
                                 <li><span class="text-muted">Current:</span> <span class="glyphicon glyphicon-download"></span> @i.PrettyIn() <span class="glyphicon glyphicon-upload"></span> @i.PrettyOut()</li>
                                 <li><span class="text-muted">MAC:</span> @i.PrettyMAC</li>
                                 <li><span class="text-muted">MTU:</span> @((i.MTU?.ToString() ?? "Unknown").ColorCode())</li>
-                                <li><span class="text-muted">Link Speed:</span> @i.PrettySpeed.ColorCode()</li>
                             </ul>
                         </div>
                         <div class="col-sm-4">
