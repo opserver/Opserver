@@ -81,9 +81,9 @@ Open Source Projects in Use
 ---------
 [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) by Marc Gravell  
 [Dapper](https://github.com/StackExchange/dapper-dot-net/) by Stack Exchange  
-[JSON.Net](http://james.newtonking.com/json) by James Newton-King     
+[JSON.Net](http://www.newtonsoft.com/json) by James Newton-King     
 [MiniProfiler](http://miniprofiler.com/) by Stack Exchange  
-[NEST](https://github.com/Mpdreamz/NEST) by Martijn Laarman  
+[NEST](https://github.com/elastic/elasticsearch-net) by Martijn Laarman  
 [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional) by Nick Craver  
 [TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack  
 
@@ -108,6 +108,6 @@ Props
 ----------
 We'd like to thank several people outside Stack Exchange for large contributions to Opserver's development.
 
-* [Brent Ozar](http://www.brentozar.com/) for lots of (continuing) help on the SQL monitoring, with some of the initial queries and help letting us know many use cases to cover.  We'll be integrating some of the awesome tooling Brent and his team have to further assist DBAs and developers (like [sp_Blitz](http://www.brentozar.com/blitz/), [sp_BlitzIndex](http://www.brentozar.com/blitzindex/), and some you'll hear about soon).  
+* [Brent Ozar](https://www.brentozar.com/) for lots of (continuing) help on the SQL monitoring, with some of the initial queries and help letting us know many use cases to cover.  We'll be integrating some of the awesome tooling Brent and his team have to further assist DBAs and developers (like [sp_Blitz](https://www.brentozar.com/blitz/), [sp_BlitzIndex](https://www.brentozar.com/blitzindex/), and some you'll hear about soon).  
 * [Adam Machanic](http://sqlblog.com/blogs/adam_machanic/) for [sp_WhoIsActive](http://sqlblog.com/blogs/adam_machanic/archive/tags/who+is+active/default.aspx), which powers the active tab for a SQL Instance.  He also assisted with use cases and performance tuning on the use of sp_WhoIsActive.  
 * The [SQL Sentry](http://www.sqlsentry.com/) guys, [Aaron Bertrand](http://sqlblog.com/blogs/aaron_bertrand/) and [Kevin Kline](http://kevinekline.com/) for even more SQL use cases, and their help with upcoming integration with SQL Sentry.  If you have SQL Sentry, Opserver will be providing historical data and some more dashboards using the data you already have from SQL Sentry, without increasing load to do the same monitoring twice.
