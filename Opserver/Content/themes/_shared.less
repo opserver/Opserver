@@ -702,11 +702,17 @@ dt {
 .ul-tree, .ul-tree ul {
   list-style-type: none;
   padding-left: @padding-base-horizontal;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 .ul-plain {
   list-style-type: none;
   padding-left: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
 /* Cache Dashboard */

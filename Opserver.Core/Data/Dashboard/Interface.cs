@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -9,20 +10,16 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public string Id { get; internal set; }
         public string NodeId { get; internal set; }
-        public int? Index { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string Name { get; internal set; }
         public string FullName { get; internal set; }
         public string Caption { get; internal set; }
         public string Comments { get; internal set; }
         public string Alias { get; internal set; }
-        public string IfName { get; internal set; }
         public string TypeDescription { get; internal set; }
         public string PhysicalAddress { get; internal set; }
-        public bool IsTeam { get; internal set; }
+        public bool IsTeam => TeamMembers?.Any() ?? false;
         public bool IsUnwatched { get; internal set; }
-        public DateTime? UnwatchedFrom { get; internal set; }
-        public DateTime? UnwatchedUntil { get; internal set; }
 
         public NodeStatus Status { get; internal set; }
 
@@ -32,9 +29,10 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? OutPps { get; internal set; }
         public int? MTU { get; internal set; }
         public double? Speed { get; internal set; }
-        public List<string> TeamMembers { get; set; }
-
-        public List<IPNet> IPs { get; set; }
+        public bool IsTeamMember => Node.Interfaces.Any(i => i.TeamMembers?.Contains(Id) ?? false);
+        public List<string> TeamMembers { get; internal set; }
+        public List<Interface> TeamMemberInterfaces => Node.Interfaces.Where(i => TeamMembers.Contains(i.Id)).ToList(); 
+        public List<IPNet> IPs { get; internal set; }
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement
@@ -56,7 +54,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_prettyName == null)
                 {
-                    _prettyName = Caption ?? "";
+                    _prettyName = Caption ?? Name ?? "";
                     foreach (var p in _prettyNameReplacements)
                     {
                         _prettyName = _prettyName.Replace(p.Key, p.Value);
@@ -69,8 +67,15 @@ namespace StackExchange.Opserver.Data.Dashboard
         private static readonly string[] _speedSizes = {"b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb"};
         public string PrettySpeed
         {
-            get { 
-                if (!Speed.HasValue) return "n/a";
+            get {
+                if (!Speed.HasValue)
+                {
+                    if (!TeamMembers.Any())
+                    {
+                        return "n/a";
+                    }
+                    Speed = TeamMemberInterfaces?.Sum(i => i.Speed) ?? 0;
+                }
                 var iSpeed = Speed.Value;
                 var order = 0;
                 while (iSpeed >= 1000 && order + 1 < _speedSizes.Length)
@@ -81,6 +86,11 @@ namespace StackExchange.Opserver.Data.Dashboard
                 return $"{iSpeed:0} {_speedSizes[order]}ps";
             }
         }
+
+        public string PrettyMAC =>
+            PhysicalAddress?.Length == 12
+                ? $"{PhysicalAddress.Substring(0, 2)}-{PhysicalAddress.Substring(2, 2)}-{PhysicalAddress.Substring(4, 2)}-{PhysicalAddress.Substring(6, 2)}-{PhysicalAddress.Substring(8, 2)}-{PhysicalAddress.Substring(10, 2)}"
+                : PhysicalAddress;
 
         public bool IsLikelyPrimary => Name.ToLower().EndsWith("team") ||
                                        Name.ToLower().StartsWith("bond") ||

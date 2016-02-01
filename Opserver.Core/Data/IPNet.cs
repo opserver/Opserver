@@ -14,6 +14,13 @@ namespace StackExchange.Opserver.Data
         public int CIDR { get; }
         public AddressFamily AddressFamily => IPAddress.AddressFamily;
 
+        public string AddressFamilyDescription =>
+            IPAddress.AddressFamily == AddressFamily.InterNetwork
+                ? "IPv4"
+                : IPAddress.AddressFamily == AddressFamily.InterNetworkV6
+                    ? "IPv6"
+                    : "";
+
         private TinyIPAddress? _tinyIPAddress { get; set; }
         private TinyIPAddress? _tinySubnet { get; set; }
 
@@ -195,7 +202,7 @@ namespace StackExchange.Opserver.Data
             private readonly ulong? LastV6Leg;
 
             public AddressFamily AddressFamily => IPv4Address.HasValue ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
-
+            
             public string BitString
             {
                 get

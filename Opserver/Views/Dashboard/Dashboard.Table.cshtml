@@ -82,7 +82,8 @@ else
                                 <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
                                 <td>@Graph(n, "cpu")</td>
                                 <td title="@n.ApplicationMemoryTextSummary()">
-                                    @n.MemoryStatusSpan()@if (n.MemoryUsed >= 0)
+                                    <span class="@n.MemoryMonitorStatus().TextClass()">@n.PrettyMemoryUsed() / @n.PrettyTotalMemory() (@(n.PercentMemoryUsed?.ToString("n2"))%)</span>
+                                    @if (n.MemoryUsed >= 0)
                                     {
                                         <div class="progress" style="width: 215px;">
                                             <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.ToString())%"></div>

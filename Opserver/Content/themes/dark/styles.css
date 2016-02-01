@@ -8959,9 +8959,16 @@ dt {
   list-style-type: none;
   padding-left: 12px;
 }
+.ul-tree:last-child,
+.ul-tree ul:last-child {
+  margin-bottom: 0;
+}
 .ul-plain {
   list-style-type: none;
   padding-left: 0;
+}
+.ul-plain:last-child {
+  margin-bottom: 0;
 }
 /* Cache Dashboard */
 tr.cache-sub-item td:first-child {

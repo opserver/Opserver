@@ -55,12 +55,10 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Gets a readable type description for dashboards, e.g. "Dictionary&lt;string,string&gt;"
         /// </summary>
-        public static string ReadableTypeDescription(this Type t)
-        {
-            return t.IsGenericType
+        public static string ReadableTypeDescription(this Type t) =>
+            t.IsGenericType
                 ? $"{t.Name.Split('`')[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
                 : t.Name;
-        }
 
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"
@@ -69,8 +67,12 @@ namespace StackExchange.Opserver
         {
             var numString = includeNumber ? number.ToComma() + " " : "";
             return number == 1
-                       ? numString + item
-                       : numString + (item.EndsWith("y") ? item.Remove(item.Length - 1) + "ies" : item + "s");
+                ? numString + item
+                : numString + (item.EndsWith("y")
+                    ? item.Remove(item.Length - 1) + "ies"
+                    : item.EndsWith("s")
+                        ? item.Remove(item.Length - 1) + "es"
+                        : item + "s");
         }
 
         /// <summary>

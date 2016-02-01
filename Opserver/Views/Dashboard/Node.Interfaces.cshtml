@@ -24,20 +24,21 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var i in Model.Interfaces.OrderBy(i => !i.IsTeam).ThenBy(i => i.Index))
-        {
-            <tr class="@i.RowClass()">
-                <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
-                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@i.Index.ToString()">
-                    @i.IconSpan()
-                    @i.PrettyName
-                </td>
-                <td class="@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
-                <td data-val="@(i.InBps?.ToString("F0"))">@i.PrettyIn()</td>
-                <td data-val="@(i.InBps?.ToString("F0"))">@Graph(i, "in")</td>
-                <td data-val="@(i.OutBps?.ToString("F0"))">@i.PrettyOut()</td>
-                <td data-val="@(i.OutBps?.ToString("F0"))">@Graph(i, "out")</td>
-            </tr>
-        }
+    @{ var j = 0; }
+    @foreach (var i in Model.Interfaces.OrderBy(i => !i.IsTeam).ThenBy(i => i.Id))
+    {
+        <tr class="@i.RowClass()">
+            <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
+                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@(j++.ToString())">
+                @i.IconSpan()
+                @i.PrettyName
+            </td>
+            <td class="@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
+            <td data-val="@(i.InBps?.ToString("F0"))">@i.PrettyIn()</td>
+            <td data-val="@(i.InBps?.ToString("F0"))">@Graph(i, "in")</td>
+            <td data-val="@(i.OutBps?.ToString("F0"))">@i.PrettyOut()</td>
+            <td data-val="@(i.OutBps?.ToString("F0"))">@Graph(i, "out")</td>
+        </tr>
+    }
     </tbody>
 </table>

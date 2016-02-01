@@ -74,6 +74,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             InBps = hi.Value.Inbps,
                             OutBps = hi.Value.Outbps,
                             Speed = hi.Value.LinkSpeed * 1000000,
+                            Status = NodeStatus.Active, // TODO: Implement
                             TeamMembers = h.Interfaces?.Where(i => i.Value.Master == hi.Value.Name).Select(i => i.Key).ToList()
                         }).ToList(),
                         Volumes = h.Disks?.Select(hd => new Volume
@@ -229,8 +230,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         }
                         n.Hardware = hs;
                     }
-
-                    n.Interfaces.ForEach(i => i.IsTeam = i.TeamMembers.Any());
 
                     if (h.UptimeSeconds.HasValue) // TODO: Check if online - maybe against ICMP data last?
                     {

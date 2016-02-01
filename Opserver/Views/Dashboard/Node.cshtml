@@ -79,14 +79,20 @@
                 </div>
                 <div class="value-block small col-xs-6" title="@s.ApplicationMemoryTextSummary()">
                     <div class="progress">
-                        <div class="progress-bar" style="width: @s.PercentMemoryUsed.ToString()%;"></div>
-                        <span>@s.MemoryStatusSpan(includePercent: false)</span>
+                        <div class="progress-bar @s.MemoryMonitorStatus().ProgressBarClass()" style="width: @s.PercentMemoryUsed.ToString()%;"></div>
+                        <span>@s.PrettyMemoryUsed() / @s.PrettyTotalMemory()</span>
                     </div>
                     <label>Memory</label>
                 </div>
                 <div class="value-block small col-xs-6" title="@s.NetworkTextSummary()">
                     @s.PrettyTotalNetwork()
-                    <label>Network</label>
+                    <label>
+                        Network
+                        @{
+                            var ips = s.IPs;
+                            <span class="text-muted">(<a href="#/dashboard/summary/network">@(ips?.Any() ?? false ? ips.Count.Pluralize("IP") : "view" )</a>)</span>
+                        }
+                    </label>
                 </div>
                 <div class="value-block small col-xs-6">
                     @if (s.LastBoot != null)

@@ -54,6 +54,19 @@ namespace StackExchange.Opserver
                     return ("(<b>" + item.Status + "</b>)").AsHtml();
             }
         }
+
+        public static IHtmlString ColorCode(this string s)
+        {
+            switch (s)
+            {
+                case "Unknown":
+                    return @"<span class=""text-warning"">Unknown</span>".AsHtml();
+                case "n/a":
+                    return @"<span class=""text-warning"">n/a</span>".AsHtml();
+                default:
+                    return HtmlEncode(s).AsHtml();
+            }
+        }
         
         /// <summary>
         /// Returns an icon span representation of this MonitorStatus

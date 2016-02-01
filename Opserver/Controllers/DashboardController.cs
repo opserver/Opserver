@@ -47,6 +47,8 @@ namespace StackExchange.Opserver.Controllers
             {
                 case "hardware":
                     return View("Node.Hardware", n);
+                case "network":
+                    return View("Node.Network", n);
                 default:
                     return ContentNotFound("Unknown summary view requested");
             }

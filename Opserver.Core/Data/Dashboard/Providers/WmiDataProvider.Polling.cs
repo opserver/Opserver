@@ -127,10 +127,7 @@ SELECT Name,
                         i.Alias = "!alias";
                         i.Caption = data.NetConnectionID == "Ethernet" ? data.Name : data.NetConnectionID;
                         i.FullName = data.Description;
-                        i.IfName = data.Name;
                         i.NodeId = Id;
-                        i.Index = 0;
-                        i.IsTeam = false; //TODO: Fix
                         i.LastSync = DateTime.UtcNow;
                         i.Name = data.Name;
                         i.PhysicalAddress = data.MACAddress;

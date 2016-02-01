@@ -13,8 +13,6 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string ComponentName { get; internal set; }
         public DateTime LastUpdated { get; internal set; }
         public bool IsUnwatched { get; internal set; }
-        public DateTime? UnwatchedFrom { get; internal set; }
-        public DateTime? UnwatchedUntil { get; internal set; }
 
         public int? ProcessID { get; internal set; }
         public string ProcessName { get; internal set; }

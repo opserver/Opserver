@@ -32,8 +32,6 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string VMHostID { get; internal set; }
         public bool IsVMHost { get; internal set; }
         public bool IsUnwatched { get; internal set; }
-        public DateTime? UnwatchedFrom { get; internal set; }
-        public DateTime? UnwatchedUntil { get; internal set; }
 
         public string Manufacturer { get; internal set; }
         public string Model { get; internal set; }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
@@ -53,8 +52,6 @@ Select Cast(n.NodeID as varchar(50)) as Id,
     Cast(vmh.NodeID as varchar(50)) as VMHostID, 
     Cast(IsNull(vh.HostID, 0) as Bit) IsVMHost,
     IsNull(UnManaged, 0) as IsUnwatched,
-    UnManageFrom as UnwatchedFrom,
-    UnManageUntil as UnwatchedUntil,
     hi.Manufacturer,
     hi.Model,
     hi.ServiceTag
@@ -68,19 +65,14 @@ Order By Id, Caption", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                     var interfaces = await conn.QueryAsync<Interface>(@"
 Select Cast(InterfaceID as varchar(50)) as Id,
        Cast(NodeID as varchar(50)) as NodeId,
-       InterfaceIndex [Index],
        LastSync,
        InterfaceName as Name,
        FullName,
        Caption,
        Comments,
        InterfaceAlias Alias,
-       IfName,
        InterfaceTypeDescription TypeDescription,
        PhysicalAddress,
-       IsNull(UnManaged, 0) as IsUnwatched,
-       UnManageFrom as UnwatchedFrom,
-       UnManageUntil as UnwatchedUntil,
        Cast(Status as int) Status,
        InBps,
        OutBps,
@@ -110,8 +102,6 @@ Select Cast(com.ApplicationID as varchar(50)) as Id,
        Cast(NodeID as varchar(50)) as NodeId, 
        app.Name as AppName, 
        IsNull(app.Unmanaged, 0) as IsUnwatched,
-       app.UnManageFrom as UnwatchedFrom,
-       app.UnManageUntil as UnwatchedUntil,
        com.Name as ComponentName, 
        ccs.TimeStamp as LastUpdated,
        --pe.PID as ProcessID, 
@@ -171,7 +161,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
         {
             public string InterfaceID { get; set; }
             public string IPAddress { get; set; }
-            public string Subnet { get; set; }
+            public string SubnetMask { get; set; }
             public IPNet IPNet { get; set; }
         }
         // ReSharper restore ClassNeverInstantiated.Local
@@ -189,7 +179,7 @@ Select Cast(i.InterfaceID as varchar(50)) as InterfaceID, ipa.IPAddress, ipa.Sub
             foreach (var m in result)
             {
                 IPNet net;
-                if (IPNet.TryParse(m.IPAddress, m.Subnet, out net))
+                if (IPNet.TryParse(m.IPAddress, m.SubnetMask, out net))
                 {
                     m.IPNet = net;
                 }
