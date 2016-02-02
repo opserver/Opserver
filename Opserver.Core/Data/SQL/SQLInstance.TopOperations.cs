@@ -96,6 +96,7 @@ namespace StackExchange.Opserver.Data.SQL
             }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
        TotalCPU, TotalDuration, TotalReads,
        PercentCPU, PercentDuration, PercentReads, PercentExecutions,
@@ -135,8 +136,8 @@ FROM (SELECT TOP (@MaxResultCount)
              CAST(ROUND(100.00 * total_elapsed_time / t.TotalElapsed, 2) AS MONEY) AS PercentDuration,
              CAST(ROUND(100.00 * total_logical_reads / t.TotalReads, 2) AS MONEY) AS PercentReads,
              CAST(ROUND(100.00 * execution_count / t.TotalExecs, 2) AS MONEY) AS PercentExecutions,
-             qs.creation_time AS PlanCreationTime,
-             qs.last_execution_time AS LastExecutionTime,
+             DATEADD(mi, -@UTCOffset, qs.creation_time) AS PlanCreationTime,
+             DATEADD(mi, -@UTCOffset, qs.last_execution_time) AS LastExecutionTime,
              qs.plan_handle AS PlanHandle,
              qs.statement_start_offset AS StatementStartOffset,
              qs.statement_end_offset AS StatementEndOffset,
@@ -242,7 +243,7 @@ FROM (SELECT TOP (@MaxResultCount)
                 var clauses = new List<string>();
                 if (MinExecs.GetValueOrDefault(0) > 0) clauses.Add("execution_count >= @MinExecs");
                 if (MinExecsPerMin.GetValueOrDefault(0) > 0) clauses.Add("(Case When DATEDIFF(mi, creation_time, qs.last_execution_time) > 0 Then CAST((1.00 * execution_count / DATEDIFF(mi, creation_time, qs.last_execution_time)) AS money) Else Null End) >= @MinExecsPerMin");
-                if (MinLastRunDate.HasValue) clauses.Add("qs.last_execution_time >= @MinLastRunDate");
+                if (MinLastRunDate.HasValue) clauses.Add("qs.last_execution_time >= DATEADD(mi, @UTCOffset, @MinLastRunDate)");
                 if (Database.HasValue) clauses.Add("Cast(pa.value as Int) = @Database");
 
                 return clauses.Any() ? "\n       And " + string.Join("\n       And ", clauses) : "";

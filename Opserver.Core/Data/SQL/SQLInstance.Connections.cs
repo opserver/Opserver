@@ -25,10 +25,11 @@ namespace StackExchange.Opserver.Data.SQL
             public long TotalWrites { get; internal set; }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 Select s.login_name LoginName,
        s.host_name HostName,
        s.transaction_isolation_level TransactionIsolationLevel,
-       Max(c.connect_time) LastConnectTime, 
+       DATEADD(mi, -@UTCOffset, Max(c.connect_time)) LastConnectTime,
        Count(*) ConnectionCount,
        Sum(Cast(c.num_reads as BigInt)) TotalReads, 
        Sum(Cast(c.num_writes as BigInt)) TotalWrites
@@ -78,8 +79,9 @@ Select s.login_name LoginName,
        s.program_name ProgramName,";
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 Select c.connection_id Id, 
-       c.connect_time ConnectTime, 
+       DATEADD(mi, -@UTCOffset, c.connect_time) ConnectTime, 
        c.most_recent_sql_handle PlanHandle, 
        st.text QueryText,  
        c.client_net_address ClientNetAddress, 
@@ -90,7 +92,7 @@ Select c.connection_id Id,
        c.num_writes NumWrites,
        s.transaction_isolation_level TransactionIsolationLevel,
        s.session_id SessionId, 
-       s.login_time LoginTime, {0}       
+       DATEADD(mi, -@UTCOffset, s.login_time) LoginTime, {0}       
        s.status SessionStatus
   From sys.dm_exec_connections c
        Join sys.dm_exec_sessions s

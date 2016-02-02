@@ -115,7 +115,7 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
 	Set @sql = @sql + '
-       sqlserver_start_time SQLServerStartTime,';
+       DATEADD(mi, -DATEDIFF(MI, GETUTCDATE(), GETDATE()), sqlserver_start_time) SQLServerStartTime,';
 
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 11
     Set @sql = @sql + '

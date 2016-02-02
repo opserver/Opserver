@@ -47,13 +47,14 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime StartTime { get; internal set; }
 
             internal const string FetchSQL = @"
+DECLARE @UTCOffset INT = DATEDIFF(MI, GETUTCDATE(), GETDATE())
 select listener_id ListenerId,
        ip_address IPAddress,
        is_ipv4 IsIPV4,
        port Port,
        type Type,
        state State,
-       start_time StartTime
+       DATEADD(mi, -@UTCOffset, start_time) StartTime
 from sys.dm_tcp_listener_states";
 
             public string GetFetchSQL(Version v)
