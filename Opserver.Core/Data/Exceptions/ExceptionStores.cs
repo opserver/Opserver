@@ -65,16 +65,17 @@ namespace StackExchange.Opserver.Data.Exceptions
             List<Task> toPoll = new List<Task>();
             foreach (var s in GetApps(appName).Select(a => a.Store).Distinct())
             {
+                if (s == null)
+                {
+                    continue;
+                }
                 var aResult = await action(s).ConfigureAwait(false);
                 if (typeof(T) == typeof(bool) && Convert.ToBoolean(aResult))
                 {
                     result = aResult;
                 }
-                if (s != null)
-                {
-                    toPoll.Add(s.Applications.PollAsync(true));
-                    toPoll.Add(s.ErrorSummary.PollAsync(true));
-                }
+                toPoll.Add(s.Applications.PollAsync(true));
+                toPoll.Add(s.ErrorSummary.PollAsync(true));
             }
             await Task.WhenAll(toPoll);
             return result;
