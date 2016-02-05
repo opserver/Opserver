@@ -131,7 +131,7 @@
                             <th colspan="2">Bandwidth</th>
                             <th colspan="2">Status</th>
                         </tr>
-                        @foreach (var s in combinedStats)
+                        @foreach (var s in combinedStats.OrderBy(sg => sg.Key.Type == StatusType.Frontend || sg.Key.Type == StatusType.Backend).ThenBy(sg => sg.Key.Description))
                         {
                             var stat = s.Key;
                             var proxyStatus = s.GetWorstStatus();
