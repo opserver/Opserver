@@ -27,7 +27,7 @@
 <h5 class="page-header">
     @SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span>
 </h5>
-<div class="row">
+<div class="row small">
     <div class="col-md-4">
         <div class="panel panel-default">
             <div class="panel-heading">Info</div>
@@ -72,33 +72,31 @@
         <div class="panel panel-default">
             <div class="panel-heading">Polling</div>
             <div class="panel-body small">
-                <div class="row">
-                    <div class="value-block col-xs-4 @(pollingInfo.BackgroundClass())">
-                        @(pollingInfo.IsAlive ? "Alive" : "Dead")
-                        <label>Thread</label>
-                    </div>
-                    <div class="value-block col-xs-4">
-                        @pollingInfo.StartTime.ToRelativeTimeSpan()
-                        <label>Started</label>
-                    </div>
-                    <div class="value-block col-xs-4">
-                        @(pollingInfo.LastPollAll?.ToRelativeTimeSpan())
-                        <label>Last Poll</label>
-                    </div>
-                    <div class="value-block col-xs-4">
-                        @pollingInfo.TotalPollers.ToComma()
-                        <label>Pollers</label>
-                    </div>
-                    <div class="value-block col-xs-4">
-                        @pollingInfo.TotalPollIntervals.ToComma()
-                        <label>Poll Intervals</label>
-                    </div>
-                    <div class="value-block col-xs-4">
-                        @pollingInfo.TotalPollers.ToComma()
-                        <label>Caches <span class="text-muted">(<a href="/about/caches">view</a>)</span></label>
-                    </div>
+                <div class="value-block col-xs-4 @(pollingInfo.BackgroundClass())">
+                    @(pollingInfo.IsAlive ? "Alive" : "Dead")
+                    <label>Thread</label>
                 </div>
-                <h5 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h5>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.StartTime.ToRelativeTimeSpan()
+                    <label>Started</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @(pollingInfo.LastPollAll?.ToRelativeTimeSpan())
+                    <label>Last Poll</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollers.ToComma()
+                    <label>Pollers</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollIntervals.ToComma()
+                    <label>Poll Intervals</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollers.ToComma()
+                    <label>Caches <span class="text-muted">(<a href="/about/caches">view</a>)</span></label>
+                </div>
+                <h6 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h6>
                 <ul class="list-group">
                     @foreach (var ng in pollingInfo.NodeBreakdown)
                     {
@@ -127,10 +125,9 @@
                     @Current.RequestIP
                     <label>Request IP</label>
                 </div>
-                
-                <dl>
-                    <dt>Current Roles</dt>
-                    <dd>
+                <ul class="list-group col-xs-12">
+                    <li class="list-group-item">
+                        <span class="text-muted">Current Roles:</span>
                         @if (Current.User.IsGlobalAdmin)
                         {
                             <strong class="text-success">Global Admin</strong>
@@ -139,19 +136,21 @@
                         {
                             @Current.User.Role
                         }
-                    </dd>
-                    <dt>Internal Networks</dt>
-                    <dd>@Current.Security.InternalNetworks.Count</dd>
-                    <dt>Admins</dt>
-                    <dd>@(SiteSettings.AdminGroups?.Replace(";", ", "))</dd>
-                    <dt>Viewers</dt>
-                    <dd>@(SiteSettings.ViewGroups?.Replace(";", ", "))</dd>
-                </dl>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">@Current.Security.InternalNetworks.Count.ToComma()</span>
+                        <span class="text-muted">Internal Networks</span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="text-muted">Admins:</span> @(SiteSettings.AdminGroups?.Replace(";", ", "))
+                    </li>
+                    <li class="list-group-item">
+                        <span class="text-muted">Viewers:</span> @(SiteSettings.ViewGroups?.Replace(";", ", "))
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
-</div>
-<div class="row">
     <div class="col-md-4">
         @if (s.Dashboard.Enabled)
         {
@@ -160,7 +159,7 @@
                 <div class="panel-body">
                     @foreach (var p in DashboardData.DataProviders)
                     {
-                        <h5 class="page-header">@p.IconSpan() @p.Name</h5>
+                        <h6 class="page-header">@p.IconSpan() @p.Name</h6>
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <span class="badge">@p.AllNodes.Count.ToComma()</span>
@@ -213,7 +212,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
             <div class="panel panel-default panel-@instances.GetWorstStatus().RawClass(showGood: true)">
                 <div class="panel-heading">SQL Instances</div>
                 <div class="panel-body small">
-                    <h5 class="page-header">@clusters.Count.Pluralize("Availability Group Cluster")</h5>
+                    <h6 class="page-header">@clusters.Count.Pluralize("Availability Group Cluster")</h6>
                     @foreach (var cluster in clusters)
                     {
                         <h6>@cluster.IconSpan() @cluster.Name</h6>
@@ -224,8 +223,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
                             }
                         </ul>
                     }
-
-                    <h5 class="page-header">@instances.Count.Pluralize("Standalone Node")</h5>
+                    <h6 class="page-header">@instances.Count.Pluralize("Standalone Node")</h6>
                     <ul class="list-group">
                         @foreach (var instance in instances)
                         {
@@ -236,79 +234,109 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
             </div>
         </div>
     }
+    @if (s.Exceptions.Enabled)
+    {
+        var exceptionStatus = ExceptionStores.MonitorStatus;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@exceptionStatus.RawClass(showGood: true)">
+                <div class="panel-heading">Exceptions</div>
+                <div class="panel-body small">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span class="text-muted">Admins:</span>
+                            @((s.Exceptions.AdminGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Viewers:</span>
+                            @((s.Exceptions.ViewGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge@(s.Exceptions.EnablePreviews ? "" : " alert-warning")">@s.Exceptions.EnablePreviews</span>
+                            Previews
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">@s.Exceptions.RecentSeconds.Pluralize("Second")</span>
+                            Recent Threshold
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge alert-warning">@s.Exceptions.WarningCount.ToComma() / @s.Exceptions.WarningRecentCount.ToComma() Recent</span>
+                            Warning Thresholds
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge alert-danger">@s.Exceptions.CriticalCount.ToComma() / @s.Exceptions.CriticalRecentCount.ToComma() Recent</span>
+                            Critical Thresholds
+                        </li>
+                    </ul>
+                    @foreach (var store in s.Exceptions.Stores)
+                    {
+                        var es = ExceptionStores.Stores.First(ess => ess.Name == store.Name);
+                        <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <span class="badge">@(store.QueryTimeoutMs.ToComma())ms</span>
+                                Timeout
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">@(store.PollIntervalSeconds.ToComma())s</span>
+                                Poll Interval
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">@(es.Applications.Data?.Sum(a => a.ExceptionCount).ToComma() ?? "0")</span>
+                                Exception Count
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    @if (s.HAProxy.Enabled)
+    {
+        var groups = HAProxyGroup.AllGroups;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@HAProxyGroup.AllGroups.GetWorstStatus().RawClass(showGood: true)">
+                <div class="panel-heading">HAProxy</div>
+                <div class="panel-body small">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span class="text-muted">Admins:</span>
+                            @((s.HAProxy.AdminGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Viewers:</span>
+                            @((s.HAProxy.ViewGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">User:</span>
+                            @s.HAProxy.User
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">@(s.HAProxy.QueryTimeoutMs.ToComma())ms</span>
+                            Timeout
+                        </li>
+                    </ul>
+                    @if (groups.Count > 0)
+                    {
+                        foreach (var g in groups)
+                        {
+                            <h6 class="page-header">@g.IconSpan() @g.Name</h6>
+                            <ul class="list-group">
+                                @foreach (var i in g.Instances)
+                                {
+                                    <li class="list-group-item">
+                                        @i.IconSpan() <span class="text-muted">@i.Name:</span> @i.Url
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>
 <div class="about">
     <section class="per-section-props">
-        @if (s.Exceptions.Enabled)
-        {
-            var apps = ExceptionStores.Applications;
-            <header class="properties">@ExceptionStores.MonitorStatus.IconSpan() Exceptions</header>
-            <section class="properties">
-                <ul>
-                    @if (@s.Exceptions.AdminGroups.HasValue())
-                    {
-                        <li>Admins: <span class="value">@s.Exceptions.AdminGroups</span></li>
-                    }
-                    @if (@s.Exceptions.ViewGroups.HasValue())
-                    {
-                        <li>Viewers: <span class="value">@s.Exceptions.ViewGroups</span></li>
-                    }
-                    <li>Previews: <span class="value">@s.Exceptions.EnablePreviews</span></li>
-                    <li>RecentSeconds: <span class="value">@s.Exceptions.RecentSeconds</span></li>
-                    <li>WarningCount: <span class="value">@s.Exceptions.WarningCount</span></li>
-                    <li>CriticalCount: <span class="value">@s.Exceptions.CriticalCount</span></li>
-                    <li>WarningRecentCount: <span class="value">@s.Exceptions.WarningRecentCount</span></li>
-                    <li>CriticalRecentCount: <span class="value">@s.Exceptions.CriticalRecentCount</span></li>
-                    <li>
-                        Stores: <span class="value">@s.Exceptions.Stores.Count</span>
-                        <ul class="sub-list">
-                            @foreach (var store in s.Exceptions.Stores)
-                            {
-                                var es = ExceptionStores.Stores.First(ess => ess.Name == store.Name);
-                                <li>
-                                    @es.LastFetch.IconSpan() <span class="value">@store.Name</span> - Timeout: @(store.QueryTimeoutMs.ToComma())ms - PollInterval: @(store.PollIntervalSeconds.ToComma())s
-                                    <ul class="sub-list">
-                                        @foreach (var app in apps.Where(a => a.StoreName == store.Name))
-                                        {
-                                            <li>@app.Name: <span class="value">@app.ExceptionCount</span></li>
-                                        }
-                                    </ul>
-                                </li>
-                            }
-                        </ul>
-                    </li>
-                </ul>
-            </section>
-        }
-        @if (s.HAProxy.Enabled)
-        {
-            <header class="properties">@HAProxyGroup.AllGroups.GetWorstStatus().IconSpan() HAProxy</header>
-            <section class="properties">
-                <ul>
-                    @if (@s.HAProxy.AdminGroups.HasValue())
-                    {
-                        <li>Admins: <span class="value">@s.HAProxy.AdminGroups</span></li>
-                    }
-                    @if (@s.HAProxy.ViewGroups.HasValue())
-                    {
-                        <li>Viewers: <span class="value">@s.HAProxy.ViewGroups</span></li>
-                    }
-                    <li>User: <span class="value">@s.HAProxy.User</span></li>
-                    <li>Query Timeout: <span class="value">@s.HAProxy.QueryTimeoutMs</span></li>
-
-
-                    <li>
-                        Instances: <span class="value">@s.HAProxy.Instances.Count</span>
-                        <ul class="sub-list">
-                            @foreach (var hap in HAProxyGroup.AllGroups.SelectMany(g => g.Instances))
-                            {
-                                <li>@hap.IconSpan() <span class="value">@hap.Name</span> @hap.Url - Timeout: @(hap.QueryTimeoutMs.GetValueOrDefault().ToComma())ms</li>
-                            }
-                        </ul>
-                    </li>
-                </ul>
-            </section>
-        }
         @if (s.TeamCity.Enabled)
         {
             var projects = BuildStatus.GetAllProjects();
@@ -343,8 +371,4 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
             </section>
         }
     </section>
-
-    <div class="bottom-links">
-        <a href="~/">Home</a>
-    </div>
 </div>

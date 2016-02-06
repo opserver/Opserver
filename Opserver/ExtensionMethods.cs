@@ -59,6 +59,8 @@ namespace StackExchange.Opserver
         {
             switch (s)
             {
+                case "None":
+                    return @"<span class=""text-muted"">None</span>".AsHtml();
                 case "Unknown":
                     return @"<span class=""text-warning"">Unknown</span>".AsHtml();
                 case "n/a":
