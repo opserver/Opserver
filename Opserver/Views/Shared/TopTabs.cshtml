@@ -13,8 +13,8 @@
             var status = tab.GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
             var badgeCount = tab.GetBadgeCount?.Invoke();
                     <li class="@(tab.IsCurrentTab ? "active" : null)">
-                        <a class="@(status.TextClass())" href="@tab.Url" title="@(tab.GetTooltip?.Invoke())">
-                            @tab.Name
+                        <a href="@tab.Url" title="@(tab.GetTooltip?.Invoke())">
+                            <span class="@(status.TextClass())">@tab.Name</span>
                             @if (badgeCount > 0)
                             {
                                 <span class="badge" data-name="@tab.Name">@badgeCount.ToComma()</span>
