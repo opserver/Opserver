@@ -95,14 +95,13 @@ namespace StackExchange.Opserver.Controllers
             var sb = StringBuilderCache.Get().AppendFormat(@"<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
   <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{3}"" stroke-width=""1"" />
   <g fill=""{2}"" stroke=""none"">
-    <path d=""M0 50 ", width.ToString(), height.ToString(), Color, AxisColor);
+    <path d=""M0 50 L", width.ToString(), height.ToString(), Color, AxisColor);
             foreach (var p in points)
             {
-                sb.Append("L")
-                  .Append((p.DateEpoch - startEpoch) / range).Append(" ")
+                sb.Append((p.DateEpoch - startEpoch) / range).Append(" ")
                   .Append((height - getVal(p) / divisor).ToString("n1")).Append(" ");
             }
-            sb.AppendFormat(@"L{0} {1} z""/>
+            sb.AppendFormat(@"{0} {1} z""/>
    </g>
 </svg>", width.ToString(), height.ToString());
 
