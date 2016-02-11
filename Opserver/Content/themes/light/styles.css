@@ -8807,7 +8807,7 @@ a.value-block.bg-danger:focus {
 table .text-muted,
 .table .text-muted {
   color: #999999;
-  font-weight: normal;
+  font-weight: lighter;
 }
 .table-super-condensed > thead > tr.first-of-group td,
 .table-super-condensed > tbody > tr.first-of-group td,
