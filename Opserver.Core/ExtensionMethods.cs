@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
@@ -51,6 +52,17 @@ namespace StackExchange.Opserver
             s == null || toTrim == null || !s.EndsWith(toTrim)
                 ? s
                 : s.Substring(0, s.Length - toTrim.Length);
+
+
+        /// <summary>
+        /// returns Url Encoded string
+        /// </summary>
+        public static string UrlEncode(this string s) => s.HasValue() ? WebUtility.UrlEncode(s) : s;
+
+        /// <summary>
+        /// returns Html Encoded string
+        /// </summary>
+        public static string HtmlEncode(this string s) => s.HasValue() ? WebUtility.HtmlEncode(s) : s;
 
         /// <summary>
         /// Gets a readable type description for dashboards, e.g. "Dictionary&lt;string,string&gt;"

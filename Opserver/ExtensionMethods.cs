@@ -18,21 +18,6 @@ namespace StackExchange.Opserver
     public static class WebExtensionMethods
     {
         /// <summary>
-        /// returns Url Encoded string
-        /// </summary>
-        public static string UrlEncode(this string s) => s.HasValue() ? HttpUtility.UrlEncode(s) : s;
-
-        /// <summary>
-        /// Returns a url encoded string with any + converted to %20 for better query string transport.
-        /// </summary>
-        public static string QueryStringEncode(this string s) => s.HasValue() ? HtmlUtilities.QueryStringEncode(s) : s;
-
-        /// <summary>
-        /// returns Html Encoded string
-        /// </summary>
-        public static string HtmlEncode(this string s) => s.HasValue() ? HttpUtility.HtmlEncode(s) : s;
-
-        /// <summary>
         /// Title cases a string given the current culture
         /// </summary>
         public static string ToTitleCase(this string s) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
@@ -66,7 +51,7 @@ namespace StackExchange.Opserver
                 case "n/a":
                     return @"<span class=""text-warning"">n/a</span>".AsHtml();
                 default:
-                    return HtmlEncode(s).AsHtml();
+                    return s.HtmlEncode().AsHtml();
             }
         }
         
@@ -439,9 +424,9 @@ namespace StackExchange.Opserver
                 foreach (var value in nvc.GetValues(key))
                 {
                     if (sb.Length > 1) sb.Append("&");
-                    sb.Append(HttpUtility.UrlEncode(key))
+                    sb.Append(key.UrlEncode())
                         .Append("=")
-                        .Append(HttpUtility.UrlEncode(value));
+                        .Append(value.UrlEncode());
                 }
             }
             var result = sb.ToStringRecycle();
@@ -453,7 +438,7 @@ namespace StackExchange.Opserver
     {
         public static void SetPageTitle(this WebViewPage page, string title)
         {
-            title = HtmlUtilities.Encode(title);
+            title = title.HtmlEncode();
             page.ViewData[ViewDataKeys.PageTitle] = GetPageTitle(page, title);
         }
 

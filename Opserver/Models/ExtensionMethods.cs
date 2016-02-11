@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Models
             
             if (options.MinExecs.HasValue) sb.Append("MinExecs=").Append(options.MinExecs.ToString()).Append("&");
             if (options.MinExecsPerMin.HasValue) sb.Append("MinExecsPerMin=").Append(options.MinExecsPerMin.ToString()).Append("&");
-            if (options.Search.HasValue()) sb.Append("Search=").Append(HttpUtility.UrlEncode(options.Search)).Append("&");
+            if (options.Search.HasValue()) sb.Append("Search=").Append(options.Search.UrlEncode()).Append("&");
             if (options.Database.HasValue) sb.Append("Database=").Append(options.Database.Value).Append("&");
             if (options.LastRunSeconds.HasValue) sb.Append("LastRunSeconds=").Append(options.LastRunSeconds.Value).Append("&");
 

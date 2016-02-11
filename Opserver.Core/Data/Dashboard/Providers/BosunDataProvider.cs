@@ -85,9 +85,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         public override string GetManagementUrl(Node node)
-        {
-            // TODO: UrlEncode
-            return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id}&time=1d-ago";
+        {   
+            return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id.UrlEncode()}&time=1d-ago";
         }
 
         public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
