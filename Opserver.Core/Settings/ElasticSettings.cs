@@ -5,7 +5,7 @@ namespace StackExchange.Opserver
 {
     public class ElasticSettings : Settings<ElasticSettings>
     {
-        public override bool Enabled => Clusters.Any();
+        public override bool Enabled => Clusters?.Any() ?? false;
 
         /// <summary>
         /// elastic search clusters to monitor
