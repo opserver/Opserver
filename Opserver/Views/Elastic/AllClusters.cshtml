@@ -31,7 +31,7 @@
                     <th>Node</th>
                     <th>Healthy</th>
                     <th>Error</th>
-                    <th>As of</th>
+                    <th>Last Seen</th>
                 </tr>
             </thead>
             <tbody>
@@ -41,8 +41,8 @@
                         <td>@(MonitorStatus.Critical.IconSpan())</td>
                         <td>@n.Url</td>
                         <td class="text-muted">Unknown</td>
-                        @*<td title="@(n.LastError?.Message)">@(n.LastError?.Message.TruncateWithEllipsis(60))</td>
-                            <td>@((n.LastPing ?? n.LastSeen)?.ToRelativeTimeSpan())</td>*@
+                        <td title="@(n.LastException?.Message)">@(n.LastException?.Message.TruncateWithEllipsis(100))</td>
+                        <td>@(n.LastSeen?.ToRelativeTimeSpan() ?? "Never".AsHtml())</td>
                     </tr>
                 }
             </tbody>

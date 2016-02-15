@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Net;
+using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
@@ -25,7 +26,8 @@ namespace StackExchange.Opserver.Data.Elastic
             public string ClusterName => LastStatus?.ClusterName;
             public NodeHomeInfo.VersionInfo Version => LastStatus?.Version;
 
-            public DateTime LastSeen { get; private set; }
+            public DateTime? LastSeen { get; private set; }
+            public Exception LastException { get; private set; }
             public NodeHomeInfo LastStatus { get; private set; }
 
             public ElasticNode(string hostAndPort)
@@ -71,11 +73,18 @@ namespace StackExchange.Opserver.Data.Elastic
                     using (var rs = await wc.OpenReadTaskAsync(Url + path).ConfigureAwait(false))
                     using (var sr = new StreamReader(rs))
                     {
+                        LastSeen = DateTime.UtcNow;
                         return JSON.Deserialize<T>(sr);
                     }
                 }
+                catch (SocketException e)
+                {
+                    LastException = e;
+                    // nothing - we failed to reach a downed node which is to be expected
+                }
                 catch (Exception e)
                 {
+                    LastException = e;
                     Current.LogException(e);
                     // In the case of a 404, 500, etc - carry on to the next node
                 }
