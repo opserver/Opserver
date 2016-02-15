@@ -40,6 +40,8 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             if (HealthStatus.Data?.Indexes != null)
                 yield return HealthStatus.Data.Indexes.Values.GetWorstStatus();
+            if (KnownNodes.Any(n => n.LastException != null))
+                yield return MonitorStatus.Warning;
             yield return DataPollers.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()

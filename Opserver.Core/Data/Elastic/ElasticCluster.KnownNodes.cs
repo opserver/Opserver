@@ -74,7 +74,9 @@ namespace StackExchange.Opserver.Data.Elastic
                     using (var sr = new StreamReader(rs))
                     {
                         LastSeen = DateTime.UtcNow;
-                        return JSON.Deserialize<T>(sr);
+                        var result = JSON.Deserialize<T>(sr);
+                        LastException = null;
+                        return result;
                     }
                 }
                 catch (SocketException e)
