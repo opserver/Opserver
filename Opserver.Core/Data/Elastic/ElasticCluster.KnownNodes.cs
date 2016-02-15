@@ -82,6 +82,11 @@ namespace StackExchange.Opserver.Data.Elastic
                     LastException = e;
                     // nothing - we failed to reach a downed node which is to be expected
                 }
+                catch (WebException e)
+                {
+                    LastException = e;
+                    // nothing - we failed to reach a downed node which is to be expected
+                }
                 catch (Exception e)
                 {
                     LastException = e;
