@@ -10,7 +10,7 @@
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
-            Status.SQL.init({ node: @(Model.CurrentInstance?.Name.ToJson()) });
+            Status.SQL.init({ node: '@(Model.CurrentInstance?.Name)' });
         });
     </script>
 }
