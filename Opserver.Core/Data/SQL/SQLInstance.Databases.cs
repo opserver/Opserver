@@ -503,16 +503,24 @@ Create Table #vlfTemp (
     CreateLSN nvarchar(255)
 );
 
-Declare @sql nvarchar(max);
-Set @sql = '';
-Select @sql = @sql + ' Insert #vlfTemp Exec ' + QuoteName(name) + '.sys.sp_executesql N''DBCC LOGINFO WITH NO_INFOMSGS'';
-  Insert #VLFCounts Select ' + Cast(database_id as nvarchar(10)) + ',''' + name + ''', Count(*) From #vlfTemp;
-  Truncate Table #vlfTemp;'
-  From sys.databases
-  Where state <> 6; -- Skip OFFLINE databases as they cause errors
+Declare @dbId int, @dbName sysname;
+Declare dbs Cursor Local Fast_Forward For (Select database_id, name From sys.databases Where state <> 6);
+Open dbs;
+Fetch Next From dbs Into @dbId, @dbName;
+While @@FETCH_STATUS = 0
+Begin
+    Insert Into #vlfTemp
+    Exec('DBCC LOGINFO(''' + @dbName + ''') WITH NO_INFOMSGS');
+    Insert Into #VLFCounts (DatabaseId, DatabaseName, VLFCount)
+    Values (@dbId, @dbName, @@ROWCOUNT);
+    Truncate Table #vlfTemp;
+    Fetch Next From dbs Into @dbId, @dbName;
+End
+Close dbs;
+Deallocate dbs;
 
-Exec sp_executesql @sql;
 Select * From #VLFCounts;
+
 Drop Table #VLFCounts;
 Drop Table #vlfTemp;";
 
