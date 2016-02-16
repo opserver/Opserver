@@ -16,7 +16,7 @@
         {
             foreach (var db in unhealthy.OrderBy(u => u.DatabaseName))
             {
-                <div class="ag-db-error" title="@db.DatabaseName
+                <div class="text-warning" title="@db.DatabaseName
 Sync: @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.GetDescription() : "Unknown")
 Health: @(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.GetDescription() : "Unknown")
 @if (db.SuspendReason.HasValue) {<text>
@@ -25,7 +25,7 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
         }
         else
         {
-            <div class="ag-error">Sync: @r.SynchronizationHealth.GetDescription()</div>
+            <div class="text-danger">Sync: @r.SynchronizationHealth.GetDescription()</div>
         }
     }
 }
@@ -94,8 +94,8 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
                         </div>
                         @RenderDBIssues(r)
                         <div>
-                            <span class="glyphicon glyphicon-upload"></span> @(((long)r.BytesReceivedPerSecond).ToSize(zero: "0"))ps
-                            <span class="glyphicon glyphicon-download"></span> @(((long)r.BytesSentPerSecond).ToSize(zero: "0"))ps
+                            <span class="glyphicon glyphicon-upload"></span> @(((long)r.BytesReceivedPerSecond).ToSize(zero: "0 B"))ps
+                            <span class="glyphicon glyphicon-download"></span> @(((long)r.BytesSentPerSecond).ToSize(zero: "0 B"))ps
                         </div>
                         <div>
                             <span class="pull-right">@ag.Node.AvailabilityGroups.ToPollSpan(mini: true, lastSuccess: true)</span>
