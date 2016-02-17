@@ -146,7 +146,8 @@ namespace StackExchange.Opserver.Data.Redis
                                    logExceptions: false,
                                    addExceptionData: e => e.AddLoggedData("Server", Name)
                                                            .AddLoggedData("Host", Host)
-                                                           .AddLoggedData("Port", Port.ToString()));
+                                                           .AddLoggedData("Port", Port.ToString()),
+                                   timeoutMs: 10000);
         }
 
         public bool Equals(RedisInstance other)

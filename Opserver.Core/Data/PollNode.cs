@@ -243,7 +243,8 @@ namespace StackExchange.Opserver.Data
         protected Func<Cache<T>, Task> UpdateCacheItem<T>(string description,
                                                       Func<Task<T>> getData,
                                                       bool logExceptions = false, // TODO: Settings
-                                                      Action<Exception> addExceptionData = null) where T : class
+                                                      Action<Exception> addExceptionData = null,
+                                                      int? timeoutMs = null) where T : class
         {
             return async cache =>
             {
@@ -260,7 +261,23 @@ namespace StackExchange.Opserver.Data
                         cache.PollStatus = "Fetching";
                         using (MiniProfiler.Current.Step("Data Fetch"))
                         {
-                            cache.SetData(await getData().ConfigureAwait(false));
+                            var fetch = getData();
+                            if (timeoutMs.HasValue)
+                            {
+                                if (await Task.WhenAny(fetch, Task.Delay(timeoutMs.Value)) == fetch)
+                                {
+                                    // Re-await for throws.
+                                    cache.SetData(await fetch.ConfigureAwait(false));
+                                }
+                                else
+                                {
+                                    throw new TimeoutException($"Fetch timed out after {timeoutMs.ToString()} ms.");
+                                }
+                            }
+                            else
+                            {
+                                cache.SetData(await fetch.ConfigureAwait(false));
+                            }
                         }
                         cache.PollStatus = "Fetch Complete";
                         cache.SetSuccess();
