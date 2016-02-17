@@ -49,7 +49,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Jil, Version=2.13.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Jil.2.13.0-beta1\lib\net45\Jil.dll</HintPath>
+      <HintPath>..\packages\Jil.2.13.0\lib\net45\Jil.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="JsonFx">
@@ -63,8 +63,8 @@
       <HintPath>..\packages\MiniProfiler.3.2.0.157\lib\net40\MiniProfiler.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Sigil, Version=4.5.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
@@ -79,14 +79,15 @@
       <HintPath>..\packages\StackExchange.Exceptional.1.0.122\lib\StackExchange.Exceptional.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\StackExchange.Redis.1.0.488\lib\net45\StackExchange.Redis.dll</HintPath>
+    <Reference Include="StackExchange.Redis, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\StackExchange.Redis.1.1.572-alpha\lib\net46\StackExchange.Redis.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
@@ -413,6 +414,7 @@
     <Compile Include="Data\CloudFlare\CloudFlareAPI.Zones.cs">
       <DependentUpon>CloudFlareAPI.cs</DependentUpon>
     </Compile>
+    <None Include="app.config" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
