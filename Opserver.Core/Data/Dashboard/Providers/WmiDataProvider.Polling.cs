@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,6 +15,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private partial class WmiNode
         {
+            private static readonly string LocalDomainName;
+
+            static WmiNode()
+            {
+                LocalDomainName =
+                    System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName;
+            }
+
             public async Task<Node> PollNodeInfo()
             {
                 try
@@ -53,6 +62,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 const string machineQuery = @"select 
                 DNSHostName,
+                Domain,
                 Manufacturer,
                 Model
                 from Win32_ComputerSystem";
@@ -63,7 +73,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         return;
                     Model = data.Model;
                     Manufacturer = data.Manufacturer;
-                    Name = data.DNSHostName;
+                    Name = data.Domain != LocalDomainName ? 
+                        $"{data.DNSHostName}.{data.Domain}" : data.DNSHostName;
                 }
 
                 const string query = @"select 
