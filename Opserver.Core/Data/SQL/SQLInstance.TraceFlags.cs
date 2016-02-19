@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Data.SQL
             public string GetFetchSQL(Version v) => @"
 Declare @Flags Table(TraceFlag INT, Enabled BIT, Global BIT, Session INT);
 Insert Into @Flags Exec('DBCC TRACESTATUS (-1) WITH NO_INFOMSGS');
-Select * From @flags;";
+Select * From @Flags;";
         }
     }
 }
