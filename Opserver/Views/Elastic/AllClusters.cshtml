@@ -2,7 +2,7 @@
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
-    var knownClusters = Model.Clusters.Where(c => c.Nodes.Data?.Nodes != null && c.Nodes.Data.Nodes.Any());
+    var knownClusters = Model.Clusters.Where(c => c.Nodes.Data?.Nodes != null && c.Nodes.Data.Nodes.Any()).ToList();
     var unknownClusters = Model.Clusters.Where(c => !c.Nodes.Data?.Nodes?.Any() ?? true);
 }
 @helper CommonVersionHeader(ElasticCluster c)
@@ -100,15 +100,15 @@
                         {
                             continue;
                         }
-                        var shards = ss.Where(sh => sh.Node == n.GUID);
+                        var shards = ss.Where(sh => sh.Node == n.GUID).ToList();
                         var stats = n.Stats;
                         var upTime = stats?.JVM?.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
                         <tr class="@n.RowClass()@(false ? " info" : null)">
-                            <td title="Up since @(upTime.HasValue ? upTime?.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
+                            <td title="Up since @(upTime.HasValue ? upTime.Value.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
                                 @n.IconSpan()
                                 <a class="@n.TextClass()" href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
                             </td>
-                            <td>@shards.Count().ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
+                            <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
                             @if (stats?.Process?.CPU != null)
                             {
                                 <td title="Process CPU: @stats.Process.CPU.Percent.ToComma()% load average @(stats.OS.LoadAverageString ?? "Unknown")">
@@ -183,6 +183,5 @@
         </h5>
         @Html.Partial("Indexes.Table", Model)
         @Html.Partial("Shards.Table", Model)
-
     }
 </div>

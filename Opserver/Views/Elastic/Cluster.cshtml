@@ -6,7 +6,6 @@
     var c = Model.CurrentCluster;
     if (c == null) { return; }
     var nodes = c.Nodes.Data?.Nodes ?? new List<ElasticCluster.NodeInfo>();
-    var gs = c.IndexStats.Data?.All;
 }
 <div>
     <h5 class="page-header">

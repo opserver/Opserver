@@ -10,7 +10,7 @@
     var jvm = n.Stats?.JVM;
     var fs = n.Stats?.FileSystem;
     var transport = n.Stats?.Transport;
-    var cnd = c?.Nodes.Data?.Nodes.FirstOrDefault(nd => nd.GUID == n.GUID);
+    var cnd = c.Nodes.Data?.Nodes.FirstOrDefault(nd => nd.GUID == n.GUID);
 }
 <div>
     <h5 class="page-header">
@@ -93,10 +93,10 @@ Transport: @n.Stats?.TransportAddress">
                         }
                         <label title="Memory Used">Memory</label>
                     </div>
-                    <div class="value-block col-md-3 col-sm-6" title="@os.Swap.FreeInBytes.ToSize() free">
-                        @if (os.Swap != null)
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (os?.Swap != null)
                         {
-                            <span>
+                            <span title="@os.Swap.FreeInBytes.ToSize() free">
                                 @os.Swap.UsedInBytes.ToSize(zero: "0") / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
                             </span>
                         }
@@ -194,7 +194,7 @@ Available: @fsd.AvailableInBytes.ToSize()
 Reads: @fsd.DiskReads.ToComma() (@fsd.DiskReadSizeInBytes.ToSize())
 Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
                                 <div class="progress">
-                                    <div class="progress-bar" style="width: @percentUsed.ToString()%;"></div>
+                                    <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.InvariantCulture)%;"></div>
                                     <span>@((fsd.TotalInBytes - fsd.AvailableInBytes).ToSize()) / @fsd.TotalInBytes.ToSize() <span class="smaller">(@fsd.AvailableInBytes.ToSize() free)</span></span>
                                 </div>
                                 <label>@fsd.Mount</label>
