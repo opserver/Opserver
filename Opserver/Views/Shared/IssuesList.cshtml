@@ -48,8 +48,24 @@
 @if (issues.Any())
 {
             <ul class="nav navbar-nav">
-                <li>
-                    <a href="#" class="js-issues-botton" data-count="@issues.Count.ToString()"><span class="badge alert-@issues.GetWorstStatus().RawClass()">@issues.Count.ToComma()</span></a>
+                <li class="dropdown">
+                    <a href="#" class="js-issues-button dropdown-toggle" data-toggle="dropdown" data-count="@issues.Count.ToString()">
+                        <span class="badge alert-@issues.GetWorstStatus().RawClass()">@issues.Count.ToComma()</span>
+                    </a>
+                    <ul class="issues-dropdown dropdown-menu">
+                        @foreach (var i in issues)
+                        {
+                            <li>
+                                <a class="issue-item" href="@GetLink(i)">
+                                    <span class="">@i.IconSpan() @i.Title</span>
+                                    @if (i.Description.HasValue())
+                                    {
+                                        <div class="note" style="color: #aaa;" title="@i.Description">@i.Description.Truncate(100)</div>
+                                    }
+                                </a>
+                            </li>
+                        }
+                    </ul>
                 </li>
             </ul>
 }

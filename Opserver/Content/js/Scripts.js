@@ -257,6 +257,9 @@
                     }
                 }).fail(Status.UI.ajaxError);
             }, Status.options.HeaderRefresh * 1000);
+
+            // Initializing issue dropdown
+            $('.dropdown-toggle').dropdown();
         }
 
         var resizeTimer;
