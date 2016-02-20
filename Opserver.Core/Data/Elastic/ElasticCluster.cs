@@ -49,7 +49,20 @@ namespace StackExchange.Opserver.Data.Elastic
         }
         protected override string GetMonitorStatusReason()
         {
-            return HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
+			var reason = HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
+
+	        if (reason.IsNullOrEmpty())
+	        {
+				var errors = KnownNodes.Select(n =>
+				{
+					var name = !n.Name.IsNullOrEmpty() ? n.Name : n.Host;
+					return $"{name}: " + n.LastException?.Message;
+				});
+
+				reason = string.Join("; ", errors);
+	        }
+
+			return reason;
         }
 
         // TODO: Poll down nodes faster?
