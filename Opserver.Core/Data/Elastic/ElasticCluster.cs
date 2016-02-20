@@ -56,7 +56,9 @@ namespace StackExchange.Opserver.Data.Elastic
 				var errors = KnownNodes.Select(n =>
 				{
 					var name = !n.Name.IsNullOrEmpty() ? n.Name : n.Host;
-					return $"{name}: " + n.LastException?.Message;
+					var message = n.LastException?.Message;
+
+                    return message != null ? $"{name}: {message}" : name;
 				});
 
 				reason = string.Join("; ", errors);
