@@ -40,13 +40,31 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             if (HealthStatus.Data?.Indexes != null)
                 yield return HealthStatus.Data.Indexes.Values.GetWorstStatus();
+			if(KnownNodes.All(n => n.LastException != null))
+				yield return MonitorStatus.Critical;
             if (KnownNodes.Any(n => n.LastException != null))
                 yield return MonitorStatus.Warning;
+
             yield return DataPollers.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()
         {
-            return HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
+			var reason = HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
+
+	        if (reason.IsNullOrEmpty())
+	        {
+				var errors = KnownNodes.Select(n =>
+				{
+					var name = !n.Name.IsNullOrEmpty() ? n.Name : n.Host;
+					var message = n.LastException?.Message;
+
+                    return message != null ? $"{name}: {message}" : name;
+				});
+
+				reason = string.Join("; ", errors);
+	        }
+
+			return reason;
         }
 
         // TODO: Poll down nodes faster?

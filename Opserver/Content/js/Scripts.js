@@ -227,34 +227,49 @@
                 return $.ajax('/top-refresh', {
                     data: { tab: Status.options.Tab }
                 }).done(function (html) {
-                    var resp = $(html);
-                    var tabs = $('.js-top-tabs', resp);
-                    if (tabs.length) {
-                        $('.js-top-tabs').replaceWith(tabs);
+                    var response = $(html);
+
+                    var currentTabs = $('.js-top-tabs');
+                    var newTabs = $('.js-top-tabs', response);
+
+                    if (newTabs.length) {
+                        currentTabs.replaceWith(newTabs);
                     }
-                    // TODO: Just replace issues completely if not expanded, otherwise skip when expanded
-                    var issuesList = $('.js-issues-button', resp);
-                    var curList = $('.js-issues-button');
-                    if (issuesList.length) {
-                        // TODO: Fix replacement
-                        // Re-think what comes down here, plan for websockets
-                        var issueCount = issuesList.data('count');
-                        // TODO: don't if hovering
-                        if (issueCount > 0) {
-                            if (!curList.children().length) {
-                                curList.replaceWith(issuesList.find('.issues-button').fadeIn().end());
+
+                    var newButton = $('.js-issues-button', response);
+                    var newDropdown = $('.js-issues-dropdown', response);
+                    
+                    var currentDropdown = $('.js-issues-dropdown');
+                    var currentButton = $('.js-issues-button');
+                    
+                    if (newDropdown.length) {
+                        // TODO: Re-think what comes down here, plan for websockets
+                        // Also consider sending JSON and templating in client side (for ex. with Handlebars).
+
+                        var newIssuesCount = newButton.data('count');
+                        if (newIssuesCount > 0) {
+                            var currentIssuesCount = currentDropdown.children().length;
+
+                            if (!currentIssuesCount) {
+                                $('#topbar-collapse').prepend($('#js-issue-list', response));
                             } else {
-                                $('.issues-button').html($('.issues-button', issuesList).html());
-                                $('.issues-dropdown').html($('.issues-dropdown', issuesList).html());
+                                currentButton.html(newButton.html());
+                                currentDropdown.html(newDropdown.html());
                             }
-                        } else {
-                            curList.fadeOut(function() {
-                                $(this).empty();
-                            });
                         }
+
+                        $('.dropdown-toggle').dropdown();
+                    } else {
+                        currentButton.fadeOut();
+                        currentDropdown.empty();
+                        $('#js-issue-list').remove();
                     }
+
                 }).fail(Status.UI.ajaxError);
             }, Status.options.HeaderRefresh * 1000);
+
+            // Initializing issue dropdown
+            $('.dropdown-toggle').dropdown();
         }
 
         var resizeTimer;
