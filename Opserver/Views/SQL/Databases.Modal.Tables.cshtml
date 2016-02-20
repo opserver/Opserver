@@ -28,7 +28,7 @@
         <tbody>
             @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
             {
-                <tr data-id="@t.Id.ToString()" data-table="@(t.SchemaName).@(t.TableName)" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
+                <tr data-table="@(t.SchemaName).@(t.TableName)" class="js-database-table" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
                     <td>
                         <a href="#/db/@(Model.Database)/tables/@(t.SchemaName).@(t.TableName)">
                             <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
@@ -44,15 +44,12 @@
                     <td data-val="@t.IndexTotalSpaceKB.ToString()">@((t.IndexTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                     <td data-val="@t.TotalSpaceKB.ToString()">@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                 </tr>
-                <tr class="tablesorter-childRow hidden js-table-columns">
+                <tr class="tablesorter-childRow hidden">
                     <td colspan="6">
                         @Html.Partial("Databases.Modal.Tables.Columns", columns.Data.Where(c => c.Schema == t.SchemaName && c.TableName == t.TableName))
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>
-                if (t.SchemaName + "." + t.TableName == Model.ObjectName)
-                {
-                }
             }
         </tbody>
         <tfoot>

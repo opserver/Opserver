@@ -98,8 +98,7 @@
         }
     }
 
-    var currentDialog = null,
-        loadedHash = null;
+    var currentDialog = null;
 
     function closePopup() {
         if (currentDialog) {
@@ -141,7 +140,6 @@
         }
 
         // TODO: refresh intervals via header
-        loadedHash = window.location.hash;
         $('.js-summary-popup')
             .appendWaveLoader()
             .load(url, data, function () {
@@ -156,13 +154,13 @@
         return dialog;
     }
 
-    function hashChangeHandler() {
+    function hashChangeHandler(firstLoad) {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
             for (var h in loadersList) {
                 if (loadersList.hasOwnProperty(h) && hash.indexOf(h) === 0) {
                     var val = hash.replace(h, '');
-                    loadersList[h](val);
+                    loadersList[h](val, firstLoad);
                 }
             }
         }
@@ -175,10 +173,10 @@
         $.extend(loadersList, loaders);
     }
 
-    $(window).on('hashchange', hashChangeHandler);
+    $(window).on('hashchange', function () { hashChangeHandler(); });
     $(function() {
         // individual sections add via Status.loaders.register(), delay running until after they're added on-load
-        setTimeout(hashChangeHandler, 1);
+        setTimeout(function () { hashChangeHandler(true); }, 1);
     });
 
     function prepTableSorter() {
@@ -737,16 +735,25 @@ Status.SQL = (function () {
             '#/sql/active/filters': function () {
                 Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
             },
-            '#/db/': function (val) {
-                if (val.indexOf('tables/') > 0) {
-                    $('.js-table-columns').hide();
-                    var table = val.split('/').pop();
-                    console.log($('[data-table="' + table + '"]'));
-                    $('tr[data-table="' + table + '"]').next().show();
+            '#/db/': function (val, firstLoad) {
+                var tbl = val.indexOf('tables/') > 0 ? val.split('/').pop() : null;
+                function showColumns() {
+                    $('.js-database-table').removeClass('info').next().hide();
+                    $('[data-table="' + tbl + '"]').addClass('info').next().show(200);
+                }
+                if (!firstLoad) {
+                    if (/\/tables$/.test(val)) {
+                        $('.js-database-table.info').removeClass('info').next().hide();
+                        return;
+                    }
+                    showColumns();
                     return;
                 }
                 Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
-                     modalClass: 'modal-huge'
+                    modalClass: 'modal-huge',
+                    onLoad: function () {
+                        showColumns();
+                    }
                 });
             }
         });        
@@ -808,6 +815,8 @@ Status.SQL = (function () {
             return false;
         }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
+        }).on('click', '.js-database-table', function () {
+            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables');
         });
     }
 
