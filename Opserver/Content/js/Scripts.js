@@ -98,7 +98,8 @@
         }
     }
 
-    var currentDialog = null;
+    var currentDialog = null,
+        loadedHash = null;
 
     function closePopup() {
         if (currentDialog) {
@@ -111,7 +112,8 @@
     function popup(url, data, options) {
         closePopup();
 
-        var dialog = currentDialog = bootbox.dialog({
+        var hash = window.location.hash,
+            dialog = currentDialog = bootbox.dialog({
             message: '<div class="modal-loader js-summary-popup"></div>',
             title: 'Loading...',
             size: 'large',
@@ -122,11 +124,13 @@
 
         dialog.on('hide.bs.modal', function () {
             var l = window.location;
-            if ('pushState' in history) {
-                history.pushState('', document.title, l.pathname + l.search);
-                hashChangeHandler();
-            } else {
-                l.hash = '';
+            if (hash === l.hash) { // Only clear when we aren't shifting hashes
+                if ('pushState' in history) {
+                    history.pushState('', document.title, l.pathname + l.search);
+                    hashChangeHandler();
+                } else {
+                    l.hash = '';
+                }
             }
             if (options && options.onClose) {
                 options.onClose.call(this);
@@ -137,6 +141,7 @@
         }
 
         // TODO: refresh intervals via header
+        loadedHash = window.location.hash;
         $('.js-summary-popup')
             .appendWaveLoader()
             .load(url, data, function () {
@@ -732,7 +737,14 @@ Status.SQL = (function () {
             '#/sql/active/filters': function () {
                 Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
             },
-            '#/db/': function(val) {
+            '#/db/': function (val) {
+                if (val.indexOf('tables/') > 0) {
+                    $('.js-table-columns').hide();
+                    var table = val.split('/').pop();
+                    console.log($('[data-table="' + table + '"]'));
+                    $('tr[data-table="' + table + '"]').next().show();
+                    return;
+                }
                 Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
                      modalClass: 'modal-huge'
                 });

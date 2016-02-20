@@ -5,6 +5,7 @@
     Layout = "Databases.Modal.cshtml";
     var s = Model.Instance;
     var tables = s.GetTableInfo(Model.Database);
+    var columns = s.GetColumnInfo(Model.Database);
 }
 @if (tables.Data == null || !tables.LastPollSuccessful)
 {
@@ -29,25 +30,28 @@
             {
                 <tr data-id="@t.Id.ToString()" data-table="@(t.SchemaName).@(t.TableName)" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
                     <td>
-                        <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
-                        @if (t.TableType == TableTypes.Heap)
-                        {
-                            <span class="text-muted"> (Heap)</span>
-                        }
+                        <a href="#/db/@(Model.Database)/tables/@(t.SchemaName).@(t.TableName)">
+                            <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
+                            @if (t.TableType == TableTypes.Heap)
+                            {
+                                <span class="text-muted"> (Heap)</span>
+                            }
+                        </a>
                     </td>
                     <td data-val="@t.RowCount.ToString()">@t.RowCount.ToComma()</td>
                     <td data-val="@t.IndexCount.ToString()">@t.IndexCount.ToComma()</td>
-                    <td data-val="@t.DataTotalSpaceKB.ToString()">@((t.DataTotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
-                    <td data-val="@t.IndexTotalSpaceKB.ToString()">@((t.IndexTotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
-                    <td data-val="@t.TotalSpaceKB.ToString()">@((t.TotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                    <td data-val="@t.DataTotalSpaceKB.ToString()">@((t.DataTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
+                    <td data-val="@t.IndexTotalSpaceKB.ToString()">@((t.IndexTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
+                    <td data-val="@t.TotalSpaceKB.ToString()">@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                 </tr>
+                <tr class="tablesorter-childRow hidden js-table-columns">
+                    <td colspan="6">
+                        @Html.Partial("Databases.Modal.Tables.Columns", columns.Data.Where(c => c.Schema == t.SchemaName && c.TableName == t.TableName))
+                    </td>
+                </tr>
+                <tr class="tablesorter-childRow hidden"></tr>
                 if (t.SchemaName + "." + t.TableName == Model.ObjectName)
                 {
-                    <tr class="tablesorter-childRow">
-                        <td colspan="6">
-                            @Html.Partial("Databases.Modal.Tables.Columns", Model)
-                        </td>
-                    </tr>
                 }
             }
         </tbody>
@@ -75,13 +79,6 @@
     </table>
     <script>
         $(function () {
-            @*$('.js-database-table').on('click', 'tr', function(e) {
-                var tableName = $(this).data('table');
-                if (tableName) {
-                    window.location = '#/db/@(Model.Database)/tables/' + tableName;
-                }
-                e.preventDefault();
-            });*@
             $('.js-database-table').tablesorter({
                 headers: {
                     1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
