@@ -95,8 +95,16 @@ namespace StackExchange.Opserver.Data.Dashboard
         public bool IsLikelyPrimary => Name.ToLower().EndsWith("team") ||
                                        Name.ToLower().StartsWith("bond") ||
                                        Name.Contains("Microsoft Network Adapter Multiplexor Driver");
-        
-        public Interface() {}
-        public Interface(string id) { Id = id; }
+
+        public Interface()
+        {
+            TeamMembers = new List<string>();
+            IPs = new List<IPNet>();
+        }
+
+        public Interface(string id) : this()
+        {
+            Id = id;
+        }
     }
 }
