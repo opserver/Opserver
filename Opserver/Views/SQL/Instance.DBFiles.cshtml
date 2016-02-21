@@ -1,24 +1,9 @@
-﻿@using System.Text.RegularExpressions
-@model StackExchange.Opserver.Data.SQL.SQLInstance
+﻿@using StackExchange.Opserver.Data.SQL
+@model SQLInstance
 @{
     Layout = null;
     var files = Model.Databases.Data?.SelectMany(db => db.Files).OrderBy(f => f.PhysicalName);
     var volumes = files?.GroupBy(p => p.VolumeMountPoint);
-}
-@functions
-{
-    static readonly Regex CommonPathMatcher = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
-}
-@helper ShortenPath(string path)
-{
-    if (CommonPathMatcher.IsMatch(path))
-    {
-        <span title="@path">@CommonPathMatcher.Replace(path, @"C:\Program...MSSQLSERVER\MSSQL\DATA")</span>
-    }
-    else
-    {
-        @path
-    }
 }
 <h4 class="modal-title">
     Database Files
@@ -58,7 +43,7 @@
                 <tr>
                     <td>@f.DatabaseName</td>
                     <td>@f.FileType.GetDescription()</td>
-                    <td title="Virtual Name: @f.FileName">@ShortenPath(f.PhysicalName)</td>
+                    <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
                     <td data-val="@f.FileSizeBytes.ToString()">@f.FileSizeBytes.ToHumanReadableSize()</td>
                     <td title="Reads: @f.NumReads.ToComma()
 Stalled: @f.StallReadMs.ToComma()">

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -64,7 +65,7 @@ namespace StackExchange.Opserver.Data.SQL
                         return conn.QueryAsync<DatabaseTable>(GetFetchSQL<DatabaseTable>());
                     },
                     logExceptions: true),
-                10, 5*60);
+                60, 5*60);
 
         public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
             Cache<List<DatabaseView>>.WithKey(GetCacheKey("ViewInfo-" + databaseName),
@@ -75,7 +76,7 @@ namespace StackExchange.Opserver.Data.SQL
                         return conn.QueryAsync<DatabaseView>(GetFetchSQL<DatabaseView>());
                     },
                     logExceptions: true),
-                10, 5 * 60);
+                60, 5 * 60);
 
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             Cache<List<DatabaseBackup>>.WithKey(
@@ -434,6 +435,12 @@ Select Top 100
             public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / (double)NumReads;
             public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / (double)NumWrites;
             public long FileSizeBytes => FileSizePages*8*1024;
+
+            private static readonly Regex _ShortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
+            private string _shortPhysicalName;
+            public string ShortPhysicalName =>
+                    _shortPhysicalName ?? (_shortPhysicalName = _ShortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
+
 
             public string GrowthDescription
             {
