@@ -745,9 +745,7 @@ Status.SQL = (function () {
                     $('[data-table="' + obj + '"],[data-view="' + obj + '"]').addClass('info').next().show(200);
                 }
                 if (!firstLoad) {
-                    console.log(val, prev);
                     if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev))) {
-                        //$('.js-database-table.info,.js-database-view.info').removeClass('info').next().hide();
                         showColumns();
                         return;
                     }
