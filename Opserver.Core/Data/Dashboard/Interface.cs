@@ -70,7 +70,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             get {
                 if (!Speed.HasValue)
                 {
-                    if (!TeamMembers.Any())
+                    if (!(TeamMembers?.Any() ?? false))
                     {
                         return "n/a";
                     }

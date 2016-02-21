@@ -144,6 +144,8 @@ SELECT Name,
                         i.Speed = data.Speed;
                         i.Status = NodeStatus.Active;
                         i.TypeDescription = "";
+                        // TODO: Implement on less-frequent queries => bulk and getter override?
+                        i.IPs = new List<IPNet>();
                     }
                 }
             }
