@@ -98,7 +98,8 @@
         }
     }
 
-    var currentDialog = null;
+    var currentDialog = null,
+        prevHash = null;
 
     function closePopup() {
         if (currentDialog) {
@@ -160,13 +161,14 @@
             for (var h in loadersList) {
                 if (loadersList.hasOwnProperty(h) && hash.indexOf(h) === 0) {
                     var val = hash.replace(h, '');
-                    loadersList[h](val, firstLoad);
+                    loadersList[h](val, firstLoad, prevHash);
                 }
             }
         }
         if (!hash) {
             closePopup();
         }
+        prevHash = hash;
     }
 
     function registerLoaders(loaders) {
@@ -735,19 +737,20 @@ Status.SQL = (function () {
             '#/sql/active/filters': function () {
                 Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
             },
-            '#/db/': function (val, firstLoad) {
-                var tbl = val.indexOf('tables/') > 0 ? val.split('/').pop() : null;
+            '#/db/': function (val, firstLoad, prev) {
+                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') > 0
+                          ? val.split('/').pop() : null;
                 function showColumns() {
-                    $('.js-database-table').removeClass('info').next().hide();
-                    $('[data-table="' + tbl + '"]').addClass('info').next().show(200);
+                    $('.js-database-table,.js-database-view').removeClass('info').next().hide();
+                    $('[data-table="' + obj + '"],[data-view="' + obj + '"]').addClass('info').next().show(200);
                 }
                 if (!firstLoad) {
-                    if (/\/tables$/.test(val)) {
-                        $('.js-database-table.info').removeClass('info').next().hide();
+                    console.log(val, prev);
+                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev))) {
+                        //$('.js-database-table.info,.js-database-view.info').removeClass('info').next().hide();
+                        showColumns();
                         return;
                     }
-                    showColumns();
-                    return;
                 }
                 Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
                     modalClass: 'modal-huge',
@@ -815,8 +818,8 @@ Status.SQL = (function () {
             return false;
         }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
-        }).on('click', '.js-database-table', function () {
-            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables');
+        }).on('click', '.js-database-table,.js-database-view', function () {
+            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables').replace(/\/views\/.*/, '/views');
         });
     }
 

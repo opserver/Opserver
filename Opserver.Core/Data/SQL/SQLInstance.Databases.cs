@@ -54,16 +54,28 @@ namespace StackExchange.Opserver.Data.SQL
             }
         }
 
+        // TODO: Generic when we see what #3 and #4 look like
         public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
             Cache<List<DatabaseTable>>.WithKey(GetCacheKey("TableInfo-" + databaseName),
                 UpdateFromSql("Table Info for " + databaseName,
                     conn =>
                     {
-                        var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseTable>()}";
-                        return conn.QueryAsync<DatabaseTable>(sql);
+                        conn.ChangeDatabase(databaseName);
+                        return conn.QueryAsync<DatabaseTable>(GetFetchSQL<DatabaseTable>());
                     },
                     logExceptions: true),
                 10, 5*60);
+
+        public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
+            Cache<List<DatabaseView>>.WithKey(GetCacheKey("ViewInfo-" + databaseName),
+                UpdateFromSql("View Info for " + databaseName,
+                    conn =>
+                    {
+                        conn.ChangeDatabase(databaseName);
+                        return conn.QueryAsync<DatabaseView>(GetFetchSQL<DatabaseView>());
+                    },
+                    logExceptions: true),
+                10, 5 * 60);
 
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             Cache<List<DatabaseBackup>>.WithKey(
@@ -583,6 +595,28 @@ Select t.object_id Id,
    And i.object_id > 255
 Group By t.object_id, t.Name, t.create_date, s.name";
         }
+        
+        public class DatabaseView : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
+            public int Id { get; internal set; }
+            public string SchemaName { get; internal set; }
+            public string ViewName { get; internal set; }
+            public DateTime CreationDate { get; internal set; }
+            public bool IsReplicated { get; internal set; }
+
+            public string GetFetchSQL(Version v) => @"
+Select v.object_id Id,
+       s.name SchemaName,
+       v.name ViewName,
+       v.create_date CreationDate,
+       v.is_replicated IsReplicated
+  From sys.views v
+       Join sys.schemas s
+         On v.schema_id = s.schema_id
+ Where v.is_ms_shipped = 0";
+        }
 
         public class DatabaseColumn : ISQLVersioned
         {
@@ -592,7 +626,9 @@ Group By t.object_id, t.Name, t.create_date, s.name";
 
             public string Schema { get; internal set; }
             public string TableName { get; internal set; }
+            public string ViewName { get; internal set; }
             public int Position { get; internal set; }
+            public int ObjectId { get; internal set; }
             public string ColumnName { get; internal set; }
             public string DataType { get; internal set; }
             public bool IsNullable { get; internal set; }
@@ -687,7 +723,9 @@ Group By t.object_id, t.Name, t.create_date, s.name";
             public string GetFetchSQL(Version v) => @"
 Select s.name [Schema],
        t.name TableName,
+       v.name ViewName,
        c.column_id Position,
+       c.object_id ObjectId,
        c.name ColumnName,
        ty.name DataType,
        c.is_nullable IsNullable,
@@ -712,8 +750,9 @@ Select s.name [Schema],
        ft.name ForeignKeyTargetTable,
        fc.name ForeignKeyTargetColumn
   From sys.columns c
-       Join sys.tables t On c.object_id = t.object_id
-       Join sys.schemas s On t.schema_id = s.schema_id
+       Left Join sys.tables t On c.object_id = t.object_id
+       Left Join sys.views v On c.object_id = v.object_id
+       Join sys.schemas s On (t.schema_id = s.schema_id Or v.schema_id = s.schema_id)
        Join sys.types ty On c.user_type_id = ty.user_type_id
        Left Join sys.foreign_key_columns fkc On fkc.parent_object_id = t.object_id And fkc.parent_column_id = c.column_id
        Left Join sys.tables ft On fkc.referenced_object_id = ft.object_id

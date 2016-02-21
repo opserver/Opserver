@@ -14,7 +14,7 @@
         <p class="error-stack">@tables.ErrorMessage</p>
     </div>
 } else {
-    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-table">
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-tables">
         <thead>
             <tr>
                 <th>Table</th>
@@ -46,7 +46,7 @@
                 </tr>
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="6">
-                        @Html.Partial("Databases.Modal.Tables.Columns", columns.Data.Where(c => c.Schema == t.SchemaName && c.TableName == t.TableName))
+                        @Html.Partial("Databases.Modal.Columns", columns.Data.Where(c => c.Schema == t.SchemaName && c.TableName == t.TableName))
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>
@@ -76,7 +76,7 @@
     </table>
     <script>
         $(function () {
-            $('.js-database-table').tablesorter({
+            $('.js-database-tables').tablesorter({
                 headers: {
                     1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                     2: { sorter: 'dataVal', sortInitialOrder: 'desc' },

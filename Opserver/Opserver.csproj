@@ -459,10 +459,13 @@
     <Content Include="Views\SQL\Databases.Modal.Backups.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\SQL\Databases.Modal.Tables.Columns.cshtml">
-      <DependentUpon>Databases.Modal.Tables.cshtml</DependentUpon>
+    <Content Include="Views\SQL\Databases.Modal.Columns.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Tables.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Databases.Modal.Views.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Instance.Configuration.cshtml">
@@ -676,7 +679,6 @@
     <Content Include="Views\Hub\SQL.AvailabilityGroup.cshtml" />
     <Content Include="Views\Home\About.Caches.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.cshtml" />
-    <Content Include="Views\SQL\Databases.Modal.Views.cshtml" />
     <Content Include="Views\Elastic\Node.cshtml" />
     <Content Include="Views\Redis\Instance.cshtml" />
     <Content Include="Views\Redis\Instance.Selector.cshtml" />
