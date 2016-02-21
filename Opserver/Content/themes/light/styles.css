@@ -8224,6 +8224,9 @@ li.L9 {
 .navbar-left > a.active:hover {
   text-decoration: none;
 }
+a:focus {
+  text-decoration: none;
+}
 h4,
 .h4,
 h5,

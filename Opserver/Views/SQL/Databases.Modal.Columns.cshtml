@@ -1,0 +1,47 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model IEnumerable<SQLInstance.DatabaseColumn>
+@{
+    var columns = Model;
+}
+<div class="panel panel-default">
+    <div class="panel-body">
+        <table class="table-striped col-xs-12">
+            <thead>
+                <tr>
+                    <th>Column</th>
+                    <th>Constraint</th>
+                    <th>Target</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var c in columns.OrderBy(c => c.Position))
+            {
+                <tr data-id="@c.Id">
+                    <td>
+                        @if (c.PrimaryKeyConstraint.HasValue())
+                        {
+                            <span class="glyphicon glyphicon-asterisk text-warning" title="Primary Key: @c.PrimaryKeyConstraint"></span>
+                        }
+                        else if (c.ForeignKeyConstraint.HasValue())
+                        {
+                            <span class="glyphicon glyphicon-link text-primary" title="Foreign Key: @c.ForeignKeyConstraint"></span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-list-alt text-muted"></span>
+                        }
+                        @c.ColumnName <span class="text-muted">(@c.DataTypeDescription)</span>
+                    </td>
+                    <td>@(c.PrimaryKeyConstraint ?? c.ForeignKeyConstraint)</td>
+                    <td>
+                        @if (c.ForeignKeyConstraint.HasValue())
+                        {
+                            @:<span class="text-muted">@c.ForeignKeyTargetSchema.</span>@(c.ForeignKeyTargetTable).@(c.ForeignKeyTargetColumn)
+                        }
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

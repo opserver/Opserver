@@ -98,7 +98,8 @@
         }
     }
 
-    var currentDialog = null;
+    var currentDialog = null,
+        prevHash = null;
 
     function closePopup() {
         if (currentDialog) {
@@ -111,7 +112,8 @@
     function popup(url, data, options) {
         closePopup();
 
-        var dialog = currentDialog = bootbox.dialog({
+        var hash = window.location.hash,
+            dialog = currentDialog = bootbox.dialog({
             message: '<div class="modal-loader js-summary-popup"></div>',
             title: 'Loading...',
             size: 'large',
@@ -122,11 +124,13 @@
 
         dialog.on('hide.bs.modal', function () {
             var l = window.location;
-            if ('pushState' in history) {
-                history.pushState('', document.title, l.pathname + l.search);
-                hashChangeHandler();
-            } else {
-                l.hash = '';
+            if (hash === l.hash) { // Only clear when we aren't shifting hashes
+                if ('pushState' in history) {
+                    history.pushState('', document.title, l.pathname + l.search);
+                    hashChangeHandler();
+                } else {
+                    l.hash = '';
+                }
             }
             if (options && options.onClose) {
                 options.onClose.call(this);
@@ -151,29 +155,30 @@
         return dialog;
     }
 
-    function hashChangeHandler() {
+    function hashChangeHandler(firstLoad) {
         var hash = window.location.hash;
         if (!hash || hash.length > 1) {
             for (var h in loadersList) {
                 if (loadersList.hasOwnProperty(h) && hash.indexOf(h) === 0) {
                     var val = hash.replace(h, '');
-                    loadersList[h](val);
+                    loadersList[h](val, firstLoad, prevHash);
                 }
             }
         }
         if (!hash) {
             closePopup();
         }
+        prevHash = hash;
     }
 
     function registerLoaders(loaders) {
         $.extend(loadersList, loaders);
     }
 
-    $(window).on('hashchange', hashChangeHandler);
+    $(window).on('hashchange', function () { hashChangeHandler(); });
     $(function() {
         // individual sections add via Status.loaders.register(), delay running until after they're added on-load
-        setTimeout(hashChangeHandler, 1);
+        setTimeout(function () { hashChangeHandler(true); }, 1);
     });
 
     function prepTableSorter() {
@@ -732,9 +737,24 @@ Status.SQL = (function () {
             '#/sql/active/filters': function () {
                 Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
             },
-            '#/db/': function(val) {
+            '#/db/': function (val, firstLoad, prev) {
+                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') > 0
+                          ? val.split('/').pop() : null;
+                function showColumns() {
+                    $('.js-database-table,.js-database-view').removeClass('info').next().hide();
+                    $('[data-table="' + obj + '"],[data-view="' + obj + '"]').addClass('info').next().show(200);
+                }
+                if (!firstLoad) {
+                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev))) {
+                        showColumns();
+                        return;
+                    }
+                }
                 Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
-                     modalClass: 'modal-huge'
+                    modalClass: 'modal-huge',
+                    onLoad: function () {
+                        showColumns();
+                    }
                 });
             }
         });        
@@ -796,6 +816,8 @@ Status.SQL = (function () {
             return false;
         }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
+        }).on('click', '.js-database-table,.js-database-view', function () {
+            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables').replace(/\/views\/.*/, '/views');
         });
     }
 
