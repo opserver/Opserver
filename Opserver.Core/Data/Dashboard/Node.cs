@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -129,7 +128,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get
             {
-                if (_primaryInterfaces == null)
+                if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
                 {
                     var s = Settings;
                     var dbInterfaces = s?.PrimaryInterfacePatternRegex != null
