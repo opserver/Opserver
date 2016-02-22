@@ -43,7 +43,7 @@
                     <td>@f.DatabaseName</td>
                     <td>@f.FileType.GetDescription()</td>
                     <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
-                    <td data-val="@f.FileSizeBytes.ToString()">@f.FileSizeBytes.ToHumanReadableSize()</td>
+                    <td data-val="@f.TotalSizeBytes.ToString()">@f.TotalSizeBytes.ToHumanReadableSize()</td>
                     <td title="Reads: @f.NumReads.ToComma()
 Stalled: @f.StallReadMs.ToComma()">
                         @f.AvgReadStallMs.ToString("F") <span class="text-muted">ms</span>
