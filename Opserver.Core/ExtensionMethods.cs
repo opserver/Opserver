@@ -207,6 +207,11 @@ namespace StackExchange.Opserver
             return ims.ThenByDescending(getter);
         }
 
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source)
+        {
+            return new HashSet<T>(source);
+        }
+
         /// <summary>
         /// Returns a unix Epoch time given a Date
         /// </summary>

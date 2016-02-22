@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -56,45 +54,40 @@ namespace StackExchange.Opserver.Data.SQL
                 });
             }
         }
-        
+
+        // TODO: Address master_files reusage, since this requires post-filtering
+        public Cache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
+            DatabaseFetch<DatabaseFile>(databaseName);
+
         public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
-            Cache<List<DatabaseTable>>.WithKey(GetCacheKey("TableInfo-" + databaseName),
-                UpdateFromSql("Table Info for " + databaseName,
-                    conn => DatabaseFetch<DatabaseTable>(conn, databaseName),
-                    logExceptions: true),
-                60, 5*60);
+            DatabaseFetch<DatabaseTable>(databaseName, 60, 5*60);
 
         public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
-            Cache<List<DatabaseView>>.WithKey(GetCacheKey("ViewInfo-" + databaseName),
-                UpdateFromSql("View Info for " + databaseName,
-                    conn => DatabaseFetch<DatabaseView>(conn, databaseName),
-                    logExceptions: true),
-                60, 5 * 60);
+            DatabaseFetch<DatabaseView>(databaseName, 60, 5*60);
 
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
-            Cache<List<DatabaseBackup>>.WithKey(
-                GetCacheKey("BackupInfo-" + databaseName),
-                UpdateFromSql("Backup Info for " + databaseName,
-                    conn => conn.QueryAsync<DatabaseBackup>(GetFetchSQL<DatabaseBackup>(), new {databaseName}),
-                    logExceptions: true),
-                RefreshInterval, 60);
-        
-        public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName)
-        {
-            return Cache<List<DatabaseColumn>>.WithKey(
-                GetCacheKey("ColumnInfo-" + databaseName),
-                UpdateFromSql("Column Info for " + databaseName,
-                    conn => DatabaseFetch<DatabaseColumn>(conn, databaseName)),
-                5*60, 30*60);
-        }
+            DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
+
+        public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
+            DatabaseFetch<DatabaseColumn>(databaseName);
+
+        public Cache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
+            DatabaseFetch<DatabaseDataSpace>(databaseName);
 
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
-        private Task<List<T>> DatabaseFetch<T>(DbConnection conn, string databaseName) where T : ISQLVersioned, new()
-        {
-            conn.ChangeDatabase(databaseName);
-            return conn.QueryAsync<T>(GetFetchSQL<T>());
-        }
+        private Cache<List<T>> DatabaseFetch<T>(string databaseName, int duration = 5*60, int staleDuration = 30*60)
+            where T : ISQLVersioned, new() =>
+                Cache<List<T>>.WithKey(
+                    GetCacheKey(typeof (T).Name + "Info-" + databaseName),
+                    UpdateFromSql(typeof (T).Name + " Info for " + databaseName,
+                        conn =>
+                        {
+                            conn.ChangeDatabase(databaseName);
+                            return conn.QueryAsync<T>(GetFetchSQL<T>());
+                        },
+                        logExceptions: true),
+                    duration, staleDuration);
 
         public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
             {
@@ -428,17 +421,17 @@ Select Top 100
             public long NumReads { get; internal set; }
             public long StallWriteMs { get; internal set; }
             public long NumWrites { get; internal set; }
+            public long UsedSizeBytes { get; internal set; }
+            public long TotalSizeBytes { get; internal set; }
 
             public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / (double)NumReads;
             public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / (double)NumWrites;
-            public long FileSizeBytes => FileSizePages*8*1024;
 
             private static readonly Regex _ShortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
                     _shortPhysicalName ?? (_shortPhysicalName = _ShortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
-
-
+            
             public string GrowthDescription
             {
                 get
@@ -490,12 +483,52 @@ Select vs.volume_id VolumeId,
        fs.io_stall_read_ms StallReadMs,
        fs.num_of_reads NumReads,
        fs.io_stall_write_ms StallWriteMs,
-       fs.num_of_writes NumWrites
+       fs.num_of_writes NumWrites,
+       Cast(FileProperty(mf.name, 'SpaceUsed') As BigInt)*8*1024 UsedSizeBytes,
+       Cast(mf.size as BigInt)*8*1024 TotalSizeBytes
   From sys.dm_io_virtual_file_stats(null, null) fs
        Join sys.master_files mf 
          On fs.database_id = mf.database_id
          And fs.file_id = mf.file_id
-       Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs";
+       Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs
+ Where (FileProperty(mf.name, 'SpaceUsed') Is Not Null Or DB_Name() = 'master')";
+        }
+
+        public class DatabaseDataSpace : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
+            public int Id { get; internal set; }
+            public string Name { get; internal set; }
+            public string Type { get; internal set; }
+            public string TypeDescription => GetTypeDescription(Type);
+            public bool IsDefault { get; internal set; }
+            public bool IsSystem { get; internal set; }
+
+            public static string GetTypeDescription(string type)
+            {
+                switch (type)
+                {
+                    case "FG":
+                        return "Filegroup";
+                    case "PS":
+                        return "Partition Scheme";
+                    case "FD":
+                        return "FILESTREAM";
+                    case null:
+                        return "";
+                    default:
+                        return "Unknown";
+                }
+            }
+
+            public string GetFetchSQL(Version v) => @"
+Select data_space_id Id,
+       name Name,
+       type Type,
+       is_default IsDefault,
+       is_system IsSystem
+  From sys.data_spaces";
         }
 
         public class DatabaseVLF : ISQLVersioned
