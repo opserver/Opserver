@@ -215,12 +215,15 @@ namespace StackExchange.Opserver.Controllers
             };
             switch (view)
             {
-                case "tables":
-                    vd.View = DatabasesModel.Views.Tables;
-                    return View("Databases.Modal.Tables", vd);
                 case "backups":
                     vd.View = DatabasesModel.Views.Backups;
                     return View("Databases.Modal.Backups", vd);
+                case "storage":
+                    vd.View = DatabasesModel.Views.Storage;
+                    return View("Databases.Modal.Storage", vd);
+                case "tables":
+                    vd.View = DatabasesModel.Views.Tables;
+                    return View("Databases.Modal.Tables", vd);
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);

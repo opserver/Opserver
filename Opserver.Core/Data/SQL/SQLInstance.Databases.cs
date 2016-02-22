@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -54,27 +56,18 @@ namespace StackExchange.Opserver.Data.SQL
                 });
             }
         }
-
-        // TODO: Generic when we see what #3 and #4 look like
+        
         public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
             Cache<List<DatabaseTable>>.WithKey(GetCacheKey("TableInfo-" + databaseName),
                 UpdateFromSql("Table Info for " + databaseName,
-                    conn =>
-                    {
-                        conn.ChangeDatabase(databaseName);
-                        return conn.QueryAsync<DatabaseTable>(GetFetchSQL<DatabaseTable>());
-                    },
+                    conn => DatabaseFetch<DatabaseTable>(conn, databaseName),
                     logExceptions: true),
                 60, 5*60);
 
         public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
             Cache<List<DatabaseView>>.WithKey(GetCacheKey("ViewInfo-" + databaseName),
                 UpdateFromSql("View Info for " + databaseName,
-                    conn =>
-                    {
-                        conn.ChangeDatabase(databaseName);
-                        return conn.QueryAsync<DatabaseView>(GetFetchSQL<DatabaseView>());
-                    },
+                    conn => DatabaseFetch<DatabaseView>(conn, databaseName),
                     logExceptions: true),
                 60, 5 * 60);
 
@@ -85,18 +78,22 @@ namespace StackExchange.Opserver.Data.SQL
                     conn => conn.QueryAsync<DatabaseBackup>(GetFetchSQL<DatabaseBackup>(), new {databaseName}),
                     logExceptions: true),
                 RefreshInterval, 60);
-
-
+        
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName)
         {
             return Cache<List<DatabaseColumn>>.WithKey(
                 GetCacheKey("ColumnInfo-" + databaseName),
-                UpdateFromSql("Column Info for " + databaseName, conn =>
-                {
-                    var sql = $"Use [{databaseName}]; {GetFetchSQL<DatabaseColumn>()}";
-                    return conn.QueryAsync<DatabaseColumn>(sql);
-                }),
+                UpdateFromSql("Column Info for " + databaseName,
+                    conn => DatabaseFetch<DatabaseColumn>(conn, databaseName)),
                 5*60, 30*60);
+        }
+
+        public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
+
+        private Task<List<T>> DatabaseFetch<T>(DbConnection conn, string databaseName) where T : ISQLVersioned, new()
+        {
+            conn.ChangeDatabase(databaseName);
+            return conn.QueryAsync<T>(GetFetchSQL<T>());
         }
 
         public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
