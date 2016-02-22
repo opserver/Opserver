@@ -84,7 +84,7 @@ namespace StackExchange.Opserver.Data.SQL
                         conn =>
                         {
                             conn.ChangeDatabase(databaseName);
-                            return conn.QueryAsync<T>(GetFetchSQL<T>());
+                            return conn.QueryAsync<T>(GetFetchSQL<T>(), new { databaseName });
                         },
                         logExceptions: true),
                     duration, staleDuration);
