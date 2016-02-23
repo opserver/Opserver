@@ -285,7 +285,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                             @foreach (var cn in ci.Cluster.Nodes)
                             {
                                 <div class="value-block col-md-4 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
-                                    @Html.ActionLink(cn.Name, nameof(SQLController.Instance), new { node = cn.Name })
+                                    <a href="@Url.Action(nameof(SQLController.Instance), new { node = cn.Name })">@cn.Name</a>
                                     <label>Replica</label>
                                 </div>
                             }

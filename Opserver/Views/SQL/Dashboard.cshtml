@@ -18,7 +18,7 @@
 @helper TabLink(SQLViews view, string action, string name, bool includeParams = true)
 {
     <li class="@(Model.View == view ? "active" : null)">
-        @Html.ActionLink(name, action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.Name } : null)
+        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new {node = Model.CurrentInstance.Name} : null)">@name</a>
     </li>
 }
 <ul class="nav nav-tabs nav-tabs-right">

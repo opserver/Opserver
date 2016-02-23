@@ -6,7 +6,7 @@
     var groups = connections.GroupBy(c => new { c.LoginName, c.TransactionIsolationLevel }).OrderByDescending(c => c.Sum(g => g.ConnectionCount));
 }
 <h4 class="modal-title">
-    Connections <span class="text-muted small">(@Html.ActionLink("View Detail", nameof(SQLController.Connections), new { node = Model.Name }))</span>  
+    Connections <span class="text-muted small">(<a href="@Url.Action(nameof(SQLController.Connections), new { node = Model.Name })">View Detail</a>)</span>  
 </h4>
 @if (connections.Any())
 {

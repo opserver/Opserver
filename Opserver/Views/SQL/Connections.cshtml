@@ -42,7 +42,7 @@
                     <td title="Program: @c.ProgramName (@c.HostProcessId)">
                         @if (enableDashboardLinks && monitoredList.Contains(c.HostName.IsNullOrEmptyReturn("").ToLower()))
                         {
-                            @Html.ActionLink(c.HostName, nameof(DashboardController.Node), "Dashboard", new { node = c.HostName }, null)
+                            <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = c.HostName })">@c.HostName</a>
                         }
                         else
                         {
