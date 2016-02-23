@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare")]
         public ActionResult Dashboard()
         {
-            return Redirect("/cloudflare/dns");
+            return RedirectToAction(nameof(DNS));
         }
 
         [Route("cloudflare/railgun")]

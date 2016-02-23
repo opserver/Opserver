@@ -1,4 +1,5 @@
 ﻿@using StackExchange.Opserver
+@using StackExchange.Opserver.Controllers
 @model StackExchange.Exceptional.Error
 @{
     Layout = null;
@@ -17,11 +18,11 @@ else
     <h6 class="page-header">
         <strong>@error.Type</strong>
         <span class="pull-right">
-            <a href="/exceptions/similar?id=@error.GUID.ToString()&log=@error.ApplicationName.UrlEncode()" title="View exceptions with the same message in the same log">View Similar</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })" title="View exceptions with the same message in the same log">View Similar</a>
             <span class="text-muted">|</span>
-            <a href="/exceptions/similar?id=@error.GUID.ToString()&app=@error.ApplicationName.UrlEncode()&byTime=true" title="View exceptions within 5 minutes of this one">View Nearby</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
             <span class="text-muted">|</span>
-            <a class="text-danger js-clear-all" href="#" data-url="/exceptions/delete-similar" data-log="@error.ApplicationName" data-id="@error.GUID"><span class="glyphicon glyphicon-remove"></span> Clear all similar</a>
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@error.ApplicationName" data-id="@error.GUID"><span class="glyphicon glyphicon-remove"></span> Clear all similar</a>
         </span>
     </h6>
     <p class="small text-danger">@error.Message</p>

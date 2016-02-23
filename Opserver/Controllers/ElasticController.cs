@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic/cluster")]
-        public ActionResult Dashboard(string cluster)
+        public ActionResult Cluster(string cluster)
         {
             var vd = GetViewData(cluster);
             vd.View = DashboardModel.Views.Cluster;

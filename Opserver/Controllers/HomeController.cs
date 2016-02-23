@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Net;
 using System.Web.Mvc;
 using StackExchange.Opserver.Views.Shared;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Home;

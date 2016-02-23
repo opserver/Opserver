@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
@@ -29,7 +30,7 @@
                         <div class="row">
                             <h6 class="col-xs-12 page-header">
                                 @n.IconSpan()
-                                <a href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">
+                                <a href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">
                                     @n.ShortName
                                 </a>
                                 @if (isMaster)

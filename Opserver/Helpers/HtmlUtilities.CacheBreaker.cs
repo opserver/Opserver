@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Mvc;
 
 namespace StackExchange.Opserver.Helpers
@@ -25,7 +26,7 @@ namespace StackExchange.Opserver.Helpers
         /// <returns></returns>
         public static string GetCacheBreakerUrl(string path)
         {
-            return _cacheBreakerUrls.GetOrAdd(path, s => CalculateCacheBreakerUrl(s));
+            return _cacheBreakerUrls.GetOrAdd(path, CalculateCacheBreakerUrl);
         }
 
         internal static IEnumerable<KeyValuePair<string, string>> GetAllCacheBreakerUrls()
@@ -47,8 +48,13 @@ namespace StackExchange.Opserver.Helpers
             }
             else
                 file = path;
-
+            
             var breaker = GetCacheBreakerForLocalFile(file);
+            
+            if (path.StartsWith("~/"))
+                path = HostingEnvironment.ApplicationVirtualPath == "/"
+                    ? path.Substring(1)
+                    : HostingEnvironment.ApplicationVirtualPath + "/" + path.Substring(2);
 
             if (breaker == null)
                 return path;
@@ -68,7 +74,9 @@ namespace StackExchange.Opserver.Helpers
 
         private static string CalculateBreaker(string path)
         {
-            var fullpath = AppDomain.CurrentDomain.BaseDirectory + path;
+            var fullpath =  path.StartsWith("~/")
+                ? HostingEnvironment.MapPath(path)
+                : AppDomain.CurrentDomain.BaseDirectory + path;
             if (!File.Exists(fullpath))
                 return null;
 

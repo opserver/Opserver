@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.HAProxy
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.HAProxy
 @using StackExchange.Opserver.Views.HAProxy
 @model HAProxyModel
 @{
@@ -21,15 +22,15 @@
     </script>
 }
 }
-@helper TabLink(HAProxyModel.Views view, string href, string name)
+@helper TabLink(HAProxyModel.Views view, string action, string name)
 {
-    <li class="@(Model.View == view ? "active" : null)"><a href="@href">@name</a></li>
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(HAProxyModel.Views.Dashboard, "/haproxy", "dashboard")
+    @TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard")
     @if (Current.Settings.HAProxy.Traffic.Enabled)
     {
-        @TabLink(HAProxyModel.Views.Traffic, "/haproxy/traffic", "traffic")
+        @TabLink(HAProxyModel.Views.Traffic, nameof(HAProxyController.Traffic), "traffic")
     }
 </ul>
 <div class="js-refresh" data-name="haproxy-header">

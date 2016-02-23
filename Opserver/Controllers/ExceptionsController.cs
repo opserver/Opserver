@@ -47,7 +47,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/load-more")]
-        public ActionResult ExceptionsLoadMore(string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
+        public ActionResult LoadMore(string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
         {
             var vd = GetExceptionsModel(log, sort, count, prevLast);
             return View("Exceptions.Table.Rows", vd);
@@ -78,7 +78,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/similar")]
-        public async Task<ActionResult> ExceptionsSimilar(string log, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
+        public async Task<ActionResult> Similar(string log, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
         {
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
@@ -102,7 +102,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/search")]
-        public async Task<ActionResult> ExceptionsSearch(string q, string log, ExceptionSorts? sort = null, bool showDeleted = false)
+        public async Task<ActionResult> Search(string q, string log, ExceptionSorts? sort = null, bool showDeleted = false)
         {
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
@@ -110,13 +110,13 @@ namespace StackExchange.Opserver.Controllers
 
             // empty searches go back to the main log
             if (q.IsNullOrEmpty())
-                return RedirectToAction("Exceptions", new { log });
+                return RedirectToAction(nameof(Exceptions), new { log });
 
             var errors = await ExceptionStores.FindErrorsAsync(q, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value);
             if (!errors.Any() && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
-                return RedirectToAction("ExceptionsSearch", new { q, log, showDeleted = true });
+                return RedirectToAction(nameof(Search), new { q, log, showDeleted = true });
             }
 
             var vd = new ExceptionsModel
@@ -133,21 +133,21 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/detail")]
-        public async Task<ActionResult> ExceptionDetail(string app, Guid id)
+        public async Task<ActionResult> Detail(string app, Guid id)
         {
             var e = await ExceptionStores.GetError(app, id);
             return View("Exceptions.Detail", e);
         }
 
         [Route("exceptions/preview")]
-        public async Task<ActionResult> ExceptionPreview(string app, Guid id)
+        public async Task<ActionResult> Preview(string app, Guid id)
         {
             var e = await ExceptionStores.GetError(app, id);
             return View("Exceptions.Preview", e);
         }
 
         [Route("exceptions/detail/json"), AlsoAllow(Roles.Anonymous)]
-        public async Task<JsonResult> ExceptionDetailJson(string app, Guid id)
+        public async Task<JsonResult> DetailJson(string app, Guid id)
         {
             var e = await ExceptionStores.GetError(app, id);
             return e != null
@@ -173,24 +173,24 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/protect"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsProtect(string log, Guid id)
+        public async Task<ActionResult> Protect(string log, Guid id)
         {
             var success = await ExceptionStores.ActionAsync(log, s => s.ProtectErrorAsync(id));
-            return success ? ExceptionCounts() : JsonError("Unable to protect, error was not found in the log");
+            return success ? Counts() : JsonError("Unable to protect, error was not found in the log");
         }
 
         [Route("exceptions/delete"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsDelete(string log, Guid id, bool redirect = false)
+        public async Task<ActionResult> Delete(string log, Guid id, bool redirect = false)
         {
             // we don't care about success...if it's *already* deleted, that's fine
             // if we throw an exception trying to delete, that's another matter
             await ExceptionStores.ActionAsync(log, s => s.DeleteErrorAsync(id));
 
-            return redirect ? Json(new { url = Url.Action("Exceptions", new { log }) }) : ExceptionCounts();
+            return redirect ? Json(new { url = Url.Action("Exceptions", new { log }) }) : Counts();
         }
 
         [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsDeleteAll(string log)
+        public async Task<ActionResult> DeleteAll(string log)
         {
             await ExceptionStores.ActionAsync(log, s => s.DeleteAllErrorsAsync(log));
 
@@ -198,7 +198,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/delete-similar"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsDeleteSimilar(string log, Guid id)
+        public async Task<ActionResult> DeleteSimilar(string log, Guid id)
         {
             var e = await ExceptionStores.GetError(log, id);
             await ExceptionStores.ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrorsAsync(e));
@@ -207,16 +207,16 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/delete-list"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> ExceptionsDeleteList(Guid[] ids, bool returnCounts = false)
+        public async Task<ActionResult> DeleteList(Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
             await ExceptionStores.ActionAsync(null, s => s.DeleteErrorsAsync(ids.ToList()));
 
-            return returnCounts ? ExceptionCounts() : Json(new { url = Url.Action("Exceptions") });
+            return returnCounts ? Counts() : Json(new { url = Url.Action("Exceptions") });
         }
 
         [Route("exceptions/counts")]
-        public ActionResult ExceptionCounts()
+        public ActionResult Counts()
         {
             var apps = ExceptionStores.Applications.GroupBy(a => a.Name)
                 .ToDictionary(g => g.Key, g => new

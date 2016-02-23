@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Dashboard
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
 @model NodeModel
@@ -26,7 +27,7 @@
     @s.PrettyName
     @if (s.IsVM)
     {
-        @:(Virtual - <a href="/dashboard/node?node=@s.VMHost.PrettyName&view=@CurrentStatusTypes.VMHost" class="node-name-link">@s.VMHost.PrettyName</a>)
+        @:(Virtual - <a href="@Url.Action(nameof(DashboardController.Node), new { node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost })">@s.VMHost.PrettyName</a>)
     }
     @if (s.ManagementUrl.HasValue())
     {
@@ -139,28 +140,29 @@
     <ul class="nav nav-tabs nav-tabs-right">
         @foreach (var st in Model.StatusTypes.OrderBy(i => i))
         {
+            // TODO: Re-vamp this whole section
             switch (st)
             {
                 case CurrentStatusTypes.SQLInstance:
-                    @SubnavItem(st, "/sql/instance?node=" + s.PrettyName)
+                    @SubnavItem(st, Url.Action(nameof(SQLController.Instance), "SQL", new { node = s.PrettyName }))
                     break;
                 case CurrentStatusTypes.SQLActive:
-                    @SubnavItem(st, "/sql/active?node=" + s.PrettyName)
+                    @SubnavItem(st, Url.Action(nameof(SQLController.Active), "SQL", new { node = s.PrettyName }))
                     break;
                 case CurrentStatusTypes.SQLTop:
-                    @SubnavItem(st, "/sql/top?node=" + s.PrettyName)
+                    @SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }))
                     break;
-                case CurrentStatusTypes.Redis:
-                    @SubnavItem(st, "/redis?node=" + s.PrettyName)
-                    break;
+                //case CurrentStatusTypes.Redis:
+                    //@SubnavItem(st, "/redis?node=" + s.PrettyName)
+                    //break;
                 case CurrentStatusTypes.HAProxy:
-                    @SubnavItem(st, "/haproxy")
+                    @SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }))
                     break;
-                case CurrentStatusTypes.Elastic:
-                    @SubnavItem(st, "/elastic" + s.PrettyName)
-                    break;
+                //case CurrentStatusTypes.Elastic:
+                    //@SubnavItem(st, "/elastic" + s.PrettyName)
+                    //break;
                 default:
-                    @SubnavItem(st, $"/dashboard/node?node={s.PrettyName}&view={st}")
+                    @SubnavItem(st, Url.Action(nameof(DashboardController.Node), new { node = s.PrettyName, view = st }))
                     break;
             }
         }

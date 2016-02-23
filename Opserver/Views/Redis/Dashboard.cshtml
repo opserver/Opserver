@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Redis
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Redis
 @using StackExchange.Opserver.Views.Redis
 @model DashboardModel
 @{
@@ -6,9 +7,11 @@
     this.SetPageTitle("Redis Dashboard");
     this.SetTopNodes(RedisInstance.AllInstances, "Redis Servers", Model.CurrentInstance);
 }
-@helper TabLink(RedisViews view, string href, string name, bool includeParams = true)
+@helper TabLink(RedisViews view, string action, string name, bool includeParams = true)
 {
-    <li class="@(Model.View == view ? "active" : null)"><a href="@href@(includeParams && Model.CurrentInstance != null ? $"?node={Model.CurrentInstance.HostAndPort}" : "")">@name</a></li>
+    <li class="@(Model.View == view ? "active" : null)">
+        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.HostAndPort } : null)">@name</a>
+    </li>
 }
 @section head {
     <script>
@@ -19,8 +22,8 @@
     </script>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(RedisViews.All, "/redis", "all servers", false)
-    @TabLink(RedisViews.Instance, "/redis/instance", "instance")
+    @TabLink(RedisViews.All, nameof(RedisController.Dashboard), "all servers", false)
+    @TabLink(RedisViews.Instance, nameof(RedisController.Instance), "instance")
 </ul>
 <div>
     @if (Model.View == RedisViews.Instance && Model.CurrentInstance == null)

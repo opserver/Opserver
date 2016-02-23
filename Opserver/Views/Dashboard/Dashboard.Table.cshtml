@@ -4,6 +4,7 @@
 @using StackExchange.Opserver.Views.Dashboard
 @model DashboardModel
 @{
+    // Note: not using MVC Url.Action and such here because it's too slow
     Layout = null;
     var categories = Model.Nodes
                           .GroupBy(n => n.Category)
@@ -15,7 +16,7 @@
 if (DashboardData.HasData)
 {
         <a href="#/dashboard/graph/@(s.Id.UrlEncode())/@type">
-            <img src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" />
+            <img src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" />
         </a>
 }
 else
@@ -77,7 +78,7 @@ else
                             <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
                                 <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @(n.LastSync?.ToRelativeTime())">
                                     @n.IconSpan()
-                                    <a href="/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
+                                    <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
                                 </td>
                                 <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
                                 <td>@Graph(n, "cpu")</td>
@@ -92,7 +93,7 @@ else
                                 </td>
                                 <td>@Graph(n, "memory")</td>
                                 <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
-                                <td><a href="/dashboard/node?node=@n.PrettyName">@Graph(n, "network")</a></td>
+                                <td>@Graph(n, "network")</td>
                             </tr>
                         }
                     </tbody>

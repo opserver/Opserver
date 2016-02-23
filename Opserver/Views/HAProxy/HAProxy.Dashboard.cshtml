@@ -1,10 +1,12 @@
-﻿@using StackExchange.Opserver.Data.HAProxy
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.HAProxy
 @using Action = StackExchange.Opserver.Data.HAProxy.Action
 @model StackExchange.Opserver.Views.HAProxy.HAProxyModel
 @{
     Layout = "HAProxy.cshtml";
 
     var isAdmin = Current.User.IsHAProxyAdmin;
+    // TODO: Fold in
     var groupQS = Model.SelectedGroup != null ? "&group=" + Model.SelectedGroup.Name.UrlEncode() : "";
     var proxies = Model.Proxies;
     // move critical stuff to the top
@@ -117,7 +119,7 @@
                                            class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")" 
                                            title="take all servers out of rotation for this backend"></a>
                                     }
-                                    <a href="/haproxy?watch=@g.GroupLinkName.UrlEncode()@groupQS" class="node-name-link">@g.GroupStatus.IconSpan() @g.GroupName: @g.NiceName</a>
+                                    <a href="@Url.Action(nameof(HAProxyController.Dashboard), new { watch = g.GroupLinkName })@groupQS">@g.GroupStatus.IconSpan() @g.GroupName: @g.NiceName</a>
                                     <span class="pull-right text-muted small">As of: @g.PollDate.ToRelativeTimeSpanMini()</span>
                                 </h5>
                             </th>

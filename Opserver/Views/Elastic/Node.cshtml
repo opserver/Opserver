@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -28,7 +29,7 @@ Transport: @n.Stats?.TransportAddress">
                         @c.Name
                         <label>
                             Cluster
-                            <span class="text-muted">(<a href="/elastic/cluster?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">view</a>)</span>
+                            <span class="text-muted">(<a href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name, node = n.Name })">view</a>)</span>
                         </label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">

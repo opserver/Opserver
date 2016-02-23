@@ -1,4 +1,5 @@
-﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+﻿@using StackExchange.Opserver.Controllers
+@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     var e = Model.Exception;
     var log = Model.SelectedLog;
@@ -12,9 +13,9 @@
     </script>
 }
 <h5 class="page-header">
-    <a href="/exceptions">Exceptions</a> 
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a> 
     <span class="text-muted">/</span> 
-    <a href="/exceptions?log=@log.UrlEncode()">@e.ApplicationName</a>
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log })">@e.ApplicationName</a>
     <span class="text-muted">/</span> 
     @e.Type
 </h5>

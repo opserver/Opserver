@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Dashboard
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
 @model Node
@@ -20,12 +21,12 @@
         <div class="text-muted">No Data Available</div>
         return;
     }
-    <img class="js-dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
+    <img class="js-dashboard-spark" src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
 }
 <div class="item dashboard @s.TextClass() @GetItemClass(s)">
     <div class="server-name">
         @s.IconSpan()
-        <a href="/dashboard/node?node=@s.PrettyName" class="node-name-link">@s.PrettyName</a>
+        <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = s.PrettyName })">@s.PrettyName</a>
         @if (s.IsUnwatched)
         {
             <span class="unmanaged">(unmanaged)</span>
@@ -45,6 +46,6 @@
     </div>
     <div class="status-block net-status">
         <span class="label">Net </span>@s.PrettyTotalNetwork() 
-        <div class="status-graph"><a href="/dashboard/node?node=@s.PrettyName&view=@CurrentStatusTypes.Interfaces">@Graph(s, "Network")</a></div>
+        <div class="status-graph">@Graph(s, "Network")</div>
     </div>
 </div>

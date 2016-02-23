@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.SQL
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsActiveModel
 @helper SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label)
@@ -13,7 +14,7 @@
 <h4 class="modal-title">
     Active Operation Filters
 </h4>
-<form class="form-horizontal" action="/sql/active" method="GET">
+<form class="form-horizontal" action="@Url.Action(nameof(SQLController.Active))" method="GET">
     <input type="hidden" name="node" value="@Model.CurrentInstance.Name" />
     <div class="form-group form-group-sm">
         <label class="col-md-3 control-label">Include Details</label>

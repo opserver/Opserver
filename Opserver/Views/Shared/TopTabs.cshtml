@@ -13,7 +13,7 @@
             var status = tab.GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
             var badgeCount = tab.GetBadgeCount?.Invoke();
                     <li class="@(tab.IsCurrentTab ? "active" : null)">
-                        <a href="@tab.Url" title="@(tab.GetTooltip?.Invoke())">
+                        <a href="@Url.Content(tab.Url)" title="@(tab.GetTooltip?.Invoke())">
                             <span class="@(status.TextClass())">@tab.Name</span>
                             @if (badgeCount > 0)
                             {

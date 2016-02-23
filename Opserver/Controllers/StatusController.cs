@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Net;
-using System.Web.WebPages;
 using System.Web.Mvc;
 using Jil;
 using StackExchange.Opserver.Views.Shared;
@@ -81,17 +80,17 @@ namespace StackExchange.Opserver.Controllers
             var s = Current.Settings;
 
             if (s.Dashboard.Enabled && s.Dashboard.HasAccess())
-                return RedirectToAction("Dashboard", "Dashboard");
+                return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
             if (s.SQL.Enabled && s.SQL.HasAccess())
-                return RedirectToAction("Dashboard", "SQL");
+                return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
             if (s.Redis.Enabled && s.Redis.HasAccess())
-                return RedirectToAction("Dashboard", "Redis");
+                return RedirectToAction(nameof(RedisController.Dashboard), "Redis");
             if (s.Elastic.Enabled && s.Elastic.HasAccess())
-                return RedirectToAction("Dashboard", "Elastic");
+                return RedirectToAction(nameof(ElasticController.Dashboard), "Elastic");
             if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
-                return RedirectToAction("Exceptions", "Exceptions");
+                return RedirectToAction(nameof(ExceptionsController.Exceptions), "Exceptions");
             if (s.HAProxy.Enabled && s.HAProxy.HasAccess())
-                return RedirectToAction("HAProxyDashboard", "HAProxy");
+                return RedirectToAction(nameof(HAProxyController.Dashboard), "HAProxy");
 
             return View("NoConfiguration");
         }
@@ -120,7 +119,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (Current.User.IsAnonymous)
             {
-                return Redirect("/login?ReturnUrl=" + Request.Url.PathAndQuery.UrlEncode());
+                return RedirectToAction(nameof(LoginController.Login), "Login", new { returnUrl = Request.Url.PathAndQuery });
             }
 
             Response.StatusCode = (int)HttpStatusCode.Forbidden;

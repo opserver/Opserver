@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Exceptions
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     var showActions = Current.User.IsExceptionAdmin;
@@ -28,7 +29,7 @@
                 }
                 else
                 {
-                    <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="/exceptions/delete-all"><span class="glyphicon glyphicon-remove"></span> Clear all non-protected errors</a>
+                    <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteAll))"><span class="glyphicon glyphicon-remove"></span> Clear all non-protected errors</a>
                 }
             </span>
         }

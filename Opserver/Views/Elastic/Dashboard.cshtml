@@ -1,4 +1,4 @@
-﻿@using System.Collections.Specialized
+﻿@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
@@ -17,26 +17,25 @@
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string href, string name, bool includeCluster = true, bool includeNode = false)
+@helper TabLink(DashboardModel.Views view, string action, string name, bool includeCluster = true, bool includeNode = false)
 {
-    var nvc=  new NameValueCollection();
+    var rvd = new RouteValueDictionary();
     if (includeCluster && Model.CurrentClusterName.HasValue())
     {
-        nvc.Add("cluster", Model.CurrentClusterName);
+        rvd.Add("cluster", Model.CurrentClusterName);
     }
     if (includeNode && Model.CurrentNodeName.HasValue())
     {
-        nvc.Add("node", Model.CurrentNodeName);
+        rvd.Add("node", Model.CurrentNodeName);
     }
-    var query = nvc.ToQueryString();
 
-    <li class="@(Model.View == view ? "active" : null)"><a href="@href@query">@name</a></li>
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action, rvd)">@name</a></li>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(DashboardModel.Views.AllClusters, "/elastic", "all clusters", false)
-    @TabLink(DashboardModel.Views.Cluster, "/elastic/cluster", "cluster")
-    @TabLink(DashboardModel.Views.Node, "/elastic/node", "node", includeNode: true)
-    @TabLink(DashboardModel.Views.Indexes, "/elastic/indexes", "indexes")
+    @TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false)
+    @TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster")
+    @TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true)
+    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes")
 </ul>
 <div>
     @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))

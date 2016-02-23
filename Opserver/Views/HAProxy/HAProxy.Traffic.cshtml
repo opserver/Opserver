@@ -1,4 +1,5 @@
-﻿@model StackExchange.Opserver.Views.HAProxy.HAProxyModel
+﻿@using StackExchange.Opserver.Controllers
+@model StackExchange.Opserver.Views.HAProxy.HAProxyModel
 @{
     Layout = "HAProxy.cshtml";
     
@@ -40,7 +41,7 @@
 <div style="padding: 4px; width: 1200px; margin: 0 auto;">
     <h2>
         Stack Exchange Network Traffic
-        <form method="GET" action="/haproxy/traffic" style="float: right;">
+        <form method="GET" action="@Url.Action(nameof(HAProxyController.Traffic))" style="float: right;">
             <div>
                 <input type="text" placeholder="All Sites" value="@Model.Host" id="host" name="host" />
             </div>
@@ -170,8 +171,8 @@
                             </table>
                         </div>                
                     </td>
-                    @*<td><img src="/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
-                    <td><img src="/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>*@
+                    @*<td><img src="~/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
+                    <td><img src="~/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>*@
                 </tr>
                 if (i++ >= maxTopRoutesToShow) { break; }
             }

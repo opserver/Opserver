@@ -1,4 +1,5 @@
 ﻿@using System.Reflection
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.Exceptions
 @using StackExchange.Opserver.Data.HAProxy
@@ -94,7 +95,7 @@
                 </div>
                 <div class="value-block col-xs-4">
                     @pollingInfo.TotalPollers.ToComma()
-                    <label>Caches <span class="text-muted">(<a href="/about/caches">view</a>)</span></label>
+                    <label>Caches <span class="text-muted">(<a href="@Url.Action(nameof(HomeController.AboutCaches))">view</a>)</span></label>
                 </div>
                 <h6 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h6>
                 <ul class="list-group">

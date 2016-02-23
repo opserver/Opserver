@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Elastic
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
@@ -73,7 +74,7 @@
                     <tr class="category-row">
                         <th colspan="11">
                             <h5>
-                                @hs.IconSpan() <a href="/elastic/cluster?cluster=@c.Name.UrlEncode()">@c.Name</a>
+                                @hs.IconSpan() <a href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name})">@c.Name</a>
                                 <span class="text-muted small">(@string.Join(", ", attribs))@CommonVersionHeader(c)</span>
                             </h5>
                         </th>
@@ -106,7 +107,7 @@
                         <tr class="@n.RowClass()@(false ? " info" : null)">
                             <td title="Up since @(upTime.HasValue ? upTime.Value.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
                                 @n.IconSpan()
-                                <a class="@n.TextClass()" href="/elastic/node?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">@n.Name.TrimEnd("-" + c.Name)</a>
+                                <a class="@n.TextClass()" href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">@n.Name.TrimEnd("-" + c.Name)</a>
                             </td>
                             <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
                             @if (stats?.Process?.CPU != null)
@@ -132,7 +133,7 @@
                             @if (stats?.Process != null)
                             {
                                 <td title="@c.HealthStatus.Data.Indexes.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
-                                    <a href="/elastic/indexes?cluster=@c.Name">
+                                    <a href="@Url.Action(nameof(ElasticController.Indexes), new { cluster = c.Name, node = n.Name })">
                                         @c.HealthStatus.Data.Indexes.Count.ToComma()
                                     </a> <span class="text-muted">@(stats.Indexes.Store.SizeInBytes > 0 ? "(" + stats.Indexes.Store.SizeInBytes.ToSize() + ")" : "")</span>
                                 </td>

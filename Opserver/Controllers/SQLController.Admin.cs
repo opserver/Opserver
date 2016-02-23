@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Controllers
     public partial class SQLController
     {
         [Route("sql/remove-plan"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
-        public async Task<ActionResult> SQLRemovePlan(string node, string handle)
+        public async Task<ActionResult> RemovePlan(string node, string handle)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
             var instance = SQLInstance.Get(node);

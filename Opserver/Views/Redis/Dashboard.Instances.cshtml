@@ -34,7 +34,7 @@
         </td>
         <td style="padding-left: @((20*nest).ToString())px">
             @server.IconSpan()
-            <a href="/redis/instance?node=@server.HostAndPort" class="@server.TextClass()">@server.Host</a>
+            <a href="~/redis/instance?node=@server.HostAndPort" class="@server.TextClass()">@server.Host</a>
             <span class="text-muted small">(@server.Port.ToString()@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
         </td>
         <td>@ServerRole(server.Role)</td>

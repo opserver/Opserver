@@ -2,6 +2,7 @@
 @using System.Text.RegularExpressions
 @using StackExchange.Exceptional
 @using StackExchange.Opserver
+@using StackExchange.Opserver.Controllers
 @model Error
 @{
     var error = Model;
@@ -140,7 +141,7 @@
     @if (error == null)
     {
         <h5 class="page-header">
-            <a href="/exceptions">Exceptions</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
             <span class="text-muted">/</span> 
             Unknown
         </h5>
@@ -152,8 +153,8 @@
     else
     {
         <h5 class="page-header">
-            <a href="/exceptions?log=@error.ApplicationName.UrlEncode()">@error.ApplicationName Log</a> <span class="text-muted">/</span> @error.Type 
-            <span class="pull-right"><a href="/exceptions/similar?id=@error.GUID.ToString()&log=@error.ApplicationName.UrlEncode()">View Similar</a></span>
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = error.ApplicationName })">@error.ApplicationName Log</a> <span class="text-muted">/</span> @error.Type 
+            <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })">View Similar</a></span>
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
         <div class="error-info">

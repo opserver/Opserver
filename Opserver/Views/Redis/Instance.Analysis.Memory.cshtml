@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Redis
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Redis
 @model RedisMemoryAnalysis
 @{
     Layout = "~/Views/Shared/Master.cshtml";
@@ -12,7 +13,7 @@
 }
 <h5 class="page-header">
     @Model.IconSpan() @serverInfo.HostAndPort (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()
-    <a class="pull-right" href="/redis/analyze/memory/clear?node=@serverInfo.HostAndPort&db=@Model.Database.ToString()">Re-run analysis</a>
+    <a class="pull-right" href="@Url.Action(nameof(RedisController.ClearAnalysis), new { node = serverInfo.HostAndPort, db = Model.Database })">Re-run analysis</a>
 </h5>
 <div class="row small">
     <div class="value-block col-md-2 col-sm-4 col-xs-6">

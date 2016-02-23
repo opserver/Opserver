@@ -14,7 +14,7 @@
 <div class="row js-refresh" data-name="instance-summary">
     <div class="col-md-6">
         <div class="panel panel-default">
-            <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/redis/summary/config">view config</a> - <a href="/redis/instance/get-config/@i.HostAndPort-config.zip">download</a>)</span></div>
+            <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/redis/summary/config">view config</a> - <a href="~/redis/instance/get-config/@i.HostAndPort-config.zip">download</a>)</span></div>
             <div class="panel-body small">
                 @{
                     var info = i.Info.SafeData(true);
@@ -242,7 +242,7 @@
                         {
                             <tr>
                                 <td>@kd.Key.ToString()@if (Current.User.IsInRole(Roles.RedisAdmin))
-                                { <span class="text-muted">(<a href="/redis/analyze/memory?node=@i.HostAndPort&db=@kd.Key.ToString()" class="node-name-link">analyze</a>)</span>}</td>
+                                { <span class="text-muted">(<a href="~/redis/analyze/memory?node=@i.HostAndPort&db=@kd.Key.ToString()">analyze</a>)</span>}</td>
                                 <td>@kd.Value.Keys.ToComma()</td>
                                 <td>@kd.Value.Expires.ToComma()</td>
                             </tr>

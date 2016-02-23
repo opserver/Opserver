@@ -1,9 +1,10 @@
-﻿@using StackExchange.Opserver.Data.Dashboard
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Views.Dashboard
 @model DashboardModel
 @{
     this.SetPageTitle("Dashboard");
-    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: "/dashboard/node");
+    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: Url.Action(nameof(DashboardController.Node)));
 }
 @section head {
     <script>

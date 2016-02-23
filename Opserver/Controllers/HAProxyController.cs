@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Controllers
 
         [Route("haproxy")]
         [Route("haproxy/dashboard")]
-        public ActionResult HAProxyDashboard(string group, string node, string watch = null, bool norefresh = false)
+        public ActionResult Dashboard(string group, string node, string watch = null, bool norefresh = false)
         {
             var haGroup = HAProxyGroup.GetGroup(group ?? node);
             var proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies());
@@ -37,13 +37,13 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("haproxy/traffic")]
-        public async Task<ActionResult> HAProxyTraffic(string host)
+        public async Task<ActionResult> Traffic(string host)
         {
             if (!Current.Settings.HAProxy.Traffic.Enabled)
                 return DefaultAction();
             
-            var hosts = Data.HAProxy.HAProxyTraffic.GetHostsAsync();
-            var topRoutes = Data.HAProxy.HAProxyTraffic.GetTopPageRotuesAsync(30, host);
+            var hosts = HAProxyTraffic.GetHostsAsync();
+            var topRoutes = HAProxyTraffic.GetTopPageRotuesAsync(30, host);
 
             await Task.WhenAll(hosts, topRoutes);
 

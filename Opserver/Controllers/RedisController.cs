@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var instance = RedisInstance.GetInstance(node);
             if (instance != null)
-                return RedirectToAction("Instance", new {node});
+                return RedirectToAction(nameof(Instance), new {node});
 
             var vd = new DashboardModel
             {
@@ -95,7 +95,7 @@ namespace StackExchange.Opserver.Controllers
                 return TextPlain("Instance not found");
             instance.ClearDatabaseMemoryAnalysisCache(db);
 
-            return RedirectToAction("Analysis", new { node, db });
+            return RedirectToAction(nameof(Analysis), new { node, db });
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿@using System.Globalization
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model InstanceModel
@@ -10,32 +11,32 @@
 }
 @helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
 {
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter == null)
-    {
-        return;
-    }
+var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+if (counter == null)
+{
+    return;
+}
     <div class="value-block col-md-3 col-sm-6">
         @if (url.HasValue())
         {
             <a href="@url">
-                @(((long) counter.CalculatedValue*1024).ToSize())
+                @(((long)counter.CalculatedValue * 1024).ToSize())
             </a>
         }
         else
         {
-            @(((long) counter.CalculatedValue*1024).ToSize())
+            @(((long)counter.CalculatedValue * 1024).ToSize())
         }
         <label>@label</label>
     </div>
 }
 @helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
 {
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter == null)
-    {
-        return;
-    }
+var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+if (counter == null)
+{
+    return;
+}
     <div class="value-block col-md-4 col-sm-6">
         @counter.CalculatedValue.ToString("#,##0.###") @suffix
         <label>@label</label>
@@ -43,11 +44,11 @@
 }
 @helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3, bool showTotal = true)
 {
-    var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-    if (counter == null)
-    {
-        return;
-    }
+var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+if (counter == null)
+{
+    return;
+}
     <div class="value-block col-md-@cols.ToString() col-sm-6">
         @counter.CalculatedValue.ToString("#,##0.###")
         <span class="text-muted">/sec</span>
@@ -178,7 +179,7 @@
                             @if (pd.PhysicalMemoryBytes > 0)
                             {
                                 var clerks = i.MemoryClerkSummary.SafeData(true);
-                                <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
+                            <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
 Virtual: @pd.VirtualMemoryBytes.ToComma() (@pd.VirtualMemoryBytes.ToSize())
 SQL Server Used: @pd.CommittedBytes.ToComma() (@pd.CommittedBytes.ToSize())
 SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToSize())
@@ -188,35 +189,35 @@ Top Users:
 {
     <text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)</text>
 }">
-                                    <div class="progress">
-                                        <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.ToString())%;"></div>
-                                        <span>
-                                            @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
-                                            <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
-                                        </span>
-                                    </div>
-                                    <label>
-                                        Memory
-                                        <span class="text-muted">(<a href="#/sql/summary/memory">view</a>)</span>
-                                    </label>
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.ToString())%;"></div>
+                                    <span>
+                                        @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
+                                        <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
+                                    </span>
                                 </div>
+                                <label>
+                                    Memory
+                                    <span class="text-muted">(<a href="#/sql/summary/memory">view</a>)</span>
+                                </label>
+                            </div>
                                 if (clerks.Any())
                                 {
                                     var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
                                     var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
                                     if (buffer != null)
                                     {
-                                        <div class="value-block col-md-3">
-                                            @buffer.UsedBytes.ToSize()
-                                            <label>Buffer Pool</label>
-                                        </div>
+                            <div class="value-block col-md-3">
+                                @buffer.UsedBytes.ToSize()
+                                <label>Buffer Pool</label>
+                            </div>
                                     }
                                     if (plans != null)
                                     {
-                                        <div class="value-block col-md-3">
-                                            @plans.UsedBytes.ToSize()
-                                            <label>Plan Cache</label>
-                                        </div>
+                            <div class="value-block col-md-3">
+                                @plans.UsedBytes.ToSize()
+                                <label>Plan Cache</label>
+                            </div>
                                     }
                                 }
                             }
@@ -238,13 +239,13 @@ Top Users:
                             <div class="panel-body small">
                                 @foreach (var s in services)
                                 {
-                                    <div class="value-block col-md-@cols @s.MonitorStatus.BackgroundClass()" title="Name: @s.ServiceName
+                                <div class="value-block col-md-@cols @s.MonitorStatus.BackgroundClass()" title="Name: @s.ServiceName
             Status: @s.Status.GetDescription()
             Account: @s.ServiceAccount
             Clustered: @(s.IsClusteredBool ? "Yes" : "No")">
-                                        @s.Status.GetDescription() <span class="small">(@s.StartupType.GetDescription())</span>
-                                        <label>@s.ServiceName.Replace(" (MSSQLSERVER)", "").Replace(" Filter Daemon Launcher", "")</label>
-                                    </div>
+                                    @s.Status.GetDescription() <span class="small">(@s.StartupType.GetDescription())</span>
+                                    <label>@s.ServiceName.Replace(" (MSSQLSERVER)", "").Replace(" Filter Daemon Launcher", "")</label>
+                                </div>
                                 }
                             </div>
                         </div>
@@ -284,7 +285,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                             @foreach (var cn in ci.Cluster.Nodes)
                             {
                                 <div class="value-block col-md-4 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
-                                    <a href="/sql/instance?node=@cn.Name">@cn.Name</a>
+                                    @Html.ActionLink(cn.Name, nameof(SQLController.Instance), new { node = cn.Name })
                                     <label>Replica</label>
                                 </div>
                             }
@@ -302,7 +303,7 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                                 {
                                     <h6 class="page-header row">
                                         @ag.IconSpan()
-                                        <a href="/sql/servers#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a>
+                                        <a href="@Url.Action(nameof(SQLController.Servers))#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a>
                                     </h6>
                                     <div class="row">
                                         <div class="value-block col-md-3 col-sm-6">
@@ -344,44 +345,44 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
         <div class="col-md-6">
             @if (counters.Any())
             {
-                <div class="panel panel-default">
-                    <div class="panel-heading">Performance</div>
-                    <div class="panel-body small">
-                        @{
+            <div class="panel panel-default">
+                <div class="panel-heading">Performance</div>
+                <div class="panel-body small">
+                    @{
                             var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
                             var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
                             var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? (compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
-                        }
-                        @RenderPerSecCounter("Batches", "SQL Statistics", "Batch Requests/sec", "", url: $"/sql/top?node={i.Name.UrlEncode()}&sort=ExecutionsPerMinute&LastRunSeconds=300")
-                        @RenderPerSecCounter("Compilations", "SQL Statistics", "SQL Compilations/sec", "", suffix: compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
-                        @RenderPerSecCounter("Re-Compilations", "SQL Statistics", "SQL Re-Compilations/sec", "")
-                        @RenderPerSecCounter("Guided Plans", "SQL Statistics", "Guided plan executions/sec", "")
+                    }
+                    @RenderPerSecCounter("Batches", "SQL Statistics", "Batch Requests/sec", "", url: Url.Action(nameof(SQLController.Top), new { node = i.Name, sort = "ExecutionsPerMinute", LastRunSeconds = 300 }))
+                    @RenderPerSecCounter("Compilations", "SQL Statistics", "SQL Compilations/sec", "", suffix: compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
+                    @RenderPerSecCounter("Re-Compilations", "SQL Statistics", "SQL Re-Compilations/sec", "")
+                    @RenderPerSecCounter("Guided Plans", "SQL Statistics", "Guided plan executions/sec", "")
 
-                        @RenderPerSecCounter("Transactions", "Databases", "Transactions/sec", "_Total")
+                    @RenderPerSecCounter("Transactions", "Databases", "Transactions/sec", "_Total")
 
-                        @RenderPerSecCounter("Index Searches", "Access Methods", "Index Searches/sec", "")
-                        @RenderPerSecCounter("Lock Requests", "Locks", "Lock Requests/sec", "_Total")
-                        @RenderPerSecCounter("Errors", "SQL Errors", "Errors/sec", "_Total", url: "#/sql/summary/errors")
-                    </div>
+                    @RenderPerSecCounter("Index Searches", "Access Methods", "Index Searches/sec", "")
+                    @RenderPerSecCounter("Lock Requests", "Locks", "Lock Requests/sec", "_Total")
+                    @RenderPerSecCounter("Errors", "SQL Errors", "Errors/sec", "_Total", url: "#/sql/summary/errors")
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Memory & Storage</div>
-                    <div class="panel-body small">
-                        @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
-                        @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
-                        @RenderSizeCounter("Database Cache", "Memory Manager", "Database Cache Memory (KB)", "")
-                        @RenderSizeCounter("Free", "Memory Manager", "Free Memory (KB)", "")
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Memory & Storage</div>
+                <div class="panel-body small">
+                    @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
+                    @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
+                    @RenderSizeCounter("Database Cache", "Memory Manager", "Database Cache Memory (KB)", "")
+                    @RenderSizeCounter("Free", "Memory Manager", "Free Memory (KB)", "")
 
-                        @RenderSizeCounter("Data Files", "Databases", "Data File(s) Size (KB)", "_Total")
-                        @RenderSizeCounter("Log Files", "Databases", "Log File(s) Size (KB)", "_Total")
-                        @RenderSizeCounter("Log Files Used", "Databases", "Log File(s) Used Size (KB)", "_Total")
-                        @RenderSizeCounter("TempDB Free", "Transactions", "Free Space in tempdb (KB)", "")
-                    </div>
+                    @RenderSizeCounter("Data Files", "Databases", "Data File(s) Size (KB)", "_Total")
+                    @RenderSizeCounter("Log Files", "Databases", "Log File(s) Size (KB)", "_Total")
+                    @RenderSizeCounter("Log Files Used", "Databases", "Log File(s) Used Size (KB)", "_Total")
+                    @RenderSizeCounter("TempDB Free", "Transactions", "Free Space in tempdb (KB)", "")
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Cache</div>
-                    <div class="panel-body small">
-                        @{
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Cache</div>
+                <div class="panel-body small">
+                    @{
                             Func<string, string, string, string> getCacheSize = (o, c, j) =>
                             {
                                 var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue*8*1024;
@@ -390,33 +391,33 @@ Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms
                             var dbCacheBytes = getCacheSize("Buffer Manager", "Database pages", "");
                             var planCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
                             var objectCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "_Total");
-                        }
-                        @RenderCacheCounter("Page Life (Seconds)", "Buffer Manager", "Page life expectancy", "")
-                        @RenderCacheCounter("Page Lookups", "Buffer Manager", "Page lookups/sec", "")
-                        @RenderCacheCounter("Database Pages", "Buffer Manager", "Database pages", "", suffix: dbCacheBytes)
+                    }
+                    @RenderCacheCounter("Page Life (Seconds)", "Buffer Manager", "Page life expectancy", "")
+                    @RenderCacheCounter("Page Lookups", "Buffer Manager", "Page lookups/sec", "")
+                    @RenderCacheCounter("Database Pages", "Buffer Manager", "Database pages", "", suffix: dbCacheBytes)
 
-                        @RenderCacheCounter("Objects in Cache", "Plan Cache", "Cache Object Counts", "_Total", suffix: objectCacheBytes)
-                        @RenderCacheCounter("Plans in Cache", "Plan Cache", "Cache Object Counts", "SQL Plans", suffix: planCacheBytes)
-                        @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
-                    </div>
+                    @RenderCacheCounter("Objects in Cache", "Plan Cache", "Cache Object Counts", "_Total", suffix: objectCacheBytes)
+                    @RenderCacheCounter("Plans in Cache", "Plan Cache", "Cache Object Counts", "SQL Plans", suffix: planCacheBytes)
+                    @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
                 </div>
-                <div class="panel panel-default">
-                    <div class="panel-heading">Waits</div>
-                    <div class="panel-body small">
-                        @RenderPerSecCounter("Lock", "Wait Statistics", "Lock waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Log Buffer", "Wait Statistics", "Log buffer waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Log Write", "Wait Statistics", "Log write waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Network IO", "Wait Statistics", "Network IO waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Non-Page Latch", "Wait Statistics", "Non-Page latch waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Page IO Latch", "Wait Statistics", "Page IO latch waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Page Latch", "Wait Statistics", "Page latch waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Thread-safe Memory", "Wait Statistics", "Thread-safe memory objects waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Transaction Ownership", "Wait Statistics", "Transaction ownership waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Worker", "Wait Statistics", "Wait for the worker", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Workspace Sync", "Wait Statistics", "Workspace synchronization waits", "Waits started per second", showTotal: false)
-                        @RenderPerSecCounter("Memory Grant", "Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second", showTotal: false)                     
-                    </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">Waits</div>
+                <div class="panel-body small">
+                    @RenderPerSecCounter("Lock", "Wait Statistics", "Lock waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Log Buffer", "Wait Statistics", "Log buffer waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Log Write", "Wait Statistics", "Log write waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Network IO", "Wait Statistics", "Network IO waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Non-Page Latch", "Wait Statistics", "Non-Page latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Page IO Latch", "Wait Statistics", "Page IO latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Page Latch", "Wait Statistics", "Page latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Thread-safe Memory", "Wait Statistics", "Thread-safe memory objects waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Transaction Ownership", "Wait Statistics", "Transaction ownership waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Worker", "Wait Statistics", "Wait for the worker", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Workspace Sync", "Wait Statistics", "Workspace synchronization waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Memory Grant", "Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second", showTotal: false)
                 </div>
+            </div>
             }
         </div>
     </div>

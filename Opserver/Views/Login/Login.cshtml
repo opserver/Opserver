@@ -6,14 +6,14 @@
 <html lang="en">
     <head>
         <title>@SiteSettings.SiteNameLong</title>
-        <link href="@Url.CacheBreaker("/Content/themes/light/styles.min.css")" rel="stylesheet" type="text/css" />
-        <link href="@Url.CacheBreaker("/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
+        <link href="@Url.CacheBreaker("~/Content/themes/light/styles.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@Url.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
     </head>
     <body>
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="/hub"></a>
+                    <a class="navbar-brand" href="~/hub"></a>
                 </div>
             </div>
         </nav>
@@ -21,7 +21,7 @@
             <div class="row">
                 <div class="col-md-4 col-md-offset-4" style="margin-top: 50px;">
                     <h4 class="page-header">@SiteSettings.SiteNameLong Login</h4>
-                    <form action="/login" method="POST">
+                    <form action="~/login" method="POST">
                         <div class="form-group form-group-sm">
                             <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
                             <input type="text" class="form-control" name="user" placeholder="Username" autofocus="autofocus" /> <br />

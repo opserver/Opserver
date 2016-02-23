@@ -58,7 +58,7 @@
                     }
                 </th>
                 <th class="actions">
-                    <a href="/json/@pn.NodeType/@pn.UniqueKey">JSON</a>
+                    <a href="~/json/@pn.NodeType/@pn.UniqueKey">JSON</a>
                     <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey">Poll All</a>
                 </th>
             </tr>
@@ -94,8 +94,8 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
                     </td>
                     <td class="@(p.IsPolling ? "text-success small" : "text-muted small")">(@(p.PollStatus))</td>
                     <td class="actions">
-                        <a href="/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
-                        <a href="/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
+                        <a href="~/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
+                        <a href="~/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
                         <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey" data-id="@p.UniqueId.ToString()">Poll</a>
                     </td>
                 </tr>

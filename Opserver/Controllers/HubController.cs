@@ -12,18 +12,12 @@ using StackExchange.Opserver.Views.Hub;
 
 namespace StackExchange.Opserver.Controllers
 {
-    public partial class HubController : StatusController
+    public class HubController : StatusController
     {
         protected override ISecurableSection SettingsSection => Current.Settings.Dashboard;
 
         protected override string TopTab => TopTabs.BuiltIn.Dashboard;
-
-        [Route("headsup"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult HeadsUp()
-        {
-            return RedirectToAction("Index");
-        }
-
+        
         [Route("hub"), Route("headsup"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult Index()
         {

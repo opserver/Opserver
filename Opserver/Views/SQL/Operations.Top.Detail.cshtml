@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Models
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL.QueryPlans
 @model StackExchange.Opserver.Views.SQL.OperationsTopDetailModel
 @{
@@ -30,7 +31,7 @@
                     <div class="panel-heading">CPU</div>
                     <div class="panel-body">
                         <div class="value-block">
-                            @ReadableTime(op.TotalCPU/1000)
+                            @ReadableTime(op.TotalCPU / 1000)
                             <label>Total</label>
                         </div>
                         <div class="value-block">
@@ -133,7 +134,7 @@
                             <label>Last Execution</label>
                         </div>
                         <div class="value-block">
-                            <a href="/sql/top/plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)" class="blue-dotted">Download</a>
+                            <a href="@Url.Action(nameof(SQLController.TopPlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">Download</a>
                             <label>Query Plan</label>
                         </div>
                     </div>
@@ -143,16 +144,16 @@
         <div class="row small">
             <div class="value-block col-md-12">
                 0x@(op.ReadablePlanHandle)
-                <label>Plan Handle (<a class="text-danger js-remove-plan js-confirm" href="/sql/remove-plan?node=@s.Name&handle=@HttpServerUtility.UrlTokenEncode(op.PlanHandle)">purge plan</a>)</label>
+                <label>Plan Handle (<a class="text-danger js-remove-plan js-confirm" href="@Url.Action(nameof(SQLController.RemovePlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">purge plan</a>)</label>
             </div>
         </div>
 
         <div class="sql-query-section">
             @*<ul class="nav nav-tabs nav-tabs-right">
-                <li class="active"><a href="#sql-query" data-toggle="tab">query text</a></li>
-                <li><a href="#sql-query-details" data-toggle="tab">query details</a></li>
-                <li><a href="#sql-query-plan" data-toggle="tab">query plan</a></li>
-            </ul>*@
+                    <li class="active"><a href="#sql-query" data-toggle="tab">query text</a></li>
+                    <li><a href="#sql-query-details" data-toggle="tab">query details</a></li>
+                    <li><a href="#sql-query-plan" data-toggle="tab">query plan</a></li>
+                </ul>*@
             <div>
                 <div id="sql-query" class="tab-pane fade active in" style="overflow-x: auto;">
                     <div>
@@ -171,106 +172,106 @@
                     </div>
                 </div>
                 @*<div id="sql-query-details" class="tab-pane fade">
-                    <div>
-                        @foreach (var statement in plan.Statements)
-                        {
-                            var ss = statement as StmtSimpleType;
-                            if (statement.IsMinor)
+                        <div>
+                            @foreach (var statement in plan.Statements)
                             {
-                                continue;
-                            }
-                            var excerpt = statement.StatementTextWithoutInitialParamsTrimmed;
-                            <div class="sql-statement">
-                                <div class="sql-query-header" title="Type: @statement.StatementType">
-                                    Statement
-                                    @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
-                                    {
-                                        <span class="text-muted">
-                                            @(statement.StatementSubTreeCostSpecified ? "cost: " + statement.StatementSubTreeCost : "")
-                                            @(statement.StatementSubTreeCostSpecified && statement.StatementOptmLevel.HasValue() ? " - " : "")
-                                            @(statement.StatementOptmLevel.HasValue() ? "optimization: " + statement.StatementOptmLevel : "")
-                                        </span>
-                                    }
-                                </div>
-                                <div class="sql-query-excerpt">
-                                    <pre class="pre-code prettyprint lang-sql">@excerpt</pre>
-                                </div>
-                                @if (excerpt.LineCount() > 3)
+                                var ss = statement as StmtSimpleType;
+                                if (statement.IsMinor)
                                 {
-                                    <div class="hide-gradient">
-                                        <a href="#" class="show-toggle">(show more)</a>
+                                    continue;
+                                }
+                                var excerpt = statement.StatementTextWithoutInitialParamsTrimmed;
+                                <div class="sql-statement">
+                                    <div class="sql-query-header" title="Type: @statement.StatementType">
+                                        Statement
+                                        @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
+                                        {
+                                            <span class="text-muted">
+                                                @(statement.StatementSubTreeCostSpecified ? "cost: " + statement.StatementSubTreeCost : "")
+                                                @(statement.StatementSubTreeCostSpecified && statement.StatementOptmLevel.HasValue() ? " - " : "")
+                                                @(statement.StatementOptmLevel.HasValue() ? "optimization: " + statement.StatementOptmLevel : "")
+                                            </span>
+                                        }
                                     </div>
-                                }
-                                <div class="sql-query-attributes">
-                                    @if (statement.QueryPlanHash.HasValue() || statement.QueryHash.HasValue())
+                                    <div class="sql-query-excerpt">
+                                        <pre class="pre-code prettyprint lang-sql">@excerpt</pre>
+                                    </div>
+                                    @if (excerpt.LineCount() > 3)
                                     {
-                                        <div>
-                                            <div class="key">Hashes</div>
-                                            <div class="value">
-                                                @if (statement.QueryPlanHash.HasValue())
-                                                {
-                                                    @statement.QueryPlanHash
-                                                    <span class="text-muted">(plan)</span>
-                                                }
-                                                @if (statement.QueryHash.HasValue())
-                                                {
-                                                    @statement.QueryHash
-                                                    <span class="text-muted">(query)</span>
-                                                }
-                                            </div>
+                                        <div class="hide-gradient">
+                                            <a href="#" class="show-toggle">(show more)</a>
                                         </div>
                                     }
-                                    @if (ss?.QueryPlan != null)
-                                    {
-                                        if (ss.QueryPlan.NonParallelPlanReason.HasValue())
+                                    <div class="sql-query-attributes">
+                                        @if (statement.QueryPlanHash.HasValue() || statement.QueryHash.HasValue())
                                         {
                                             <div>
-                                                <div class="key">Non-Parallel Because:</div>
-                                                <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
+                                                <div class="key">Hashes</div>
+                                                <div class="value">
+                                                    @if (statement.QueryPlanHash.HasValue())
+                                                    {
+                                                        @statement.QueryPlanHash
+                                                        <span class="text-muted">(plan)</span>
+                                                    }
+                                                    @if (statement.QueryHash.HasValue())
+                                                    {
+                                                        @statement.QueryHash
+                                                        <span class="text-muted">(query)</span>
+                                                    }
+                                                </div>
                                             </div>
                                         }
-                                        if (ss.QueryPlan.DegreeOfParallelismSpecified)
+                                        @if (ss?.QueryPlan != null)
+                                        {
+                                            if (ss.QueryPlan.NonParallelPlanReason.HasValue())
+                                            {
+                                                <div>
+                                                    <div class="key">Non-Parallel Because:</div>
+                                                    <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
+                                                </div>
+                                            }
+                                            if (ss.QueryPlan.DegreeOfParallelismSpecified)
+                                            {
+                                                <div>
+                                                    <div class="key">Parallelism:</div>
+                                                    <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
+                                                </div>
+                                            }
+                                        }
+                                        @if (statement.StatementEstRowsSpecified)
                                         {
                                             <div>
-                                                <div class="key">Parallelism:</div>
-                                                <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
+                                                <div class="key">Estimated Rows</div>
+                                                <div class="value">@statement.StatementEstRows</div>
                                             </div>
                                         }
-                                    }
-                                    @if (statement.StatementEstRowsSpecified)
+                                    </div>
+                                    @if (ss?.QueryPlan?.MissingIndexes != null)
                                     {
-                                        <div>
-                                            <div class="key">Estimated Rows</div>
-                                            <div class="value">@statement.StatementEstRows</div>
-                                        </div>
+                                        <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="text-muted">(according to SQL Server, don't blindly apply these)</span></div>
+                                        foreach (var mi in ss.QueryPlan.MissingIndexes)
+                                        {
+                                            <div class="index-details">
+                                                <span class="text-muted">(Impact: @mi.Impact)</span>
+                                                @foreach (var index in mi.MissingIndex)
+                                                {
+                                                    var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
+                                                    var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
+                                                    <span>
+                                                        @($"{index.Database}.{index.Schema}.{index.Table}") (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        @if (include.Any())
+                                                        {
+                                                            @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        }
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
                                     }
                                 </div>
-                                @if (ss?.QueryPlan?.MissingIndexes != null)
-                                {
-                                    <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="text-muted">(according to SQL Server, don't blindly apply these)</span></div>
-                                    foreach (var mi in ss.QueryPlan.MissingIndexes)
-                                    {
-                                        <div class="index-details">
-                                            <span class="text-muted">(Impact: @mi.Impact)</span>
-                                            @foreach (var index in mi.MissingIndex)
-                                            {
-                                                var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
-                                                var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
-                                                <span>
-                                                    @($"{index.Database}.{index.Schema}.{index.Table}") (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
-                                                    @if (include.Any())
-                                                    {
-                                                        @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
-                                                    }
-                                                </span>
-                                            }
-                                        </div>
-                                    }
-                                }
-                            </div>
-                        }
-                    </div>
-                </div>*@
+                            }
+                        </div>
+                    </div>*@
                 <div id="sql-query-plan" class="well well-sm" style="overflow-x: auto;">
                     <div class="sql-query-plan">
                         @op.QueryPlanHtml()
@@ -278,5 +279,5 @@
                 </div>
             </div>
         </div>
-    }
+                            }
 </div>

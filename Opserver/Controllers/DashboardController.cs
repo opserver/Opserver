@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("dashboard/node")]
-        public ActionResult SingleNode([DefaultValue(CurrentStatusTypes.Stats)]CurrentStatusTypes view, string node = null)
+        public ActionResult Node([DefaultValue(CurrentStatusTypes.Stats)]CurrentStatusTypes view, string node = null)
         {
             var vd = new NodeModel
             {

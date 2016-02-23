@@ -47,39 +47,40 @@ namespace StackExchange.Opserver.Models
 
         static TopTabs()
         {
+            // TODO: MVC Routes for URL generation
             Tabs = new SortedList<int, TopTab>();
 
-            AddTab("Dashboard", "/dashboard", 0);
+            AddTab("Dashboard", "~/dashboard", 0);
 
             var s = Current.Settings;
 
-            AddTab(new TopTab("SQL", "/sql", 10, s.SQL)
+            AddTab(new TopTab("SQL", "~/sql", 10, s.SQL)
             {
                 GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus()
             });
-            AddTab(new TopTab("Redis", "/redis", 20, s.Redis)
+            AddTab(new TopTab("Redis", "~/redis", 20, s.Redis)
             {
                 GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus()
             });
-            AddTab(new TopTab("Elastic", "/elastic", 30, s.Elastic)
+            AddTab(new TopTab("Elastic", "~/elastic", 30, s.Elastic)
             {
                 GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus()
             });
-            AddTab(new TopTab("CloudFlare", "/cloudflare", 40, s.CloudFlare)
+            AddTab(new TopTab("CloudFlare", "~/cloudflare", 40, s.CloudFlare)
             {
                 GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
             });
-            AddTab(new TopTab("PagerDuty", "/pagerduty", 45, s.PagerDuty)
+            AddTab(new TopTab("PagerDuty", "~/pagerduty", 45, s.PagerDuty)
             {
                 GetMonitorStatus = () => PagerDutyAPI.Instance.MonitorStatus
             });
-            AddTab(new TopTab("Exceptions", "/exceptions", 50, s.Exceptions)
+            AddTab(new TopTab("Exceptions", "~/exceptions", 50, s.Exceptions)
             {
                 GetMonitorStatus = () => ExceptionStores.MonitorStatus,
                 GetBadgeCount = () => ExceptionStores.TotalExceptionCount,
                 GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
             });
-            AddTab(new TopTab("HAProxy", "/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
+            AddTab(new TopTab("HAProxy", "~/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
         }
 
         public static TopTab AddTab(string name, string url, int order = 0)

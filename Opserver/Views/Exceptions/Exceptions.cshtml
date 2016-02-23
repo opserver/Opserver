@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Exceptions
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     var log = Model.SelectedLog;
@@ -7,7 +8,7 @@
     this.SetPageTitle(Model.Title);
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
                       Model.Search,
-                      "/exceptions/search",
+                      Url.Action(nameof(ExceptionsController.Search)),
                       log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
 
     var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
@@ -21,7 +22,7 @@
     <h5 class="page-header">Exception Logs
         @if (!Model.ShowAll)
         {
-            @: <a class="pull-right" href="/exceptions">View All</a> 
+            @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a> 
         }
         @if (ExceptionStores.Stores?.Any() == true)
         {
@@ -32,7 +33,7 @@
         @foreach (var a in distinctApps)
         {
             <li class="@(a.Name == log ? "active" : null)" data-name="@a.Name">
-                <a href="/exceptions?log=@a.Name.UrlEncode()">@a.Name</a>
+                <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = a.Name })">@a.Name</a>
                 @if (a.ExceptionCount > 0)
                 {
                     <span class="badge">@a.ExceptionCount.ToComma()</span>
