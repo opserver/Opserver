@@ -24,8 +24,10 @@
     </div>
 </div>
 <script>
-    $('#cpu-container').cpuGraph({ id: '@Model.Id', realtime: true });
-    $('#memory-container').memoryGraph({ id: '@Model.Id' });
+    $(function () {
+        $('#cpu-container').cpuGraph({ id: '@Model.Id', realtime: true });
+        $('#memory-container').memoryGraph({ id: '@Model.Id' });
+    });
 </script>
 @if (Model.Interfaces.Any())
 {

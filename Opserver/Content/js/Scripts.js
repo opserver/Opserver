@@ -143,7 +143,7 @@
         // TODO: refresh intervals via header
         $('.js-summary-popup')
             .appendWaveLoader()
-            .load(url, data, function (responseText, textStatus, req) {
+            .load(Status.options.rootPath + url, data, function (responseText, textStatus, req) {
                 if (textStatus === "error") {
                     $(this).closest('.modal-content').find('.modal-header .modal-title').addClass('text-warning').text('Error');
                     $(this).html('<div class="alert alert-warning"><h5>Error loading</h5><p class="error-stack">Status: ' + req.statusText + '\nCode: ' + req.status + '\nUrl: ' + url + '</p></div><p>Direct link: <a href="' + url + '">' + url + '</a></p>');
@@ -231,7 +231,7 @@
 
         if (options.HeaderRefresh) {
             Status.refresh.register('TopBar', function() {
-                return $.ajax('/top-refresh', {
+                return $.ajax(options.rootPath + 'top-refresh', {
                     data: { tab: Status.options.Tab }
                 }).done(function (html) {
                     var resp = $(html);
@@ -286,7 +286,7 @@
                 link.find('.glyphicon').hide();
                 link.find('.js-text').text('Polling...');
                 Status.refresh.pause();
-                $.post('/poll', data)
+                $.post(Status.options.rootPath + 'poll', data)
                     .fail(function() {
                         toastr.error('There was an error polling this node.', 'Polling',
                         {
@@ -317,7 +317,7 @@
 
             if (type && key) {
                 $(this).text('').prependWaveLoader().addClass('disabled');
-                $.ajax('/poll', {
+                $.ajax(Status.options.rootPath + 'poll', {
                     data: {
                         type: type,
                         key: key,
@@ -341,7 +341,7 @@
             bootbox.confirm('Are you sure you want to force poll all nodes?', function(result) {
                 if (result) {
                     $link.text('').prependWaveLoader().addClass('disabled');
-                    $.post('/poll/all')
+                    $.post(Status.options.rootPath + 'poll/all')
                         .done(function() {
                             window.location.reload(true);
                         });
@@ -418,7 +418,7 @@ Status.Dashboard = (function () {
         
         Status.loaders.register({
             '#/dashboard/graph/': function (val) {
-                Status.popup('/dashboard/graph/' + val);
+                Status.popup('dashboard/graph/' + val);
             }
         });
 
@@ -472,7 +472,7 @@ Status.Dashboard.Server = (function () {
 
         Status.loaders.register({
             '#/dashboard/summary/': function (val) {
-                Status.popup('/dashboard/node/summary/' + val, { node: Status.Dashboard.Server.options.node });
+                Status.popup('dashboard/node/summary/' + val, { node: Status.Dashboard.Server.options.node });
             }
         });
 
@@ -536,13 +536,13 @@ Status.Elastic = (function () {
 
         Status.loaders.register({
             '#/elastic/node/': function (val) {
-                Status.popup('/elastic/node/modal/' + val, {
+                Status.popup('elastic/node/modal/' + val, {
                     cluster: Status.Elastic.options.cluster,
                     node: Status.Elastic.options.node
                 });
             },
             '#/elastic/cluster/': function (val) {
-                Status.popup('/elastic/cluster/modal/' + val, {
+                Status.popup('elastic/cluster/modal/' + val, {
                     cluster: Status.Elastic.options.cluster,
                     node: Status.Elastic.options.node
                 });
@@ -550,7 +550,7 @@ Status.Elastic = (function () {
             '#/elastic/index/': function (val) {
                 var parts = val.split('/');
                 var reqOptions = $.extend({}, options, { index: parts[0] });
-                Status.popup('/elastic/index/modal/' + parts[1], reqOptions);
+                Status.popup('elastic/index/modal/' + parts[1], reqOptions);
             }
         });
     }
@@ -651,7 +651,7 @@ Status.SQL = (function () {
             ag: pieces.length > 1 ? pieces[1] : null,
             node: pieces.length > 2 ? pieces[2] : null
         };
-        Status.popup('/sql/servers', $.extend({}, Status.Dashboard.options.refreshData, { detailOnly: true }));
+        Status.popup('sql/servers', $.extend({}, Status.Dashboard.options.refreshData, { detailOnly: true }));
     }
 
     function loadPlan(val) {
@@ -659,7 +659,7 @@ Status.SQL = (function () {
             handle = parts[0],
             offset = parts.length > 1 ? parts[1] : null;
         $('.plan-row[data-plan-handle="' + handle + '"]').addClass('info');
-        Status.popup('/sql/top/detail', {
+        Status.popup('sql/top/detail', {
             node: Status.SQL.options.node,
             handle: handle,
             offset: offset
@@ -734,13 +734,13 @@ Status.SQL = (function () {
             '#/cluster/': loadCluster,
             '#/plan/': loadPlan,
             '#/sql/summary/': function (val) {
-                Status.popup('/sql/instance/summary/' + val, { node: Status.SQL.options.node });
+                Status.popup('sql/instance/summary/' + val, { node: Status.SQL.options.node });
             },
             '#/sql/top/filters': function () {
-                Status.popup('/sql/top/filters' + window.location.search, null, filterOptions);
+                Status.popup('sql/top/filters' + window.location.search, null, filterOptions);
             },
             '#/sql/active/filters': function () {
-                Status.popup('/sql/active/filters' + window.location.search, null, filterOptions);
+                Status.popup('sql/active/filters' + window.location.search, null, filterOptions);
             },
             '#/db/': function (val, firstLoad, prev) {
                 var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') > 0
@@ -755,7 +755,7 @@ Status.SQL = (function () {
                         return;
                     }
                 }
-                Status.popup('/sql/db/' + val, { node: Status.SQL.options.node }, {
+                Status.popup('sql/db/' + val, { node: Status.SQL.options.node }, {
                     modalClass: 'modal-huge',
                     onLoad: function () {
                         showColumns();
@@ -786,7 +786,7 @@ Status.SQL = (function () {
         function agentAction(link, route, errMessage) {
             var origText = link.text();
             var $link = link.text('').prependWaveLoader();
-            $.ajax('/sql/' + route, {
+            $.ajax(Status.options.rootPath + 'sql/' + route, {
                 type: 'POST',
                 data: {
                     node: Status.SQL.options.node,
@@ -795,7 +795,7 @@ Status.SQL = (function () {
                 },
                 success: function (data, status, xhr) {
                     if (data === true) {
-                        Status.popup('/sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
                     } else {
                         $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                     }
@@ -839,10 +839,10 @@ Status.Redis = (function () {
 
         Status.loaders.register({
             '#/redis/summary/': function(val) {
-                Status.popup('/redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
+                Status.popup('redis/instance/summary/' + val, { node: Status.Redis.options.node + ':' + Status.Redis.options.port });
             },
             '#/redis/actions/': function (val) {
-                Status.popup('/redis/instance/actions/' + val);
+                Status.popup('redis/instance/actions/' + val);
             }
         });
 
@@ -954,7 +954,7 @@ Status.Exceptions = (function () {
                 loadingMore = true;
                 $('.js-bottom-loader').show();
                 var lastGuid = $('.js-exceptions tr.js-error').last().data('id');
-                $.ajax('/exceptions/load-more', {
+                $.ajax(Status.options.rootPath + 'exceptions/load-more', {
                     data: {
                         log: options.log,
                         sort: options.sort,
@@ -1125,7 +1125,7 @@ Status.Exceptions = (function () {
                         context: this,
                         traditional: true,
                         data: { ids: ids, returnCounts: true },
-                        url: '/exceptions/delete-list',
+                        url: Status.options.rootPath + 'exceptions/delete-list',
                         success: function (data) {
                             var table = selected.closest('table');
                             selected.remove();
@@ -1184,7 +1184,7 @@ Status.Exceptions = (function () {
                         type: 'POST',
                         traditional: true,
                         data: { log: options.log, ids: ids },
-                        url: '/exceptions/delete-list',
+                        url: Status.options.rootPath + 'exceptions/delete-list',
                         success: function (data) {
                             window.location.href = data.url;
                         },
@@ -1246,7 +1246,7 @@ Status.Exceptions = (function () {
                 type: 'POST',
                 data: { id: options.id, log: options.log, redirect: true },
                 context: this,
-                url: '/exceptions/delete',
+                url: Status.options.rootPath + 'exceptions/delete',
                 success: function (data) {
                     window.location.href = data.url;
                 },
@@ -1265,7 +1265,7 @@ Status.Exceptions = (function () {
                 type: 'POST',
                 data: { id: options.id, log: options.log, actionid: actionid },
                 context: this,
-                url: '/exceptions/jiraaction',
+                url: Status.options.rootPath + 'exceptions/jiraaction',
                 success: function (data) {
                     $(this).removeClass('loading');
                     if (data.success) {
@@ -1324,7 +1324,7 @@ Status.HAProxy = (function () {
                 $.ajax({
                     type: 'POST',
                     data: data,
-                    url: '/haproxy/admin/action',
+                    url: Status.options.rootPath + 'haproxy/admin/action',
                     success: function () {
                         Status.refresh.run();
                     },
@@ -1612,7 +1612,7 @@ Status.HAProxy = (function () {
                 svg, focus, context, clip,
                 currentArea,
                 refreshTimer,
-                urlPath = '/graph/' + options.type + (options.subtype ? '/' + options.subtype : '') + '/json',
+                urlPath = Status.options.rootPath + 'graph/' + options.type + (options.subtype ? '/' + options.subtype : '') + '/json',
                 params = { summary: true },
                 stack, stackArea, stackSummaryArea, stackFunc; // stacked specific vars
             
@@ -2050,7 +2050,7 @@ Status.HAProxy = (function () {
                 brush2.extent(x.domain())(bottomBrushArea);
 
                 if (options.showBuilds && !data.builds) {
-                    $.getJSON('/graph/builds/json', params, function (bData) {
+                    $.getJSON(Status.options.rootPath + 'graph/builds/json', params, function (bData) {
                         postProcess(bData);
                         drawBuilds(bData);
                     });

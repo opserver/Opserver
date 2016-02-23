@@ -15,7 +15,7 @@
     <script src="@Url.CacheBreaker("~/Content/bootstrap/js/bootstrap.min.js")"></script>
     @Scripts.Render("~/scripts/plugins.js")    @Scripts.Render("~/scripts/scripts.js")    <script>
         $(function() {
-            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', HeaderRefresh: 10 });
+            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', rootPath: '@Url.Content("~/")', HeaderRefresh: 10 });
             @if (topNodes?.AllNodes?.Any() ?? false)
             {
                 var serverJson = topNodes.AllNodes.Select(n => new
