@@ -179,10 +179,15 @@
 <div class="js-refresh" data-name="cluster-sub-detail">
     @foreach (var c in Model.Clusters.Where(c => c.TroubledIndexes.Any()))
     {
+        var m = new DashboardModel
+        {
+            WarningsOnly = Model.WarningsOnly,
+            CurrentCluster = c
+        };
         <h5 class="page-header">
             @c.IconSpan() @c.Name indexes with problems
         </h5>
-        @Html.Partial("Indexes.Table", Model)
-        @Html.Partial("Shards.Table", Model)
+        @Html.Partial("Indexes.Table", m)
+        @Html.Partial("Shards.Table", m)
     }
 </div>
