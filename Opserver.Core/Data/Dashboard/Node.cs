@@ -130,13 +130,11 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
                 {
-                    var s = Settings;
-                    var dbInterfaces = s?.PrimaryInterfacePatternRegex != null
-                        ? Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName.IsNullOrEmptyReturn(i.Name))).ToList()
-                        : Interfaces.Where(i => i.IsLikelyPrimary).ToList();
+                    var pattern = Settings?.PrimaryInterfacePatternRegex;
+                    var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
                     _primaryInterfaces = (dbInterfaces.Any()
-                                              ? dbInterfaces.OrderBy(i => i.Name)
-                                              : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
+                        ? dbInterfaces.OrderBy(i => i.Name)
+                        : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
                 }
                 return _primaryInterfaces;
             }

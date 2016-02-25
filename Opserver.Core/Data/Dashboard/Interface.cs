@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -92,9 +93,13 @@ namespace StackExchange.Opserver.Data.Dashboard
                 ? $"{PhysicalAddress.Substring(0, 2)}-{PhysicalAddress.Substring(2, 2)}-{PhysicalAddress.Substring(4, 2)}-{PhysicalAddress.Substring(6, 2)}-{PhysicalAddress.Substring(8, 2)}-{PhysicalAddress.Substring(10, 2)}"
                 : PhysicalAddress;
 
-        public bool IsLikelyPrimary => Name.ToLower().EndsWith("team") ||
-                                       Name.ToLower().StartsWith("bond") ||
-                                       Name.Contains("Microsoft Network Adapter Multiplexor Driver");
+        internal bool IsLikelyPrimary(Regex pattern) => pattern != null
+            ? (FullName != null && pattern.IsMatch(FullName)) ||
+              (Name != null && pattern.IsMatch(Name)) ||
+              (Caption != null && pattern.IsMatch(Caption))
+            : Name.ToLower().EndsWith("team") ||
+              Name.ToLower().StartsWith("bond") ||
+              Name.Contains("Microsoft Network Adapter Multiplexor Driver");
         
         public Interface() {}
         public Interface(string id) { Id = id; }
