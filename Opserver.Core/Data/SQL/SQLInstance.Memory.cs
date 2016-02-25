@@ -119,7 +119,7 @@ namespace StackExchange.Opserver.Data.SQL
             public string GetFetchSQL(Version version)
             {
                 if (version < SQLServerVersions.SQL2012.RTM)
-                    return FetchSQL.Replace("pages_kb", "single_pages_kb + multi_pages_kb");
+                    return FetchSQL.Replace("pages_kb", "(single_pages_kb + multi_pages_kb)");
 
                 return FetchSQL;
             }
