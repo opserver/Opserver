@@ -10,9 +10,9 @@ namespace StackExchange.Opserver.Models.Security
 {
     public class ActiveDirectoryProvider : SecurityProvider
     {
-        private List<string> Servers { get; set; }
-        private string AuthUser { get; set; }
-        private string AuthPassword { get; set; }
+        private List<string> Servers { get; }
+        private string AuthUser { get; }
+        private string AuthPassword { get; }
 
         public ActiveDirectoryProvider(SecuritySettings settings)
         {

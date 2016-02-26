@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Helpers
     /// </remarks>
     public class OnlyAllowAttribute : AuthorizeAttribute
     {
-        private const string ITEMS_KEY = "AlsoAllow.Roles";
+        private const string ItemsKey = "AlsoAllow.Roles";
 
         public new Roles Roles { get; set; }
 
@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Helpers
             var alsoAllow = filterContext.ActionDescriptor.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() as AlsoAllowAttribute;
             if (alsoAllow != null)
             {
-                filterContext.HttpContext.Items[ITEMS_KEY] = alsoAllow.Roles;
+                filterContext.HttpContext.Items[ItemsKey] = alsoAllow.Roles;
             }
 
             // this will then call AuthorizeCore - one should view MS' source for OnAuthorization
@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Helpers
 
         protected override bool AuthorizeCore(HttpContextBase httpContext)
         {
-            var alsoAllow = httpContext.Items.Contains(ITEMS_KEY) ? (Roles)httpContext.Items[ITEMS_KEY] : Roles.None;
+            var alsoAllow = httpContext.Items.Contains(ItemsKey) ? (Roles)httpContext.Items[ItemsKey] : Roles.None;
             var allAllow = Roles | alsoAllow;
             
             var u = Current.User;

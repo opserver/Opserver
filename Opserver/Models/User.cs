@@ -7,10 +7,10 @@ namespace StackExchange.Opserver.Models
 {
     public class User : IPrincipal
     {
-        public IIdentity Identity { get; private set; }
+        public IIdentity Identity { get; }
 
         public string AccountName { get; private set; }
-        public bool IsAnonymous { get; private set; }
+        public bool IsAnonymous { get; }
 
         public User(IIdentity identity)
         {
