@@ -275,10 +275,10 @@ namespace StackExchange.Opserver.Data.Jira
             return JSON.Deserialize<TResponse>(response);
         }
 
-        public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
+        public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data,string contentType= "application/json") where TResponse : class
         {
             client = client ?? new WebClient();
-            client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
+            client.Headers.Add(HttpRequestHeader.ContentType,contentType);
             client.Encoding = Encoding.UTF8;
             var authz = GetBasicAuthzValue();
             if (authz.HasValue())

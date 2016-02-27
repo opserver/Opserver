@@ -9,6 +9,7 @@ using StackExchange.Opserver.Views.Exceptions;
 using System.Threading.Tasks;
 using Microsoft.Ajax.Utilities;
 using StackExchange.Opserver.Data.Jira;
+using StackExchange.Opserver.Data.TFS;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -20,6 +21,7 @@ namespace StackExchange.Opserver.Controllers
         protected override string TopTab => TopTabs.BuiltIn.Exceptions;
 
         private JiraSettings JiraSettings => Current.Settings.Jira;
+        private TfsSettings TfsSettings => Current.Settings.Tfs;
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
         {
@@ -237,6 +239,38 @@ namespace StackExchange.Opserver.Controllers
             return View("Exceptions.Jira", issues);
         }
 
+        [Route("exceptions/tfsactions"), AcceptVerbs(HttpVerbs.Get), OnlyAllow(Roles.ExceptionsAdmin)]
+        public ActionResult TfsActions(string appName)
+        {
+            var issues = TfsSettings.GetActionsForApplication(appName);
+            return View("Exceptions.Tfs", issues);
+        }
+
+        [Route("exceptions/tfsaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
+        public async Task<ActionResult> TfsAction(string log, Guid id, int actionid, bool redirect = false)
+        {
+            var e = await ExceptionStores.GetError(log, id);
+            var user = Current.User;
+            var action = TfsSettings.Actions.FirstOrDefault(i => i.Id == actionid);
+            var tfsClient = new TfsClient(TfsSettings);
+            var result = await tfsClient.CreateIssue(action, e, user.AccountName);
+            if (result.Id>0 && result.Links.Html.Href.IsNullOrWhiteSpace())
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "Can not create TFS work item"
+                });
+
+            }
+            return Json(new
+            {
+                success = true,
+                issueKey = result.Id,
+                browseUrl = result.Links.Html.Href
+            });
+
+        }
         [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> JiraAction(string log, Guid id, int actionid, bool redirect = false)
         {
@@ -251,7 +285,7 @@ namespace StackExchange.Opserver.Controllers
                 return Json(new
                 {
                     success = false,
-                    message = "Can not create issue"
+                    message = "Can not create jira issue"
                 });
             }
             else

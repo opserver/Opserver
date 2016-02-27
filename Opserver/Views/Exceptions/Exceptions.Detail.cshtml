@@ -160,6 +160,12 @@
             {
                 @Html.Action("JiraActions", new { appName = Model.ApplicationName })
             }
+            @if (Current.Settings.Tfs.Enabled && Current.User.IsExceptionAdmin)
+            {
+                @Html.Action("TfsActions", new { appName = Model.ApplicationName })
+            }
+           
+
             @if (!string.IsNullOrEmpty(error.SQL))
             {
                 <h3 class="kv-title">SQL</h3>

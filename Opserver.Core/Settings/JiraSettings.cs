@@ -4,6 +4,31 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
+    public abstract class IssueTrackerActionBase
+    {
+        /// <summary>
+        /// The caption to be displayed in the UI (Ex : Create Bug)
+        /// </summary>
+        public string Caption { set; get; }
+
+        /// <summary>
+        /// Type of work item/action  (Ex : Bug or Task)
+        /// </summary>
+        public string Name { set; get; }
+
+        /// <summary>
+        /// Comma delimited list of labels
+        /// </summary>
+        public string Labels { get; set; }
+
+        /// <summary>
+        /// List of app names for which this action is available
+        /// </summary>
+        public List<string> Applications { get; set; }
+    }
+
+
+
     public class JiraSettings : Settings<JiraSettings>
     {
         public override bool Enabled => Actions.Any();
@@ -57,11 +82,11 @@ namespace StackExchange.Opserver
 
     }
 
-    public class JiraAction : ISettingsCollectionItem<JiraAction>
+    public class JiraAction : IssueTrackerActionBase, ISettingsCollectionItem<JiraAction>
     {
         public List<JiraComponent> Components { get; set; }
 
-        public List<string> Applications { get; set; }
+       // public List<string> Applications { get; set; }
 
         public JiraAction()
         {
@@ -91,19 +116,8 @@ namespace StackExchange.Opserver
         /// Jira project key 
         /// </summary>
         public string ProjectKey { get; set; }
-        /// <summary>
-        /// Name of the jira issue type
-        /// </summary>
-        public string Name { get; set; }
-        /// <summary>
-        /// Action link caption
-        /// </summary>
-        public string Caption { get; set; }
+        
 
-        /// <summary>
-        /// Comma delimited list of labels
-        /// </summary>
-        public string Labels { get; set; }
 
         public List<object> GetComponentsForApplication(string application)
         {

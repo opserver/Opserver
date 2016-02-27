@@ -248,6 +248,7 @@
     <Content Include="Config\JiraSettings.json.example" />
     <None Include="compilerconfig.json" />
     <None Include="Config\PagerDutySettings.json.example" />
+    <None Include="Config\TfsSettings.json.example" />
     <None Include="Content\_Styles.HeadsUp.less">
       <DependentUpon>Styles.less</DependentUpon>
     </None>
@@ -613,6 +614,7 @@
     <Content Include="Views\Redis\Instance.SlowLog.cshtml" />
     <Content Include="Views\Redis\Instance.Config.cshtml" />
     <Content Include="Views\SQL\_ViewStart.cshtml" />
+    <Content Include="Views\Exceptions\Exceptions.Tfs.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />
