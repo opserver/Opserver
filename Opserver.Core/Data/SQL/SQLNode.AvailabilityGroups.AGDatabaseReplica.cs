@@ -64,7 +64,7 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 get
                 {
-                    if (LogKBytesUsed.GetValueOrDefault() <= 0 || LogKBytesUsed.GetValueOrDefault() <= 0) return null;
+                    if (LogKBytesUsed.GetValueOrDefault() <= 0 || LogKBytesTotal.GetValueOrDefault() <= 0) return null;
                     return (double)(LogKBytesUsed / LogKBytesTotal);
                 }
             }
