@@ -43,6 +43,10 @@ namespace StackExchange.Opserver
 
         public List<string> Applications { get; set; }
 
+        public TfsSettings()
+        {
+            this.Actions=new List<TfsAction>();
+        }
 
         public List<TfsAction> GetActionsForApplication(string application)
         {
