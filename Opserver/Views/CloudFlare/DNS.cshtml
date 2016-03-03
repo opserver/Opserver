@@ -25,6 +25,19 @@
             <th>Total</th>
         </tr>
     </thead>
+    @if (!CloudFlareAPI.Instance.Zones.LastPollSuccessful)
+    {
+        <tbody>
+            <tr>
+                <td colspan="@((3 + (showDCs ? dcs.Count : 0)).ToString())">
+                    <div class="alert alert-warning">
+                        <h5>Error fetching DNS zones from CloudFlare</h5>
+                        <p class="error-stack">@CloudFlareAPI.Instance.Zones.ErrorMessage</p>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    }
     <tbody>
         @foreach (var z in zones)
         {
@@ -64,43 +77,67 @@
             <th>Data Centers</th>
         </tr>
     </thead>
-    <tbody>
-        @foreach (var r in records.OrderBy(r => r.Type).ThenBy(r => r.ZoneName).ThenBy(r => r.Name))
-        {
-            if (hiddenRecordTypes.Contains(r.Type))
-            {
-                continue;
-            }
-            var rootIPs = r.RootIPAddresses;
-            var servedDCs = rootIPs != null ? dcs.Where(dc => dc.Value.Any(range => rootIPs.Any(range.Contains))).ToList() : null;
-            var masked = rootIPs != null ? DataCenters.GetMasked(rootIPs).ToList() : null;
-            var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
-            <tr class="@(r.Proxied ? "success" : null)">
-                <td class="@(r.Type == DNSRecordType.CNAME ? "text-warning" : null)">@r.Type</td>
-                <td><strong>@(r.Name != r.ZoneName ? r.Name.Replace(r.ZoneName, "") : r.Name)</strong>@if (r.Name != r.ZoneName){<span class="text-muted">.@r.ZoneName</span>}</td>
-                <td>
-                    @switch (r.Type)
-                    {
-                        case DNSRecordType.CNAME:
-                            @r.Content
-                            if (rootIPs != null && rootIPs.Any())
-                            {
-                                <span class="text-muted">(@string.Join(", ", masked))</span>
-                            }
-                            break;
-                        default:
-                            @(masked != null ? string.Join(", ", masked) : null)
-                            break;
-                    }
-                </td>
-                <td>@(r.IsAutoTTL ? "Auto" : $"{r.TTL}s")</td>
-                <td>@(r.Proxied ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan())</td>
-                <td class="@(r.Proxied ? "text-primary" : "")">
-                    @recordDCs
+    @if (!CloudFlareAPI.Instance.DNSRecords.LastPollSuccessful)
+    {
+        <tbody>
+            <tr>
+                <td colspan="6">
+                    <div class="alert alert-warning">
+                        <h5>Error fetching DNS records from CloudFlare</h5>
+                        <p class="error-stack">@CloudFlareAPI.Instance.DNSRecords.ErrorMessage</p>
+                    </div>
                 </td>
             </tr>
+        </tbody>
+    }
+    <tbody>
+    @foreach (var r in records.OrderBy(r => r.Type).ThenBy(r => r.ZoneName).ThenBy(r => r.Name))
+    {
+        if (hiddenRecordTypes.Contains(r.Type))
+        {
+            continue;
         }
+        var rootIPs = r.RootIPAddresses;
+        var servedDCs = rootIPs != null ? dcs.Where(dc => dc.Value.Any(range => rootIPs.Any(range.Contains))).ToList() : null;
+        var masked = rootIPs != null ? DataCenters.GetMasked(rootIPs).ToList() : null;
+        var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
+        <tr class="@(r.Proxied ? "success" : null)">
+            <td class="@(r.Type == DNSRecordType.CNAME ? "text-warning" : null)">@r.Type</td>
+            <td><strong>@(r.Name != r.ZoneName ? r.Name.Replace(r.ZoneName, "") : r.Name)</strong>@if (r.Name != r.ZoneName)
+                                                                                                  {<span class="text-muted">.@r.ZoneName</span>}</td>
+            <td>
+                @switch (r.Type)
+                {
+                    case DNSRecordType.CNAME:
+                        @r.Content
+                        if (rootIPs != null && rootIPs.Any())
+                        {
+                            <span class="text-muted">(@string.Join(", ", masked))</span>
+                        }
+                        break;
+                    default:
+                        @(masked != null ? string.Join(", ", masked) : null)
+                        break;
+                }
+            </td>
+            <td>@(r.IsAutoTTL ? "Auto" : $"{r.TTL}s")</td>
+            <td>@(r.Proxied ? MonitorStatus.Good.IconSpan() : MonitorStatus.Unknown.IconSpan())</td>
+            <td class="@(r.Proxied ? "text-primary" : "")">
+                @recordDCs
+            </td>
+        </tr>
+    }
     </tbody>
+    @if (records.Count == 0)
+    {
+        <tbody>
+            <tr>
+                <td colspan="6" class="no-content">
+                    No DNS records found
+                </td>
+            </tr>
+        </tbody>
+    }
 </table>
 <script>
     $(function() {

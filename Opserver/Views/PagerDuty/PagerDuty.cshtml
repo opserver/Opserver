@@ -86,6 +86,19 @@
                 <th>Phone</th>
             </tr>
         </thead>
+        @if (!PagerDutyAPI.Instance.AllSchedules.LastPollSuccessful)
+        {
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        <div class="alert alert-warning">
+                            <h5>Error fetching schedule from PagerDuty</h5>
+                            <p class="error-stack">@PagerDutyAPI.Instance.AllSchedules.ErrorMessage</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        }
         <tbody>
         @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
         {
@@ -110,6 +123,19 @@
                 <th>Summary</th>
             </tr>
         </thead>
+        @if (!PagerDutyAPI.Instance.Incidents.LastPollSuccessful)
+        {
+            <tbody>
+                <tr>
+                    <td colspan="5">
+                        <div class="alert alert-warning">
+                            <h5>Error fetching incidents from PagerDuty</h5>
+                            <p class="error-stack">@PagerDutyAPI.Instance.Incidents.ErrorMessage</p>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        }
         <tbody>
         @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
         {
