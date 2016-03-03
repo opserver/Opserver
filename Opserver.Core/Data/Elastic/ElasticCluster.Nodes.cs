@@ -647,8 +647,8 @@ namespace StackExchange.Opserver.Data.Elastic
 
                     public class GCOverallStats : GarbageCollectorStats
                     {
-                        [DataMember(Name = "Collectors")]
-                        public Dictionary<string, GarbageCollectorStats> collectors { get; internal set; }
+                        [DataMember(Name = "collectors")]
+                        public Dictionary<string, GarbageCollectorStats> Collectors { get; internal set; }
                     }
 
                     public class GarbageCollectorStats
