@@ -12,9 +12,12 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.HAProxy;
+        public override ISecurableSection SettingsSection => Current.Settings.HAProxy;
 
-        protected override string TopTab => TopTabs.BuiltIn.HAProxy;
+        public override TopTab TopTab => new TopTab("HAProxy", nameof(Dashboard), this, 60)
+        {
+            GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus()
+        };
 
         [Route("haproxy")]
         [Route("haproxy/dashboard")]

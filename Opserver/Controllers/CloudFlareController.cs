@@ -7,11 +7,14 @@ using StackExchange.Opserver.Views.CloudFlare;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.CloudFlare)]
-    public partial class CloudFlareController : StatusController
+    public class CloudFlareController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.CloudFlare;
+        public override ISecurableSection SettingsSection => Current.Settings.CloudFlare;
 
-        protected override string TopTab => TopTabs.BuiltIn.CloudFlare;
+        public override TopTab TopTab => new TopTab("CloudFlare", nameof(Dashboard), this, 40)
+        {
+            GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
+        };
 
         [Route("cloudflare")]
         public ActionResult Dashboard()

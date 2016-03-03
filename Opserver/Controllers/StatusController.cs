@@ -13,8 +13,8 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Authenticated)]
     public partial class StatusController : Controller
     {
-        protected virtual ISecurableSection SettingsSection => null;
-        protected virtual string TopTab => null;
+        public virtual ISecurableSection SettingsSection => null;
+        public virtual TopTab TopTab => null;
 
         private IDisposable _betweenInitializeAndActionExecuting,
                             _betweenActionExecutingAndExecuted,
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 _stopStep(_betweenInitializeAndActionExecuting);
                 _betweenActionExecutingAndExecuted = _startStep(nameof(OnActionExecuting));
-                TopTabs.CurrentTab = TopTab;
+                TopTabs.SetCurrent(filterContext.Controller.GetType());
             }
 
             var iSettings = SettingsSection as Settings;
@@ -119,7 +119,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (Current.User.IsAnonymous)
             {
-                return RedirectToAction(nameof(LoginController.Login), "Login", new { returnUrl = Request.Url.PathAndQuery });
+                return RedirectToAction(nameof(LoginController.Login), "Login", new { returnUrl = Request.Url?.PathAndQuery });
             }
 
             Response.StatusCode = (int)HttpStatusCode.Forbidden;

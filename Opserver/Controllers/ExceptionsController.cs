@@ -15,9 +15,14 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Exceptions)] 
     public class ExceptionsController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.Exceptions;
+        public override ISecurableSection SettingsSection => Current.Settings.Exceptions;
 
-        protected override string TopTab => TopTabs.BuiltIn.Exceptions;
+        public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
+        {
+            GetMonitorStatus = () => ExceptionStores.MonitorStatus,
+            GetBadgeCount = () => ExceptionStores.TotalExceptionCount,
+            GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
+        };
 
         private JiraSettings JiraSettings => Current.Settings.Jira;
 

@@ -12,9 +12,12 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.PagerDuty;
+        public override ISecurableSection SettingsSection => Current.Settings.PagerDuty;
 
-        protected override string TopTab => TopTabs.BuiltIn.PagerDuty;
+        public override TopTab TopTab => new TopTab("PagerDuty", nameof(Dashboard), this, 45)
+        {
+            GetMonitorStatus = () => PagerDutyAPI.Instance.MonitorStatus
+        };
 
         public PagerDutyPerson CurrentPagerDutyPerson
         {
@@ -30,7 +33,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty")]
-        public ActionResult PagerDutyDashboard()
+        public ActionResult Dashboard()
         {
             var i = PagerDutyAPI.Instance;
             i.WaitForFirstPoll(5000);
@@ -47,7 +50,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty/incident/detail/{id}")]
-        public async Task<ActionResult> PagerDutyIncidentDetail(int id)
+        public async Task<ActionResult> IncidentDetail(int id)
         {
             var incident = PagerDutyAPI.Instance.Incidents.Data.First(i => i.Number == id);
             var vd = new PagerDutyIncidentModel
@@ -60,7 +63,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty/escalation/full")]
-        public ActionResult PagerDutyFullEscalation()
+        public ActionResult FullEscalation()
         {
             return View("PagerDuty.EscFull", PagerDutyAPI.Instance.GetSchedule());
         }

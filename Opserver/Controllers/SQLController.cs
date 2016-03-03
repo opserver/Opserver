@@ -14,9 +14,12 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.SQL;
+        public override ISecurableSection SettingsSection => Current.Settings.SQL;
 
-        protected override string TopTab => TopTabs.BuiltIn.SQL;
+        public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
+        {
+            GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus()
+        };
 
         [Route("sql")]
         public ActionResult Dashboard()

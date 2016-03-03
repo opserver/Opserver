@@ -10,10 +10,10 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController
     {
-        protected override ISecurableSection SettingsSection => Current.Settings.Dashboard;
+        public override ISecurableSection SettingsSection => Current.Settings.Dashboard;
 
-        protected override string TopTab => TopTabs.BuiltIn.Dashboard;
-
+        public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
+        
         [Route("dashboard")]
         public ActionResult Dashboard(string filter)
         {

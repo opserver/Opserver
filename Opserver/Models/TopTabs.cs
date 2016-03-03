@@ -1,38 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Web;
+using StackExchange.Opserver.Controllers;
 using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.CloudFlare;
-using StackExchange.Opserver.Data.Elastic;
-using StackExchange.Opserver.Data.Exceptions;
-using StackExchange.Opserver.Data.HAProxy;
-using StackExchange.Opserver.Data.PagerDuty;
-using StackExchange.Opserver.Data.Redis;
-using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver.Models
 {
     public class TopTabs
     {
-        public static class BuiltIn
-        {
-            public const string Dashboard = "Dashboard";
-            public const string Exceptions = "Exceptions";
-            public const string SQL = "SQL";
-            public const string Redis = "Redis";
-            public const string Elastic = "Elastic";
-            public const string CloudFlare = "CloudFlare";
-            public const string HAProxy = "HAProxy";
-            public const string PagerDuty = "PagerDuty";
-        }
-
-        public static SortedList<int, TopTab> Tabs { get; set; }
+        public static List<TopTab> Tabs { get; private set; }
 
         public static string CurrentTab
         {
             get { return HttpContext.Current.Items["TopTabs-Current"] as string; }
             set { HttpContext.Current.Items["TopTabs-Current"] = value; }
+        }
+
+        public static void SetCurrent(Type type)
+        {
+            var tab = Tabs.FirstOrDefault(t => t.ControllerType == type);
+            if (tab != null) CurrentTab = tab.Name;
         }
 
         public static bool HideAll
@@ -47,62 +36,42 @@ namespace StackExchange.Opserver.Models
 
         static TopTabs()
         {
-            // TODO: MVC Routes for URL generation
-            Tabs = new SortedList<int, TopTab>();
-
-            AddTab("Dashboard", "~/dashboard", 0);
-
-            var s = Current.Settings;
-
-            AddTab(new TopTab("SQL", "~/sql", 10, s.SQL)
-            {
-                GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus()
-            });
-            AddTab(new TopTab("Redis", "~/redis", 20, s.Redis)
-            {
-                GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus()
-            });
-            AddTab(new TopTab("Elastic", "~/elastic", 30, s.Elastic)
-            {
-                GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus()
-            });
-            AddTab(new TopTab("CloudFlare", "~/cloudflare", 40, s.CloudFlare)
-            {
-                GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
-            });
-            AddTab(new TopTab("PagerDuty", "~/pagerduty", 45, s.PagerDuty)
-            {
-                GetMonitorStatus = () => PagerDutyAPI.Instance.MonitorStatus
-            });
-            AddTab(new TopTab("Exceptions", "~/exceptions", 50, s.Exceptions)
-            {
-                GetMonitorStatus = () => ExceptionStores.MonitorStatus,
-                GetBadgeCount = () => ExceptionStores.TotalExceptionCount,
-                GetTooltip = () => ExceptionStores.TotalRecentExceptionCount.ToComma() + " recent"
-            });
-            AddTab(new TopTab("HAProxy", "~/haproxy", 60, s.HAProxy) { GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus() });
+            ReloadTabs();
         }
 
-        public static TopTab AddTab(string name, string url, int order = 0)
+        public static void ReloadTabs()
         {
-            var tab = new TopTab(name, url, order);
-            Tabs.Add(tab.Order, tab);
-            return tab;
-        }
+            var newTabs = new List<TopTab>();
 
-        public static void AddTab(TopTab tab)
-        {
-            Tabs.Add(tab.Order, tab);
+            var tabControllers = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(s => s.GetTypes())
+                .Where(t => t.BaseType == typeof (StatusController));
+
+            foreach (var tc in tabControllers)
+            {
+                try
+                {
+                    var tt = (Activator.CreateInstance(tc) as StatusController)?.TopTab;
+                    if (tt != null) newTabs.Add(tt);
+                }
+                catch (Exception e)
+                {
+                    Current.LogException("Error creating StatusController instance for " + tc, e);
+                }
+            }
+            newTabs.Sort((a, b) => a.Order.CompareTo(b.Order));
+            Tabs = newTabs;
         }
     }
 
-    public class TopTab : ITopTab
+    public class TopTab
     {
         public string Name { get; set; }
-        public string Url { get; set; }
+        public string Controller { get; set; }
+        public Type ControllerType { get; set; }
+        public string Action { get; set; }
         public int Order { get; set; }
         public ISecurableSection SecurableSection { get; set; }
-        public Func<bool> GetIsEnabled { get; set; }
         public Func<MonitorStatus> GetMonitorStatus { get; set; }
         public Func<string> GetTooltip { get; set; }
         public Func<int> GetBadgeCount { get; set; }
@@ -116,28 +85,20 @@ namespace StackExchange.Opserver.Models
                     if (!SecurableSection.Enabled) return false;
                     if (!SecurableSection.HasAccess()) return false;
                 }
-                return GetIsEnabled == null || GetIsEnabled();
+                return true;
             }
         }
 
         public bool IsCurrentTab => string.Equals(TopTabs.CurrentTab, Name);
 
-        public TopTab(string name, string url, int order = 0, ISecurableSection section = null)
+        public TopTab(string name, string action, StatusController controller, int order)
         {
             Name = name;
-            Url = url;
+            Controller = controller.GetType().Name.Replace("Controller", "");
+            ControllerType = controller.GetType();
+            Action = action;
+            SecurableSection = controller.SettingsSection;
             Order = order;
-            SecurableSection = section;
         }
-    }
-
-    public interface ITopTab
-    {
-        string Name { get; set; }
-        string Url { get; set; }
-        int Order { get; set; }
-        Func<bool> GetIsEnabled { get; set; }
-        Func<MonitorStatus> GetMonitorStatus { get; set; }
-        Func<string> GetTooltip { get; set; }
     }
 }
