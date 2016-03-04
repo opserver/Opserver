@@ -116,8 +116,11 @@
                                            class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(anyDown ? null : " disabled")" 
                                            title="put all servers server into rotation for this backend"></a>
                                         <a href="#" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")" 
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")"
                                            title="take all servers out of rotation for this backend"></a>
+                                    <a href="#" data-action="@Action.maint"
+                                           class="js-haproxy-action glyphicon glyphicon-circle-arrow-down text-danger hover-pulsate@(anyUp ? null : " disabled")" 
+                                           title="take all servers down for this backend"></a>
                                     }
                                     <a href="@Url.Action(nameof(HAProxyController.Dashboard), new { watch = g.GroupLinkName })@groupQS">@g.GroupStatus.IconSpan() @g.GroupName: @g.NiceName</a>
                                     <span class="pull-right text-muted small">As of: @g.PollDate.ToRelativeTimeSpanMini()</span>
@@ -150,7 +153,10 @@
                                            title="put this server into rotation for this backend"></a>
                                         <a href="#" data-action="@Action.drain"
                                            class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(sAnyUp ? null : " disabled")" 
-                                           title="take this server out of rotation for this backend"></a>
+                                           title="take this server out of rotation for this backend"></a>                                        
+                                           <a href="#" data-action="@Action.maint"
+                                           class="js-haproxy-action glyphicon glyphicon-circle-arrow-down text-danger hover-pulsate@(sAnyUp ? null : " disabled")" 
+                                           title="take this server down for this backend"></a>
                                     }
                                 </td>
                                 <td>@proxyStatus.IconSpan() @stat.Description</td>
@@ -255,8 +261,11 @@
                                            class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(maint > 0 ? null : " disabled")" 
                                            title="put all proxies in this group into rotation"></a>
                                         <a href="#" data-group="@g.Name" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(up + down > 0 ? null : " disabled")" 
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(up + down > 0 ? null : " disabled")"
                                            title="take all proxies in this group out of rotation"></a>
+                                        <a href="#" data-group="@g.Name" data-action="@Action.maint "
+                                           class="js-haproxy-action glyphicon glyphicon-circle-arrow-down text-danger hover-pulsate@(up + down > 0 ? null : " disabled")" 
+                                           title="take all proxies in this group down"></a>
                                     </td>
                                     <td>@status.IconSpan() @g.Name</td>
                                     <td>@up.ToComma()</td>
@@ -289,8 +298,11 @@
                                            class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(s.Maint > 0 ? null : " disabled")" 
                                            title="put this server into rotation everywhere"></a>
                                         <a href="#" data-server="@s.Server" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")" 
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")"
                                            title="take this server out of rotation everywhere"></a>
+                                        <a href="#" data-server="@s.Server" data-action="@Action.maint"
+                                           class="js-haproxy-action glyphicon glyphicon-circle-arrow-down text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")" 
+                                           title="take this server down everywhere"></a>
                                     </td>
                                     <td>@status.IconSpan() @s.Server</td>
                                     <td>@s.Up.ToComma()</td>
