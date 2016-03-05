@@ -1125,23 +1125,26 @@ Status.Exceptions = (function () {
             return false;
         });
 
-        /* Jira action handlers*/
-        $('.info-jira-action-link a').on('click', function () {
-            $(this).addClass('loading');
-            var actionid = $(this).data("actionid");
+        /* External issue tracker action handlers (Jira ,Team foundation service) */
+        $('.issue-tracker-action-link a').on('click', function (e) {
+            e.preventDefault();
+           
+            var _this = $(this);
+            _this.addClass('loading');
+            var actionid = _this.data("actionid");
+
             $.ajax({
                 type: 'POST',
                 data: { id: options.id, log: options.log, actionid: actionid },
                 context: this,
-                url: '/exceptions/jiraaction',
+                url: _this.attr("href"),
                 success: function (data) {
-                    $(this).removeClass('loading');
+                    _this.removeClass('loading');
                     if (data.success) {
                         if (data.browseUrl != null && data.browseUrl !== "") {
-
                             var issueLink = '<a href="' + data.browseUrl + '" target="_blank">' + data.issueKey + '</a>';
-                            $("#jira-links-container").show();
-                            $("#jira-links-container").append('<span> ( ' + issueLink + ' ) </span>');
+                            var browseLinkContainer = _this.closest(".issue-tracker-action-container").find(".issue-tracker-browser-links-container");
+                            browseLinkContainer.append('<span> ( ' + issueLink + ' ) </span>').show();
                             toastr.success('<div style="margin-top:5px">' + issueLink + '</div>', 'Issue Created');
                         }
                         else {
@@ -1155,7 +1158,7 @@ Status.Exceptions = (function () {
 
                 },
                 error: function () {
-                    $(this).removeClass('loading').parent().errorPopup('An error occured while trying to perform the selected Jira issue action.');
+                    _this.removeClass('loading').parent().errorPopup('An error occured while trying to perform the selected Jira issue action.');
                 }
             });
             return false;

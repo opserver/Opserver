@@ -13,6 +13,15 @@ using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Models
 {
+    public static class DateTimeExtension
+    {
+        public static bool IsRecent(this DateTime dateTime,int numberOfHours)
+        {
+            return dateTime.AddHours(numberOfHours) >= DateTime.Now;
+        }
+
+        
+    }
     public static class ExtensionMethods
     {
         public static IHtmlString ToSpeed(this float bps, string unit = "b")

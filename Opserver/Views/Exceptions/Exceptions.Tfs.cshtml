@@ -1,0 +1,22 @@
+﻿@model List<TfsAction>
+@{
+    Layout = null;
+}
+@if (Model != null && Model.Any())
+{
+    <div class="issue-tracker-action-container">
+        <p class="error-time" style="margin: 5px 0 5px 0">
+            Visual Studio Team Services Actions
+            @foreach (var action in Model)
+            {
+                <span class="issue-tracker-action-link">
+                    ( <a class="info-link" data-actionid="@action.Id" href="@Url.Action("tfsaction")">@action.Caption</a>  )
+                </span>
+            }
+        </p>
+
+        <p class="error-time issue-tracker-browser-links-container" style="display: none; margin: 5px 0 5px 0">
+            Browse in Visual Studio Team Services
+        </p>
+    </div>
+}

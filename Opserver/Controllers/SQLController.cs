@@ -28,11 +28,13 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
         {
             var vd = new ServersModel
-                {
-                    StandaloneInstances = SQLInstance.AllStandalone,
-                    Clusters = SQLCluster.AllClusters,
-                    Refresh = node.HasValue() ? 10 : 5
-                };
+            {
+                StandaloneInstances = SQLInstance.AllStandalone,
+                Clusters = SQLCluster.AllClusters,
+                Refresh = node.HasValue() ? 10 : 5
+
+            };
+
 
             if (cluster.HasValue())
                 vd.CurrentCluster = vd.Clusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.OrdinalIgnoreCase));
@@ -206,6 +208,9 @@ namespace StackExchange.Opserver.Controllers
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);
+                case "missingindexes":
+                    vd.View = DatabasesModel.Views.MissingIndexes;
+                    return View("Databases.Modal.MissingIndexes", vd);
             }
             return View("Databases.Modal.Tables", vd);
         }
@@ -222,7 +227,6 @@ namespace StackExchange.Opserver.Controllers
             };
             return View("Databases.Modal.Tables", vd);
         }
-        
         private ActionResult NoInstanceRedirect(string node)
         {
             if (Current.IsAjaxRequest)

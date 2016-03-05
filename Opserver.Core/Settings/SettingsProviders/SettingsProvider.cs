@@ -25,6 +25,9 @@ namespace StackExchange.Opserver.SettingsProviders
         public TeamCitySettings TeamCity => GetSettings<TeamCitySettings>();
         public JiraSettings Jira => GetSettings<JiraSettings>();
 
+        public TfsSettings Tfs => GetSettings<TfsSettings>();
+
+
         public abstract T GetSettings<T>() where T : Settings<T>, new();
         public abstract T SaveSettings<T>(T settings) where T : class, new();
 

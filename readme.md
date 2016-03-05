@@ -52,6 +52,18 @@ In order to use Jira
 
 [Jira action screenshots](http://imgur.com/a/XtW0j)
 
+Visual Studio Team Services Actions Configuration
+-----------
+Similar to JIRA issue creation, you can configure Visual studio team services to create work items from the exception detail page. 
+
+In order to use VS Team services actions 
+
+* You have to enable Exception monitoring 
+* Add TfsSettings.json file under `/config` folder (you can simple rename the TfsSettins.json.example file to remove the .example suffix)
+* Update the TfsSettings.json file with your team service information such as instance url,user credentials,default project path etc.
+
+[VS Team Services actions screenshots](http://imgur.com/a/KNkYV)
+
 PagerDuty Configuration
 ------------
 You can connect OpServer to your pagerduty istallation.

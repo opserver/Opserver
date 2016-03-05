@@ -216,6 +216,7 @@
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\SQL\SQLIssues.cs" />
+    <Compile Include="Data\TFS\TFSClient.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ExtensionMethods.Sql.cs" />
     <Compile Include="Helpers\AppCache.cs" />
@@ -376,6 +377,7 @@
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
     <Compile Include="Settings\TeamCitySettings.cs" />
+    <Compile Include="Settings\TfsSettings.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>
   <ItemGroup>

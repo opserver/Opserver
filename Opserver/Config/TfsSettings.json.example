@@ -1,0 +1,32 @@
+﻿{
+  "instanceUrl": "https://yourInstanceName.visualstudio.com/",
+  "defaultCollection": "DefaultCollection",
+  "apiVersion": "1.0",
+  "defaultUsername": "yourUserName",
+  "defaultPassword": "yourPassword",
+  "defaultProjectKey": "yourDefaultProjectKey",
+  "applications": [
+    "MyAppName",
+    "My Error Log Name"
+  ],
+  "actions": [
+    {
+      "caption": "Create Bug",
+      "name": "Bug",
+      "labels": "MyTag12",
+      "applications": [
+        "My Error Log Name",
+        "MyAppName"
+      ]
+    },
+    {
+      "caption": "Create PBI",
+      "name": "Product Backlog Item",
+      "labels": "MyTag1,Label2",
+      "applications": [
+        "My Error Log Name",
+        "APP2MyAppName"
+      ]
+    }
+  ]
+}

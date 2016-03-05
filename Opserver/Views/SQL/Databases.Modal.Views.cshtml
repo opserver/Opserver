@@ -1,9 +1,88 @@
-﻿@using StackExchange.Opserver.Views.SQL
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Views.SQL
 @model DatabasesModel
 @{
     Layout = "Databases.Modal.cshtml";
     var s = Model.Instance;
+    var views = s.GetViewsInfo(Model.Database);
 }
+<style>
+    .recent-item {
+        font-weight: bold;
+    }
+</style>
 <div class="sql-tables">
-    Coming soon!
+    @if (views.LastPollStatus == FetchStatus.Fail || views.Data == null)
+    {
+        <div class="sql-server sql-error">
+            <span class="error-label">There was an error fetching view(s) info from status from @s.Name for @Model.Database</span>
+            @views.ErrorMessage
+        </div>
+    }
+    else {
+        <div>
+           @if (!views.Data.Any())
+           {
+               <p>There aren't any views in this database.</p>
+           }
+           else
+           {
+               <table class="cluster-dashboard striped-dashboard" id="database-table">
+                   <thead>
+                   <tr>
+                       <th>View</th>
+                       <th>Created date</th>
+                       <th>Last Modified date</th>
+
+                   </tr>
+                   </thead>
+                   <tbody class="node-group">
+                   @foreach (var t in views.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ViewName))
+                   {
+                       <tr data-id="@t.Id" data-table="@(t.SchemaName).@(t.ViewName)" title="@t.Definition">
+                           <td>
+                               <span class="note">@(t.SchemaName).</span><span>@t.ViewName</span>
+
+                           </td>
+                           <td>@t.CreationDate</td>
+                           <td class="@(t.ModifiedDate.IsRecent(3) ? "recent-item" : "")">
+                               @t.ModifiedDate
+                           </td>
+
+
+                       </tr>
+                       if (t.SchemaName + "." + t.ViewName == Model.ObjectName)
+                       {
+                           <p>Columns</p>
+                           <tr class="tablesorter-childRow">
+                               <td colspan="3">
+                                   @Html.Partial("Databases.Modal.Views.Columns", Model)
+                               </td>
+                           </tr>
+                       }
+                   }
+                   </tbody>
+                   <tfoot>
+                        <tr class="total-row">
+                           <td colspan="3"><b>Total</b> <span class="note">(@views.Data.Count().Pluralize("view"))</span></td>
+                       </tr>
+                  </tfoot>
+
+               </table>
+               <script>
+                   $(function() {
+                       $('#database-table').on('click', 'tr', function() {
+                           var tableName = $(this).data('table');
+                           if (tableName) {
+                               window.location = '#/db/@(Model.Database)/views/' + tableName;
+                           }
+                       });
+                       $('#database-table').tablesorter();
+
+                   });
+               </script>
+           }
+        </div>
+    }
 </div>
