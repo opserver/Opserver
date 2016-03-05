@@ -49,6 +49,21 @@ namespace StackExchange.Opserver.Data.SQL
 
         }
 
+        public Cache<List<SQLDatabaseMissingIndexInfo>> GetMissingIndexes(string databaseName)
+        {
+            return new Cache<List<SQLDatabaseMissingIndexInfo>>
+            {
+                CacheForSeconds = 60,
+                CacheStaleForSeconds = 5*60,
+                CacheKey = GetCacheKey("MisingIndexes-" + databaseName),
+                UpdateCache = UpdateFromSql("Mising Indexes Info for " + databaseName, conn =>
+                {
+                    var sql = GetFetchSQL<SQLDatabaseMissingIndexInfo>();
+                    return conn.QueryAsync<SQLDatabaseMissingIndexInfo>(sql, new {@databaseName = databaseName});
+                })
+            };
+        }
+
         public Cache<List<SQLDatabaseColumnInfo>> GetColumnInfo(string databaseName)
         {
             return new Cache<List<SQLDatabaseColumnInfo>>
@@ -414,6 +429,40 @@ Select vs.volume_id VolumeId,
             return FetchSQL;
         }
     }
+
+        public class SQLDatabaseMissingIndexInfo : ISQLVersionedObject
+        {
+            public string TableName { internal set; get; }
+            public string ColumnName { internal set; get; }
+            public string ColumnUsage { internal set; get; }
+            public decimal AverageTotalUserCost { internal set; get; }
+            public decimal AverageUserImpact { internal set; get; }
+            public int UserSeeks { internal set; get; }
+            public int UserScans { internal set; get; }
+            public Version MinVersion { get; }
+
+            public decimal AnticipatedImprovement { get; internal set; }
+            public string GetFetchSQL(Version v)
+            {
+                return @"SELECT 
+                        statement AS TableName,
+                        column_name AS ColumnName,
+                        column_usage as ColumnUsage,
+                        avg_total_user_cost as AverageTotalUserCost,
+                        avg_user_impact as AverageUserImpact,
+                        user_seeks as UserSeeks,
+                        user_scans as UserScans,
+                        avg_total_user_cost* avg_user_impact *(user_seeks + user_scans) as AnticipatedImprovement
+
+                        FROM sys.dm_db_missing_index_details AS mid
+                        CROSS APPLY sys.dm_db_missing_index_columns(mid.index_handle)
+                        INNER JOIN sys.dm_db_missing_index_groups AS mig ON mig.index_handle = mid.index_handle
+                        INNER JOIN sys.dm_db_missing_index_group_stats migs on migs.group_handle = mig.index_group_handle
+                        INNER JOIN sys.databases d on d.database_id = mid.database_id
+                        where name = @databaseName
+                        ORDER BY AnticipatedImprovement";
+            }
+        }
 
     public class SQLDatabaseViewInfo : ISQLVersionedObject
     {

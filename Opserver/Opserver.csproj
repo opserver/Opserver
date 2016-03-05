@@ -178,6 +178,7 @@
       <DependentUpon>Servers.cshtml</DependentUpon>
     </Compile>
     <Content Include="Config\Readme.txt" />
+    <Content Include="Config\SecuritySettings.config.example" />
     <Content Include="Content\Common.css">
       <DependentUpon>Common.less</DependentUpon>
     </Content>
@@ -232,7 +233,6 @@
       <DependentUpon>Styles.less</DependentUpon>
     </Content>
     <Content Include="App_Code\Helpers.cshtml" />
-    <Content Include="Config\DashboardSettings.json.example" />
     <Content Include="Config\ElasticSettings.json.example" />
     <Content Include="Config\ExceptionsSettings.json.example" />
     <Content Include="Config\HAProxySettings.json.example" />
@@ -245,6 +245,7 @@
     </Content>
     <Content Include="Config\JiraSettings.json.example" />
     <None Include="compilerconfig.json" />
+    <None Include="Config\DashboardSettings.json.example" />
     <None Include="Config\PagerDutySettings.json.example" />
     <Content Include="Config\SQLSettings.json.example" />
     <None Include="Config\TfsSettings.json.example" />
@@ -615,6 +616,7 @@
     <Content Include="Views\SQL\_ViewStart.cshtml" />
     <Content Include="Views\Exceptions\Exceptions.Tfs.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.Views.Columns.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.MissingIndexes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\img\ajax-loader.gif" />

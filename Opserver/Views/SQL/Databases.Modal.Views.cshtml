@@ -22,70 +22,67 @@
     }
     else {
         <div>
-            <table class="cluster-dashboard striped-dashboard" id="database-table">
-                <thead>
-                    <tr>
-                        <th>View</th>
-                        <th>Created date</th>
-                        <th>Last Modified date</th>
+           @if (!views.Data.Any())
+           {
+               <p>There aren't any views in this database.</p>
+           }
+           else
+           {
+               <table class="cluster-dashboard striped-dashboard" id="database-table">
+                   <thead>
+                   <tr>
+                       <th>View</th>
+                       <th>Created date</th>
+                       <th>Last Modified date</th>
 
-                    </tr>
-                </thead>
-                <tbody class="node-group">
-                @foreach (var t in views.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ViewName))
-                {
-                    <tr data-id="@t.Id" data-table="@(t.SchemaName).@(t.ViewName)" title="@t.Definition">
-                        <td>
-                            <span class="note">@(t.SchemaName).</span><span>@t.ViewName</span>
+                   </tr>
+                   </thead>
+                   <tbody class="node-group">
+                   @foreach (var t in views.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ViewName))
+                   {
+                       <tr data-id="@t.Id" data-table="@(t.SchemaName).@(t.ViewName)" title="@t.Definition">
+                           <td>
+                               <span class="note">@(t.SchemaName).</span><span>@t.ViewName</span>
 
-                        </td>
-                        <td>@t.CreationDate</td>
-                        <td class="@(t.ModifiedDate.IsRecent(3) ? "recent-item" : "")">
-                            @t.ModifiedDate
-                        </td>
+                           </td>
+                           <td>@t.CreationDate</td>
+                           <td class="@(t.ModifiedDate.IsRecent(3) ? "recent-item" : "")">
+                               @t.ModifiedDate
+                           </td>
 
 
-                    </tr>
-                    if (t.SchemaName + "." + t.ViewName == Model.ObjectName)
-                    {
-                        <p>Columns</p>
-                        <tr class="tablesorter-childRow">
-                            <td colspan="3">
-                                @Html.Partial("Databases.Modal.Views.Columns", Model)
-                            </td>
-                        </tr>
-                    }
-                }
-                </tbody>
-                <tfoot>
-                    @if (views.Data.Any())
-                    {
+                       </tr>
+                       if (t.SchemaName + "." + t.ViewName == Model.ObjectName)
+                       {
+                           <p>Columns</p>
+                           <tr class="tablesorter-childRow">
+                               <td colspan="3">
+                                   @Html.Partial("Databases.Modal.Views.Columns", Model)
+                               </td>
+                           </tr>
+                       }
+                   }
+                   </tbody>
+                   <tfoot>
                         <tr class="total-row">
-                            <td  colspan="3"><b>Total</b> <span class="note">(@views.Data.Count().Pluralize("view"))</span></td>
-                         </tr>
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="3"><div class="none-active">There aren't any views in this database.</div></td>
-                        </tr>
-                    }
-                </tfoot>
+                           <td colspan="3"><b>Total</b> <span class="note">(@views.Data.Count().Pluralize("view"))</span></td>
+                       </tr>
+                  </tfoot>
 
-            </table>
-            <script>
-                $(function () {
-                    $('#database-table').on('click', 'tr', function () {
-                        var tableName = $(this).data('table');
-                        if (tableName) {
-                            window.location = '#/db/@(Model.Database)/views/' + tableName;
-                        }
-                    });
-                   
-                    $('#database-table').tablesorter();
+               </table>
+               <script>
+                   $(function() {
+                       $('#database-table').on('click', 'tr', function() {
+                           var tableName = $(this).data('table');
+                           if (tableName) {
+                               window.location = '#/db/@(Model.Database)/views/' + tableName;
+                           }
+                       });
+                       $('#database-table').tablesorter();
 
-                });
-            </script>
+                   });
+               </script>
+           }
         </div>
     }
 </div>

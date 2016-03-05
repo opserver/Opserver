@@ -1,0 +1,69 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = "Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var views = s.GetMissingIndexes(Model.Database);
+}
+<div class="sql-tables">
+    @if (views.LastPollStatus == FetchStatus.Fail || views.Data == null)
+    {
+        <div class="sql-server sql-error">
+            <span class="error-label">There was an error fetching missing indexes info from status from @s.Name for @Model.Database</span>
+            @views.ErrorMessage
+        </div>
+    }
+    else {
+        <div>
+            @if (!views.Data.Any())
+            {
+                <p>There aren't any missing indexes found in this database. Try running some SQL againist your db and revisit this tab.</p>
+            }
+            else
+            {
+                <table class="cluster-dashboard striped-dashboard" id="database-table">
+                    <thead>
+                        <tr>
+                            <th>Table</th>
+                            <th>Column Name</th>
+                            <th>Column Usage</th>
+                            <th>Avg User Impact</th>
+                            <th>Avg Total User Cost</th>
+                            <th>User Scans</th>
+                            <th>User Seeks</th>
+
+                        </tr>
+                    </thead>
+                    <tbody class="node-group">
+                        @foreach (var t in views.Data.OrderByDescending(t => t.AnticipatedImprovement).ThenBy(g => g.TableName))
+                    {
+                            <tr title="Anticipated improvement @t.AnticipatedImprovement">
+                                <td>@t.TableName</td>
+                                <td>@t.ColumnName</td>
+                                <td>@t.ColumnUsage</td>
+                                <td>@t.AverageUserImpact</td>
+                                <td title="@t.AverageTotalUserCost">@t.AverageTotalUserCost.ToString("##.####")</td>
+                                <td>@t.UserScans</td>
+                                <td>@t.UserSeeks</td>
+                            </tr>
+                        }
+                    </tbody>
+                    <tfoot>
+                        <tr class="total-row">
+                            <td colspan="7"><b>Total</b> <span class="note">(@views.Data.Count().Pluralize("missing index"))</span></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                <script>
+                    $(function () {
+                       
+                        $('#database-table').tablesorter();
+
+                    });
+                </script>
+            }
+        </div>
+    }
+</div>
