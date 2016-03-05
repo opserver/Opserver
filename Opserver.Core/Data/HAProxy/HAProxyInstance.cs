@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         }
 
         public HAProxyInstance(HAProxySettings.Instance instance, HAProxySettings.Group group = null)
-            : base(instance.Name + ":" + instance.Description + " - " + instance.Url.GetHashCode().ToString())
+            : base(instance.Name + ":" + instance.Description + " - " + instance.Url)
         {
             RawSettings = instance;
             Settings = Current.Settings.HAProxy.GetInstanceSettings(instance, group);

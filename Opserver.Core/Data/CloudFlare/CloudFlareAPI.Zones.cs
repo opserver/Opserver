@@ -16,7 +16,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 return _zones ?? (_zones = new Cache<List<CloudFlareZone>>
                 {
                     CacheForSeconds = 5*60,
-                    CacheStaleForSeconds = 60*60,
                     UpdateCache = CloudFlareFetch(nameof(Zones), api => api.Get<List<CloudFlareZone>>("zones"))
                 });
             }
@@ -35,7 +34,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 return _dnsRecords ?? (_dnsRecords = new Cache<List<CloudFlareDNSRecord>>
                 {
                     CacheForSeconds = 5*60,
-                    CacheStaleForSeconds = 60*60,
                     UpdateCache = CloudFlareFetch(nameof(DNSRecords),
                         async api =>
                         {

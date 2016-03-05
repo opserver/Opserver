@@ -33,6 +33,7 @@
             <th>Name</th>
             <th>Summary</th>
             <th>Last</th>
+            <th>Next</th>
             <th>Thread</th>
             <th>Action</th>
         </tr>
@@ -47,6 +48,7 @@
                 <th>@pn.UniqueKey</th>
                 <th>@pn</th>
                 <th>@(pn.LastPoll?.ToRelativeTimeSpanMini()) <span class="text-muted small">(@pn.LastPollDuration.ToTimeStringMini())</span></th>
+                <th></th>
                 <th>
                     @if (pn.IsPolling)
                     {
@@ -76,23 +78,25 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
                     <td>
                         @(p.InventoryDescription ?? "(empty)")
                         <small>
-                            @if (!p.ContainsData){<span class="text-danger"> (No Data)</span>}
-                            @if (p.IsStale){<span class="text-warning"> (Stale)</span>}
-                            @if (p.CacheStaleForSeconds > 0 && p.IsExpired){<span class="text-danger"> (Expired)</span>}
+                            @{
+                                if (!p.ContainsData) {<span class="text-danger"> (No Data)</span>}
+                                else if (p.IsStale){<span class="text-warning"> (Stale)</span>}
+                            }
                             (@p.PollsTotal.Pluralize("poll"): @p.PollsSuccessful.ToComma() successful)
                         </small>
                     </td>
                     <td>
                         @if (p.LastPoll == null)
                         {
-                            <span class="critical light">Never</span>
+                            <span class="text-danger small">Never</span>
                         }
                         else
                         {
                             @:@p.ToPollSpan() <span class="text-muted small">(@(p.LastPollDuration?.ToTimeStringMini()))</span>
                         }
                     </td>
-                    <td class="@(p.IsPolling ? "text-success small" : "text-muted small")">(@(p.PollStatus))</td>
+                    <td class="text-muted small">@(p.NextPoll?.ToRelativeTimeSpanMini())</td>
+                    <td class="@(p.IsPolling ? "text-success small" : "text-muted small")">(@(p.PollStatus.IsNullOrEmptyReturn("none")))</td>
                     <td class="actions">
                         <a href="~/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
                         <a href="~/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
