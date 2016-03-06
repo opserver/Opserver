@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Models
         public static IHtmlString PrettyOut(this Interface i) => i.OutBps?.ToSpeed() ?? MvcHtmlString.Empty;
     }
 
-    public static class ServerInfoExtensionMethods
+    public static class NodeExtensionMethods
     {
         public static IHtmlString LastUpdatedSpan(this Node info)
         {
@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Models
             {
                 addClass = MonitorStatus.Warning.TextClass();
             }
-            return info.LastSync?.ToRelativeTimeSpan(addClass);
+            return info.LastSync?.ToRelativeTimeSpan(addClass) ?? "Unknown".AsHtml();
         }
 
         public static string PrettyTotalMemory(this Node info) => info.TotalMemory?.ToSize() ?? "";

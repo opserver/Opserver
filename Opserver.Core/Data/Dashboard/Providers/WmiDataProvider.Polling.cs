@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.DirectoryServices.ActiveDirectory;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -13,12 +14,21 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private partial class WmiNode
         {
-            private static readonly string LocalDomainName;
+            private static readonly string MachineDomainName;
  
             static WmiNode()
             {
-                LocalDomainName =
-                    System.Net.NetworkInformation.IPGlobalProperties.GetIPGlobalProperties().DomainName;
+                try
+                {
+                    // throws a 
+                    var d = Domain.GetComputerDomain();
+                    MachineDomainName = d.Name;
+                }
+                catch (ActiveDirectoryObjectNotFoundException) { }
+                catch (Exception e)
+                {
+                    Current.LogException(e);
+                }
             }
  
             public async Task<Node> PollNodeInfoAsync()
@@ -71,8 +81,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         return;
                     Model = data.Model;
                     Manufacturer = data.Manufacturer;
-                    Name = data.Domain != LocalDomainName ?
-                        $"{data.DNSHostName}.{data.Domain}" : data.DNSHostName;
+                    // Only use domain if we're on one - not for things like workgroups
+                    Name = MachineDomainName.HasValue() && data.Domain != MachineDomainName
+                        ? $"{data.DNSHostName}.{data.Domain}"
+                        : data.DNSHostName;
                 }
 
                 const string query = @"select 
