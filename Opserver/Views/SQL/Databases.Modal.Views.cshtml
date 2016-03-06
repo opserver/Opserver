@@ -19,7 +19,8 @@ else {
         <thead>
             <tr>
                 <th>View</th>
-                <th>Creation Date</th>
+                <th>Created On</th>
+                <th>Last Modified</th>
                 <th>Replicated</th>
             </tr>
         </thead>
@@ -33,11 +34,13 @@ else {
                         </a>
                     </td>
                     <td data-val="@v.CreationDate.ToEpochTime().ToString()">@v.CreationDate.ToRelativeTimeSpan()</td>
+                    <td data-val="@v.LastModifiedDate.ToEpochTime().ToString()">@v.LastModifiedDate.ToRelativeTimeSpan()</td>
                     <td data-val="@v.IsReplicated.ToString()">@v.IsReplicated.ToYesNo()</td>
                 </tr>
                 <tr class="tablesorter-childRow hidden">
-                    <td colspan="3">
+                    <td colspan="4">
                         @Html.Partial("Databases.Modal.Columns", columns.Data.Where(c => c.Schema == v.SchemaName && c.ViewName == v.ViewName))
+                        <pre class="pre-code prettyprint lang-sql">@v.Definition.Trim()</pre>
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>
@@ -47,7 +50,7 @@ else {
             @if (!views.Data.Any())
             {
                 <tr>
-                    <td colspan="3">
+                    <td colspan="4">
                         <div class="none-active">There aren't any tables in this database.</div>
                     </td>
                 </tr>
@@ -62,6 +65,7 @@ else {
                     2: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                 }
             });
+            prettyPrint();
         });
     </script>
 }

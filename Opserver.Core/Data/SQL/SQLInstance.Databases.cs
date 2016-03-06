@@ -636,17 +636,23 @@ Group By t.object_id, t.Name, t.create_date, s.name";
             public string SchemaName { get; internal set; }
             public string ViewName { get; internal set; }
             public DateTime CreationDate { get; internal set; }
+            public DateTime LastModifiedDate { get; internal set; }
             public bool IsReplicated { get; internal set; }
+            public string Definition { get; internal set; }
 
             public string GetFetchSQL(Version v) => @"
 Select v.object_id Id,
        s.name SchemaName,
        v.name ViewName,
        v.create_date CreationDate,
-       v.is_replicated IsReplicated
+       v.modify_date LastModifiedDate,
+       v.is_replicated IsReplicated,
+       sm.definition Definition
   From sys.views v
        Join sys.schemas s
          On v.schema_id = s.schema_id
+       Join sys.sql_modules sm 
+         On sm.object_id = v.object_id  
  Where v.is_ms_shipped = 0";
         }
 
