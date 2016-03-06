@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data.SQL
 {
-    public interface ISQLVersioned
+    public interface ISQLVersioned : IMinVersioned
     {
-        [IgnoreDataMember]
-        Version MinVersion { get; }
         string GetFetchSQL(Version v);
     }
 }

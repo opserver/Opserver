@@ -254,6 +254,7 @@
     <Compile Include="Helpers\LocalCache.cs" />
     <Compile Include="Helpers\Singleton.cs" />
     <Compile Include="Helpers\WindowsKernelVersions.cs" />
+    <Compile Include="IMinVersioned.cs" />
     <Compile Include="ISeachableNode.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.cs" />
     <Compile Include="Data\Cache.cs" />
