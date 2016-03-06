@@ -401,9 +401,8 @@ Select Top 100
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
-            public string VolumeId { get; internal set; }
-            public string VolumeMountPoint { get; internal set; }
-            public string LogicalVolumeName { get; internal set; }
+            private string _volumeMountPoint;
+            public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon).First());
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
             public int FileId { get; internal set; }
@@ -464,10 +463,7 @@ Select Top 100
             }
 
             public string GetFetchSQL(Version v) => @"
-Select vs.volume_id VolumeId,
-       vs.volume_mount_point VolumeMountPoint, 
-       vs.logical_volume_name LogicalVolumeName,
-       mf.database_id DatabaseId,
+Select mf.database_id DatabaseId,
        DB_Name(mf.database_id) DatabaseName,
        mf.file_id FileId,
        mf.name FileName,
@@ -490,7 +486,6 @@ Select vs.volume_id VolumeId,
        Join sys.master_files mf 
          On fs.database_id = mf.database_id
          And fs.file_id = mf.file_id
-       Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs
  Where (FileProperty(mf.name, 'SpaceUsed') Is Not Null Or DB_Name() = 'master')";
         }
 
