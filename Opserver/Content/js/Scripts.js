@@ -734,7 +734,9 @@ Status.SQL = (function () {
             '#/cluster/': loadCluster,
             '#/plan/': loadPlan,
             '#/sql/summary/': function (val) {
-                Status.popup('sql/instance/summary/' + val, { node: Status.SQL.options.node });
+                Status.popup('sql/instance/summary/' + val, { node: Status.SQL.options.node }, {
+                    modalClass: val === 'errors' ? 'modal-huge' : 'modal-lg'
+                });
             },
             '#/sql/top/filters': function () {
                 Status.popup('sql/top/filters' + window.location.search, null, filterOptions);
