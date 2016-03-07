@@ -11,7 +11,7 @@
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
-            Status.SQL.init({ node: '@(Model.CurrentInstance?.Name)' });
+            Status.SQL.init({ node: @(Model.CurrentInstance?.Name.ToJson()) });
         });
     </script>
 }
