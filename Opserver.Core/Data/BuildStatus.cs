@@ -65,16 +65,9 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        public static BuildConfig GetConfig(string buildTypeId)
-        {
-            var config = Configs.FirstOrDefault(c => c.Id == buildTypeId);
-            return config;
-        }
+        public static BuildConfig GetConfig(string buildTypeId) => Configs.FirstOrDefault(c => c.Id == buildTypeId);
 
-        public static List<Build> GetAllBuilds()
-        {
-            return Builds;
-        }
+        public static List<Build> GetAllBuilds() => Builds;
 
         public static List<Build> GetBuildsByServer(string server)
         {
@@ -89,10 +82,7 @@ namespace StackExchange.Opserver.Data
             return new List<Build>();
         }
 
-        public static List<Build> GetBuildsById(string buildTypeId)
-        {
-            return Builds.Where(b => b.BuildTypeId == buildTypeId).ToList();
-        }
+        public static List<Build> GetBuildsById(string buildTypeId) => Builds.Where(b => b.BuildTypeId == buildTypeId).ToList();
 
         public static List<BuildConfig> GetAllBuildConfigs()
         {
@@ -122,12 +112,10 @@ namespace StackExchange.Opserver.Data
 
         public static TeamCityClient GetClient()
         {
-            TeamCityClient client;
             Uri uri;
-            if (Uri.TryCreate(Current.Settings.TeamCity.Url, UriKind.Absolute, out uri))
-                client = new TeamCityClient(uri.Host, useSsl: uri.Scheme == Uri.UriSchemeHttps);
-            else
-                client = new TeamCityClient(Current.Settings.TeamCity.Url, useSsl: false);
+            var client = Uri.TryCreate(Current.Settings.TeamCity.Url, UriKind.Absolute, out uri)
+                ? new TeamCityClient(uri.Host, useSsl: uri.Scheme == Uri.UriSchemeHttps)
+                : new TeamCityClient(Current.Settings.TeamCity.Url, useSsl: false);
 
             client.Connect(Current.Settings.TeamCity.User, Current.Settings.TeamCity.Password);
             return client;

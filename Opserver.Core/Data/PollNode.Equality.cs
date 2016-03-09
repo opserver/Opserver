@@ -8,18 +8,11 @@
             if (ReferenceEquals(this, other)) return true;
             return other.GetType() == GetType() && string.Equals(UniqueKey, other.UniqueKey);
         }
-        public override int GetHashCode()
-        {
-            return (UniqueKey != null ? UniqueKey.GetHashCode() : 0);
-        }
-        public static bool operator ==(PollNode left, PollNode right)
-        {
-            return Equals(left, right);
-        }
-        public static bool operator !=(PollNode left, PollNode right)
-        {
-            return !Equals(left, right);
-        }
+        public override int GetHashCode() => UniqueKey?.GetHashCode() ?? 0;
+
+        public static bool operator ==(PollNode left, PollNode right) => Equals(left, right);
+
+        public static bool operator !=(PollNode left, PollNode right) => !Equals(left, right);
 
         public override bool Equals(object obj)
         {

@@ -54,8 +54,7 @@ namespace StackExchange.Opserver.Data.SQL
                 });
             }
         }
-
-        // TODO: Address master_files reusage, since this requires post-filtering
+        
         public Cache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
             DatabaseFetch<DatabaseFile>(databaseName);
 
