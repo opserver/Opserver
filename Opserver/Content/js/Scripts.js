@@ -136,6 +136,11 @@
                 options.onClose.call(this);
             }
         });
+        dialog.on('hidden.bs.modal', function() {
+            if ($('.bootbox').length) {
+                $('body').addClass('modal-open');
+            }
+        });
         if (options && options.modalClass) {
             dialog.find('.modal-lg').removeClass('modal-lg').addClass(options.modalClass);
         }
@@ -144,7 +149,7 @@
         $('.js-summary-popup')
             .appendWaveLoader()
             .load(Status.options.rootPath + url, data, function (responseText, textStatus, req) {
-                if (textStatus === "error") {
+                if (textStatus === 'error') {
                     $(this).closest('.modal-content').find('.modal-header .modal-title').addClass('text-warning').text('Error');
                     $(this).html('<div class="alert alert-warning"><h5>Error loading</h5><p class="error-stack">Status: ' + req.statusText + '\nCode: ' + req.status + '\nUrl: ' + url + '</p></div><p>Direct link: <a href="' + url + '">' + url + '</a></p>');
                     return;
