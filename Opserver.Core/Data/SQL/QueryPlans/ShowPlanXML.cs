@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             {
                 //TODO: Pair these down, seeing what looks good for now
                 var ss = this as StmtSimpleType;
-                return ss != null ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText, ""), "").Trim() : "";
+                return ss != null ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim() : "";
             }
         }
 
