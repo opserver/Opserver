@@ -159,14 +159,14 @@
                     <div>
                         @{
                             var truncated = plan.Statements.Any(st => st.StatementText != null && st.StatementText.Length > 3998);
-                            var lastStatement = plan.Statements.Any() ? plan.Statements.Last() : null;
+                            var lastStatement = plan.Statements.LastOrDefault();
                             var textPos = 0;
                         }
                         @foreach (var statement in plan.Statements)
                         {
                             <pre class="pre-code prettyprint lang-sql @(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
 @if (!truncated){@statement.StatementTextWithoutInitialParams}
-@if(truncated && lastStatement!=null && statement == lastStatement){@op.FullText}</pre>
+@if(truncated && statement == lastStatement){@op.FullText}</pre>
                             textPos += statement.StatementText.Length * 2;
                         }
                     </div>
