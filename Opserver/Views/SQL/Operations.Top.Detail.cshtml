@@ -159,7 +159,7 @@
                     <div>
                         @{
                             var truncated = plan.Statements.Any(st => st.StatementText != null && st.StatementText.Length > 3998);
-                            var lastStatement = plan.Statements.Last();
+                            var lastStatement = plan.Statements.LastOrDefault();
                             var textPos = 0;
                         }
                         @foreach (var statement in plan.Statements)
