@@ -167,7 +167,7 @@
                             <pre class="pre-code prettyprint lang-sql @(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
 @if (!truncated){@statement.StatementTextWithoutInitialParams}
 @if(truncated && statement == lastStatement){@op.FullText}</pre>
-                            textPos += statement.StatementText.Length * 2;
+                            textPos += statement.StatementText?.Length * 2 ?? 0;
                         }
                     </div>
                 </div>
