@@ -10,3 +10,15 @@
 Example of global access for everyone:
 <SecuritySettings provider="alladmin" />
 -->
+
+<!-- 
+Example of windows authentication access:
+<SecuritySettings provider="windowsauth" />
+  To use this, also change Web.config:
+    - in the <system.web> section:
+          - remove this block:
+            <authentication mode="Forms">
+              <forms name=".ADTkn" loginUrl="~/login" timeout="10080" slidingExpiration="true" protection="All" defaultUrl="~/" cookieless="UseCookies" />
+            </authentication>
+          - replace it with <authentication mode="Windows" />
+-->
