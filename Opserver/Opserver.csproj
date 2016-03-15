@@ -164,6 +164,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\Security\WindowsAuthenticationProvider.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
       <DependentUpon>Node.Graph.cshtml</DependentUpon>
     </Compile>
