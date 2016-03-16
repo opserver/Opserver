@@ -140,8 +140,13 @@
                             var latestStat = s.OrderBy(si => si.LastStatusChange).Last();
                             var sAnyUp = s.Any(sp => !sp.InMaintenance);
                             var sAnyDown = s.Any(sp => sp.InMaintenance);
+                            // If everything is green, render it as a backup server if appropriate
+                            var isBackup = s.Any(sp => sp.IsServer && sp.Backup > 0);
+                            var rowClass = proxyStatus == MonitorStatus.Good
+                                ? isBackup ? "info" : ""
+                                : proxyStatus.RowClass();
 
-                            <tr class="@(GetRowClass(stat.Type)) status @proxyStatus.RowClass()" data-server="@stat.Description">
+                            <tr class="@(GetRowClass(stat.Type)) status @rowClass" data-server="@stat.Description">
                                 <td>
                                     @if (stat.IsServer && showAdmin)
                                     {
@@ -153,14 +158,14 @@
                                            title="take this server out of rotation for this backend"></a>
                                     }
                                 </td>
-                                <td>@proxyStatus.IconSpan() @stat.Description</td>
+                                <td>@proxyStatus.IconSpan() @stat.Description@if (isBackup){ <span class="text-primary"> (Backup)</span>}</td>
                                 <td class="load-balancers">
                                     @foreach (var ip in s)
                                     {
                                         var p = statMapping[ip];
                                         // TODO: Primary/active detection
                                         var isPrimary = false;
-                                        <span title="@ip.CheckStatusString" class="@(isPrimary ? "primary" : null)">@ip.IconSpan() @p.Instance.Name</span>
+                                        <span title="@ip.CheckStatusString" class="@(isPrimary ? "primary" : null)@(ip.IsServer && ip.Backup > 0 ? " text-muted" : null)">@ip.IconSpan() @p.Instance.Name</span>
                                     }
                                 </td>
                                 <td title="@CombinedStat("Current sessions", s, si => si.CurrentSessions.ToComma()) ">
