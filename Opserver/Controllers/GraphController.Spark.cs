@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Controllers
             Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
             if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
 
-            return SparkSVG(points, Convert.ToInt64(points.Max(getter)), getter);
+            return SparkSVG(points, Convert.ToInt64(points.DefaultIfEmpty(new DoubleGraphPoint()).Max(getter)), getter);
         }
 
         [OutputCache(Duration = 120, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
