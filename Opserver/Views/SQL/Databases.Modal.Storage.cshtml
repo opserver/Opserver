@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Data.SQL
+﻿@using System.Globalization
+@using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model DatabasesModel
 @{
@@ -58,7 +59,7 @@ else
                     <td>
                         @f.UsedSizeBytes.ToHumanReadableSize() / @f.TotalSizeBytes.ToHumanReadableSize() <span class="text-muted">(@percentFull.ToString("n2")%)</span>
                         <div class="progress" style="width: 200px;">
-                            <div class="progress-bar" style="width: @(percentFull.ToString("n2"))%"></div>
+                            <div class="progress-bar" style="width: @percentFull.ToString("n2", CultureInfo.InvariantCulture)%"></div>
                         </div>
                     </td>
                     <td>@f.NumReads.ToComma()</td>
@@ -111,7 +112,7 @@ else
                         <td>@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                         <td>
                             <div class="progress-embed" style="min-width: 100px;">
-                                <div class="progress-bar" style="width: @percentUsed.ToString("n2")%"></div>
+                                <div class="progress-bar" style="width: @percentUsed.ToString("n2", CultureInfo.InvariantCulture)%"></div>
                                 <span>@(percentUsed.ToString("#0.###"))%</span>
                             </div>
                         </td>

@@ -2,6 +2,7 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
+@using System.Globalization
 @model NodeModel
 @{
     var s = Model.CurrentNode;
@@ -73,14 +74,14 @@
             <div class="panel-body">
                 <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary()">
                     <div class="progress">
-                        <div class="progress-bar" style="width: @s.CPULoad.ToString()%;"></div>
+                        <div class="progress-bar" style="width: @s.CPULoad.Value.ToString(CultureInfo.InvariantCulture)%;"></div>
                         <span>@s.CPUStatusSpan()</span>
                     </div>
                     <label>CPU</label>
                 </div>
                 <div class="value-block small col-xs-6" title="@s.ApplicationMemoryTextSummary()">
                     <div class="progress">
-                        <div class="progress-bar @s.MemoryMonitorStatus().ProgressBarClass()" style="width: @s.PercentMemoryUsed.ToString()%;"></div>
+                        <div class="progress-bar @s.MemoryMonitorStatus().ProgressBarClass()" style="width: @s.PercentMemoryUsed.Value.ToString(CultureInfo.InvariantCulture)%;"></div>
                         <span>@s.PrettyMemoryUsed() / @s.PrettyTotalMemory()</span>
                     </div>
                     <label>Memory</label>
@@ -121,7 +122,7 @@
                     {
                         <div class="value-block small col-xs-12" title="@v.Description: @(v.Used?.ToString("n0")) of @(v.Size?.ToString("n0")) bytes used">
                             <div class="progress">
-                                <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed.ToString())%;"></div>
+                                <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed.Value.ToString(CultureInfo.InvariantCulture))%;"></div>
                                 <span>@v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span></span>
                             </div>
                         </div>
