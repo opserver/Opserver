@@ -2,6 +2,7 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
+@using System.Globalization
 @model DashboardModel
 @{
     // Note: not using MVC Url.Action and such here because it's too slow
@@ -87,7 +88,7 @@ else
                                     @if (n.MemoryUsed >= 0)
                                     {
                                         <div class="progress" style="width: 215px;">
-                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.ToString())%"></div>
+                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed.Value.ToString(CultureInfo.InvariantCulture))%"></div>
                                         </div>
                                     }
                                 </td>
