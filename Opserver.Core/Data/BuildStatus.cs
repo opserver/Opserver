@@ -114,7 +114,7 @@ namespace StackExchange.Opserver.Data
         {
             Uri uri;
             var client = Uri.TryCreate(Current.Settings.TeamCity.Url, UriKind.Absolute, out uri)
-                ? new TeamCityClient(uri.Host + ":" + uri.Port, useSsl: uri.Scheme == Uri.UriSchemeHttps)
+                ? new TeamCityClient(uri.Host + (uri.IsDefaultPort ? "" : ":" + uri.Port.ToString()), useSsl: uri.Scheme == Uri.UriSchemeHttps)
                 : new TeamCityClient(Current.Settings.TeamCity.Url, useSsl: false);
 
             client.Connect(Current.Settings.TeamCity.User, Current.Settings.TeamCity.Password);
