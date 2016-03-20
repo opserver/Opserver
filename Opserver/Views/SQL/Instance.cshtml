@@ -159,7 +159,7 @@ if (counter == null)
                         <div class="panel-body small">
                             <div class="value-block col-md-3">
                                 <div class="progress">
-                                    <div class="progress-bar" style="width: @i.CurrentCPUPercent.Value.ToString()%;"></div>
+                                    <div class="progress-bar" style="width: @(i.CurrentCPUPercent?.ToString(CultureInfo.InvariantCulture))%;"></div>
                                     <span>@i.CurrentCPUPercent.ToString()%</span>
                                 </div>
                                 <label>CPU</label>
@@ -190,7 +190,7 @@ Top Users:
     <text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)</text>
 }">
                                 <div class="progress">
-                                    <div class="progress-bar" style="width: @(i.CurrentMemoryPercent.Value.ToString(CultureInfo.InvariantCulture))%;"></div>
+                                    <div class="progress-bar" style="width: @(i.CurrentMemoryPercent?.ToString(CultureInfo.InvariantCulture))%;"></div>
                                     <span>
                                         @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
                                         <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>

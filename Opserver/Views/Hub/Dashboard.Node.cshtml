@@ -2,7 +2,6 @@
 @using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Views.Dashboard
 @model Node
 @{
     var s = Model;
@@ -41,7 +40,7 @@
     <div class="status-block mem-status">
         <span class="label">Mem </span>@s.MemoryPercentStatusSpan()
         <div class="status-graph">@s.MemoryStatusSpan()@if (s.HasValidMemoryReading) {
-            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width: @s.PercentMemoryUsed.Value.ToString(CultureInfo.InvariantCulture)%"></div></div>
+            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div></div>
         }
         </div>
     </div>
