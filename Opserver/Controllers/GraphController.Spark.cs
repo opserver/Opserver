@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,10 +64,10 @@ namespace StackExchange.Opserver.Controllers
             if (iface == null) return ContentNotFound();
             var points = await iface.GetUtilization(SparkStart, null, SparkPoints);
 
-            Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
-            if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
+            Func<DoubleGraphPoint, double?> getter = p => p.Value;
+            if (direction == "out") getter = p => p.BottomValue;
 
-            return SparkSVG(points, Convert.ToInt64(points.Max(getter)), getter);
+            return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p).GetValueOrDefault(0));
         }
 
         [OutputCache(Duration = 120, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
@@ -92,18 +93,18 @@ namespace StackExchange.Opserver.Controllers
                  divisor = max/50,
                  range = (nowEpoch - startEpoch)/width;
 
-            var sb = StringBuilderCache.Get().AppendFormat(@"<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
+            var sb = StringBuilderCache.Get().AppendFormat(CultureInfo.InvariantCulture, @"<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
   <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{3}"" stroke-width=""1"" />
   <g fill=""{2}"" stroke=""none"">
-    <path d=""M0 50 L", width.ToString(), height.ToString(), Color, AxisColor);
+    <path d=""M0 50 L", width, height, Color, AxisColor);
             foreach (var p in points)
             {
-                sb.Append((p.DateEpoch - startEpoch) / range).Append(" ")
-                  .Append((height - getVal(p) / divisor).ToString("n1")).Append(" ");
+                sb.Append(((p.DateEpoch - startEpoch) / range).ToString(CultureInfo.InvariantCulture)).Append(" ")
+                  .Append((height - getVal(p) / divisor).ToString("n1", CultureInfo.InvariantCulture)).Append(" ");
             }
-            sb.AppendFormat(@"{0} {1} z""/>
+            sb.AppendFormat(CultureInfo.InvariantCulture, @"{0} {1} z""/>
    </g>
-</svg>", width.ToString(), height.ToString());
+</svg>", width, height);
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
             return new FileContentResult(bytes, "image/svg+xml");
