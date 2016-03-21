@@ -15,9 +15,10 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
     {
+        private const int SparkHeight = 50;
+        private const int SparkPoints = 500;
         private const int SparkHours = 24;
         private static DateTime SparkStart => DateTime.UtcNow.AddHours(-SparkHours);
-        private const int SparkPoints = 500;
         // TODO: Change to based on theme
         private static string Color => "#008cba";
         private static string AxisColor => "#f6f6f6";
@@ -30,6 +31,9 @@ namespace StackExchange.Opserver.Controllers
             var node = DashboardData.GetNodeById(id);
             if (node == null) return ContentNotFound();
             var points = await node.GetCPUUtilization(SparkStart, null, SparkPoints);
+
+            if (points.Count == 0) return EmptySparkSVG();
+
             return SparkSVG(points, 100, p => p.Value.GetValueOrDefault());
         }
 
@@ -41,6 +45,9 @@ namespace StackExchange.Opserver.Controllers
             var node = DashboardData.GetNodeById(id);
             if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
             var points = await node.GetMemoryUtilization(SparkStart, null, SparkPoints);
+
+            if (points.Count == 0) return EmptySparkSVG();
+
             return SparkSVG(points, Convert.ToInt64(node.TotalMemory.GetValueOrDefault()), p => p.Value.GetValueOrDefault());
         }
 
@@ -52,6 +59,9 @@ namespace StackExchange.Opserver.Controllers
             var node = DashboardData.GetNodeById(id);
             if (node == null) return ContentNotFound();
             var points = await node.GetNetworkUtilization(SparkStart, null, SparkPoints);
+
+            if (points.Count == 0) return EmptySparkSVG();
+
             return SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
@@ -63,15 +73,13 @@ namespace StackExchange.Opserver.Controllers
             var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return ContentNotFound();
             var points = await iface.GetUtilization(SparkStart, null, SparkPoints);
-            
+
+            if (points.Count == 0) return EmptySparkSVG();
+
             Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
             if (direction == "out") getter = p => p.BottomValue.GetValueOrDefault(0);
 
-            // TODO: Shared SVG for empty point series
-            // There's no need to even run this code multiple tiles for such cases
-            var max = points.Count > 0 ? Convert.ToInt64(points.Max(getter)) : 0L;
-
-            return SparkSVG(points, max, p => getter(p));
+            return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
         [OutputCache(Duration = 120, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
@@ -82,15 +90,16 @@ namespace StackExchange.Opserver.Controllers
             var instance = SQLInstance.Get(node);
             if (instance == null) return ContentNotFound($"SQLNode not found with name = '{node}'");
             var start = DateTime.UtcNow.AddHours(-1);
-            var points = instance.ResourceHistory.Data?.Where(p => p.EventTime >= start)
-                         ?? Enumerable.Empty<SQLInstance.ResourceEvent>();
+            var points = instance.ResourceHistory.Data?.Where(p => p.EventTime >= start).ToList();
+
+            if (points == null || points.Count == 0) return EmptySparkSVG();
 
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
-        private FileResult SparkSVG<T>(IEnumerable<T> points, long max, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
+        private static FileResult SparkSVG<T>(IEnumerable<T> points, long max, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
         {
-            const int height = 50,
+            const int height = SparkHeight,
                       width = SparkPoints;
             long nowEpoch = DateTime.UtcNow.ToEpochTime(),
                  startEpoch = (start ?? SparkStart).ToEpochTime(),
@@ -106,12 +115,26 @@ namespace StackExchange.Opserver.Controllers
                 sb.Append(((p.DateEpoch - startEpoch) / range).ToString(CultureInfo.InvariantCulture)).Append(" ")
                   .Append((height - getVal(p) / divisor).ToString("n1", CultureInfo.InvariantCulture)).Append(" ");
             }
-            sb.AppendFormat(@"{0} {1} z""/>
+            sb.Append(width)
+              .Append(" ")
+              .Append(height)
+              .Append(@" z""/>
    </g>
-</svg>", width.ToString(), height.ToString());
+</svg>");
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
             return new FileContentResult(bytes, "image/svg+xml");
+        }
+
+        // No need to compute this more than once
+        private static readonly byte[] EmptySvgBytes = Encoding.UTF8.GetBytes(string.Format(
+            @"<svg version=""1.1"" baseProfile=""full"" width=""{1}"" height=""{0}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
+  <line x1=""0"" y1=""{0}"" x2=""{1}"" y2=""{0}"" stroke=""#f6f6f6"" stroke-width=""1"" />
+</svg>", SparkHeight.ToString(), SparkPoints.ToString()));
+
+        private static FileResult EmptySparkSVG()
+        {
+            return new FileContentResult(EmptySvgBytes, "image/svg+xml");
         }
     }
 }
