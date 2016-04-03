@@ -74,7 +74,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Manufacturer,
                 Model
                 from Win32_ComputerSystem";
-                using (var q = Wmi.Query(Name, machineQuery))
+                using (var q = Wmi.Query(Endpoint, machineQuery))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Version
                 from Win32_OperatingSystem";
 
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -126,7 +126,7 @@ SELECT Name,
  WHERE NetConnectionStatus = 2"; //connected adapters.
                 //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
                 var indexMap = new Dictionary<uint, Interface>();
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -159,7 +159,7 @@ Select InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
   From WIn32_NetworkAdapterConfiguration 
  Where IPEnabled = 'True'";
 
-                using (var q = Wmi.Query(Name, ipQuery))
+                using (var q = Wmi.Query(Endpoint, ipQuery))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -200,7 +200,7 @@ SELECT Caption,
   FROM Win32_LogicalDisk
  WHERE DriveType = 3"; //fixed disks
 
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var disk in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -237,7 +237,7 @@ SELECT PercentProcessorTime
   FROM Win32_PerfFormattedData_PerfOS_Processor
  WHERE Name = '_Total'";
 
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -259,7 +259,7 @@ SELECT PercentProcessorTime
 SELECT AvailableKBytes 
   FROM Win32_PerfFormattedData_PerfOS_Memory";
                 
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -309,7 +309,7 @@ SELECT Name,
                     OutAvgBps = 0
                 };
 
-                using (var q = Wmi.Query(Name, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {

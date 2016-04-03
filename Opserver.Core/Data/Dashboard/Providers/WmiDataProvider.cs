@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public WmiDataProvider(WMISettings settings) : base(settings)
         {
             _config = settings;
-            _wmiNodes = InitNodeList(_config.Nodes).OrderBy(x => x.OriginalName).ToList();
+            _wmiNodes = InitNodeList(_config.Nodes).OrderBy(x => x.Endpoint).ToList();
             // Do this ref cast list once
             _allNodes = _wmiNodes.Cast<Node>().ToList();
             // For fast lookups
@@ -36,13 +36,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             var nodesList = new List<WmiNode>(names.Count);
             foreach (var nodeName in names)
             {
-                var node = new WmiNode
+                var node = new WmiNode(nodeName)
                 {
                     Config = _config,
-                    Id = nodeName.ToLower(),
-                    Name = nodeName.ToLower(),
-                    DataProvider = this,
-                    MachineType = "Windows"
+                    DataProvider = this
                 };
 
                 try

@@ -24,21 +24,24 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             /// Name as specified in DashboardSettings.json.
             /// Real name can be different, like for localhost, for example.
             /// </summary>
-            internal string OriginalName { get; set; }
+            internal string Endpoint { get; set; }
 
             internal List<Cache> Caches { get; }
             
             internal WMISettings Config { get; set; }
 
-            public WmiNode()
+            public WmiNode(string endpoint)
             {
+                Endpoint = endpoint;
+                Id = endpoint.ToLower();
+                Name = endpoint.ToLower();
+                MachineType = "Windows";
+
                 Caches = new List<Cache>(2);
                 Interfaces = new List<Interface>(2);
                 Volumes = new List<Volume>(3);
                 VMs = new List<Node>();
                 Apps = new List<Application>();
-                // TODO: IPs on interfaces
-                //IPs = new List<IPNet>();
 
                 // TODO: Size for retention / interval and convert to limited list
                 MemoryHistory = new List<MemoryUtilization>(1024);
