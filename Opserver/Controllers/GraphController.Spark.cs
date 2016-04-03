@@ -102,9 +102,10 @@ namespace StackExchange.Opserver.Controllers
             const int height = SparkHeight,
                       width = SparkPoints;
             long nowEpoch = DateTime.UtcNow.ToEpochTime(),
-                 startEpoch = (start ?? SparkStart).ToEpochTime(),
-                 divisor = max/50,
-                 range = (nowEpoch - startEpoch)/width;
+                startEpoch = (start ?? SparkStart).ToEpochTime(),
+                divisor = max/50;
+            var range = (nowEpoch - startEpoch)/(float)width;
+            var first = true;
 
             var sb = StringBuilderCache.Get().AppendFormat(@"<svg version=""1.1"" baseProfile=""full"" width=""{0}"" height=""{1}"" xmlns=""http://www.w3.org/2000/svg"" preserveAspectRatio=""none"">
   <line x1=""0"" y1=""{1}"" x2=""{0}"" y2=""{1}"" stroke=""{3}"" stroke-width=""1"" />
@@ -112,7 +113,17 @@ namespace StackExchange.Opserver.Controllers
     <path d=""M0 50 L", width.ToString(), height.ToString(), Color, AxisColor);
             foreach (var p in points)
             {
-                sb.Append(((p.DateEpoch - startEpoch) / range).ToString(CultureInfo.InvariantCulture)).Append(" ")
+                var pos = (p.DateEpoch - startEpoch)/range;
+                if (first && pos > 0)
+                {
+                    // TODO: Indicate a missing, ungraphed time portion?
+                    sb.Append((pos - 1).ToString("n1", CultureInfo.InvariantCulture))
+                      .Append(" ")
+                      .Append(height)
+                      .Append(" ");
+                    first = false;
+                }
+                sb.Append(pos.ToString("n1", CultureInfo.InvariantCulture)).Append(" ")
                   .Append((height - getVal(p) / divisor).ToString("n1", CultureInfo.InvariantCulture)).Append(" ");
             }
             sb.Append(width)
