@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             /// Name as specified in DashboardSettings.json.
             /// Real name can be different, like for localhost, for example.
             /// </summary>
-            internal string Endpoint { get; set; }
+            internal string Endpoint { get; }
 
             internal List<Cache> Caches { get; }
             

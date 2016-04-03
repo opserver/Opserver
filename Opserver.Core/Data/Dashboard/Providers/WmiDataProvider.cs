@@ -11,14 +11,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private readonly WMISettings _config;
         private readonly List<WmiNode> _wmiNodes;
         private readonly Dictionary<string, WmiNode> _wmiNodeLookup;
-        private readonly List<Node> _allNodes;
 
         public WmiDataProvider(WMISettings settings) : base(settings)
         {
             _config = settings;
             _wmiNodes = InitNodeList(_config.Nodes).OrderBy(x => x.Endpoint).ToList();
             // Do this ref cast list once
-            _allNodes = _wmiNodes.Cast<Node>().ToList();
+            AllNodes = _wmiNodes.Cast<Node>().ToList();
             // For fast lookups
             _wmiNodeLookup = new Dictionary<string, WmiNode>(_wmiNodes.Count);
             foreach(var n in _wmiNodes)
@@ -100,6 +99,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override bool HasData => DataPollers.Any(x => x.HasData());
 
-        public override List<Node> AllNodes => _allNodes;
+        public override List<Node> AllNodes { get; }
     }
 }
