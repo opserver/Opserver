@@ -10,11 +10,21 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private readonly WMISettings _config;
         private readonly List<WmiNode> _wmiNodes;
+        private readonly Dictionary<string, WmiNode> _wmiNodeLookup;
+        private readonly List<Node> _allNodes;
 
         public WmiDataProvider(WMISettings settings) : base(settings)
         {
             _config = settings;
             _wmiNodes = InitNodeList(_config.Nodes).OrderBy(x => x.OriginalName).ToList();
+            // Do this ref cast list once
+            _allNodes = _wmiNodes.Cast<Node>().ToList();
+            // For fast lookups
+            _wmiNodeLookup = new Dictionary<string, WmiNode>(_wmiNodes.Count);
+            foreach(var n in _wmiNodes)
+            {
+                _wmiNodeLookup[n.Id] = n;
+            }
         }
 
         /// <summary>
@@ -72,6 +82,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return nodesList;
         }
 
+        private WmiNode GetWmiNodeById(string id)
+        {
+            WmiNode n;
+            return _wmiNodeLookup.TryGetValue(id, out n) ? n : null;
+        }
+
         public override int MinSecondsBetweenPolls => 10;
 
         public override string NodeType => "WMI";
@@ -87,6 +103,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override bool HasData => DataPollers.Any(x => x.HasData());
 
-        public override List<Node> AllNodes => _wmiNodes.Cast<Node>().ToList();
+        public override List<Node> AllNodes => _allNodes;
     }
 }

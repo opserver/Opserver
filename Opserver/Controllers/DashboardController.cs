@@ -54,11 +54,11 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        [Route("dashboard/graph/{node}/{type}")]
-        [Route("dashboard/graph/{node}/{type}/{subId?}")]
-        public async Task<ActionResult> NodeGraph(string node, string type, string subId)
+        [Route("dashboard/graph/{nodeId}/{type}")]
+        [Route("dashboard/graph/{nodeId}/{type}/{subId?}")]
+        public async Task<ActionResult> NodeGraph(string nodeId, string type, string subId)
         {
-            var n = DashboardData.GetNodeByName(node);
+            var n = DashboardData.GetNodeById(nodeId);
             var vd = new NodeGraphModel
             {
                 Node = n,

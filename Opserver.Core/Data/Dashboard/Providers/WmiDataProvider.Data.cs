@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
@@ -88,19 +87,19 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
+            var wNode = GetWmiNodeById(node.Id);
             return Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(wNode?.CPUHistory, start, end).ToList());
         }
 
         public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
+            var wNode = GetWmiNodeById(node.Id);
             return Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(wNode?.MemoryHistory, start, end).ToList());
         }
         
         public override Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var wNode = _wmiNodes.FirstOrDefault(x => x.Id == node.Id);
+            var wNode = GetWmiNodeById(node.Id);
             return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(wNode?.CombinedNetHistory, start, end).ToList());
         }
 
@@ -110,10 +109,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return Task.FromResult(new List<GraphPoint>());
         }
 
-        public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface @interface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var node = _wmiNodes.FirstOrDefault(x => x.Id == @interface.NodeId);
-            return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(node?.GetInterfaceUtilizationHistory(@interface), start, end).ToList());
+            var node = GetWmiNodeById(iface.NodeId);
+            return Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(node?.GetInterfaceUtilizationHistory(iface), start, end).ToList());
         }
 
         private static IEnumerable<TResult> FilterHistory<T, TResult>(List<T> list, DateTime? start, DateTime? end) where T : GraphPoint, TResult, new()
