@@ -34,6 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public List<string> TeamMembers { get; internal set; }
         public List<Interface> TeamMemberInterfaces => Node.Interfaces.Where(i => TeamMembers.Contains(i.Id)).ToList(); 
         public List<IPNet> IPs { get; internal set; }
+        public bool DHCPEnabled { get; internal set; }
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement

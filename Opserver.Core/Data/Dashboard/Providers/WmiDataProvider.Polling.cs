@@ -155,7 +155,7 @@ SELECT Name,
                 }
 
                 const string ipQuery = @"
-Select InterfaceIndex, IPAddress, IPSubnet
+Select InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
   From WIn32_NetworkAdapterConfiguration 
  Where IPEnabled = 'True'";
 
@@ -166,6 +166,7 @@ Select InterfaceIndex, IPAddress, IPSubnet
                         Interface i;
                         if (indexMap.TryGetValue(data.InterfaceIndex, out i))
                         {
+                            i.DHCPEnabled = data.DHCPEnabled;
                             string[] ips = data.IPAddress as string[],
                                      subnets = data.IPSubnet as string[];
                             for (var j = 0; j < (ips?.Length).GetValueOrDefault(0); j++)
