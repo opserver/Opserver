@@ -48,14 +48,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 VolumeHistory = new ConcurrentDictionary<string, List<Volume.VolumeUtilization>>();
             }
 
-            internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface @interface)
+            internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface iface)
             {
                 List<Interface.InterfaceUtilization> result;
-                if (@interface != null 
-                    && Interfaces.FirstOrDefault(x => x == @interface) != null
-                    && NetHistory.ContainsKey(@interface.Name))
+                if (iface != null 
+                    && Interfaces.FirstOrDefault(x => x == iface) != null
+                    && NetHistory.ContainsKey(iface.Name))
                 {
-                    result = NetHistory[@interface.Name];
+                    result = NetHistory[iface.Name];
                 }
                 else
                 {
