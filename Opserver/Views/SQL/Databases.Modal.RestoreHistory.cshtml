@@ -18,7 +18,8 @@ else {
             <tr>
                 <th>Restore date</th>
                 <th>User</th>
-                <th>Backup used</th>
+                <th>Backup media used</th>
+                <th>Backup created date</th>
             </tr>
         </thead>
         <tbody>
@@ -28,7 +29,8 @@ else {
 
                     <td>@(b.RestoreDate.ToRelativeTimeSpanMini())</td>
                     <td>@b.UserName</td>
-                    <td title="@b.BackupUsed">@b.BackupUsed.TruncateWithEllipsis(75)</td>
+                    <td title="@b.BackupMedia">@b.BackupMedia.TruncateWithEllipsis(75)</td>
+                    <td title="@b.BackupDate.ToString()">@(b.BackupDate.ToRelativeTimeSpanMini())</td>
                 </tr>
             }
         </tbody>

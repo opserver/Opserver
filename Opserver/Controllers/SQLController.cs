@@ -224,7 +224,7 @@ namespace StackExchange.Opserver.Controllers
 
                 case "restorehistory":
                     vd.View = DatabasesModel.Views.RestoreHistory;
-                    return View("Databases.Modal.Backups", vd);
+                    return View("Databases.Modal.RestoreHistory", vd);
 
                 case "storage":
                     vd.View = DatabasesModel.Views.Storage;

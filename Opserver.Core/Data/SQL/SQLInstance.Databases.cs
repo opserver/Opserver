@@ -338,14 +338,15 @@ Select db.database_id DatabaseId,
         {
             public DateTime RestoreDate { get; internal set; }
             public string  UserName { get; internal set; }
-            public string BackupUsed { get; internal set; }
+            public string BackupMedia { get; internal set; }
+            public DateTime BackupDate { get; internal set; }
 
             public Version MinVersion =>  SQLServerVersions.SQL2008.SP1;
             public string GetFetchSQL(Version v)
             {
                 return @"SELECT r.restore_date RestoreDate, 
                                             r.user_name UserName, 
-                                            bmf.physical_device_name BackupUsed
+                                            bmf.physical_device_name BackupMedia,bs.backup_finish_date BackupDate
                                             FROM msdb.dbo.[restorehistory] r 
                                             JOIN  [msdb].[dbo].[backupset] bs ON bs.backup_set_id=r.backup_set_id
                                             JOIN  [msdb].[dbo].[backupmediafamily] bmf on bmf.media_set_id = bs.media_set_id
