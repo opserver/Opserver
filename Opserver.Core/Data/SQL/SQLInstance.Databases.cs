@@ -67,6 +67,10 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
 
+        public Cache<List<RestoreHistory>> GetRestoreHistory(string databaseName) => 
+            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, 60);
+
+
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
 
@@ -330,6 +334,24 @@ Select db.database_id DatabaseId,
             }
         }
 
+        public class RestoreHistory : ISQLVersioned
+        {
+            public DateTime RestoreDate { get; internal set; }
+            public string  UserName { get; internal set; }
+            public string BackupUsed { get; internal set; }
+
+            public Version MinVersion =>  SQLServerVersions.SQL2008.SP1;
+            public string GetFetchSQL(Version v)
+            {
+                return @"SELECT r.restore_date RestoreDate, 
+                                            r.user_name UserName, 
+                                            bmf.physical_device_name BackupUsed
+                                            FROM msdb.dbo.[restorehistory] r 
+                                            JOIN  [msdb].[dbo].[backupset] bs ON bs.backup_set_id=r.backup_set_id
+                                            JOIN  [msdb].[dbo].[backupmediafamily] bmf on bmf.media_set_id = bs.media_set_id
+                                            WHERE r.destination_database_name = @databaseName"; 
+            }
+        }
         public class DatabaseBackup : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
