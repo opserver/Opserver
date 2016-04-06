@@ -67,6 +67,9 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
 
+        public Cache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
+            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, 60);
+
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
 
@@ -330,6 +333,57 @@ Select db.database_id DatabaseId,
             }
         }
 
+        public class RestoreHistory : ISQLVersioned
+        {
+            public DateTime RestoreFinishDate { get; internal set; }
+            public string  UserName { get; internal set; }
+            public string BackupMedia { get; internal set; }
+            public DateTime BackupStartDate { get; internal set; }
+            public DateTime BackupFinishDate { get; internal set; }
+            public char? RestoreType { get; internal set; }
+            public string RestoreTypeDescription => GetTypeDescription(RestoreType);
+
+            public static string GetTypeDescription(char? type)
+            {
+                switch (type)
+                {
+                    case 'D':
+                        return "Database";
+                    case 'F':
+                        return "File";
+                    case 'G':
+                        return "Filegroup";
+                    case 'I':
+                        return "Differential";
+                    case 'L':
+                        return "Log";
+                    case 'V':
+                        return "Verify Only";
+                    case null:
+                        return "";
+                    default:
+                        return "Unknown";
+                }
+            }
+
+            public Version MinVersion =>  SQLServerVersions.SQL2008.SP1;
+            public string GetFetchSQL(Version v)
+            {
+                return @"
+Select r.restore_date RestoreFinishDate, 
+       r.user_name UserName, 
+       bmf.physical_device_name BackupMedia,
+	   bs.backup_start_date BackupStartDate,
+	   bs.backup_finish_date BackupFinishDate,
+	   r.restore_type RestoreType
+  From msdb.dbo.[restorehistory] r 
+       Join [msdb].[dbo].[backupset] bs 
+         On r.backup_set_id = bs.backup_set_id
+       Join [msdb].[dbo].[backupmediafamily] bmf 
+         On bs.media_set_id = bmf.media_set_id
+ Where r.destination_database_name = @databaseName"; 
+            }
+        }
         public class DatabaseBackup : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
