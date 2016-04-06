@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Views.SQL
             UnusedIndexes,
             Storage,
             Other,
-            RestoreHistory
+            Restores
         }
 
         public static string GetDatabaseClass(SQLInstance.Database db)

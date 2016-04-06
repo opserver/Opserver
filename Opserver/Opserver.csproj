@@ -462,7 +462,7 @@
     <Content Include="Views\SQL\Databases.Modal.Columns.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\SQL\Databases.Modal.RestoreHistory.cshtml">
+    <Content Include="Views\SQL\Databases.Modal.Restores.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Storage.cshtml">

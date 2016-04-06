@@ -1,9 +1,10 @@
-﻿@using StackExchange.Opserver.Views.SQL
+﻿@using System.Globalization
+@using StackExchange.Opserver.Views.SQL
 @model DatabasesModel
 @{
     Layout = "Databases.Modal.cshtml";
     var s = Model.Instance;
-    var restoreList = s.GetRestoreHistory(Model.Database);
+    var restoreList = s.GetRestoreInfo(Model.Database);
 }
 @if (restoreList.Data == null || !restoreList.LastPollSuccessful)
 {
@@ -16,21 +17,23 @@ else {
     <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-restore-log">
         <thead>
             <tr>
-                <th>Restore date</th>
+                <th>Restore End</th>
+                <th>Type</th>
                 <th>User</th>
-                <th>Backup media used</th>
-                <th>Backup created date</th>
+                <th>Backup Media</th>
+                <th>Backup End</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var b in restoreList.Data.OrderByDescending(b => b.RestoreDate))
+            @foreach (var b in restoreList.Data.OrderByDescending(b => b.RestoreFinishDate))
             {
                 <tr>
 
-                    <td>@(b.RestoreDate.ToRelativeTimeSpanMini())</td>
+                    <td title="@b.RestoreFinishDate.ToEpochTime().ToString(CultureInfo.InvariantCulture)">@(b.RestoreFinishDate.ToRelativeTimeSpanMini())</td>
+                    <td>@b.RestoreTypeDescription</td>
                     <td>@b.UserName</td>
                     <td title="@b.BackupMedia">@b.BackupMedia.TruncateWithEllipsis(75)</td>
-                    <td title="@b.BackupDate.ToString()">@(b.BackupDate.ToRelativeTimeSpanMini())</td>
+                    <td title="@b.BackupFinishDate.ToEpochTime().ToString(CultureInfo.InvariantCulture)">@(b.BackupFinishDate.ToRelativeTimeSpanMini())</td>
                 </tr>
             }
         </tbody>
@@ -38,7 +41,7 @@ else {
             @if (!restoreList.Data.Any())
             {
                 <tr>
-                    <td colspan="6">
+                    <td colspan="5">
                         <div class="none-active">There aren't any info about restoration history.</div>
                     </td>
                 </tr>
