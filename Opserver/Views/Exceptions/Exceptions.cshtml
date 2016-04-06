@@ -34,10 +34,7 @@
         {
             <li class="@(a.Name == log ? "active" : null)" data-name="@a.Name">
                 <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = a.Name })">@a.Name</a>
-                @if (a.ExceptionCount > 0)
-                {
-                    <span class="badge">@a.ExceptionCount.ToComma()</span>
-                }
+                <span class="badge@(a.ExceptionCount == 0 ? " alert-success" : null)">@a.ExceptionCount.ToComma()</span>
             </li>
         }
     </ul>
