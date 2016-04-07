@@ -1,38 +1,15 @@
 ﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model ServersModel
 @{
     var standalone = Model.StandaloneInstances;
 }
-@helper MemoryCell(SQLInstance i) {
-    if (i.ServerInfo != null)
-    {
-        <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
-    }
-    else
-    {
-        var props = i.ServerProperties.SafeData();
-        if (props != null && props.PhysicalMemoryBytes > 0)
-        {
-            <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, 2) + "%")</td>
-        }
-        else
-        {
-            <td class="text-muted">?</td>
-        }
-    }
-}
 @helper ConnectionsCell(SQLInstance i) {
 var props = i.ServerProperties.SafeData(true);
     <td>
         <a href="@Url.Action(nameof(SQLController.Connections), new {node = i.Name})">@props.ConnectionCount.ToComma()</a> <span class="text-muted">/ @props.SessionCount.ToComma()</span>
     </td>
-}
-@helper BatchesCell(SQLInstance i) {
-    var batches = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
-    <td>@(batches != null ? ((long) batches.CalculatedValue).ToComma() : "")</td>
 }
 <div class="js-refresh" data-name="sql">
     @if (Model.Clusters.Any())
@@ -72,11 +49,11 @@ var props = i.ServerProperties.SafeData(true);
                             <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.GetDescription()</td>
                             <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
-                            @MemoryCell(n)
+                            @SQLHelpers.MemoryCell(n)
                             <td>@SQLHelpers.HealthDescriptionAGs(n, cAgs)</td>
                             <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@SQLHelpers.HealthDescription(n, cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
                             @ConnectionsCell(n)
-                            @BatchesCell(n)
+                            @SQLHelpers.BatchesCell(n)
                             <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
                             <td>@n.LastFetch.ToPollSpan()</td>
                         </tr>
@@ -116,13 +93,13 @@ var props = i.ServerProperties.SafeData(true);
                         <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
-                        @MemoryCell(i)
+                        @SQLHelpers.MemoryCell(i)
                         <td title="@dbs.Count.Pluralize("Database"):
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
                             @SQLHelpers.HealthDescription(i, dbs)
                         </td>
                         @ConnectionsCell(i)
-                        @BatchesCell(i)
+                        @SQLHelpers.BatchesCell(i)
                         <td>@i.LastFetch.ToPollSpan(mini: false)</td>
                     </tr>
                 }

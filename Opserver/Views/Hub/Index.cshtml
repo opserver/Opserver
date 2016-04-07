@@ -1,56 +1,51 @@
-﻿@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Data.HAProxy
-@using StackExchange.Opserver.Data.SQL
-@model StackExchange.Opserver.Views.Hub.HubModel
+﻿@model StackExchange.Opserver.Views.Hub.HubModel
 @{
-    // TODO: Cache check for poll fail -> toastr
     this.SetPageTitle("Hub");
-    var displayItems = Model.Items.OrderByWorst(i => i.MonitorStatus).ThenByDescending(i => i is IMonitedService);
-    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
 }
 @section head {
     <meta http-equiv="refresh" content="@(15*60)">
+    <style>
+    .circle-percent {
+        display: block;
+        height: 100px;
+        width: 100px;
+        margin: 0.5em auto;
+        position: relative;
+    }
+    .circle-percent .circle-label {
+        position: absolute;
+        display: block;
+        width: 100px;
+        transform: translate(0, -50%);
+        top: 50%;
+        text-align: center;
+        font-size: 2em;
+    }
+    .circle-percent .circle-label p {
+        line-height: 12px;
+        margin: 0;
+        font-size: 12px;
+    }
+    .circle-percent svg circle {
+        stroke-dashoffset: 0;
+        transition: stroke-dashoffset 1s linear;
+        stroke-width: 4px;
+    }
+    .circle-percent svg .bar {
+        stroke: #008cba;
+    }
+    </style>
     <script>
         $(function() {
-            function layout() {
-                $('.js-isotope').isotope({
-                    masonry: {
-                        columnWidth: 175,
-                        gutterWidth: 10
-                    }
-                });
-            }
-            Status.Dashboard.init({ refresh: 60, afterRefresh: layout });
-            layout();
+            Status.Dashboard.init({ refresh: 60 });
         });
-    </script>}
+    </script>
+    }
 <div>
-    <div class="node-dashboard main-dashboard striped-dashboard heads-up">
-        <div class="js-isotope js-refresh" data-name="all-servers">
-            @foreach (var i in displayItems)
-            {
-                var s = i as StackExchange.Opserver.Data.Dashboard.Node;
-                if (s != null)
-                {
-                    @Html.Partial("Dashboard.Node", s)
-                }
-                var ag = i as SQLNode.AGInfo;
-                if (ag != null)
-                {
-                    @Html.Partial("SQL.AvailabilityGroup", ag)
-                }
-                var ec = i as ElasticCluster;
-                if (ec != null)
-                {
-                    @Html.Partial("Elastic.Cluster", ec)
-                }
-                var hag = i as HAProxyGroup;
-                if (hag != null)
-                {
-                    @Html.Partial("HAProxy.Group", hag)
-                }
-            }
-        </div>
+    <div class="small js-isotope js-refresh" data-name="all-servers">
+        @if (Current.Settings.SQL.Enabled)
+        {
+            @Html.Partial("Index.SQL")
+        }
     </div>
 </div>
