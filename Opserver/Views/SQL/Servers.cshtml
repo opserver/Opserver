@@ -70,7 +70,7 @@ var props = i.ServerProperties.SafeData(true);
                         <tr class="@n.RowClass()@(n.IsAllAGsPrimary ? " info" : null)">
                             <td>@n.IconSpan() <a href="~/sql/instance?node=@n.Name.UrlEncode()">@n.Name</a></td>
                             <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.GetDescription()</td>
-                            <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.ServerInfo?.CPUStatusSpan())</a></td>
+                            <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
                             @MemoryCell(n)
                             <td>@SQLHelpers.HealthDescriptionAGs(n, cAgs)</td>
@@ -114,7 +114,7 @@ var props = i.ServerProperties.SafeData(true);
                     var dbs = i.Databases.SafeData(true);
                     <tr class="@i.RowClass()">
                         <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
-                        <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent + "%" : "")</a></td>
+                        <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
                         @MemoryCell(i)
                         <td title="@dbs.Count.Pluralize("Database"):

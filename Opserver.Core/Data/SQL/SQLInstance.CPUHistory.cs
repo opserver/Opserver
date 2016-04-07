@@ -7,22 +7,22 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
-        private Cache<List<ResourceEvent>> _cpuHistoryLastHour;
+        private Cache<List<ResourceEvent>> _resourceHistory;
         public Cache<List<ResourceEvent>> ResourceHistory
         {
             get
             {
-                return _cpuHistoryLastHour ?? (_cpuHistoryLastHour = new Cache<List<ResourceEvent>>
+                return _resourceHistory ?? (_resourceHistory = new Cache<List<ResourceEvent>>
+                {
+                    CacheForSeconds = RefreshInterval,
+                    UpdateCache = UpdateFromSql(nameof(ResourceHistory), async conn =>
                     {
-                        CacheForSeconds = RefreshInterval,
-                        UpdateCache = UpdateFromSql(nameof(ResourceHistory), async conn =>
-                            {
-                                var sql = GetFetchSQL<ResourceEvent>();
-                                var result = (await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false)).AsList();
-                                CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
-                                return result;
-                            })
-                    });
+                        var sql = GetFetchSQL<ResourceEvent>();
+                        var result = (await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false)).AsList();
+                        CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
+                        return result;
+                    })
+                });
             }
         }
 
