@@ -4,37 +4,6 @@
 }
 @section head {
     <meta http-equiv="refresh" content="@(15*60)">
-    <style>
-    .circle-percent {
-        display: block;
-        height: 100px;
-        width: 100px;
-        margin: 0.5em auto;
-        position: relative;
-    }
-    .circle-percent .circle-label {
-        position: absolute;
-        display: block;
-        width: 100px;
-        transform: translate(0, -50%);
-        top: 50%;
-        text-align: center;
-        font-size: 2em;
-    }
-    .circle-percent .circle-label p {
-        line-height: 12px;
-        margin: 0;
-        font-size: 12px;
-    }
-    .circle-percent svg circle {
-        stroke-dashoffset: 0;
-        transition: stroke-dashoffset 1s linear;
-        stroke-width: 4px;
-    }
-    .circle-percent svg .bar {
-        stroke: #008cba;
-    }
-    </style>
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: 60 });

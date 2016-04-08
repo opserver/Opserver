@@ -3,37 +3,14 @@
     <div class="panel panel-default">
         <div class="panel-heading">SQL</div>
         <div class="panel-body">
-            @{
-                var instnanceCount = SQLInstance.AllInstances.Count;
-                var agCount = SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups).Count();
-                var dbCount = SQLInstance.AllInstances.Sum(i => i.Databases.Data?.Count ?? 0);
-            }
             <div class="col-md-4">
-                <div class="circle-percent" data-pct="100">
-                    <svg width="100" height="100" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                        <circle r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                        <circle class="bar" r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                    </svg>
-                    <div class="circle-label">@instnanceCount.ToComma()<p>@instnanceCount.Pluralize("Instance", false)</p></div>
-                </div>
+                @Guages.Circle("Instance", SQLInstance.AllInstances)
             </div>
             <div class="col-md-4">
-                <div class="circle-percent col-md-4" data-pct="100">
-                    <svg width="100" height="100" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                        <circle r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                        <circle class="bar" r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                    </svg>
-                    <div class="circle-label">@agCount.ToComma()<p>@agCount.Pluralize("AG", false)</p></div>
-                </div>
+                @Guages.Circle("AG", SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups))
             </div>
             <div class="col-md-4">
-                <div class="circle-percent col-md-4" data-pct="100">
-                    <svg width="100" height="100" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
-                        <circle r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                        <circle class="bar" r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="565.48" stroke-dashoffset="0" />
-                    </svg>
-                    <div class="circle-label">@dbCount.ToComma()<p>@dbCount.Pluralize("Database", false)</p></div>
-                </div>
+                @Guages.Circle("Database", SQLInstance.AllInstances.SelectMany(i => i.Databases.SafeData(true)))
             </div>
             <table class="table table-super-condensed table-striped col-md-12">
                 @foreach (var c in SQLCluster.AllClusters)

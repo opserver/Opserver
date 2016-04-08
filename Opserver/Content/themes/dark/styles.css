@@ -7737,6 +7737,47 @@ li.L9 {
   position: relative;
   top: 1px;
 }
+.circle-percent {
+  display: block;
+  height: 100px;
+  width: 100px;
+  margin: 0.5em auto;
+  position: relative;
+}
+.circle-percent .circle-label {
+  position: absolute;
+  display: block;
+  width: 100px;
+  transform: translate(0, -50%);
+  top: 50%;
+  text-align: center;
+  font-size: 2em;
+}
+.circle-percent .circle-label p {
+  line-height: 12px;
+  margin: 0;
+  font-size: 12px;
+}
+.circle-percent svg circle {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear;
+  stroke-width: 4px;
+}
+svg .stroke-primary {
+  stroke: #DF691A;
+}
+svg .stroke-success {
+  stroke: #5cb85c;
+}
+svg .stroke-info {
+  stroke: #5bc0de;
+}
+svg .stroke-warning {
+  stroke: #f0ad4e;
+}
+svg .stroke-danger {
+  stroke: #d9534f;
+}
 .badge-link-list {
   list-style-type: none;
   padding-left: 0;
