@@ -15,16 +15,33 @@ namespace StackExchange.Opserver.Models
         public User(IIdentity identity)
         {
             Identity = identity;
-            var i = identity as FormsIdentity;
-            if (i == null)
+            if (Current.Security is StackExchange.Opserver.Models.Security.WindowsAuthenticationProvider)
             {
-                IsAnonymous = true;
-                return;
+                var i = identity as WindowsIdentity;
+                if (i == null)
+                {
+                    IsAnonymous = true;
+                    return;
+                }
+
+                IsAnonymous = !i.IsAuthenticated;
+                if (i.IsAuthenticated)
+                    AccountName = i.NameWithoutDomain();
+            }
+            else
+            {
+                var i = identity as FormsIdentity;
+                if (i == null)
+                {
+                    IsAnonymous = true;
+                    return;
+                }
+
+                IsAnonymous = !i.IsAuthenticated;
+                if (i.IsAuthenticated)
+                    AccountName = i.Name;
             }
 
-            IsAnonymous = !i.IsAuthenticated;
-            if (i.IsAuthenticated)
-                AccountName = i.Name;
         }
 
         public bool IsInRole(string role)

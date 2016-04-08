@@ -10,6 +10,7 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
+using System.Security.Principal;
 
 namespace StackExchange.Opserver.Models
 {
@@ -41,7 +42,11 @@ namespace StackExchange.Opserver.Models
             if (leadingAmp) sb.Insert(0, "&");
             return sb.ToStringRecycle(0, sb.Length - 1).AsHtml();
         }
-    }
+        public static string NameWithoutDomain(this WindowsIdentity identity)
+        {
+            return identity.Name.Substring(identity.Name.IndexOf(@"\") + 1); ;
+        }
+}
 
     public static class VolumeExtensionMethods
     {
