@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public static string ConvertTime(DateTime? date, DateTime valueIfNull)
             {
-                return (date ?? valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss");
+                return (date ?? valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss", CultureInfo.InvariantCulture);
             }
 
             public void AddQuery(string metric, string host = "*", bool counter = true, IDictionary<string, string> tags = null)

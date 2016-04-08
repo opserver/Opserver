@@ -184,3 +184,52 @@
         }
     }
 }
+
+
+.circle-percent {
+  display: block;
+  height: 100px;
+  width: 100px;
+  margin: 0.5em auto;
+  position: relative;
+
+  .circle-label {
+    position: absolute;
+    display: block;
+    width: 100px;
+    transform: translate(0, -50%);
+    top: 50%;
+    text-align: center;
+    font-size: 2em;
+
+    p {
+      line-height: 12px;
+      margin: 0;
+      font-size: 12px;
+    }
+  }
+
+  svg circle {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1s linear;
+    stroke-width: 4px;
+  }
+}
+
+svg {
+  .stroke-primary {
+    stroke: @brand-primary;
+  }
+  .stroke-success {
+    stroke: @brand-success;
+  }
+  .stroke-info {
+    stroke: @brand-info;
+  }
+  .stroke-warning {
+    stroke: @brand-warning;
+  }
+  .stroke-danger {
+    stroke: @brand-danger;
+  }
+}

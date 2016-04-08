@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver
 @using StackExchange.Opserver.Data
 @using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
 
 @helper HealthDescription(SQLInstance n, IEnumerable<IMonitorStatus> ims, bool unknownIsHealthy = false)
 {
@@ -50,4 +51,28 @@
             @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma() Healthy
         }
     }
+}
+@helper MemoryCell(SQLInstance i, int decimalPlaces = 2)
+{
+    if (i.ServerInfo != null)
+    {
+        <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
+    }
+    else
+    {
+        var props = i.ServerProperties.SafeData();
+        if (props != null && props.PhysicalMemoryBytes > 0)
+        {
+            <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, decimalPlaces) + "%")</td>
+        }
+        else
+        {
+            <td class="text-muted">?</td>
+        }
+    }
+}
+@helper BatchesCell(SQLInstance i)
+{
+var batches = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
+    <td>@(batches != null ? ((long)batches.CalculatedValue).ToComma() : "")</td>
 }
