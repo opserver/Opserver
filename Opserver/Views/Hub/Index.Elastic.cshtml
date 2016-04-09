@@ -1,0 +1,47 @@
+@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
+<div class="col-md-4">
+    <div class="panel panel-default">
+        <div class="panel-heading">Elasticsearch</div>
+        <div class="panel-body">
+            <div class="col-md-4">
+                @Guages.Circle("Cluster", ElasticCluster.AllClusters)
+            </div>
+            <div class="col-md-4">
+                @Guages.Circle("Index", ElasticCluster.AllClusters.SelectMany(c => c.HealthStatus.Data.Indexes.Values))
+            </div>
+            <div class="col-md-4">
+                @Guages.Circle("Shard", ElasticCluster.AllClusters.SelectMany(c => c.AllShards))
+            </div>
+            <table class="table table-super-condensed table-striped col-md-12">
+                @foreach (var c in ElasticCluster.AllClusters)
+                {
+                    var cShards = c.AllShards;
+                    var indexes = c.HealthStatus.Data.Indexes.Values;
+                    <tbody>
+                        <tr>
+                            <th>@c.Name</th>
+                            <th>CPU</th>
+                            <th>Mem</th>
+                            <th>Indexes</th>
+                            <th>Shards</th>
+                            <th>Searches</th>
+                        </tr>
+                        @foreach (var n in c.Nodes.SafeData(true).Nodes)
+                        {
+                            var shards = cShards.Where(sh => sh.Node == n.GUID).ToList();
+                            <tr class="@n.RowClass()@(c.State?.Data?.MasterNode == n.GUID ? " info" : null)">
+                                <td>@n.IconSpan() <a href="@Url.Action(nameof(ElasticController.Node), "Elastic", new { cluster = c.Name, node = n.Name })">@n.Name.TrimEnd("-" + c.Name)</a></td>
+                                <td>@(n.Stats.Process.CPU.Percent.ToComma())%</td>
+                                <td>@(n.Stats?.Process?.Memory?.ResidentInBytes.ToSize())</td>
+                                <td>@indexes.GetWorstStatus().IconSpan() @indexes.Count.ToComma()</td>
+                                <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma())</span></td>
+                                <td>@n.Stats.Indexes.Search.QueryTotal.ToComma()</td>
+                            </tr>
+                        }
+                    </tbody>
+                }
+            </table>
+        </div>
+    </div>
+</div>

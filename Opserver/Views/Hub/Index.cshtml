@@ -16,5 +16,9 @@
         {
             @Html.Partial("Index.SQL")
         }
+        @if (Current.Settings.Elastic.Enabled)
+        {
+            @Html.Partial("Index.Elastic")
+        }
     </div>
 </div>
