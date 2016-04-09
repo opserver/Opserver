@@ -1,15 +1,15 @@
 ﻿@using StackExchange.Opserver.Data.SQL
 <div class="col-md-4">
     <div class="panel panel-default">
-        <div class="panel-heading">SQL</div>
+        <div class="panel-heading">@SQLInstance.AllInstances.GetWorstStatus().IconSpan() SQL</div>
         <div class="panel-body">
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("Instance", SQLInstance.AllInstances)
             </div>
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("AG", SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups))
             </div>
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("Database", SQLInstance.AllInstances.SelectMany(i => i.Databases.SafeData(true)))
             </div>
             <table class="table table-super-condensed table-striped col-md-12">

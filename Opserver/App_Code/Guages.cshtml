@@ -3,6 +3,7 @@
 @using StackExchange.Opserver.Data
 @functions
 {
+    const int Size = 100;
     const double Full = 45 * 2 * Math.PI;
     static readonly string FullStr = Full.ToString(CultureInfo.InvariantCulture);
 }
@@ -13,7 +14,7 @@
     var total = statuses.Sum(i => i.Count());
     double startDeg = 0;
     <div class="circle-percent" data-pct="100">
-        <svg width="100" height="100" viewPort="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
             <circle r="45" cx="50" cy="50" stroke-dasharray="@Full.ToString(CultureInfo.InvariantCulture)" stroke-dashoffset="0" />
             @foreach (var s in statuses)
             {

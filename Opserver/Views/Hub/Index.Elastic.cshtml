@@ -2,15 +2,15 @@
 @using StackExchange.Opserver.Data.Elastic
 <div class="col-md-5">
     <div class="panel panel-default">
-        <div class="panel-heading">Elasticsearch</div>
+        <div class="panel-heading">@ElasticCluster.AllClusters.GetWorstStatus().IconSpan() Elasticsearch</div>
         <div class="panel-body">
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("Cluster", ElasticCluster.AllClusters)
             </div>
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("Index", ElasticCluster.AllClusters.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>()))
             </div>
-            <div class="col-md-4">
+            <div class="col-xs-4">
                 @Guages.Circle("Shard", ElasticCluster.AllClusters.SelectMany(c => c.AllShards))
             </div>
 
