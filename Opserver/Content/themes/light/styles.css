@@ -7767,8 +7767,9 @@ li.L9 {
 }
 .circle-percent svg circle {
   stroke-dashoffset: 0;
-  transition: stroke-dashoffset 1s linear;
   stroke-width: 4px;
+  transform-origin: 50% 50%;
+  fill: transparent;
 }
 svg .stroke-primary {
   stroke: #008cba;
@@ -7784,6 +7785,9 @@ svg .stroke-warning {
 }
 svg .stroke-danger {
   stroke: #F04124;
+}
+svg .stroke-muted {
+  stroke: rgba(78, 93, 108, 0.2);
 }
 .badge-link-list {
   list-style-type: none;

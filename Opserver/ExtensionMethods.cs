@@ -118,7 +118,7 @@ namespace StackExchange.Opserver
         }
 
         public static string RawClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
-        public static string RawClass(this MonitorStatus status, bool showGood = false)
+        public static string RawClass(this MonitorStatus status, bool showGood = false, bool maint = false)
         {
             switch (status)
             {
@@ -128,6 +128,8 @@ namespace StackExchange.Opserver
                     return "warning";
                 case MonitorStatus.Critical:
                     return "danger";
+                case MonitorStatus.Maintenance:
+                    return maint ? "info" : "muted";
                 default:
                     return "muted";
             }

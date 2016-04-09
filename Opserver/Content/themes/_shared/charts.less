@@ -211,8 +211,9 @@
 
   svg circle {
     stroke-dashoffset: 0;
-    transition: stroke-dashoffset 1s linear;
     stroke-width: 4px;
+    transform-origin: 50% 50%;
+    fill: transparent;
   }
 }
 
@@ -231,5 +232,8 @@ svg {
   }
   .stroke-danger {
     stroke: @brand-danger;
+  }
+  .stroke-muted {
+    stroke: @gray-light;
   }
 }
