@@ -34,6 +34,6 @@
                 <circle class="stroke-@(MonitorStatus.Unknown.RawClass())" r="45" cx="50" cy="50" fill="transparent" stroke-dasharray="@Full.ToString(CultureInfo.InvariantCulture)" stroke-dashoffset="0" />
             }
         </svg>
-        <div class="circle-label @worst.TextClass()">@total.ToComma()<p>@total.Pluralize(label, false)</p></div>
+        <div class="circle-label"><span class="@worst.TextClass()">@total.ToComma()</span><p>@total.Pluralize(label, false)</p></div>
     </div>
 }
