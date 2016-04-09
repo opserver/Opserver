@@ -31,7 +31,8 @@ namespace StackExchange.Opserver.Data.Elastic
             })
         });
 
-        public string Name => Nodes.HasData() ? Nodes.Data.Name : "Unknown";
+        public string Name => Nodes.HasData() ? Nodes.Data.Name : SettingsName;
+        public string ShortName(NodeInfo node) => node?.Name.TrimEnd("-" + Name);
 
         public class ClusterNodesInfo
         {
