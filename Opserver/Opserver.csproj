@@ -703,6 +703,7 @@
     <Content Include="Views\Elastic\Indexes.cshtml" />
     <Content Include="Views\Elastic\Shards.Table.cshtml" />
     <Content Include="Views\Hub\Index.Elastic.cshtml" />
+    <Content Include="Views\Hub\Index.HAProxy.cshtml" />
     <None Include="Views\Hub\Index.SQL.cshtml" />
   </ItemGroup>
   <ItemGroup>

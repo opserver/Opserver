@@ -20,5 +20,9 @@
         {
             @Html.Partial("Index.Elastic")
         }
+        @if (Current.Settings.HAProxy.Enabled)
+        {
+            @Html.Partial("Index.HAProxy")
+        }
     </div>
 </div>

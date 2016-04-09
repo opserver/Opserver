@@ -9032,6 +9032,9 @@ tr.cache-sub-item td:first-child {
 .ui-helper-hidden-accessible {
   display: none;
 }
+.total-row {
+  font-weight: bold;
+}
 .navbar-default .badge {
   background-color: #fff;
   color: #4E5D6C;
