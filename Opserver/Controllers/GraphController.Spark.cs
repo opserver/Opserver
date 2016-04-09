@@ -117,14 +117,14 @@ namespace StackExchange.Opserver.Controllers
                 if (first && pos > 0)
                 {
                     // TODO: Indicate a missing, ungraphed time portion?
-                    sb.Append((pos - 1).ToString("n1", CultureInfo.InvariantCulture))
+                    sb.Append((pos - 1).ToString("f1", CultureInfo.InvariantCulture))
                       .Append(" ")
                       .Append(height)
                       .Append(" ");
                     first = false;
                 }
-                sb.Append(pos.ToString("n1", CultureInfo.InvariantCulture)).Append(" ")
-                  .Append((height - getVal(p) / divisor).ToString("n1", CultureInfo.InvariantCulture)).Append(" ");
+                sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
+                  .Append((height - getVal(p) / divisor).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
             }
             sb.Append(width)
               .Append(" ")
