@@ -38,7 +38,7 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
         <div class="panel-body small list-group">
             <div class="well well-sm well-condensed">
                 <div class="pull-right">
-                    <span class="glyphicon glyphicon-tasks @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))"></span> @SQLHelpers.HealthDescriptionAGs(ag.LocalReplica.ReplicaNode, ag.LocalReplica.Databases, minimal: true)
+                    <span class="glyphicon glyphicon-tasks @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))"></span> @SQLHelpers.HealthDescriptionAGs(ag.LocalReplica.Databases, minimal: true)
                 </div>
                 <div>
                     @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.Node.Name</a> <span class="text-success">(Master)</span>
@@ -76,7 +76,7 @@ Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @d
     Connection State: @r.ConnectedState
     Mode: @r.AvailabilityMode">
                         <div class="pull-right">
-                            <span class="glyphicon glyphicon-tasks @(r.Databases.GetWorstStatus().TextClass())"></span> @SQLHelpers.HealthDescriptionAGs(r.ReplicaNode, r.Databases, minimal: true)
+                            <span class="glyphicon glyphicon-tasks @(r.Databases.GetWorstStatus().TextClass())"></span> @SQLHelpers.HealthDescriptionAGs(r.Databases, minimal: true)
                         </div>
                         <div>
                             <span>

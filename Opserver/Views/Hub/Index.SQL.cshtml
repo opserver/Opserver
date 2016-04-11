@@ -1,16 +1,19 @@
 ﻿@using StackExchange.Opserver.Data.SQL
+@{
+    var all = SQLInstance.AllInstances;
+}
 <div class="col-md-4">
     <div class="panel panel-default">
-        <div class="panel-heading">@SQLInstance.AllInstances.GetWorstStatus().IconSpan() SQL</div>
+        <div class="panel-heading">@all.GetWorstStatus().IconSpan() SQL</div>
         <div class="panel-body">
             <div class="col-xs-4">
-                @Guages.Circle("Instance", SQLInstance.AllInstances)
+                @Guages.Circle("Instance", all)
             </div>
             <div class="col-xs-4">
                 @Guages.Circle("AG", SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups))
             </div>
             <div class="col-xs-4">
-                @Guages.Circle("Database", SQLInstance.AllInstances.SelectMany(i => i.Databases.SafeData(true)))
+                @Guages.Circle("Database", all.SelectMany(i => i.Databases.SafeData(true)))
             </div>
             <table class="table table-super-condensed table-striped col-md-12">
                 @foreach (var c in SQLCluster.AllClusters)
@@ -29,7 +32,7 @@
                             <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16"/></td>
                             @SQLHelpers.MemoryCell(i, 0)
-                            <td>@SQLHelpers.HealthDescription(i, i.Databases.SafeData(true))</td>
+                            <td>@Helpers.HealthDescription(i.Databases.SafeData(true))</td>
                             @SQLHelpers.BatchesCell(i)
                         </tr>
                     }
@@ -49,11 +52,20 @@
                         <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16"/></td>
                         @SQLHelpers.MemoryCell(i, 0)
-                        <td>@SQLHelpers.HealthDescription(i, i.Databases.SafeData(true))</td>
+                        <td>@Helpers.HealthDescription(i.Databases.SafeData(true))</td>
                         @SQLHelpers.BatchesCell(i)
                     </tr>
                 }
                 </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td>@all.Sum(i => i.Databases.Data?.Count ?? 0).ToComma()</td>
+                        <td>@all.Sum(i => i.BatchesPerSec ?? 0).ToComma()</td>
+                    </tr>
+                </tfoot>
             </table>
         </div>
     </div>

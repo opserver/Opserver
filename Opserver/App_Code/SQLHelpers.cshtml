@@ -3,28 +3,7 @@
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Models
 
-@helper HealthDescription(SQLInstance n, IEnumerable<IMonitorStatus> ims, bool unknownIsHealthy = false)
-{
-    if (ims == null) { return; }
-    var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
-    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
-    var bad = ims.Except(warning).Except(good).ToList();
-    
-    if (bad.Any())
-    {
-        @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma()
-    }
-    if (warning.Any())
-    {
-        @:@MonitorStatus.Warning.IconSpan() @warning.Count.ToComma()
-    }
-    if (good.Any())
-    {
-        @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
-    }
-}
-
-@helper HealthDescriptionAGs(SQLNode n, IEnumerable<IMonitorStatus> ims, bool minimal = false, bool icons = true)
+@helper HealthDescriptionAGs(IEnumerable<IMonitorStatus> ims, bool minimal = false, bool icons = true)
 {
     if (ims == null) { return; }
     var bad = ims.Where(ag => ag.MonitorStatus != MonitorStatus.Good).ToList();
@@ -73,6 +52,5 @@
 }
 @helper BatchesCell(SQLInstance i)
 {
-var batches = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
-    <td>@(batches != null ? ((long)batches.CalculatedValue).ToComma() : "")</td>
+    <td>@(i.BatchesPerSec?.ToComma())</td>
 }

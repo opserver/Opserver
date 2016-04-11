@@ -122,7 +122,7 @@ if (counter == null)
                                 var dbs = i.Databases.Data;
                                 var dbStatus = dbs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @dbStatus.BackgroundClass()">
-                                    @SQLHelpers.HealthDescription(i, dbs)
+                                    @Helpers.HealthDescription(dbs)
                                     <label>
                                         @dbs.Count.Pluralize("Database", includeNumber: false)
                                     </label>
@@ -134,7 +134,7 @@ if (counter == null)
                                 var running = jobs.Count(j => j.IsRunning);
                                 var jobStatus = jobs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @jobStatus.BackgroundClass()">
-                                    @SQLHelpers.HealthDescription(i, jobs, unknownIsHealthy: true)
+                                    @Helpers.HealthDescription(jobs, unknownIsHealthy: true)
                                     <label>
                                         @jobs.Count.Pluralize("Job", includeNumber: false)
                                         @if (running > 0)

@@ -50,8 +50,8 @@ var props = i.ServerProperties.SafeData(true);
                             <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
                             @SQLHelpers.MemoryCell(n)
-                            <td>@SQLHelpers.HealthDescriptionAGs(n, cAgs)</td>
-                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@SQLHelpers.HealthDescription(n, cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
+                            <td>@SQLHelpers.HealthDescriptionAGs(cAgs)</td>
+                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Helpers.HealthDescription(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
                             @ConnectionsCell(n)
                             @SQLHelpers.BatchesCell(n)
                             <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
@@ -96,7 +96,7 @@ var props = i.ServerProperties.SafeData(true);
                         @SQLHelpers.MemoryCell(i)
                         <td title="@dbs.Count.Pluralize("Database"):
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
-                            @SQLHelpers.HealthDescription(i, dbs)
+                            @Helpers.HealthDescription(dbs)
                         </td>
                         @ConnectionsCell(i)
                         @SQLHelpers.BatchesCell(i)
