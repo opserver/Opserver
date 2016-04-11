@@ -171,6 +171,7 @@
     <Compile Include="Views\Home\About.Model.cs">
       <DependentUpon>About.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Hub\HubView.cs" />
     <Compile Include="Views\SQL\Instance.Model.cs">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Compile>

@@ -1,32 +1,22 @@
-﻿@model StackExchange.Opserver.Views.Hub.HubModel
+﻿@using StackExchange.Opserver.Views.Hub
+@model HubModel
 @{
     this.SetPageTitle("Hub");
 }
 @section head {
-    <meta http-equiv="refresh" content="@(15*60)">
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: 60 });
         });
     </script>
-    }
+}
 <div>
     <div class="small js-isotope js-refresh" data-name="all-servers">
-        @if (Current.Settings.SQL.Enabled)
+        @foreach (var v in HubView.Views)
         {
-            @Html.Partial("Index.SQL")
-        }
-        @if (Current.Settings.Elastic.Enabled)
-        {
-            @Html.Partial("Index.Elastic")
-        }
-        @if (Current.Settings.HAProxy.Enabled)
-        {
-            @Html.Partial("Index.HAProxy")
-        }
-        @if (Current.Settings.Dashboard.Enabled)
-        {
-            @Html.Partial("Index.Dashboard")
+            <div class="col-md-4">
+                @Html.Partial(v.ViewName)
+            </div>
         }
     </div>
 </div>

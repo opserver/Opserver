@@ -214,26 +214,45 @@
     stroke-width: 3px;
     transform-origin: 50% 50%;
     fill: transparent;
+    fill-opacity: 0.05;
   }
 }
 
 svg {
   .stroke-primary {
     stroke: @brand-primary;
+    &.filled {
+      fill: @brand-primary;
+    }
   }
   .stroke-success {
     stroke: @brand-success;
+    &.filled {
+      fill: @brand-success;
+    }
   }
   .stroke-info {
     stroke: @brand-info;
+    &.filled {
+      fill: @brand-info;
+    }
   }
   .stroke-warning {
     stroke: @brand-warning;
+    &.filled {
+      fill: @brand-warning;
+    }
   }
   .stroke-danger {
     stroke: @brand-danger;
+    &.filled {
+      fill: @brand-danger;
+    }
   }
   .stroke-muted {
     stroke: @gray-light;
+    &.filled {
+      fill: @gray-light;
+    }
   }
 }

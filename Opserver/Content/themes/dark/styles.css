@@ -7763,24 +7763,43 @@ li.L9 {
   stroke-width: 3px;
   transform-origin: 50% 50%;
   fill: transparent;
+  fill-opacity: 0.05;
 }
 svg .stroke-primary {
   stroke: #DF691A;
 }
+svg .stroke-primary.filled {
+  fill: #DF691A;
+}
 svg .stroke-success {
   stroke: #5cb85c;
+}
+svg .stroke-success.filled {
+  fill: #5cb85c;
 }
 svg .stroke-info {
   stroke: #5bc0de;
 }
+svg .stroke-info.filled {
+  fill: #5bc0de;
+}
 svg .stroke-warning {
   stroke: #f0ad4e;
+}
+svg .stroke-warning.filled {
+  fill: #f0ad4e;
 }
 svg .stroke-danger {
   stroke: #d9534f;
 }
+svg .stroke-danger.filled {
+  fill: #d9534f;
+}
 svg .stroke-muted {
   stroke: #4E5D6C;
+}
+svg .stroke-muted.filled {
+  fill: #4E5D6C;
 }
 .badge-link-list {
   list-style-type: none;
