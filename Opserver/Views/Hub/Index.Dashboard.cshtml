@@ -23,7 +23,7 @@
                         <tr>
                             <td>@g.Key.Name</td>
                             <td>@Helpers.HealthDescription(g)</td>
-                            <th>@g.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</th>
+                            <td>@g.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
                         </tr>
                     }
                 </tbody>
