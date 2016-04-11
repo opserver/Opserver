@@ -67,6 +67,9 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
 
+        public Cache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
+            DatabaseFetch<MissingIndex>(databaseName, RefreshInterval, 60);
+
         public Cache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
             DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, 60);
 
@@ -330,6 +333,41 @@ Select db.database_id DatabaseId,
                     return FetchSQL.Replace("compressed_backup_size,", "null compressed_backup_size,");
                 }
                 return FetchSQL;
+            }
+        }
+        public class MissingIndex : ISQLVersioned
+        {
+            public string SchemaName { internal set; get; }
+            public string TableName { internal set; get; }
+            public string ColumnName { internal set; get; }
+            public string ColumnUsage { internal set; get; }
+            public decimal AverageTotalUserCost { internal set; get; }
+            public decimal AverageUserImpact { internal set; get; }
+            public int UserSeeks { internal set; get; }
+            public int UserScans { internal set; get; }
+            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
+
+            public decimal AnticipatedImprovement { get; internal set; }
+            public string GetFetchSQL(Version v)
+            {
+                return @"SELECT                         
+                        PARSENAME(statement,2) as SchemaName,
+                        PARSENAME(statement,1) as TableName,
+                        column_name AS ColumnName,
+                        column_usage as ColumnUsage,
+                        avg_total_user_cost as AverageTotalUserCost,
+                        avg_user_impact as AverageUserImpact,
+                        user_seeks as UserSeeks,
+                        user_scans as UserScans,
+                        avg_total_user_cost* avg_user_impact *(user_seeks + user_scans) as AnticipatedImprovement
+
+                        FROM sys.dm_db_missing_index_details AS mid
+                        CROSS APPLY sys.dm_db_missing_index_columns(mid.index_handle)
+                        INNER JOIN sys.dm_db_missing_index_groups AS mig ON mig.index_handle = mid.index_handle
+                        INNER JOIN sys.dm_db_missing_index_group_stats migs on migs.group_handle = mig.index_group_handle
+                        INNER JOIN sys.databases d on d.database_id = mid.database_id
+                        where name = @databaseName and avg_total_user_cost* avg_user_impact *(user_seeks + user_scans)>0
+                        ORDER BY AnticipatedImprovement";
             }
         }
 
