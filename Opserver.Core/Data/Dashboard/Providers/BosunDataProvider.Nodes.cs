@@ -32,9 +32,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 if (!apiResponse.Success) return nodes;
 
                 var hostsDict = apiResponse.Result;
-
+                
                 foreach (var h in hostsDict.Values)
                 {
+                    if (Current.Settings.Dashboard.ExcludePatternRegex?.IsMatch(h.Name) ?? false)
+                        continue;
+
                     Version kernelVersion;
                     // Note: we can't follow this pattern, we'll need to refresh existing nodes 
                     // not wholesale replace on poll

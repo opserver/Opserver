@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new DashboardModel
                 {
-                    Nodes = DashboardData.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
+                    Nodes = DashboardData.AllNodes.ToList(),
                     ErrorMessages = DashboardData.ProviderExceptions.ToList(),
                     Filter = filter,
                     IsStartingUp = DashboardData.AnyDoingFirstPoll

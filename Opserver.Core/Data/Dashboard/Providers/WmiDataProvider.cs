@@ -33,8 +33,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private IEnumerable<WmiNode> InitNodeList(IList<string> names)
         {
             var nodesList = new List<WmiNode>(names.Count);
+            var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
             foreach (var nodeName in names)
             {
+                if (exclude?.IsMatch(nodeName) ?? false) continue;
+
                 var node = new WmiNode(nodeName)
                 {
                     Config = _config,
