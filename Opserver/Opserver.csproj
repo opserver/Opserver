@@ -703,6 +703,7 @@
     <Content Include="Views\Hub\Index.HAProxy.cshtml" />
     <Content Include="Views\Hub\Index.SQL.cshtml" />
     <Content Include="Views\Hub\Index.Dashboard.cshtml" />
+    <Content Include="Views\Hub\Index.Issues.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

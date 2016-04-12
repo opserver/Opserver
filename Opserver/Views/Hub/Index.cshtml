@@ -2,6 +2,7 @@
 @model HubModel
 @{
     this.SetPageTitle("Hub");
+    var views = HubView.Views;
 }
 @section head {
     <script>
@@ -12,11 +13,20 @@
 }
 <div>
     <div class="small js-isotope js-refresh" data-name="all-servers">
-        @foreach (var v in HubView.Views)
-        {
-            <div class="col-md-4">
-                @Html.Partial(v.ViewName)
-            </div>
-        }
+        <div class="col-md-4">
+            @for (var i = 0; i < views.Count; i += 2)
+            {
+                @Html.Partial(views[i].ViewName)
+            }
+        </div>
+        <div class="col-md-4">
+            @for (var i = 1; i < views.Count; i += 2)
+            {
+                @Html.Partial(views[i].ViewName)
+            }
+        </div>
+        <div class="col-md-4">
+            @Html.Partial("Index.Issues")
+        </div>
     </div>
 </div>

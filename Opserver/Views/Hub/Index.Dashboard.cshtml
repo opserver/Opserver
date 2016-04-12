@@ -7,9 +7,9 @@
 <div class="panel panel-default">
     <div class="panel-heading">@nodes.GetWorstStatus().IconSpan() @nodes.Count.Pluralize("Node")</div>
     <div class="panel-body">
-        <div class="col-xs-4">
+        @*<div class="col-xs-4">
             @Guages.Circle("Node", nodes)
-        </div>
+        </div>*@
         <table class="table table-super-condensed table-striped col-md-12">
             <tbody>
                 <tr>
@@ -29,7 +29,7 @@
             <tfoot>
                 <tr class="total-row">
                     <td><strong>Total</strong></td>
-                    <td>@nodes.Count.ToComma()</td>
+                    <td>@Helpers.HealthDescription(nodes)</td>
                     <td>@nodes.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
                 </tr>
             </tfoot>
