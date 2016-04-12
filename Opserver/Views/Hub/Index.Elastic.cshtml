@@ -7,13 +7,13 @@
     <div class="panel-heading">@all.GetWorstStatus().IconSpan() Elasticsearch</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            @Guages.Circle("Cluster", all)
+            @Gauges.Circle("Cluster", all)
         </div>
         <div class="col-xs-4">
-            @Guages.Circle("Index", all.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>()))
+            @Gauges.Circle("Index", all.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>()))
         </div>
         <div class="col-xs-4">
-            @Guages.Circle("Shard", all.SelectMany(c => c.AllShards))
+            @Gauges.Circle("Shard", all.SelectMany(c => c.AllShards))
         </div>
 
         <table class="table table-super-condensed table-striped col-md-12">

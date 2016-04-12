@@ -229,7 +229,7 @@
     <Content Include="Config\TeamCitySettings.json.example" />
     <Content Include="Content\img\logo\logo.eps" />
     <Content Include="Config\JiraSettings.json.example" />
-    <Content Include="App_Code\Guages.cshtml" />
+    <Content Include="App_Code\Gauges.cshtml" />
     <None Include="compilerconfig.json" />
     <Content Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
