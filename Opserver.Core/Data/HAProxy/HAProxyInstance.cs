@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         }
         protected override string GetMonitorStatusReason()
         {
-            if (Proxies.Data == null) return Name + ": No Proxy Data Available";
+            if (Proxies.Data == null) return Name + ": No Data";
 
             var statuses = Proxies.Data
                 .SelectMany(p => p.Servers)
