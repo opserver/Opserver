@@ -8,7 +8,7 @@
 }
 @helper Circle(string label, IEnumerable<IMonitorStatus> items)
 {
-    var statuses = items.ToList().GroupBy(i => i.MonitorStatus).ToList();
+    var statuses = items.OrderBy(i => i.MonitorStatus).ToList().GroupBy(i => i.MonitorStatus).ToList();
     var worst = MonitorStatus.Good;
     var total = statuses.Sum(i => i.Count());
     double startDeg = 0;
