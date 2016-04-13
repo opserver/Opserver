@@ -1,0 +1,50 @@
+﻿{
+    "allServers": {
+        "name": "All",
+        "instances": [
+            {
+                "name": "Core (Q&A)",
+                "port": "6379",
+                "analysisRegexes": {
+                    "**local**": "^local-",
+                    "**dev**": "^dev-",
+                    "**local**": "^local:",
+                    "**dev**": "^dev:"
+                }
+            },
+            {
+                "name": "Careers",
+                "port": "6380"
+            },
+            {
+                "name": "Gossip (Q&A)",
+                "port": "6381"
+            },
+            {
+                "name": "Analytics (Careers)",
+                "port": "6382"
+            },
+            {
+                "name": "CoreML (Q&A)",
+                "port": "6383",
+                "analysisRegexes": {
+                    "ltah-home-pred": "^ltah-home-pred-",
+                    "ltal-home-pred": "^ltal-home-pred-",
+                    "ml-ltap-cache": "^ml-ltap-cache-",
+                    "is-ml-elligible": "^is-ml-elligible-",
+                    "is-ml-elligible": "^is-lowml-elligible-"
+                }
+            }
+        ]
+    },
+    "Servers": [
+        { "name": "ny-redis01" },
+        { "name": "ny-redis02" },
+        { "name": "co-redis01" },
+        { "name": "co-redis02" },
+        {
+          "name": "ny-mlredis01",
+          "instances": [ { "name": "Machine Learning", "port": "6379" } ]
+        }
+    ]
+}

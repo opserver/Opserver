@@ -390,6 +390,7 @@
     <Compile Include="Controllers\PagerDutyController.Admin.cs">
       <DependentUpon>PagerDutyController.cs</DependentUpon>
     </Compile>
+    <Content Include="Config\MongoDBSettings.json.example" />
     <None Include="Help\SQL\WaitStats.md" />
     <Content Include="Views\CloudFlare\Railguns.cshtml" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />
