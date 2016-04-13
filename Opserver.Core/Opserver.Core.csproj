@@ -63,6 +63,18 @@
       <HintPath>..\packages\MiniProfiler.3.2.0.157\lib\net40\MiniProfiler.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="MongoDB.Bson, Version=2.2.3.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Bson.2.2.3\lib\net45\MongoDB.Bson.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.2.3.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Driver.2.2.3\lib\net45\MongoDB.Driver.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="MongoDB.Driver.Core, Version=2.2.3.3, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Driver.Core.2.2.3\lib\net45\MongoDB.Driver.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
@@ -173,6 +185,17 @@
     <Compile Include="Data\HAProxy\HAProxyIssues.cs" />
     <Compile Include="Data\IssuesProvider.cs" />
     <Compile Include="Data\Jira\JiraClient.cs" />
+    <Compile Include="Data\MongoDB\MongoDBAnalyzer.Memory.cs" />
+    <Compile Include="Data\MongoDB\MongoDBConnectionInfo.Cache.cs" />
+    <Compile Include="Data\MongoDB\MongoDBConnectionInfo.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInfo.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInfo.Parsing.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInfo.PropertyAttribute.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInstance.Cache.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInstance.Clients.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInstance.Info.cs" />
+    <Compile Include="Data\MongoDB\MongoDBInstance.cs" />
+    <Compile Include="Data\MongoDB\MongoDBIssues.cs" />
     <Compile Include="Data\PagerDuty\IncidentStatus.cs" />
     <Compile Include="Data\PagerDuty\PagerDutyAPI.Actions.cs">
       <DependentUpon>PagerDutyAPI.cs</DependentUpon>
@@ -209,9 +232,7 @@
     <Compile Include="Data\Redis\RedisInstance.Info.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Redis\RedisInstance.SlowLog.cs">
-      <DependentUpon>RedisInstance.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Data\Redis\RedisInstance.SlowLog.cs" />
     <Compile Include="Data\Redis\RedisIssues.cs" />
     <Compile Include="Data\SearchResult.cs" />
     <Compile Include="Data\SinglePollNode.cs" />
@@ -383,6 +404,7 @@
     <Compile Include="Settings\HAProxySettings.Traffic.cs" />
     <Compile Include="Settings\CloudFlareSettings.cs" />
     <Compile Include="Settings\JiraSettings.cs" />
+    <Compile Include="Settings\MongoDBSettings.cs" />
     <Compile Include="Settings\PagerDutySettings.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\PollingSettings.cs" />
@@ -421,6 +443,7 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

@@ -33,8 +33,11 @@ namespace StackExchange.Opserver.Models
         PagerDuty = 1 << 17,
         PagerDutyAdmin = 1 << 18,
 
-        InternalRequest = 1 << 19,
+        MongoDB = 1 << 19,
+        MongoDBAdmin = 1 << 20,
 
-        GlobalAdmin = 1 << 20
+        InternalRequest = 1 << 29,
+
+        GlobalAdmin = 1 << 30
     }
 }

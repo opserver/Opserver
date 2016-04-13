@@ -12,6 +12,7 @@ namespace StackExchange.Opserver.SettingsProviders
         public string ConnectionString { get; set; }
 
         // Accessors for built-in types
+        public MongoDBSettings MongoDB => GetSettings<MongoDBSettings>();
         public PagerDutySettings PagerDuty => GetSettings<PagerDutySettings>();
         public CloudFlareSettings CloudFlare => GetSettings<CloudFlareSettings>();
         public DashboardSettings Dashboard => GetSettings<DashboardSettings>();

@@ -383,6 +383,11 @@ namespace StackExchange.Opserver
             return string.Format(new FileSizeFormatProvider(), "{0:fs}", size);
         }
 
+        public static string ToHumanReadableSize(this double size)
+        {
+            return string.Format(new FileSizeFormatProvider(), "{0:fs}", size);
+        }
+
         public static string ToComma(this int? number, string valueIfZero = null)
         {
             return number.HasValue ? ToComma(number.Value, valueIfZero) : "";

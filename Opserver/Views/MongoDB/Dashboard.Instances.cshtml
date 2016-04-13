@@ -1,0 +1,259 @@
+﻿@using StackExchange.Opserver.Data.MongoDB
+@using StackExchange.Opserver.Views.MongoDB
+@model DashboardModel
+@helper ServerRole (MongoDBInfo.MongoDBInstanceRole role) {
+    switch (role)
+    {
+        case MongoDBInfo.MongoDBInstanceRole.Master:
+            <strong>Master</strong>
+            break;
+        case MongoDBInfo.MongoDBInstanceRole.Slave:
+            <span>Slave</span>
+            break;
+        default:
+            <span class="text-muted">Unknown</span>
+            break;
+    }
+}
+@helper CommonVersionHeader()
+{
+    if (Model.AllVersionsMatch)
+    {
+        @:- Version @Model.CommonVersion
+    }
+}
+@helper ServerRow (MongoDBInstance server, int nest = 0, long? toSync = null, string prevMaster = null) {
+    var info = server.Info.SafeData();
+    <tr class="@(nest == 0 && server.Name != prevMaster ? "first-of-group " : "")@server.RowClass()">
+        <td>
+            @*@if (Current.User.IsMongoDBAdmin)
+            {
+                <a href="#/mongodb/actions/@server.HostAndPort" class="hover-pulsate"><span class="glyphicon glyphicon-cog"></span></a>
+            }*@
+            @server.ConnectionInfo.Name
+        </td>
+        <td style="padding-left: @((20*nest).ToString())px">
+            @server.IconSpan()
+            <a href="~/mongodb/instance?node=@server.HostAndPort" class="@server.TextClass()">@server.Host</a>
+            <span class="text-muted small">(@server.Port.ToString()@if (toSync > 0){<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})</span>            
+        </td>
+        <td>@ServerRole(server.Role)</td>
+        <td title="@server.SlaveCount.Pluralize("direct slave"), @server.TotalSlaveCount.ToComma() total
+@if (server.SlaveConnections != null) {
+foreach (var s in server.SlaveConnections) {
+  @:@s.IP:@s.Port.ToString() (@AppCache.GetHostName(s.IP)) - @s.Status - Offset: @s.Offset.ToComma()
+}
+}">@server.SlaveCount.ToComma() @if(server.TotalSlaveCount > server.SlaveCount){<span class="text-muted small">(@((server.TotalSlaveCount - server.SlaveCount).ToComma()))</span>}</td>
+        @if (info != null)
+        {
+            <td>@info.Connections.Current <span class="text-muted small">(@info.Connections.Available)</span></td>
+            <td>@info.Mem.Virtual.ToHumanReadableSize() <span class="text-muted small">(@info.Mem.Used.ToHumanReadableSize())</span></td>
+            <td>@info.Clients.Connected.ToComma()</td>
+        } 
+        else
+        {
+            <td colspan="4" class="text-muted">No data available</td>
+        }
+        @if (!Model.AllVersionsMatch)
+        {
+            <td>@server.Version</td>
+        }
+        <td>@server.Info.ToPollSpan()</td>
+    </tr>
+    if (server.SlaveCount <= 0 || server.Replication == null) { return; }
+    foreach (var s in server.SlaveInstances)
+    {
+        if (s?.Replication == null) { continue; }
+        @ServerRow(s, nest + 1, s.IsSlaving ? s.Replication.MastSyncLeftBytes : (s.Replication.SlaveReplicationOffset == 1 ? 0 : server.Replication.MasterReplicationOffset - s.Replication.SlaveReplicationOffset))
+    }
+}
+@{
+    var instances = Model.Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host);
+    var masters = instances.Where(i => i.IsMaster).ToList();
+    var slaving = instances.Where(i => i.IsSlaving).ToList();
+    var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == MongoDBInfo.MongoDBInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();
+    var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0).ToList();
+    var standAloneMasters = masters.Where(m => m.SlaveCount == 0).ToList();
+}
+<div class="js-refresh" data-name="mongodb-overview">
+    @if (slaving.Any())
+    {
+        <h5 class="page-header">
+            @MonitorStatus.Warning.IconSpan() @slaving.Count.Pluralize("Slaving Instance") <span class="small">@CommonVersionHeader()</span>
+            @Helpers.PollNow(slaving)
+        </h5>
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Master</th>
+                    <th>Slave</th>
+                    <th>Master Status</th>
+                    <th>Link Status</th>
+                    <th>Bytes Left</th>
+                    @if (!Model.AllVersionsMatch)
+                    {
+                    <th>Version</th>}
+                    <th>As of</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var s in slaving)
+                {
+                    var master = s.Master;
+                    <tr>
+                        <td>@s.Name</td>
+                        @if (master != null)
+                        {
+                            <td>
+                                @master.IconSpan()
+                                <a href="?node=@master.HostAndPort" class="@master.TextClass()">@master.Host</a> <span class="text-muted">(@master.Port.ToString())</span>
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-muted">Not Found</td>
+                        }
+                        <td>
+                            @s.IconSpan()
+                            <a href="?node=@s.HostAndPort" class="@s.TextClass()">@s.Host</a> <span class="text-muted">(@s.Port.ToString())</span>
+                        </td>
+                        @if (master != null)
+                        {
+                            var sc = master.SlaveConnections?.FirstOrDefault(sci => s.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress)));
+                            if (sc != null)
+                            {
+                                <td>@sc.Status</td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">unknown</td>
+                            }
+                        }
+                        else
+                        {
+                            <td class="text-muted">unknown</td>
+                        }
+                        <td>@s.Replication.MasterLinkStatus</td>
+                        @switch (s.Replication.MastSyncLeftBytes)
+                        {
+                            case -1:
+                                <td class="text-muted">n/a</td>
+                                break;
+                            case 0:
+                                <td class="text-muted">unknown</td>
+                                break;
+                            default:
+                                <td title="@s.Replication.MastSyncLeftBytes.ToComma() bytes left to replicate">@s.Replication.MastSyncLeftBytes.ToHumanReadableSize()</td>
+                                break;
+                        }
+                        @if (!Model.AllVersionsMatch)
+                        {
+                            <td>@s.Version</td>
+                        }
+                        <td>@s.Info.ToPollSpan()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    @if (missing.Any())
+    {
+        <h5 class="page-header">
+            @MonitorStatus.Critical.IconSpan() @missing.Count.Pluralize("Missing/Unknown Instance")
+            @Helpers.PollNow(missing)
+        </h5>
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Host</th>
+                    <th>Role</th>
+                    <th>Exception</th>
+                    <th>As of</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in missing)
+                {
+                    <tr class="@m.RowClass()">
+                        <td>@m.Name</td>
+                        <td>
+                            @m.IconSpan()
+                            <a href="#" class="@m.TextClass()">@m.Host</a> <span class="text-muted">(@m.Port.ToString())</span>
+                        </td>
+                        <td>@ServerRole(m.Role)</td>
+                        <td title="@m.Info.ErrorMessage" class="text-muted">@m.Info.ErrorMessage.TruncateWithEllipsis(100)</td>
+                        <td>@m.Info.ToPollSpan()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    @if (mastersWithSlaves.Any())
+    {
+        <h5 class="page-header">
+            @mastersWithSlaves.GetWorstStatus().IconSpan() @mastersWithSlaves.Count.Pluralize("Group")
+            <span class="small">(@((mastersWithSlaves.Count + mastersWithSlaves.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
+            @Helpers.PollNow(mastersWithSlaves.Union(mastersWithSlaves.SelectMany(s => s.GetAllSlavesInChain())))
+        </h5>
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Host <span class="text-muted small">(port - behind)</span></th>
+                    <th>Role</th>
+                    <th>Slaves</th>
+                    <th title="Connections">Conn <span class="text-muted small">(/Free)</span></th>
+                    <th>Memory <span class="text-muted small">(used)</span></th>
+                    <th>Clients</th>
+                    @if (!Model.AllVersionsMatch)
+                    {
+                        <th>Version</th>
+                    }
+                    <th>As of</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ var prevMaster = ""; }
+                @foreach (var m in mastersWithSlaves)
+                {
+                    @ServerRow(m, prevMaster: prevMaster)
+                    prevMaster = m.Name;
+                }
+            </tbody>
+        </table>
+    }
+    @if (standAloneMasters.Any())
+    {
+        <h5 class="page-header">
+            @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count.Pluralize("Standalone")
+            <span class="small">(All Masters)@CommonVersionHeader()</span>
+            @Helpers.PollNow(standAloneMasters)
+        </h5>
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Host</th>
+                    <th>Role</th>
+                    <th>Slaves</th>
+                    <th title="Connections">Conn <span class="text-muted small">(/Free)</span></th>
+                    <th>Memory <span class="text-muted small">(used)</span></th>
+                    <th>Clients</th>
+                    @if (!Model.AllVersionsMatch)
+                    {
+                        <th>Version</th>
+                    }
+                    <th>As of</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var m in standAloneMasters.OrderBy(m => m.Port).ThenBy(m => m.Name))
+                {
+                    @ServerRow(m)
+                }
+            </tbody>
+        </table>
+    }
+</div>

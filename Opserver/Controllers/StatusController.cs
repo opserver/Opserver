@@ -87,6 +87,8 @@ namespace StackExchange.Opserver.Controllers
                 return RedirectToAction(nameof(RedisController.Dashboard), "Redis");
             if (s.Elastic.Enabled && s.Elastic.HasAccess())
                 return RedirectToAction(nameof(ElasticController.Dashboard), "Elastic");
+            if (s.MongoDB.Enabled && s.MongoDB.HasAccess())
+                return RedirectToAction(nameof(MongoDBController.Dashboard), "MongoDB");
             if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
                 return RedirectToAction(nameof(ExceptionsController.Exceptions), "Exceptions");
             if (s.HAProxy.Enabled && s.HAProxy.HasAccess())

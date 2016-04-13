@@ -164,6 +164,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\MongoDBController.cs" />
     <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
       <DependentUpon>Node.Graph.cshtml</DependentUpon>
@@ -171,6 +172,7 @@
     <Compile Include="Views\Home\About.Model.cs">
       <DependentUpon>About.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Views\MongoDB\Dashboard.Model.cs" />
     <Compile Include="Views\SQL\Instance.Model.cs">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Compile>
@@ -702,6 +704,15 @@
     <Content Include="Views\Hub\Index.HAProxy.cshtml" />
     <Content Include="Views\Hub\Index.SQL.cshtml" />
     <Content Include="Views\Hub\Index.Dashboard.cshtml" />
+    <Content Include="Views\MongoDB\_ViewStart.cshtml" />
+    <Content Include="Views\MongoDB\Dashboard.cshtml" />
+    <Content Include="Views\MongoDB\Dashboard.Instances.cshtml" />
+    <Content Include="Views\MongoDB\Instance.Analysis.Memory.cshtml" />
+    <Content Include="Views\MongoDB\Instance.Clients.cshtml" />
+    <Content Include="Views\MongoDB\Instance.Config.cshtml" />
+    <Content Include="Views\MongoDB\Instance.cshtml" />
+    <Content Include="Views\MongoDB\Instance.Info.cshtml" />
+    <Content Include="Views\MongoDB\Instance.Selector.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

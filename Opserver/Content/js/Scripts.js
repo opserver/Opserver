@@ -915,6 +915,82 @@ Status.Redis = (function () {
 
 })();
 
+Status.MongoDB = (function () {
+
+    function init(options) {
+        Status.MongoDB.options = options;
+
+        Status.loaders.register({
+            '#/mongodb/summary/': function (val) {
+                Status.popup('mongodb/instance/summary/' + val, { node: Status.MongoDB.options.node + ':' + Status.MongoDB.options.port });
+            },
+            '#/mongodb/actions/': function (val) {
+                Status.popup('mongodb/instance/actions/' + val);
+            }
+        });
+
+        function runAction(link, options) {
+            var action = $(link).data('action'),
+                node = $(link).closest('.js-mongodb-actions').data('node'),
+                confirmMessage = options && options.confirmMessage || $(link).data('confirm');
+
+            function innerRun() {
+                $.post('mongodb/instance/actions/' + node + '/' + action, options && options.data)
+                 .done(options && options.onComplete || function () {
+                     Status.refresh.run();
+                     bootbox.hideAll();
+                 });
+            }
+            if (confirmMessage) {
+                bootbox.confirm(confirmMessage, function (result) {
+                    if (result) {
+                        innerRun();
+                    }
+                });
+            } else {
+                innerRun();
+            }
+        }
+        $(document).on('change', '.js-mongodb-role-new-master', function () {
+            $('button.js-mongodb-role-slave').prop('disabled', this.value.length === 0);
+        }).on('click', '.js-instance-action', function (e) {
+            e.preventDefault();
+            runAction(this);
+        }).on('click', '.js-mongodb-role-slave', function (e) {
+            var modal = $(this).closest('.js-mongodb-actions'),
+                node = modal.data('node'),
+                newMaster = $('[name=newMaster]', modal).val();
+            e.preventDefault();
+            runAction(this, {
+                confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
+                data: {
+                    newMaster: newMaster
+                }
+            });
+        }).on('click', '.js-mongodb-key-purge', function (e) {
+            var modal = $(this).closest('.js-mongodb-actions'),
+                key = $('[name=key]', modal).val();
+            e.preventDefault();
+            runAction(this, {
+                data: {
+                    db: $('[name=database]', modal).val(),
+                    key: key
+                },
+                onComplete: function (result) {
+                    bootbox.alert(result
+                        ? 'Keys removed: ' + result.removed
+                        : 'Error removing keys');
+                }
+            });
+        });
+    }
+
+    return {
+        init: init
+    };
+
+})();
+
 Status.Exceptions = (function () {
 
     function refreshCounts(data) {

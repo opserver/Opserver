@@ -1,0 +1,34 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.MongoDB
+@using StackExchange.Opserver.Views.MongoDB
+@model DashboardModel
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+    this.SetPageTitle("MongoDB Dashboard");
+    this.SetTopNodes(MongoDBInstance.AllInstances, "MongoDB Servers", Model.CurrentInstance);
+}
+@helper TabLink(MongoDBViews view, string action, string name, bool includeParams = true)
+{
+    <li class="@(Model.View == view ? "active" : null)">
+        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.HostAndPort } : null)">@name</a>
+    </li>
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh ? 5 : 0) });
+            Status.MongoDB.init({ node: '@(Model.CurrentInstance?.Host ?? "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
+        });
+    </script>
+}
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(MongoDBViews.All, nameof(RedisController.Dashboard), "all servers", false)
+    @TabLink(MongoDBViews.Instance, nameof(RedisController.Instance), "instance")
+</ul>
+<div>
+    @if (Model.View == MongoDBViews.Instance && Model.CurrentInstance == null)
+    {
+        @Html.Partial("Instance.Selector")
+    }
+    @RenderBody()
+</div>

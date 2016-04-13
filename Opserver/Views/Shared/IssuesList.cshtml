@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Data.HAProxy
+@using StackExchange.Opserver.Data.MongoDB
 @using StackExchange.Opserver.Data.Redis
 @using StackExchange.Opserver.Data.SQL
 @{
@@ -35,6 +36,11 @@
         if (elasticCluster?.Item != null)
         {
             return $"/elastic/cluster?cluster={elasticCluster.Item.Name}";
+        }
+        var mongoDBInstance = i as Issue<MongoDBInstance>;
+        if (mongoDBInstance?.Item != null)
+        {
+            return $"/mongodb/instance?node={mongoDBInstance.Item.Name.UrlEncode()}";
         }
         var haproxyGroup = i as Issue<HAProxyGroup>;
         if (haproxyGroup?.Item != null)

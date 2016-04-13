@@ -68,6 +68,7 @@ namespace StackExchange.Opserver.Models
                         result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
                         result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
                         result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
+                        result |= GetRoles(Current.Settings.MongoDB, Roles.MongoDB, Roles.MongoDBAdmin);
 
                         _role = result;
                     }
@@ -90,5 +91,6 @@ namespace StackExchange.Opserver.Models
         public bool IsHAProxyAdmin => IsInRole(Roles.ExceptionsAdmin);
         public bool IsRedisAdmin => IsInRole(Roles.RedisAdmin);
         public bool IsSQLAdmin => IsInRole(Roles.SQLAdmin);
+        public bool IsMongoAdmin => IsInRole(Roles.MongoDBAdmin);
     }
 }

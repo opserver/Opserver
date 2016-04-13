@@ -1,0 +1,100 @@
+﻿@model StackExchange.Opserver.Data.MongoDB.MongoDBInstance
+@{
+    Layout = null;
+    var clients = Model.Clients.SafeData(true);
+}
+<h4 class="modal-title">
+    @clients.Count.ToComma() Clients
+</h4>
+@if (clients.Any())
+{
+    <table class="clients-table table table-striped table-responsive table-super-condensed table-hover" data-node="@Model.HostAndPort">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Server</th>
+                <th>Name</th>
+                <th>DB</th>
+                <th>Flags</th>
+                <th>Subs</th>
+                <th>Connected</th>
+                <th>Idle</th>
+                <th>Last Command</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in clients)
+            {
+                var c = client.MongoClient.Settings;
+
+                var ip = c.Server.Host;
+                var server = Model.GetServerName(ip);
+                <tr title="">
+                    <td>
+                        @*@if (.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)
+                        {
+                            <a class="hover-pulsate js-kill-client" href="#" data-addr="@c.Address"><span class="glyphicon glyphicon-remove text-danger"></span></a>
+                        }*@
+                        @*@(c.Address)*@
+                    </td>
+                    @*<td>@(server.HasValue() ? server : "unknown")</td>
+                    <td>@c.Name</td>
+                    <td>@c.Database.ToString()</td>
+                    @if (c.Flags != ClientFlags.None)
+                    {
+                        <td>@c.Flags.ToString()</td>
+                    }
+                    else
+                    {
+                        <td class="text-muted">none</td>
+                    }
+                    <td data-val="@((c.SubscriptionCount + c.PatternSubscriptionCount).ToString())">@c.SubscriptionCount.ToComma() <span class="text-muted">(@c.PatternSubscriptionCount.ToComma())</span></td>
+                    <td data-val="@c.AgeSeconds.ToString()">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
+                    <td data-val="@c.IdleSeconds.ToString()">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
+                    <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>*@
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script>
+        $(function() {
+            $('.clients-table').tablesorter({
+                headers: {
+                    3: { sorter: 'number' },
+                    5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                }
+            });
+            $('.js-kill-client').click(function(e) {
+                var anchor = $(this);
+                var node = anchor.closest('.clients-table').data('node');
+                var address = anchor.data('addr');
+                if (node && address && (e.ctrlKey || confirm('Kill the connection ' + address + ' ?'))) {
+                    anchor.addClass('icon-rotate-flip');
+                    $.ajax('/redis/instance/kill-client', {
+                        type: 'POST',
+                        data: {
+                            node: node,
+                            address: address
+                        },
+                        success: function(data) {
+                            if (data && data.success) {
+                                anchor.closest('tr').addClass('danger');
+                                anchor.remove();
+                            }
+                        },
+                        complete: function() {
+                            anchor.removeClass('icon-rotate-flip');
+                        }
+                    });
+                }
+                e.preventDefault();
+            });
+        });
+    </script>
+}
+else
+{
+    <div class="no-content">No Clients Found</div>
+}

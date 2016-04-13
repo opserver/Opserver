@@ -1,0 +1,317 @@
+﻿@using System.Globalization
+@using StackExchange.Opserver.Data.MongoDB
+@using Roles = StackExchange.Opserver.Models.Roles
+@model StackExchange.Opserver.Views.MongoDB.DashboardModel
+@{
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
+}
+<h5 class="page-header">
+    @i.IconSpan() @i.Host<span class="text-muted">: </span> @i.Port.ToString()
+    <small class="text-muted">(<a href="#/mongodb/summary/info">View INFO</a>)</small>
+    @Helpers.PollNow(i)
+</h5>
+<div class="row js-refresh" data-name="instance-summary">
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Summary
+                @*<span class="small text-muted">(<a href="#/mongodb/summary/config">view config</a> - <a href="~/mongodb/instance/get-config/@i.HostAndPort-config.zip">download</a>)</span>*@
+            </div>
+            <div class="panel-body small">
+                @{
+                    var info = i.Info.SafeData(true);
+                    var uptime = TimeSpan.FromSeconds(info.Server.UptimeInSeconds);
+                    var master = i.Master;
+                }
+                <div class="value-block col-md-3 col-sm-6">
+                    @i.Name
+                    <label>Name</label>
+                </div>
+                <div class="value-block col-md-3 col-sm-6">
+                    @info.Server.Version - @info.Mem.PlatformVersion bit
+                    <label>Version</label>
+                </div>
+                <div class="value-block col-md-3 col-sm-6" title="@uptime.ToReadableString()">
+                    @uptime.ToTimeStringMini(4)
+                    <label>Uptime</label>
+                </div>
+                <div class="value-block col-md-3 col-sm-6">
+                    @i.Clients.SafeData(true).Count.ToComma()
+                    <label>
+                        Clients
+                        @*<span class="text-muted">(<a href="#/mongodb/summary/clients">view</a>)</span>*@
+                    </label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Replication</div>
+            <div class="panel-body small">
+                <div class="value-block col-md-4">
+                    @i.Role.GetDescription()
+                    @*@if (i.IsSlave)
+                    {
+                        var offset = i.Master.Replication.MasterReplicationOffset - i.Replication.SlaveReplicationOffset;
+                        if (offset > 0)
+                        {
+                            <span class="text-muted">(@offset.ToSize() behind)</span>
+                        }
+                    }*@
+                    <label>Role</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @i.SlaveCount.ToComma()
+                    <label>@i.SlaveCount.Pluralize("Slave", includeNumber: false)</label>
+                </div>
+                @if (i.Role == MongoDBInfo.MongoDBInstanceRole.Slave)
+                {
+                    <div class="value-block col-md-4">
+                        @if (master != null)
+                        {
+                            @master.HostAndPort
+                        }
+                        else
+                        {
+                            @:Unknown
+                        }
+                        <label>Master</label>
+                    </div>
+                }
+
+                @if (i.Replication != null && i.Replication.BacklogActive)
+                {
+                    <div class="value-block col-md-4">
+                        <div class="progress">
+                            <div class="progress-bar" style="width: @(i.Replication.BacklogHistoryLength*100.0 / i.Replication.BacklogSize)%;"></div>
+                            <span>@i.Replication.BacklogHistoryLength.ToHumanReadableSize() / @i.Replication.BacklogSize.ToHumanReadableSize()</span>
+                        </div>
+                        <label>Backlog</label>
+                    </div>
+                }
+
+                <div>
+                    @if (master == null && i.SlaveCount == 0)
+                    {
+                        <span class="text-muted">No slaves or masters</span>
+                    }
+                    else
+                    {
+                        if (master != null)
+                        {
+                            <div class="mongodb-instance">
+                                @master.IconSpan() <a href="?node=@master.HostAndPort">@master.HostAndPort</a> <span class="text-muted">(Master)</span>
+                            </div>
+                        }
+                        <div class="mongodb-instance">
+                            @i.IconSpan() <a href="?node=@i.HostAndPort">@i.HostAndPort</a> <span class="text-muted">(Current)</span>
+                        </div>
+                        var slaves = i.SlaveInstances;
+                        if (slaves.Count > 0)
+                        {
+                            <div class="mongodb-instance">
+                                @foreach (var s in slaves)
+                                {
+                                    <div>
+                                        @s.IconSpan() <a href="?node=@s.HostAndPort">@s.HostAndPort</a> <span class="text-muted">(Slave)</span>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Memory</div>
+            <div class="panel-body small">
+                <div class="value-block col-md-4" title="@info.Mem.Used.ToComma() bytes">
+                    @info.Mem.Used.ToHumanReadableSize()
+                    <label>Used</label>
+                </div>
+                <div class="value-block col-md-4" title="@info.Mem.Virtual.ToComma() bytes">
+                    @info.Mem.Virtual.ToHumanReadableSize()
+                    <label>Virtual</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Mem.ExtendedSupport.ToString(CultureInfo.CurrentCulture)
+                    <label>Extended Support</label>
+                </div>
+                <div class="value-block col-md-4" title="@info.Mem.Mapped.ToComma() bytes">
+                    @info.Mem.Mapped.ToHumanReadableSize()
+                    <label>Mapped</label>
+                </div>
+                <div class="value-block col-md-4" title="@info.Mem.MappedWithJournal.ToComma() bytes">
+                    @info.Mem.MappedWithJournal.ToHumanReadableSize()
+                    <label>Mapped With Journal</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Mem.Note
+                    <label>Note</label>
+                </div>
+            </div>
+        </div>
+    @*<div class="panel panel-default">
+            <div class="panel-heading">Persistence</div>
+            <div class="panel-body small">
+                @{
+                    var lastSave = info.Persistence.RDBLastSaveTime.ToDateTime();
+                }
+                @if (info.Persistence.Loading)
+                {
+                    <div class="col-md-12 alert alert-warning">
+                        Load in progress!
+                    </div>
+                }
+                @if (info.Persistence.RDBBGSaveInProgress)
+                {
+                    <div class="col-md-12 alert alert-warning">
+                        Background save in progress (@TimeSpan.FromSeconds(info.Persistence.RDBCurrentBGSaveTimeSeconds).ToTimeStringMini())
+                    </div>
+                }
+                <div class="row">
+                    <div class="value-block col-md-4" title="Duration: @TimeSpan.FromSeconds(info.Persistence.RDBLastBGSaveTimeSeconds).ToTimeStringMini()">
+                        @lastSave.ToRelativeTimeSpan() <span class="text-muted">(@info.Persistence.RDBLastBGSaveStatus)</span>
+                        <label>Last Save</label>
+                    </div>
+                    <div class="value-block col-md-4">
+                        @info.Persistence.RDBChangesSinceLastSave.ToComma()
+                        <label>Changes since save</label>
+                    </div>
+                    <div class="value-block col-md-4">
+                        <span class="@(info.Persistence.AOFEnabled ? "text-success" : "text-warning")">
+                            @(info.Persistence.AOFEnabled ? "Enabled" : "Disabled")
+                        </span>
+                        <label>AOF</label>
+                    </div>
+                </div>
+                @if (info.Persistence.AOFEnabled)
+                {
+                    <div class="row">
+                        <div class="value-block col-md-3" title="Duration: @TimeSpan.FromSeconds(info.Persistence.AOFLastRewriteTimeSeconds).ToTimeStringMini()">
+                            <span class="@(info.Persistence.AOFLastBGRewriteStatusIsGood ? "text-success" : "text-danger")">
+                                @(info.Persistence.AOFLastBGRewriteStatus?.ToUpper())
+                            </span>
+                            <label>Last AOF Rewrite</label>
+                        </div>
+                        <div class="value-block col-md-3" title="@info.Persistence.AOFBaseSize.ToComma() bytes">
+                            @info.Persistence.AOFBaseSize.ToSize()
+                            <label>AOF Base Size</label>
+                        </div>
+                        <div class="value-block col-md-3" title="@info.Persistence.AOFCurrentSize.ToComma() bytes">
+                            @info.Persistence.AOFCurrentSize.ToSize()
+                            <label>AOF Current Size</label>
+                        </div>
+                        <div class="value-block col-md-3">
+                            @info.Persistence.AOFDelayedFSync.ToComma()
+                            <label>AOF Delayed fsyncs</label>
+                        </div>
+                    </div>
+
+                    if (info.Persistence.AOFRewriteInProgress)
+                    {
+                        <div class="col-md-12 alert alert-warning">
+                            AOF rewrite in progress(@TimeSpan.FromSeconds(info.Persistence.AOFCurrentRewriteTimeSeconds).ToTimeStringMini())
+                        </div>
+                    }
+                }
+            </div>
+        </div>*@
+        <div class="panel panel-default">
+            <div class="panel-heading">Databases (@(info.Databases.Databases.Count))</div>
+            <div class="panel-body small">
+                <table class="table table-striped table-hover table-super-condensed">
+                    <thead>
+                        <tr>
+                            <th>DB</th>
+                            <th>Size</th>
+                            <th>Is Empty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var kd in info.Databases.Databases)
+                        {
+                            <tr>
+                                <td>
+                                    @kd.Name @*@if (Current.User.IsInRole(Roles.RedisAdmin))
+                                    { <span class="text-muted">(<a href="~/mongodb/analyze/memory?node=@i.HostAndPort&db=@kd.Name">analyze</a>)</span>}*@
+                                </td>
+                                <td>@kd.SizeOnDisk.ToHumanReadableSize()</td>
+                                <td>@kd.IsEmpty</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Network</div>
+            <div class="panel-body small">
+                <div class="value-block col-md-4">
+                    @info.Network.Requests.ToComma()
+                    <label>Total Requests</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Network.Tx.ToHumanReadableSize()
+                    <label>Tx</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Network.Rx.ToHumanReadableSize()
+                    <label>Rx</label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Connections</div>
+            <div class="panel-body small">
+                <div class="value-block col-md-4">
+                    @info.Connections.TotalCreated.ToComma()
+                    <label>Total Connections</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Connections.Available.ToComma()
+                    <label>Available Connections</label>
+                </div>
+                <div class="value-block col-md-4">
+                    @info.Connections.Current.ToComma()
+                    <label>Current Connections</label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Clients <span class="small text-muted">(<a class="top-right-nav" href="#/mongodb/summary/clients">View All</a>)</span></div>
+            <div class="panel-body small">
+                @if (i.Clients.Data == null)
+                {
+                    <div class="no-content">No Client Connection Data</div>
+                }
+                else
+                {
+                    var clients = i.Clients.Data;
+                    <table class="table table-striped table-hover table-super-condensed">
+                        <tbody>
+                            @{
+                                var ips = clients.GroupBy(ip => ip).ToList();
+                                if (ips.Any())
+                                {
+                                    <tr>
+                                        <th colspan="3" class="sub-header text-center">Summary <span class="text-muted">(by IP)</span></th>
+                                    </tr>
+                                    foreach (var ip in ips.OrderBy(ipg => ipg.Key))
+                                    {
+                                        <tr>
+                                            <td>@ip.Key.Ip</td>
+                                            <td>@((ip.Key.Active)?"inactive":"active")</td>
+                                            <td>@ip.Count().ToComma() <span class="text-muted">@ip.Count().Pluralize("connection", includeNumber: false)</span></td>
+                                        </tr>
+                                    }
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>
