@@ -601,7 +601,14 @@ Create Table #vlfTemp (
 );
 
 Declare @dbId int, @dbName sysname;
-Declare dbs Cursor Local Fast_Forward For (Select database_id, name From sys.databases Where state not in (1,6));
+Declare dbs Cursor Local Fast_Forward For (
+    Select db.database_id, db.name From sys.databases db
+    Left Join sys.database_mirroring m ON db.database_id = m.database_id
+    Where db.state <> 6
+        and ( db.state <> 1 
+            or ( m.mirroring_role = 2 and m.mirroring_state = 4 )
+            )
+    );
 Open dbs;
 Fetch Next From dbs Into @dbId, @dbName;
 While @@FETCH_STATUS = 0
