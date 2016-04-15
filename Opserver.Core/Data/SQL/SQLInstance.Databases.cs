@@ -601,7 +601,14 @@ Create Table #vlfTemp (
 );
 
 Declare @dbId int, @dbName sysname;
-Declare dbs Cursor Local Fast_Forward For (Select database_id, name From sys.databases Where state <> 6);
+Declare dbs Cursor Local Fast_Forward For (
+    Select db.database_id, db.name From sys.databases db
+    Left Join sys.database_mirroring m ON db.database_id = m.database_id
+    Where db.state <> 6
+        and ( db.state <> 1 
+            or ( m.mirroring_role = 2 and m.mirroring_state = 4 )
+            )
+    );
 Open dbs;
 Fetch Next From dbs Into @dbId, @dbName;
 While @@FETCH_STATUS = 0
@@ -810,8 +817,12 @@ Select v.object_id Id,
 //         And c.TABLE_NAME = kcu.TABLE_NAME
 //         And c.COLUMN_NAME = kcu.COLUMN_NAME
 //Order By c.TABLE_SCHEMA, c.TABLE_NAME, c.ORDINAL_POSITION";
+            internal const string FetchSQL2008Columns = @"
+       c.is_sparse IsSparse,
+       c.is_column_set IsColumnSet,
+";
 
-            public string GetFetchSQL(Version v) => @"
+            internal const string FetchSQL = @"
 Select s.name [Schema],
        t.name TableName,
        v.name ViewName,
@@ -827,9 +838,7 @@ Select s.name [Schema],
        c.collation_name CollationName,
        c.is_identity IsIdentity,
        c.is_computed IsComputed,
-       c.is_filestream IsFileStream,
-       c.is_sparse IsSparse,
-       c.is_column_set IsColumnSet,
+       c.is_filestream IsFileStream, {0}
        (Select Top 1 i.name
           From sys.indexes i 
                Join sys.index_columns ic On i.object_id = ic.object_id And i.index_id = ic.index_id
@@ -850,6 +859,15 @@ Select s.name [Schema],
        Left Join sys.schemas fs On ft.schema_id = fs.schema_id
        Left Join sys.columns fc On fkc.referenced_object_id = fc.object_id And fkc.referenced_column_id = fc.column_id
 Order By 1, 2, 3";
+
+            public string GetFetchSQL(Version v)
+            {
+                if (v >= SQLServerVersions.SQL2008.RTM)
+                    return string.Format(FetchSQL, FetchSQL2008Columns);
+
+                return string.Format(FetchSQL, "");
+            }
+
         }
 
     }
