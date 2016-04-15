@@ -388,6 +388,16 @@ namespace StackExchange.Opserver
             return string.Format(new FileSizeFormatProvider(), "{0:fs}", size);
         }
 
+        public static string ToHumanReadableMbSize(this long size)
+        {
+            return string.Format(new FileSizeFormatProvider(), "{0:fs}", size * 1024 * 1024);
+        }
+
+        public static string ToHumanReadableMbSize(this double size)
+        {
+            return string.Format(new FileSizeFormatProvider(), "{0:fs}", size * 1024 * 1024);
+        }
+
         public static string ToComma(this int? number, string valueIfZero = null)
         {
             return number.HasValue ? ToComma(number.Value, valueIfZero) : "";

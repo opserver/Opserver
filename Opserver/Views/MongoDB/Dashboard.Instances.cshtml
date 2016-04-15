@@ -47,7 +47,7 @@ foreach (var s in server.SlaveConnections) {
         @if (info != null)
         {
             <td>@info.Connections.Current <span class="text-muted small">(@info.Connections.Available)</span></td>
-            <td>@info.Mem.Virtual.ToHumanReadableSize() <span class="text-muted small">(@info.Mem.Used.ToHumanReadableSize())</span></td>
+            <td>@info.Mem.Virtual.ToHumanReadableMbSize() <span class="text-muted small">(@info.Mem.Used.ToHumanReadableMbSize())</span></td>
             <td>@info.Clients.Connected.ToComma()</td>
         } 
         else

@@ -124,24 +124,24 @@
         <div class="panel panel-default">
             <div class="panel-heading">Memory</div>
             <div class="panel-body small">
-                <div class="value-block col-md-4" title="@info.Mem.Used.ToComma() bytes">
-                    @info.Mem.Used.ToHumanReadableSize()
+                <div class="value-block col-md-4" title="@info.Mem.Used.ToComma() megabytes">
+                    @info.Mem.Used.ToHumanReadableMbSize()
                     <label>Used</label>
                 </div>
-                <div class="value-block col-md-4" title="@info.Mem.Virtual.ToComma() bytes">
-                    @info.Mem.Virtual.ToHumanReadableSize()
+                <div class="value-block col-md-4" title="@info.Mem.Virtual.ToComma() megabytes">
+                    @info.Mem.Virtual.ToHumanReadableMbSize()
                     <label>Virtual</label>
                 </div>
                 <div class="value-block col-md-4">
                     @info.Mem.ExtendedSupport.ToString(CultureInfo.CurrentCulture)
                     <label>Extended Support</label>
                 </div>
-                <div class="value-block col-md-4" title="@info.Mem.Mapped.ToComma() bytes">
-                    @info.Mem.Mapped.ToHumanReadableSize()
+                <div class="value-block col-md-4" title="@info.Mem.Mapped.ToComma() megabytes">
+                    @info.Mem.Mapped.ToHumanReadableMbSize()
                     <label>Mapped</label>
                 </div>
-                <div class="value-block col-md-4" title="@info.Mem.MappedWithJournal.ToComma() bytes">
-                    @info.Mem.MappedWithJournal.ToHumanReadableSize()
+                <div class="value-block col-md-4" title="@info.Mem.MappedWithJournal.ToComma() megabytes">
+                    @info.Mem.MappedWithJournal.ToHumanReadableMbSize()
                     <label>Mapped With Journal</label>
                 </div>
                 <div class="value-block col-md-4">
@@ -280,7 +280,7 @@
             </div>
         </div>
         <div class="panel panel-default">
-            <div class="panel-heading">Clients <span class="small text-muted">(<a class="top-right-nav" href="#/mongodb/summary/clients">View All</a>)</span></div>
+            <div class="panel-heading">Clients @*<span class="small text-muted">(<a class="top-right-nav" href="#/mongodb/summary/clients">View All</a>)</span></div>*@
             <div class="panel-body small">
                 @if (i.Clients.Data == null)
                 {

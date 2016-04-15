@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net;
 using System.Text.RegularExpressions;
 using Jil;
@@ -173,7 +174,7 @@ namespace StackExchange.Opserver.Data.MongoDB
             [MongoDBInfoProperty("mappedWithJournal")]
             public long MappedWithJournal { get; internal set; }
 
-            [MongoDBInfoProperty("mem.note")]
+            [MongoDBInfoProperty("note")]
             public string Note { get; internal set; }
         }
 
