@@ -601,7 +601,7 @@ Create Table #vlfTemp (
 );
 
 Declare @dbId int, @dbName sysname;
-Declare dbs Cursor Local Fast_Forward For (Select database_id, name From sys.databases Where state <> 6);
+Declare dbs Cursor Local Fast_Forward For (Select database_id, name From sys.databases Where state not in (1,6));
 Open dbs;
 Fetch Next From dbs Into @dbId, @dbName;
 While @@FETCH_STATUS = 0
