@@ -84,6 +84,7 @@ namespace StackExchange.Opserver
                     ? item.Remove(item.Length - 1) + "ies"
                     : item.EndsWith("s")
                         ? item.Remove(item.Length - 1) + "es"
+                        : item.EndsWith("ex")? item+"es"
                         : item + "s");
         }
 
