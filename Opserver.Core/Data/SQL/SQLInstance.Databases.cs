@@ -337,37 +337,42 @@ Select db.database_id DatabaseId,
         }
         public class MissingIndex : ISQLVersioned
         {
-            public string SchemaName { internal set; get; }
-            public string TableName { internal set; get; }
-            public string ColumnName { internal set; get; }
-            public string ColumnUsage { internal set; get; }
-            public decimal AverageTotalUserCost { internal set; get; }
-            public decimal AverageUserImpact { internal set; get; }
-            public int UserSeeks { internal set; get; }
-            public int UserScans { internal set; get; }
+            public string SchemaName { get; internal set; }
+            public string TableName { get; internal set; }
+            public decimal AvgTotalUserCost { get; internal set; }
+            public decimal AvgUserImpact { get; internal set; }
+            public int UserSeeks { get; internal set; }
+            public int UserScans { get; internal set; }
+            public int UniqueCompiles { get; internal set; }
+            public string EqualityColumns { get; internal set; }
+            public string InEqualityColumns { get; internal set; }
+            public string IncludedColumns { get; internal set; }
+            public decimal EstimatedImprovement { get; internal set; }
             public Version MinVersion => SQLServerVersions.SQL2008.SP1;
-
-            public decimal AnticipatedImprovement { get; internal set; }
+            
             public string GetFetchSQL(Version v)
             {
-                return @"SELECT                         
-                        PARSENAME(statement,2) as SchemaName,
-                        PARSENAME(statement,1) as TableName,
-                        column_name AS ColumnName,
-                        column_usage as ColumnUsage,
-                        avg_total_user_cost as AverageTotalUserCost,
-                        avg_user_impact as AverageUserImpact,
-                        user_seeks as UserSeeks,
-                        user_scans as UserScans,
-                        avg_total_user_cost* avg_user_impact *(user_seeks + user_scans) as AnticipatedImprovement
-
-                        FROM sys.dm_db_missing_index_details AS mid
-                        CROSS APPLY sys.dm_db_missing_index_columns(mid.index_handle)
-                        INNER JOIN sys.dm_db_missing_index_groups AS mig ON mig.index_handle = mid.index_handle
-                        INNER JOIN sys.dm_db_missing_index_group_stats migs on migs.group_handle = mig.index_group_handle
-                        INNER JOIN sys.databases d on d.database_id = mid.database_id
-                        where name = @databaseName and avg_total_user_cost* avg_user_impact *(user_seeks + user_scans)>0
-                        ORDER BY AnticipatedImprovement";
+                return @"
+ Select s.name SchemaName,
+        o.name TableName,
+        avg_total_user_cost AvgTotalUserCost,
+        avg_user_impact AvgUserImpact,
+        user_seeks UserSeeks,
+        user_scans UserScans,
+		unique_compiles UniqueCompiles,
+		equality_columns EqualityColumns,
+		inequality_columns InEqualityColumns,
+		included_columns IncludedColumns,
+        avg_total_user_cost* avg_user_impact *(user_seeks + user_scans) EstimatedImprovement
+   From sys.dm_db_missing_index_details mid
+        Join sys.dm_db_missing_index_groups mig On mig.index_handle = mid.index_handle
+        Join sys.dm_db_missing_index_group_stats migs On migs.group_handle = mig.index_group_handle
+        Join sys.databases d On d.database_id = mid.database_id
+        Join sys.objects o On mid.object_id = o.object_id
+        Join sys.schemas s On o.schema_id = s.schema_id
+  Where d.name = @databaseName
+    And avg_total_user_cost * avg_user_impact * (user_seeks + user_scans) > 0
+  Order By EstimatedImprovement Desc";
             }
         }
 
