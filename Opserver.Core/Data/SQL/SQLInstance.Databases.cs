@@ -67,6 +67,9 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
 
+        public Cache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
+            DatabaseFetch<MissingIndex>(databaseName, RefreshInterval, 60);
+
         public Cache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
             DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, 60);
 
@@ -330,6 +333,46 @@ Select db.database_id DatabaseId,
                     return FetchSQL.Replace("compressed_backup_size,", "null compressed_backup_size,");
                 }
                 return FetchSQL;
+            }
+        }
+        public class MissingIndex : ISQLVersioned
+        {
+            public string SchemaName { get; internal set; }
+            public string TableName { get; internal set; }
+            public decimal AvgTotalUserCost { get; internal set; }
+            public decimal AvgUserImpact { get; internal set; }
+            public int UserSeeks { get; internal set; }
+            public int UserScans { get; internal set; }
+            public int UniqueCompiles { get; internal set; }
+            public string EqualityColumns { get; internal set; }
+            public string InEqualityColumns { get; internal set; }
+            public string IncludedColumns { get; internal set; }
+            public decimal EstimatedImprovement { get; internal set; }
+            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
+            
+            public string GetFetchSQL(Version v)
+            {
+                return @"
+ Select s.name SchemaName,
+        o.name TableName,
+        avg_total_user_cost AvgTotalUserCost,
+        avg_user_impact AvgUserImpact,
+        user_seeks UserSeeks,
+        user_scans UserScans,
+		unique_compiles UniqueCompiles,
+		equality_columns EqualityColumns,
+		inequality_columns InEqualityColumns,
+		included_columns IncludedColumns,
+        avg_total_user_cost* avg_user_impact *(user_seeks + user_scans) EstimatedImprovement
+   From sys.dm_db_missing_index_details mid
+        Join sys.dm_db_missing_index_groups mig On mig.index_handle = mid.index_handle
+        Join sys.dm_db_missing_index_group_stats migs On migs.group_handle = mig.index_group_handle
+        Join sys.databases d On d.database_id = mid.database_id
+        Join sys.objects o On mid.object_id = o.object_id
+        Join sys.schemas s On o.schema_id = s.schema_id
+  Where d.name = @databaseName
+    And avg_total_user_cost * avg_user_impact * (user_seeks + user_scans) > 0
+  Order By EstimatedImprovement Desc";
             }
         }
 

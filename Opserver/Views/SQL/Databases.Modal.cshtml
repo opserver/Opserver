@@ -1,4 +1,5 @@
-﻿@using StackExchange.Opserver.Views.SQL
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
 @model DatabasesModel
 @{
     var db = Model.Database;
@@ -24,7 +25,7 @@
         @RenderLink(DatabasesModel.Views.Restores, "Restores")
         @RenderLink(DatabasesModel.Views.Views, "Views")
         @RenderLink(DatabasesModel.Views.Storage, "Storage")
-        @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", true)
+        @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", Model.Instance.Version < Singleton<SQLInstance.MissingIndex>.Instance.MinVersion)
         @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", true)
         @RenderLink(DatabasesModel.Views.BlitzIndex, "Blitz Index", true)
     </div>

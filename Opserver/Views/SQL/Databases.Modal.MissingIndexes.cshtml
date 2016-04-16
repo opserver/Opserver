@@ -1,0 +1,79 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = "Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var missingIndexList = s.GetMissingIndexes(Model.Database);
+}
+@helper ColumnSummary(SQLInstance.MissingIndex i)
+{
+    if (i.EqualityColumns.HasValue())
+    {
+        <div><span class="text-muted">Equals:</span> @i.EqualityColumns</div>
+    }
+    if (i.InEqualityColumns.HasValue())
+    {
+        <div><span class="text-muted">Not Equals:</span> @i.InEqualityColumns</div>
+    }
+    if (i.IncludedColumns.HasValue())
+    {
+        <div><span class="text-muted">Include:</span> @i.IncludedColumns</div>
+    }
+}
+@if (missingIndexList.Data == null || !missingIndexList.LastPollSuccessful)
+{
+    <div class="alert alert-warning">
+        <h5>There was an error fetching missing indexes info from @s.Name for @Model.Database</h5>
+        <p class="error-stack">@missingIndexList.ErrorMessage</p>
+    </div>
+}
+else
+{
+    <div class="alert alert-dismissible alert-info" style="margin-bottom: 2px;">
+        These are the indexes SQL Server <i>thinks</i> are missing.
+        It's not always right and you should not blindly create what it says.
+        <div>Things like existing similar indexes are not taken into account.</div>
+    </div>
+    <table class="table table-striped table-hover table-super-condensed table-responsive js-database-missing-index-log">
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>Est. Improvement</th>
+                <th>Columns</th>
+                <th>Avg Impact</th>
+                <th>Avg Cost</th>
+                <th>User Scans</th>
+                <th>User Seeks</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var i in missingIndexList.Data.OrderByDescending(b => b.EstimatedImprovement))
+            {
+                <tr>
+                    <td><span class="text-muted">@(i.SchemaName).</span><span>@i.TableName</span></td>
+                    <td title="Unique Compiles: @i.UniqueCompiles.ToComma()">@i.EstimatedImprovement.ToString("n3")</td>
+                    <td title="Equality: @i.EqualityColumns.IsNullOrEmptyReturn("(none)")
+Inequality: @i.InEqualityColumns.IsNullOrEmptyReturn("(none)")
+Included: @i.IncludedColumns.IsNullOrEmptyReturn("(none)")">
+                        @ColumnSummary(i)
+                    </td>
+                    <td>@i.AvgUserImpact</td>
+                    <td title="@i.AvgTotalUserCost.ToString("f4")">@i.AvgTotalUserCost.ToString("##.####")</td>
+                    <td>@i.UserScans.ToComma()</td>
+                    <td>@i.UserSeeks.ToComma()</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="7"><b>Total</b> <span class="note">(@missingIndexList.Data.Count.Pluralize("missing index"))</span></td>
+            </tr>
+        </tfoot>
+    </table>
+    <script>
+        $(function () {
+            $('.js-database-missing-index-log').tablesorter();
+        });
+    </script>
+}

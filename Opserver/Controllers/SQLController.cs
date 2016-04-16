@@ -233,6 +233,9 @@ namespace StackExchange.Opserver.Controllers
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);
+                case "missingindexes":
+                    vd.View = DatabasesModel.Views.MissingIndexes;
+                    return View("Databases.Modal.MissingIndexes", vd);
             }
             return View("Databases.Modal.Tables", vd);
         }
