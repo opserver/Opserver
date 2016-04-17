@@ -233,6 +233,9 @@ namespace StackExchange.Opserver.Controllers
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);
+                case "storedprocedures":
+                    vd.View = DatabasesModel.Views.StoredProcedures;
+                    return View("Databases.Modal.StoredProcedures", vd);
             }
             return View("Databases.Modal.Tables", vd);
         }
