@@ -384,38 +384,36 @@ Select db.database_id DatabaseId,
         public class StoredProcedure : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
-
-            public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
             public string ProcedureName { get; internal set; }
             public DateTime CreationDate { get; internal set; }
             public DateTime LastModifiedDate { get; internal set; }
-
-            public DateTime? LastExecuted { set; get; }
-
-            public int? ExecutionCount { set; get; }
-
-            public int? LastElapsedTime { set; get; }
-            public int? MaxElapsedTime { set; get; }
-            public int? MinElapsedTime { set; get; }
+            public DateTime? LastExecuted { get; internal set; }
+            public int? ExecutionCount { get; internal set; }
+            public int? LastElapsedTime { get; internal set; }
+            public int? MaxElapsedTime { get; internal set; }
+            public int? MinElapsedTime { get; internal set; }
             public string Definition { get; internal set; }
-            public string GetFetchSQL(Version v) => @"select p.object_id,s.name as SchemaName,
-                                                    p.name ProcedureName,
-                                                    p.create_date CreationDate,
-                                                    p.modify_date LastModifiedDate,
-                                                    max(ps.last_execution_time) as LastExecuted,
-                                                    max(ps.execution_count) as ExecutionCount,
-                                                    max(ps.last_elapsed_time/1000) as LastElapsedTime,
-                                                    max(ps.max_elapsed_time/1000) as MaxElapsedTime,
-                                                    max(ps.min_elapsed_time/1000) as MinElapsedTime,      
-                                                    sm.definition Definition
-                                                    From sys.procedures p
-                                                    Join sys.schemas s	On p.schema_id = s.schema_id
-                                                    Join sys.sql_modules sm On sm.object_id = p.object_id  
-                                                    left join sys.dm_exec_procedure_stats ps on ps.object_id=p.object_id										
-                                                    Where p.is_ms_shipped = 0 
-                                                    group by p.object_id,s.name,p.name,p.create_date ,p.modify_date,sm.definition
-                                                    order by object_id,p.name, p.create_date,p.modify_date";
+            public string GetFetchSQL(Version v) => @"
+Select p.object_id,s.name as SchemaName,
+    p.name ProcedureName,
+    p.create_date CreationDate,
+    p.modify_date LastModifiedDate,
+    max(ps.last_execution_time) as LastExecuted,
+    max(ps.execution_count) as ExecutionCount,
+    max(ps.last_elapsed_time/1000) as LastElapsedTime,
+    max(ps.max_elapsed_time/1000) as MaxElapsedTime,
+    max(ps.min_elapsed_time/1000) as MinElapsedTime,      
+    sm.definition Definition
+  From sys.procedures p
+    Join sys.schemas s	
+        On p.schema_id = s.schema_id
+    Join sys.sql_modules sm 
+        On sm.object_id = p.object_id  
+    left join sys.dm_exec_procedure_stats ps 
+        On ps.object_id=p.object_id										
+Where p.is_ms_shipped = 0 
+  Group By p.object_id,s.name,p.name,p.create_date ,p.modify_date,sm.definition";
         }
         public class RestoreHistory : ISQLVersioned
         {
