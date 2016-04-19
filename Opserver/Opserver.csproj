@@ -477,6 +477,9 @@
     <Content Include="Views\SQL\Databases.Modal.Tables.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\SQL\Databases.Modal.StoredProcedures.cshtml" >
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\SQL\Databases.Modal.Views.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>

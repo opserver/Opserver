@@ -750,14 +750,15 @@ Status.SQL = (function () {
                 Status.popup('sql/active/filters' + window.location.search, null, filterOptions);
             },
             '#/db/': function (val, firstLoad, prev) {
-                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') > 0
+                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') || val.indexOf('storedprocedures/') > 0
                           ? val.split('/').pop() : null;
                 function showColumns() {
-                    $('.js-database-table,.js-database-view').removeClass('info').next().hide();
-                    $('[data-table="' + obj + '"],[data-view="' + obj + '"]').addClass('info').next().show(200);
+                    $('.js-database-table,.js-database-view,.js-database-storedproc').removeClass('info').next().hide();
+                    $('[data-table="' + obj + '"],[data-view="' + obj + '"],[data-storedproc="' + obj + '"]').addClass('info').next().show(200);
                 }
                 if (!firstLoad) {
-                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev))) {
+                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev)) || (/\/storedprocedures/.test(val) && /\/storedprocedures/.test(prev))) {
+
                         showColumns();
                         return;
                     }
@@ -828,8 +829,8 @@ Status.SQL = (function () {
             return false;
         }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
-        }).on('click', '.js-database-table,.js-database-view', function () {
-            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables').replace(/\/views\/.*/, '/views');
+        }).on('click', '.js-database-table,.js-database-view,.js-database-storedproc', function () {
+            window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables').replace(/\/views\/.*/, '/views').replace(/\/storedprocedures\/.*/, '/storedprocedures');
         });
     }
 

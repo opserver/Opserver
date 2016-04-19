@@ -64,6 +64,10 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
             DatabaseFetch<DatabaseView>(databaseName, 60, 5*60);
 
+        public Cache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
+    DatabaseFetch<StoredProcedure>(databaseName, 60, 5 * 60);
+
+
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
 
@@ -376,6 +380,42 @@ Select db.database_id DatabaseId,
             }
         }
 
+
+        public class StoredProcedure : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            public string SchemaName { get; internal set; }
+            public string ProcedureName { get; internal set; }
+            public DateTime CreationDate { get; internal set; }
+            public DateTime LastModifiedDate { get; internal set; }
+            public DateTime? LastExecuted { get; internal set; }
+            public int? ExecutionCount { get; internal set; }
+            public int? LastElapsedTime { get; internal set; }
+            public int? MaxElapsedTime { get; internal set; }
+            public int? MinElapsedTime { get; internal set; }
+            public string Definition { get; internal set; }
+            public string GetFetchSQL(Version v) => @"
+Select p.object_id,
+       s.name as SchemaName,
+       p.name ProcedureName,
+       p.create_date CreationDate,
+       p.modify_date LastModifiedDate,
+       Max(ps.last_execution_time) as LastExecuted,
+       Max(ps.execution_count) as ExecutionCount,
+       Max(ps.last_elapsed_time/1000) as LastElapsedTime,
+       Max(ps.max_elapsed_time/1000) as MaxElapsedTime,
+       Max(ps.min_elapsed_time/1000) as MinElapsedTime,
+       sm.definition [Definition]
+  From sys.procedures p
+       Join sys.schemas s
+         On p.schema_id = s.schema_id
+       Join sys.sql_modules sm 
+         On p.object_id  = sm.object_id 
+       Left Join sys.dm_exec_procedure_stats ps 
+         On p.object_id	= ps.object_id
+ Where p.is_ms_shipped = 0
+ Group By p.object_id, s.name, p.name, p.create_date, p.modify_date, sm.definition";
+        }
         public class RestoreHistory : ISQLVersioned
         {
             public DateTime RestoreFinishDate { get; internal set; }
