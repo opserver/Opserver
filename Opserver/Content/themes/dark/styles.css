@@ -7737,6 +7737,70 @@ li.L9 {
   position: relative;
   top: 1px;
 }
+.circle-percent {
+  display: block;
+  height: 80px;
+  width: 80px;
+  margin: 0 auto 5px auto;
+  position: relative;
+}
+.circle-percent .circle-label {
+  position: absolute;
+  display: block;
+  width: 100%;
+  transform: translate(0, -50%);
+  top: 50%;
+  text-align: center;
+  font-size: 1.8em;
+}
+.circle-percent .circle-label p {
+  line-height: 11px;
+  margin: 0;
+  font-size: 11px;
+}
+.circle-percent svg circle {
+  stroke-dashoffset: 0;
+  stroke-width: 3px;
+  transform-origin: 50% 50%;
+  fill: transparent;
+  fill-opacity: 0.05;
+}
+svg .stroke-primary {
+  stroke: #DF691A;
+}
+svg .stroke-primary.filled {
+  fill: #DF691A;
+}
+svg .stroke-success {
+  stroke: #5cb85c;
+}
+svg .stroke-success.filled {
+  fill: #5cb85c;
+}
+svg .stroke-info {
+  stroke: #5bc0de;
+}
+svg .stroke-info.filled {
+  fill: #5bc0de;
+}
+svg .stroke-warning {
+  stroke: #f0ad4e;
+}
+svg .stroke-warning.filled {
+  fill: #f0ad4e;
+}
+svg .stroke-danger {
+  stroke: #d9534f;
+}
+svg .stroke-danger.filled {
+  fill: #d9534f;
+}
+svg .stroke-muted {
+  stroke: #4E5D6C;
+}
+svg .stroke-muted.filled {
+  fill: #4E5D6C;
+}
 .badge-link-list {
   list-style-type: none;
   padding-left: 0;
@@ -7758,6 +7822,8 @@ li.L9 {
   font-size: 10px;
   vertical-align: text-bottom;
   text-decoration: none;
+  line-height: 15px;
+  padding: 0 4px;
 }
 .badge-link-list li:after {
   content: " | ";
@@ -8899,7 +8965,7 @@ table .text-muted,
   margin: 0 auto;
 }
 .no-content {
-  color: #4E5D6C;
+  color: #999999;
   text-align: center;
 }
 dl {
@@ -8984,6 +9050,9 @@ tr.cache-sub-item td:first-child {
 }
 .ui-helper-hidden-accessible {
   display: none;
+}
+.total-row {
+  font-weight: bold;
 }
 .navbar-default .badge {
   background-color: #fff;

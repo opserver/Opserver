@@ -14,7 +14,9 @@ namespace StackExchange.Opserver.Data.Elastic
             UpdateCache = UpdateFromElastic(nameof(State), async () =>
                 await GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/").ConfigureAwait(false))
         });
-        
+
+        public NodeInfo MasterNode => Nodes.Data?.Nodes?.FirstOrDefault(n => State?.Data?.MasterNode == n.GUID);
+
         public IEnumerable<ClusterStateInfo.ShardState> TroubledShards => AllShards.Where(s => s.State != "STARTED");
         public List<ClusterStateInfo.ShardState> AllShards => State.Data?.AllShards ?? new List<ClusterStateInfo.ShardState>();
         

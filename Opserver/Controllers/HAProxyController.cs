@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Dashboard(string group, string node, string watch = null, bool norefresh = false)
         {
             var haGroup = HAProxyGroup.GetGroup(group ?? node);
-            var proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies());
+            var proxies = haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies();
             proxies.RemoveAll(p => !p.HasServers);
 
             var vd = new HAProxyModel

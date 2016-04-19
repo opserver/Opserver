@@ -27,3 +27,26 @@
 {
     <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@nodeType" data-uk="all"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
 }
+@helper HealthDescription(IEnumerable<IMonitorStatus> ims, bool unknownIsHealthy = false)
+{
+    if (ims == null)
+    {
+        return;
+    }
+    var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
+    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
+    var bad = ims.Except(warning).Except(good).ToList();
+
+    if (bad.Any())
+    {
+        @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma()
+    }
+    if (warning.Any())
+    {
+        @:@MonitorStatus.Warning.IconSpan() @warning.Count.ToComma()
+    }
+    if (good.Any())
+    {
+        @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
+    }
+}

@@ -1,0 +1,38 @@
+@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Models
+@{
+    var nodes = DashboardData.AllNodes;
+    var groups = nodes.GroupBy(n => n.Category).OrderBy(g => g.Key.Index).ToList();
+}
+<div class="panel panel-default">
+    <div class="panel-heading">@nodes.GetWorstStatus().IconSpan() @nodes.Count.Pluralize("Node")</div>
+    <div class="panel-body">
+        @*<div class="col-xs-4">
+            @Gauges.Circle("Node", nodes)
+        </div>*@
+        <table class="table table-super-condensed table-striped col-md-12">
+            <tbody>
+                <tr>
+                    <th>Group</th>
+                    <th>Nodes</th>
+                    <th>Network</th>
+                </tr>
+                @foreach (var g in groups)
+                {
+                    <tr>
+                        <td>@g.Key.Name</td>
+                        <td>@Helpers.HealthDescription(g)</td>
+                        <td>@g.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td><strong>Total</strong></td>
+                    <td>@Helpers.HealthDescription(nodes)</td>
+                    <td>@nodes.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,94 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = "Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var storedProcs = s.GetStoredProcedureInfo(Model.Database);
+}
+@if (storedProcs.Data == null || !storedProcs.LastPollSuccessful)
+{
+    <div class="alert alert-warning">
+        <h5>There was an error fetching stored procedure info from @s.Name for @Model.Database</h5>
+        <p class="error-stack">@storedProcs.ErrorMessage</p>
+    </div>
+}
+else
+{
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-storedproc">
+        <thead>
+            <tr>
+                <th>Procedure</th>
+                <th>Created</th>
+                <th>Modified</th>
+                <th>Last Exec<span class="text-muted">*</span></th>
+                <th>Execs<span class="text-muted">*</span></th>
+                <th title="Elapsed time, for the most recently completed execution of this stored procedure">Last Elapsed <span class="text-muted">(ms)*</span></th>
+                <th title="Maximum elapsed time, in microseconds, for any completed execution of this stored procedure">Max Elapsed <span class="text-muted">(ms)*</span></th>
+                <th title="Minimum elapsed time, for any completed execution of this stored procedure">Min Elapsed <span class="text-muted">(ms)*</span></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var v in storedProcs.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ProcedureName))
+            {
+                <tr data-storedproc="@(v.SchemaName).@(v.ProcedureName)" class="js-database-storedproc" title="@(v.SchemaName).@(v.ProcedureName) created @v.CreationDate">
+                    <td>
+                        <a href="#/db/@(Model.Database)/storedprocedures/@(v.SchemaName).@(v.ProcedureName)">
+                            <span class="text-muted">@(v.SchemaName).</span><span>@v.ProcedureName</span>
+                        </a>
+                    </td>
+                    <td data-val="@v.CreationDate.ToEpochTime().ToString()">@v.CreationDate.ToRelativeTimeSpan()</td>
+                    <td data-val="@v.LastModifiedDate.ToEpochTime().ToString()">@v.LastModifiedDate.ToRelativeTimeSpan()</td>
+                    <td data-val="@(v.LastExecuted?.ToEpochTime().ToString())">@(v.LastExecuted?.ToRelativeTimeSpan())</td>
+                    <td data-val="@(v.ExecutionCount?.ToString())">@(v.ExecutionCount.ToComma())</td>
+                    <td data-val="@(v.LastElapsedTime?.ToString())">@(v.LastElapsedTime?.ToComma())</td>
+                    <td data-val="@(v.MaxElapsedTime?.ToString())">@(v.MaxElapsedTime.ToComma())</td>
+                    <td data-val="@(v.MinElapsedTime?.ToString())">@(v.MinElapsedTime.ToComma())</td>
+                </tr>
+                <tr class="tablesorter-childRow hidden">
+                    <td colspan="8">
+
+                        <pre class="pre-code prettyprint lang-sql">@v.Definition.Trim()</pre>
+                    </td>
+                </tr>
+                <tr class="tablesorter-childRow hidden"></tr>
+            }
+        </tbody>
+        <tfoot>
+            @if (!storedProcs.Data.Any())
+            {
+                <tr>
+                    <td colspan="8">
+                        <div class="no-content">There aren't any stored procedures in this database.</div>
+                    </td>
+                </tr>
+            }
+            else
+            {
+                <tr class="total-row">
+                    <td colspan="8">
+                        <b>Total</b> <span class="text-muted">(@storedProcs.Data.Count.Pluralize("stored procedure"))</span>
+                    </td>
+                </tr>
+            }
+            <tr>
+                <td colspan="8" class="text-muted">
+                    * Basesd on data obtained from cached stored proc execution plan(s). SQL server resets this data as needed.
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <script>
+        $(function () {
+            $('.js-database-storedproc').tablesorter({
+                headers: {
+                    1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    3: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                }
+            });
+            prettyPrint();
+        });
+    </script>
+}

@@ -1,0 +1,19 @@
+@{
+    var issues = IssueProvider.GetIssues().OrderByWorst().ToList();
+}
+<div class="panel panel-default">
+    <div class="panel-heading">@((issues.Count > 0 ? MonitorStatus.Warning : MonitorStatus.Good).IconSpan()) @issues.Count.Pluralize("Issue")</div>
+    <div class="panel-body">
+        @foreach (var i in issues)
+        {
+            <div>
+                <h6>
+                    @i.MonitorStatus.IconSpan() @i.Title
+                    <span class="pull-right">@i.Date.ToRelativeTimeSpan()</span>
+                </h6>
+                <div>@i.Description</div>
+                <p></p>
+            </div>
+        }
+    </div>
+</div>

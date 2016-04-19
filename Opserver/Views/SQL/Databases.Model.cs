@@ -20,7 +20,9 @@ namespace StackExchange.Opserver.Views.SQL
             MissingIndexes,
             UnusedIndexes,
             Storage,
-            Other
+            Other,
+            Restores,
+            StoredProcedures
         }
 
         public static string GetDatabaseClass(SQLInstance.Database db)

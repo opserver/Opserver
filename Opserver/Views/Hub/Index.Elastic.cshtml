@@ -1,0 +1,62 @@
+@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
+@{
+    var all = ElasticCluster.AllClusters;
+}
+<div class="panel panel-default">
+    <div class="panel-heading">@all.GetWorstStatus().IconSpan() Elasticsearch</div>
+    <div class="panel-body">
+        <div class="col-xs-4">
+            @Gauges.Circle("Cluster", all)
+        </div>
+        <div class="col-xs-4">
+            @Gauges.Circle("Index", all.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>()))
+        </div>
+        <div class="col-xs-4">
+            @Gauges.Circle("Shard", all.SelectMany(c => c.AllShards))
+        </div>
+
+        <table class="table table-super-condensed table-striped col-md-12">
+            <tbody>
+                <tr>
+                    <th>Cluster</th>
+                    <th>CPU</th>
+                    <th>Mem</th>
+                    <th>Indexes</th>
+                    <th>Shards</th>
+                    <th>Searches</th>
+                </tr>
+                @foreach (var c in all)
+                {
+                    var cShards = c.AllShards;
+                    var indexes = c.HealthStatus.Data?.Indexes?.Values;
+                    var master = c.MasterNode;
+                    <tr>
+                        <td>
+                            @c.IconSpan() <a href="@Url.Action(nameof(ElasticController.Cluster), "Elastic", new { cluster = c.Name})">@c.Name</a>
+                            @if (master != null)
+                            {
+                                <div><label>M:</label> @master.IconSpan() @c.ShortName(master)</div>
+                            }
+                        </td>
+                        <td>@(c.Nodes.Data?.Nodes?.Sum(n => n.Stats?.Process?.CPU?.Percent).ToComma())%</td>
+                        <td>@(c.Nodes.Data?.Nodes?.Sum(n => n.Stats?.Process?.Memory?.ResidentInBytes)?.ToSize())</td>
+                        <td>@indexes.GetWorstStatus().IconSpan() @(indexes?.Count.ToComma())</td>
+                        <td>@cShards.Count.ToComma() <span class="text-muted small">(@cShards.Count(s => s.Primary).ToComma())</span></td>
+                        <td>@(c.Nodes.Data?.Nodes?.Sum(n => n.Stats?.Indexes?.Search?.QueryTotal).ToComma())</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td><strong>Total</strong></td>
+                    <td></td>
+                    <td></td>
+                    <td>@all.Sum(c => c.HealthStatus.Data?.Indexes?.Values.Count ?? 0).ToComma()</td>
+                    <td>@all.Sum(c => c.AllShards.Count).ToComma()</td>
+                    <td>@all.Sum(c => c.Nodes.Data?.Nodes?.Sum(n => n.Stats?.Indexes?.Search?.QueryTotal)).ToComma()</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

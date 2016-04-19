@@ -139,6 +139,12 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
                     }
 
+                    var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
+                    if (exclude != null)
+                    {
+                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name)).ToList();
+                    }
+
                     foreach (var n in nodes)
                     {
                         n.DataProvider = this;

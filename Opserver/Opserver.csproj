@@ -164,12 +164,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
       <DependentUpon>Node.Graph.cshtml</DependentUpon>
     </Compile>
     <Compile Include="Views\Home\About.Model.cs">
       <DependentUpon>About.cshtml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Hub\HubView.cs" />
     <Compile Include="Views\SQL\Instance.Model.cs">
       <DependentUpon>Instance.cshtml</DependentUpon>
     </Compile>
@@ -227,6 +229,7 @@
     <Content Include="Config\TeamCitySettings.json.example" />
     <Content Include="Content\img\logo\logo.eps" />
     <Content Include="Config\JiraSettings.json.example" />
+    <Content Include="App_Code\Gauges.cshtml" />
     <None Include="compilerconfig.json" />
     <Content Include="compilerconfig.json.defaults">
       <DependentUpon>compilerconfig.json</DependentUpon>
@@ -462,10 +465,19 @@
     <Content Include="Views\SQL\Databases.Modal.Columns.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\SQL\Databases.Modal.MissingIndexes.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Databases.Modal.Restores.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\SQL\Databases.Modal.Storage.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Tables.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Databases.Modal.StoredProcedures.cshtml" >
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Views.cshtml">
@@ -686,10 +698,6 @@
     <Content Include="Views\Redis\Instance.cshtml" />
     <Content Include="Views\Redis\Instance.Selector.cshtml" />
     <Content Include="Views\Shared\IssuesList.cshtml" />
-    <Content Include="Views\Hub\Elastic.Cluster.cshtml">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Include="Views\Hub\HAProxy.Group.cshtml" />
     <Content Include="Views\Shared\TopRefresh.cshtml" />
     <Content Include="Views\Shared\NoConfiguration.cshtml" />
     <Content Include="Views\SQL\Servers.cshtml" />
@@ -697,6 +705,11 @@
     <Content Include="Views\Elastic\Cluster.cshtml" />
     <Content Include="Views\Elastic\Indexes.cshtml" />
     <Content Include="Views\Elastic\Shards.Table.cshtml" />
+    <Content Include="Views\Hub\Index.Elastic.cshtml" />
+    <Content Include="Views\Hub\Index.HAProxy.cshtml" />
+    <Content Include="Views\Hub\Index.SQL.cshtml" />
+    <Content Include="Views\Hub\Index.Dashboard.cshtml" />
+    <Content Include="Views\Hub\Index.Issues.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

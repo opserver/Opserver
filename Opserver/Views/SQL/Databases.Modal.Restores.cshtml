@@ -1,0 +1,62 @@
+﻿@using System.Globalization
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = "Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var restoreList = s.GetRestoreInfo(Model.Database);
+}
+@if (restoreList.Data == null || !restoreList.LastPollSuccessful)
+{
+    <div class="alert alert-warning">
+        <h5>There was an error fetching restore info from @s.Name for @Model.Database</h5>
+        <p class="error-stack">@restoreList.ErrorMessage</p>
+    </div>
+}
+else {
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-restore-log">
+        <thead>
+            <tr>
+                <th>Restore End</th>
+                <th>Type</th>
+                <th>User</th>
+                <th>Backup Media</th>
+                <th>Backup End</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var b in restoreList.Data.OrderByDescending(b => b.RestoreFinishDate))
+            {
+                <tr>
+
+                    <td title="@b.RestoreFinishDate.ToEpochTime().ToString(CultureInfo.InvariantCulture)">@(b.RestoreFinishDate.ToRelativeTimeSpanMini())</td>
+                    <td>@b.RestoreTypeDescription</td>
+                    <td>@b.UserName</td>
+                    <td title="@b.BackupMedia">@b.BackupMedia.TruncateWithEllipsis(75)</td>
+                    <td title="@b.BackupFinishDate.ToEpochTime().ToString(CultureInfo.InvariantCulture)">@(b.BackupFinishDate.ToRelativeTimeSpanMini())</td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            @if (!restoreList.Data.Any())
+            {
+                <tr>
+                    <td colspan="5">
+                        <div class="no-content">There is no database restore history available.</div>
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+    <script>
+        $(function () {
+            $('.js-database-restore-log').tablesorter({
+                headers: {
+                    1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    3: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                }
+            });
+        });
+    </script>
+}

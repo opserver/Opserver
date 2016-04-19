@@ -124,7 +124,7 @@ namespace StackExchange.Opserver.Data.Redis
         public List<RedisInstance> GetAllSlavesInChain()
         {
             var slaves = SlaveInstances;
-            return slaves.Union(slaves.SelectMany(i => i?.GetAllSlavesInChain())).Distinct().ToList();
+            return slaves.Union(slaves.SelectMany(i => i?.GetAllSlavesInChain() ?? Enumerable.Empty<RedisInstance>())).Distinct().ToList();
         }
 
         public class RedisInfoSection

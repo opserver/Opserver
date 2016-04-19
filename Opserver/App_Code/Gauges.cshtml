@@ -1,0 +1,38 @@
+﻿@using System.Globalization
+@using StackExchange.Opserver
+@using StackExchange.Opserver.Data
+@functions
+{
+    const double Full = 45 * 2 * Math.PI;
+    static readonly string FullStr = Full.ToString(CultureInfo.InvariantCulture);
+}
+@helper Circle(string label, IEnumerable<IMonitorStatus> items)
+{
+    var statuses = items.OrderBy(i => i.MonitorStatus).ToList().GroupBy(i => i.MonitorStatus).ToList();
+    var worst = MonitorStatus.Good;
+    var total = statuses.Sum(i => i.Count());
+    double startDeg = 0;
+    <div class="circle-percent">
+        <svg viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg">
+            <circle r="45" cx="50" cy="50" stroke-dasharray="@Full.ToString(CultureInfo.InvariantCulture)" stroke-dashoffset="0" />
+            @foreach (var s in statuses)
+            {
+                if (s.Key > worst)
+                {
+                    worst = s.Key;
+                }
+                var percent = s.Count()/(double) total;
+                var deg = percent*360;
+                <circle class="stroke-@s.Key.RawClass(true, true)@(s.Key != MonitorStatus.Good ? " filled" : null)" r="45" cx="50" cy="50"
+                        stroke-dasharray="@FullStr" 
+                        style="stroke-dashoffset: @((Full-percent*Full).ToString(CultureInfo.InvariantCulture)); transform: rotate(@(startDeg.ToString(CultureInfo.InvariantCulture))deg);" />
+                startDeg += deg;
+            }
+            @if (!statuses.Any())
+            {
+                <circle class="stroke-@(MonitorStatus.Unknown.RawClass())" r="45" cx="50" cy="50" stroke-dasharray="@Full.ToString(CultureInfo.InvariantCulture)" stroke-dashoffset="0" />
+            }
+        </svg>
+        <div class="circle-label"><span>@total.ToComma()</span><p>@total.Pluralize(label, false)</p></div>
+    </div>
+}
