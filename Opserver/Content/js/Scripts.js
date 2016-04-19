@@ -754,7 +754,10 @@ Status.SQL = (function () {
                           ? val.split('/').pop() : null;
                 function showColumns() {
                     $('.js-next-collapsible').removeClass('info').next().hide();
-                    $('[data-obj="' + obj + '"]').addClass('info').next().show(200);
+                    var cell = $('[data-obj="' + obj + '"]').addClass('info').next().show(200).find('td');
+                    if (cell.length === 1) {
+                        cell.css('max-width', cell.closest('.js-database-modal-right').width());
+                    }
                 }
                 if (!firstLoad) {
                     // TODO: Generalize this to not need the replace? Possibly a root load in the modal
