@@ -18,14 +18,14 @@ else
     <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-storedproc">
         <thead>
             <tr>
-                <th>Stored Procedure</th>
-                <th>Created On</th>
-                <th>Last Modified</th>
-                <th>Last Executed*</th>
-                <th>Execution Count*</th>
-                <th title="Elapsed time, for the most recently completed execution of this stored procedure">Last Elapsed time(ms)*</th>
-                <th title="Maximum elapsed time, in microseconds, for any completed execution of this stored procedure">Max Elapsed time(ms)*</th>
-                <th title="Minimum elapsed time, for any completed execution of this stored procedure">Min Elapsed time(ms)*</th>
+                <th>Procedure</th>
+                <th>Created</th>
+                <th>Modified</th>
+                <th>Last Exec<span class="text-muted">*</span></th>
+                <th>Execs<span class="text-muted">*</span></th>
+                <th title="Elapsed time, for the most recently completed execution of this stored procedure">Last Elapsed <span class="text-muted">(ms)*</span></th>
+                <th title="Maximum elapsed time, in microseconds, for any completed execution of this stored procedure">Max Elapsed <span class="text-muted">(ms)*</span></th>
+                <th title="Minimum elapsed time, for any completed execution of this stored procedure">Min Elapsed <span class="text-muted">(ms)*</span></th>
             </tr>
         </thead>
         <tbody>
@@ -39,12 +39,11 @@ else
                     </td>
                     <td data-val="@v.CreationDate.ToEpochTime().ToString()">@v.CreationDate.ToRelativeTimeSpan()</td>
                     <td data-val="@v.LastModifiedDate.ToEpochTime().ToString()">@v.LastModifiedDate.ToRelativeTimeSpan()</td>
-                    <td data-val="@(v.LastExecuted?.ToEpochTime().ToString() ?? "")">@(v.LastExecuted?.ToRelativeTimeSpan() ?? "".AsHtml())</td>
-                    <td data-val="@(v.LastElapsedTime?.ToString() ?? "")">@(v.LastElapsedTime?.ToString() ?? "")</td>
-                    <td data-val="@(v.ExecutionCount?.ToString() ?? "")">@(v.ExecutionCount?.ToString() ?? "")</td>
-                    <td data-val="@(v.MaxElapsedTime?.ToString() ?? "")">@(v.MaxElapsedTime?.ToString() ?? "")</td>
-                    <td data-val="@(v.MinElapsedTime?.ToString() ?? "")">@(v.MinElapsedTime?.ToString() ?? "")</td>
-
+                    <td data-val="@(v.LastExecuted?.ToEpochTime().ToString())">@(v.LastExecuted?.ToRelativeTimeSpan())</td>
+                    <td data-val="@(v.ExecutionCount?.ToString())">@(v.ExecutionCount.ToComma())</td>
+                    <td data-val="@(v.LastElapsedTime?.ToString())">@(v.LastElapsedTime?.ToComma())</td>
+                    <td data-val="@(v.MaxElapsedTime?.ToString())">@(v.MaxElapsedTime.ToComma())</td>
+                    <td data-val="@(v.MinElapsedTime?.ToString())">@(v.MinElapsedTime.ToComma())</td>
                 </tr>
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="8">
@@ -73,8 +72,8 @@ else
                 </tr>
             }
             <tr>
-                <td colspan="8">
-                    * <span class="text-muted">Basesd on data obtained from cached stored proc execution plan(s). SQL server resets this data as needed.</span>
+                <td colspan="8" class="text-muted">
+                    * Basesd on data obtained from cached stored proc execution plan(s). SQL server resets this data as needed.
                 </td>
             </tr>
         </tfoot>
