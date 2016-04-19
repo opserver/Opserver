@@ -27,7 +27,7 @@ else {
         <tbody>
             @foreach (var v in views.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ViewName))
             {
-                <tr data-view="@(v.SchemaName).@(v.ViewName)" class="js-database-view" title="@(v.SchemaName).@(v.ViewName) created @v.CreationDate">
+                <tr data-obj="@(v.SchemaName).@(v.ViewName)" class="js-next-collapsible" title="@(v.SchemaName).@(v.ViewName) created @v.CreationDate">
                     <td>
                         <a href="#/db/@(Model.Database)/views/@(v.SchemaName).@(v.ViewName)">
                             <span class="text-muted">@(v.SchemaName).</span><span>@v.ViewName</span>

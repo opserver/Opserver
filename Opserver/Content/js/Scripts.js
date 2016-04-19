@@ -753,12 +753,12 @@ Status.SQL = (function () {
                 var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') || val.indexOf('storedprocedures/') > 0
                           ? val.split('/').pop() : null;
                 function showColumns() {
-                    $('.js-database-table,.js-database-view,.js-database-storedproc').removeClass('info').next().hide();
-                    $('[data-table="' + obj + '"],[data-view="' + obj + '"],[data-storedproc="' + obj + '"]').addClass('info').next().show(200);
+                    $('.js-next-collapsible').removeClass('info').next().hide();
+                    $('[data-obj="' + obj + '"]').addClass('info').next().show(200);
                 }
                 if (!firstLoad) {
+                    // TODO: Generalize this to not need the replace? Possibly a root load in the modal
                     if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev)) || (/\/storedprocedures/.test(val) && /\/storedprocedures/.test(prev))) {
-
                         showColumns();
                         return;
                     }
@@ -829,7 +829,7 @@ Status.SQL = (function () {
             return false;
         }).on('click', '.ag-node', function() {
             window.location.hash = $('.ag-node-name a', this)[0].hash;
-        }).on('click', '.js-database-table,.js-database-view,.js-database-storedproc', function () {
+        }).on('click', '.js-next-collapsible', function () {
             window.location.hash = window.location.hash.replace(/\/tables\/.*/, '/tables').replace(/\/views\/.*/, '/views').replace(/\/storedprocedures\/.*/, '/storedprocedures');
         });
     }

@@ -31,7 +31,7 @@ else
         <tbody>
             @foreach (var v in storedProcs.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.ProcedureName))
             {
-                <tr data-storedproc="@(v.SchemaName).@(v.ProcedureName)" class="js-database-storedproc" title="@(v.SchemaName).@(v.ProcedureName) created @v.CreationDate">
+                <tr data-obj="@(v.SchemaName).@(v.ProcedureName)" class="js-next-collapsible" title="@(v.SchemaName).@(v.ProcedureName) created @v.CreationDate">
                     <td>
                         <a href="#/db/@(Model.Database)/storedprocedures/@(v.SchemaName).@(v.ProcedureName)">
                             <span class="text-muted">@(v.SchemaName).</span><span>@v.ProcedureName</span>
