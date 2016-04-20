@@ -9,7 +9,7 @@
 <head>
     <title>@Html.Raw((string)ViewData[ViewDataKeys.PageTitle])</title>
     <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="@Url.CacheBreaker("~/Content/themes/light/styles.min.css")">
+    <link rel="stylesheet" href="@Url.CacheBreaker("~/Content/themes/" + Theme.Current + "/styles.min.css")">
     <link href="@Url.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon"/>
     <script src="@Url.CacheBreaker("~/Content/js/jquery-1.11.3.min.js")"></script>
     <script src="@Url.CacheBreaker("~/Content/bootstrap/js/bootstrap.min.js")"></script>

@@ -165,6 +165,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\TestItem.cs" />
+    <Compile Include="Helpers\Theme.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
       <DependentUpon>Node.Graph.cshtml</DependentUpon>
     </Compile>
@@ -477,7 +478,7 @@
     <Content Include="Views\SQL\Databases.Modal.Tables.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\SQL\Databases.Modal.StoredProcedures.cshtml" >
+    <Content Include="Views\SQL\Databases.Modal.StoredProcedures.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Views.cshtml">

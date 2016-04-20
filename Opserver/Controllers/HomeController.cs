@@ -47,6 +47,13 @@ namespace StackExchange.Opserver.Controllers
             return View("About.Caches", vd);
         }
 
+        [Route("set-theme"), HttpPost]
+        public ActionResult SetTheme(string theme)
+        {
+            Theme.Set(theme);
+            return Redirect(Request.UrlReferrer?.ToString());
+        }
+
         [Route("debug"), AllowAnonymous]
         public ActionResult Debug()
         {

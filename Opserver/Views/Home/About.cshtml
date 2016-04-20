@@ -13,6 +13,7 @@
     var s = Current.Settings;
     var cacheStats = ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
+    var currentTheme = Theme.Current;
 }
 @section head {
     <style>
@@ -55,6 +56,27 @@
                 </div>
             </div>
         </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Settings</div>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4">
+                    <form method="POST" action="~/set-theme">
+                        <select class="js-theme" name="theme">
+                            @foreach (var t in Theme.Options)
+                            {
+                                <option value="@t" selected="@(t == currentTheme ? "selected" : null)">@t@(t == Theme.Default ? " (Default)" : null)</option>
+                            }
+                        </select>
+                    </form>
+                    <label>Current Theme</label>
+                </div>
+            </div>
+        </div>
+        <script>
+            $('.js-theme').change(function () {
+                this.form.submit();
+            });
+        </script>
         <div class="panel panel-default">
             <div class="panel-heading">Sections</div>
             <div class="panel-body">
