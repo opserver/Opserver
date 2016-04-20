@@ -21,10 +21,10 @@
 <div class="row">
     <div class="navbar-left col-md-2">
         @RenderLink(DatabasesModel.Views.Tables, "Tables")
+        @RenderLink(DatabasesModel.Views.Views, "Views")
+        @RenderLink(DatabasesModel.Views.StoredProcedures, "Stored Procs")
         @RenderLink(DatabasesModel.Views.Backups, "Backups")
         @RenderLink(DatabasesModel.Views.Restores, "Restores")
-        @RenderLink(DatabasesModel.Views.Views, "Views")
-        @RenderLink(DatabasesModel.Views.StoredProcedures, "Stored Procedures")
         @RenderLink(DatabasesModel.Views.Storage, "Storage")
         @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", Model.Instance.Version < Singleton<SQLInstance.MissingIndex>.Instance.MinVersion)
         @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", true)
