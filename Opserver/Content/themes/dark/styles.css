@@ -8897,9 +8897,9 @@ table .text-muted,
 .table > thead tr.category-row th,
 .table-striped > thead tr.category-row th {
   border-top: none;
-  background: white;
+  background: #2B3E50;
   padding-top: 11px;
-  padding-bottom: 0px;
+  padding-bottom: 0;
 }
 .table > tbody tr.category-row th h4,
 .table-striped > tbody tr.category-row th h4,
