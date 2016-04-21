@@ -213,6 +213,7 @@ Update Exceptions
                 result.DuplicateCount = sqlError.DuplicateCount;
                 result.DeletionDate = sqlError.DeletionDate;
                 result.ApplicationName = sqlError.ApplicationName;
+                result.IsProtected = sqlError.IsProtected;
                 return result;
             }
             catch (Exception e)

@@ -156,7 +156,21 @@
             <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = error.ApplicationName })">@error.ApplicationName Log</a> <span class="text-muted">/</span> @error.Type 
             <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })">View Similar</a></span>
         </h5>
-        <p class="small text-danger js-error-message">@error.Message</p>
+        <p class="small text-danger js-error-message">
+            @error.Message
+            <span class="protected-icon-container pull-right">
+            @if (error.IsProtected)
+            {
+                <span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>
+            }
+            else
+            {
+                <a title="Protect this error from automatic deletion" class="hover-pulsate text-warning js-protect-link" data-log="@error.ApplicationName" data-id="@error.GUID" href="~/exceptions/protect">
+                    <span class="glyphicon glyphicon-lock"></span>
+                </a>
+            }
+            </span>
+        </p>
         <div class="error-info">
             <pre class="pre-code error-detail">@error.Detail.TrimEnd()</pre>
             <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
