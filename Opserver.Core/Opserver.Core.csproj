@@ -121,7 +121,6 @@
       <DependentUpon>RailgunInstance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Dashboard\DashboardData.cs" />
-    <Compile Include="Data\Dashboard\DashboardIssues.cs" />
     <Compile Include="Data\Dashboard\GraphPoint.cs" />
     <Compile Include="Data\Dashboard\HardwareSummary.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
