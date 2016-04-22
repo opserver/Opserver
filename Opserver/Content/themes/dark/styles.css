@@ -1324,7 +1324,7 @@ mark,
   text-transform: capitalize;
 }
 .text-muted {
-  color: #4E5D6C;
+  color: #999999;
 }
 .text-primary {
   color: #DF691A;
@@ -2242,7 +2242,7 @@ table {
 caption {
   padding-top: 8px;
   padding-bottom: 8px;
-  color: #4E5D6C;
+  color: #999999;
   text-align: left;
 }
 th {
@@ -8270,7 +8270,7 @@ svg .stroke-muted.filled {
 }
 .navbar-left > a.disabled:hover {
   background-color: #fff;
-  color: #4E5D6C;
+  color: #999999;
   text-decoration: none;
 }
 .navbar-left > a:first-child {
@@ -9098,7 +9098,7 @@ table .dropdown-menu a,
 }
 table .text-muted,
 .table .text-muted {
-  color: #4E5D6C;
+  color: #999999;
 }
 table > thead > tr > th,
 .table > thead > tr > th,
