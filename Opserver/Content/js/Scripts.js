@@ -1060,17 +1060,17 @@ Status.Exceptions = (function () {
         var protectedElementMarkup = '<span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>';
 
         //Exception details page- Protect
-        $('.js-content').on("click", "a.js-protect-link", function () {
+        $('.js-content').on('click', 'a.js-protect-link', function () {
             var link = $(this);
             link.addClass('icon-rotate-flip');
 
-            $.post(link.attr("href"), { id: link.data("id"), log: link.data('log') })
+            $.post(link.attr('href'), { id: link.data('id'), log: link.data('log') })
                 .done(function (data) {
-                    link.closest(".protected-icon-container").html(protectedElementMarkup);
+                    link.closest('.protected-icon-container').html(protectedElementMarkup);
                     refreshCounts(data);
                 })
                 .fail(function (xhr) {
-                    link.closest("p").errorPopupFromJSON(xhr, 'An error occurred protecting');
+                    link.closest('p').errorPopupFromJSON(xhr, 'An error occurred protecting');
                 })
                 .always(function () {
                     link.removeClass('icon-rotate-flip');
