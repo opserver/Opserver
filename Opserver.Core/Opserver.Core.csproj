@@ -44,16 +44,9 @@
       <HintPath>..\packages\Dapper.1.50.0-beta6\lib\net45\Dapper.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="EasyHttp, Version=1.6.80.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\EasyHttp.1.6.80.0\lib\net40\EasyHttp.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="Jil, Version=2.13.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Jil.2.13.0\lib\net45\Jil.dll</HintPath>
       <Private>True</Private>
-    </Reference>
-    <Reference Include="JsonFx">
-      <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.1\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
@@ -93,10 +86,6 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TeamCitySharp, Version=0.3.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\TeamCitySharp.0.3.5\lib\net40\TeamCitySharp.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Current.Cache.cs">
@@ -315,7 +304,6 @@
     <Compile Include="Monitoring\MiniProfilerNullStorage.cs" />
     <Compile Include="Monitoring\OpserverProfileProvider.cs" />
     <Compile Include="Monitoring\PerfCounters.cs" />
-    <Compile Include="Data\BuildStatus.cs" />
     <Compile Include="Data\Dashboard\Application.cs" />
     <Compile Include="Data\Dashboard\DashboardCategory.cs" />
     <Compile Include="Data\Dashboard\Interface.cs" />
@@ -388,7 +376,6 @@
     <Compile Include="Settings\RedisSettings.cs" />
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
-    <Compile Include="Settings\TeamCitySettings.cs" />
     <Compile Include="StringBuilderCache.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>

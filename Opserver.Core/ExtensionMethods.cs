@@ -14,7 +14,6 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
-using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver
 {
@@ -609,17 +608,6 @@ namespace StackExchange.Opserver
 
     public static class ThirdPartyExtensionMethods
     {
-        public static string NiceName(this Build b)
-        {
-            var config = BuildStatus.GetConfig(b.BuildTypeId);
-            return config != null ? config.Name : "Unknown build config";
-        }
-        public static string NiceProjectName(this Build b)
-        {
-            var config = BuildStatus.GetConfig(b.BuildTypeId);
-            return config != null ? config.ProjectName : "Unknown build config";
-        }
-
         private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
         public static string TraceDescription(this CommandTrace trace, int? truncateTo = null)
         {

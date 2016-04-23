@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
-using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
-using TeamCitySharp.DomainEntities;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -151,38 +148,19 @@ namespace StackExchange.Opserver.Controllers
             };
         }
 
-        [OutputCache(Duration = 120, VaryByParam = "id;start;end", VaryByContentEncoding = "gzip;deflate")]
-        [Route("graph/builds/json")]
-        public ActionResult BuildsJson(string id, long start, long end)
-        {
-            return Json(new
-            {
-                builds = GetBuilds(id, start, end).Select(b => new
-                {
-                    date = b.StartDate.ToEpochTime(true),
-                    text = GetFlagTooltip(b),
-                    link = b.WebUrl
-                })
-            });
-        }
-
-        private static IEnumerable<Build> GetBuilds(string id, long startEpoch, long endEpoch)
-        {
-            if (!Current.Settings.TeamCity.Enabled) return Enumerable.Empty<Build>();
-
-            // only show builds when zoomed in, say 5 days for starters?
-            //TODO: Move this to a setting
-            if((endEpoch - startEpoch) > TimeSpan.FromDays(30).TotalSeconds)
-                return new List<Build>();
-
-            var node = DashboardData.GetNodeById(id);
-            DateTime start = startEpoch.ToDateTime(), end = endEpoch.ToDateTime();
-            return BuildStatus.GetBuildsByServer(node.PrettyName).Where(b => b.StartDate >= start && b.StartDate <= end);
-        }
-
-        private static string GetFlagTooltip(Build b)
-        {
-            return $"{b.NiceProjectName()} - {b.NiceName()} #{b.Number}";
-        }
+        //[OutputCache(Duration = 120, VaryByParam = "id;start;end", VaryByContentEncoding = "gzip;deflate")]
+        //[Route("graph/builds/json")]
+        //public ActionResult BuildsJson(string id, long start, long end)
+        //{
+        //    return Json(new
+        //    {
+        //        builds = GetBuilds(id, start, end).Select(b => new
+        //        {
+        //            date = b.StartDate.ToEpochTime(true),
+        //            text = GetFlagTooltip(b),
+        //            link = b.WebUrl
+        //        })
+        //    });
+        //}
     }
 }

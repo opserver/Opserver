@@ -2061,10 +2061,10 @@ Status.HAProxy = (function () {
                 brush2.extent(x.domain())(bottomBrushArea);
 
                 if (options.showBuilds && !data.builds) {
-                    $.getJSON(Status.options.rootPath + 'graph/builds/json', params, function (bData) {
-                        postProcess(bData);
-                        drawBuilds(bData);
-                    });
+                    //$.getJSON(Status.options.rootPath + 'graph/builds/json', params, function (bData) {
+                    //    postProcess(bData);
+                    //    drawBuilds(bData);
+                    //});
                 }
             }
 

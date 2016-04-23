@@ -21,8 +21,6 @@ namespace StackExchange.Opserver.SettingsProviders
         public PollingSettings Polling => GetSettings<PollingSettings>();
         public RedisSettings Redis => GetSettings<RedisSettings>();
         public SQLSettings SQL => GetSettings<SQLSettings>();
-        // Generic build settings later
-        public TeamCitySettings TeamCity => GetSettings<TeamCitySettings>();
         public JiraSettings Jira => GetSettings<JiraSettings>();
 
         public abstract T GetSettings<T>() where T : Settings<T>, new();
