@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Helpers
                                 if (string.Equals(s, "false", StringComparison.OrdinalIgnoreCase)) return false;
                             }
                         }
-                        catch { }// best attempt only
+                        catch { /* best attempt only */ }
                     }
                     result = Convert.ChangeType(result, underlyingType, valueProviderResult.Culture);
                     return result;

@@ -12,25 +12,16 @@ namespace StackExchange.Opserver
 {
     public static partial class ExtensionMethods
     {
-        // ReSharper disable InvokeAsExtensionMethod
         /// <summary>
-        /// Obtains the data as a list; if it is *already* a list, the original object is returned without
-        ///             any duplication; otherwise, ToList() is invoked.
-        /// 
+        /// Obtains the data as a list; if it is *already* a list, the original object is returned 
+        /// without any duplication; otherwise, ToList() is invoked. 
         /// </summary>
-        public static List<T> AsList<T>(this IEnumerable<T> source)
-        {
-            if (source != null && !(source is List<T>))
-                return Enumerable.ToList(source);
-            return (List<T>)source;
-        }
+        public static List<T> AsList<T>(this IEnumerable<T> source) => source is List<T> ? (List<T>)source : source.ToList();
 
         public static async Task<List<T>> AsList<T>(this ConfiguredTaskAwaitable<IEnumerable<T>> source)
         {
             var result = await source;
-            if (result != null && !(result is List<T>))
-                return Enumerable.ToList(result);
-            return (List<T>)result;
+            return result != null && !(result is List<T>) ? result.ToList() : (List<T>) result;
         }
 
         public static async Task<int> ExecuteAsync(this DbConnection conn, string sql, dynamic param = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null, int? commandTimeout = null)
@@ -45,7 +36,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync<T>(conn, MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync<T>(MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -53,7 +44,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -61,7 +52,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -69,7 +60,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -77,7 +68,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await SqlMapper.QueryAsync(conn, MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -106,7 +97,7 @@ namespace StackExchange.Opserver
                     catch
                     {
                         try { connection.Close(); }
-                        catch { } // we're already trying to handle, kthxbye
+                        catch { /* we're already trying to handle, kthxbye */ }
                         throw;
                     }
 
@@ -114,7 +105,6 @@ namespace StackExchange.Opserver
                     throw new InvalidOperationException("Cannot use EnsureOpen when connection is " + connection.State);
             }
         }
-        // ReSharper restore InvokeAsExtensionMethod
 
         private static readonly ConcurrentDictionary<int, string> _markedSql = new ConcurrentDictionary<int, string>();
 
@@ -123,10 +113,7 @@ namespace StackExchange.Opserver
         /// </summary>
         private static string MarkSqlString(string sql, string path, int lineNumber, string comment)
         {
-            if (path.IsNullOrEmpty() || lineNumber == 0)
-            {
-                return sql;
-            }
+            if (path.IsNullOrEmpty() || lineNumber == 0) return sql;
 
             int key = 17;
             unchecked
@@ -139,13 +126,9 @@ namespace StackExchange.Opserver
 
             // Have we seen this before???
             string output;
-            if (_markedSql.TryGetValue(key, out output))
-            {
-                return output;
-            }
+            if (_markedSql.TryGetValue(key, out output)) return output;
 
-            // nopeb
-
+            // nope
             var commentWrap = " ";
             var i = sql.IndexOf(Environment.NewLine, StringComparison.InvariantCultureIgnoreCase);
 
@@ -158,27 +141,18 @@ namespace StackExchange.Opserver
 
             if (i < 0) return sql;
 
-            // Grab one directory and the file name worth of the path
-            //   this dodges problems with the build server using temp dirs
-            //   but also gives us enough info to uniquely identify a queries location
+            // Grab one directory and the file name worth of the path this dodges problems with the build server using temp dirs
+            // but also gives us enough info to uniquely identify a queries location
             var split = path.LastIndexOf('\\') - 1;
             if (split < 0) return sql;
             split = path.LastIndexOf('\\', split);
 
             if (split < 0) return sql;
-
             split++; // just for Craver
-
-            var sqlComment = " /* " + path.Substring(split) + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap;
-
-            var ret =
-                sql.Substring(0, i) +
-                sqlComment +
-                sql.Substring(i);
-
+            
+            var ret = sql.Substring(0, i) + " /* " + path.Substring(split) + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap + sql.Substring(i);
             // Cache, don't allocate all this pass again
             _markedSql[key] = ret;
-
             return ret;
         }
         
@@ -192,6 +166,7 @@ namespace StackExchange.Opserver
             }
             return 1;
         }
+
         private class ConnectionCloser : IDisposable
         {
             DbConnection _connection;
@@ -204,7 +179,7 @@ namespace StackExchange.Opserver
                 var cn = _connection;
                 _connection = null;
                 try { cn?.Close(); }
-                catch { }//throwing from Dispose() is so lame
+                catch { /* throwing from Dispose() is so lame */ }
             }
         }
     }

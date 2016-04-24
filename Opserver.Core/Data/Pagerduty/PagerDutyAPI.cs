@@ -117,13 +117,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             }
                         }
                     }
-                    catch { }
+                    catch { /* we gave it a shot, but don't boom in the boom that feeds */ }
 
                     Current.LogException(
                         e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
-                            .AddLoggedData("Endpoint", fullUri)
-                            .AddLoggedData("Headers", req.Headers.ToString())
-                            .AddLoggedData("Contecnt Type", req.ContentType));
+                         .AddLoggedData("Endpoint", fullUri)
+                         .AddLoggedData("Headers", req.Headers.ToString())
+                         .AddLoggedData("Contecnt Type", req.ContentType));
                     return getFromJson("fail");
                 }
             }

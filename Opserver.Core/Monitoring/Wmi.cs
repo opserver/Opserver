@@ -30,9 +30,9 @@ namespace StackExchange.Opserver.Monitoring
                 Timeout = TimeSpan.FromSeconds(30)
             };
             string username = Current.Settings.Dashboard.Providers?.WMI?.Username ??
-                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn((string)null),
+                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn(null),
                 password = Current.Settings.Dashboard.Providers?.WMI?.Password ??
-                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn((string)null);
+                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(null);
 
             if (username.HasValue() && password.HasValue())
             {
@@ -112,9 +112,9 @@ namespace StackExchange.Opserver.Monitoring
             }
         }
 
-        class WmiDynamic : DynamicObject
+        private class WmiDynamic : DynamicObject
         {
-            readonly ManagementObject _obj;
+            private readonly ManagementObject _obj;
             public WmiDynamic(ManagementObject obj)
             {
                 _obj = obj;
