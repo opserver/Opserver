@@ -22,25 +22,6 @@ namespace StackExchange.Opserver.Models
             var byteScale = bps.ToSize(unit);
             return string.Format(@"<span class=""speed pow{1}"">{0}/s</span>", byteScale, pow.ToString(CultureInfo.InvariantCulture)).AsHtml();
         }
-
-        public static IHtmlString ToQueryString(this SQLInstance.TopSearchOptions options, bool leadingAmp = false)
-        {
-            var sb = StringBuilderCache.Get();
-
-            // TODO: Refactor all of this to proper classes
-            // For example, this is called in a loop and running the same code n times for no reason
-            
-            if (options.MinExecs.HasValue) sb.Append("MinExecs=").Append(options.MinExecs.ToString()).Append("&");
-            if (options.MinExecsPerMin.HasValue) sb.Append("MinExecsPerMin=").Append(options.MinExecsPerMin.ToString()).Append("&");
-            if (options.Search.HasValue()) sb.Append("Search=").Append(options.Search.UrlEncode()).Append("&");
-            if (options.Database.HasValue) sb.Append("Database=").Append(options.Database.Value).Append("&");
-            if (options.LastRunSeconds.HasValue) sb.Append("LastRunSeconds=").Append(options.LastRunSeconds.Value).Append("&");
-
-            if (sb.Length <= 0) return MvcHtmlString.Empty;
-
-            if (leadingAmp) sb.Insert(0, "&");
-            return sb.ToStringRecycle(0, sb.Length - 1).AsHtml();
-        }
     }
 
     public static class VolumeExtensionMethods

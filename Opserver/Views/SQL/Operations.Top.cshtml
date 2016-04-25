@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Data.SQL
+﻿@using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsTopModel
 @{
@@ -21,7 +20,7 @@
         }
         else
         {
-            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptions.ToQueryString(true))" title="Sort by @sort.GetDescription()">@title</a>
+            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.GetDescription()">@title</a>
         }
     </th>
 }
