@@ -7685,10 +7685,9 @@ li.L9 {
   display: none;
   box-shadow: 2px 2px 3px #222222;
   position: absolute;
-  background-color: white;
+  background-color: #f5f5f5;
   white-space: nowrap;
   z-index: 5;
-  border: solid 1px #EEE;
 }
 .chart .chart-tooltip .note {
   color: #AAA;
