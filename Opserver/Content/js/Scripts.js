@@ -1653,14 +1653,25 @@ Status.HAProxy = (function () {
                 height = options.height - margin.top - margin.bottom;
                 height2 = options.height - margin2.top - margin2.bottom;
 
+                var timeFormats = d3.time.format.utc.multi([
+                    ['.%L', function (d) { return d.getUTCMilliseconds(); }],
+                    [':%S', function (d) { return d.getUTCSeconds(); }],
+                    ['%H:%M', function (d) { return d.getUTCMinutes(); }],
+                    ['%H:%M', function (d) { return d.getUTCHours(); }],
+                    ['%a %d', function (d) { return d.getUTCDay() && d.getUTCDate() !== 1; }],
+                    ['%b %d', function (d) { return d.getUTCDate() !== 1; }],
+                    ['%B', function (d) { return d.getUTCMonth(); }],
+                    ['%Y', function () { return true; }]
+                ]);
+
                 x = d3.time.scale.utc().range([0, width]);
                 x2 = d3.time.scale.utc().range([0, width]);
                 y = d3.scale.linear().range([height, 0]);
                 yr = d3.scale.linear().range([height, 0]);
                 y2 = d3.scale.linear().range([height2, 0]);
 
-                xAxis = d3.svg.axis().scale(x).orient('bottom');
-                xAxis2 = d3.svg.axis().scale(x2).orient('bottom');
+                xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(timeFormats);
+                xAxis2 = d3.svg.axis().scale(x2).orient('bottom').tickFormat(timeFormats);
                 yAxis = d3.svg.axis().scale(y).orient('left');
                 yrAxis = d3.svg.axis().scale(yr).orient('right');
                 
