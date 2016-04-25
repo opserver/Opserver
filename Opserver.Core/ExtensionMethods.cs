@@ -39,8 +39,12 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Returns the toReturn parameter when this string is null/empty.
         /// </summary>
-        public static string IsNullOrEmptyReturn(this string s, string toReturn) =>
-            s.HasValue() ? s : (toReturn.HasValue() ? toReturn : "");
+        public static string IsNullOrEmptyReturn(this string s, string toReturn) => s.HasValue() ? s : toReturn;
+
+        /// <summary>
+        /// Returns null for an empty string. For use in places like attributes that need not render with no content
+        /// </summary>
+        public static string Nullify(this string s) => s.IsNullOrEmptyReturn(null);
 
         /// <summary>
         /// If this string ends in "toTrim", this will trim it once off the end

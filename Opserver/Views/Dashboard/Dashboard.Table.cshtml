@@ -16,14 +16,10 @@
 {
 if (DashboardData.HasData)
 {
-        <a href="#/dashboard/graph/@(s.Id.UrlEncode())/@type">
-            <img src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" />
-        </a>
-}
+<a href="#/dashboard/graph/@(s.Id.UrlEncode())/@type"><img src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" /></a>}
 else
 {
-        <div class="text-muted">No Data Available</div>
-}
+<div class="text-muted">No Data Available</div>}
 }
 <div class="js-refresh" data-name="dashboard-overview">
     @if (!Model.Nodes.Any())
@@ -76,24 +72,24 @@ else
                         </tr>
                         @foreach (var n in g.OrderBy(n => n.PrettyName))
                         {
-                            <tr class="@n.RowClass() @(n.IsVM ? " virtual-machine" : "")@(n.IsUnwatched ? " unwatched-row" : "")" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
-                                <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : "")Last Updated: @(n.LastSync?.ToRelativeTime())">
+                            <tr class="@(n.RowClass().Nullify())@(n.IsVM ? " virtual-machine" : null)@(n.IsUnwatched ? " unwatched-row" : null)" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                                <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : null)Last Updated: @(n.LastSync?.ToRelativeTime())">
                                     @n.IconSpan()
-                                    <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass()">@n.PrettyName</a>
+                                    <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass().Nullify()">@n.PrettyName</a>
                                 </td>
-                                <td title="@n.ApplicationCPUTextSummary()">@n.CPUStatusSpan()</td>
+                                <td title="@n.ApplicationCPUTextSummary().Nullify()" class="@n.CPUMonitorStatus().TextClass().Nullify()">@(n.CPULoad?.ToString("n0")) %</td>
                                 <td>@Graph(n, "cpu")</td>
-                                <td title="@n.ApplicationMemoryTextSummary()">
-                                    <span class="@n.MemoryMonitorStatus().TextClass()">@n.PrettyMemoryUsed() / @n.PrettyTotalMemory() (@(n.PercentMemoryUsed?.ToString("n2"))%)</span>
+                                <td title="@n.ApplicationMemoryTextSummary().Nullify()">
+                                    <span class="@n.MemoryMonitorStatus().TextClass().Nullify()">@n.PrettyMemoryUsed() / @n.PrettyTotalMemory() (@(n.PercentMemoryUsed?.ToString("n2"))%)</span>
                                     @if (n.MemoryUsed >= 0)
                                     {
-                                        <div class="progress" style="width: 215px;">
-                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div>
-                                        </div>
+                                    <div class="progress" style="width: 215px;">
+                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div>
+                                    </div>
                                     }
                                 </td>
                                 <td>@Graph(n, "memory")</td>
-                                <td title="@n.NetworkTextSummary()">@n.PrettyTotalNetwork()</td>
+                                <td>@n.PrettyTotalNetwork()</td>
                                 <td>@Graph(n, "network")</td>
                             </tr>
                         }

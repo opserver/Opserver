@@ -118,7 +118,7 @@ namespace StackExchange.Opserver.Models
                 ? MvcHtmlString.Empty
                 : info.TotalPrimaryNetworkbps.ToSpeed();
 
-        public static IHtmlString NetworkTextSummary(this Node info)
+        public static string NetworkTextSummary(this Node info)
         {
             var sb = StringBuilderCache.Get();
             sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
@@ -129,12 +129,12 @@ namespace StackExchange.Opserver.Models
                     (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
                     i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
             }
-            return sb.ToStringRecycle().AsHtml();
+            return sb.ToStringRecycle();
         }
 
-        public static IHtmlString ApplicationCPUTextSummary(this Node info)
+        public static string ApplicationCPUTextSummary(this Node info)
         {
-            if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
+            if (info.Apps?.Any() != true) return "";
 
             var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool CPU: {0} %\n", info.Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)).ToString(CultureInfo.CurrentCulture));
@@ -142,13 +142,13 @@ namespace StackExchange.Opserver.Models
             foreach (var a in info.Apps.OrderBy(a => a.NiceName))
             {
                 sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
-            }   
-            return sb.ToStringRecycle().AsHtml();
+            } 
+            return sb.ToStringRecycle();
         }
 
-        public static IHtmlString ApplicationMemoryTextSummary(this Node info)
+        public static string ApplicationMemoryTextSummary(this Node info)
         {
-            if (info.Apps?.Any() != true) return MvcHtmlString.Empty;
+            if (info.Apps?.Any() != true) return "";
 
             var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool Memory: {0}\n", info.Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
@@ -157,7 +157,7 @@ namespace StackExchange.Opserver.Models
             {
                 sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
             }
-            return sb.ToStringRecycle().AsHtml();
+            return sb.ToStringRecycle();
         }
     }
 
