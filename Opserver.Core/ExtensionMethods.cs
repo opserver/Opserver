@@ -398,7 +398,7 @@ namespace StackExchange.Opserver
 
         /// <summary>
         /// 
-        /// lookup refreshes the data if necessay, passing the old data if we have it.
+        /// lookup refreshes the data if necessary, passing the old data if we have it.
         /// 
         /// durationSecs is the "time before stale" for the data
         /// serveStaleSecs is the maximum amount of time to serve data once it becomes stale
