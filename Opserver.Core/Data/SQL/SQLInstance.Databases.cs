@@ -80,6 +80,9 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
 
+        public Cache<List<TableIndex>> GetIndexInfo(string databaseName) =>
+            DatabaseFetch<TableIndex>(databaseName);
+
         public Cache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
             DatabaseFetch<DatabaseDataSpace>(databaseName);
 
@@ -380,7 +383,41 @@ Select db.database_id DatabaseId,
             }
         }
 
+        public class TableIndex : ISQLVersioned
+        {
+            public string IndexName { get; internal set; }
+            public DateTime? LastUpdated { get; internal set; }
+            public string TypeDescription { get; internal set; }
+            public bool IsUnique { get; internal set; }
+            public string ColumnName { get; internal set; }
+            public bool IsPrimaryKey { get; internal set; }
+          
+            public string TableName { get; internal set; }
+            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
 
+            public string GetFetchSQL(Version v)
+            {
+                return @"
+ SELECT ind.name IndexName,	
+	    STATS_DATE(s.object_id, s.stats_id) LastUpdated,	  
+        ind.type_desc TypeDescription,
+	    ind.is_unique IsUnique,
+	    col.name ColumnName,
+        ind.is_primary_key IsPrimaryKey,
+        t.name TableName
+  FROM sys.indexes ind 
+        Join sys.index_columns ic 
+          On  ind.object_id = ic.object_id and ind.index_id = ic.index_id 
+        Join sys.columns col 
+          On ic.object_id = col.object_id and ic.column_id = col.column_id 
+        Join sys.tables t
+          On ind.object_id = t.object_id 
+        Join sys.stats s 
+          On s.object_id=ic.object_id and s.stats_id=ind.index_id
+WHERE t.is_ms_shipped = 0 
+Order by t.name,ind.index_id, ic.index_column_id ";
+            }
+        }
         public class StoredProcedure : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;

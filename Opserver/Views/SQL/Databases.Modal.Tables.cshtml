@@ -6,6 +6,7 @@
     var s = Model.Instance;
     var tables = s.GetTableInfo(Model.Database);
     var columns = s.GetColumnInfo(Model.Database);
+    var indexes = s.GetIndexInfo(Model.Database);
 }
 @if (tables.Data == null || !tables.LastPollSuccessful)
 {
@@ -47,6 +48,7 @@
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="6">
                         @Html.Partial("Databases.Modal.Columns", columns.Data.Where(c => c.Schema == t.SchemaName && c.TableName == t.TableName))
+                        @Html.Partial("Databases.Modal.Indexes", indexes.Data.Where(c => c.TableName == t.TableName))
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>

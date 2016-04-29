@@ -1,0 +1,58 @@
+﻿@using StackExchange.Exceptional.Extensions
+@using StackExchange.Opserver.Data.SQL
+@model IEnumerable<SQLInstance.TableIndex>
+@{
+    var columns = Model;
+
+    var groupedData = columns.GroupBy(i => i.IndexName, r => r, (k, v) => new
+    {
+        IndexName = k,
+        Unique = v.Select(x => x.IsUnique).FirstOrDefault() ? "Unique" : "Not Unique",
+        LastUpdated = v.Select(x => x.LastUpdated).FirstOrDefault(),
+        IsPrimaryKey = v.Select(p => p.IsPrimaryKey).FirstOrDefault(),
+        Type = v.Select(p => p.TypeDescription).FirstOrDefault(),
+        Columns = String.Join(", ", v.Select(c => c.ColumnName))
+    });
+}
+<h5>@groupedData.Count() Indexes</h5>
+<div class="panel panel-default">
+    <div class="panel-body">
+
+        <table class="table-striped col-xs-12">
+            <thead>
+                <tr>
+                    <th>Index Name</th>
+                    <th>Last Rebuilt</th>
+                    <th>Columns</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var ind in groupedData.OrderByDescending(c => c.IsPrimaryKey))
+            {
+                    <tr>
+                        <td>
+                            @ind.IndexName <span class="text-muted">
+                                (@ind.Type, @ind.Unique)
+                            </span>
+                            @if (ind.IsPrimaryKey)
+                            {
+                                @:<b>PK</b>
+                            }
+                        </td>
+                        <td title="@(ind.LastUpdated?.ToString())">
+                            @if (ind.LastUpdated != null)
+                            {
+                                <span>@ind.LastUpdated.Value.ToRelativeTime()</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">n/a</span>
+                            }
+                        </td>
+                        <td>@ind.Columns</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
