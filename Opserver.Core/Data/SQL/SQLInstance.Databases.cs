@@ -150,7 +150,7 @@ namespace StackExchange.Opserver.Data.SQL
                 get
                 {
                     if (IsReadOnly)
-                        return "Database is read-only";
+                        return Name + " is read-only";
 
                     switch (State)
                     {

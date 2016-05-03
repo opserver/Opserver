@@ -4,6 +4,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 {
     public class HAProxyIssues : IIssuesProvider
     {
+        public bool Enabled => HAProxyGroup.AllGroups.Count > 0;
         public string Name => "HAProxy";
 
         public IEnumerable<Issue> GetIssues()

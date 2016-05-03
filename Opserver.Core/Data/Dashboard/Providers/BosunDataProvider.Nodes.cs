@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Status = GetNodeStatus(h),
                         // TODO: Add Last Ping time to all providers
                         LastSync = h.CPU?.StatsLastUpdated,
-                        CPULoad = (short?)h.CPU?.PercentUsed,
+                        CPULoad = (short?) h.CPU?.PercentUsed,
                         MemoryUsed = h.Memory?.UsedBytes,
                         TotalMemory = h.Memory?.TotalBytes,
                         Manufacturer = h.Manufacturer,
@@ -76,9 +76,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             LastSync = hi.Value.StatsLastUpdated,
                             InBps = hi.Value.Inbps,
                             OutBps = hi.Value.Outbps,
-                            Speed = hi.Value.LinkSpeed * 1000000,
+                            Speed = hi.Value.LinkSpeed*1000000,
                             Status = NodeStatus.Active, // TODO: Implement
-                            TeamMembers = h.Interfaces?.Where(i => i.Value.Master == hi.Value.Name).Select(i => i.Key).ToList()
+                            TeamMembers =
+                                h.Interfaces?.Where(i => i.Value.Master == hi.Value.Name).Select(i => i.Key).ToList()
                         }).ToList(),
                         Volumes = h.Disks?.Select(hd => new Volume
                         {
@@ -91,11 +92,24 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Used = hd.Value.UsedBytes,
                             Size = hd.Value.TotalBytes,
                             Available = hd.Value.TotalBytes - hd.Value.UsedBytes,
-                            PercentUsed = 100 * (hd.Value.UsedBytes / hd.Value.TotalBytes),
+                            PercentUsed = 100*(hd.Value.UsedBytes/hd.Value.TotalBytes),
                         }).ToList(),
                         //Apps = new List<Application>(),
                         //VMs = new List<Node>()
                     };
+
+                    if (h.OpenIncidents?.Count > 0)
+                    {
+                        n.Issues = h.OpenIncidents.Select(i => new Issue<Node>(n)
+                        {
+                            Title = n.PrettyName,
+                            Date = i.LastAbnormalTime.ToDateTime(),
+                            Description = i.Subject,
+                            MonitorStatus = GetStatusFromString(i.Status),
+                            MonitorStatusReason = i.Subject
+                        }).ToList();
+                    }
+
                     var hs = new HardwareSummary();
                     if (h.CPU?.Processors != null)
                     {
@@ -246,6 +260,20 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
+        private MonitorStatus GetStatusFromString(string status)
+        {
+            switch (status)
+            {
+                case "normal":
+                    return MonitorStatus.Good;
+                case "warning":
+                    return MonitorStatus.Warning; // critical?
+                default:
+                //case "unknown":
+                    return MonitorStatus.Unknown;
+            }
+        }
+
         private NodeStatus GetNodeStatus(BosunHost host)
         {
             if (host.OpenIncidents?.Count > 0)
@@ -322,10 +350,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public class IncidentInfo
             {
                 public int IncidentID { get; set; }
+                public bool Active { get; set; }
                 public string AlertKey { get; set; }
                 public string Status { get; set; }
                 public string Subject { get; set; }
                 public bool Silenced { get; set; }
+                public long StatusTime { get; set; }
+                public long LastAbnormalTime { get; set; }
+                public bool NeedsAck { get; set; }
             }
 
             public class ICMPInfo

@@ -14,20 +14,30 @@ namespace StackExchange.Opserver.Data
         {
             IssueProviders = new List<IIssuesProvider>();
             var providers = AppDomain.CurrentDomain.GetAssemblies()
-                                     .SelectMany(s => s.GetTypes())
-                                     .Where(typeof (IIssuesProvider).IsAssignableFrom);
+                .SelectMany(s => s.GetTypes())
+                .Where(t => typeof(IIssuesProvider).IsAssignableFrom(t) && !typeof(IIssuesProviderInstance).IsAssignableFrom(t));
+
             foreach (var p in providers)
             {
                 if (!p.IsClass) continue;
                 try
                 {
-                    IssueProviders.Add((IIssuesProvider) Activator.CreateInstance(p));
+                    var provider = (IIssuesProvider) Activator.CreateInstance(p);
+                    if (provider.Enabled)
+                    {
+                        IssueProviders.Add(provider);
+                    }
                 }
                 catch (Exception e)
                 {
                     Current.LogException("Error creating IIssuesProvider instance for " + p, e);
                 }
             }
+        }
+
+        public static void AddProvider(IIssuesProviderInstance provider)
+        {
+            IssueProviders.Add(provider);
         }
 
         public static List<Issue> GetIssues()
@@ -58,13 +68,19 @@ namespace StackExchange.Opserver.Data
                 }, 60, 4*60*60);
         }
     }
-
-
+    
     public interface IIssuesProvider
     {
+        bool Enabled { get; }
         string Name { get; }
         IEnumerable<Issue> GetIssues();
     }
+
+    /// <summary>
+    /// For classes we have an instance of already in order to access local instance data,
+    /// as in the case of dashboard data proviers.
+    /// </summary>
+    public interface IIssuesProviderInstance : IIssuesProvider {}
 
     public class Issue<T> : Issue where T : IMonitorStatus
     {

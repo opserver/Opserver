@@ -5,6 +5,7 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public class SQLIssues : IIssuesProvider
     {
+        public bool Enabled => SQLCluster.AllClusters.Count > 0 || SQLInstance.AllInstances.Count > 0;
         public string Name => "SQL";
 
         public IEnumerable<Issue> GetIssues()

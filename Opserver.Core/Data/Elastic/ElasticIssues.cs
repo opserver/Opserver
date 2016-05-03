@@ -4,6 +4,7 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public class ElasticIssues : IIssuesProvider
     {
+        public bool Enabled => ElasticCluster.AllClusters.Count > 0;
         public string Name => "Elastic";
 
         public IEnumerable<Issue> GetIssues()
