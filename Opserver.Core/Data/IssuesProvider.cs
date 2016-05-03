@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Data
                         .ThenByDescending(i => i.Date)
                         .ThenBy(i => i.Title)
                         .ToList();
-                }, 60, 4*60*60);
+                }, 15, 4*60*60);
         }
     }
     
