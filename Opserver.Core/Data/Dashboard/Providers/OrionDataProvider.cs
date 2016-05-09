@@ -167,8 +167,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                                     Date = n.LastSync ?? DateTime.UtcNow,
                                     Title = n.PrettyName,
                                     Description = n.StatusDescription,
-                                    MonitorStatus = n.Status.ToMonitorStatus(),
-                                    MonitorStatusReason = n.StatusDescription
+                                    MonitorStatus = n.Status.ToMonitorStatus()
                                 }
                             };
                         }

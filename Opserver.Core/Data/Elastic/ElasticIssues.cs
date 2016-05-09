@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Data.Elastic
         {
             foreach (var c in ElasticCluster.AllClusters.WithIssues())
             {
-                yield return new Issue<ElasticCluster>(c, c.Name) { IsService = true };
+                yield return new Issue<ElasticCluster>(c, c.Name) { IsCluster = true };
             }
         }
     }

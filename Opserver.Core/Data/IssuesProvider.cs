@@ -35,14 +35,12 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        public static void AddProvider(IIssuesProviderInstance provider)
-        {
-            IssueProviders.Add(provider);
-        }
+        public static void AddProvider(IIssuesProviderInstance provider) => IssueProviders.Add(provider);
 
         public static List<Issue> GetIssues()
         {
-            using (MiniProfiler.Current.Step("GetIssues"))
+            using (MiniProfiler.Current.Step(nameof(GetIssues)))
+            {
                 return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
                 {
                     var result = new List<Issue>();
@@ -60,12 +58,13 @@ namespace StackExchange.Opserver.Data
                     });
 
                     return result
-                        .OrderByDescending(i => i.IsService)
+                        .OrderByDescending(i => i.IsCluster)
                         .ThenByDescending(i => i.MonitorStatus)
                         .ThenByDescending(i => i.Date)
                         .ThenBy(i => i.Title)
                         .ToList();
-                }, 15, 4*60*60);
+                }, 15, 4 * 60 * 60);
+            }
         }
     }
     
@@ -105,9 +104,9 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Whether this issue is a service rather than a node - presumably an entire service being offline is worse
         /// </summary>
-        public bool IsService { get; set; }
+        public bool IsCluster { get; set; }
         public DateTime Date { get; set; }
         public MonitorStatus MonitorStatus { get; set; }
-        public string MonitorStatusReason { get; set; }
+        public string MonitorStatusReason => Description;
     }
 }

@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             foreach (var ag in SQLCluster.AllClusters.SelectMany(c => c.AvailabilityGroups).WithIssues())
             {
-                yield return new Issue<SQLNode.AGInfo>(ag, ag.Name) { IsService = true };
+                yield return new Issue<SQLNode.AGInfo>(ag, ag.Name) { IsCluster = true };
             }
             foreach (var instance in SQLInstance.AllInstances.WithIssues())
             {

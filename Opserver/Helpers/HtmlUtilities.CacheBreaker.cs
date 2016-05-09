@@ -12,27 +12,16 @@ namespace StackExchange.Opserver.Helpers
 {
     public partial class HtmlUtilities
     {
-        public static IHtmlString CacheBreaker(this UrlHelper url, string path)
-        {
-            return MvcHtmlString.Create(GetCacheBreakerUrl(path));
-        }
+        public static IHtmlString CacheBreaker(this UrlHelper url, string path) => MvcHtmlString.Create(GetCacheBreakerUrl(path));
 
         /// <summary>
         /// Given the URL to a static file, returns the URL together with a cache breaker, i.e. ?v=123abc... appended.
         /// The cache breaker will always be based on the local version of the file, even if the URL points to sstatic.net,
         /// and only calculated once.
         /// </summary>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static string GetCacheBreakerUrl(string path)
-        {
-            return CacheBreakerUrls.GetOrAdd(path, CalculateCacheBreakerUrl);
-        }
+        public static string GetCacheBreakerUrl(string path) => CacheBreakerUrls.GetOrAdd(path, CalculateCacheBreakerUrl);
 
-        internal static IEnumerable<KeyValuePair<string, string>> GetAllCacheBreakerUrls()
-        {
-            return CacheBreakerUrls.ToList();
-        }
+        internal static IEnumerable<KeyValuePair<string, string>> GetAllCacheBreakerUrls() => CacheBreakerUrls.ToList();
 
         private static readonly ConcurrentDictionary<string, string> CacheBreakers = new ConcurrentDictionary<string, string>();
         private static readonly ConcurrentDictionary<string, string> CacheBreakerUrls = new ConcurrentDictionary<string, string>();

@@ -105,8 +105,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Title = n.PrettyName,
                             Date = i.LastAbnormalTime.ToDateTime(),
                             Description = i.Subject,
-                            MonitorStatus = GetStatusFromString(i.Status),
-                            MonitorStatusReason = i.Subject
+                            MonitorStatus = GetStatusFromString(i.Status)
                         }).ToList();
                     }
 
