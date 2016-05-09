@@ -6,11 +6,7 @@ namespace StackExchange.Opserver.Data.Dashboard
     public partial class Volume : IMonitorStatus
     {
         public Node Node { get; set; }
-
-        // TODO: Not constants eh?
-        public const int WarningPercentUsed = 90;
-        public const int CriticalPercentUsed = 95;
-
+        
         public string Id { get; internal set; }
         public string NodeId { get; internal set; }
         public DateTime? LastSync { get; internal set; }
@@ -21,11 +17,11 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Type { get; internal set; }
         public NodeStatus Status { get; internal set; }
 
-        public double? Size { get; internal set; }
-        public double? Used { get; internal set; }
-        public double? Available { get; internal set; }
-        public float? PercentUsed { get; internal set; }
-        public float? PercentFree => 100 - PercentUsed;
+        public decimal? Size { get; internal set; }
+        public decimal? Used { get; internal set; }
+        public decimal? Available { get; internal set; }
+        public decimal? PercentUsed { get; internal set; }
+        public decimal? PercentFree => 100 - PercentUsed;
 
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement
@@ -46,7 +42,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        private readonly Func<double?, string> _sizeFormat = s => s.HasValue ? s.Value.ToSize() : "";
+        private readonly Func<decimal?, string> _sizeFormat = s => s.HasValue ? s.Value.ToSize() : "";
 
         public string PrettySize => _sizeFormat(Size);
         public string PrettyUsed => _sizeFormat(Used);
@@ -56,9 +52,11 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get
             {
-                if (PercentUsed > CriticalPercentUsed)
+                if (!PercentUsed.HasValue)
+                    return MonitorStatus.Unknown;
+                if (Node.DiskCriticalPercent.HasValue && PercentUsed > Node.DiskCriticalPercent.Value)
                     return MonitorStatus.Critical;
-                if (PercentUsed > WarningPercentUsed)
+                if (Node.DiskWarningPercent.HasValue && PercentUsed > Node.DiskWarningPercent.Value)
                     return MonitorStatus.Warning;
                 return MonitorStatus.Good;
             }

@@ -568,6 +568,17 @@ namespace StackExchange.Opserver
         /// <param name="bytes">This value.</param>
         /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
         /// <param name="precision">How much precision to show, defaults to 2</param>
+        /// <param name="zero">String to show if the value is 0</param>
+        /// <returns>Filesize and quantifier formatted as a string.</returns>
+        public static string ToSize(this decimal bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
+            ToSize((double)bytes, unit, precision, zero: zero);
+
+        /// <summary>
+        /// Formats the value as a filesize in bytes (KB, MB, etc.)
+        /// </summary>
+        /// <param name="bytes">This value.</param>
+        /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
+        /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="kiloSize">1k size, usually 1024 or 1000 depending on context</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>

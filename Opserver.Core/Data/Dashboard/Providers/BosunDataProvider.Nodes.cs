@@ -325,8 +325,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public class DiskInfo
             {
-                public float? UsedBytes { get; set; }
-                public float? TotalBytes { get; set; }
+                public decimal? UsedBytes { get; set; }
+                public decimal? TotalBytes { get; set; }
                 public DateTime StatsLastUpdated { get; set; }
             }
 

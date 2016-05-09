@@ -224,7 +224,7 @@ SELECT Caption,
                         v.Used = v.Size - v.Available;
                         if (v.Size > 0)
                         {
-                            v.PercentUsed = (float)(100 * v.Used / v.Size);
+                            v.PercentUsed = 100 * v.Used / v.Size;
                         }
                     }
                 }

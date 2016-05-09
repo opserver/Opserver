@@ -8934,6 +8934,24 @@ table .text-muted,
   border: none;
   margin-bottom: 0;
 }
+.table > tbody .progress.vertical,
+.table-striped > tbody .progress.vertical,
+.table > thead .progress.vertical,
+.table-striped > thead .progress.vertical {
+  height: 20px;
+  width: 6px;
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+}
+.table > tbody .progress.vertical .progress-bar,
+.table-striped > tbody .progress.vertical .progress-bar,
+.table > thead .progress.vertical .progress-bar,
+.table-striped > thead .progress.vertical .progress-bar {
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
 .table-actions h5 a.glyphicon {
   font-size: 12px;
 }

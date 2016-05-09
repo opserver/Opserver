@@ -581,6 +581,18 @@ h4, h5, h6 {
       padding: 0;
       border: none;
       margin-bottom: 0;
+      &.vertical {
+        height: 20px;
+        width: 6px;
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        .progress-bar {
+          width: 100%;
+          position: absolute;
+          bottom: 0;
+        }
+      }
     }
   }
 }

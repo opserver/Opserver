@@ -59,8 +59,8 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus MemoryMonitorStatus(this Node info)
         {
             if (!info.PercentMemoryUsed.HasValue) return MonitorStatus.Unknown;
-            if (info.Category.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryCriticalPercent) return MonitorStatus.Critical;
-            if (info.Category.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryWarningPercent) return MonitorStatus.Warning;
+            if (info.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryCriticalPercent) return MonitorStatus.Critical;
+            if (info.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
@@ -83,8 +83,8 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus CPUMonitorStatus(this Node info)
         {
             if (!info.CPULoad.HasValue) return MonitorStatus.Unknown;
-            if (info.Category.CPUCriticalPercent > 0 && info.CPULoad > info.Category.CPUCriticalPercent) return MonitorStatus.Critical;
-            if (info.Category.CPUWarningPercent > 0 && info.CPULoad > info.Category.CPUWarningPercent) return MonitorStatus.Warning;
+            if (info.CPUCriticalPercent > 0 && info.CPULoad > info.CPUCriticalPercent) return MonitorStatus.Critical;
+            if (info.CPUWarningPercent > 0 && info.CPULoad > info.CPUWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
