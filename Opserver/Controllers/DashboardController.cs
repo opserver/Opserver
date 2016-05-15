@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Jil;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
@@ -25,6 +26,56 @@ namespace StackExchange.Opserver.Controllers
                     IsStartingUp = DashboardData.AnyDoingFirstPoll
                 };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
+        }
+
+        [Route("dashboard/json")]
+        public ActionResult DashboardJson(string filter)
+        {
+            var categories = DashboardData.AllNodes
+                .GroupBy(n => n.Category)
+                .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
+                .OrderBy(g => g.Key.Index);
+
+            var resultCategories = categories.Select(g =>
+            {
+                var c = g.Key;
+                var cNodes = g.OrderBy(n => n.PrettyName);
+                var nodes = cNodes.Select(n => new
+                {
+                    n.Id,
+                    Status = n.RawClass(),
+                    Class = n.RowClass().Nullify() + (n.IsVM ? " virtual-machine" : null),
+                    Search = n.SearchString,
+                    Name = n.PrettyName,
+                    Label = n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : null + "Last Updated:" + n.LastSync?.ToRelativeTime(),
+                    AppText = n.ApplicationCPUTextSummary(),
+                    CpuStatus = n.CPUMonitorStatus().RawClass(),
+                    CPU = n.CPULoad,
+                    AppMemory = n.ApplicationMemoryTextSummary().Nullify(),
+                    MemStatus = n.MemoryMonitorStatus().RawClass().Nullify(),
+                    MemPercent = n.PercentMemoryUsed > 0 ? n.PercentMemoryUsed : null,
+                    MemText = $"{n.PrettyMemoryUsed()} / {n.PrettyTotalMemory()}({n.PercentMemoryUsed?.ToString("n2")}%)",
+                    NetPretty = n.PrettyTotalNetwork().ToString(),
+                    DiskPercent = n.Volumes?.Where(v => v.PercentUsed.HasValue).Max(v => v.PercentUsed.Value),
+                    Disks = n.Volumes?.Select(v => new
+                    {
+                        Name = v.PrettyName,
+                        Status = v.RawClass(),
+                        Tooltip = $"{v.PrettyName}: {v.PercentUsed?.ToString("n2")}% used ({v.PrettyUsed}/{v.PrettySize})",
+                        PercentUsed = v.PercentUsed?.ToString("n2")
+                    })
+                });
+                return new
+                {
+                    c.Name,
+                    Nodes = nodes
+                };
+            }).ToList();
+            return Json(new
+            {
+                DashboardData.HasData,
+                Categories = resultCategories
+            }, Options.ExcludeNulls);
         }
 
         [Route("dashboard/node")]

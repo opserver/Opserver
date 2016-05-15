@@ -15,13 +15,8 @@ namespace StackExchange.Opserver.Models
 {
     public static class ExtensionMethods
     {
-        public static IHtmlString ToSpeed(this float bps, string unit = "b")
-        {
-            if (bps < 1) return @"<span class=""speed pow0"">0 b/s</span>".AsHtml();
-            var pow = Math.Floor(Math.Log10(bps) / 3);
-            var byteScale = bps.ToSize(unit);
-            return string.Format(@"<span class=""speed pow{1}"">{0}/s</span>", byteScale, pow.ToString(CultureInfo.InvariantCulture)).AsHtml();
-        }
+        public static string ToSpeed(this float bps, string unit = "b") =>
+            bps < 1 ? "0 b/s" : $"{bps.ToSize(unit)}/s";
     }
 
     public static class VolumeExtensionMethods
@@ -31,9 +26,9 @@ namespace StackExchange.Opserver.Models
 
     public static class InterfaceExtensionMethods
     {
-        public static IHtmlString PrettyIn(this Interface i) => i.InBps?.ToSpeed() ?? MvcHtmlString.Empty;
+        public static string PrettyIn(this Interface i) => i.InBps?.ToSpeed();
 
-        public static IHtmlString PrettyOut(this Interface i) => i.OutBps?.ToSpeed() ?? MvcHtmlString.Empty;
+        public static string PrettyOut(this Interface i) => i.OutBps?.ToSpeed();
     }
 
     public static class NodeExtensionMethods
@@ -94,9 +89,9 @@ namespace StackExchange.Opserver.Models
             return $@"<span class=""{info.CPUMonitorStatus().GetDescription()}"">{info.CPULoad?.ToString("n0")} %</span>".AsHtml();
         }
 
-        public static IHtmlString PrettyTotalNetwork(this Node info) =>
+        public static string PrettyTotalNetwork(this Node info) =>
             info.TotalPrimaryNetworkbps < 0
-                ? MvcHtmlString.Empty
+                ? null
                 : info.TotalPrimaryNetworkbps.ToSpeed();
 
         public static string NetworkTextSummary(this Node info)

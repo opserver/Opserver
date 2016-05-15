@@ -36,7 +36,7 @@ else
         foreach (var vol in n.Volumes)
         {
             <div class="progress vertical" title="@vol.PrettyName: @(vol.PercentUsed?.ToString("n2"))% used (@vol.PrettyUsed/@vol.PrettySize)">
-                <div class="progress-bar @vol.SpaceStatus.ProgressBarClass()" style="height: @(vol.PercentUsed?.ToString(CultureInfo.InvariantCulture))%"></div>
+                <div class="progress-bar @vol.SpaceStatus.ProgressBarClass()" style="height: @(vol.PercentUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
             </div>
         }
     }
@@ -105,7 +105,7 @@ else
                                     @if (n.MemoryUsed >= 0)
                                     {
                                     <div class="progress" style="width: 215px;">
-                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div>
+                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
                                     </div>
                                     }
                                 </td>

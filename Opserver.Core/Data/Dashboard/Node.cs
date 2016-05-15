@@ -119,7 +119,6 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
 
         public float TotalNetworkbps => Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
-
         public float TotalPrimaryNetworkbps => PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
 
         private DashboardSettings.NodeSettings _settings;
