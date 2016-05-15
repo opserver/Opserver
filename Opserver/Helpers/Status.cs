@@ -15,16 +15,16 @@ namespace StackExchange.Opserver.Helpers
         public static IHtmlString IconSpanUnknown = $@"<span class=""{UnknownClass}"">●</span>".AsHtml();
 
 
-        public static IHtmlString UpCustomSpam(string text, string tooltip = null) => 
+        public static IHtmlString UpCustomSpan(string text, string tooltip = null) => 
             CustomSpan(UpClass, text, tooltip);
 
-        public static IHtmlString DownCustomSpam(string text, string tooltip = null) => 
+        public static IHtmlString DownCustomSpan(string text, string tooltip = null) => 
             CustomSpan(DownClass, text, tooltip);
 
-        public static IHtmlString WarningCustomSpam(string text, string tooltip = null) => 
+        public static IHtmlString WarningCustomSpan(string text, string tooltip = null) => 
             CustomSpan(WarningClass, text, tooltip);
 
-        public static IHtmlString UnknownCustomSpam(string text, string tooltip = null) => 
+        public static IHtmlString UnknownCustomSpan(string text, string tooltip = null) => 
             CustomSpan(UnknownClass, text, tooltip);
 
         private static IHtmlString CustomSpan(string className, string text, string tooltip) => 
