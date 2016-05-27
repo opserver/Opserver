@@ -22,7 +22,7 @@ else
 }
 @helper DiskText(Node n)
 {
-    var worst = n.Volumes?.Where(v => v.PercentUsed.HasValue).Max(v => v.PercentUsed.Value);
+    var worst = n.Volumes?.Where(v => v.PercentUsed.HasValue).DefaultIfEmpty().Max(v => v.PercentUsed.Value);
     if (worst > 0)
     {
         @worst.Value.ToString("n0")@:%
