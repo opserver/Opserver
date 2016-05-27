@@ -97,7 +97,8 @@ Select Cast(VolumeID as varchar(50)) as Id,
        VolumeSpaceUsed as Used,
        VolumeSpaceAvailable as Available,
        VolumePercentUsed as PercentUsed
-From Volumes", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+  From Volumes
+ Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
 
                     var apps = await conn.QueryAsync<Application>(@"
 Select Cast(com.ApplicationID as varchar(50)) as Id, 
