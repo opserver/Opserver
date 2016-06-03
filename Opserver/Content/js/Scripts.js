@@ -1225,23 +1225,23 @@ Status.Exceptions = (function () {
             var previewTimer = 0;
             $('.js-content').on({
                 mouseenter: function (e) {
-                    if ($(e.target).closest('td:first-child').length) {
-                        return;
+                    if ($(e.target).closest('.js-error td:nth-child(4)').length) {
+                        var jThis = $(this).find('.js-exception-link'),
+                            url = jThis.attr('href').replace('/detail', '/preview');
+
+                        clearTimeout(previewTimer);
+                        previewTimer = setTimeout(function() {
+                                $.get(url,
+                                    function(resp) {
+                                        var sane = $(resp).filter('.error-preview');
+                                        if (!sane.length) return;
+
+                                        $('.error-preview-popup').fadeOut(125, function() { $(this).remove(); });
+                                        var errDiv = $('<div class="error-preview-popup" />').append(resp);
+                                        errDiv.appendTo(jThis.parent()).fadeIn('fast');
+                                    });
+                            }, 600);
                     }
-                    var jThis = $(this).find('.js-exception-link'),
-                        url = jThis.attr('href').replace('/detail', '/preview');
-
-                    clearTimeout(previewTimer);
-                    previewTimer = setTimeout(function () {
-                        $.get(url, function (resp) {
-                            var sane = $(resp).filter('.error-preview');
-                            if (!sane.length) return;
-
-                            $('.error-preview-popup').fadeOut(125, function () { $(this).remove(); });
-                            var errDiv = $('<div class="error-preview-popup" />').append(resp);
-                            errDiv.appendTo(jThis.parent()).fadeIn('fast');
-                        });
-                    }, 600);
                 },
                 mouseleave: function () {
                     clearTimeout(previewTimer);
