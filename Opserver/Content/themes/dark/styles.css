@@ -8985,20 +8985,6 @@ table .text-muted,
   color: #999999;
   text-align: center;
 }
-dl {
-  overflow: auto;
-  margin-bottom: 0;
-}
-dt,
-dd {
-  float: left;
-}
-dt {
-  clear: both;
-  font-weight: normal;
-  margin-right: 10px;
-  color: #999999;
-}
 .panel-body.smaller {
   font-size: 0.9em;
 }
