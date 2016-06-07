@@ -102,4 +102,3 @@ $RECYCLE.BIN/
 Opserver/config/*.json
 Opserver/config/*.config
 *.StackOverflow.*
-/packages/MySql.Data.6.9.8
