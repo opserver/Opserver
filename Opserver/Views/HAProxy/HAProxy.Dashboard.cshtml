@@ -106,7 +106,7 @@
                     var anyUp = g.AllServers.Any(s => !s.InMaintenance);
                     var anyDown = g.AllServers.Any(s => s.InMaintenance);
 
-                    <tbody class="@(g.GroupLinkName == Model.WatchProxy ? "watched-proxy" : "")" data-group="@g.Name" data-proxy="@g.ProxyName">
+                    <tbody class="@(g.GroupLinkName == Model.WatchProxy ? "watched-proxy" : "")" data-group="@g.GroupName" data-proxy="@g.ProxyName">
                         <tr class="category-row" title="Name: @g.GroupName">
                             <th colspan="12">
                                 <h5>
