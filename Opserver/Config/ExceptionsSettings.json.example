@@ -22,7 +22,8 @@
             "name": "New York",
             "queryTimeoutMs": 2000,
             "pollIntervalSeconds": 10,
-            "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;"
+          "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;",
+          "databasetype": "mssql"
         }
     ]
 }
