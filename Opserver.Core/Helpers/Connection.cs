@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
+using MySql.Data.MySqlClient;
 
 namespace StackExchange.Opserver.Helpers
 {
@@ -17,11 +18,21 @@ namespace StackExchange.Opserver.Helpers
         /// <param name="connectionString">The connection string to use for the connection</param>
         /// <param name="connectionTimeout">Milliseconds to wait to connect, optional</param>
         /// <returns>A READ UNCOMMITTED connection to the specified connection string</returns>
-        public static DbConnection GetOpen(string connectionString, int? connectionTimeout = null)
+        public static DbConnection GetOpen(string connectionString, int? connectionTimeout = null,string databasetype="mssql")
         {
-            var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
+            ProfiledDbConnection conn = null;
+            if (databasetype=="mysql")
+            {
+               conn= new ProfiledDbConnection(new MySqlConnection(connectionString), MiniProfiler.Current);
+            }
+            else
+            {
+               conn= new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
+            }
+          
             Action<DbConnection> setReadUncommitted = c =>
                 {
+                    //TODO
                     using (var cmd = c.CreateCommand())
                     {
                         cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
@@ -43,7 +54,7 @@ namespace StackExchange.Opserver.Helpers
                 try
                 {
                     conn.Open();
-                }
+                }//TODO
                 catch (SqlException e)
                 {
                     var csb = new SqlConnectionStringBuilder(connectionString);
@@ -68,10 +79,17 @@ namespace StackExchange.Opserver.Helpers
         /// <param name="connectionString">The connection string to use for the connection</param>
         /// <param name="connectionTimeout">Milliseconds to wait to connect, optional</param>
         /// <returns>A READ UNCOMMITTED connection to the specified connection string</returns>
-        public static async Task<DbConnection> GetOpenAsync(string connectionString, int? connectionTimeout = null)
+        public static async Task<DbConnection> GetOpenAsync(string connectionString, int? connectionTimeout = null,string databasetype="mssql")
         {
-            var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
-
+            ProfiledDbConnection conn = null;
+            if (databasetype == "mysql")
+            {
+                conn = new ProfiledDbConnection(new MySqlConnection(connectionString), MiniProfiler.Current);
+            }
+            else
+            {
+                conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
+            }
             if (connectionTimeout.GetValueOrDefault(0) == 0)
             {
                 await conn.OpenAsync().ConfigureAwait(false);
@@ -97,7 +115,7 @@ namespace StackExchange.Opserver.Helpers
                         var csb = new SqlConnectionStringBuilder(connectionString);
                         var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource}, timeout out at {connectionTimeout.ToComma()} ms";
                         throw new Exception(sqlException, e);
-                    }
+                    }//TODO
                     catch (SqlException e)
                     {
                         conn.Close();

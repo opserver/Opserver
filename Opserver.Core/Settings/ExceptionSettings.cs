@@ -59,6 +59,10 @@ namespace StackExchange.Opserver
             /// How often to poll this store
             /// </summary>
             public int PollIntervalSeconds { get; set; } = 300;
+            /// <summary>
+            /// databasetype support mssql & mysql
+            /// </summary>
+            public string DatabaseType { get; set; }
 
             /// <summary>
             /// Connection string for this store's database

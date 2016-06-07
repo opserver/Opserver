@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Exceptions
     {
         public string Name { get; internal set; }
         public string StoreName { get; internal set; }
-        public ExceptionStore Store { get; internal set; }
+        public IExceptionStore Store { get; internal set; }
 
         public int ExceptionCount { get; internal set; }
         public int RecentExceptionCount { get; internal set; }

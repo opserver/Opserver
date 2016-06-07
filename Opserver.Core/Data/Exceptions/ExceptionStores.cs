@@ -42,12 +42,23 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        public static List<ExceptionStore> Stores { get; } =
+        public static List<IExceptionStore> Stores { get; } =
             Current.Settings.Exceptions.Stores
-                .Select(s => new ExceptionStore(s))
+                .Select(s => GetExceptionStoreByDatabaseType(s))
                 .Where(s => s.TryAddToGlobalPollers())
                 .ToList();
 
+        public static IExceptionStore GetExceptionStoreByDatabaseType(ExceptionsSettings.Store store)
+        {
+            if (store.DatabaseType=="mysql")
+            {
+                return new MysqlExceptionStore(store);
+            }
+            else
+            {
+                return new ExceptionStore(store);
+            }
+        }
         public static List<Application> ConfigApplications { get; } =
             Current.Settings.Exceptions.Applications
                 .Select(a => new Application {Name = a}).ToList();
@@ -59,7 +70,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             return result.FirstOrDefault(e => e != null);
         }
 
-        public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
+        public static async Task<T> ActionAsync<T>(string appName, Func<IExceptionStore, Task<T>> action)
         {
             var result = default(T);
             List<Task> toPoll = new List<Task>();
@@ -90,7 +101,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        private static IEnumerable<ExceptionStore> GetStores(string appName)
+        private static IEnumerable<IExceptionStore> GetStores(string appName)
         {
             var stores = GetApps(appName).Where(a => a.Store != null).Select(a => a.Store).Distinct();
             // if we have no error stores hooked up, return all stores to search
