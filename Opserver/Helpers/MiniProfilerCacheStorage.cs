@@ -7,16 +7,7 @@ namespace StackExchange.Opserver.Helpers
 {
     public class MiniProfilerCacheStorage : HttpRuntimeCacheStorage, IStorage
     {
-        public MiniProfilerCacheStorage(TimeSpan cacheDuration) : base(cacheDuration){}
-
-        MiniProfiler IStorage.Load(Guid id)
-        {
-            var profiler = base.Load(id);
-            if (profiler == null)
-            {
-                return PollingEngine.GetCache(id)?.Profiler;
-            }
-            return profiler;
-        }
+        public MiniProfilerCacheStorage(TimeSpan cacheDuration) : base(cacheDuration) {}
+        MiniProfiler IStorage.Load(Guid id) => base.Load(id) ?? PollingEngine.GetCache(id)?.Profiler;
     }
 }
