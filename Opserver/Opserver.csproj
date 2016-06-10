@@ -144,6 +144,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Helpers\Theme.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">

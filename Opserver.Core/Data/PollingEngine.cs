@@ -208,5 +208,17 @@ namespace StackExchange.Opserver.Data
         {
             return AllPollNodes.FirstOrDefault(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase) && pn.UniqueKey == key);
         }
+
+        public static Cache GetCache(Guid id)
+        {
+            foreach (var pn in AllPollNodes)
+            {
+                foreach (var c in pn.DataPollers)
+                {
+                    if (c.UniqueId == id) return c;
+                }
+            }
+            return null;
+        }
     }
 }

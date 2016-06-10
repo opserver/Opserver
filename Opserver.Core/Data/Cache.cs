@@ -52,11 +52,6 @@ namespace StackExchange.Opserver.Data
         }
         public Func<Cache<T>, Task> UpdateCache { get; set; }
 
-        /// <summary>
-        /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
-        /// </summary>
-        public MiniProfiler Profiler { get; set; }
-
         public override async Task<int> PollAsync(bool force = false)
         {
             Interlocked.Increment(ref PollingEngine._activePolls);
@@ -193,7 +188,12 @@ namespace StackExchange.Opserver.Data
         public TimeSpan? LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
         public bool LastPollSuccessful { get; internal set; }
-        
+
+        /// <summary>
+        /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
+        /// </summary>
+        public MiniProfiler Profiler { get; set; }
+
         internal void SetSuccess()
         {
             LastSuccess = LastPoll = DateTime.UtcNow;
