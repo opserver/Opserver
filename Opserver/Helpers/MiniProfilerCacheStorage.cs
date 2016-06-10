@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Helpers
             {
                 return PollingEngine.GetCache(id)?.Profiler;
             }
-            return null;
+            return profiler;
         }
     }
 }
