@@ -5,7 +5,7 @@ using System.Threading;
 namespace StackExchange.Opserver
 {
     /// <summary>
-    /// Provides optoimized access to StringBuilder instances
+    /// Provides optimized access to StringBuilder instances
     /// Credit: Marc Gravell (@marcgravell), Stack Exchange Inc.
     /// </summary>
     public static class StringBuilderCache
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Get the string contents of a StringBuilder and recyle the instance at the same time
+        /// Get the string contents of a StringBuilder and recycle the instance at the same time
         /// </summary>
         public static string ToStringRecycle(this StringBuilder obj, int startIndex, int length)
         {
