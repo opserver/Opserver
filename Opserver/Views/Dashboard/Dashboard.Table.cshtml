@@ -59,7 +59,7 @@ else
                 }
             </div>
         </div>
-        if (errors.Any())
+        if (errors != null && errors.Any())
         {
             <script>
                 @foreach (var e in errors)
