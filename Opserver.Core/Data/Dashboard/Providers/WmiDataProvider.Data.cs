@@ -21,6 +21,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
 
             /// <summary>
+            /// Defines if we can use "Win32_PerfFormattedData_Tcpip_NetworkAdapter" to query adapter utilization or not.
+            /// This is needed because "Win32_PerfFormattedData_Tcpip_NetworkAdapter" was first introduced in Windows 8 and Windows 2012.
+            /// </summary>
+            private bool canQueryAdapterUtilization;
+
+            /// <summary>
             /// Name as specified in DashboardSettings.json.
             /// Real name can be different, like for localhost, for example.
             /// </summary>
