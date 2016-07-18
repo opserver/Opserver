@@ -10,9 +10,31 @@ namespace StackExchange.Opserver.Monitoring
 {
     internal static class Wmi
     {
-        internal static WmiQuery Query(string machineName, string query, string wmiNamespace = @"root\cimv2")
+        private const string defaultWmiNamespace = @"root\cimv2";
+
+        internal static WmiQuery Query(string machineName, string query, string wmiNamespace = defaultWmiNamespace)
         {
             return new WmiQuery(machineName, query, wmiNamespace);
+        }
+
+        internal static async Task<bool> ClassExists(string machineName, string @class, string wmiNamespace = defaultWmiNamespace)
+        {
+            // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
+            var query = $"SELECT * FROM {@class}";
+
+            try
+            { 
+                using (var q = Query(machineName, query, wmiNamespace))
+                {
+                    await q.GetFirstResultAsync().ConfigureAwait(false);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static readonly ConnectionOptions _localOptions, _remoteOptions;
