@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             AllNodes = _wmiNodes.Cast<Node>().ToList();
             // For fast lookups
             _wmiNodeLookup = new Dictionary<string, WmiNode>(_wmiNodes.Count);
-            foreach(var n in _wmiNodes)
+            foreach (var n in _wmiNodes)
             {
                 _wmiNodeLookup[n.Id] = n;
             }
@@ -34,9 +34,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             var nodesList = new List<WmiNode>(names.Count);
             var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
+
+            var staticDataCaches = new List<Task>();
+
             foreach (var nodeName in names)
             {
-                if (exclude?.IsMatch(nodeName) ?? false) continue;
+                if (exclude?.IsMatch(nodeName) ?? false)
+                {
+                    continue;
+                }
 
                 var node = new WmiNode(nodeName)
                 {
@@ -62,18 +68,26 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     node.Status = NodeStatus.Unreachable;
                 }
 
-                node.Caches.Add(ProviderCache(
+                var staticDataCache = ProviderCache(
                     () => node.PollNodeInfoAsync(),
-                    _config.StaticDataTimeoutSeconds.Seconds(),
-                    memberName: node.Name + "-Static"));
+                    _config.StaticDataTimeoutSeconds,
+                    memberName: node.Name + "-Static");
+                node.Caches.Add(staticDataCache);
 
                 node.Caches.Add(ProviderCache(
                     () => node.PollStats(),
-                    _config.DynamicDataTimeoutSeconds.Seconds(),
+                    _config.DynamicDataTimeoutSeconds,
                     memberName: node.Name + "-Dynamic"));
-                
+
+                staticDataCaches.Add(staticDataCache.PollAsync(true));
+
                 nodesList.Add(node);
             }
+
+            //Force update static host data, incuding os info, volumes, interfaces.
+            var caches = staticDataCaches.ToArray();
+            Task.WaitAll(caches);
+
             return nodesList;
         }
 

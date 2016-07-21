@@ -33,10 +33,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 try
                 {
-                    // TODO: Check concurrency options for a Task.WaitAll
-                    await UpdateNodeDataAsync().ConfigureAwait(false);
-                    await GetAllInterfacesAsync().ConfigureAwait(false);
-                    await GetAllVolumesAsync().ConfigureAwait(false);
+                    var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync() };
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
                     SetReferences();
                 }
                 catch (COMException e)
@@ -51,11 +49,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 try
                 {
-                    // TODO: Check concurrency options for a Task.WaitAll
-                    await PollCpuUtilizationAsync().ConfigureAwait(false);
-                    await PollMemoryUtilizationAsync().ConfigureAwait(false);
-                    await PollNetworkUtilizationAsync().ConfigureAwait(false);
-                    await this.PollVolumePerformanceUtilizationAsync().ConfigureAwait(false);
+                    var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
                 }
                 catch (COMException e)
                 {
