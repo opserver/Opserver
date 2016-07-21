@@ -97,21 +97,21 @@ namespace StackExchange.Opserver.Controllers
             {
                 maximums = new
                 {
-                    main_in = anyTraffic ? traffic.Max(i => (int)i.Value.GetValueOrDefault(0)) : 0,
-                    main_out = anyTraffic ? traffic.Max(i => (int)i.BottomValue.GetValueOrDefault(0)) : 0
+                    main_in = anyTraffic ? traffic.Max(i => (long)i.Value.GetValueOrDefault(0)) : 0,
+                    main_out = anyTraffic ? traffic.Max(i => (long)i.BottomValue.GetValueOrDefault(0)) : 0
                 },
                 points = traffic.Select(i => new
                 {
                     date = i.DateEpoch,
-                    main_in = (int)i.Value.GetValueOrDefault(),
-                    main_out = (int)i.BottomValue.GetValueOrDefault()
+                    main_in = (long)i.Value.GetValueOrDefault(),
+                    main_out = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
                     ? (await n.GetNetworkUtilization(null, null, 2000)).Select(i => new
                     {
                         date = i.DateEpoch,
-                        main_in = (int)i.Value.GetValueOrDefault(),
-                        main_out = (int)i.BottomValue.GetValueOrDefault()
+                        main_in = (long)i.Value.GetValueOrDefault(),
+                        main_out = (long)i.BottomValue.GetValueOrDefault()
                     })
                     : null
             };
@@ -128,21 +128,95 @@ namespace StackExchange.Opserver.Controllers
             {
                 maximums = new
                 {
-                    main_in = anyTraffic ? traffic.Max(i => (int) i.Value.GetValueOrDefault(0)) : 0,
-                    main_out = anyTraffic ? traffic.Max(i => (int) i.BottomValue.GetValueOrDefault(0)) : 0
+                    main_in = anyTraffic ? traffic.Max(i => (long)i.Value.GetValueOrDefault(0)) : 0,
+                    main_out = anyTraffic ? traffic.Max(i => (long)i.BottomValue.GetValueOrDefault(0)) : 0
                 },
                 points = traffic.Select(i => new
                 {
                     date = i.DateEpoch,
-                    main_in = (int) i.Value.GetValueOrDefault(),
-                    main_out = (int) i.BottomValue.GetValueOrDefault()
+                    main_in = (long)i.Value.GetValueOrDefault(),
+                    main_out = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
                     ? (await iface.GetUtilization(null, null, 2000)).Select(i => new
                     {
                         date = i.DateEpoch,
-                        main_in = (int) i.Value.GetValueOrDefault(),
-                        main_out = (int) i.BottomValue.GetValueOrDefault()
+                        main_in = (long)i.Value.GetValueOrDefault(),
+                        main_out = (long)i.BottomValue.GetValueOrDefault()
+                    })
+                    : null
+            };
+        }
+
+        [OutputCache(Duration = 120, VaryByParam = "id;iid;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
+        [Route("graph/volumePerformance/json")]
+        public async Task<ActionResult> VolumePerformanceJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
+        {
+            var iface = DashboardData.GetNodeById(id)?.GetVolume(iid);
+            if (iface == null) return JsonNotFound();
+            var data = await VolumePerformanceData(iface, start, end, summary);
+            if (data == null) return JsonNotFound();
+
+            return Json(data);
+        }
+
+        public static async Task<object> VolumePerformanceData(Node n, long? start = null, long? end = null, bool? summary = false)
+        {
+            var traffic = await n.GetVolumePerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (traffic == null) return null;
+
+            var anyTraffic = traffic.Any();
+
+            return new
+            {
+                maximums = new
+                {
+                    main_read = anyTraffic ? traffic.Max(i => (long)i.Value.GetValueOrDefault(0)) : 0,
+                    main_write = anyTraffic ? traffic.Max(i => (long)i.BottomValue.GetValueOrDefault(0)) : 0
+                },
+                points = traffic.Select(i => new
+                {
+                    date = i.DateEpoch,
+                    main_read = (long)i.Value.GetValueOrDefault(),
+                    main_write = (long)i.BottomValue.GetValueOrDefault()
+                }),
+                summary = summary.GetValueOrDefault()
+                    ? (await n.GetVolumePerformanceUtilization(null, null, 2000)).Select(i => new
+                    {
+                        date = i.DateEpoch,
+                        main_read = (long)i.Value.GetValueOrDefault(),
+                        main_write = (long)i.BottomValue.GetValueOrDefault()
+                    })
+                    : null
+            };
+        }
+
+        public static async Task<object> VolumePerformanceData(Volume volume, long? start = null, long? end = null, bool? summary = false)
+        {
+            var traffic = await volume.GetPerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (traffic == null) return null;
+
+            var anyTraffic = traffic.Any();
+
+            return new
+            {
+                maximums = new
+                {
+                    main_read = anyTraffic ? traffic.Max(i => (long)i.Value.GetValueOrDefault(0)) : 0,
+                    main_write = anyTraffic ? traffic.Max(i => (long)i.BottomValue.GetValueOrDefault(0)) : 0
+                },
+                points = traffic.Select(i => new
+                {
+                    date = i.DateEpoch,
+                    main_read = (long)i.Value.GetValueOrDefault(),
+                    main_write = (long)i.BottomValue.GetValueOrDefault()
+                }),
+                summary = summary.GetValueOrDefault()
+                    ? (await volume.GetPerformanceUtilization(null, null, 2000)).Select(i => new
+                    {
+                        date = i.DateEpoch,
+                        main_read = (long)i.Value.GetValueOrDefault(),
+                        main_write = (long)i.BottomValue.GetValueOrDefault()
                     })
                     : null
             };

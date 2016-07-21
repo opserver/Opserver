@@ -1564,7 +1564,24 @@ Status.HAProxy = (function () {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
                 }
             }, options);
-        },   
+        },
+        volumePerformanceGraph: function (options) {
+            return this.d3graph({
+                type: 'volumePerformance',
+                series: [
+                    { name: 'main_read', label: 'Read' },
+                    { name: 'main_write', label: 'Write', direction: 'down' }
+                ],
+                min: 'auto',
+                leftMargin: 60,
+                areaTooltipFormat: function (value, series, name) {
+                    return '<span>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>';
+                },
+                yAxis: {
+                    tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
+                }
+            }, options);
+        },
         haproxyGraph: function (options) {
             var comma = d3.format(',');
             return this.d3graph({
@@ -2259,7 +2276,7 @@ Status.HAProxy = (function () {
             }
             
             return this
-                .removeClass('cpu-chart memory-chart network-chart')
+                .removeClass('cpu-chart memory-chart network-chart volumePerformance-chart')
                 .addClass(options.type + (options.subtype ? '-' + options.subtype : '') + '-chart');
         },
         lived3graph: function(options) {
@@ -2525,7 +2542,7 @@ Status.HAProxy = (function () {
             };
             dataPoll();
 
-            this.removeClass('cpu-chart memory-chart network-chart')
+            this.removeClass('cpu-chart memory-chart network-chart volumePerformance-chart')
                 .addClass(options.type + (options.subtype ? '-' + options.subtype : '') + '-chart');
 
             function stop() {

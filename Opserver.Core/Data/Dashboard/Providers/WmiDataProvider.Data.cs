@@ -19,12 +19,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             internal readonly List<Interface.InterfaceUtilization> CombinedNetHistory;
             private readonly ConcurrentDictionary<string, List<Interface.InterfaceUtilization>> NetHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
+            internal readonly List<Volume.VolumePerformanceUtilization> CombinedVolumePerformanceHistory;
+            private readonly ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>> VolumePerformanceHistory;
 
             /// <summary>
             /// Defines if we can use "Win32_PerfFormattedData_Tcpip_NetworkAdapter" to query adapter utilization or not.
             /// This is needed because "Win32_PerfFormattedData_Tcpip_NetworkAdapter" was first introduced in Windows 8 and Windows 2012.
             /// </summary>
             private bool canQueryAdapterUtilization;
+
+            private bool canQueryTeamingInformation;
 
             /// <summary>
             /// Name as specified in DashboardSettings.json.
@@ -33,7 +37,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             internal string Endpoint { get; }
 
             internal List<Cache> Caches { get; }
-            
+
             internal WMISettings Config { get; set; }
 
             public WmiNode(string endpoint)
@@ -55,12 +59,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 CombinedNetHistory = new List<Interface.InterfaceUtilization>(1024);
                 NetHistory = new ConcurrentDictionary<string, List<Interface.InterfaceUtilization>>();
                 VolumeHistory = new ConcurrentDictionary<string, List<Volume.VolumeUtilization>>();
+                CombinedVolumePerformanceHistory = new List<Volume.VolumePerformanceUtilization>(1024);
+                VolumePerformanceHistory = new ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>>();
             }
 
             internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface iface)
             {
                 List<Interface.InterfaceUtilization> result;
-                if (iface != null 
+                if (iface != null
                     && Interfaces.FirstOrDefault(x => x == iface) != null
                     && NetHistory.ContainsKey(iface.Name))
                 {
@@ -73,13 +79,29 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return result;
             }
 
+            internal List<Volume.VolumePerformanceUtilization> GetVolumePerformanceUtilizationHistory(Volume iface)
+            {
+                List<Volume.VolumePerformanceUtilization> result;
+                if (iface != null
+                    && Volumes.FirstOrDefault(x => x == iface) != null
+                    && this.VolumePerformanceHistory.ContainsKey(iface.Name))
+                {
+                    result = this.VolumePerformanceHistory[iface.Name];
+                }
+                else
+                {
+                    result = new List<Volume.VolumePerformanceUtilization>(0);
+                }
+                return result;
+            }
+
             private void UpdateHistoryStorage<T>(List<T> data, T newItem) where T : GraphPoint
             {
                 lock (data)
                 {
                     data.Add(newItem);
 
-                    if (data.Count%100 != 0)
+                    if (data.Count % 100 != 0)
                         return;
 
                     var limit = DateTime.UtcNow.AddHours(-Config.HistoryHours).ToEpochTime();
@@ -99,15 +121,20 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) =>
             Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(GetWmiNodeById(node.Id)?.MemoryHistory, start, end).ToList());
-        
-        public override Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => 
+
+        public override Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) =>
             Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(GetWmiNodeById(node.Id)?.CombinedNetHistory, start, end).ToList());
+
+        public override Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) =>
+            Task.FromResult(FilterHistory<Volume.VolumePerformanceUtilization, DoubleGraphPoint>(GetWmiNodeById(node.Id)?.CombinedVolumePerformanceHistory, start, end).ToList());
 
         // TODO: Needs implementation
         public override Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             return Task.FromResult(new List<GraphPoint>());
         }
+        public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume iface, DateTime? start, DateTime? end, int? pointCount = null) =>
+            Task.FromResult(FilterHistory<Volume.VolumePerformanceUtilization, DoubleGraphPoint>(GetWmiNodeById(iface.NodeId)?.GetVolumePerformanceUtilizationHistory(iface), start, end).ToList());
 
         public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null) =>
             Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(GetWmiNodeById(iface.NodeId)?.GetInterfaceUtilizationHistory(iface), start, end).ToList());

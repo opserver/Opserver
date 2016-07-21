@@ -81,11 +81,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
         public abstract Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
         public abstract Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
 
         public abstract Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
-        
+
         public abstract Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
-        
+        public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume iface, DateTime? start, DateTime? end, int? pointCount = null);
+
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 
         #endregion

@@ -55,6 +55,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     await PollCpuUtilizationAsync().ConfigureAwait(false);
                     await PollMemoryUtilizationAsync().ConfigureAwait(false);
                     await PollNetworkUtilizationAsync().ConfigureAwait(false);
+                    await this.PollVolumePerformanceUtilizationAsync().ConfigureAwait(false);
                 }
                 catch (COMException e)
                 {
@@ -101,8 +102,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     if (data != null)
                     {
                         this.LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
-                        this.TotalMemory = data.TotalVisibleMemorySize*1024;
-                        this.MemoryUsed = this.TotalMemory - data.FreePhysicalMemory*1024;
+                        this.TotalMemory = data.TotalVisibleMemorySize * 1024;
+                        this.MemoryUsed = this.TotalMemory - data.FreePhysicalMemory * 1024;
                         this.KernelVersion = Version.Parse(data.Version);
                         this.MachineType = data.Caption.ToString() + " " + data.Version.ToString();
                     }
@@ -114,6 +115,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 this.IsVMHost = await this.GetIsVMHost().ConfigureAwait(false);
 
                 this.canQueryAdapterUtilization = await this.GetCanQueryAdapterUtilization().ConfigureAwait(false);
+                this.canQueryTeamingInformation = await Wmi.ClassExists(this.Endpoint, "MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
             }
 
             private async Task GetAllInterfacesAsync()
@@ -157,6 +159,54 @@ SELECT Name,
                         i.Status = NodeStatus.Active;
                         i.TypeDescription = "";
                         i.IPs = new List<IPNet>();
+                        i.TeamMembers = new List<string>();
+                    }
+                }
+
+                if (this.canQueryTeamingInformation)
+                {
+                    const string teamsQuery = "SELECT InstanceID, Name FROM MSFT_NetLbfoTeam";
+                    var teamNamesToInterfaces = new Dictionary<string, Interface>();
+
+                    using (var q = Wmi.Query(this.Endpoint, teamsQuery, @"root\standardcimv2"))
+                    {
+                        foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                        {
+                            var teamInterface = this.Interfaces.FirstOrDefault(x => x.Caption == data.Name);
+                            //var teamInterface = this.Interfaces.FirstOrDefault(x => x.Id == data.InstanceID);
+
+                            if (teamInterface == null)
+                            {
+                                continue;
+                            }
+
+                            teamNamesToInterfaces.Add(data.Name, teamInterface);
+                        }
+                    }
+
+                    const string teamMembersQuery = "SELECT InstanceID, Name, Team FROM MSFT_NetLbfoTeamMember";
+                    using (var q = Wmi.Query(this.Endpoint, teamMembersQuery, @"root\standardcimv2"))
+                    {
+                        foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                        {
+                            var teamName = data.Team;
+
+                            Interface teamInterface;
+                            if (teamNamesToInterfaces.TryGetValue(teamName, out teamInterface))
+                            {
+                                var adapterName = data.Name;
+                                var memberInterface = this.Interfaces.FirstOrDefault(x => x.Name == adapterName);
+                                //var adapterId = data.InstanceID;
+                                //var memberInterface = this.Interfaces.FirstOrDefault(x => x.Id == adapterId);
+
+                                if (memberInterface == null)
+                                {
+                                    continue;
+                                }
+
+                                teamInterface.TeamMembers.Add(memberInterface.Id);
+                            }
+                        }
                     }
                 }
 
@@ -245,7 +295,7 @@ SELECT Caption,
 
             private async Task PollCpuUtilizationAsync()
             {
-                var query = this.IsVMHost 
+                var query = this.IsVMHost
                     ? @"SELECT PercentTotalRunTime FROM Win32_PerfFormattedData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
                     : @"SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'";
 
@@ -288,7 +338,7 @@ SELECT AvailableKBytes
                 }
             }
 
-            private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();            
+            private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();
 
             private static string GetCounterName(string original)
             {
@@ -360,6 +410,57 @@ SELECT AvailableKBytes
                 this.UpdateHistoryStorage(this.CombinedNetHistory, combinedUtil);
             }
 
+            private async Task PollVolumePerformanceUtilizationAsync()
+            {
+                var utilizationTable = "Win32_PerfFormattedData_PerfDisk_LogicalDisk";
+
+                var query = $@"
+                    SELECT Name,
+                           DiskReadBytesPersec,
+                           DiskWriteBytesPersec
+                      FROM {utilizationTable}";
+
+                var queryTime = DateTime.UtcNow.ToEpochTime();
+                var combinedUtil = new Volume.VolumePerformanceUtilization
+                {
+                    DateEpoch = queryTime,
+                    ReadAvgBps = 0,
+                    WriteAvgBps = 0
+                };
+
+                using (var q = Wmi.Query(this.Endpoint, query))
+                {
+                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    {
+                        if (data == null) continue;
+                        var name = data.Name;
+                        var iface = this.Volumes.FirstOrDefault(i => name == GetCounterName(i.Name));
+                        if (iface == null) continue;
+
+                        iface.ReadBps = data.DiskReadBytesPersec;
+                        iface.WriteBps = data.DiskWriteBytesPersec;
+
+                        var util = new Volume.VolumePerformanceUtilization
+                        {
+                            DateEpoch = queryTime,
+                            ReadAvgBps = iface.ReadBps,
+                            WriteAvgBps = iface.WriteBps
+                        };
+
+                        var netData = this.VolumePerformanceHistory.GetOrAdd(iface.Name, k => new List<Volume.VolumePerformanceUtilization>(1024));
+                        this.UpdateHistoryStorage(netData, util);
+
+                        //if (this.PrimaryInterfaces.Contains(iface))
+                        {
+                            combinedUtil.ReadAvgBps += util.ReadAvgBps;
+                            combinedUtil.WriteAvgBps += util.WriteAvgBps;
+                        }
+                    }
+                }
+
+                this.UpdateHistoryStorage(this.CombinedVolumePerformanceHistory, combinedUtil);
+            }
+
             #region private helpers
 
             private async Task<bool> GetIsVMHost()
@@ -399,7 +500,7 @@ SELECT AvailableKBytes
                 }
 
                 return true;
-            } 
+            }
 
             #endregion
         }

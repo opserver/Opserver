@@ -696,6 +696,7 @@
     <Content Include="Views\Hub\Index.SQL.cshtml" />
     <Content Include="Views\Hub\Index.Dashboard.cshtml" />
     <Content Include="Views\Hub\Index.Issues.cshtml" />
+    <Content Include="Views\Dashboard\Node.Volumes.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

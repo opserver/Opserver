@@ -74,6 +74,10 @@
         .d3-multi-chart(@chart-area-split-top, main_in, 40%);
         .d3-multi-chart(@chart-area-split-bottom, main_out, 40%);
     }
+    &.volumePerformance-chart {
+        .d3-multi-chart(@chart-area-split-top, main_read, 40%);
+        .d3-multi-chart(@chart-area-split-bottom, main_write, 40%);
+    }
     &.haproxy-traffic-chart {
         .d3-multi-chart(@chart-area-blue, main_hits, 80%);
         .d3-multi-chart(rgb(191, 94, 91), main_pages, 80%);

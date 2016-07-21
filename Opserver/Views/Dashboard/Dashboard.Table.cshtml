@@ -88,6 +88,7 @@ else
                             <th colspan="2">CPU</th>
                             <th colspan="2">Memory</th>
                             <th colspan="2">Network</th>
+                            <th colspan="2">Disk (Perf)</th>
                             <th colspan="2">Disk</th>
                         </tr>
                         @foreach (var n in g.OrderBy(n => n.PrettyName))
@@ -111,6 +112,8 @@ else
                                 <td>@Graph(n, "memory")</td>
                                 <td>@n.PrettyTotalNetwork()</td>
                                 <td>@Graph(n, "network")</td>
+                                <td>@n.PrettyTotalVolumePerformance()</td>
+                                <td>@Graph(n, "volumePerformance")</td>
                                 <td>@DiskText(n)</td>
                                 <td>@DiskGraphs(n)</td>
                             </tr>

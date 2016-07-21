@@ -320,6 +320,13 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
             }
         }
 
+        public override Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<DoubleGraphPoint>());
+
+        public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            return Task.FromResult(new List<DoubleGraphPoint>());
+        }
+
         public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             const string allSql = @"

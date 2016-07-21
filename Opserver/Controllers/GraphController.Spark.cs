@@ -82,6 +82,37 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
+        [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate")]
+        [Route("graph/volumePerformance/spark"), AlsoAllow(Roles.InternalRequest)]
+        public async Task<ActionResult> VolumeSpark(string id)
+        {
+            MiniProfiler.Stop(true);
+            var node = DashboardData.GetNodeById(id);
+            if (node == null) return ContentNotFound();
+            var points = await node.GetVolumePerformanceUtilization(SparkStart, null, SparkPoints);
+
+            return points.Count == 0
+                ? EmptySparkSVG()
+                : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
+        }
+
+        [OutputCache(Duration = 120, VaryByParam = "id;iid", VaryByContentEncoding = "gzip;deflate")]
+        [Route("graph/volumePerformance/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
+        public async Task<ActionResult> VolumeSpark(string direction, string id, string iid)
+        {
+            MiniProfiler.Stop(true);
+            var volume = DashboardData.GetNodeById(id)?.GetVolume(iid);
+            if (volume == null) return ContentNotFound();
+            var points = await volume.GetPerformanceUtilization(SparkStart, null, SparkPoints);
+
+            if (points.Count == 0) return EmptySparkSVG();
+
+            Func<DoubleGraphPoint, double> getter = p => p.Value.GetValueOrDefault(0);
+            if (direction == "write") getter = p => p.BottomValue.GetValueOrDefault(0);
+
+            return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
+        }
+
         [OutputCache(Duration = 120, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)

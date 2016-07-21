@@ -145,6 +145,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return JoinNetwork(apiResponse?.Series) ?? new List<DoubleGraphPoint>();
         }
 
+        public override Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<DoubleGraphPoint>());
+
         public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var apiResponse = await GetMetric(
@@ -155,6 +157,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 TagCombos.AllDisks).ConfigureAwait(false);
 
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
+        }
+
+        public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            return Task.FromResult(new List<DoubleGraphPoint>());
         }
 
         public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)

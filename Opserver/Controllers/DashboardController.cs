@@ -87,7 +87,7 @@ namespace StackExchange.Opserver.Controllers
                 CurrentStatusType = view
             };
 
-            return View("Node",vd);
+            return View("Node", vd);
         }
 
         [Route("dashboard/node/summary/{type}")]
@@ -130,6 +130,19 @@ namespace StackExchange.Opserver.Controllers
                     case NodeGraphModel.KnownTypes.Network:
                     case NodeGraphModel.KnownTypes.Volume:
                         await PopulateModel(vd, type, subId);
+                        break;
+                    case NodeGraphModel.KnownTypes.VolumePerformance:
+                        if (subId.HasValue())
+                        {
+                            var v = vd.Node.GetVolume(subId);
+                            vd.Volume = v;
+                            vd.Title = "Volume Utilization (" + (v?.PrettyName ?? "Unknown") + ")";
+                        }
+                        else
+                        {
+                            vd.Title = "Volume Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                            vd.GraphData = await GraphController.VolumePerformanceData(n, summary: true);
+                        }
                         break;
                 }
             }
