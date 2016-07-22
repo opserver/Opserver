@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -23,7 +24,7 @@ namespace StackExchange.Opserver.Monitoring
             var query = $"SELECT * FROM {@class}";
 
             try
-            { 
+            {
                 using (var q = Query(machineName, query, wmiNamespace))
                 {
                     await q.GetFirstResultAsync().ConfigureAwait(false);
@@ -60,7 +61,7 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _remoteOptions.Username = username;
                 _remoteOptions.Password = password;
-            }       
+            }
         }
 
         private static ConnectionOptions GetConnectOptions(string machineName)
@@ -81,6 +82,9 @@ namespace StackExchange.Opserver.Monitoring
 
         internal class WmiQuery : IDisposable
         {
+            private static readonly ConcurrentDictionary<string, ManagementScope> scopeCache = new ConcurrentDictionary<string, ManagementScope>();
+            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
+
             ManagementObjectCollection _data;
             ManagementObjectSearcher _searcher;
             private readonly string _machineName;
@@ -94,8 +98,10 @@ namespace StackExchange.Opserver.Monitoring
                     throw new ArgumentException("machineName should not be empty.");
 
                 var connectionOptions = GetConnectOptions(machineName);
-                var scope = new ManagementScope($@"\\{machineName}\{wmiNamespace}", connectionOptions);
-                _searcher = new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions{Timeout = connectionOptions.Timeout});
+
+                var path = $@"\\{machineName}\{wmiNamespace}";
+                var scope = scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
+                _searcher = searcherCache.GetOrAdd(path + q, x => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
             }
 
             public Task<ManagementObjectCollection> Result
@@ -129,8 +135,6 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _data?.Dispose();
                 _data = null;
-                _searcher?.Dispose();
-                _searcher = null;
             }
         }
 
