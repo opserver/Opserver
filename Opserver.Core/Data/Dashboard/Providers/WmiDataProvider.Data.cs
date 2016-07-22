@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Management;
 using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
@@ -22,6 +23,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             internal readonly List<Volume.VolumePerformanceUtilization> CombinedVolumePerformanceHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>> VolumePerformanceHistory;
 
+            internal readonly ConcurrentDictionary<string, PerfRawData> previousPerfDataCache = new ConcurrentDictionary<string, PerfRawData>();
+
             /// <summary>
             /// Defines if we can use "Win32_PerfFormattedData_Tcpip_NetworkAdapter" to query adapter utilization or not.
             /// This is needed because "Win32_PerfFormattedData_Tcpip_NetworkAdapter" was first introduced in Windows 8 and Windows 2012.
@@ -29,6 +32,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             private bool canQueryAdapterUtilization;
 
             private bool canQueryTeamingInformation;
+
+            private bool nodeInfoAvailable;
+
+            public uint NumberOfLogicalProcessors { get; private set; }
 
             /// <summary>
             /// Name as specified in DashboardSettings.json.
@@ -166,9 +173,55 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        class GraphPointComparer<T> : IComparer<T> where T : IGraphPoint
+        private class GraphPointComparer<T> : IComparer<T> where T : IGraphPoint
         {
             public int Compare(T x, T y) => x.DateEpoch.CompareTo(y.DateEpoch);
+        }
+
+        private class PerfRawData
+        {
+            private readonly ManagementObject data;
+            private readonly string cacheKey;
+            private PerfRawData previousData;
+
+            public PerfRawData(WmiNode node, dynamic data)
+                : this(node, (ManagementObject)data)
+            {
+            }
+
+            public PerfRawData(WmiNode node, ManagementObject data)
+            {
+                this.data = data;
+
+                this.Classname = data.ClassPath.ClassName;
+                this.Identifier = (string)this.data["Name"];
+                this.Timestamp = Convert.ToUInt64(this.data["Timestamp_Sys100NS"]);
+
+                this.cacheKey = $"{this.Classname}.{this.Identifier}";
+
+                node.previousPerfDataCache.AddOrUpdate(this.cacheKey, s => this.previousData = this, (s, rawData) => { this.previousData = rawData; return this; });
+            }
+
+            public string Classname { get; }
+
+            public string Identifier { get; }
+
+            public ulong Timestamp { get; }
+
+            public double GetCalculatedValue(string property, double scale = 1D)
+            {
+                return this.GetCalculatedValue(this.previousData, property, scale);
+            }
+
+            private double GetCalculatedValue(PerfRawData previousData, string property, double scale)
+            {
+                var timestampDiff = Math.Max(1, this.Timestamp - previousData.Timestamp);
+                var valueDiff = Convert.ToUInt64(this.data[property]) - Convert.ToUInt64(previousData.data[property]);
+                var scaledValueDiff = valueDiff * scale;
+                // ReSharper disable once PossibleLossOfFraction                    
+                var calculatedValue = scaledValueDiff / timestampDiff;
+                return calculatedValue;
+            }
         }
     }
 }

@@ -36,6 +36,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync() };
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     SetReferences();
+
+                    this.nodeInfoAvailable = true;
                 }
                 catch (COMException e)
                 {
@@ -47,6 +49,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public async Task<Node> PollStats()
             {
+                if (this.nodeInfoAvailable == false)
+                {
+                    return this;
+                }
+
                 try
                 {
                     var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
@@ -66,7 +73,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 DNSHostName,
                 Domain,
                 Manufacturer,
-                Model
+                Model,
+                NumberOfLogicalProcessors
                 FROM Win32_ComputerSystem";
                 using (var q = Wmi.Query(this.Endpoint, machineQuery))
                 {
@@ -79,6 +87,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         this.Name = MachineDomainName.HasValue() && data.Domain != MachineDomainName
                                    ? $"{data.DNSHostName}.{data.Domain}"
                                    : data.DNSHostName;
+                        this.NumberOfLogicalProcessors = data.NumberOfLogicalProcessors;
                     }
                 }
 
@@ -291,8 +300,12 @@ SELECT Caption,
             private async Task PollCpuUtilizationAsync()
             {
                 var query = this.IsVMHost
-                    ? @"SELECT PercentTotalRunTime FROM Win32_PerfFormattedData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
-                    : @"SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'";
+                    ? @"SELECT Name, Timestamp_Sys100NS, PercentTotalRunTime FROM Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
+                    : @"SELECT Name, Timestamp_Sys100NS, PercentProcessorTime FROM Win32_PerfRawData_PerfOS_Processor WHERE Name = '_Total'";
+
+                var property = this.IsVMHost
+                    ? "PercentTotalRunTime"
+                    : "PercentProcessorTime";
 
                 using (var q = Wmi.Query(Endpoint, query))
                 {
@@ -300,7 +313,9 @@ SELECT Caption,
                     if (data == null)
                         return;
 
-                    CPULoad = this.IsVMHost ? (short)data.PercentTotalRunTime : (short)data.PercentProcessorTime;
+                    var perfData = new PerfRawData(this, data);
+
+                    CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / this.NumberOfLogicalProcessors);
                     var cpuUtilization = new CPUUtilization
                     {
                         DateEpoch = DateTime.UtcNow.ToEpochTime(),
@@ -312,9 +327,7 @@ SELECT Caption,
 
             private async Task PollMemoryUtilizationAsync()
             {
-                const string query = @"
-SELECT AvailableKBytes 
-  FROM Win32_PerfFormattedData_PerfOS_Memory";
+                const string query = @"SELECT AvailableKBytes FROM Win32_PerfRawData_PerfOS_Memory";
 
                 using (var q = Wmi.Query(Endpoint, query))
                 {
@@ -351,11 +364,12 @@ SELECT AvailableKBytes
             private async Task PollNetworkUtilizationAsync()
             {
                 var utilizationTable = this.canQueryAdapterUtilization
-                                           ? "Win32_PerfFormattedData_Tcpip_NetworkAdapter"
-                                           : "Win32_PerfFormattedData_Tcpip_NetworkInterface";
+                                           ? "Win32_PerfRawData_Tcpip_NetworkAdapter"
+                                           : "Win32_PerfRawData_Tcpip_NetworkInterface";
 
                 var query = $@"
                     SELECT Name,
+                           Timestamp_Sys100NS,
                            BytesReceivedPersec,
                            BytesSentPersec,
                            PacketsReceivedPersec,
@@ -374,15 +388,15 @@ SELECT AvailableKBytes
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
-                        if (data == null) continue;
-                        var name = data.Name;
+                        var perfData = new PerfRawData(this, data);
+                        var name = perfData.Identifier;
                         var iface = this.Interfaces.FirstOrDefault(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
-                        iface.InBps = data.BytesReceivedPersec;
-                        iface.OutBps = data.BytesSentPersec;
-                        iface.InPps = data.PacketsReceivedPersec;
-                        iface.OutPps = data.PacketsSentPersec;
+                        iface.InBps = (float)perfData.GetCalculatedValue("BytesReceivedPersec", 10000000);
+                        iface.OutBps = (float)perfData.GetCalculatedValue("BytesSentPersec", 10000000);
+                        iface.InPps = (float)perfData.GetCalculatedValue("PacketsReceivedPersec", 10000000);
+                        iface.OutPps = (float)perfData.GetCalculatedValue("PacketsSentPersec", 10000000);
 
                         var util = new Interface.InterfaceUtilization
                         {
@@ -407,13 +421,12 @@ SELECT AvailableKBytes
 
             private async Task PollVolumePerformanceUtilizationAsync()
             {
-                var utilizationTable = "Win32_PerfFormattedData_PerfDisk_LogicalDisk";
-
                 var query = $@"
                     SELECT Name,
+                           Timestamp_Sys100NS,
                            DiskReadBytesPersec,
                            DiskWriteBytesPersec
-                      FROM {utilizationTable}";
+                      FROM Win32_PerfRawData_PerfDisk_LogicalDisk";
 
                 var queryTime = DateTime.UtcNow.ToEpochTime();
                 var combinedUtil = new Volume.VolumePerformanceUtilization
@@ -427,13 +440,14 @@ SELECT AvailableKBytes
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
-                        if (data == null) continue;
-                        var name = data.Name;
+                        var perfData = new PerfRawData(this, data);
+
+                        var name = perfData.Identifier;
                         var iface = this.Volumes.FirstOrDefault(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
-                        iface.ReadBps = data.DiskReadBytesPersec;
-                        iface.WriteBps = data.DiskWriteBytesPersec;
+                        iface.ReadBps = (float)perfData.GetCalculatedValue("DiskReadBytesPersec", 10000000);
+                        iface.WriteBps = (float)perfData.GetCalculatedValue("DiskWriteBytesPersec", 10000000);
 
                         var util = new Volume.VolumePerformanceUtilization
                         {
@@ -480,7 +494,7 @@ SELECT AvailableKBytes
             private async Task<bool> GetCanQueryAdapterUtilization()
             {
                 // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
-                const string query = "SELECT name FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter";
+                const string query = "SELECT name FROM Win32_PerfRawData_Tcpip_NetworkAdapter";
 
                 try
                 {

@@ -36,6 +36,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
 
             var staticDataCaches = new List<Task>();
+            var dynamicDataCaches = new List<Task>();
 
             foreach (var nodeName in names)
             {
@@ -74,19 +75,30 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     memberName: node.Name + "-Static");
                 node.Caches.Add(staticDataCache);
 
-                node.Caches.Add(ProviderCache(
+                var dynamicDataCache = this.ProviderCache(
                     () => node.PollStats(),
-                    _config.DynamicDataTimeoutSeconds,
-                    memberName: node.Name + "-Dynamic"));
+                    this._config.DynamicDataTimeoutSeconds,
+                    memberName: node.Name + "-Dynamic");
+                node.Caches.Add(dynamicDataCache);
 
                 staticDataCaches.Add(staticDataCache.PollAsync(true));
+                dynamicDataCaches.Add(dynamicDataCache.PollAsync(true));
 
                 nodesList.Add(node);
             }
 
-            //Force update static host data, incuding os info, volumes, interfaces.
-            var caches = staticDataCaches.ToArray();
-            Task.WaitAll(caches);
+            // Force update static host data, incuding os info, volumes, interfaces.
+            {
+                var caches = staticDataCaches.ToArray();
+                Task.WaitAll(caches);
+            }
+
+            // Force first dynamic polling of utilization.
+            // This is needed because we use PerfRawData performance counters and we need this as a first starting point for our calculations.
+            {
+                var caches = dynamicDataCaches.ToArray();
+                Task.WaitAll(caches);
+            }
 
             return nodesList;
         }
