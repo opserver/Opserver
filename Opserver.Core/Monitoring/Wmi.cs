@@ -146,6 +146,17 @@ namespace StackExchange.Opserver.Monitoring
                 _obj = obj;
             }
 
+            public override bool TryConvert(ConvertBinder binder, out object result)
+            {
+                if (binder.Type == typeof(ManagementObject))
+                {
+                    result = this._obj;
+                    return true;
+                }
+
+                return base.TryConvert(binder, out result);
+            }
+
             public override bool TryGetMember(GetMemberBinder binder, out object result)
             {
                 try
