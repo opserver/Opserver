@@ -21,8 +21,8 @@ namespace StackExchange.Opserver.Data.SQL
             public long UsedBytes => TotalBytes - AvailableBytes;
             public bool IsReadOnly { get; internal set; }
             public bool IsCompressed { get; internal set; }
-            public decimal AvgReadStallMS { get; internal set; }
-            public decimal AvgWriteStallMS { get; internal set; }
+            public decimal AvgReadStallMs { get; internal set; }
+            public decimal AvgWriteStallMs { get; internal set; }
             
             public string GetFetchSQL(Version v) => @"
 Select vs.volume_mount_point VolumeMountPoint, 
@@ -30,11 +30,11 @@ Select vs.volume_mount_point VolumeMountPoint,
        vs.logical_volume_name LogicalVolumeName, 
        vs.file_system_type FileSystemType, 
        vs.total_bytes TotalBytes, 
-       vs.available_bytes AvailableBytes, 
+       Min(vs.available_bytes) AvailableBytes, 
        vs.is_read_only IsReadOnly, 
        vs.is_compressed IsCompressed,
-       CASE SUM(fs.num_of_reads) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_read_ms) / (SUM(fs.num_of_reads)) END AS AvgReadStallMS,
-       CASE SUM(fs.num_of_writes) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_write_ms) / (SUM(fs.num_of_writes)) END AS AvgWriteStallMS       
+       CASE SUM(fs.num_of_reads) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_read_ms) / (SUM(fs.num_of_reads)) END AS AvgReadStallMs,
+       CASE SUM(fs.num_of_writes) WHEN 0 THEN 0 ELSE SUM(fs.io_stall_write_ms) / (SUM(fs.num_of_writes)) END AS AvgWriteStallMs      
   From sys.dm_io_virtual_file_stats(null, null) fs
        Join sys.master_files mf 
          On fs.database_id = mf.database_id
@@ -45,7 +45,6 @@ Select vs.volume_mount_point VolumeMountPoint,
        vs.logical_volume_name,
        vs.file_system_type,
        vs.total_bytes,
-       vs.available_bytes,
        vs.is_read_only,
        vs.is_compressed;";
         }

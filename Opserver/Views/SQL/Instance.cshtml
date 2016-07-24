@@ -262,8 +262,8 @@ Top Users:
 Total: @v.TotalBytes.ToComma() bytes (@v.TotalBytes.ToSize())
 Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
 Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
-Avgerage Read Stall: @v.AvgReadStallMS.ToString(CultureInfo.CurrentCulture) ms
-Avgerage Write Stall: @v.AvgWriteStallMS.ToString(CultureInfo.CurrentCulture) ms">
+Avgerage Read Stall: @v.AvgReadStallMs.ToString(CultureInfo.CurrentCulture) ms
+Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms">
                                         <div class="progress">
                                             <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.InvariantCulture)%;"></div>
                                             <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
