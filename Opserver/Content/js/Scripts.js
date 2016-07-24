@@ -1,7 +1,8 @@
 ﻿window.Status = (function() {
 
     var loadersList = {},
-        registeredRefreshes = {};
+        registeredRefreshes = {},
+        refreshInteralMultiplier = 1;
 
     function registerRefresh(name, callback, interval, paused) {
         var refreshData = {
@@ -11,7 +12,13 @@
             paused: paused // false on init almost always
         };
         registeredRefreshes[name] = refreshData;
-        refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
+        refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval * refreshInteralMultiplier);
+    }
+
+    function setRefreshInterval(val) {
+        if (val === 0) return; // don't do that
+        console.log('Setting refresh speed to ' + (100/val).toFixed(0) + '% of normal.');
+        refreshInteralMultiplier = val;
     }
 
     function getRefresh(name) {
@@ -19,8 +26,9 @@
     }
 
     function runRefresh(name) {
-        pauseRefresh(name);
-        resumeRefresh(name);
+        console.log('Forcing a full refresh.');
+        pauseRefresh(name, true);
+        resumeRefresh(name, true);
     }
 
     function scheduleRefresh(ms) {
@@ -34,7 +42,7 @@
         var def = refreshData.func();
         if (typeof (def.done) === 'function') {
             def.done(function() {
-                refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
+                refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval * refreshInteralMultiplier);
             });
         }
 
@@ -42,8 +50,7 @@
         refreshData.timer = 0;
     }
 
-    function pauseRefresh(name) {
-
+    function pauseRefresh(name, silent) {
         function pauseSingleRefresh(r) {
             r.paused = true;
             if (r.timer) {
@@ -61,12 +68,16 @@
         }
 
         if (name && registeredRefreshes[name]) {
-            console.log('Refresh paused for: ' + name);
+            if (!silent) {
+                console.log('Refresh paused for: ' + name);
+            }
             pauseSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
-        console.log('Refresh paused');
+        if (!silent) {
+            console.log('Refresh paused');
+        }
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 pauseSingleRefresh(registeredRefreshes[key]);
@@ -74,8 +85,7 @@
         }
     }
 
-    function resumeRefresh(name) {
-
+    function resumeRefresh(name, silent) {
         function resumeSingleRefresh(r) {
             if (r.timer) {
                 clearTimeout(r.timer);
@@ -85,12 +95,16 @@
         }
 
         if (name && registeredRefreshes[name]) {
-            console.log('Refresh resumed for: ' + name);
+            if (!silent) {
+                console.log('Refresh resumed for: ' + name);
+            }
             resumeSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
-        console.log('Refresh resumed');
+        if (!silent) {
+            console.log('Refresh resumed');
+        }
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 resumeSingleRefresh(registeredRefreshes[key]);
@@ -357,10 +371,11 @@
                 $('.action-popup').remove();
             },
             'show': function() {
-                resumeRefresh();
+                setRefreshInterval(1);
+                runRefresh();
             },
             'hide': function() {
-                pauseRefresh();
+                setRefreshInterval(10);
             }
         });
         prepTableSorter();
