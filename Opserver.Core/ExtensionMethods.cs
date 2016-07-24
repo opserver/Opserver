@@ -70,7 +70,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public static string ReadableTypeDescription(this Type t) =>
             t.IsGenericType
-                ? $"{t.Name.Split('`')[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
+                ? $"{t.Name.Split(StringSplits.Tilde)[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
                 : t.Name;
         
         /// <summary>
@@ -127,14 +127,10 @@ namespace StackExchange.Opserver
         /// force string to be maxlen or smaller
         /// </summary>
         public static string Truncate(this string s, int maxLength) =>
-            s.IsNullOrEmpty()
-                ? s
-                : (s.Length > maxLength ? s.Remove(maxLength) : s);
+            s.IsNullOrEmpty() ? s : (s.Length > maxLength ? s.Remove(maxLength) : s);
 
         public static string TruncateWithEllipsis(this string s, int maxLength) =>
-            s.IsNullOrEmpty() || s.Length <= maxLength
-                ? s
-                : Truncate(s, Math.Max(maxLength, 3) - 3) + "...";
+            s.IsNullOrEmpty() || s.Length <= maxLength ? s : Truncate(s, Math.Max(maxLength, 3) - 3) + "…";
 
         public static string CleanCRLF(this string s) =>
             string.IsNullOrWhiteSpace(s)
@@ -157,7 +153,7 @@ namespace StackExchange.Opserver
 
         public static IEnumerable<T> WithIssues<T>(this IEnumerable<T> items) where T : IMonitorStatus =>
             items.Where(i => i.MonitorStatus != MonitorStatus.Good);
-        
+
         public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items) =>
             string.Join(", ", items.WithIssues().Select(i => i.MonitorStatusReason));
 
