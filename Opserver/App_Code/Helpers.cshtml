@@ -20,7 +20,7 @@
 { 
     if (nodes != null)
     {
-        <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@(nodes.FirstOrDefault()?.NodeType)" data-uk="@Json.Encode(nodes.Select(i => i.UniqueKey))"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
+        <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@(nodes.FirstOrDefault()?.NodeType)" data-uk="@Json.Encode(nodes.Where(i => i != null).Select(i => i.UniqueKey))"><span class="glyphicon glyphicon-refresh"></span> <span class="js-text">Poll Now</span></a>
     }
 }
 @helper PollNow(string nodeType)
