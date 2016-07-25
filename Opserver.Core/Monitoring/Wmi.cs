@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _machineName = machineName;
                 _rawQuery = q;
-                if (string.IsNullOrEmpty(machineName))
+                if (machineName.IsNullOrEmpty())
                     throw new ArgumentException("machineName should not be empty.");
 
                 var connectionOptions = GetConnectOptions(machineName);

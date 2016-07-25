@@ -377,7 +377,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 //Get the stat from the split array
                 var statText = stats[i];
                 //If it's empty, skip it
-                if(string.IsNullOrEmpty(statText)) continue;
+                if (statText.IsNullOrEmpty()) continue;
 
                 //Get the property info for this position
                 var propInfo = StatProperty.AllOrdered[i].PropertyInfo;

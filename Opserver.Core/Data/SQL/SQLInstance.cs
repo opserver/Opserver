@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Data.SQL
             // Grab the instance name for performance counters and such
             var csb = new SqlConnectionStringBuilder(ConnectionString);
             var parts = csb.DataSource?.Split(StringSplits.BackSlash);
-            if(!String.IsNullOrEmpty(Settings.ObjectName))
+            if (Settings.ObjectName.HasValue())
             {
                 ObjectName = Settings.ObjectName;
             }

@@ -136,7 +136,7 @@ namespace StackExchange.Opserver.Controllers
         public void SetTitle(string title)
         {
             title = title.HtmlEncode();
-            var pageTitle = string.IsNullOrEmpty(title) ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
+            var pageTitle = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
             ViewData[ViewDataKeys.PageTitle] = pageTitle;
         }
         
