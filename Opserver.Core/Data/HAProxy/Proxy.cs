@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             get
             {
-                if(Servers == null || Servers.Count == 0) return null;
+                if (Servers == null || Servers.Count == 0) return null;
                 var pieces = new List<string>();
                 foreach(var g in Servers.WithIssues().GroupBy(s => s.ProxyServerStatus).OrderByDescending(g => g.Key))
                 {

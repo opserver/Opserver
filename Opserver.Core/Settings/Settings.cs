@@ -45,7 +45,7 @@ namespace StackExchange.Opserver
                         // TODO: Decide on how collections (and subcollections) are handled
                         // need to broadcast these changes or publish them via json APIs
                     }
-                    else if(prop.CanWrite)
+                    else if (prop.CanWrite)
                     {
                         try
                         {
