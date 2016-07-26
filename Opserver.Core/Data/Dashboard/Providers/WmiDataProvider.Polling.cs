@@ -315,7 +315,15 @@ SELECT Caption,
 
                     var perfData = new PerfRawData(this, data);
 
-                    CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / this.NumberOfLogicalProcessors);
+                    if (this.IsVMHost)
+                    {
+                        CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / this.NumberOfLogicalProcessors);
+                    }
+                    else
+                    {
+                        CPULoad = (short)Math.Round((1 - perfData.GetCalculatedValue(property)) * 100);
+                    }
+
                     var cpuUtilization = new CPUUtilization
                     {
                         DateEpoch = DateTime.UtcNow.ToEpochTime(),
