@@ -199,7 +199,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 this.cacheKey = $"{this.Classname}.{this.Identifier}";
 
-                node.previousPerfDataCache.AddOrUpdate(this.cacheKey, s => this.previousData = this, (s, rawData) => { this.previousData = rawData; return this; });
+                // "previous.previousData = null" to cleanup previousData from previousData. Otherwise we get a linked list which never cleans up.
+                node.previousPerfDataCache.AddOrUpdate(this.cacheKey, s => this.previousData = this, (s, previous) => { previous.previousData = null; this.previousData = previous; return this; });
             }
 
             public string Classname { get; }
