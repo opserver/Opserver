@@ -32,6 +32,13 @@
         <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
     </label>
 }
+@helper VisualIndicator(decimal value, decimal maximum, string title = "")
+{
+    <div class="progress vertical" title="@title" >
+        <div class="progress-bar" style="height: @((100 * value / maximum).ToString("0.00"))%"></div>
+    </div>
+}
+
 @if (errorMessage.HasValue())
 {
     <h5 class="page-header">
@@ -56,6 +63,7 @@ else
     <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive table-row-actions">
         <thead>
             <tr class="sort-row sort-category">
+                <th>Visual</th>
                 <th colspan="3">CPU</th>
                 <th colspan="2">Time</th>
                 <th colspan="2">Reads</th>
@@ -64,6 +72,8 @@ else
                 <th colspan="2">Query Info</th>
             </tr>
             <tr class="sort-row">
+                <th></th>
+
                 @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg")
                 @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min")
                 @SortLink(SQLInstance.TopSorts.TotalCPU, "Total")
@@ -82,23 +92,6 @@ else
             </tr>
         </thead>
         <tbody>
-        @foreach (var o in topOps)
-        {
-            <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
-                <td>@o.AvgCPU.ToComma()µs</td>
-                <td>@o.AvgCPUPerMinute.ToComma()µs</td>
-                <td>@ReadableTime(o.TotalCPU)</td>
-                <td>@ReadableTime(o.AvgDuration)</td>
-                <td>@ReadableTime(o.TotalDuration)</td>
-                <td>@o.AvgReads.ToComma()</td>
-                <td>@o.TotalReads.ToComma()</td>
-                <td>@o.ExecutionCount.ToComma()</td>
-                <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
-                <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
-                <td>@o.CompiledOnDatabase</td>
-                <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
-            </tr>
-        }
         @if (!topOps.Any())
         {
             <tr>
@@ -106,6 +99,47 @@ else
                     <div class="no-content">There are no operations in the plan cache on this server.</div>
                 </td>
             </tr>
+        }
+        else
+        {
+            var maxAvgCPU = topOps.Max(x => x.AvgCPU);
+            var maxAvgCPUPerMinute = topOps.Max(x => x.AvgCPUPerMinute);
+            var maxTotalCPU = topOps.Max(x => x.TotalCPU);
+            var maxAvgDuration = topOps.Max(x => x.AvgDuration);
+            var maxTotalDuration = topOps.Max(x => x.TotalDuration);
+            var maxAvgReads = topOps.Max(x => x.AvgReads);
+            var maxTotalReads = topOps.Max(x => x.TotalReads);
+            var maxExecutionCount = topOps.Max(x => x.ExecutionCount);
+            var maxExecutionsPerMinute = topOps.Max(x => x.ExecutionsPerMinute);
+
+            foreach (var o in topOps)
+            {
+                <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
+                    <td>
+                        @VisualIndicator(o.AvgCPU, maxAvgCPU, "Avg CPU")
+                        @VisualIndicator(o.AvgDuration, maxAvgDuration, "Avg Time")
+                        @VisualIndicator(o.AvgReads, maxAvgReads, "Avg Reads")
+                        @VisualIndicator(o.TotalCPU, maxTotalCPU, "Total CPU")
+                        @VisualIndicator(o.TotalDuration, maxTotalDuration, "Total Time")
+                        @VisualIndicator(o.TotalReads, maxTotalReads, "Total Reads")
+                        @VisualIndicator(o.ExecutionCount, maxExecutionCount, "Total Executions")
+                        @VisualIndicator(o.AvgCPUPerMinute, maxAvgCPUPerMinute, "Avg CPU /minute")
+                        @VisualIndicator(o.ExecutionsPerMinute, maxExecutionsPerMinute, "Executions /minute")
+                    </td>
+                    <td>@o.AvgCPU.ToComma()µs</td>
+                    <td>@o.AvgCPUPerMinute.ToComma()µs</td>
+                    <td>@ReadableTime(o.TotalCPU)</td>
+                    <td>@ReadableTime(o.AvgDuration)</td>
+                    <td>@ReadableTime(o.TotalDuration)</td>
+                    <td>@o.AvgReads.ToComma()</td>
+                    <td>@o.TotalReads.ToComma()</td>
+                    <td>@o.ExecutionCount.ToComma()</td>
+                    <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
+                    <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
+                    <td>@o.CompiledOnDatabase</td>
+                    <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
+                </tr>
+            }
         }
         </tbody>
     </table>
