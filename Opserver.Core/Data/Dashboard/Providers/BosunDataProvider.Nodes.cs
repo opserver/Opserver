@@ -277,7 +277,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             if (host.OpenIncidents?.Count > 0)
                 return NodeStatus.Warning;
-            if (host.ICMPData?.Count > 0 && host.ICMPData?.Values.All(p => p.TimedOut) == true)
+            if (host.ICMPData?.Values.All(p => p.TimedOut) == true)
                 return NodeStatus.Unreachable;
             return NodeStatus.Active;
         }
