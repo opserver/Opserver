@@ -1,28 +1,70 @@
 ﻿{
-    "warningRecentCount": "100",
-    "criticalRecentCount": "200",
-    "viewGroups": "StatusExceptionsRO",
-    "applications": [
+  "warningRecentCount": "100",
+  "criticalRecentCount": "200",
+  "viewGroups": "StatusExceptionsRO",
+  // You can have a simple applications list here, or a grouped structure when dealing with many apps.
+  //"applications": [
+  //  "Core",
+  //  "Chat",
+  //  "Stack Auth",
+  //  "StackExchange.com",
+  //  "API",
+  //  "API v2",
+  //  "Area 51",
+  //  "Status",
+  //  "Push Server",
+  //  "Sockets",
+  //  "Careers",
+  //  "BackOffice",
+  //  "Control Panel"
+  //],
+  "groups": [
+    {
+      "name": "Core Q&A",
+      "applications": [
         "Core",
         "Chat",
         "Stack Auth",
         "StackExchange.com",
-        "API",
         "API v2",
-        "Area 51",
-        "Status",
-        "Push Server",
         "Sockets",
+        "Area 51",
+        "Open ID",
+        "Stack Server",
+        "StackSnippets",
+        "Status"
+      ]
+    },
+    {
+      "name": "Careers",
+      "applications": [
         "Careers",
         "BackOffice",
-        "Control Panel"
-    ],
-    "stores": [
-        {
-            "name": "New York",
-            "queryTimeoutMs": 2000,
-            "pollIntervalSeconds": 10,
-            "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;"
-        }
-    ]
+        "BackOffice",
+        "Control Panel",
+        "StackShop",
+        "CareersAuth"
+      ]
+    },
+    {
+      "name": "Mobile",
+      "applications": [
+        "Push Server"
+      ]
+    },
+    {
+      "name": "Ads & Data",
+      "applications": [
+        "Prov Read API"
+      ]
+    }
+  ],
+  "stores": [
+    {
+      "name": "New York",
+      "queryTimeoutMs": 2000,
+      "pollIntervalSeconds": 10,
+      "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;"
+    }
+  ]
 }

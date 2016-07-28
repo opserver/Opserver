@@ -1,0 +1,46 @@
+﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@{
+    Layout = null;
+}
+@if (Model.Groups.Count > 1)
+{
+    <a href="/exceptions" class="btn btn-xs@(Model.ShowAll ? " btn-primary" : null)">View All</a>
+}
+@foreach (var g in Model.Groups)
+{
+    if (g.Applications.Count == 0)
+    {
+        continue;
+    }
+    var active = g.Name == Model.SelectedGroup;
+    var btnClass = active ? "btn-primary" : "";
+    var app = active ? g.Applications.FirstOrDefault(a => a.Name == Model.SelectedLog) : null;
+    <div class="btn-group dropdown">
+        <a href="?group=@g.Name.UrlEncode()" class="btn btn-xs @btnClass">
+            @g.Name
+            @if (app != null)
+            {
+                @:(@app.Name)
+                @:(<span class="js-exception-total" data-name="@g.Name-@app.Name">@app.ExceptionCount.ToComma()</span> of <span class="js-exception-total" data-name="@g.Name">@g.Total.ToComma()</span>)
+            }
+            else
+            {
+                @:(<span class="js-exception-total" data-name="@g.Name">@g.Total.ToComma()</span>)
+            }
+        </a>
+        <a href="#" class="btn btn-xs dropdown-toggle @btnClass" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            @foreach (var a in g.Applications)
+                {
+                <li class="@(Model.SelectedLog == a.Name ? " active" : null)">
+                    <a href="?group=@g.Name.UrlEncode()&log=@a.Name.UrlEncode()">
+                        @a.Name
+                        <span class="badge js-exception-total" data-name="@g.Name-@a.Name">@a.ExceptionCount.ToComma()</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+}

@@ -415,6 +415,9 @@
     <Content Include="Views\Elastic\Node.Settings.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Exceptions\Exceptions.Navigation.cshtml">
+      <DependentUpon>Exceptions.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Exceptions\Exceptions.Table.Rows.cshtml">
       <DependentUpon>Exceptions.cshtml</DependentUpon>
     </Content>

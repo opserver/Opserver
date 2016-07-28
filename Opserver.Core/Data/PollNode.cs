@@ -239,12 +239,15 @@ namespace StackExchange.Opserver.Data
         /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnectionAsync()) { return getFromConnection(conn); }</code></param>
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
         /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
+        /// <param name="timeoutMs">The timeout in milliseconds for this poll to complete before aborting.</param>
+        /// <param name="afterPoll">An optional action to run after polling has completed successfully</param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
         protected Func<Cache<T>, Task> UpdateCacheItem<T>(string description,
                                                       Func<Task<T>> getData,
                                                       bool logExceptions = false, // TODO: Settings
                                                       Action<Exception> addExceptionData = null,
-                                                      int? timeoutMs = null) where T : class
+                                                      int? timeoutMs = null,
+                                                      Action<Cache<T>> afterPoll = null) where T : class
         {
             return async cache =>
             {
@@ -282,6 +285,7 @@ namespace StackExchange.Opserver.Data
                         cache.PollStatus = "Fetch Complete";
                         cache.SetSuccess();
                         PollFailsInaRow = 0;
+                        afterPoll?.Invoke(cache);
                     }
                     catch (Exception e)
                     {

@@ -937,20 +937,26 @@ Status.Redis = (function () {
 Status.Exceptions = (function () {
 
     function refreshCounts(data) {
-        if (!data.apps && data.apps.length) return;
-        $('.badge-link-list li').each(function () {
-            var app = data.apps[$(this).data('name')];
-            $('.badge', this).text(app && app.ExceptionCount ? app.ExceptionCount.toLocaleString() : '');
+        if (!(data.Groups && data.Groups.length)) return;
+        var log = Status.Exceptions.options.log, logCount = 0;
+        // For any not found...
+        $('.js-exception-total').text('0');
+        data.Groups.forEach(function(group) {
+            $('.js-exception-total[data-name="' + group.Name + '"]').text(group.Total.toLocaleString());
+            group.Applications.forEach(function(app) {
+                if (app.Name === log) {
+                    logCount = app.Total;
+                }
+                $('.js-exception-total[data-name="' + group.Name + '-' + app.Name + '"]').text(app.Total.toLocaleString());
+            });
         });
         if (Status.Exceptions.options.search) return;
-        var log = Status.Exceptions.options.log;
         if (log) {
-            var count = data.apps[log].ExceptionCount;
-            $('.js-exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count !== 1 ? 's' : ''));
+            $('.js-exception-title').text(logCount.toLocaleString() + ' ' + log + ' Exception' + (logCount !== 1 ? 's' : ''));
         } else {
-            $('.js-exception-title').text(total.toLocaleString() + ' Exception' + (data.total !== 1 ? 's' : ''));
+            $('.js-exception-title').text(data.Total.toLocaleString() + ' Exception' + (data.Total !== 1 ? 's' : ''));
         }
-        $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.total.toLocaleString());
+        $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.Total.toLocaleString());
     }
 
     function init(options) {

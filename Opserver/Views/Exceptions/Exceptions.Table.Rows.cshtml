@@ -43,13 +43,13 @@
         </td>
         <td class="@ErrorStyle(e)" data-val="@e.CreationDate.ToEpochTime()">@e.CreationDate.ToRelativeTimeSpanMini()</td>
         <td title="@e.Type">
-            @if (Model.ShowAll)
+            @if (Model.SelectedLog.HasValue())
             {
-                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a>
+                @GetShortName(e)
             }
             else
             {
-                @GetShortName(e)
+                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a>
             }
         </td>
         <td>

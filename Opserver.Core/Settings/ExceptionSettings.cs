@@ -9,6 +9,8 @@ namespace StackExchange.Opserver
 
         public List<Store> Stores { get; set; } = new List<Store>();
 
+        public List<ExceptionsGroup> Groups { get; set; } = new List<ExceptionsGroup>();
+
         public List<string> Applications { get; set; } = new List<string>();
         
         /// <summary>
@@ -41,13 +43,22 @@ namespace StackExchange.Opserver
         /// </summary>
         public bool EnablePreviews { get; set; } = true;
 
+        public class ExceptionsGroup : ISettingsCollectionItem
+        {
+            /// <summary>
+            /// The name that appears for this group, used as a key for applications
+            /// </summary>
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public List<string> Applications { get; set; } = new List<string>();
+        }
+
         public class Store : ISettingsCollectionItem
         {
             /// <summary>
             /// The name that appears for this store, used as a key for applications
             /// </summary>
             public string Name { get; set; }
-
             public string Description { get; set; }
 
             /// <summary>
