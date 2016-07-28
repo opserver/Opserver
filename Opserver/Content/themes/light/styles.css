@@ -9000,6 +9000,9 @@ table .text-muted,
 .table-actions h5 a .glyphicon {
   font-size: 12px;
 }
+.table-actions a.disabled {
+  opacity: 0.2;
+}
 .table-actions a .glyphicon,
 .table-actions a.glyphicon,
 .table-actions a.icon-rotate-flip:hover .glyphicon {

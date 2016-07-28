@@ -25,7 +25,7 @@
             <span class="pull-right">
                 @if (Model.ClearLinkForVisibleOnly)
                 {
-                    <a class="text-danger hover-pulsate js-clear-visible" href="#"><span class="glyphicon glyphicon-remove"></span> Clear visible errors</a>
+                    <a class="text-danger hover-pulsate js-clear-visible" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteList))"><span class="glyphicon glyphicon-remove"></span> Clear visible errors</a>
                 }
                 else
                 {

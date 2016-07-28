@@ -128,13 +128,13 @@ namespace StackExchange.Opserver.Controllers
 
             // empty searches go back to the main log
             if (q.IsNullOrEmpty())
-                return RedirectToAction(nameof(Exceptions), new { log });
+                return RedirectToAction(nameof(Exceptions), new { group, log });
 
             var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value);
             if (!errors.Any() && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
-                return RedirectToAction(nameof(Search), new { q, log, showDeleted = true });
+                return RedirectToAction(nameof(Search), new { q, group, log, showDeleted = true });
             }
 
             var vd = new ExceptionsModel

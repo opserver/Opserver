@@ -1042,7 +1042,7 @@ Status.Exceptions = (function () {
                 url: url,
                 success: function (data) {
                     if (options.showingDeleted) {
-                        jThis.attr('title', 'Error is already deleted');
+                        jThis.attr('title', 'Error is already deleted').addClass('disabled');
                         jRow.addClass('deleted');
                         // TODO: Replace protected glyph here
                         //jCell.find('span.protected').replaceWith('<a title="Undelete and protect this error" class="protect-link" href="' + url.replace('/delete', '/protect') + '">&nbsp;P&nbsp;</a>');
@@ -1199,6 +1199,7 @@ Status.Exceptions = (function () {
                     $.ajax({
                         type: 'POST',
                         data: {
+                            group: jThis.data('group') || options.group,
                             log: jThis.data('log') || options.log,
                             id: jThis.data('id') || options.id
                         },
@@ -1218,17 +1219,17 @@ Status.Exceptions = (function () {
 
         $(document).on('click', 'a.js-clear-visible', function () {
             var jThis = $(this);
-            bootbox.confirm('Really delete all non-protected errors?', function (result) {
+            bootbox.confirm('Really delete all visible, non-protected errors?', function (result) {
                 if (result)
                 {
-                    var ids = $('.exceptions-dashboard tr.error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
+                    var ids = $('.js-error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
                     jThis.find('.glyphicon').addClass('icon-rotate-flip');
 
                     $.ajax({
                         type: 'POST',
                         traditional: true,
-                        data: { log: options.log, ids: ids },
-                        url: Status.options.rootPath + 'exceptions/delete-list',
+                        data: { group: options.group, log: options.log, ids: ids },
+                        url: jThis.data('url'),
                         success: function (data) {
                             window.location.href = data.url;
                         },
