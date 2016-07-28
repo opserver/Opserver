@@ -165,7 +165,7 @@
                 <span class="text-muted">(<a href="#" title="delete this error from the log">delete</a>)</span>
             }
             </p>
-            @if (Current.Settings.Jira.Enabled && Current.User.IsExceptionAdmin)
+            @if ((Current.Settings.Jira?.Enabled ?? false) && Current.User.IsExceptionAdmin)
             {
                 @Html.Action("JiraAction", new { appName = Model.ApplicationName })
             }
