@@ -938,23 +938,35 @@ Status.Exceptions = (function () {
 
     function refreshCounts(data) {
         if (!(data.Groups && data.Groups.length)) return;
-        var log = Status.Exceptions.options.log, logCount = 0;
+        var log = Status.Exceptions.options.log,
+            logCount = 0,
+            group = Status.Exceptions.options.group,
+            groupCount = 0;
         // For any not found...
         $('.js-exception-total').text('0');
-        data.Groups.forEach(function(group) {
-            $('.js-exception-total[data-name="' + group.Name + '"]').text(group.Total.toLocaleString());
-            group.Applications.forEach(function(app) {
+        data.Groups.forEach(function(g) {
+            if (g.Name === group) {
+                groupCount = g.Total;
+            }
+            $('.js-exception-total[data-name="' + g.Name + '"]').text(g.Total.toLocaleString());
+            g.Applications.forEach(function(app) {
                 if (app.Name === log) {
                     logCount = app.Total;
                 }
-                $('.js-exception-total[data-name="' + group.Name + '-' + app.Name + '"]').text(app.Total.toLocaleString());
+                $('.js-exception-total[data-name="' + g.Name + '-' + app.Name + '"]').text(app.Total.toLocaleString());
             });
         });
         if (Status.Exceptions.options.search) return;
+        function setTitle(name, count) {
+            $('.js-exception-title').text(count.toLocaleString() + ' ' + name + ' Exception' + (count !== 1 ? 's' : ''));
+        }
+
         if (log) {
-            $('.js-exception-title').text(logCount.toLocaleString() + ' ' + log + ' Exception' + (logCount !== 1 ? 's' : ''));
+            setTitle(log, logCount);
+        } else if (group) {
+            setTitle(group, groupCount);
         } else {
-            $('.js-exception-title').text(data.Total.toLocaleString() + ' Exception' + (data.Total !== 1 ? 's' : ''));
+            setTitle('', data.Total);
         }
         $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.Total.toLocaleString());
     }
