@@ -45,6 +45,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             {
                 yield return OnCallUsers;
                 yield return Incidents;
+                yield return AllSchedules;
             }
         }
         
