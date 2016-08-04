@@ -25,6 +25,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public DateTime? LastBoot { get; internal set; }
         public NodeStatus Status { get; internal set; }
+        public NodeStatus? ChildStatus { get; internal set; }
         public string StatusDescription { get; internal set; }
 
         public short? CPULoad { get; internal set; }

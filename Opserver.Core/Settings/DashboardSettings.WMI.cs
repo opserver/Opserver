@@ -36,9 +36,7 @@ namespace StackExchange.Opserver
         /// Password to use when polling (for non-domain testing)
         /// </summary>
         public string Password { get; set; }
-
-        public WMISettings() {}
-
+        
         public void Normalize() {}
     }
 }
