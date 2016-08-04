@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {

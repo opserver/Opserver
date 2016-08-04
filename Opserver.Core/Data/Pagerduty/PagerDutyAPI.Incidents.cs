@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {

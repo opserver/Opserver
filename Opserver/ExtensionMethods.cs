@@ -9,6 +9,7 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver
 {
@@ -488,18 +489,18 @@ namespace StackExchange.Opserver
             {
                 case SynchronizationStates.Synchronizing:
                 case SynchronizationStates.Synchronized:
-                    return StatusIndicator.UpCustomSpan(state.GetDescription(), tooltip);
+                    return StatusIndicator.UpCustomSpan(state.Value.GetDescription(), tooltip);
                 case SynchronizationStates.NotSynchronizing:
                 case SynchronizationStates.Reverting:
                 case SynchronizationStates.Initializing:
-                    return StatusIndicator.DownCustomSpan(state.GetDescription(), tooltip);
+                    return StatusIndicator.DownCustomSpan(state.Value.GetDescription(), tooltip);
                 default:
-                    return StatusIndicator.UnknownCustomSpan(state.GetDescription(), tooltip);
+                    return StatusIndicator.UnknownCustomSpan(state.Value.GetDescription(), tooltip);
             }
         }
         public static IHtmlString ToSpan(this ReplicaRoles? state, string tooltip = null, bool abbreviate = false)
         {
-            var desc = state.GetDescription();
+            var desc = state.HasValue ? state.Value.GetDescription() : "";
             if (abbreviate) desc = desc.Substring(0, 1);
             switch (state)
             {

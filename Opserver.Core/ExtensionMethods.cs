@@ -14,6 +14,7 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver
 {
@@ -272,26 +273,6 @@ namespace StackExchange.Opserver
                 : string.Join(joinSeparator, o.GetType()
                                               .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                               .Select(p => p.Name + ":" + p.GetValue(o, null)));
-
-        public static string GetDescription<T>(this T? enumValue) where T : struct => 
-            enumValue.HasValue ? enumValue.Value.GetDescription() : string.Empty;
-
-        /// <summary>
-        /// Gets the Description attribute text or the .ToString() of an enum member
-        /// </summary>
-        public static string GetDescription<T>(this T enumerationValue) where T : struct
-        {
-            var type = enumerationValue.GetType();
-            if (!type.IsEnum) throw new ArgumentException("EnumerationValue must be of Enum type", nameof(enumerationValue));
-            var memberInfo = type.GetMember(enumerationValue.ToString());
-            if (memberInfo.Length > 0)
-            {
-                var attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-                if (attrs.Length > 0)
-                    return ((DescriptionAttribute)attrs[0]).Description;
-            }
-            return enumerationValue.ToString();
-        }
         
         /// <summary>
         /// Converts a raw long into a readable size

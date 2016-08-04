@@ -56,7 +56,7 @@ Last Run Message: @j.LastRunMessage">
                     }
                     else if (j.LastRunStatus.HasValue)
                     {
-                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.GetDescription().IsNullOrEmptyReturn("Unknown")) (@j.LastRunRequestedSource.GetDescription())</td>
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.GetDescription().IsNullOrEmptyReturn("Unknown")) (@j.LastRunRequestedSource.GetDescription())</td>
                         <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
