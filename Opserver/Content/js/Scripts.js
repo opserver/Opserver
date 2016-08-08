@@ -283,7 +283,7 @@
             }, Status.options.HeaderRefresh * 1000);
         }
 
-        var resizeTimer;
+        var resizeTimer, dropdownPause;
         $(window).resize(function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
@@ -366,9 +366,32 @@
                         });
                 }
             });
+        }).on('click', '.js-dropdown-actions', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var jThis = $(this);
+            if (jThis.hasClass('open')) {
+                jThis.removeClass('open');
+                resumeRefresh();
+            } else {
+                $('.js-dropdown-actions.open').removeClass('open');
+                var ddSource = $('.js-haproxy-server-dropdown ul').clone();
+                jThis.append(ddSource);
+                var actions = jThis.data('actions');
+                if (actions) {
+                    jThis.find('a[data-action]').each(function(_, i) {
+                        $(i).toggleClass('disabled', actions.indexOf($(i).data('action')) === -1);
+                    });
+                }
+                jThis.addClass('open');
+                pauseRefresh();
+            }
+        }).on('click', '.js-dropdown-actions a', function (e) {
+            e.preventDefault();
         }).on({
             'click': function() {
                 $('.action-popup').remove();
+                $('.js-dropdown-actions.open').removeClass('open');
             },
             'show': function() {
                 setRefreshInterval(1);
@@ -1118,9 +1141,7 @@ Status.Exceptions = (function () {
                 }
             });
             return false;
-        });
-        
-        $('.js-content').on('click', '.js-exceptions tbody td', function (e) {
+        }).on('click', '.js-exceptions tbody td', function (e) {
             if ($(e.target).closest('a').length) {
                 return;
             }
@@ -1314,7 +1335,7 @@ Status.Exceptions = (function () {
                 success: function (data) {
                     $(this).removeClass('loading');
                     if (data.success) {
-                        if (data.browseUrl != null && data.browseUrl !== "") {
+                        if (data.browseUrl && data.browseUrl !== "") {
 
                             var issueLink = '<a href="' + data.browseUrl + '" target="_blank">' + data.issueKey + '</a>';
                             $("#jira-links-container").show();
@@ -1355,7 +1376,7 @@ Status.HAProxy = (function () {
         }
 
         // Admin Panel (security is server-side)
-        $('.js-content').on('click', '.js-haproxy-action', function (e) {
+        $('.js-content').on('click', '.js-haproxy-action, .js-haproxy-actions a', function (e) {
             var jThis = $(this),
                 data = {
                     group: jThis.closest('[data-group]').data('group'),
@@ -1365,7 +1386,8 @@ Status.HAProxy = (function () {
                 };
 
             function haproxyAction() {
-                jThis.addClass('icon-rotate-flip');
+                jThis.find('.glyphicon').addBack('.glyphicon').addClass('icon-rotate-flip');
+                var cog = jThis.closest('.js-dropdown-actions').find('.hover-spin > .glyphicon').addClass('spin');
                 $.ajax({
                     type: 'POST',
                     data: data,
@@ -1375,6 +1397,7 @@ Status.HAProxy = (function () {
                     },
                     error: function () {
                         jThis.removeClass('icon-rotate-flip').parent().errorPopup('An error occured while trying to ' + data.act + '.');
+                        cog.removeClass('spin');
                     }
                 });
             }
