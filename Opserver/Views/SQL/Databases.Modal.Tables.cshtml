@@ -23,7 +23,6 @@
                 <th>Data Size</th>
                 <th>Index Size</th>
                 <th>Total Size</th>
-                <th>Modified</th>
             </tr>
         </thead>
         <tbody>
@@ -44,7 +43,6 @@
                     <td data-val="@t.DataTotalSpaceKB.ToString()">@((t.DataTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                     <td data-val="@t.IndexTotalSpaceKB.ToString()">@((t.IndexTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
                     <td data-val="@t.TotalSpaceKB.ToString()">@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
-                    <td data-val="@t.LastModifiedDate.ToEpochTime().ToString()">@t.LastModifiedDate.ToRelativeTimeSpan()</td>
                 </tr>
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="6">
@@ -64,13 +62,12 @@
                     <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
                     <td>@((tables.Data.Sum(t => t.IndexTotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
                     <td>@((tables.Data.Sum(t => t.TotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
-                    <td></td>
                 </tr>
             }
             else
             {
                 <tr>
-                    <td colspan="7">
+                    <td colspan="6">
                         <div class="no-content">There aren't any tables in this database.</div>
                     </td>
                 </tr>
@@ -86,8 +83,7 @@
                     3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                     4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
                     5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                    6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                    7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                    6: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                 }
             });
         });
