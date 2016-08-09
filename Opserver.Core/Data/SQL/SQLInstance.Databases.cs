@@ -728,6 +728,7 @@ Drop Table #vlfTemp;";
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
             public DateTime CreationDate { get; internal set; }
+            public DateTime LastModifiedDate { get; internal set; }
             public int IndexCount { get; internal set; }
             public long RowCount { get; internal set; }
             public long DataTotalSpaceKB { get; internal set; }
@@ -742,6 +743,7 @@ Select t.object_id Id,
        s.name SchemaName,
        t.name TableName,
        t.create_date CreationDate,
+       t.modify_date LastModifiedDate,
        Count(i.index_id) IndexCount,
        Max(ddps.row_count) [RowCount],
        Sum(Case When i.type <= 1 Then a.total_pages Else 0 End) * 8 DataTotalSpaceKB,
@@ -769,7 +771,7 @@ Select t.object_id Id,
          And i.type < 2         
  Where t.is_ms_shipped = 0
    And i.object_id > 255
-Group By t.object_id, t.Name, t.create_date, s.name";
+Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name";
         }
         
         public class DatabaseView : ISQLVersioned
