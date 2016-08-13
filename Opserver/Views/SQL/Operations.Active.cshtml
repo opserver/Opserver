@@ -38,7 +38,7 @@ else
     {
         var data = activeOps.SafeData(true);
         <h5 class="page-header">
-            Current active queries on @i.Name:
+            @data.Count Active queries currently on @i.Name:  
             <span class="pull-right">
                 <a href="#/sql/active/filters" class="hover-pulsate@(Model.ActiveSearchOptions.IsNonDefault ? " text-warning" : "")"><span class="glyphicon glyphicon-filter"></span></a>
                 <a href="#" class="js-reload-link">Reload</a>
