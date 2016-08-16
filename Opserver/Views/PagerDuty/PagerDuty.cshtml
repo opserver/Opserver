@@ -34,10 +34,10 @@
         $(function() {
             Status.loaders.register({
                 '#/pagerduty/incident/': function (val) {
-                    Status.popup('/pagerduty/incident/' + val);
+                    Status.popup('pagerduty/incident/' + val);
                 },
-                '#/pagerduty/escalation/': function(val) {
-                    Status.popup('/pagerduty/escalation/' + val);
+                '#/pagerduty/escalation/': function (val) {
+                    Status.popup('pagerduty/escalation/' + val);
                 }
             });
             $(".js-incident-action").on('click', function(e) {
