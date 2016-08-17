@@ -57,6 +57,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Manufacturer = h.Manufacturer,
                         ServiceTag = h.SerialNumber,
                         MachineType = h.OS?.Caption,
+                        MachineOSVersion = h.OS?.Version,
                         KernelVersion = Version.TryParse(h.OS?.Version, out kernelVersion) ? kernelVersion : null,
 
                         Interfaces = h.Interfaces?.Select(hi => new Interface

@@ -19,7 +19,9 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Name { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
-        public string MachineTypePretty => MachineType?.Replace("Microsoft Windows ", "");
+        public string MachineOSVersion { get; internal set; }
+        private string _machineTypePretty;
+        public string MachineTypePretty => _machineTypePretty ?? (_machineTypePretty = GetPrettyMachineType());
         public string Ip { get; internal set; }
         public short? PollIntervalSeconds { get; internal set; }
 
@@ -58,6 +60,12 @@ namespace StackExchange.Opserver.Data.Dashboard
         public DashboardCategory Category
         {
             get { return _category ?? (_category = DashboardCategory.AllCategories.FirstOrDefault(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown); }
+        }
+
+        private string GetPrettyMachineType()
+        {
+            if (MachineType.StartsWith("Linux")) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
+            return MachineType?.Replace("Microsoft Windows ", "");
         }
 
         public string ManagementUrl { get; internal set; }
