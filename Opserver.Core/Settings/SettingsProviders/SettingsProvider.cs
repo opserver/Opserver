@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Configuration;
+using System.IO;
 
 namespace StackExchange.Opserver.SettingsProviders
 {
@@ -10,6 +11,8 @@ namespace StackExchange.Opserver.SettingsProviders
         public string Name { get; set; }
         public string Path { get; set; }
         public string ConnectionString { get; set; }
+
+        public event Action OnChanged;
 
         // Accessors for built-in types
         public PagerDutySettings PagerDuty => GetSettings<PagerDutySettings>();
@@ -54,6 +57,15 @@ namespace StackExchange.Opserver.SettingsProviders
             }
             var p = (SettingsProvider) Activator.CreateInstance(t, section);
             return p;
+        }
+
+        protected void SettingsChanged() => OnChanged?.Invoke();
+
+        protected void AddDirectoryWatcher()
+        {
+            var watcher = new FileSystemWatcher(Path);
+            watcher.Changed += (s, args) => SettingsChanged();
+            watcher.EnableRaisingEvents = true;
         }
     }
 }
