@@ -9,16 +9,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI
     {
-        public Task<LogEntry> GetEventEntryAsync(string id)
-        {
-            return GetFromPagerDutyAsync($"log_entries/{id}", getFromJson:
-                response => JSON.Deserialize<LogEntry>(response, JilOptions));
-        }
 
         public Task<List<LogEntry>> GetIncidentEntriesAsync(string id)
         {
-            return GetFromPagerDutyAsync($"incidents/{id}/log_entries", getFromJson:
-                response => JSON.Deserialize<LogEntries>(response, JilOptions).Logs);
+            try
+            {
+                return GetFromPagerDutyAsync($"incidents/{id}/log_entries", getFromJson:
+                    response => JSON.Deserialize<LogEntries>(response, JilOptions).Logs);
+            }
+            catch(DeserializationException de)
+            {
+                Current.LogException(
+                    de.AddLoggedData("Snippet After", de.SnippetAfterError)
+                    );
+                return null;
+            }
         }
     }
 
@@ -31,47 +36,21 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public class LogEntry 
     {
         [DataMember(Name="id")]
-        public string Id { get; set; }
+        public string LogId { get; set; }
+        [DataMember(Name ="summary")]
+        public string Summary { get; set; }
         [DataMember(Name="created_at")]
         public DateTime? CreationTime { get; set; }
         [DataMember(Name = "type")]
         public string LogType { get; set; }
         [DataMember(Name = "agent")]
         public LogAgent Agent { get; set; }
-        public LogDetail Detail {
-            get
-            {
-                var r = new LogDetail();
-                if (LogType == "notify")
-                {
-                    r.Message = NotifyUser.FullName + " via " + NotificationAction.NotifyAddress;
-                }
-                else
-                {
-                    switch (Agent.Service)
-                    {
-                        case "user":
-                            r.Message = Agent.Person.FullName + " via " + Channel.ChannelType;
-                            break;
-                        case "service":
-                            r.Message = "Action Performed by: " + Channel.ChannelType;
-                            break;
-                        default:
-                            r.Message = "I have no idea what i'm doing";
-                            break;
-                    }
-                }
-                return r;
-            } 
-        }
-        [DataMember(Name = "channel")]
-        public LogChannel Channel { get; set; }
         [DataMember(Name = "note")]
         public string Note { get; set; }
         [DataMember(Name="user")]
         public PagerDutyPerson NotifyUser { get; set; }
-        [DataMember(Name = "notification")]
-        public Notification NotificationAction { get; set; }
+        [DataMember(Name = "channel")]
+        public NotificationChannel Channel { get; set; }
     }
 
     public class LogAgent
@@ -80,7 +59,18 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string AgentId { get; set; }
         [DataMember(Name="type")]
         public string Service { get; set; }
-        public PagerDutyPerson Person => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == AgentId);
+        // Temp till we get the AllUsers fixed up
+        [DataMember(Name ="summary")]
+        public string Person { get; set; }
+       // public PagerDutyPerson Person => PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == AgentId);
+    }
+    public class NotificationChannel
+    {
+        [DataMember(Name = "type")]
+        public string ChannelType { get; set; }
+        [DataMember(Name = "notification")]
+        public Notification NotificationInfo { get; set; }
+
     }
     public class Notification
     {

@@ -47,9 +47,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10.Minutes(), PrimarySchedule.GetOverridesAsync));
             }
         }
+
     }
 
-    class PagerDutyScheduleResponse
+    public class PagerDutyScheduleResponse
     {
         [DataMember(Name="schedules")]
         public List<PagerDutySchedule> Schedules { get; set; }
@@ -72,13 +73,17 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     start,
                     end,
-                    user_id = pdPerson.Id
+                    user = new 
+                    {
+                        id = pdPerson.Id,
+                        type = "user_reference"
+                    }
                 }
             };
             var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
                 getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData).ConfigureAwait(false);
 
-            await PagerDutyAPI.Instance.OnCallUsers.PollAsync(true).ConfigureAwait(false);
+            await PagerDutyAPI.Instance.OnCallInfo.PollAsync(true).ConfigureAwait(false);
             await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
             return result;
         }

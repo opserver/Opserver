@@ -6,6 +6,7 @@ using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.PagerDuty;
 using System;
+using StackExchange.Opserver.Data;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -36,11 +37,24 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> Dashboard()
         {
             var i = PagerDutyAPI.Instance;
-            await i.PollAsync();
             
+
+            //i.WaitForFirstPoll(5000);
+            
+            i.OnCallInfo.Data.Sort(
+                (a, b) =>
+                    a.EscalationLevel.GetValueOrDefault(int.MaxValue)
+                        .CompareTo((b.EscalationLevel.GetValueOrDefault(int.MaxValue))));
+            if (i.OnCallInfo.Data.Count > 1 &&
+                i.OnCallInfo.Data[0].AssignedUser.Id == i.OnCallInfo.Data[1].AssignedUser.Id)
+            {
+                i.OnCallInfo.Data[1].MonitorStatus = MonitorStatus.Warning;
+                i.OnCallInfo.Data[1].MonitorStatusReason = "Primary and secondary on call are the same";
+            }
+
             var vd = new PagerDutyModel
             {
-                Schedule = i.GetSchedule(),
+                Schedule = i.OnCallInfo.Data,
                 OnCallToShow = i.Settings.OnCallToShow,
                 CachedDays = i.Settings.DaysToCache,
                 AllIncidents = i.Incidents.SafeData(true),
@@ -65,7 +79,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("pagerduty/escalation/full")]
         public ActionResult FullEscalation()
         {
-            return View("PagerDuty.EscFull", PagerDutyAPI.Instance.GetSchedule());
+            return View("PagerDuty.EscFull", PagerDutyAPI.Instance.OnCallInfo.Data);
         }
     }
 }

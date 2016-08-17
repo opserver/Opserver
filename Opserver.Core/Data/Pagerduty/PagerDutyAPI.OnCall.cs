@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -10,86 +11,55 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public partial class PagerDutyAPI
     {
         // TODO: We need to able able to handle when people have more than one on call schedule
-        public PagerDutyPerson PrimaryOnCall => OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1);
-        public PagerDutyPerson SecondaryOnCall => OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2);
-
-        private Cache<List<PagerDutyPerson>> _oncallusers;
-        public Cache<List<PagerDutyPerson>> OnCallUsers =>
-            _oncallusers ?? (_oncallusers = GetPagerDutyCache(60.Minutes(),
-                () => GetFromPagerDutyAsync("users/on_call?include[]=contact_methods",
-                    getFromJson: response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users)
-            ));
-
-        private List<OnCallAssignment> _scheduleCache;
-        public List<OnCallAssignment> GetSchedule()
+        public PagerDutyPerson PrimaryOnCall
         {
-            // TODO: Totally refactor this on their new API which makes it unecessary
-            if (_scheduleCache == null)
-            {
-                var result = new List<OnCallAssignment>();
-                var overrides = PrimaryScheduleOverrides?.Data;
-                if (OnCallUsers.Data == null) return result;
-                foreach (var p in OnCallUsers.Data)
-                {
-                    if (p.Schedule == null) continue;
-                    for (var i = 0; i < p.Schedule.Count; i++)
-                    {
-                        bool isOverride = false;
-                        if (overrides != null)
-                        {
-                            for (var j = 0; j < overrides.Count; j++)
-                            {
-                                var o = overrides[j];
-                                if (o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == p.Id)
-                                {
-                                    isOverride = true;
-                                    break;
-                                }
-                            }
-                        }
-                        result.Add(new OnCallAssignment { Person = p, Schedule = p.Schedule[i], IsOverride = isOverride });
-                    }
-                }
-                result.Sort((a, b) => a.EscalationLevel.GetValueOrDefault(int.MaxValue).CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
-
-                if (result.Count > 1 && result[0].Person.Id == result[1].Person.Id)
-                {
-                    result[1].MonitorStatus = MonitorStatus.Warning;
-                    result[1].MonitorStatusReason = "Primary and secondary on call are the same";
-                }
-
-                _scheduleCache = result;
-            }
-            return _scheduleCache;
+            get { return OnCallInfo.Data.FirstOrDefault(p => p.EscalationLevel == 1).AssignedUser; }
         }
+
+        public PagerDutyPerson SecondaryOnCall
+        {
+            get { return OnCallInfo.Data.FirstOrDefault(p => p.EscalationLevel == 2).AssignedUser; }
+        }
+
+        private Cache<List<OnCall>> _oncallinfo;
+        public Cache<List<OnCall>> OnCallInfo => _oncallinfo ?? (_oncallinfo = new Cache<List<OnCall>>(
+            Instance,
+            "On Call information for Pagerduty",
+            new TimeSpan(0,5,0),
+            getData: GetOnCallUsers,
+            logExceptions: true));
+
+        private Task<List<OnCall>> GetOnCallUsers()
+        {
+            try
+            {
+                return GetFromPagerDutyAsync("oncalls", getFromJson:
+                    response => JSON.Deserialize<PagerDutyOnCallResponse>(response.ToString(), JilOptions).OnCallInfo);
+            }
+            catch (DeserializationException de)
+            {
+                Current.LogException(
+                    de.AddLoggedData("Snippet After", de.SnippetAfterError)
+                    .AddLoggedData("Message", de.Message)
+                    );
+                return null;
+            }
+            
+
+        }
+       
     }
 
-    public class OnCallAssignment : IMonitorStatus
+    public class PagerDutyOnCallResponse
     {
-        public PagerDutyPerson Person { get; set; }
-        public OnCall Schedule { get; set; }
-        public bool IsOverride { get; set; }
-
-        public int? EscalationLevel => Schedule?.EscalationLevel;
-
-        public bool IsPrimary => EscalationLevel == 1;
-
-        public string EscalationLevelDescription => PagerDutyPerson.GetEscalationLevelDescription(EscalationLevel);
-
-        public MonitorStatus MonitorStatus { get; internal set; }
-
-        public string MonitorStatusReason { get; internal set; }
+        [DataMember(Name = "oncalls")]
+        public List<OnCall> OnCallInfo;
     }
 
     public class PagerDutyUserResponse
     {
         [DataMember(Name = "users")]
         public List<PagerDutyPerson> Users;
-    }
-
-    public class PagerDutySingleUserResponse
-    {
-        [DataMember(Name = "user")] public PagerDutyPerson User;
     }
 
     public class PagerDutyPerson
@@ -111,9 +81,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "user_url")]
         public string UserUrl { get; set; }
         [DataMember(Name = "contact_methods")]
-        public List<PagerDutyContact> ContactMethods { get; set; }
-        [DataMember(Name = "on_call")] 
-        public List<OnCall> Schedule { get; set; }
+        public List<PagerDutyContactMethod> ContactMethods { get; set; }
 
         private string _phone;
         public string Phone
@@ -123,14 +91,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 if (_phone == null)
                 {
                     // The PagerDuty API does not always return a full contact. HANDLE IT.
-                    var m = ContactMethods?.FirstOrDefault(cm => cm.Type == "phone" || cm.Type == "SMS");
+                    var m = ContactMethods?.FirstOrDefault(cm => cm.Type == "phone_contact_method" || cm.Type == "sms_contact_method");
                     _phone = m != null ? m.FormattedAddress : "n/a";
                 }
                 return _phone;
             }
         }
-
-        public int? EscalationLevel => Schedule != null && Schedule.Count > 0 ? Schedule[0].EscalationLevel : (int?)null;
+        [DataMember(Name = "escalation_level")]
+        public int? EscalationLevel { get; set; }
 
         public static string GetEscalationLevelDescription(int? level)
         {
@@ -159,44 +127,119 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
     }
 
-    public class PagerDutyContact
+    public class PagerDutyContactMethod
     {
         [DataMember(Name = "id")]
         public string Id {get; set; }
         [DataMember(Name = "label")]
         public string Label { get; set; }
-        [DataMember(Name = "address")]
+        [DataMember(Name="address")]
         public string Address { get; set; }
-        [DataMember(Name = "type")]
-        public string Type { get; set; }
-
+        [DataMember(Name="country_code")]
+        public int? CountryCode { get; set; }
         public string FormattedAddress
         {
             get
             {
                 switch (Type)
                 {
-                    case "SMS":
-                    case "phone":
+                    case "sms_contact_method":
+                    case "phone_contact_method":
                         // I'm sure no one outside the US uses this...
                         // we will have to fix this soon
+                        // NOTE: C# port of Google's Phone number formatting Library can be found here:
+                        // https://www.nuget.org/packages/libphonenumber-csharp/
                         return Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
                     default:
                         return Address;
                 }
             }
         }
+        [DataMember(Name = "type")]
+        public string Type { get; set; }
+
+       
     }
 
-    public class OnCall
+    public class EscalationPolicy
     {
-        [DataMember(Name = "level")]
-        public int EscalationLevel { get; set; }
+        public string Id;
+        public string Type;
+        public string Summary;
+    }
+
+    public class OnCallUser
+    {
+        [DataMember(Name = "id")]
+        public string Id { get; set; }
+    }
+    public class OnCall : IMonitorStatus
+    {
+        [DataMember(Name = "escalation_level")]
+        public int? EscalationLevel { get; set; }
         [DataMember(Name = "start")]
         public DateTime? StartDate { get; set; }
         [DataMember(Name = "end")]
         public DateTime? EndDate { get; set; }
         [DataMember(Name = "escalation_policy")]
-        public Dictionary<string,string> Policy { get; set; } 
+        public EscalationPolicy Policy { get; set; } 
+        [DataMember(Name = "user")]
+        public OnCallUser User { get; set; }
+
+        public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == User.Id);
+
+        public bool IsOverride
+        {
+            get
+            {
+                return
+                    PagerDutyAPI.Instance.PrimaryScheduleOverrides.Data?.Any(
+                        o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == AssignedUser.Id) ?? false;
+            }
+        }
+
+        public bool IsPrimary => EscalationLevel == 1;
+
+        public string EscalationLevelDescription
+        {
+            get
+            {
+                if (EscalationLevel.HasValue)
+                {
+                    switch (EscalationLevel.Value)
+                    {
+                        case 1:
+                            return "Primary";
+                        case 2:
+                            return "Secondary";
+                        case 3:
+                            return "Third";
+                        default:
+                            return EscalationLevel.Value + "th";
+                    }
+                }
+                else
+                {
+                    return "unknown";
+                }
+            }
+        }
+
+        public MonitorStatus MonitorStatus { get; set; }
+
+        public string MonitorStatusReason { get; set; }
+    }
+
+    public class PagerDutyInfoReference
+    {
+        [DataMember(Name = "id")]
+        public string Id { get; set; }
+        [DataMember(Name = "type")]
+        public string Type { get; set; }
+        [DataMember(Name = "summary")]
+        public string Summary { get; set; }
+        [DataMember(Name = "self")]
+        public string ApiLink { get; set; }
+
     }
 }
