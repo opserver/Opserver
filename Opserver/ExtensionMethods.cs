@@ -6,6 +6,7 @@ using System.Web;
 using System.Web.Mvc;
 using Jil;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
@@ -72,6 +73,26 @@ namespace StackExchange.Opserver
                     return StatusIndicator.IconSpanCritical;
                 default:
                     return StatusIndicator.IconSpanUnknown;
+            }
+        }
+
+        public static IHtmlString IconSpan(this Node node)
+        {
+            if (node == null)
+                return @"<span class=""text-muted"">●</span>".AsHtml();
+
+            var monitorStatusClass = node.MonitorStatus.TextClass(true);
+            switch (node.HardwareType)
+            {
+                case HardwareType.Physical:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-tasks"" title=""Physical""></span>".AsHtml();
+                case HardwareType.VirtualMachine:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-cloud"" title=""Virtual Machine""></span>".AsHtml();
+                case HardwareType.Network:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-transfer"" title=""Network""></span>".AsHtml();
+                //case HardwareType.Unknown:
+                default:
+                    return $@"<span class=""{monitorStatusClass}"" title=""Unknown hardware type"">●</span>".AsHtml();
             }
         }
 

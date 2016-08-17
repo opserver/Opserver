@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -29,6 +30,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         public NodeStatus Status { get; internal set; }
         public NodeStatus? ChildStatus { get; internal set; }
         public string StatusDescription { get; internal set; }
+        private HardwareType? _hardwareType;
+        public HardwareType HardwareType => _hardwareType ?? (_hardwareType = GetHardwareType()).Value;
 
         public short? CPULoad { get; internal set; }
         public float? TotalMemory { get; internal set; }
@@ -66,6 +69,15 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             if (MachineType.StartsWith("Linux")) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
             return MachineType?.Replace("Microsoft Windows ", "");
+        }
+
+        private HardwareType GetHardwareType()
+        {
+            if (IsVM) return HardwareType.VirtualMachine;
+            return HardwareType.Physical;
+            
+            // TODO: Detect network gear in a reliable way
+            return HardwareType.Unknown;
         }
 
         public string ManagementUrl { get; internal set; }
