@@ -4,8 +4,8 @@
     var allProxies = HAProxyGroup.GetAllProxies();
     var allServers = allProxies.SelectMany(p => p.Servers).ToList();
     var totalUp = allServers.Count(s => s.MonitorStatus == MonitorStatus.Good);
-    var totalMaint = allServers.Count(s => s.InMaintenance);
-    var totalDown = allServers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.InMaintenance);
+    var totalOut = allServers.Count(s => s.OutOfRotation);
+    var totalDown = allServers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.OutOfRotation);
 }
 <div class="panel panel-default">
     <div class="panel-heading">@HAProxyGroup.AllGroups.GetWorstStatus().IconSpan() HAProxy</div>
@@ -23,8 +23,8 @@
             <thead>
                 <tr>
                     <th>Group</th>
-                    <th>Up</th>
-                    <th>Maint</th>
+                    <th>In</th>
+                    <th>Out</th>
                     <th>Down</th>
                     <th>Sessions</th>
                     <th>Rate</th>
@@ -34,13 +34,13 @@
             @foreach (var group in allGroups)
             {
                 var servers = group.GetProxies().SelectMany(p => p.Servers).ToList();
-                var inMaint = servers.Count(s => s.InMaintenance);
-                var inDown = servers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.InMaintenance);
+                var gOut = servers.Count(s => s.OutOfRotation);
+                var gDown = servers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.InMaintenance);
                 <tr>
                     <td>@group.IconSpan() @group.Name</td>
                     <td>@servers.Count(s => s.MonitorStatus == MonitorStatus.Good).ToComma()</td>
-                    <td class="@(inMaint > 0 ? MonitorStatus.Maintenance.TextClass() : null)">@inMaint.ToComma()</td>
-                    <td class="@(inDown > 0 ? MonitorStatus.Critical.TextClass() : null)">@inDown.ToComma()</td>
+                    <td class="@(gOut > 0 ? MonitorStatus.Maintenance.TextClass() : null)">@gOut.ToComma()</td>
+                    <td class="@(gDown > 0 ? MonitorStatus.Critical.TextClass() : null)">@gDown.ToComma()</td>
                     <td>@servers.Sum(s => s.CurrentSessions).ToComma()</td>
                     <td>@servers.Sum(s => s.CurrentNewSessionsPerSecond).ToComma()</td>
                 </tr>
@@ -50,7 +50,7 @@
                 <tr class="total-row">
                     <td><strong>Total</strong></td>
                     <td>@totalUp.ToComma()</td>
-                    <td class="@(totalMaint > 0 ? MonitorStatus.Maintenance.TextClass() : null)">@totalMaint.ToComma()</td>
+                    <td class="@(totalOut > 0 ? MonitorStatus.Maintenance.TextClass() : null)">@totalOut.ToComma()</td>
                     <td class="@(totalDown > 0 ? MonitorStatus.Critical.TextClass() : null)">@totalDown.ToComma()</td>
                     <td>@allServers.Sum(s => s.CurrentSessions).ToComma()</td>
                     <td>@allServers.Sum(s => s.CurrentNewSessionsPerSecond).ToComma()</td>

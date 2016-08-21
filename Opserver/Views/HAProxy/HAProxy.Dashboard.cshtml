@@ -1,6 +1,8 @@
-﻿@using StackExchange.Opserver.Controllers
+﻿@using System.Collections.Concurrent
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.HAProxy
 @using Action = StackExchange.Opserver.Data.HAProxy.Action
+@using ExtensionMethods = StackExchange.Exceptional.Extensions.ExtensionMethods
 @model StackExchange.Opserver.Views.HAProxy.HAProxyModel
 @{
     Layout = "HAProxy.cshtml";
@@ -11,7 +13,6 @@
     var proxies = Model.Proxies;
     // move critical stuff to the top
     // TODO: Decide on admin sort
-    // TODO: Not allocate the ever living hell out of this
     var groups = proxies.GroupBy(p => new
     {
         p.Name,
@@ -20,19 +21,17 @@
         ProxyName = p.Name,
         p.NiceName,
         p.Instance.HasAdminLogin
-    }).Select(g => new
-    {
-        g.Key.Name,
+    }).Select(g => new ProxyGroupKey(g.Key.Name,
         g.Key.GroupLinkName,
         g.Key.GroupName,
         g.Key.ProxyName,
         g.Key.NiceName,
         g.Key.HasAdminLogin,
-        GroupStatus = g.GetWorstStatus(),
-        AllServers = g.SelectMany(p => p.Servers),
-        AllStats = g.SelectMany(p => p.AllStats),
-        PollDate = g.Max(p => p.PollDate)
-    }).OrderByDescending(g => g.GroupLinkName == Model.WatchProxy)
+        g.GetWorstStatus(),
+        g.SelectMany(p => p.Servers),
+        g.SelectMany(p => p.AllStats),
+        g.Max(p => p.PollDate)))
+        .OrderByDescending(g => g.GroupLinkName == Model.WatchProxy)
         .ThenBy(g => g.GroupStatus == MonitorStatus.Good)
         .ThenBy(g => g.AllServers.GetWorstStatus() == MonitorStatus.Warning)
         .ToList();
@@ -61,9 +60,9 @@
         foreach (var s in stats)
         {
             sb.Append(statMapping[s].Instance.Name)
-              .Append(": ")
-              .Append(getter(s))
-              .Append('\n');
+                .Append(": ")
+                .Append(getter(s))
+                .Append('\n');
         }
         sb.Length -= 1;
         return sb.ToStringRecycle();
@@ -80,6 +79,169 @@
         return null;
     }
 
+    public class ProxyGroupKey : IEquatable<ProxyGroupKey>
+    {
+        public string Name { get; }
+        public string GroupLinkName { get; }
+        public string GroupName { get; }
+        public string ProxyName { get; }
+        public string NiceName { get; }
+        public bool HasAdminLogin { get; }
+        public MonitorStatus GroupStatus { get; }
+        public IEnumerable<Server> AllServers { get; }
+        public IEnumerable<Item> AllStats { get; }
+        public DateTime PollDate { get; }
+
+        public ProxyGroupKey(string name, string groupLinkName, string groupName, string proxyName, string niceName, bool hasAdminLogin, MonitorStatus groupStatus, IEnumerable<Server> servers, IEnumerable<Item> stats, DateTime pollDate)
+        {
+            Name = name;
+            GroupLinkName = groupLinkName;
+            GroupName = groupName;
+            ProxyName = proxyName;
+            NiceName = niceName;
+            HasAdminLogin = hasAdminLogin;
+            GroupStatus = groupStatus;
+            AllServers = servers;
+            AllStats = stats;
+            PollDate = pollDate;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ProxyGroupKey)obj);
+        }
+
+        public bool Equals(ProxyGroupKey other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Name, other.Name) && string.Equals(GroupLinkName, other.GroupLinkName) && string.Equals(GroupName, other.GroupName) && string.Equals(ProxyName, other.ProxyName) && string.Equals(NiceName, other.NiceName) && HasAdminLogin == other.HasAdminLogin && GroupStatus == other.GroupStatus && Equals(AllServers, other.AllServers) && Equals(AllStats, other.AllStats) && PollDate.Equals(other.PollDate);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Name?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (GroupLinkName?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (GroupName?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (ProxyName?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (NiceName?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ HasAdminLogin.GetHashCode();
+                hashCode = (hashCode * 397) ^ (int)GroupStatus;
+                hashCode = (hashCode * 397) ^ (AllServers?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ (AllStats?.GetHashCode() ?? 0);
+                hashCode = (hashCode * 397) ^ PollDate.GetHashCode();
+                return hashCode;
+            }
+        }
+    }
+
+    public class ServerGroupKey : IEquatable<ServerGroupKey>
+    {
+        public string Description { get; }
+        public StatusType Type { get; }
+        public bool IsFrontend { get; }
+        public bool IsChecked { get; }
+        public bool IsServer { get; }
+
+        public ServerGroupKey(string description, StatusType type, bool isFrontEnd, bool isChecked, bool isServer)
+        {
+            Description = description;
+            Type = type;
+            IsFrontend = isFrontEnd;
+            IsChecked = isChecked;
+            IsServer = isServer;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((ServerGroupKey)obj);
+        }
+        public bool Equals(ServerGroupKey other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return string.Equals(Description, other.Description) && Type == other.Type && IsFrontend == other.IsFrontend && IsChecked == other.IsChecked && IsServer == other.IsServer;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Description?.GetHashCode() ?? 0;
+                hashCode = (hashCode * 397) ^ (int)Type;
+                hashCode = (hashCode * 397) ^ IsFrontend.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsChecked.GetHashCode();
+                hashCode = (hashCode * 397) ^ IsServer.GetHashCode();
+                return hashCode;
+            }
+        }
+    }
+
+    public static ConcurrentDictionary<Action, string> ActionLists = new ConcurrentDictionary<Action, string>();
+
+    private string GetActionString(Action action)
+    {
+        string result;
+        if (!ActionLists.TryGetValue(action, out result))
+        {
+            var strings = new List<string>();
+            foreach (Action a in Enum.GetValues(typeof(Action)))
+            {
+                if ((action & a) != 0) strings.Add(a.ToString());
+            }
+            result = ExtensionMethods.ToJson(strings);
+            ActionLists.TryAdd(action, result);
+        }
+        return result;
+    }
+
+    public string GetActions(ProxyGroupKey group)
+    {
+        var enabled = Action.None;
+        if (group.AllStats.Any(s => s.OutOfRotation)) enabled |= Action.Ready;
+        if (group.AllStats.Any(s => !s.InDrain)) enabled |= Action.Drain;
+        if (group.AllStats.Any(s => !s.InMaintenance)) enabled |= Action.Maintenance;
+
+        if (group.AllServers.Any(s => s.IsChecked))
+        {
+            enabled |= Action.HealthCheckDisable | Action.HealthForceUp | Action.HealthForceNoLB | Action.HealthForceDown;
+        }
+        else
+        {
+            enabled |= Action.HealthCheckEnable;
+        }
+        enabled |= Action.KillSessions; // TODO: Always enabled?
+
+        return GetActionString(enabled);
+    }
+
+    public string GetActions(IGrouping<ServerGroupKey, Item> group)
+    {
+        var enabled = Action.None;
+        if (group.Any(s => s.OutOfRotation)) enabled |= Action.Ready;
+        if (group.Any(s => !s.InDrain)) enabled |= Action.Drain;
+        if (group.Any(s => !s.InMaintenance)) enabled |= Action.Maintenance;
+
+        if (group.Key.IsChecked)
+        {
+            enabled |= Action.HealthCheckDisable | Action.HealthForceUp | Action.HealthForceNoLB | Action.HealthForceDown;
+        }
+        else
+        {
+            enabled |= Action.HealthCheckEnable;
+        }
+        enabled |= Action.KillSessions; // TODO: Always enabled?
+
+        return GetActionString(enabled);
+    }
 }
 <div class="row js-refresh" data-name="haproxy">
     <div class="col-md-@(isAdmin ? "9" : "12")">
@@ -102,9 +264,9 @@
                 @foreach (var g in groups)
                 {
                     var showAdmin = isAdmin && g.HasAdminLogin;
-                    var combinedStats = g.AllStats.GroupBy(p => new { p.Description, p.Type, p.IsFrontend, p.IsChecked, p.IsServer }).ToList();
-                    var anyUp = g.AllServers.Any(s => !s.InMaintenance);
-                    var anyDown = g.AllServers.Any(s => s.InMaintenance);
+                    var combinedStats = g.AllStats.GroupBy(p => new ServerGroupKey(p.Description, p.Type, p.IsFrontend, p.IsChecked, p.IsServer)).ToList();
+                    var anyUp = g.AllServers.Any(s => !s.OutOfRotation);
+                    var anyDown = g.AllServers.Any(s => s.OutOfRotation);
 
                     <tbody class="@(g.GroupLinkName == Model.WatchProxy ? "watched-proxy" : "")" data-group="@g.GroupName" data-proxy="@g.ProxyName">
                         <tr class="category-row" title="Name: @g.GroupName">
@@ -112,12 +274,17 @@
                                 <h5>
                                     @if (showAdmin)
                                     {
-                                        <a href="#" data-action="@Action.ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(anyDown ? null : " disabled")" 
+                                        <a href="#" data-action="@Action.Ready"
+                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(anyDown ? null : " disabled")"
                                            title="put all servers server into rotation for this backend"></a>
-                                        <a href="#" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")" 
+                                        <a href="#" data-action="@Action.Drain"
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")"
                                            title="take all servers out of rotation for this backend"></a>
+                                        <div class="btn-group dropdown js-dropdown-actions" data-actions="@GetActions(g)">
+                                            <a href="#" class="hover-spin" title="Actions for all servers in this group">
+                                                <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+                                            </a>
+                                        </div>
                                     }
                                     <a href="@Url.Action(nameof(HAProxyController.Dashboard), new { watch = g.GroupLinkName })@groupQS">@g.GroupStatus.IconSpan() @g.GroupName: @g.NiceName</a>
                                     <span class="pull-right text-muted small">As of: @g.PollDate.ToRelativeTimeSpanMini()</span>
@@ -138,8 +305,6 @@
                             var stat = s.Key;
                             var proxyStatus = s.GetWorstStatus();
                             var latestStat = s.OrderBy(si => si.LastStatusChange).Last();
-                            var sAnyUp = s.Any(sp => !sp.InMaintenance);
-                            var sAnyDown = s.Any(sp => sp.InMaintenance);
                             // If everything is green, render it as a backup server if appropriate
                             var isBackup = s.Any(sp => sp.IsServer && sp.Backup > 0);
                             var rowClass = proxyStatus == MonitorStatus.Good
@@ -150,15 +315,15 @@
                                 <td>
                                     @if (stat.IsServer && showAdmin)
                                     {
-                                        <a href="#" data-action="@Action.ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(sAnyDown ? null : " disabled")" 
-                                           title="put this server into rotation for this backend"></a>
-                                        <a href="#" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(sAnyUp ? null : " disabled")" 
-                                           title="take this server out of rotation for this backend"></a>
+                                        <div class="btn-group dropdown js-dropdown-actions" data-actions="@GetActions(s)">
+                                            <a href="#" class="hover-spin" title="Actions for this server">
+                                                <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+                                            </a>
+                                        </div>
                                     }
                                 </td>
-                                <td>@proxyStatus.IconSpan() @stat.Description@if (isBackup){ <span class="text-primary"> (Backup)</span>}</td>
+                                <td>@proxyStatus.IconSpan() @stat.Description@if (isBackup)
+                                { <span class="text-primary"> (Backup)</span>}</td>
                                 <td class="load-balancers">
                                     @foreach (var ip in s)
                                     {
@@ -188,7 +353,7 @@
                                     <span class="text-muted">Out:</span>
                                     @s.Sum(si => si.BytesOut).ToHumanReadableSize()
                                 </td>
-                                <td title="@CombinedStat("Status", s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") ">
+                                <td title="@CombinedStat("Status", s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") " class="@(stat.IsChecked ? null : "text-muted")">
                                     @(!stat.IsFrontend && stat.IsChecked ? s.Max(si => si.LastStatusChange).ToRelativeTimeMiniAll() : "") @latestStat.ToStatusSpan()
                                 </td>
                                 <td title="@CombinedStat("Poll Status", s, si => $"{si.CheckStatusString} - {si.CheckCode.ToString()} ({si.CheckDurationMiliseconds.ToString()}ms)") ">
@@ -225,7 +390,7 @@
                 {
                     Server = g.Key,
                     Up = g.Count(s => s.MonitorStatus == MonitorStatus.Good),
-                    Maint = g.Count(s => s.InMaintenance),
+                    Out = g.Count(s => s.OutOfRotation),
                     Down = g.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.InMaintenance),
                     MonitorStatus = g.GetWorstStatus()
                 }).OrderBy(s => s.Server).ToList();
@@ -241,32 +406,32 @@
                             <tr>
                                 <th></th>
                                 <th>Instance</th>
-                                <th>Up</th>
-                                <th>Maint</th>
+                                <th>In</th>
+                                <th>Out</th>
                                 <th>Down</th>
                             </tr>
                         </tbody>
                         <tbody>
                             @foreach (var g in adminGroups)
                             {
-                                var up = g.Servers.Count(s => s.MonitorStatus == MonitorStatus.Good);
-                                var maint = g.Servers.Count(s => s.InMaintenance);
-                                var down = g.Servers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.InMaintenance);
+                                var gIn = g.Servers.Count(s => s.MonitorStatus == MonitorStatus.Good);
+                                var gOut = g.Servers.Count(s => s.OutOfRotation);
+                                var gDown = g.Servers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.OutOfRotation);
                                 var status = g.Servers.GetWorstStatus();
 
                                 <tr class="status @status.RowClass()">
                                     <td>
-                                        <a href="#" data-group="@g.Name" data-action="@Action.ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(maint > 0 ? null : " disabled")" 
+                                        <a href="#" data-group="@g.Name" data-action="@Action.Ready"
+                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(gOut > 0 ? null : " disabled")"
                                            title="put all proxies in this group into rotation"></a>
-                                        <a href="#" data-group="@g.Name" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(up + down > 0 ? null : " disabled")" 
+                                        <a href="#" data-group="@g.Name" data-action="@Action.Drain"
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(gIn + gDown > 0 ? null : " disabled")"
                                            title="take all proxies in this group out of rotation"></a>
                                     </td>
                                     <td>@status.IconSpan() @g.Name</td>
-                                    <td>@up.ToComma()</td>
-                                    <td>@maint.ToComma()</td>
-                                    <td>@down.ToComma()</td>
+                                    <td>@gIn.ToComma()</td>
+                                    <td>@gOut.ToComma()</td>
+                                    <td>@gDown.ToComma()</td>
                                 </tr>
                             }
                         </tbody>
@@ -279,8 +444,8 @@
                             <tr>
                                 <th></th>
                                 <th>Server</th>
-                                <th>Up</th>
-                                <th>Maint</th>
+                                <th>In</th>
+                                <th>Out</th>
                                 <th>Down</th>
                             </tr>
                         </tbody>
@@ -290,16 +455,16 @@
                                 var status = s.Down > 0 && s.Up == 0 ? MonitorStatus.Critical : s.Down > 0 && s.Up > 0 ? MonitorStatus.Warning : MonitorStatus.Good;
                                 <tr class="status @s.MonitorStatus.RowClass()">
                                     <td>
-                                        <a href="#" data-server="@s.Server" data-action="@Action.ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(s.Maint > 0 ? null : " disabled")" 
+                                        <a href="#" data-server="@s.Server" data-action="@Action.Ready"
+                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(s.Out > 0 ? null : " disabled")"
                                            title="put this server into rotation everywhere"></a>
-                                        <a href="#" data-server="@s.Server" data-action="@Action.drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")" 
+                                        <a href="#" data-server="@s.Server" data-action="@Action.Drain"
+                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")"
                                            title="take this server out of rotation everywhere"></a>
                                     </td>
                                     <td>@status.IconSpan() @s.Server</td>
                                     <td>@s.Up.ToComma()</td>
-                                    <td>@s.Maint.ToComma()</td>
+                                    <td>@s.Out.ToComma()</td>
                                     <td>@s.Down.ToComma()</td>
                                 </tr>
                             }
@@ -307,6 +472,22 @@
                     </table>
                 </div>
             }
+        </div>
+        <div class="js-haproxy-server-dropdown">
+            <ul class="dropdown-menu js-haproxy-actions">
+                <li><a href="#" data-action="@Action.Ready"><span class="glyphicon glyphicon-plus-sign text-success"></span> Enable Server (READY)</a></li>
+                <li><a href="#" data-action="@Action.Drain"><span class="glyphicon glyphicon-minus-sign text-primary"></span> Disable Server (DRAIN)</a></li>
+                <li><a href="#" data-action="@Action.Maintenance"><span class="glyphicon glyphicon-wrench text-warning"></span> Disable Server (MAINT)</a></li>
+                <li class="divider"></li>
+                <li><a href="#" data-action="@Action.HealthCheckEnable"><span class="glyphicon glyphicon-heart-empty text-success"></span> Health: Enable Checks</a></li>
+                <li><a href="#" data-action="@Action.HealthCheckDisable"><span class="glyphicon glyphicon-heart-empty text-danger"></span> Health: Disable Checks</a></li>
+                <li class="divider"></li>
+                <li><a href="#" data-action="@Action.HealthForceUp"><span class="glyphicon glyphicon-collapse-up text-success"></span> Health: Force UP</a></li>
+                <li><a href="#" data-action="@Action.HealthForceNoLB"><span class="glyphicon glyphicon-unchecked text-warning"></span> Health: Force NOLB</a></li>
+                <li><a href="#" data-action="@Action.HealthForceDown"><span class="glyphicon glyphicon-collapse-down text-danger"></span> Health: Force DOWN</a></li>
+                <li class="divider"></li>
+                <li><a href="#" data-action="@Action.KillSessions"><span class="glyphicon glyphicon-fire text-danger"></span> Kill all sessions</a></li>
+            </ul>
         </div>
     }
 </div>

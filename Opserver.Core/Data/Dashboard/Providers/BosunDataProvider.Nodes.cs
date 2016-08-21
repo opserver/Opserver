@@ -57,6 +57,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         Manufacturer = h.Manufacturer,
                         ServiceTag = h.SerialNumber,
                         MachineType = h.OS?.Caption,
+                        MachineOSVersion = h.OS?.Version,
                         KernelVersion = Version.TryParse(h.OS?.Version, out kernelVersion) ? kernelVersion : null,
 
                         Interfaces = h.Interfaces?.Select(hi => new Interface
@@ -247,12 +248,24 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         n.Hardware = hs;
                     }
 
+                    if (h.VM != null)
+                    {
+                        n.VMHostID = h.VM.Host;
+                    }
+
                     if (h.UptimeSeconds.HasValue) // TODO: Check if online - maybe against ICMP data last?
                     {
                         n.LastBoot = DateTime.UtcNow.AddSeconds(-h.UptimeSeconds.Value);
                     }
                     n.SetReferences();
                     nodes.Add(n);
+                }
+
+                // Hook up relationships after a full decode
+                foreach (var n in nodes)
+                {
+                    n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
+                    n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
                 }
 
                 return nodes;
@@ -301,6 +314,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             public List<IncidentInfo> OpenIncidents { get; set; }
             public Dictionary<string, ICMPInfo> ICMPData { get; set; }
             public HardwareInfo Hardware { get; set; }
+            public VMInfo VM { get; set; }
 
             public class CPUInfo
             {
@@ -438,6 +452,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
             }
 
+            public class VMInfo
+            {
+                public string Host { get; set; }
+            }
         }
         // ReSharper restore CollectionNeverUpdated.Local
         // ReSharper restore ClassNeverInstantiated.Local

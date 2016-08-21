@@ -47,7 +47,7 @@
 else
 {
     <h5 class="page-header">
-        Top queries on @i.Name by @Model.TopSearchOptions.Sort.GetDescription():
+        Top queries on @i.Name @(Model.TopSearchOptions.Sort.HasValue ? " by " + Model.TopSearchOptions.Sort.Value.GetDescription() : "")
         <span class="pull-right">
             <a href="#/sql/top/filters" class="hover-pulsate@(Model.TopSearchOptions.IsNonDefault ? " text-warning" : "")"><span class="glyphicon glyphicon-filter"></span></a>
             <a href="#" class="js-reload-link">Reload</a>

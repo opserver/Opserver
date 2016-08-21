@@ -42,7 +42,8 @@ Select Cast(n.NodeID as varchar(50)) as Id,
        Caption as Name,
        LastSync,
        MachineType,
-       Cast(Case Status When 1 Then ChildStatus Else Status End as int) Status,
+       Cast(Status as int) Status,
+       Cast(ChildStatus as int) ChildStatus,
        StatusDescription,
        LastBoot, 
        Coalesce(Cast(vm.CPULoad as smallint), n.CPULoad) as CPULoad,
@@ -158,6 +159,11 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
                         n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
                         n.SetReferences();
+
+                        if (Settings.ChildStatusForHealthy && n.Status == NodeStatus.Up && n.ChildStatus.HasValue)
+                        {
+                            n.Status = n.ChildStatus.Value;
+                        }
 
                         if (n.Status != NodeStatus.Up)
                         {

@@ -71,6 +71,9 @@ namespace StackExchange.Opserver
 
             // enable custom model binder
             ModelBinders.Binders.DefaultBinder = new ProfiledModelBinder();
+
+            // When settings change, reload the app pool
+            Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
         }
 
         protected void Application_End()

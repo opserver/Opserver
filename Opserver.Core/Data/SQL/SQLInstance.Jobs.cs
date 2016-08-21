@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
