@@ -25,7 +25,7 @@
             <span class="pull-right">
                 @if (Model.ClearLinkForVisibleOnly)
                 {
-                    <a class="text-danger hover-pulsate js-clear-visible" href="#"><span class="glyphicon glyphicon-remove"></span> Clear visible errors</a>
+                    <a class="text-danger hover-pulsate js-clear-visible" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteList))"><span class="glyphicon glyphicon-remove"></span> Clear visible errors</a>
                 }
                 else
                 {
@@ -39,7 +39,7 @@
             <tr class="sort-row">
                 <th class="@(showActions ? "" : "hidden")"></th>
                 <th>@HeaderLink("Time", ExceptionSorts.TimeDesc)</th>
-                <th>@(Model.ShowAll ? HeaderLink("App", ExceptionSorts.AppAsc) : HeaderLink("Type", ExceptionSorts.TypeAsc))</th>
+                <th>@(Model.SelectedLog.HasValue() ? HeaderLink("Type", ExceptionSorts.TypeAsc) : HeaderLink("App", ExceptionSorts.AppAsc))</th>
                 <th>@HeaderLink("Error", ExceptionSorts.MessageAsc)</th>
                 <th>@HeaderLink("Url", ExceptionSorts.UrlAsc)</th>
                 <th>@HeaderLink("Remote IP", ExceptionSorts.IPAddressAsc)</th>

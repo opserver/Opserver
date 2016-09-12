@@ -66,7 +66,7 @@
 }
 @helper Linkify(string possibleLink)
 {
-    if (string.IsNullOrEmpty(possibleLink))
+    if (possibleLink.IsNullOrEmpty())
     {
         @possibleLink
     }
@@ -153,7 +153,11 @@
     else
     {
         <h5 class="page-header">
-            <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = error.ApplicationName })">@error.ApplicationName Log</a> <span class="text-muted">/</span> @error.Type 
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
+            <span class="text-muted">/</span>
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new {log = error.ApplicationName})">@error.ApplicationName</a>
+            <span class="text-muted">/</span>
+            @error.Type
             <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })">View Similar</a></span>
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
@@ -165,11 +169,11 @@
                 <span class="text-muted">(<a href="#" title="delete this error from the log">delete</a>)</span>
             }
             </p>
-            @if (Current.Settings.Jira.Enabled && Current.User.IsExceptionAdmin)
+            @if ((Current.Settings.Jira?.Enabled ?? false) && Current.User.IsExceptionAdmin)
             {
                 @Html.Action("JiraAction", new { appName = Model.ApplicationName })
             }
-            @if (!string.IsNullOrEmpty(error.SQL))
+            @if (error.SQL.HasValue())
             {
                 <h5><strong>SQL</strong></h5>
                 <pre class="pre-code prettyprint lang-sql">@error.SQL</pre>

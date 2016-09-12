@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -377,7 +378,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 //Get the stat from the split array
                 var statText = stats[i];
                 //If it's empty, skip it
-                if(string.IsNullOrEmpty(statText)) continue;
+                if (statText.IsNullOrEmpty()) continue;
 
                 //Get the property info for this position
                 var propInfo = StatProperty.AllOrdered[i].PropertyInfo;
@@ -433,9 +434,9 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public virtual string Description => Type == StatusType.Server ? ServerName : Type.ToString();
 
-        public bool InMaintenance
-            => ProxyServerStatus == ProxyServerStatus.Maintenance
-               || ProxyServerStatus == ProxyServerStatus.Drain;
+        public bool InMaintenance => ProxyServerStatus == ProxyServerStatus.Maintenance;
+        public bool InDrain => ProxyServerStatus == ProxyServerStatus.Drain;
+        public bool OutOfRotation => InMaintenance || InDrain;
 
         public virtual MonitorStatus MonitorStatus
         {

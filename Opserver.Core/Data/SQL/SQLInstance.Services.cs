@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -46,7 +47,7 @@ namespace StackExchange.Opserver.Data.SQL
                         case ServiceStatuses.PausePending:
                             return null;
                         default:
-                            return ServiceName + " - " + Status.GetDescription();
+                            return ServiceName + " - " + (Status.HasValue ? Status.Value.GetDescription() : "");
                     }
                 }
             }

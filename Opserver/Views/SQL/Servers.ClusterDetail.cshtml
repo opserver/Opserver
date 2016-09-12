@@ -90,7 +90,7 @@
                         <td colspan="9" style="text-align: center; font-size: 12px; padding: 4px 0;">
                             @if (db.IsSuspended.GetValueOrDefault())
                             {
-                                @:Database @db.DatabaseName is @db.SynchronizationState.ToSpan(), was suspended by <b>@db.SuspendReason.GetDescription()</b>
+                                @:Database @db.DatabaseName is @db.SynchronizationState.ToSpan(), was suspended by <b>@(db.SuspendReason.HasValue ? db.SuspendReason.Value.GetDescription() : "Unknown")</b>
                             }
                         </td>
                     </tr>

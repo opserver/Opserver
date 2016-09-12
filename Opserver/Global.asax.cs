@@ -13,6 +13,7 @@ using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling.Mvc;
+using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Opserver
 {
@@ -70,6 +71,9 @@ namespace StackExchange.Opserver
 
             // enable custom model binder
             ModelBinders.Binders.DefaultBinder = new ProfiledModelBinder();
+
+            // When settings change, reload the app pool
+            Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
         }
 
         protected void Application_End()
@@ -86,6 +90,7 @@ namespace StackExchange.Opserver
             MiniProfiler.Settings.IgnoredPaths = paths.ToArray();
             MiniProfiler.Settings.PopupMaxTracesToShow = 5;
             MiniProfiler.Settings.ProfilerProvider = new OpserverProfileProvider();
+            MiniProfiler.Settings.Storage = new MiniProfilerCacheStorage(TimeSpan.FromMinutes(10));
             OpserverProfileProvider.EnablePollerProfiling = SiteSettings.PollerProfiling;
 
             var copy = ViewEngines.Engines.ToList();

@@ -6,22 +6,19 @@ using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Xsl;
+using StackExchange.Opserver;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Models
 {
     public static class ExtensionMethods
     {
-        public static IHtmlString ToSpeed(this float bps, string unit = "b")
-        {
-            if (bps < 1) return @"<span class=""speed pow0"">0 b/s</span>".AsHtml();
-            var pow = Math.Floor(Math.Log10(bps) / 3);
-            var byteScale = bps.ToSize(unit);
-            return string.Format(@"<span class=""speed pow{1}"">{0}/s</span>", byteScale, pow.ToString(CultureInfo.InvariantCulture)).AsHtml();
-        }
+        public static string ToSpeed(this float bps, string unit = "b") =>
+            bps < 1 ? "0 b/s" : $"{bps.ToSize(unit)}/s";
     }
 
     public static class VolumeExtensionMethods
@@ -31,9 +28,9 @@ namespace StackExchange.Opserver.Models
 
     public static class InterfaceExtensionMethods
     {
-        public static IHtmlString PrettyIn(this Interface i) => i.InBps?.ToSpeed() ?? MvcHtmlString.Empty;
+        public static string PrettyIn(this Interface i) => i.InBps?.ToSpeed();
 
-        public static IHtmlString PrettyOut(this Interface i) => i.OutBps?.ToSpeed() ?? MvcHtmlString.Empty;
+        public static string PrettyOut(this Interface i) => i.OutBps?.ToSpeed();
     }
 
     public static class NodeExtensionMethods
@@ -59,8 +56,8 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus MemoryMonitorStatus(this Node info)
         {
             if (!info.PercentMemoryUsed.HasValue) return MonitorStatus.Unknown;
-            if (info.Category.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryCriticalPercent) return MonitorStatus.Critical;
-            if (info.Category.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.Category.MemoryWarningPercent) return MonitorStatus.Warning;
+            if (info.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryCriticalPercent) return MonitorStatus.Critical;
+            if (info.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
@@ -83,8 +80,8 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus CPUMonitorStatus(this Node info)
         {
             if (!info.CPULoad.HasValue) return MonitorStatus.Unknown;
-            if (info.Category.CPUCriticalPercent > 0 && info.CPULoad > info.Category.CPUCriticalPercent) return MonitorStatus.Critical;
-            if (info.Category.CPUWarningPercent > 0 && info.CPULoad > info.Category.CPUWarningPercent) return MonitorStatus.Warning;
+            if (info.CPUCriticalPercent > 0 && info.CPULoad > info.CPUCriticalPercent) return MonitorStatus.Critical;
+            if (info.CPUWarningPercent > 0 && info.CPULoad > info.CPUWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
@@ -94,9 +91,9 @@ namespace StackExchange.Opserver.Models
             return $@"<span class=""{info.CPUMonitorStatus().GetDescription()}"">{info.CPULoad?.ToString("n0")} %</span>".AsHtml();
         }
 
-        public static IHtmlString PrettyTotalNetwork(this Node info) =>
+        public static string PrettyTotalNetwork(this Node info) =>
             info.TotalPrimaryNetworkbps < 0
-                ? MvcHtmlString.Empty
+                ? null
                 : info.TotalPrimaryNetworkbps.ToSpeed();
 
         public static string NetworkTextSummary(this Node info)

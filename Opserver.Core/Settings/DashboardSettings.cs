@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -16,25 +15,9 @@ namespace StackExchange.Opserver
         public List<NodeSettings> PerNodeSettings { get; set; } = new List<NodeSettings>();
 
         public bool ShowOther { get; set; } = true;
-
-        public NodeSettings GetNodeSettings(string node, Category c)
-        {
-            var s = PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node));
-            
-            // Grab setting from node, then category, then global
-            Func<Func<INodeSettings, decimal?>, decimal?> getVal = f => (s != null ? f(s) : null) ?? f(c) ?? f(this);
-
-            return new NodeSettings
-                {
-                    CPUWarningPercent = getVal(i => i.CPUWarningPercent),
-                    CPUCriticalPercent = getVal(i => i.CPUCriticalPercent),
-                    MemoryWarningPercent = getVal(i => i.MemoryWarningPercent),
-                    MemoryCriticalPercent = getVal(i => i.MemoryCriticalPercent),
-                    DiskWarningPercent = getVal(i => i.DiskWarningPercent),
-                    DiskCriticalPercent = getVal(i => i.DiskCriticalPercent),
-                    PrimaryInterfacePatternRegex = s?.PrimaryInterfacePatternRegex ?? c.PrimaryInterfacePatternRegex
-                };
-        }
+        
+        public NodeSettings GetNodeSettings(string node) => 
+            PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node)) ?? NodeSettings.Empty;
 
         #region Direct Properties
 
@@ -146,8 +129,9 @@ namespace StackExchange.Opserver
         /// </summary>
         public class NodeSettings : INodeSettings, ISettingsCollectionItem
         {
+            public static NodeSettings Empty { get; } = new NodeSettings();
             string ISettingsCollectionItem.Name => Pattern;
-
+            
             /// <summary>
             /// The name that appears for this category
             /// </summary>

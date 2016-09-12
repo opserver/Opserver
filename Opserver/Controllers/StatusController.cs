@@ -136,7 +136,7 @@ namespace StackExchange.Opserver.Controllers
         public void SetTitle(string title)
         {
             title = title.HtmlEncode();
-            var pageTitle = string.IsNullOrEmpty(title) ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
+            var pageTitle = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
             ViewData[ViewDataKeys.PageTitle] = pageTitle;
         }
         
@@ -171,9 +171,9 @@ namespace StackExchange.Opserver.Controllers
             return new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
         }
 
-        protected JsonResult Json<T>(T data)
+        protected JsonResult Json<T>(T data, Options options = null)
         {
-            return new JsonJilResult<T> { Data = data, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
+            return new JsonJilResult<T> { Data = data, Options = options, JsonRequestBehavior = JsonRequestBehavior.AllowGet };
         }
 
         protected JsonResult JsonNotFound()
@@ -203,6 +203,7 @@ namespace StackExchange.Opserver.Controllers
         public class JsonJilResult<T> : JsonResult
         {
             public new T Data { get; set; }
+            public Options Options { get; set; }
             public override void ExecuteResult(ControllerContext context)
             {
                 if (context == null)
@@ -212,7 +213,7 @@ namespace StackExchange.Opserver.Controllers
                 response.ContentType = ContentType.HasValue() ? ContentType : "application/json";
                 if (ContentEncoding != null) response.ContentEncoding = ContentEncoding;
 
-                var serializedObject = JSON.Serialize(Data);
+                var serializedObject = JSON.Serialize(Data, Options);
                 response.Write(serializedObject);
             }
         }

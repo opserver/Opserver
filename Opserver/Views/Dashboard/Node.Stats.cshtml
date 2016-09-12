@@ -18,7 +18,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">Memory Utilization <span cass="text-muted">(@(Model.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
             <div class="panel-body">
-                <div class="history-graph" id="memory-container" data-max="@((Model.TotalMemory/1024/1024)?.ToString())"></div>
+                <div class="history-graph" id="memory-container" data-max="@((Model.TotalMemory/1024/1024)?.ToString(CultureInfo.InvariantCulture))"></div>
             </div>
         </div>
     </div>

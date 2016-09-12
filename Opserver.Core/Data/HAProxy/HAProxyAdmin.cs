@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -65,7 +66,9 @@ namespace StackExchange.Opserver.Data.HAProxy
                 instances.Add(p.Proxy.Instance);
             }
             var result = (await Task.WhenAll(tasks)).All(r => r);
-            Parallel.ForEach(instances, i => i.PollAsync(true));
+            // Actions complete, now re-check status
+            var instanceTasks = instances.Select(i => i.Proxies.PollAsync(true));
+            await Task.WhenAll(instanceTasks);
             return result;
         }
         
@@ -79,9 +82,9 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
 
             // HAProxy will not drain a downed server, do the next best thing: MAINT
-            if (action == Action.drain && server.ProxyServerStatus == ProxyServerStatus.Down)
+            if (action == Action.Drain && server.ProxyServerStatus == ProxyServerStatus.Down)
             {
-                action = Action.maint;
+                action = Action.Maintenance;
             }
 
             try
@@ -94,7 +97,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                     var responseBytes = await wc.UploadValuesTaskAsync(instance.Url, new NameValueCollection
                     {
                         ["s"] = server.Name,
-                        ["action"] = action.ToString().ToLower(),
+                        ["action"] = action.GetDescription(),
                         ["b"] = p.Name
                     });
                     var response = Encoding.UTF8.GetString(responseBytes);
@@ -108,39 +111,39 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
     }
+    
 
+    [Flags]
     public enum Action
     {
         // ReSharper disable InconsistentNaming
-        [Description("Set State to READY")]
-        ready,
-        [Description("Set State to DRAIN")]
-        drain,
-        [Description("Set State to MAINT")]
-        maint,
-        [Description("Health: disable checks")]
-        dhlth,
-        [Description("Health: enable checks")]
-        ehlth,
-        [Description("Health: force UP")]
-        hrunn,
-        [Description("Health: force NOLB")]
-        hnolb,
-        [Description("Health: force DOWN")]
-        hdown,
-        [Description("Agent: disable checks")]
-        dagent,
-        [Description("Agent: enable checks")]
-        eagent,
-        [Description("Agent: force UP")]
-        arunn,
-        [Description("Agent: force DOWN")]
-        adown,
-        [Description("Kill Sessions")]
-        shutdown,
-
-        Enable,
-        Disable
+        None = 0,
+        [Description("ready")] // Set State to READY
+        Ready = 1 << 1,
+        [Description("drain")] // Set State to DRAIN
+        Drain = 1 << 2,
+        [Description("maint")] // Set State to MAINT
+        Maintenance = 1 << 3,
+        [Description("dhlth")] // Health: disable checks
+        HealthCheckDisable = 1 << 4,
+        [Description("ehlth")] // Health: enable checks
+        HealthCheckEnable = 1 << 5,
+        [Description("hrunn")] // Health: force UP
+        HealthForceUp = 1 << 6,
+        [Description("hnolb")] // Health: force NOLB
+        HealthForceNoLB = 1 << 7,
+        [Description("hdown")] // Health: force DOWN
+        HealthForceDown = 1 << 8,
+        [Description("dagent")] // Agent: disable checks
+        AgentCheckDisable = 1 << 9,
+        [Description("eagent")] // Agent: enable checks
+        AgentCheckEnable = 1 << 10,
+        [Description("arunn")] // Agent: force UP
+        AgentForceUp = 1 << 11,
+        [Description("adown")] // Agent: force DOWN
+        AgentForceDown = 1 << 12,
+        [Description("shutdown")] // Kill Sessions
+        KillSessions = 1 << 13,
         // ReSharper restore InconsistentNaming
     }
 }

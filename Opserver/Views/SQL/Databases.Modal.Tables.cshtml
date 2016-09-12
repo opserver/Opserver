@@ -28,7 +28,7 @@
         <tbody>
             @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
             {
-                <tr data-obj="@(t.SchemaName).@(t.TableName)" class="js-next-collapsible" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate">
+                <tr data-obj="@(t.SchemaName).@(t.TableName)" class="js-next-collapsible" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate.ToZuluTime() modified @t.LastModifiedDate.ToZuluTime()">
                     <td>
                         <a href="#/db/@(Model.Database)/tables/@(t.SchemaName).@(t.TableName)">
                             <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>

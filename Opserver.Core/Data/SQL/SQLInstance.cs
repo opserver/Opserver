@@ -37,7 +37,14 @@ namespace StackExchange.Opserver.Data.SQL
             // Grab the instance name for performance counters and such
             var csb = new SqlConnectionStringBuilder(ConnectionString);
             var parts = csb.DataSource?.Split(StringSplits.BackSlash);
-            ObjectName = parts?.Length == 2 ? "MSSQL$" + parts[1].ToUpper() : "SQLServer";
+            if (Settings.ObjectName.HasValue())
+            {
+                ObjectName = Settings.ObjectName;
+            }
+            else
+            {
+                ObjectName = parts?.Length == 2 ? "MSSQL$" + parts[1].ToUpper() : "SQLServer";
+            }
         }
 
         public static SQLInstance Get(string name)

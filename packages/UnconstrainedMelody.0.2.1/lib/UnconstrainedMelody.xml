@@ -1,0 +1,408 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>UnconstrainedMelody</name>
+    </assembly>
+    <members>
+        <member name="T:UnconstrainedMelody.Delegates">
+            <summary>
+            Provides a set of static utility (and extension) methods for use with delegate
+            types.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.GetInvocationArray``1(``0)">
+            <summary>
+            Returns the individual delegates comprising the specified value.
+            Each returned delegate will represent a single method invocation.
+            This method is effectively a strongly-typed wrapper around
+            <see cref="M:System.Delegate.GetInvocationList"/>.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="value">Delegate to split</param>
+            <returns>A strongly typed array of single delegates.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="value" /> is null</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.GetReadOnlyInvocationList``1(``0)">
+            <summary>
+            Returns the individual delegates comprising the specified value as an immutable list.
+            Each returned delegate will represent a single method invocation.
+            This method is effectively a wrapper around
+            <see cref="M:System.Delegate.GetInvocationList"/>, but returning an immutable list instead
+            of an array.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="value">Delegate to split</param>
+            <returns>An immutable list of single delegates.</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="value" /> is null</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Reflection.MethodInfo)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Reflection.MethodInfo)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="method">Method to create delegate for</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Object,System.Reflection.MethodInfo)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Object,System.Reflection.MethodInfo)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="method">Method to create delegate for</param>
+            <param name="target">The target for the delegate (for instance methods) or the first argument
+            (for static methods)</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Object,System.String)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Object,System.String)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="target">The target for the delegate</param>
+            <param name="methodName">Name of instance method to create delegate for</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Type,System.String)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Type,System.String)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="targetType">The type containing the static method</param>
+            <param name="methodName">Name of static method to create delegate for</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Reflection.MethodInfo,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Reflection.MethodInfo,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="method">Method to create delegate for</param>
+            <param name="throwOnBindFailure">Whether or not to throw an exception on bind failure</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Object,System.Reflection.MethodInfo,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Object,System.Reflection.MethodInfo,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="method">Method to create delegate for</param>
+            <param name="target">The target for the delegate (for instance methods) or the first argument
+            (for static methods)</param>
+            <param name="throwOnBindFailure">Whether or not to throw an exception on bind failure</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Object,System.String,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Object,System.String,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="target">The target for the delegate</param>
+            <param name="methodName">Name of instance method to create delegate for</param>
+            <param name="ignoreCase">Whether the name should be matched in a case-insensitive manner</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Type,System.String,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Type,System.String,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="targetType">The type containing the static method</param>
+            <param name="methodName">Name of static method to create delegate for</param>
+            <param name="ignoreCase">Whether the name should be matched in a case-insensitive manner</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Object,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Object,System.String,System.Boolean,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="target">The target for the delegate</param>
+            <param name="methodName">Name of instance method to create delegate for</param>
+            <param name="ignoreCase">Whether the name should be matched in a case-insensitive manner</param>
+            <param name="throwOnBindFailure">Whether or not to throw an exception on bind failure</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Delegates.CreateDelegate``1(System.Type,System.String,System.Boolean,System.Boolean)">
+            <summary>
+            See <see cref="M:System.Delegate.CreateDelegate(System.Type,System.Type,System.String,System.Boolean,System.Boolean)" />.
+            </summary>
+            <typeparam name="T">Delegate type</typeparam>
+            <param name="targetType">The type containing the static method</param>
+            <param name="methodName">Name of static method to create delegate for</param>
+            <param name="ignoreCase">Whether the name should be matched in a case-insensitive manner</param>
+            <param name="throwOnBindFailure">Whether or not to throw an exception on bind failure</param>
+            <returns>A delegate for the given method</returns>
+        </member>
+        <member name="T:UnconstrainedMelody.DelegateConstraint">
+            <summary>
+            Dummy class only used to represent a delegate constraint.
+            </summary>
+        </member>
+        <member name="T:UnconstrainedMelody.EnumInternals`1">
+            <summary>
+            Shared constants used by Flags and Enums.
+            </summary>
+        </member>
+        <member name="T:UnconstrainedMelody.Flags">
+            <summary>
+            Provides a set of static methods for use with "flags" enums,
+            i.e. those decorated with <see cref="T:System.FlagsAttribute"/>.
+            Other than <see cref="M:UnconstrainedMelody.Flags.IsValidCombination``1(``0)"/>, methods in this
+            class throw <see cref="T:UnconstrainedMelody.TypeArgumentException" />.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.ThrowIfNotFlags``1">
+            <summary>
+            Helper method used by almost all methods to make sure
+            the type argument is really a flags enum.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.IsFlags``1">
+            <summary>
+            Returns whether or not the specified enum is a "flags" enum,
+            i.e. whether it has FlagsAttribute applied to it.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>True if the enum type is decorated with
+            FlagsAttribute; False otherwise.</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.IsValidCombination``1(``0)">
+            <summary>
+            Determines whether the given value only uses bits covered
+            by named values.
+            </summary>
+            internal static
+            <param name="values">Combination to test</param>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.HasAny``1(``0,``0)">
+            <summary>
+            Determines whether the two specified values have any flags in common.
+            </summary>
+            <param name="value">Value to test</param>
+            <param name="desiredFlags">Flags we wish to find</param>
+            <returns>Whether the two specified values have any flags in common.</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.HasAll``1(``0,``0)">
+            <summary>
+            Determines whether all of the flags in <paramref name="desiredFlags"/>
+            </summary>
+            <param name="value">Value to test</param>
+            <param name="desiredFlags">Flags we wish to find</param>
+            <returns>Whether all the flags in <paramref name="desiredFlags"/> are in <paramref name="value"/>.</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.And``1(``0,``0)">
+            <summary>
+            Returns the bitwise "and" of two values.
+            </summary>
+            internal static
+            <param name="first">First value</param>
+            <param name="second">Second value</param>
+            <returns>The bitwise "and" of the two values</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.Or``1(``0,``0)">
+            <summary>
+            Returns the bitwise "or" of two values.
+            </summary>
+            internal static
+            <param name="first">First value</param>
+            <param name="second">Second value</param>
+            <returns>The bitwise "or" of the two values</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.GetUsedBits``1">
+            <summary>
+            Returns all the bits used in any flag values
+            </summary>
+            internal static
+            <returns>A flag value with all the bits set that are ever set in any defined value</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.AllBitsInverse``1(``0)">
+            <summary>
+            Returns the inverse of a value, with no consideration for which bits are used
+            by values within the enum (i.e. a simple bitwise negation).
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="value">Value to invert</param>
+            <returns>The bitwise negation of the value</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.UsedBitsInverse``1(``0)">
+            <summary>
+            Returns the inverse of a value, but limited to those bits which are used by
+            values within the enum.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="value">Value to invert</param>
+            <returns>The restricted inverse of the value</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.IsEmpty``1(``0)">
+            <summary>
+            Returns whether this value is an empty set of fields, i.e. the zero value.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="value">Value to test</param>
+            <returns>True if the value is empty (zero); False otherwise.</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Flags.IsNotEmpty``1(``0)">
+            <summary>
+            Returns whether this value has any fields set, i.e. is not zero.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="value">Value to test</param>
+            <returns>True if the value is non-empty (not zero); False otherwise.</returns>
+            <exception cref="T:UnconstrainedMelody.TypeArgumentException"><typeparamref name="T"/> is not a flags enum.</exception>
+        </member>
+        <member name="T:UnconstrainedMelody.IEnumConstraint">
+            <summary>
+            Dummy interface only used to represent an enum constraint.
+            </summary>
+        </member>
+        <member name="T:UnconstrainedMelody.Enums">
+            <summary>
+            Provides a set of static methods for use with enum types. Much of
+            what's available here is already in System.Enum, but this class
+            provides a strongly typed API.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetValuesArray``1">
+            <summary>
+            Returns an array of values in the enum.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>An array of values in the enum</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetValues``1">
+            <summary>
+            Returns the values for the given enum as an immutable list.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetNamesArray``1">
+            <summary>
+            Returns an array of names in the enum.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>An array of names in the enum</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetNames``1">
+            <summary>
+            Returns the names for the given enum as an immutable list.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>An array of names in the enum</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.IsNamedValue``1(``0)">
+            <summary>
+            Checks whether the value is a named value for the type.
+            </summary>
+            <remarks>
+            For flags enums, it is possible for a value to be a valid
+            combination of other values without being a named value
+            in itself. To test for this possibility, use IsValidCombination.
+            </remarks>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="value">Value to test</param>
+            <returns>True if this value has a name, False otherwise.</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetDescription``1(``0)">
+            <summary>
+            Returns the description for the given value, 
+            as specified by DescriptionAttribute, or null
+            if no description is present.
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="item">Value to fetch description for</param>
+            <returns>The description of the value, or null if no description
+            has been specified (but the value is a named value).</returns>
+            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="item"/>
+            is not a named member of the enum</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.TryParseDescription``1(System.String,``0@)">
+            <summary>
+            Attempts to find a value with the given description.
+            </summary>
+            <remarks>
+            More than one value may have the same description. In this unlikely
+            situation, the first value with the specified description is returned.
+            </remarks>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="description">Description to find</param>
+            <param name="value">Enum value corresponding to given description (on return)</param>
+            <returns>True if a value with the given description was found,
+            false otherwise.</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.ParseName``1(System.String)">
+            <summary>
+            Parses the name of an enum value.
+            </summary>
+            <remarks>
+            This method only considers named values: it does not parse comma-separated
+            combinations of flags enums.
+            </remarks>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>The parsed value</returns>
+            <exception cref="T:System.ArgumentException">The name could not be parsed.</exception>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.TryParseName``1(System.String,``0@)">
+            <summary>
+            Attempts to find a value for the specified name.
+            Only names are considered - not numeric values.
+            </summary>
+            <remarks>
+            If the name is not parsed, <paramref name="value"/> will
+            be set to the zero value of the enum. This method only
+            considers named values: it does not parse comma-separated
+            combinations of flags enums.
+            </remarks>
+            <typeparam name="T">Enum type</typeparam>
+            <param name="name">Name to parse</param>
+            <param name="value">Enum value corresponding to given name (on return)</param>
+            <returns>Whether the parse attempt was successful or not</returns>
+        </member>
+        <member name="M:UnconstrainedMelody.Enums.GetUnderlyingType``1">
+            <summary>
+            Returns the underlying type for the enum
+            </summary>
+            <typeparam name="T">Enum type</typeparam>
+            <returns>The underlying type (Byte, Int32 etc) for the enum</returns>
+        </member>
+        <member name="T:UnconstrainedMelody.TypeArgumentException">
+            <summary>
+            Exception thrown to indicate that an inappropriate type argument was used for
+            a type parameter to a generic type or method.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.TypeArgumentException.#ctor">
+            <summary>
+            Constructs a new instance of TypeArgumentException with no message.
+            </summary>
+        </member>
+        <member name="M:UnconstrainedMelody.TypeArgumentException.#ctor(System.String)">
+            <summary>
+            Constructs a new instance of TypeArgumentException with the given message.
+            </summary>
+            <param name="message">Message for the exception.</param>
+        </member>
+        <member name="M:UnconstrainedMelody.TypeArgumentException.#ctor(System.String,System.Exception)">
+            <summary>
+            Constructs a new instance of TypeArgumentException with the given message and inner exception.
+            </summary>
+            <param name="message">Message for the exception.</param>
+            <param name="inner">Inner exception.</param>
+        </member>
+        <member name="M:UnconstrainedMelody.TypeArgumentException.#ctor(System.Runtime.Serialization.SerializationInfo,System.Runtime.Serialization.StreamingContext)">
+            <summary>
+            Constructor provided for serialization purposes.
+            </summary>
+            <param name="info">Serialization information</param>
+            <param name="context">Context</param>
+        </member>
+    </members>
+</doc>

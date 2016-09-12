@@ -171,8 +171,12 @@ h4, h5, h6 {
     }
   }
 
+  .glyphicon {
+    font-size: 0.8em;
+  }
+
   a.pull-right + a.pull-right:after {
-    content: "|";
+    content: "\00a0|\00a0";
     color: @gray-lighter;
     display:inline-block;
   }
@@ -211,6 +215,30 @@ h4, h5, h6 {
   .sk-wave {
     display: inline-block;
     height: 8px;
+  }
+}
+
+.btn-group {
+  .btn~.dropdown-toggle {
+  padding-left: 5px;
+  padding-right: 5px;
+  }
+  .dropdown-menu {
+    border-top-width: 1px;
+    > li {
+      &.active > a > .badge {
+        color: @badge-active-color;
+        background-color: @badge-active-bg;
+      }
+      > a {
+        padding: 3px 10px;
+        line-height: 18px;
+        min-width: 190px;
+        > .badge {
+          float: right;
+        }
+      }
+    }
   }
 }
 
@@ -581,17 +609,32 @@ h4, h5, h6 {
       padding: 0;
       border: none;
       margin-bottom: 0;
+      &.vertical {
+        height: 20px;
+        width: 6px;
+        display: inline-block;
+        vertical-align: middle;
+        position: relative;
+        .progress-bar {
+          width: 100%;
+          position: absolute;
+          bottom: 0;
+        }
+      }
     }
   }
 }
 
 .table-actions {
   h5 {
-    a.glyphicon {
+    a.glyphicon, a .glyphicon {
       font-size: 12px;
     }
   }
   a {
+    &.disabled {
+      opacity: 0.2;
+    }
     .glyphicon, &.glyphicon, &.icon-rotate-flip:hover .glyphicon {
       opacity: 0.6;
       &.disabled {
@@ -628,22 +671,6 @@ h4, h5, h6 {
 .no-content {
   color: @label-muted-color;
   text-align: center;
-}
-
-dl {
-  overflow: auto;
-  margin-bottom: 0;
-}
-
-dt, dd {
-  float: left;
-}
-
-dt {
-  clear: both;
-  font-weight: normal;
-  margin-right: 10px;
-  color: @label-muted-color;
 }
 
 .panel-body.smaller {

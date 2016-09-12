@@ -25,7 +25,7 @@
                 $('.js-dashboard-chart').memoryGraph({
                     id: '@Model.Node.Id',
                     width: 858,
-                    max: @((Model.Node.TotalMemory/1024/1024).ToString()),
+                    max: @((Model.Node.TotalMemory/1024/1024)?.ToString(CultureInfo.InvariantCulture)),
                     data: @Model.GraphData.ToJson()
                 });
             </script>

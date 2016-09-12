@@ -8,7 +8,7 @@
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
                       Model.Search,
                       Url.Action(nameof(ExceptionsController.Search)),
-                      log.HasValue() ? new Dictionary<string, string> { { "log", log } } : null);
+                      Model.SearchDictionary);
 }
 @section head {
     <script>
@@ -18,12 +18,17 @@
 <h5 class="page-header">
     <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
     <span class="text-muted">/</span>
-    @if (Model.SelectedLog.HasValue())
+    @if (Model.SelectedGroup.HasValue())
     {
-        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = Model.SelectedLog })">@Model.SelectedLog</a>
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup })">@Model.SelectedGroup</a>
         <span class="text-muted">/</span>
     }
-    Search results for '@Model.Search'
+    @if (Model.SelectedLog.HasValue())
+    {
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup, log = Model.SelectedLog })">@Model.SelectedLog</a>
+        <span class="text-muted">/</span>
+    }
+    Search
 </h5>
 <p class="small">
     @if (!Model.ShowDeleted)

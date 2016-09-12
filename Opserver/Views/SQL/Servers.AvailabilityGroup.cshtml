@@ -20,12 +20,12 @@
 Sync: @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.GetDescription() : "Unknown")
 Health: @(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.GetDescription() : "Unknown")
 @if (db.SuspendReason.HasValue) {<text>
-Suspension Reason: @db.SuspendReason.GetDescription()</text>}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)</div>
+Suspension Reason: @db.SuspendReason.Value.GetDescription()</text>}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)</div>
             }
         }
         else
         {
-            <div class="text-danger">Sync: @r.SynchronizationHealth.GetDescription()</div>
+            <div class="text-danger">Sync: @(r.SynchronizationHealth.HasValue ? r.SynchronizationHealth.Value.GetDescription() : "Unknwon")</div>
         }
     }
 }

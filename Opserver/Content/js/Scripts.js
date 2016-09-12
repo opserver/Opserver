@@ -1,7 +1,8 @@
 ﻿window.Status = (function() {
 
     var loadersList = {},
-        registeredRefreshes = {};
+        registeredRefreshes = {},
+        refreshInteralMultiplier = 1;
 
     function registerRefresh(name, callback, interval, paused) {
         var refreshData = {
@@ -11,7 +12,13 @@
             paused: paused // false on init almost always
         };
         registeredRefreshes[name] = refreshData;
-        refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
+        refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval * refreshInteralMultiplier);
+    }
+
+    function setRefreshInterval(val) {
+        if (val === 0) return; // don't do that
+        console.log('Setting refresh speed to ' + (100/val).toFixed(0) + '% of normal.');
+        refreshInteralMultiplier = val;
     }
 
     function getRefresh(name) {
@@ -19,8 +26,9 @@
     }
 
     function runRefresh(name) {
-        pauseRefresh(name);
-        resumeRefresh(name);
+        console.log('Forcing a full refresh.');
+        pauseRefresh(name, true);
+        resumeRefresh(name, true);
     }
 
     function scheduleRefresh(ms) {
@@ -34,7 +42,7 @@
         var def = refreshData.func();
         if (typeof (def.done) === 'function') {
             def.done(function() {
-                refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval);
+                refreshData.timer = setTimeout(function() { execRefresh(refreshData); }, refreshData.interval * refreshInteralMultiplier);
             });
         }
 
@@ -42,8 +50,7 @@
         refreshData.timer = 0;
     }
 
-    function pauseRefresh(name) {
-
+    function pauseRefresh(name, silent) {
         function pauseSingleRefresh(r) {
             r.paused = true;
             if (r.timer) {
@@ -61,12 +68,16 @@
         }
 
         if (name && registeredRefreshes[name]) {
-            console.log('Refresh paused for: ' + name);
+            if (!silent) {
+                console.log('Refresh paused for: ' + name);
+            }
             pauseSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
-        console.log('Refresh paused');
+        if (!silent) {
+            console.log('Refresh paused');
+        }
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 pauseSingleRefresh(registeredRefreshes[key]);
@@ -74,8 +85,7 @@
         }
     }
 
-    function resumeRefresh(name) {
-
+    function resumeRefresh(name, silent) {
         function resumeSingleRefresh(r) {
             if (r.timer) {
                 clearTimeout(r.timer);
@@ -85,12 +95,16 @@
         }
 
         if (name && registeredRefreshes[name]) {
-            console.log('Refresh resumed for: ' + name);
+            if (!silent) {
+                console.log('Refresh resumed for: ' + name);
+            }
             resumeSingleRefresh(registeredRefreshes[name]);
             return;
         }
 
-        console.log('Refresh resumed');
+        if (!silent) {
+            console.log('Refresh resumed');
+        }
         for (var key in registeredRefreshes) {
             if (registeredRefreshes.hasOwnProperty(key)) {
                 resumeSingleRefresh(registeredRefreshes[key]);
@@ -269,7 +283,7 @@
             }, Status.options.HeaderRefresh * 1000);
         }
 
-        var resizeTimer;
+        var resizeTimer, dropdownPause;
         $(window).resize(function() {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(function() {
@@ -352,15 +366,39 @@
                         });
                 }
             });
+        }).on('click', '.js-dropdown-actions', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            var jThis = $(this);
+            if (jThis.hasClass('open')) {
+                jThis.removeClass('open');
+                resumeRefresh();
+            } else {
+                $('.js-dropdown-actions.open').removeClass('open');
+                var ddSource = $('.js-haproxy-server-dropdown ul').clone();
+                jThis.append(ddSource);
+                var actions = jThis.data('actions');
+                if (actions) {
+                    jThis.find('a[data-action]').each(function(_, i) {
+                        $(i).toggleClass('disabled', actions.indexOf($(i).data('action')) === -1);
+                    });
+                }
+                jThis.addClass('open');
+                pauseRefresh();
+            }
+        }).on('click', '.js-dropdown-actions a', function (e) {
+            e.preventDefault();
         }).on({
             'click': function() {
                 $('.action-popup').remove();
+                $('.js-dropdown-actions.open').removeClass('open');
             },
             'show': function() {
-                resumeRefresh();
+                setRefreshInterval(1);
+                runRefresh();
             },
             'hide': function() {
-                pauseRefresh();
+                setRefreshInterval(10);
             }
         });
         prepTableSorter();
@@ -922,20 +960,38 @@ Status.Redis = (function () {
 Status.Exceptions = (function () {
 
     function refreshCounts(data) {
-        if (!data.apps && data.apps.length) return;
-        $('.badge-link-list li').each(function () {
-            var app = data.apps[$(this).data('name')];
-            $('.badge', this).text(app && app.ExceptionCount ? app.ExceptionCount.toLocaleString() : '');
+        if (!(data.Groups && data.Groups.length)) return;
+        var log = Status.Exceptions.options.log,
+            logCount = 0,
+            group = Status.Exceptions.options.group,
+            groupCount = 0;
+        // For any not found...
+        $('.js-exception-total').text('0');
+        data.Groups.forEach(function(g) {
+            if (g.Name === group) {
+                groupCount = g.Total;
+            }
+            $('.js-exception-total[data-name="' + g.Name + '"]').text(g.Total.toLocaleString());
+            g.Applications.forEach(function(app) {
+                if (app.Name === log) {
+                    logCount = app.Total;
+                }
+                $('.js-exception-total[data-name="' + g.Name + '-' + app.Name + '"]').text(app.Total.toLocaleString());
+            });
         });
         if (Status.Exceptions.options.search) return;
-        var log = Status.Exceptions.options.log;
-        if (log) {
-            var count = data.apps[log].ExceptionCount;
-            $('.js-exception-title').text(count.toLocaleString() + ' ' + log + ' Exception' + (count !== 1 ? 's' : ''));
-        } else {
-            $('.js-exception-title').text(total.toLocaleString() + ' Exception' + (data.total !== 1 ? 's' : ''));
+        function setTitle(name, count) {
+            $('.js-exception-title').text(count.toLocaleString() + ' ' + name + ' Exception' + (count !== 1 ? 's' : ''));
         }
-        $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.total.toLocaleString());
+
+        if (log) {
+            setTitle(log, logCount);
+        } else if (group) {
+            setTitle(group, groupCount);
+        } else {
+            setTitle('', data.Total);
+        }
+        $('.js-top-tabs .badge[data-name="Exceptions"]').text(data.Total.toLocaleString());
     }
 
     function init(options) {
@@ -1009,7 +1065,7 @@ Status.Exceptions = (function () {
                 url: url,
                 success: function (data) {
                     if (options.showingDeleted) {
-                        jThis.attr('title', 'Error is already deleted');
+                        jThis.attr('title', 'Error is already deleted').addClass('disabled');
                         jRow.addClass('deleted');
                         // TODO: Replace protected glyph here
                         //jCell.find('span.protected').replaceWith('<a title="Undelete and protect this error" class="protect-link" href="' + url.replace('/delete', '/protect') + '">&nbsp;P&nbsp;</a>');
@@ -1085,9 +1141,7 @@ Status.Exceptions = (function () {
                 }
             });
             return false;
-        });
-        
-        $('.js-content').on('click', '.js-exceptions tbody td', function (e) {
+        }).on('click', '.js-exceptions tbody td', function (e) {
             if ($(e.target).closest('a').length) {
                 return;
             }
@@ -1166,6 +1220,7 @@ Status.Exceptions = (function () {
                     $.ajax({
                         type: 'POST',
                         data: {
+                            group: jThis.data('group') || options.group,
                             log: jThis.data('log') || options.log,
                             id: jThis.data('id') || options.id
                         },
@@ -1185,17 +1240,17 @@ Status.Exceptions = (function () {
 
         $(document).on('click', 'a.js-clear-visible', function () {
             var jThis = $(this);
-            bootbox.confirm('Really delete all non-protected errors?', function (result) {
+            bootbox.confirm('Really delete all visible, non-protected errors?', function (result) {
                 if (result)
                 {
-                    var ids = $('.exceptions-dashboard tr.error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
+                    var ids = $('.js-error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
                     jThis.find('.glyphicon').addClass('icon-rotate-flip');
 
                     $.ajax({
                         type: 'POST',
                         traditional: true,
-                        data: { log: options.log, ids: ids },
-                        url: Status.options.rootPath + 'exceptions/delete-list',
+                        data: { group: options.group, log: options.log, ids: ids },
+                        url: jThis.data('url'),
                         success: function (data) {
                             window.location.href = data.url;
                         },
@@ -1225,23 +1280,23 @@ Status.Exceptions = (function () {
             var previewTimer = 0;
             $('.js-content').on({
                 mouseenter: function (e) {
-                    if ($(e.target).closest('td:first-child').length) {
-                        return;
+                    if ($(e.target).closest('.js-error td:nth-child(4)').length) {
+                        var jThis = $(this).find('.js-exception-link'),
+                            url = jThis.attr('href').replace('/detail', '/preview');
+
+                        clearTimeout(previewTimer);
+                        previewTimer = setTimeout(function() {
+                                $.get(url,
+                                    function(resp) {
+                                        var sane = $(resp).filter('.error-preview');
+                                        if (!sane.length) return;
+
+                                        $('.error-preview-popup').fadeOut(125, function() { $(this).remove(); });
+                                        var errDiv = $('<div class="error-preview-popup" />').append(resp);
+                                        errDiv.appendTo(jThis.parent()).fadeIn('fast');
+                                    });
+                            }, 600);
                     }
-                    var jThis = $(this).find('.js-exception-link'),
-                        url = jThis.attr('href').replace('/detail', '/preview');
-
-                    clearTimeout(previewTimer);
-                    previewTimer = setTimeout(function () {
-                        $.get(url, function (resp) {
-                            var sane = $(resp).filter('.error-preview');
-                            if (!sane.length) return;
-
-                            $('.error-preview-popup').fadeOut(125, function () { $(this).remove(); });
-                            var errDiv = $('<div class="error-preview-popup" />').append(resp);
-                            errDiv.appendTo(jThis.parent()).fadeIn('fast');
-                        });
-                    }, 600);
                 },
                 mouseleave: function () {
                     clearTimeout(previewTimer);
@@ -1280,7 +1335,7 @@ Status.Exceptions = (function () {
                 success: function (data) {
                     $(this).removeClass('loading');
                     if (data.success) {
-                        if (data.browseUrl != null && data.browseUrl !== "") {
+                        if (data.browseUrl && data.browseUrl !== "") {
 
                             var issueLink = '<a href="' + data.browseUrl + '" target="_blank">' + data.issueKey + '</a>';
                             $("#jira-links-container").show();
@@ -1321,7 +1376,7 @@ Status.HAProxy = (function () {
         }
 
         // Admin Panel (security is server-side)
-        $('.js-content').on('click', '.js-haproxy-action', function (e) {
+        $('.js-content').on('click', '.js-haproxy-action, .js-haproxy-actions a', function (e) {
             var jThis = $(this),
                 data = {
                     group: jThis.closest('[data-group]').data('group'),
@@ -1331,7 +1386,8 @@ Status.HAProxy = (function () {
                 };
 
             function haproxyAction() {
-                jThis.addClass('icon-rotate-flip');
+                jThis.find('.glyphicon').addBack('.glyphicon').addClass('icon-rotate-flip');
+                var cog = jThis.closest('.js-dropdown-actions').find('.hover-spin > .glyphicon').addClass('spin');
                 $.ajax({
                     type: 'POST',
                     data: data,
@@ -1341,6 +1397,7 @@ Status.HAProxy = (function () {
                     },
                     error: function () {
                         jThis.removeClass('icon-rotate-flip').parent().errorPopup('An error occured while trying to ' + data.act + '.');
+                        cog.removeClass('spin');
                     }
                 });
             }

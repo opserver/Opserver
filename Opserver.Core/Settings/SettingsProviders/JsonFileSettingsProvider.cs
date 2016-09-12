@@ -14,6 +14,7 @@ namespace StackExchange.Opserver.SettingsProviders
         {
             if (Path.StartsWith("~\\"))
                 Path = Path.Replace("~\\", AppDomain.CurrentDomain.BaseDirectory);
+            AddDirectoryWatcher();
         }
 
         private readonly object _loadLock = new object();

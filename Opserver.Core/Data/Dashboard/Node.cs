@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -13,17 +14,24 @@ namespace StackExchange.Opserver.Data.Dashboard
         
         public DashboardDataProvider DataProvider { get; set; }
         public bool IsRealTimePollable => MachineType?.Contains("Windows") == true;
+        public List<Issue<Node>> Issues { get; set; }
 
         public string Id { get; internal set; }
         public string Name { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
-        public string MachineTypePretty => MachineType?.Replace("Microsoft Windows ", "");
+        public string MachineOSVersion { get; internal set; }
+        private string _machineTypePretty;
+        public string MachineTypePretty => _machineTypePretty ?? (_machineTypePretty = GetPrettyMachineType());
         public string Ip { get; internal set; }
         public short? PollIntervalSeconds { get; internal set; }
 
         public DateTime? LastBoot { get; internal set; }
         public NodeStatus Status { get; internal set; }
+        public NodeStatus? ChildStatus { get; internal set; }
+        public string StatusDescription { get; internal set; }
+        private HardwareType? _hardwareType;
+        public HardwareType HardwareType => _hardwareType ?? (_hardwareType = GetHardwareType()).Value;
 
         public short? CPULoad { get; internal set; }
         public float? TotalMemory { get; internal set; }
@@ -55,6 +63,21 @@ namespace StackExchange.Opserver.Data.Dashboard
         public DashboardCategory Category
         {
             get { return _category ?? (_category = DashboardCategory.AllCategories.FirstOrDefault(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown); }
+        }
+
+        private string GetPrettyMachineType()
+        {
+            if (MachineType.StartsWith("Linux")) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
+            return MachineType?.Replace("Microsoft Windows ", "");
+        }
+
+        private HardwareType GetHardwareType()
+        {
+            if (IsVM) return HardwareType.VirtualMachine;
+            return HardwareType.Physical;
+            
+            // TODO: Detect network gear in a reliable way
+            return HardwareType.Unknown;
         }
 
         public string ManagementUrl { get; internal set; }
@@ -117,11 +140,19 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
 
         public float TotalNetworkbps => Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
-
         public float TotalPrimaryNetworkbps => PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
 
         private DashboardSettings.NodeSettings _settings;
-        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings));
+        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName));
+
+        private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
+        public decimal? CPUWarningPercent => GetSetting(i => i.CPUWarningPercent);
+        public decimal? CPUCriticalPercent => GetSetting(i => i.CPUCriticalPercent);
+        public decimal? MemoryWarningPercent => GetSetting(i => i.MemoryCriticalPercent);
+        public decimal? MemoryCriticalPercent => GetSetting(i => i.MemoryCriticalPercent);
+        public decimal? DiskWarningPercent => GetSetting(i => i.DiskWarningPercent);
+        public decimal? DiskCriticalPercent => GetSetting(i => i.DiskCriticalPercent);
+        
 
         private List<Interface> _primaryInterfaces; 
         public List<Interface> PrimaryInterfaces

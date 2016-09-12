@@ -2,42 +2,36 @@
 @using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
+    var group = Model.SelectedGroup;
     var log = Model.SelectedLog;
     var exceptions = Model.Errors;
-    
+
     this.SetPageTitle(Model.Title);
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
-                      Model.Search,
-                      Url.Action(nameof(ExceptionsController.Search)),
-                      log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
-
-    var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
+              Model.Search,
+              Url.Action(nameof(ExceptionsController.Search)),
+              Model.SearchDictionary);
 }
 @section head {
     <script>
-        $(function() { Status.Exceptions.init({ refresh: 120, log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function() { Status.Exceptions.init({ refresh: 120, group: '@group', log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">
-    <h5 class="page-header">Exception Logs
+    <h5 class="page-header">
+        Exception Logs
         @if (!Model.ShowAll)
         {
-            @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a> 
+            @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
         }
         @if (ExceptionStores.Stores?.Any() == true)
         {
             @Helpers.PollNow(ExceptionStores.Stores?.First().NodeType)
         }
     </h5>
-    <ul class="badge-link-list small">
-        @foreach (var a in distinctApps)
-        {
-            <li class="@(a.Name == log ? "active" : null)" data-name="@a.Name">
-                <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { log = a.Name })">@a.Name</a>
-                <span class="badge@(a.ExceptionCount == 0 ? " alert-success" : null)">@a.ExceptionCount.ToComma()</span>
-            </li>
-        }
-    </ul>
+    <div class="js-exception-counts">
+        @{ Html.RenderPartial("Exceptions.Navigation", Model); }
+    </div>
 </div>
 @if (ExceptionStores.Stores?.Any(s => s.MonitorStatus == MonitorStatus.Good) ?? false)
 {

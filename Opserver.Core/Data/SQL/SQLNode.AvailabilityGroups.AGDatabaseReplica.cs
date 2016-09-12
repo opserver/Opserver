@@ -1,4 +1,5 @@
 ﻿using System;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -101,10 +102,10 @@ namespace StackExchange.Opserver.Data.SQL
             }
 
             public string DatabaseStateDescription => DatabaseState.HasValue
-                ? DatabaseState.GetDescription() + (IsSuspended.GetValueOrDefault() ? " (Suspended)" : "")
+                ? DatabaseState.Value.GetDescription() + (IsSuspended.GetValueOrDefault() ? " (Suspended)" : "")
                 : string.Empty;
 
-            public string SuspendReasonDescription => SuspendReason.HasValue ? "Suspended by " + SuspendReason.GetDescription() : string.Empty;
+            public string SuspendReasonDescription => SuspendReason.HasValue ? "Suspended by " + SuspendReason.Value.GetDescription() : string.Empty;
 
             public string GetFetchSQL(Version v) => @"
 Select dbrs.database_id DatabaseId,

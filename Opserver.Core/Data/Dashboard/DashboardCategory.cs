@@ -30,18 +30,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         public Regex PatternRegex => Settings.PatternRegex;
         public int Index { get; private set; }
 
-        public DashboardSettings.Category Settings { get; private set; }
-
-        public decimal? CPUWarningPercent => Settings.CPUWarningPercent;
-        public decimal? CPUCriticalPercent => Settings.CPUCriticalPercent;
-        public decimal? MemoryWarningPercent => Settings.MemoryWarningPercent;
-        public decimal? MemoryCriticalPercent => Settings.MemoryCriticalPercent;
-        public decimal? DiskWarningPercent => Settings.DiskWarningPercent;
-        public decimal? DiskCriticalPercent => Settings.DiskCriticalPercent;
-
-        public Regex PrimaryInterfacePatternRegex => Settings.PrimaryInterfacePatternRegex;
-
-
+        public DashboardSettings.Category Settings { get; }
+        
         public DashboardCategory() { }
         public DashboardCategory(DashboardSettings.Category settingsCategory)
         {

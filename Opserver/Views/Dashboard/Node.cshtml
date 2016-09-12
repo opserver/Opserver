@@ -2,7 +2,6 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
-@using System.Globalization
 @model NodeModel
 @{
     var s = Model.CurrentNode;
@@ -28,7 +27,7 @@
     @s.PrettyName
     @if (s.IsVM)
     {
-        @:(Virtual - <a href="@Url.Action(nameof(DashboardController.Node), new { node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost })">@s.VMHost.PrettyName</a>)
+        <span class="text-muted">(Virtual Machine)</span>
     }
     @if (s.ManagementUrl.HasValue())
     {
@@ -50,8 +49,16 @@
             </div>
             <div class="panel-body">
                 <div class="value-block small col-xs-6">
-                    @s.Manufacturer
-                    <label>Manufacturer</label>
+                    @if (s.Manufacturer.IsNullOrEmpty() && s.IsVM)
+                    {
+                        <a href="@Url.Action(nameof(DashboardController.Node), new {node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost})">@s.VMHost.PrettyName</a>
+                        <label>VM Host</label>
+                    }
+                    else
+                    {
+                        @s.Manufacturer
+                        <label>Manufacturer</label>
+                    }
                 </div>
                 <div class="value-block small col-xs-6">
                     @s.Model
@@ -61,7 +68,7 @@
                     @(s.ServiceTag ?? "Unknown")
                     <label>Serial</label>
                 </div>
-                <div class="value-block small col-xs-6">
+                <div class="value-block small col-xs-6" title="@s.MachineType">
                     @s.MachineTypePretty
                     <label>Type</label>
                 </div>

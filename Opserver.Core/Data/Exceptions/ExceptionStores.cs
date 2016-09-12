@@ -8,14 +8,23 @@ using StackExchange.Exceptional;
 namespace StackExchange.Opserver.Data.Exceptions
 {
     public class ExceptionStores
-    {
-        public const string AllExceptionsListKey = "Exceptions-GetAllErrorsAsync";
+    {   
+        public static List<ExceptionStore> Stores { get; } =
+            Current.Settings.Exceptions.Stores
+                .Select(s => new ExceptionStore(s))
+                .Where(s => s.TryAddToGlobalPollers())
+                .ToList();
+        public static HashSet<string> KnownApplications { get; } =
+            GetConfiguredApplicationGroups().SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
 
-        public static List<Application> Applications => GetApplications();
-
-        public static int TotalExceptionCount => Applications.Sum(a => a.ExceptionCount);
-
-        public static int TotalRecentExceptionCount => Applications.Sum(a => a.RecentExceptionCount);
+        private static object _updateLock = new object();
+        public static List<Application> Applications { get; private set; }
+        private static ApplicationGroup CatchAll { get; set; }
+        private static List<ApplicationGroup> _applicationGroups;
+        public static List<ApplicationGroup> ApplicationGroups => _applicationGroups ?? (_applicationGroups = UpdateApplicationGroups());
+        
+        public static int TotalExceptionCount => Applications?.Sum(a => a.ExceptionCount) ?? 0;
+        public static int TotalRecentExceptionCount => Applications?.Sum(a => a.RecentExceptionCount) ?? 0;
 
         public static MonitorStatus MonitorStatus
         {
@@ -41,20 +50,61 @@ namespace StackExchange.Opserver.Data.Exceptions
                 return MonitorStatus.Good;
             }
         }
-
-        public static List<ExceptionStore> Stores { get; } =
-            Current.Settings.Exceptions.Stores
-                .Select(s => new ExceptionStore(s))
-                .Where(s => s.TryAddToGlobalPollers())
-                .ToList();
-
-        public static List<Application> ConfigApplications { get; } =
-            Current.Settings.Exceptions.Applications
-                .Select(a => new Application {Name = a}).ToList();
-
-        public static async Task<Error> GetError(string appName, Guid guid)
+        
+        private static List<ApplicationGroup> GetConfiguredApplicationGroups()
         {
-            var stores = GetStores(appName);
+            var settings = Current.Settings.Exceptions;
+            if (settings.Groups?.Any() ?? false)
+            {
+                var configured = settings.Groups
+                    .Select(g => new ApplicationGroup
+                    {
+                        Name = g.Name,
+                        Applications = g.Applications.OrderBy(a => a).Select(a => new Application {Name = a}).ToList()
+                    }).ToList();
+                // The user could have configured an "Other", don't duplicate it
+                if (configured.All(g => g.Name != "Other"))
+                {
+                    configured.Add(new ApplicationGroup {Name = "Other"});
+                }
+                CatchAll = configured.First(g => g.Name == "Other");
+                return configured;
+            }
+            // One big bucket if nothing is configured
+            CatchAll = new ApplicationGroup {Name = "All"};
+            if (settings.Applications?.Any() ?? false)
+            {
+                CatchAll.Applications = settings.Applications.OrderBy(a => a).Select(a => new Application {Name = a}).ToList();
+            }
+            return new List<ApplicationGroup>
+            {
+                CatchAll
+            };
+        }
+
+        public static IEnumerable<string> GetAppNames(string group, string app)
+        {
+            if (app.HasValue())
+            {
+                yield return app;
+                yield break;
+            }
+
+            if (group.IsNullOrEmpty()) yield break;
+
+            var apps = _applicationGroups?.FirstOrDefault(g => g.Name == @group)?.Applications;
+            if (apps != null)
+            {
+                foreach (var a in apps)
+                {
+                    yield return a.Name;
+                }
+            }
+        }
+
+        public static async Task<Error> GetError(string app, Guid guid)
+        {
+            var stores = GetStores(app);
             var result = await Task.WhenAll(stores.Select(s => s.GetErrorAsync(guid)));
             return result.FirstOrDefault(e => e != null);
         }
@@ -141,11 +191,11 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        public static List<Error> GetAllErrors(string appName = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        public static List<Error> GetAllErrors(string group = null, string app = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
-            using (MiniProfiler.Current.Step(nameof(GetAllErrors) + "() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
+            using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (group.HasValue() ? " (group:" + group + ")" : "") + (app.HasValue() ? " (app:" + app + ")" : "")))
             {
-                var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, appName));
+                var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, group, app));
                 return GetSorted(allErrors, sort).ToList();
             }
         }
@@ -158,31 +208,48 @@ namespace StackExchange.Opserver.Data.Exceptions
             return GetSorted(similarErrors, sort).ToList();
         }
 
-        public static async Task<List<Error>> FindErrorsAsync(string searchText, string appName = null, int max = 200, bool includeDeleted = false, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        public static async Task<List<Error>> FindErrorsAsync(string searchText, string group = null, string app = null, int max = 200, bool includeDeleted = false, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             if (searchText.IsNullOrEmpty()) return new List<Error>();
-            var stores = appName.HasValue() ? GetStores(appName) : Stores;
-            var errorFetches = stores.Select(s => s.FindErrorsAsync(searchText, appName, max, includeDeleted));
+            var stores = app.HasValue() ? GetStores(app) : Stores; // Apps are across stores, group doesn't matter here
+            var errorFetches = stores.Select(s => s.FindErrorsAsync(searchText, max, includeDeleted, GetAppNames(group, app)));
             var results = (await Task.WhenAll(errorFetches).ConfigureAwait(false)).SelectMany(e => e);
             return GetSorted(results, sort).ToList();
         }
         
-        private static List<Application> GetApplications()
+        internal static List<ApplicationGroup> UpdateApplicationGroups()
         {
-            using (MiniProfiler.Current.Step(nameof(GetApplications) + "() - All Stores"))
+            using (MiniProfiler.Current.Step("UpdateApplicationGroups() - All Stores"))
+            lock (_updateLock)
             {
+                var result = _applicationGroups ?? GetConfiguredApplicationGroups();
                 var apps = Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
-                if (!ConfigApplications.Any()) return apps;
-
-                var result = ConfigApplications.ToList();
-                for (var i = 0; i < result.Count; i++)
+                // Loop through all configured groups and hook up applications returned from the queries
+                foreach (var g in result)
                 {
-                    var app = apps.FirstOrDefault(a => a.Name == result[i].Name);
-                    if (app == null) continue;
-                    result[i] = app;
-                    apps.Remove(app);
+                    for (var i = 0; i < g.Applications.Count; i++)
+                    {
+                        var a = g.Applications[i];
+                        var matching = apps.FirstOrDefault(sapp => a.Name == sapp.Name);
+                        if (matching != null)
+                        {
+                            g.Applications[i] = matching;
+                        }
+                    }   
                 }
-                result.AddRange(apps.OrderByDescending(a => a.ExceptionCount));
+                // Clear all dynamic apps from the CatchAll group
+                CatchAll.Applications.RemoveAll(a => !KnownApplications.Contains(a.Name));
+                // Check for the any dyanmic/unconfigured apps
+                foreach (var app in apps.OrderBy(a => a.Name))
+                {
+                    if (!KnownApplications.Contains(app.Name))
+                    {
+                        // This dynamic app needs a home!
+                        CatchAll.Applications.Add(app);
+                    }
+                }
+                Applications = apps;
+                _applicationGroups = result;
                 return result;
             }
         }

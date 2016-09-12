@@ -22,7 +22,6 @@ namespace StackExchange.Opserver.Data.HAProxy
         public DateTime PollDate { get; internal set; }
 
         private List<Item> _allStats; 
-
         public List<Item> AllStats
         {
             get
@@ -58,7 +57,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             get
             {
-                if(Servers == null || Servers.Count == 0) return null;
+                if (Servers == null || Servers.Count == 0) return null;
                 var pieces = new List<string>();
                 foreach(var g in Servers.WithIssues().GroupBy(s => s.ProxyServerStatus).OrderByDescending(g => g.Key))
                 {
@@ -87,27 +86,24 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public bool ShowServers => HasServers;
 
-        public bool ShowThrottle
-        {
-            get { return HasServers && Servers.Any(s => s.Throttle > 0); }
-        }
+        public bool ShowThrottle => HasServers && Servers.Any(s => s.Throttle > 0);
 
         #endregion
 
+        private string _niceName;
         public string NiceName
         {
             get
             {
+                if (_niceName != null) return _niceName;
                 string result;
-                if (Current.Settings.HAProxy.Aliases.TryGetValue(Name, out result))
-                    return result;
-                return Name;
+                return _niceName = Current.Settings.HAProxy.Aliases.TryGetValue(Name, out result)
+                    ? result
+                    : Name;
             }
         }
 
-        public override string ToString()
-        {
-            return string.Concat(Instance.Group != null ? (Instance.Group.Name + ": ") : "", Instance.Name, ": ", Name);
-        }
+        public override string ToString() =>
+            (Instance.Group != null ? Instance.Group.Name + ": " : "") + Instance.Name + ": " + Name;
     }
 }

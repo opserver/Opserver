@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Helpers
             }
 
             string precision = format.Substring(2);
-            if (string.IsNullOrEmpty(precision)) precision = "2";
+            if (precision.IsNullOrEmpty()) precision = "2";
             return string.Format("{0:N" + precision + "}{1}", size, suffix);
 
         }

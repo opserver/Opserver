@@ -25,6 +25,7 @@
             ForwardSlash = {'/'},
             BackSlash = {'\\'},
             DoubleQuote = {'"'},
+            Tilde = {'`'},
             Period_Plus = {'.', '+'},
             NewLine_CarriageReturn = {'\n', '\r'},
             Comma_SemiColon = {',', ';'},

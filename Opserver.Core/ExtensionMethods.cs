@@ -14,6 +14,7 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver
 {
@@ -70,7 +71,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public static string ReadableTypeDescription(this Type t) =>
             t.IsGenericType
-                ? $"{t.Name.Split('`')[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
+                ? $"{t.Name.Split(StringSplits.Tilde)[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
                 : t.Name;
         
         /// <summary>
@@ -127,14 +128,10 @@ namespace StackExchange.Opserver
         /// force string to be maxlen or smaller
         /// </summary>
         public static string Truncate(this string s, int maxLength) =>
-            s.IsNullOrEmpty()
-                ? s
-                : (s.Length > maxLength ? s.Remove(maxLength) : s);
+            s.IsNullOrEmpty() ? s : (s.Length > maxLength ? s.Remove(maxLength) : s);
 
         public static string TruncateWithEllipsis(this string s, int maxLength) =>
-            s.IsNullOrEmpty() || s.Length <= maxLength
-                ? s
-                : Truncate(s, Math.Max(maxLength, 3) - 3) + "...";
+            s.IsNullOrEmpty() || s.Length <= maxLength ? s : Truncate(s, Math.Max(maxLength, 3) - 3) + "…";
 
         public static string CleanCRLF(this string s) =>
             string.IsNullOrWhiteSpace(s)
@@ -157,7 +154,7 @@ namespace StackExchange.Opserver
 
         public static IEnumerable<T> WithIssues<T>(this IEnumerable<T> items) where T : IMonitorStatus =>
             items.Where(i => i.MonitorStatus != MonitorStatus.Good);
-        
+
         public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items) =>
             string.Join(", ", items.WithIssues().Select(i => i.MonitorStatusReason));
 
@@ -276,26 +273,6 @@ namespace StackExchange.Opserver
                 : string.Join(joinSeparator, o.GetType()
                                               .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                               .Select(p => p.Name + ":" + p.GetValue(o, null)));
-
-        public static string GetDescription<T>(this T? enumValue) where T : struct => 
-            enumValue.HasValue ? enumValue.Value.GetDescription() : string.Empty;
-
-        /// <summary>
-        /// Gets the Description attribute text or the .ToString() of an enum member
-        /// </summary>
-        public static string GetDescription<T>(this T enumerationValue) where T : struct
-        {
-            var type = enumerationValue.GetType();
-            if (!type.IsEnum) throw new ArgumentException("EnumerationValue must be of Enum type", nameof(enumerationValue));
-            var memberInfo = type.GetMember(enumerationValue.ToString());
-            if (memberInfo.Length > 0)
-            {
-                var attrs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-                if (attrs.Length > 0)
-                    return ((DescriptionAttribute)attrs[0]).Description;
-            }
-            return enumerationValue.ToString();
-        }
         
         /// <summary>
         /// Converts a raw long into a readable size
@@ -398,7 +375,7 @@ namespace StackExchange.Opserver
 
         /// <summary>
         /// 
-        /// lookup refreshes the data if necessay, passing the old data if we have it.
+        /// lookup refreshes the data if necessary, passing the old data if we have it.
         /// 
         /// durationSecs is the "time before stale" for the data
         /// serveStaleSecs is the maximum amount of time to serve data once it becomes stale
@@ -560,6 +537,17 @@ namespace StackExchange.Opserver
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
         public static string ToSize(this float bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+            ToSize((double)bytes, unit, precision, zero: zero);
+
+        /// <summary>
+        /// Formats the value as a filesize in bytes (KB, MB, etc.)
+        /// </summary>
+        /// <param name="bytes">This value.</param>
+        /// <param name="unit">Unit to use in the fomat, defaults to B for bytes</param>
+        /// <param name="precision">How much precision to show, defaults to 2</param>
+        /// <param name="zero">String to show if the value is 0</param>
+        /// <returns>Filesize and quantifier formatted as a string.</returns>
+        public static string ToSize(this decimal bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>

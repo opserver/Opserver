@@ -27,7 +27,7 @@
 {
     <tr class="js-error@(e.IsProtected ? " protected js-protected" : "")@(e.DeletionDate.HasValue ? " deleted js-deleted" : "")" data-id="@e.GUID" data-log="@e.ApplicationName">
         <td class="@(showActions ? null : " hidden")">
-            <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="hover-pulsate js-delete-link" href="~/exceptions/delete"><span class="glyphicon glyphicon-remove text-danger"></span></a>
+            <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="hover-pulsate js-delete-link@(e.DeletionDate.HasValue ? " disabled" : null)" href="~/exceptions/delete"><span class="glyphicon glyphicon-remove text-danger"></span></a>
             @if (e.DeletionDate.HasValue)
             {
                 <a title="Undelete and protect this error" class="hover-pulsate text-warning js-protect-link" href="~/exceptions/protect"><span class="glyphicon glyphicon-lock"></span></a>
@@ -43,13 +43,13 @@
         </td>
         <td class="@ErrorStyle(e)" data-val="@e.CreationDate.ToEpochTime()">@e.CreationDate.ToRelativeTimeSpanMini()</td>
         <td title="@e.Type">
-            @if (Model.ShowAll)
+            @if (Model.SelectedLog.HasValue())
             {
-                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a>
+                @GetShortName(e)
             }
             else
             {
-                @GetShortName(e)
+                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a>
             }
         </td>
         <td>

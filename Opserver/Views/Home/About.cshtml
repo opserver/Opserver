@@ -15,11 +15,6 @@
     var pollingInfo = PollingEngine.GetPollingStatus();
     var currentTheme = Theme.Current;
 }
-@section head {
-    <style>
-        dl { margin-bottom: 0; }
-    </style>
-}
 @helper EnabledSpan(bool enabled) {
     <span class="@(enabled ? "text-success" : "text-danger")">@(enabled ? "Enabled" : "Disabled")</span>
 }
@@ -60,8 +55,8 @@
             <div class="panel-heading">Settings</div>
             <div class="panel-body small">
                 <div class="value-block col-xs-4">
-                    <form method="POST" action="~/set-theme">
-                        <select class="js-theme" name="theme">
+                    <form method="POST" action="~/set-theme" class="form-group-sm">
+                        <select class="js-theme form-control" name="theme">
                             @foreach (var t in Theme.Options)
                             {
                                 <option value="@t" selected="@(t == currentTheme ? "selected" : null)">@t@(t == Theme.Default ? " (Default)" : null)</option>

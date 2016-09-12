@@ -38,29 +38,32 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                 {
                     var nodes = await conn.QueryAsync<Node>(@"
-Select Cast(n.NodeID as varchar(50)) as Id, 
-    Caption as Name, 
-    LastSync, 
-    MachineType, 
-    Cast(Status as int) Status,
-    LastBoot, 
-    Coalesce(Cast(vm.CPULoad as smallint), n.CPULoad) as CPULoad, 
-    TotalMemory, 
-    MemoryUsed, 
-    IP_Address as Ip, 
-    PollInterval as PollIntervalSeconds,
-    Cast(vmh.NodeID as varchar(50)) as VMHostID, 
-    Cast(IsNull(vh.HostID, 0) as Bit) IsVMHost,
-    IsNull(UnManaged, 0) as IsUnwatched,
-    hi.Manufacturer,
-    hi.Model,
-    hi.ServiceTag
-From Nodes n
-     Left Join VIM_VirtualMachines vm On n.NodeID = vm.NodeID
-     Left Join VIM_Hosts vmh On vm.HostID = vmh.HostID
-     Left Join VIM_Hosts vh On n.NodeID = vh.NodeID
-     Left Join APM_HardwareInfo hi On n.NodeID = hi.NodeID
-Order By Id, Caption", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+Select Cast(n.NodeID as varchar(50)) as Id,
+       Caption as Name,
+       LastSync,
+       MachineType,
+       Cast(Status as int) Status,
+       Cast(ChildStatus as int) ChildStatus,
+       StatusDescription,
+       LastBoot, 
+       Coalesce(Cast(vm.CPULoad as smallint), n.CPULoad) as CPULoad,
+       TotalMemory,
+       MemoryUsed,
+       IP_Address as Ip,
+       PollInterval as PollIntervalSeconds,
+       Cast(vmh.NodeID as varchar(50)) as VMHostID,
+       Cast(IsNull(vh.HostID, 0) as Bit) IsVMHost,
+       IsNull(UnManaged, 0) as IsUnwatched,
+       hi.Manufacturer,
+       hi.Model,
+       hi.ServiceTag
+  From Nodes n
+       Left Join VIM_VirtualMachines vm On n.NodeID = vm.NodeID
+       Left Join VIM_Hosts vmh On vm.HostID = vmh.HostID
+       Left Join VIM_Hosts vh On n.NodeID = vh.NodeID
+       Left Join APM_HardwareInfo hi On n.NodeID = hi.NodeID
+ Where LastSync Is Not Null
+ Order By Id, Caption", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
 
                     var interfaces = await conn.QueryAsync<Interface>(@"
 Select Cast(InterfaceID as varchar(50)) as Id,
@@ -95,7 +98,8 @@ Select Cast(VolumeID as varchar(50)) as Id,
        VolumeSpaceUsed as Used,
        VolumeSpaceAvailable as Available,
        VolumePercentUsed as PercentUsed
-From Volumes", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+  From Volumes
+ Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
 
                     var apps = await conn.QueryAsync<Application>(@"
 Select Cast(com.ApplicationID as varchar(50)) as Id, 
@@ -155,6 +159,25 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
                         n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
                         n.SetReferences();
+
+                        if (Settings.ChildStatusForHealthy && n.Status == NodeStatus.Up && n.ChildStatus.HasValue)
+                        {
+                            n.Status = n.ChildStatus.Value;
+                        }
+
+                        if (n.Status != NodeStatus.Up)
+                        {
+                            n.Issues = new List<Issue<Node>>
+                            {
+                                new Issue<Node>(n)
+                                {
+                                    Date = n.LastSync ?? DateTime.UtcNow,
+                                    Title = n.PrettyName,
+                                    Description = n.StatusDescription,
+                                    MonitorStatus = n.Status.ToMonitorStatus()
+                                }
+                            };
+                        }
                     }
 
                     return nodes;

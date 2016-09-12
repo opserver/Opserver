@@ -99,7 +99,14 @@ Url: /@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">
                     <td class="@(p.IsPolling ? "text-success small" : "text-muted small")">(@(p.PollStatus.IsNullOrEmptyReturn("none")))</td>
                     <td class="actions">
                         <a href="~/json/@pn.NodeType/@pn.UniqueKey.UrlEncode()/@p.ParentMemberName">JSON</a>
-                        <a href="~/profiler/results?id=@p.UniqueId.ToString()" target="_blank">Profile</a>
+                        @if (p.Profiler != null)
+                        {
+                            <a href="~/profiler/results?id=@(p.Profiler?.Id.ToString())" target="_blank">Profile</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Profile</span>
+                        }
                         <a href="#" class="js-poll-now" data-type="@pn.NodeType" data-key="@pn.UniqueKey" data-id="@p.UniqueId.ToString()">Poll</a>
                     </td>
                 </tr>

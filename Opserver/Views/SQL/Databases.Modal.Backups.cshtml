@@ -32,7 +32,7 @@ else {
                     <td>@(b.StartDate?.ToRelativeTimeSpanMini())</td>
                     <td>@(b.FinishDate?.ToRelativeTimeSpanMini())</td>
                     <td>@(b.SizeBytes?.ToSize()) <span class="text-muted">(@(b.CompressedSizeBytes?.ToSize()))</span></td>
-                    <td>@b.MediaDeviceType.GetDescription()</td>
+                    <td>@(b.MediaDeviceType.HasValue ? b.MediaDeviceType.Value.GetDescription() : "")</td>
                     <td title="@(b.PhysicalDeviceName ?? b.LogicalDeviceName)">@((b.PhysicalDeviceName ?? b.LogicalDeviceName).TruncateWithEllipsis(75))</td>
                 </tr>
             }

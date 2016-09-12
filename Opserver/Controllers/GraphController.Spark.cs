@@ -32,9 +32,9 @@ namespace StackExchange.Opserver.Controllers
             if (node == null) return ContentNotFound();
             var points = await node.GetCPUUtilization(SparkStart, null, SparkPoints);
 
-            if (points.Count == 0) return EmptySparkSVG();
-
-            return SparkSVG(points, 100, p => p.Value.GetValueOrDefault());
+            return points.Count == 0
+                ? EmptySparkSVG()
+                : SparkSVG(points, 100, p => p.Value.GetValueOrDefault());
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate")]
@@ -46,9 +46,9 @@ namespace StackExchange.Opserver.Controllers
             if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
             var points = await node.GetMemoryUtilization(SparkStart, null, SparkPoints);
 
-            if (points.Count == 0) return EmptySparkSVG();
-
-            return SparkSVG(points, Convert.ToInt64(node.TotalMemory.GetValueOrDefault()), p => p.Value.GetValueOrDefault());
+            return points.Count == 0
+                ? EmptySparkSVG()
+                : SparkSVG(points, Convert.ToInt64(node.TotalMemory.GetValueOrDefault()), p => p.Value.GetValueOrDefault());
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id", VaryByContentEncoding = "gzip;deflate")]
@@ -60,9 +60,9 @@ namespace StackExchange.Opserver.Controllers
             if (node == null) return ContentNotFound();
             var points = await node.GetNetworkUtilization(SparkStart, null, SparkPoints);
 
-            if (points.Count == 0) return EmptySparkSVG();
-
-            return SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
+            return points.Count == 0
+                ? EmptySparkSVG()
+                : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
         [OutputCache(Duration = 120, VaryByParam = "id;iid", VaryByContentEncoding = "gzip;deflate")]
@@ -132,7 +132,6 @@ namespace StackExchange.Opserver.Controllers
               .Append(@" z""/>
    </g>
 </svg>");
-
             var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
             return new FileContentResult(bytes, "image/svg+xml");
         }
@@ -143,9 +142,6 @@ namespace StackExchange.Opserver.Controllers
   <line x1=""0"" y1=""{0}"" x2=""{1}"" y2=""{0}"" stroke=""#f6f6f6"" stroke-width=""1"" />
 </svg>", SparkHeight.ToString(), SparkPoints.ToString()));
 
-        private static FileResult EmptySparkSVG()
-        {
-            return new FileContentResult(EmptySvgBytes, "image/svg+xml");
-        }
+        private static FileResult EmptySparkSVG() => new FileContentResult(EmptySvgBytes, "image/svg+xml");
     }
 }

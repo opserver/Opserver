@@ -14,14 +14,19 @@ namespace StackExchange.Opserver.Data
         {
             IssueProviders = new List<IIssuesProvider>();
             var providers = AppDomain.CurrentDomain.GetAssemblies()
-                                     .SelectMany(s => s.GetTypes())
-                                     .Where(typeof (IIssuesProvider).IsAssignableFrom);
+                .SelectMany(s => s.GetTypes())
+                .Where(t => typeof(IIssuesProvider).IsAssignableFrom(t) && !typeof(IIssuesProviderInstance).IsAssignableFrom(t));
+
             foreach (var p in providers)
             {
                 if (!p.IsClass) continue;
                 try
                 {
-                    IssueProviders.Add((IIssuesProvider) Activator.CreateInstance(p));
+                    var provider = (IIssuesProvider) Activator.CreateInstance(p);
+                    if (provider.Enabled)
+                    {
+                        IssueProviders.Add(provider);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -30,9 +35,12 @@ namespace StackExchange.Opserver.Data
             }
         }
 
+        public static void AddProvider(IIssuesProviderInstance provider) => IssueProviders.Add(provider);
+
         public static List<Issue> GetIssues()
         {
-            using (MiniProfiler.Current.Step("GetIssues"))
+            using (MiniProfiler.Current.Step(nameof(GetIssues)))
+            {
                 return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (old, ctx) =>
                 {
                     var result = new List<Issue>();
@@ -50,21 +58,28 @@ namespace StackExchange.Opserver.Data
                     });
 
                     return result
-                        .OrderByDescending(i => i.IsService)
+                        .OrderByDescending(i => i.IsCluster)
                         .ThenByDescending(i => i.MonitorStatus)
                         .ThenByDescending(i => i.Date)
                         .ThenBy(i => i.Title)
                         .ToList();
-                }, 60, 4*60*60);
+                }, 15, 4 * 60 * 60);
+            }
         }
     }
-
-
+    
     public interface IIssuesProvider
     {
+        bool Enabled { get; }
         string Name { get; }
         IEnumerable<Issue> GetIssues();
     }
+
+    /// <summary>
+    /// For classes we have an instance of already in order to access local instance data,
+    /// as in the case of dashboard data proviers.
+    /// </summary>
+    public interface IIssuesProviderInstance : IIssuesProvider {}
 
     public class Issue<T> : Issue where T : IMonitorStatus
     {
@@ -89,9 +104,9 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Whether this issue is a service rather than a node - presumably an entire service being offline is worse
         /// </summary>
-        public bool IsService { get; set; }
+        public bool IsCluster { get; set; }
         public DateTime Date { get; set; }
         public MonitorStatus MonitorStatus { get; set; }
-        public string MonitorStatusReason { get; set; }
+        public string MonitorStatusReason => Description;
     }
 }

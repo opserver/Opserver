@@ -7,9 +7,9 @@
     var s = Model.Instance;
     var op = Model.Op;
 }
-@helper ReadableTime(long ms)
+@helper ReadableTime(long microseconds)
 {
-    @TimeSpan.FromMilliseconds(ms).ToTimeStringMini()
+    @TimeSpan.FromMilliseconds(microseconds / 1000).ToTimeStringMini()
 }
 <h4 class="modal-title">
     Details for operation on @s.Name@(op != null ? ": " + op.CompiledOnDatabase : null)
@@ -31,7 +31,7 @@
                     <div class="panel-heading">CPU</div>
                     <div class="panel-body">
                         <div class="value-block">
-                            @ReadableTime(op.TotalCPU / 1000)
+                            @ReadableTime(op.TotalCPU)
                             <label>Total</label>
                         </div>
                         <div class="value-block">

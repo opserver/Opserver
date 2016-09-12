@@ -6,9 +6,11 @@ using System.Web;
 using System.Web.Mvc;
 using Jil;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver
 {
@@ -74,6 +76,26 @@ namespace StackExchange.Opserver
             }
         }
 
+        public static IHtmlString IconSpan(this Node node)
+        {
+            if (node == null)
+                return @"<span class=""text-muted"">●</span>".AsHtml();
+
+            var monitorStatusClass = node.MonitorStatus.TextClass(true);
+            switch (node.HardwareType)
+            {
+                case HardwareType.Physical:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-tasks"" title=""Physical""></span>".AsHtml();
+                case HardwareType.VirtualMachine:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-cloud"" title=""Virtual Machine""></span>".AsHtml();
+                case HardwareType.Network:
+                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-transfer"" title=""Network""></span>".AsHtml();
+                //case HardwareType.Unknown:
+                default:
+                    return $@"<span class=""{monitorStatusClass}"" title=""Unknown hardware type"">●</span>".AsHtml();
+            }
+        }
+
         public static IHtmlString IconSpan(this IMonitorStatus status)
         {
             if (status == null)
@@ -107,13 +129,13 @@ namespace StackExchange.Opserver
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.UpCustomSpam(text, tooltip);
+                    return StatusIndicator.UpCustomSpan(text, tooltip);
                 case MonitorStatus.Warning:
-                    return StatusIndicator.WarningCustomSpam(text, tooltip);
+                    return StatusIndicator.WarningCustomSpan(text, tooltip);
                 case MonitorStatus.Critical:
-                    return StatusIndicator.DownCustomSpam(text, tooltip);
+                    return StatusIndicator.DownCustomSpan(text, tooltip);
                 default:
-                    return StatusIndicator.UnknownCustomSpam(text, tooltip);
+                    return StatusIndicator.UnknownCustomSpan(text, tooltip);
             }
         }
 
@@ -488,28 +510,28 @@ namespace StackExchange.Opserver
             {
                 case SynchronizationStates.Synchronizing:
                 case SynchronizationStates.Synchronized:
-                    return StatusIndicator.UpCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.UpCustomSpan(state.Value.GetDescription(), tooltip);
                 case SynchronizationStates.NotSynchronizing:
                 case SynchronizationStates.Reverting:
                 case SynchronizationStates.Initializing:
-                    return StatusIndicator.DownCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.DownCustomSpan(state.Value.GetDescription(), tooltip);
                 default:
-                    return StatusIndicator.UnknownCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.UnknownCustomSpan(state.Value.GetDescription(), tooltip);
             }
         }
         public static IHtmlString ToSpan(this ReplicaRoles? state, string tooltip = null, bool abbreviate = false)
         {
-            var desc = state.GetDescription();
+            var desc = state.HasValue ? state.Value.GetDescription() : "";
             if (abbreviate) desc = desc.Substring(0, 1);
             switch (state)
             {
                 case ReplicaRoles.Primary:
-                    return StatusIndicator.UpCustomSpam(desc, tooltip);
+                    return StatusIndicator.UpCustomSpan(desc, tooltip);
                 case ReplicaRoles.Secondary:
                     return desc.AsHtml();
                 //case ReplicaRoles.Resolving:
                 default:
-                    return StatusIndicator.DownCustomSpam(desc, tooltip);
+                    return StatusIndicator.DownCustomSpan(desc, tooltip);
             }
         }
     }
