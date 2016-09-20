@@ -78,7 +78,7 @@ There is a HeaderHTML tag that lets you put arbitrary html above all content. Yo
 [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) by Marc Gravell  
 [Dapper](https://github.com/StackExchange/dapper-dot-net/) by Stack Exchange  
 [JSON.Net](http://james.newtonking.com/json) by James Newton-King     
-[MiniProfiler](http://miniprofiler.com/) by Stack Exchange 
+[MiniProfiler](http://miniprofiler.com/) by Stack Exchange    
 [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional) by Nick Craver  
 [TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack  
 
