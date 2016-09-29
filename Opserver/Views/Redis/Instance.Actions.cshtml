@@ -26,7 +26,7 @@
             @:@i.IconSpan() @i.HostAndPort
         }
         <span class="text-muted">(@i.Name)</span>
-        @if (i.SlaveConnections.Any())
+        @if (i.SlaveConnections?.Any() ?? false)
         {
             <ul>
                 @foreach (var sc in i.SlaveConnections)
