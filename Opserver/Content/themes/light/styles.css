@@ -8462,6 +8462,10 @@ h6.page-header {
 .dashboard-chart {
   height: 400px;
 }
+.live-graphs .dashboard-chart {
+  height: 250px;
+  display: inline-block;
+}
 .reload-link:focus {
   text-decoration: none;
 }

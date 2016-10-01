@@ -2,44 +2,94 @@
 @model NodeGraphModel
 @{
     Layout = null;
+    int mainWidth = Model.IsLive ? 429 : 858;
+}
+@functions{
+    public bool ShowType(string type) => Model.Type == type || Model.IsLive;
 }
 @if (Model.Node != null)
 {
-    <h4 class="modal-title">
-        @Model.Node.PrettyName: @Model.Title
-    </h4>
-    <div class="dashboard-chart js-dashboard-chart"></div>
-    switch (Model.Type)
+    if (Model.IsLive)
     {
-        case NodeGraphModel.KnownTypes.CPU:
-            <script>
-                $('.js-dashboard-chart').cpuGraph({
+        <h4 class="modal-title">
+            Live Stats for @Model.Node.PrettyName
+        </h4>
+        <div class="row small">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        CPU Utilization
+                    </div>
+                    <div class="panel-body">
+                        <div class="history-graph js-graph-cpu"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Memory Utilization <span cass="text-muted">(@(Model.Node.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
+                    <div class="panel-body">
+                        <div class="history-graph js-graph-memory"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h4 class="modal-title">
+            @Model.Node.PrettyName: @Model.Title
+        </h4>
+        if (ShowType(NodeGraphModel.KnownTypes.CPU))
+        {
+            <div class="dashboard-chart js-graph-cpu"></div>
+        }
+        if (ShowType(NodeGraphModel.KnownTypes.Memory))
+        {
+            <div class="dashboard-chart js-graph-memory"></div>
+        }
+        if (Model.Type == NodeGraphModel.KnownTypes.Network)
+        {
+            <div class="dashboard-chart js-graph-network"></div>
+        }
+    }
+    if (ShowType(NodeGraphModel.KnownTypes.CPU))
+    {
+        <script>
+            $('.js-graph-cpu')
+                .cpuGraph({
                     id: '@Model.Node.Id',
-                    width: 858,
-                    data: @Model.GraphData.ToJson()
+                    width: @mainWidth,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.CpuData.ToJson()
                 });
-            </script>
-            break;
-        case NodeGraphModel.KnownTypes.Memory:
-            <script>
-                $('.js-dashboard-chart').memoryGraph({
+        </script>
+    }
+    if (ShowType(NodeGraphModel.KnownTypes.Memory))
+    {
+        <script>
+            $('.js-graph-memory')
+                .memoryGraph({
                     id: '@Model.Node.Id',
-                    width: 858,
+                    width: @mainWidth,
+                    live: @(Model.IsLive ? "true" : "false"),
                     max: @((Model.Node.TotalMemory/1024/1024)?.ToString(CultureInfo.InvariantCulture)),
-                    data: @Model.GraphData.ToJson()
+                    data: @Model.MemoryData.ToJson()
                 });
-            </script>
-            break;
-        case NodeGraphModel.KnownTypes.Network:
-            <script>
-                $('.js-dashboard-chart').networkGraph({
+        </script>
+    }
+    if (Model.Type == NodeGraphModel.KnownTypes.Network) // Intentionally not included yet in live view
+    {
+        <script>
+            $('.js-graph-network')
+                .networkGraph({
                     id: '@Model.Node.Id',
                     iid: '@(Model.Interface?.Id)',
                     width: 858,
-                    data: @Model.GraphData.ToJson()
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.NetworkData.ToJson()
                 });
-            </script>
-            break;
+        </script>
     }
 }
 else

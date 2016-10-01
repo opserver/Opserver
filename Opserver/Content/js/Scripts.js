@@ -1646,6 +1646,7 @@ Status.HAProxy = (function () {
                 dateRanges: true,
                 interpolation: 'linear',
                 leftMargin: 40,
+                live: false,
                 id: this.data('id'),
                 title: this.data('title'),
                 subtitle: this.data('subtitle'),
@@ -1704,11 +1705,9 @@ Status.HAProxy = (function () {
                 if (options.width - 10 - options.leftMargin < 300)
                     options.width = 300 + 10 + options.leftMargin;
                 
-                margin = { top: 10, right: options.rightMargin || 10, bottom: 100, left: options.leftMargin };
-                margin2 = { top: options.height - 77, right: 10, bottom: 20, left: options.leftMargin };
+                margin = { top: 10, right: options.rightMargin || 10, bottom: options.live ? 25 : 100, left: options.leftMargin };
                 width = options.width - margin.left - margin.right;
                 height = options.height - margin.top - margin.bottom;
-                height2 = options.height - margin2.top - margin2.bottom;
 
                 var timeFormats = d3.time.format.utc.multi([
                     ['.%L', function (d) { return d.getUTCMilliseconds(); }],
@@ -1722,13 +1721,11 @@ Status.HAProxy = (function () {
                 ]);
 
                 x = d3.time.scale.utc().range([0, width]);
-                x2 = d3.time.scale.utc().range([0, width]);
                 y = d3.scale.linear().range([height, 0]);
                 yr = d3.scale.linear().range([height, 0]);
-                y2 = d3.scale.linear().range([height2, 0]);
+
 
                 xAxis = d3.svg.axis().scale(x).orient('bottom').tickFormat(timeFormats);
-                xAxis2 = d3.svg.axis().scale(x2).orient('bottom').tickFormat(timeFormats);
                 yAxis = d3.svg.axis().scale(y).orient('left');
                 yrAxis = d3.svg.axis().scale(yr).orient('right');
                 
@@ -1748,9 +1745,6 @@ Status.HAProxy = (function () {
                     .x(x)
                     .on('brushend', redrawFromMain);
 
-                brush2 = d3.svg.brush()
-                    .x(x2)
-                    .on('brush', redrawFromSummary);
                 
                 svg = d3.select(chart[0]).append('svg')
                     .attr('width', options.width)
@@ -1763,7 +1757,21 @@ Status.HAProxy = (function () {
                     .attr('height', height);
 
                 focus = svg.append('g').attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
-                context = svg.append('g').attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
+
+
+                if (!options.live) { // Summary elements
+                    margin2 = { top: options.height - 77, right: 10, bottom: 20, left: options.leftMargin };
+                    height2 = options.height - margin2.top - margin2.bottom;
+                    x2 = d3.time.scale.utc().range([0, width]);
+                    y2 = d3.scale.linear().range([height2, 0]);
+                    xAxis2 = d3.svg.axis().scale(x2).orient('bottom').tickFormat(timeFormats);
+
+                    brush2 = d3.svg.brush()
+                        .x(x2)
+                        .on('brush', redrawFromSummary);
+
+                    context = svg.append('g').attr('transform', 'translate(' + margin2.left + ',' + margin2.top + ')');
+                }
             }
             
             function getClass(prefix, s) {
@@ -1791,8 +1799,11 @@ Status.HAProxy = (function () {
             
             function drawPrimaryGraphs(data) {
                 x.domain(options.ajaxZoom ? d3.extent(data.points.map(function (d) { return d.date; })) : [minDate, maxDate]);
-                x2.domain(d3.extent(data.summary.map(function (d) { return d.date; })));
-                y2.domain(getExtremes(data.summary, series, options.min, options.max));
+
+                if (!options.live) { // Summary
+                    x2.domain(d3.extent(data.summary.map(function(d) { return d.date; })));
+                    y2.domain(getExtremes(data.summary, series, options.min, options.max));
+                }
 
                 rescaleYAxis(data, true);
                 
@@ -1803,10 +1814,12 @@ Status.HAProxy = (function () {
                         .x(function(d) { return x(d.date); })
                         .y0(function(d) { return y(d.y0); })
                         .y1(function (d) { return y(d.y0 + d.y); });
-                    stackSummaryArea = d3.svg.area()
-                        .x(function(d) { return x2(d.date); })
-                        .y0(function(d) { return y2(d.y0); })
-                        .y1(function (d) { return y2(d.y0 + d.y); });
+                    if (!options.live) { // Summary
+                        stackSummaryArea = d3.svg.area()
+                            .x(function(d) { return x2(d.date); })
+                            .y0(function(d) { return y2(d.y0); })
+                            .y1(function(d) { return y2(d.y0 + d.y); });
+                    }
                     stackFunc = function(dataList) {
                         return stack(series.map(function(s) {
                             var result = { name: s.name, values: dataList.map(function (d) { return { date: d.date, y: d[s.name] }; }) };
@@ -1841,12 +1854,14 @@ Status.HAProxy = (function () {
                             .attr('fill', options.colorStops ? 'url(#' + gradientId + ')' : getColor())
                             .attr('clip-path', 'url(#' + clipId + ')')
                             .attr('d', s.area.y0(y(0)));
-                        // and the summary
-                        context.append('path')
-                            .datum(data.summary)
-                            .attr('class', getClass('summary-area', s))
-                            .attr('fill', getColor())
-                            .attr('d', s.summaryArea.y0(y2(0)));
+                        if (!options.live) {
+                            // and the summary
+                            context.append('path')
+                                .datum(data.summary)
+                                .attr('class', getClass('summary-area', s))
+                                .attr('fill', getColor())
+                                .attr('d', s.summaryArea.y0(y2(0)));
+                        }
                     });
                 }
 
@@ -1932,18 +1947,21 @@ Status.HAProxy = (function () {
                     .attr('y', 0)
                     .attr('height', height + 1);
 
-                context.append('g')
-                    .attr('class', 'x axis')
-                    .attr('transform', 'translate(0,' + height2 + ')')
-                    .call(xAxis2);
+                if (!options.live) {
+                    context.append('g')
+                        .attr('class', 'x axis')
+                        .attr('transform', 'translate(0,' + height2 + ')')
+                        .call(xAxis2);
 
-                // bottom selection brush, for summary
-                bottomBrushArea = context.append('g')
-                    .attr('class', 'x brush')
-                    .call(brush2);
-                bottomBrushArea.selectAll('rect')
-                    .attr('y', -6)
-                    .attr('height', height2 + 7);
+                    // bottom selection brush, for summary
+                    bottomBrushArea = context.append('g')
+                        .attr('class', 'x brush')
+                        .call(brush2);
+                    bottomBrushArea.selectAll('rect')
+                        .attr('y', -6)
+                        .attr('height', height2 + 7);
+                }
+
 
                 curWidth = chart.width();
                 curHeight = chart.height();
@@ -2125,8 +2143,10 @@ Status.HAProxy = (function () {
                 dataLoaded = true;
                 chart.find('.loader').hide();
 
-                // set the initial summary brush to reflect what was loaded up top
-                brush2.extent(x.domain())(bottomBrushArea);
+                if (!options.live) {
+                    // set the initial summary brush to reflect what was loaded up top
+                    brush2.extent(x.domain())(bottomBrushArea);
+                }
 
                 if (options.showBuilds && !data.builds) {
                     //$.getJSON(Status.options.rootPath + 'graph/builds/json', params, function (bData) {

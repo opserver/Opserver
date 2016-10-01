@@ -77,7 +77,13 @@
     </div>
     <div class="col-md-4 col-sm-6">
         <div class="panel panel-default">
-            <div class="panel-heading">Stats</div>
+            <div class="panel-heading">
+                Stats
+                @if (s.IsRealTimePollable)
+                {
+                    //<span class="text-muted">(<a href="#/dashboard/graph/@s.Id.UrlEncode()/@NodeGraphModel.KnownTypes.Live" class="js-realtime-cpu">live</a>)</span>
+                }
+            </div>
             <div class="panel-body">
                 <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary()">
                     <div class="progress">
@@ -161,14 +167,14 @@
                     @SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }))
                     break;
                 //case CurrentStatusTypes.Redis:
-                    //@SubnavItem(st, "/redis?node=" + s.PrettyName)
-                    //break;
+                //@SubnavItem(st, "/redis?node=" + s.PrettyName)
+                //break;
                 case CurrentStatusTypes.HAProxy:
                     @SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }))
                     break;
                 //case CurrentStatusTypes.Elastic:
-                    //@SubnavItem(st, "/elastic" + s.PrettyName)
-                    //break;
+                //@SubnavItem(st, "/elastic" + s.PrettyName)
+                //break;
                 default:
                     @SubnavItem(st, Url.Action(nameof(DashboardController.Node), new { node = s.PrettyName, view = st }))
                     break;

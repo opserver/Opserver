@@ -120,37 +120,57 @@ namespace StackExchange.Opserver.Controllers
             {
                 switch (type)
                 {
+                    case NodeGraphModel.KnownTypes.Live:
+                        await PopulateModel(vd, NodeGraphModel.KnownTypes.CPU, subId);
+                        await PopulateModel(vd, NodeGraphModel.KnownTypes.Memory, subId);
+                        //await PopulateModel(vd, NodeGraphModel.KnownTypes.Network, subId);
+                        break;
                     case NodeGraphModel.KnownTypes.CPU:
-                        vd.Title = "CPU Utilization (" + (n.PrettyName ?? "Unknown") + ")";
-                        vd.GraphData = await GraphController.CPUData(n, summary: true);
-                        break;
                     case NodeGraphModel.KnownTypes.Memory:
-                        vd.Title = "Memory Utilization (" + (n.TotalMemory?.ToSize() ?? "Unknown Max") + ")";
-                        vd.GraphData = await GraphController.MemoryData(n, summary: true);
-                        break;
                     case NodeGraphModel.KnownTypes.Network:
-                        if (subId.HasValue())
-                        {
-                            var i = vd.Node.GetInterface(subId);
-                            vd.Interface = i;
-                            vd.Title = "Network Utilization (" + (i?.PrettyName ?? "Unknown") + ")";
-                            vd.GraphData = await GraphController.NetworkData(i, summary: true);
-                        }
-                        else
-                        {
-                            vd.Title = "Network Utilization (" + (n.PrettyName ?? "Unknown") + ")";
-                            vd.GraphData = await GraphController.NetworkData(n, summary: true);
-                        }
-                        break;
                     case NodeGraphModel.KnownTypes.Volume:
-                        var v = vd.Node.GetVolume(subId);
-                        vd.Volume = v;
-                        vd.Title = "Volume Usage (" + (v?.PrettyName ?? "Unknown") + ")";
+                        await PopulateModel(vd, type, subId);
                         break;
                 }
             }
 
             return View("Node.Graph", vd);
+        }
+
+        private async Task PopulateModel(NodeGraphModel vd, string type, string subId)
+        {
+            var n = vd.Node;
+            switch (type)
+            {
+                case NodeGraphModel.KnownTypes.CPU:
+                    vd.Title = "CPU Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                    vd.CpuData = await GraphController.CPUData(n, summary: true);
+                    break;
+                case NodeGraphModel.KnownTypes.Memory:
+                    vd.Title = "Memory Utilization (" + (n.TotalMemory?.ToSize() ?? "Unknown Max") + ")";
+                    vd.MemoryData = await GraphController.MemoryData(n, summary: true);
+                    break;
+                case NodeGraphModel.KnownTypes.Network:
+                    if (subId.HasValue())
+                    {
+                        var i = vd.Node.GetInterface(subId);
+                        vd.Interface = i;
+                        vd.Title = "Network Utilization (" + (i?.PrettyName ?? "Unknown") + ")";
+                        vd.NetworkData = await GraphController.NetworkData(i, summary: true);
+                    }
+                    else
+                    {
+                        vd.Title = "Network Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                        vd.NetworkData = await GraphController.NetworkData(n, summary: true);
+                    }
+                    break;
+                case NodeGraphModel.KnownTypes.Volume:
+                    var v = vd.Node.GetVolume(subId);
+                    vd.Volume = v;
+                    vd.Title = "Volume Usage (" + (v?.PrettyName ?? "Unknown") + ")";
+                    // TODO: Volume data
+                    break;
+            }
         }
     }
 }

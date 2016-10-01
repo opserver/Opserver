@@ -9,7 +9,13 @@ namespace StackExchange.Opserver.Views.Dashboard
         public string Type { get; set; }
         public Interface Interface { get; set; }
         public Volume Volume { get; set; }
-        public object GraphData { get; set; }
+
+        public bool IsLive => Type == KnownTypes.Live;
+
+        public object CpuData { get; set; }
+        public object MemoryData { get; set; }
+        public object NetworkData { get; set; }
+        public object VolumeData { get; set; }
 
         public static class KnownTypes
         {
@@ -17,6 +23,7 @@ namespace StackExchange.Opserver.Views.Dashboard
             public const string Memory = "memory";
             public const string Network = "network";
             public const string Volume = "volume";
+            public const string Live = "live";
         }
     }
 }
