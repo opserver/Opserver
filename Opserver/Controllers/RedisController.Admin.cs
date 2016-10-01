@@ -35,8 +35,9 @@ namespace StackExchange.Opserver.Controllers
             try
             {
                 var message = i.PromoteToMaster();
-                i.PollAsync(true);
-                oldMaster?.PollAsync(true);
+                // We want these to be synchronous
+                i.Poll(true);
+                oldMaster?.Poll(true);
                 return Json(new { message });
             }
             catch (Exception ex)
