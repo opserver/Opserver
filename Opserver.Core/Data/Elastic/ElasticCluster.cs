@@ -71,6 +71,7 @@ namespace StackExchange.Opserver.Data.Elastic
                             $"Invalid port specified for {parts[0]}: '{parts[1]}'"));
                         Port = DefaultElasticPort;
                     }
+                    Port = port;
                 }
                 else
                 {
