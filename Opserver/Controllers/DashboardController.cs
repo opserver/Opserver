@@ -87,7 +87,7 @@ namespace StackExchange.Opserver.Controllers
                 CurrentStatusType = view
             };
 
-            return View("Node",vd);
+            return View("Node", vd);
         }
 
         [Route("dashboard/node/summary/{type}")]
