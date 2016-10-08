@@ -141,12 +141,12 @@ namespace StackExchange.Opserver.Data
         {
             while (!_shuttingDown)
             {
-                PollAllAsync();
+                PollAllAndForget();
                 Thread.Sleep(1000);
             }
         }
         
-        public static void PollAllAsync(bool force = false)
+        public static void PollAllAndForget(bool force = false)
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
@@ -155,7 +155,7 @@ namespace StackExchange.Opserver.Data
             {
                 Parallel.ForEach(AllPollNodes, n =>
                 {
-                    n.PollAsync(force);
+                    n.PollAndForget(force);
                 });
             }
             catch (Exception e)
@@ -185,16 +185,20 @@ namespace StackExchange.Opserver.Data
             if (cacheGuid.HasValue)
             {
                 var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
-                return cache != null && await cache.PollAsync(true).ConfigureAwait(false) > 0;
+                if (cache != null)
+                {
+                    await cache.PollGenericAsync(true).ConfigureAwait(false);
+                }
+                return cache?.LastPollSuccessful ?? false;
             }
             // Polling an entire server
             if (sync)
             {
-                node.Poll(true);
+                await node.PollAsync(true);
             }
             else
             {
-                node.PollAsync(true);
+                node.PollAndForget(true);
             }
             return true;
         }

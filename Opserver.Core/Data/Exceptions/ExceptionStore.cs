@@ -41,26 +41,15 @@ namespace StackExchange.Opserver.Data.Exceptions
             Settings = settings;
         }
 
-        public Func<Cache<T>, Task> UpdateFromSql<T>(string opName, Func<Task<T>> getFromConnection, Action<Cache<T>> afterPoll = null) where T : class
-        {
-            return UpdateCacheItem("Exceptions Fetch: " + Name + ":" + opName,
-                getFromConnection,
-                addExceptionData: e => e.AddLoggedData("Server", Name),
-                afterPoll: afterPoll);
-        }
-
         private Cache<List<Application>> _applications;
-        public Cache<List<Application>> Applications
-        {
-            get
-            {
-                return _applications ?? (_applications = new Cache<List<Application>>
-                       {
-                           CacheForSeconds = Settings.PollIntervalSeconds,
-                           UpdateCache = UpdateFromSql(nameof(Applications),
-                               async () =>
-                               {
-                                   var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
+        public Cache<List<Application>> Applications =>
+            _applications ?? (_applications = new Cache<List<Application>>(
+                this,
+                "Exceptions Fetch: " + Name + ":" + nameof(Applications),
+                Settings.PollIntervalSeconds,
+                async () =>
+                {
+                    var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
 Select ApplicationName as Name, 
        Sum(DuplicateCount) as ExceptionCount,
 	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentExceptionCount,
@@ -68,43 +57,33 @@ Select ApplicationName as Name,
   From Exceptions
  Where DeletionDate Is Null
  Group By ApplicationName", new {Current.Settings.Exceptions.RecentSeconds}).ConfigureAwait(false);
-                                   result.ForEach(a =>
-                                   {
-                                       a.StoreName = Name;
-                                       a.Store = this;
-                                   });
-                                   return result;
-                               },
-                               afterPoll: cache => ExceptionStores.UpdateApplicationGroups())
-                       });
-            }
-        }
+                    result.ForEach(a =>
+                    {
+                        a.StoreName = Name;
+                        a.Store = this;
+                    });
+                    return result;
+                },
+                afterPoll: cache => ExceptionStores.UpdateApplicationGroups()));
 
         private Cache<List<Error>> _errorSummary;
-        public Cache<List<Error>> ErrorSummary
-        {
-            get
-            {
-                return _errorSummary ?? (_errorSummary = new Cache<List<Error>>
-                       {
-                           CacheForSeconds = Settings.PollIntervalSeconds,
-                           UpdateCache = UpdateFromSql(nameof(ErrorSummary),
-                               () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
+        public Cache<List<Error>> ErrorSummary =>
+            _errorSummary ?? (_errorSummary = new Cache<List<Error>>(
+                this,
+                "Exceptions Fetch: " + Name + ":" + nameof(ErrorSummary),
+                Settings.PollIntervalSeconds,
+                () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
 		From Exceptions
 		Where DeletionDate Is Null) er
 	   Inner Join Exceptions e On er.Id = e.Id
  Where er.r <= @PerAppSummaryCount
- Order By CreationDate Desc", new {PerAppSummaryCount}),
-                               afterPoll: cache => ExceptionStores.UpdateApplicationGroups())
-                       });
-            }
-        }
+ Order By CreationDate Desc", new {PerAppSummaryCount})));
 
-        public List<Error> GetErrorSummary(int maxPerApp, string group = null, string app = null)
+        public async Task<List<Error>> GetErrorSummary(int maxPerApp, string group = null, string app = null)
         {
-            var errors = ErrorSummary.Data;
+            var errors = await ErrorSummary.GetData();
             if (errors == null) return new List<Error>();
             // specific application - this is most specific
             if (app.HasValue())

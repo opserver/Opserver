@@ -1,11 +1,9 @@
 ﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.CloudFlare
 @using StackExchange.Opserver.Views.CloudFlare
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("CloudFlare Dashboard");
-    this.SetTopNodes(RailgunInstance.AllInstances, "Railguns");
 }
 @section head {
     <script>
@@ -20,6 +18,5 @@
 }
 <ul class="nav nav-tabs nav-tabs-right">
     @TabLink(DashboardModel.Views.DNS, nameof(CloudFlareController.DNS), "DNS")
-    @TabLink(DashboardModel.Views.Railgun, nameof(CloudFlareController.Railguns), "Railgun")
 </ul>
 @RenderBody()

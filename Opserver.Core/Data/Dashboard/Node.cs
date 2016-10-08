@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -129,9 +128,30 @@ namespace StackExchange.Opserver.Data.Dashboard
         public List<Volume> Volumes { get; internal set; }
         public List<Application> Apps { get; internal set; }
 
-        public Interface GetInterface(string id) => Interfaces.FirstOrDefault(i => i.Id == id);
-        public Volume GetVolume(string id) => Volumes.FirstOrDefault(v => v.Id == id);
-        public Application GetApp(string id) => Apps.FirstOrDefault(a => a.Id == id);
+        public Interface GetInterface(string id)
+        {
+            foreach (var i in Interfaces)
+            {
+                if (i.Id == id) return i;
+            }
+            return null;
+        }
+        public Volume GetVolume(string id)
+        {
+            foreach (var v in Volumes)
+            {
+                if (v.Id == id) return v;
+            }
+            return null;
+        }
+        public Application GetApp(string id)
+        {
+            foreach (var a in Apps)
+            {
+                if (a.Id == id) return a;
+            }
+            return null;
+        }
 
         private static readonly List<IPNet> EmptyIPs = new List<IPNet>(); 
 

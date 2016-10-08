@@ -52,28 +52,28 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions")]
-        public ActionResult Exceptions(string group, string log, ExceptionSorts? sort = null, int? count = null)
+        public async Task<ActionResult> Exceptions(string group, string log, ExceptionSorts? sort = null, int? count = null)
         {
             // Defaults
             count = count ?? 250;
             sort = sort ?? ExceptionSorts.TimeDesc;
 
-            var vd = GetExceptionsModel(group, log, sort.Value, count.Value, loadAsync: 500);
+            var vd = await GetExceptionsModel(group, log, sort.Value, count.Value, loadAsync: 500);
             return View(vd);
         }
 
         [Route("exceptions/load-more")]
-        public ActionResult LoadMore(string group, string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
+        public async Task<ActionResult> LoadMore(string group, string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
         {
-            var vd = GetExceptionsModel(group, log, sort, count, prevLast);
+            var vd = await GetExceptionsModel(group, log, sort, count, prevLast);
             return View("Exceptions.Table.Rows", vd);
         }
 
-        public ExceptionsModel GetExceptionsModel(string group, string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null, int? loadAsync = null)
+        public async Task<ExceptionsModel> GetExceptionsModel(string group, string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null, int? loadAsync = null)
         {
             FixNames(ref group, ref log);
 
-            var errors = GetAllErrors(group, log, sort: sort);
+            var errors = await GetAllErrors(group, log, sort: sort);
 
             var startIndex = 0;
             if (prevLast.HasValue)

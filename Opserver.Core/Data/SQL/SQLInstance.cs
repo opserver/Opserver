@@ -87,12 +87,12 @@ namespace StackExchange.Opserver.Data.SQL
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (Databases.HasData())
+            if (Databases.Data != null)
                 yield return Databases.Data.GetWorstStatus();
         }
         protected override string GetMonitorStatusReason()
         {
-            return Databases.HasData() ? Databases.Data.GetReasonSummary() : null;
+            return Databases.Data?.GetReasonSummary();
         }
 
         public Node ServerInfo => DashboardData.GetNodeByName(Name);
@@ -113,16 +113,15 @@ namespace StackExchange.Opserver.Data.SQL
             [CallerLineNumber] int sourceLineNumber = 0)
             where T : class, ISQLVersioned, new()
         {
-            return new Cache<List<T>>(memberName, sourceFilePath, sourceLineNumber)
-            {
-                AffectsNodeStatus = affectsStatus,
-                CacheForSeconds = cacheSeconds,
-                CacheFailureForSeconds = cacheFailureSeconds,
-                UpdateCache = UpdateFromSql(typeof (T).Name + "-List", async conn =>
-                    Singleton<T>.Instance.MinVersion > Version
-                        ? new List<T>()
-                        : await conn.QueryAsync<T>(GetFetchSQL<T>()).ConfigureAwait(false))
-            };
+            return GetSqlCache(memberName,
+                conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
+                () => Singleton<T>.Instance.MinVersion > Version,
+                cacheSeconds,
+                cacheFailureSeconds,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
 
         public Cache<T> SqlCacheSingle<T>(
@@ -133,32 +132,45 @@ namespace StackExchange.Opserver.Data.SQL
             [CallerLineNumber] int sourceLineNumber = 0)
             where T : class, ISQLVersioned, new()
         {
-            return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
-            {
-                CacheForSeconds = cacheSeconds,
-                CacheFailureForSeconds = cacheFailureSeconds,
-                UpdateCache = UpdateFromSql(typeof (T).Name + "-Single", async conn =>
-                    Singleton<T>.Instance.MinVersion > Version
-                        ? new T()
-                        : await conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()).ConfigureAwait(false))
-            };
+            return GetSqlCache(memberName,
+                conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
+                () => Singleton<T>.Instance.MinVersion > Version,
+                cacheSeconds,
+                cacheFailureSeconds,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
-
-        public Func<Cache<T>, Task> UpdateFromSql<T>(
+        
+        protected Cache<T> GetSqlCache<T>(
             string opName,
-            Func<DbConnection, Task<T>> getFromConnection,
-            bool logExceptions = false) where T : class
+            Func<DbConnection, Task<T>> get,
+            Func<bool> shouldRun = null,
+            int? cacheSeconds = null,
+            int? cacheFailureSeconds = null,
+            bool logExceptions = false,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+            ) where T : class, new()
         {
-            return UpdateCacheItem(description: "SQL Fetch: " + Name + ":" + opName,
+            return new Cache<T>(this, "SQL Fetch: " + Name + ":" + opName,
+                cacheSeconds ?? RefreshInterval,
                 getData: async () =>
                 {
+                    if (shouldRun != null && !shouldRun()) return new T();
                     using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                     {
-                        return await getFromConnection(conn).ConfigureAwait(false);
+                        return await get(conn).ConfigureAwait(false);
                     }
                 },
+                logExceptions: logExceptions,
                 addExceptionData: e => e.AddLoggedData("Server", Name),
-                logExceptions: logExceptions);
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
 
         public override string ToString() => Name;

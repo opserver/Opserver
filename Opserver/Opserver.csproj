@@ -339,9 +339,6 @@
     <Compile Include="Views\CloudFlare\DNS.Model.cs">
       <DependentUpon>DNS.cshtml</DependentUpon>
     </Compile>
-    <Compile Include="Views\CloudFlare\Railguns.Model.cs">
-      <DependentUpon>Railguns.cshtml</DependentUpon>
-    </Compile>
     <Compile Include="Views\Dashboard\CurrentStatusTypes.cs" />
     <Compile Include="Views\Dashboard\Node.Model.cs">
       <DependentUpon>Node.cshtml</DependentUpon>
@@ -376,7 +373,6 @@
       <DependentUpon>PagerDutyController.cs</DependentUpon>
     </Compile>
     <None Include="Help\SQL\WaitStats.md" />
-    <Content Include="Views\CloudFlare\Railguns.cshtml" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />
     <Content Include="Views\Dashboard\Node.Graph.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>

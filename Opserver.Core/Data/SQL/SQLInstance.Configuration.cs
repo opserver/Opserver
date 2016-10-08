@@ -6,27 +6,20 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLConfigurationOption>> _configuration;
-        public Cache<List<SQLConfigurationOption>> Configuration
-        {
-            get
-            {
-                return _configuration ?? (_configuration = new Cache<List<SQLConfigurationOption>>
+
+        public Cache<List<SQLConfigurationOption>> Configuration =>
+            _configuration ?? (_configuration = GetSqlCache(nameof(Configuration),
+                async conn =>
                 {
-                    CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql(nameof(Configuration), async conn =>
+                    var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>()).ConfigureAwait(false);
+                    foreach (var r in result)
                     {
-                        var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>()).ConfigureAwait(false);
-                        foreach (var r in result)
-                        {
-                            int defaultVal;
-                            if (ConfigurationDefaults.TryGetValue(r.Name, out defaultVal))
-                                r.Default = defaultVal;
-                        }
-                        return result;
-                    })
-                });
-            }
-        }
+                        int defaultVal;
+                        if (ConfigurationDefaults.TryGetValue(r.Name, out defaultVal))
+                            r.Default = defaultVal;
+                    }
+                    return result;
+                }));
 
         private Dictionary<string, int> _configurationDefaults;
         public Dictionary<string, int> ConfigurationDefaults => _configurationDefaults ?? (_configurationDefaults = SQLConfigurationOption.GetDefaults(this));

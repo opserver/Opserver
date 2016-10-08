@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Controllers
         {
             try
             {
-                PollingEngine.PollAllAsync(true);
+                PollingEngine.PollAllAndForget(true);
                 return Json(true);
             }
             catch (Exception e)

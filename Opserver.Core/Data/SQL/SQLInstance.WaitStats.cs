@@ -6,21 +6,13 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<WaitStatRecord>> _waitStats;
-        public Cache<List<WaitStatRecord>> WaitStats
-        {
-            get
-            {
-                return _waitStats ?? (_waitStats = new Cache<List<WaitStatRecord>>
+        public Cache<List<WaitStatRecord>> WaitStats =>
+            _waitStats ?? (_waitStats = GetSqlCache(
+                nameof(WaitStats), conn =>
                 {
-                    CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql(nameof(WaitStats), conn =>
-                    {
-                        var sql = GetFetchSQL<WaitStatRecord>();
-                        return conn.QueryAsync<WaitStatRecord>(sql, new { secondsBetween = 15 });
-                    })
-                });
-            }
-        }
+                    var sql = GetFetchSQL<WaitStatRecord>();
+                    return conn.QueryAsync<WaitStatRecord>(sql, new {secondsBetween = 15});
+                }));
 
         public class WaitStatRecord : ISQLVersioned
         {

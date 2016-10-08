@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public class OrionDataProvider : DashboardDataProvider<OrionSettings>
     {
-        public override bool HasData => NodeCache.HasData();
+        public override bool HasData => NodeCache.ContainsData;
         public string Host => Settings.Host;
         public int QueryTimeoutMs => Settings.QueryTimeoutMs;
         public override int MinSecondsBetweenPolls => 5;

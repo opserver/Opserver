@@ -7,21 +7,12 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<PerfCounterRecord>> _perfCounters;
-        public Cache<List<PerfCounterRecord>> PerfCounters
-        {
-            get
+        public Cache<List<PerfCounterRecord>> PerfCounters =>
+            _perfCounters ?? (_perfCounters = GetSqlCache(nameof(PerfCounters), conn =>
             {
-                return _perfCounters ?? (_perfCounters = new Cache<List<PerfCounterRecord>>
-                    {
-                        CacheForSeconds = RefreshInterval,
-                        UpdateCache = UpdateFromSql(nameof(PerfCounters), conn =>
-                            {
-                                var sql = GetFetchSQL<PerfCounterRecord>();
-                                return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});
-                            })
-                    });
-            }
-        }
+                var sql = GetFetchSQL<PerfCounterRecord>();
+                return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});
+            }));
 
         public long? BatchesPerSec => (long?)GetPerfCounter("SQL Statistics", "Batch Requests/sec", "")?.CalculatedValue;
         

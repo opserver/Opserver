@@ -17,12 +17,11 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static HashSet<string> KnownApplications { get; } =
             GetConfiguredApplicationGroups().SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
 
-        private static object _updateLock = new object();
+        private static readonly object _updateLock = new object();
         public static List<Application> Applications { get; private set; }
         private static ApplicationGroup CatchAll { get; set; }
-        private static List<ApplicationGroup> _applicationGroups;
-        public static List<ApplicationGroup> ApplicationGroups => _applicationGroups ?? (_applicationGroups = UpdateApplicationGroups());
-        
+        public static List<ApplicationGroup> ApplicationGroups { get; private set; } = GetConfiguredApplicationGroups();
+
         public static int TotalExceptionCount => Applications?.Sum(a => a.ExceptionCount) ?? 0;
         public static int TotalRecentExceptionCount => Applications?.Sum(a => a.RecentExceptionCount) ?? 0;
 
@@ -92,7 +91,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
             if (group.IsNullOrEmpty()) yield break;
 
-            var apps = _applicationGroups?.FirstOrDefault(g => g.Name == @group)?.Applications;
+            var apps = ApplicationGroups?.FirstOrDefault(g => g.Name == group)?.Applications;
             if (apps != null)
             {
                 foreach (var a in apps)
@@ -191,11 +190,24 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        public static List<Error> GetAllErrors(string group = null, string app = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        public static async Task<List<Error>> GetAllErrors(string group = null, string app = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (group.HasValue() ? " (group:" + group + ")" : "") + (app.HasValue() ? " (app:" + app + ")" : "")))
             {
-                var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, group, app));
+                IEnumerable<Error> allErrors;
+                if (Stores.Count == 1)
+                {
+                    allErrors = await Stores[0].GetErrorSummary(maxPerApp, group, app);
+                }
+                else
+                {
+                    var combined = new List<Error>();
+                    foreach (var s in Stores)
+                    {
+                        combined.AddRange(await s.GetErrorSummary(maxPerApp, group, app));
+                    }
+                    allErrors = combined;
+                }
                 return GetSorted(allErrors, sort).ToList();
             }
         }
@@ -220,9 +232,9 @@ namespace StackExchange.Opserver.Data.Exceptions
         internal static List<ApplicationGroup> UpdateApplicationGroups()
         {
             using (MiniProfiler.Current.Step("UpdateApplicationGroups() - All Stores"))
-            lock (_updateLock)
+            lock (_updateLock) // In the case of multiple stores, it's off to the races.
             {
-                var result = _applicationGroups ?? GetConfiguredApplicationGroups();
+                var result = ApplicationGroups;
                 var apps = Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
                 // Loop through all configured groups and hook up applications returned from the queries
                 foreach (var g in result)
@@ -230,10 +242,13 @@ namespace StackExchange.Opserver.Data.Exceptions
                     for (var i = 0; i < g.Applications.Count; i++)
                     {
                         var a = g.Applications[i];
-                        var matching = apps.FirstOrDefault(sapp => a.Name == sapp.Name);
-                        if (matching != null)
+                        foreach (var app in apps)
                         {
-                            g.Applications[i] = matching;
+                            if (app.Name == a.Name)
+                            {
+                                g.Applications[i] = app;
+                                break;
+                            }
                         }
                     }   
                 }
@@ -249,7 +264,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                     }
                 }
                 Applications = apps;
-                _applicationGroups = result;
+                ApplicationGroups = result;
                 return result;
             }
         }

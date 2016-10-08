@@ -11,23 +11,18 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public partial class PagerDutyAPI
     {
         private Cache<List<Incident>> _incidents;
-        public Cache<List<Incident>> Incidents => _incidents ?? (_incidents = new Cache<List<Incident>>
-        {
-            CacheForSeconds = 10 * 60,
-            UpdateCache = UpdateCacheItem(nameof(Incidents), GetIncidents, true)
-        });
-
-        private Task<List<Incident>> GetIncidents()
-        {
-            string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
-                until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
-            var url = $"incidents?since={since}&until={until}&sort_by=created_on:desc";
-            return GetFromPagerDutyAsync(url, getFromJson: response =>
-                JSON.Deserialize<IncidentResponse>(response.ToString(), JilOptions)
-                    .Incidents.OrderBy(ic => ic.CreationDate)
-                    .ToList()
-                );
-        }
+        public Cache<List<Incident>> Incidents => 
+            _incidents ?? (_incidents = GetPagerDutyCache(10*60, () =>
+            {
+                string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
+                       until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
+                var url = $"incidents?since={since}&until={until}&sort_by=created_on:desc";
+                return GetFromPagerDutyAsync(url, getFromJson: response =>
+                    JSON.Deserialize<IncidentResponse>(response.ToString(), JilOptions)
+                        .Incidents.OrderBy(ic => ic.CreationDate)
+                        .ToList()
+                    );
+            }));
     }
     
     public class IncidentResponse

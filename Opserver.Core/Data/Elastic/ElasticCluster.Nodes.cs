@@ -8,10 +8,8 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterNodesInfo> _nodes;
-        public Cache<ClusterNodesInfo> Nodes => _nodes ?? (_nodes = new Cache<ClusterNodesInfo>
-        {
-            CacheForSeconds = RefreshInterval,
-            UpdateCache = UpdateFromElastic(nameof(Nodes), async () =>
+        public Cache<ClusterNodesInfo> Nodes => 
+            _nodes ?? (_nodes = GetElasticCache(async () =>
             {
                 var result = (await GetAsync<ClusterNodesInfo>("_nodes").ConfigureAwait(false))?.Prep();
                 if (result == null) return null;
@@ -28,10 +26,9 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                 }
                 return result;
-            })
-        });
+            }));
 
-        public string Name => Nodes.HasData() ? Nodes.Data.Name : SettingsName;
+        public string Name => Nodes.Data?.Name ?? SettingsName;
         public string ShortName(NodeInfo node) => node?.Name.TrimEnd("-" + Name);
 
         public class ClusterNodesInfo

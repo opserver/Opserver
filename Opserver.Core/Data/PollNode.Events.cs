@@ -18,10 +18,7 @@ namespace StackExchange.Opserver.Data
             public bool AbortPoll { get; set; }
         }
 
-        public class PollResultArgs : EventArgs
-        {
-            public int Queued { get; internal set; }
-        }
+        public class PollResultArgs : EventArgs { }
 
         public class MonitorStatusArgs : EventArgs
         {

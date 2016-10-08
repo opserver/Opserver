@@ -100,7 +100,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         protected override string GetMonitorStatusReason() => null;
 
-        public override bool HasData => DataPollers.Any(x => x.HasData());
+        public override bool HasData => DataPollers.Any(x => x.ContainsData);
 
         public override List<Node> AllNodes { get; }
     }

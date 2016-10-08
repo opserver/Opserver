@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Jil;
 
 namespace StackExchange.Opserver.Data.PagerDuty
@@ -11,42 +10,24 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public partial class PagerDutyAPI
     {
         // TODO: We need to able able to handle when people have more than one on call schedule
-        public PagerDutyPerson PrimaryOnCall
-        {
-            get { return OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1); }
-        }
-
-        public PagerDutyPerson SecondaryOnCall
-        {
-            get { return OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2); }
-        }
+        public PagerDutyPerson PrimaryOnCall => OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 1);
+        public PagerDutyPerson SecondaryOnCall => OnCallUsers.Data.FirstOrDefault(p => p.EscalationLevel == 2);
 
         private Cache<List<PagerDutyPerson>> _oncallusers;
-        public Cache<List<PagerDutyPerson>> OnCallUsers => _oncallusers ?? (_oncallusers = new Cache<List<PagerDutyPerson>>()
-        {
-            CacheForSeconds = 60*60,
-            UpdateCache = UpdateCacheItem(
-                description: nameof(OnCallUsers),
-                getData: GetOnCallUsers,
-                logExceptions: true
-                )
-        });
-
-        private Task<List<PagerDutyPerson>> GetOnCallUsers()
-        {
-            return GetFromPagerDutyAsync("users/on_call?include[]=contact_methods", getFromJson:
-                response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users);
-        }
+        public Cache<List<PagerDutyPerson>> OnCallUsers =>
+            _oncallusers ?? (_oncallusers = GetPagerDutyCache(60*60,
+                () => GetFromPagerDutyAsync("users/on_call?include[]=contact_methods",
+                    getFromJson: response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users)
+            ));
 
         private List<OnCallAssignment> _scheduleCache;
-
         public List<OnCallAssignment> GetSchedule()
         {
             if (_scheduleCache == null)
             {
                 var result = new List<OnCallAssignment>();
                 var overrides = PrimaryScheduleOverrides?.Data;
-                if (!OnCallUsers.HasData()) return result;
+                if (OnCallUsers.Data == null) return result;
                 foreach (var p in OnCallUsers.Data)
                 {
                     if (p.Schedule == null) continue;

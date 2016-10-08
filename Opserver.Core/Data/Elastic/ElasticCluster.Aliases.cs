@@ -7,10 +7,8 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<IndexAliasInfo> _aliases;
-        public Cache<IndexAliasInfo> Aliases => _aliases ?? (_aliases = new Cache<IndexAliasInfo>
-        {
-            CacheForSeconds = RefreshInterval,
-            UpdateCache = UpdateFromElastic(nameof(Aliases), async () =>
+        public Cache<IndexAliasInfo> Aliases => 
+            _aliases ?? (_aliases = GetElasticCache(async () =>
             {
                 var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases").ConfigureAwait(false);
                 return new IndexAliasInfo
@@ -19,8 +17,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
                               ?? new Dictionary<string, List<string>>()
                 };
-            })
-        });
+            }));
 
         public string GetIndexAliasedName(string index)
         {

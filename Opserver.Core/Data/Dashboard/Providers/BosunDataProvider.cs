@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
     public partial class BosunDataProvider : DashboardDataProvider<BosunSettings>
     {
-        public override bool HasData => NodeCache.HasData();
+        public override bool HasData => NodeCache.ContainsData;
         public string Host => Settings.Host;
         public override int MinSecondsBetweenPolls => 5;
         public override string NodeType => "Bosun";

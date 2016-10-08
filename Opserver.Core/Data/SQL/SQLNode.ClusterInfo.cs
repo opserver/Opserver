@@ -7,43 +7,34 @@ namespace StackExchange.Opserver.Data.SQL
     {
         private Cache<AGClusterState> _agClusterInfo;
 
-        public Cache<AGClusterState> AGClusterInfo
-        {
-            get
+        public Cache<AGClusterState> AGClusterInfo =>
+            _agClusterInfo ?? (_agClusterInfo = GetSqlCache(nameof(AGClusterInfo), async conn =>
             {
-                return _agClusterInfo ?? (_agClusterInfo = new Cache<AGClusterState>
-                {
-                    CacheForSeconds = Cluster.RefreshInterval,
-                    UpdateCache = UpdateFromSql(nameof(AGClusterInfo), async conn =>
-                    {
-                        var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Version), k =>
-                            GetFetchSQL<AGClusterState>(k.Item2) + "\n" +
-                            GetFetchSQL<AGClusterMemberInfo>(k.Item2) + "\n" +
-                            GetFetchSQL<AGClusterNetworkInfo>(k.Item2)
-                            );
+                var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Version), k =>
+                        GetFetchSQL<AGClusterState>(k.Item2) + "\n" +
+                        GetFetchSQL<AGClusterMemberInfo>(k.Item2) + "\n" +
+                        GetFetchSQL<AGClusterNetworkInfo>(k.Item2)
+                );
 
-                        AGClusterState state;
-                        using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
-                        {
-                            state = await multi.ReadFirstOrDefaultAsync<AGClusterState>().ConfigureAwait(false);
-                            if (state != null)
-                            {
-                                state.Members = await multi.ReadAsync<AGClusterMemberInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                                state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                            }
-                        }
-                        if (state != null)
-                        {
-                            foreach (var m in state.Members)
-                            {
-                                m.IsLocal = string.Equals(m.MemberName, ServerProperties.Data?.ServerName, StringComparison.InvariantCultureIgnoreCase);
-                            }
-                        }
-                        return state;
-                    })
-                });
-            }
-        }
+                AGClusterState state;
+                using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
+                {
+                    state = await multi.ReadFirstOrDefaultAsync<AGClusterState>().ConfigureAwait(false);
+                    if (state != null)
+                    {
+                        state.Members = await multi.ReadAsync<AGClusterMemberInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                        state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                    }
+                }
+                if (state != null)
+                {
+                    foreach (var m in state.Members)
+                    {
+                        m.IsLocal = string.Equals(m.MemberName, ServerProperties.Data?.ServerName, StringComparison.InvariantCultureIgnoreCase);
+                    }
+                }
+                return state;
+            }));
 
         public class AGClusterState : ISQLVersioned
         {

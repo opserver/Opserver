@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.SQL
         
         public bool IsAllAGsPrimary
         {
-            get { return AvailabilityGroups.HasData() && AvailabilityGroups.Data.Where(ag => ag.HasDatabases).All(ag => ag.IsPrimaryReplica); }
+            get { return AvailabilityGroups.Data?.Where(ag => ag.HasDatabases).All(ag => ag.IsPrimaryReplica) ?? false; }
         }
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()

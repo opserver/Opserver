@@ -26,30 +26,20 @@ namespace StackExchange.Opserver.Data.Redis
         public RedisInfo.ReplicationInfo Replication { get; private set; }
 
         private Cache<RedisInfo> _info;
-        public Cache<RedisInfo> Info
-        {
-            get
+        public Cache<RedisInfo> Info =>
+            _info ?? (_info = GetRedisCache(10, async () =>
             {
-                return _info ?? (_info = new Cache<RedisInfo>
+                var server = Connection.GetSingleServer();
+                string infoStr;
+                using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
                 {
-                    CacheForSeconds = 10,
-                    UpdateCache = GetFromRedisAsync(nameof(Info), async rc =>
-                    {
-                        var server = rc.GetSingleServer();
-                        string infoStr;
-                        //TODO: Remove when StackExchange.Redis gets profiling
-                        using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
-                        {
-                            infoStr = await server.InfoRawAsync().ConfigureAwait(false);
-                        }
-                        ConnectionInfo.Features = server.Features;
-                        var ri = RedisInfo.FromInfoString(infoStr);
-                        if (ri != null) Replication = ri.Replication;
-                        return ri;
-                    })
-                });
-            }
-        }
+                    infoStr = await server.InfoRawAsync().ConfigureAwait(false);
+                }
+                ConnectionInfo.Features = server.Features;
+                var ri = RedisInfo.FromInfoString(infoStr);
+                if (ri != null) Replication = ri.Replication;
+                return ri;
+            }));
 
         public RedisInfo.RedisInstanceRole Role
         {

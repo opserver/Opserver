@@ -5,8 +5,7 @@ namespace StackExchange.Opserver
 {
     public class CloudFlareSettings : Settings<CloudFlareSettings>
     {
-        public override bool Enabled => (Email.HasValue() && APIKey.HasValue()) || Railguns.Any();
-        public List<Railgun> Railguns { get; set; } = new List<Railgun>();
+        public override bool Enabled => Email.HasValue() && APIKey.HasValue();
         public List<DataCenter> DataCenters { get; set; } = new List<DataCenter>();
 
         /// <summary>
@@ -18,34 +17,6 @@ namespace StackExchange.Opserver
         /// APIKey for the CloudFlare account
         /// </summary>
         public string APIKey { get; set; }
-
-        public class Railgun : ISettingsCollectionItem
-        {
-            /// <summary>
-            /// The name of this railgun instance
-            /// </summary>
-            public string Name { get; set; }
-
-            /// <summary>
-            /// Host for this instance
-            /// </summary>
-            public string Host { get; set; }
-
-            /// <summary>
-            /// Connection port for this instance
-            /// </summary>
-            public int Port { get; set; } = 24088;
-
-            /// <summary>
-            /// Unused currently
-            /// </summary>
-            public string Description { get; set; }
-
-            /// <summary>
-            /// How many seconds before polling the railgun status endpoint for status again
-            /// </summary>
-            public int RefreshIntervalSeconds { get; set; } = 30;
-        }
         
         public class DataCenter : ISettingsCollectionItem
         {

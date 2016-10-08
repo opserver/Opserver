@@ -1,17 +1,6 @@
 ﻿{
   "email": "<Email>",
   "apiKey": "<API key>",
-  "railguns": [
-    // Railgun instances to pull stats from and display as a dashboard tab.
-    {
-      "name": "ny-railgun01",
-      "host": "ny-railgun01"
-    },
-    {
-      "name": "ny-railgun02",
-      "host": "ny-railgun02"
-    }
-  ],
   "datacenters": [
     // ranges: The outside ranges of *your* network, these are matches against CloudFlare's A records,
     //         to indicate where traffic is pointed to in the dashboard.

@@ -1,4 +1,6 @@
-﻿using StackExchange.Opserver.Data.SQL;
+﻿using System.Collections.Generic;
+using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.SQL;
 
 namespace StackExchange.Opserver.Views.SQL
 {
@@ -27,5 +29,8 @@ namespace StackExchange.Opserver.Views.SQL
             Hour = 60*60,
             FiveMinutes = 5*60
         }
+
+        public List<SQLInstance.SQLConnectionInfo> Connections { get; set; }
+        public Cache Cache { get; set; }
     }
 }

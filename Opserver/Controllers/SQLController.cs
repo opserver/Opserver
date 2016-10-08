@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.SQL;
@@ -89,7 +90,7 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 5 * 1, VaryByParam = "node;sort;options", VaryByContentEncoding = "gzip;deflate")]
         [Route("sql/top")]
-        public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
+        public async Task<ActionResult> Top(string node, SQLInstance.TopSearchOptions options)
         {
             var vd = GetOperationsModel(node, options);
             var i = vd.CurrentInstance;
@@ -97,7 +98,7 @@ namespace StackExchange.Opserver.Controllers
             if (i != null)
             {
                 var cache = i.GetTopOperations(options);
-                vd.TopOperations = cache.SafeData(true);
+                vd.TopOperations = await cache.GetData();
                 vd.ErrorMessage = cache.ErrorMessage;
             }
 
@@ -140,14 +141,14 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/top/plan")]
-        public ActionResult TopPlan(string node, string handle)
+        public async Task<ActionResult> TopPlan(string node, string handle)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
             var i = SQLInstance.Get(node);
-            var op = i.GetTopOperation(planHandle);
-            if (op.Data == null) return ContentNotFound("Plan was not found.");
+            var op = await i.GetTopOperation(planHandle).GetData();
+            if (op == null) return ContentNotFound("Plan was not found.");
 
-            var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.Data.QueryPlan));
+            var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.QueryPlan));
 
             return File(ms, "text/xml", $"QueryPlan-{Math.Abs(handle.GetHashCode()).ToString()}.sqlplan");
         }
@@ -178,14 +179,16 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/connections")]
-        public ActionResult Connections(string node)
+        public async Task<ActionResult> Connections(string node)
         {
             var i = SQLInstance.Get(node);
 
             var vd = new DashboardModel
             {
                 View = SQLViews.Connections,
-                CurrentInstance = i
+                CurrentInstance = i,
+                Cache = i.Connections,
+                Connections = await i.Connections.GetData()
             };
             return View(vd);
         }

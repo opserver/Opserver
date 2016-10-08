@@ -33,10 +33,10 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty")]
-        public ActionResult Dashboard()
+        public async Task<ActionResult> Dashboard()
         {
             var i = PagerDutyAPI.Instance;
-            i.WaitForFirstPoll(5000);
+            await i.PollAsync();
             
             var vd = new PagerDutyModel
             {

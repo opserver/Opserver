@@ -147,8 +147,6 @@ namespace StackExchange.Opserver
             return s.EndsWith("/") ? s : $"{s}/";
         }
 
-        public static bool HasData(this Cache cache) => cache != null && cache.ContainsData;
-
         public static T SafeData<T>(this Cache<T> cache, bool emptyIfMissing = false) where T : class, new() =>
             cache?.Data ?? (emptyIfMissing ? new T() : null);
 

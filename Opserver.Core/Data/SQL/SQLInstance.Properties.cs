@@ -6,29 +6,21 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<SQLServerProperties> _serverProperties;
-        public Cache<SQLServerProperties> ServerProperties
-        {
-            get
-            {
-                return _serverProperties ?? (_serverProperties = new Cache<SQLServerProperties>
+        public Cache<SQLServerProperties> ServerProperties =>
+            _serverProperties ?? (_serverProperties = GetSqlCache(
+                nameof(ServerProperties), async conn =>
                 {
-                    CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql(nameof(ServerProperties), async conn =>
-                            {
-                                var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL).ConfigureAwait(false);
-                                if (result != null)
-                                {
-                                    Version = result.ParsedVersion;
-                                    if (result.PhysicalMemoryBytes > 0)
-                                    {
-                                        CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
-                                    }
-                                }
-                                return result;
-                            })
-                    });
-            }
-        }
+                    var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL).ConfigureAwait(false);
+                    if (result != null)
+                    {
+                        Version = result.ParsedVersion;
+                        if (result.PhysicalMemoryBytes > 0)
+                        {
+                            CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
+                        }
+                    }
+                    return result;
+                }));
 
         public decimal? CurrentMemoryPercent { get; private set; }
 

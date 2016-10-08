@@ -31,15 +31,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
         private Cache<List<PagerDutySchedule>> _schedules;
 
-        public Cache<List<PagerDutySchedule>> AllSchedules => _schedules ?? (_schedules = new Cache<List<PagerDutySchedule>>()
-        {
-            CacheForSeconds = 10 * 60,
-            UpdateCache = UpdateCacheItem(
-                description: nameof(AllSchedules),
-                getData: GetAllSchedulesAsync,
-                logExceptions: true
-                )
-        });
+        public Cache<List<PagerDutySchedule>> AllSchedules =>
+            _schedules ?? (_schedules = GetPagerDutyCache(10*60,
+                () => GetFromPagerDutyAsync("schedules",
+                        response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), JilOptions).Schedules)
+            ));
 
         private Cache<List<PagerDutyScheduleOverride>> _primaryScheduleOverrides;
         public Cache<List<PagerDutyScheduleOverride>> PrimaryScheduleOverrides
@@ -48,23 +44,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             {
                 var schedule = PrimarySchedule;
                 if (schedule == null) return null;
-                return _primaryScheduleOverrides ??
-                       (_primaryScheduleOverrides = new Cache<List<PagerDutyScheduleOverride>>()
-                       {
-                           CacheForSeconds = 10*60,
-                           UpdateCache = UpdateCacheItem(
-                               description: nameof(PrimaryScheduleOverrides),
-                               getData: PrimarySchedule.GetOverridesAsync,
-                               logExceptions: true
-                               )
-                       });
+                return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10*60, PrimarySchedule.GetOverridesAsync));
             }
-        }
-
-        private Task<List<PagerDutySchedule>> GetAllSchedulesAsync()
-        {
-            return GetFromPagerDutyAsync("schedules", getFromJson:
-                response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), JilOptions).Schedules);
         }
     }
 

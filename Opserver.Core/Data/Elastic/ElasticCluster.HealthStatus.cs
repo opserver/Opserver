@@ -8,13 +8,11 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterHealthInfo> _healthStatus;
-        public Cache<ClusterHealthInfo> HealthStatus => _healthStatus ?? (_healthStatus = new Cache<ClusterHealthInfo>
-        {
-            CacheForSeconds = RefreshInterval,
-            UpdateCache = UpdateFromElastic(nameof(HealthStatus),
-                async () =>
-                    (await GetAsync<ClusterHealthInfo>("_cluster/health?level=shards").ConfigureAwait(false))?.Prep())
-        });
+        public Cache<ClusterHealthInfo> HealthStatus =>
+            _healthStatus ?? (_healthStatus = GetElasticCache(
+                    async () => (await GetAsync<ClusterHealthInfo>("_cluster/health?level=shards").ConfigureAwait(false))?.Prep()
+                )
+            );
 
         /// <summary>
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 

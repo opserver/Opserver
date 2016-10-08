@@ -104,7 +104,7 @@ namespace StackExchange.Opserver.Data
                     LastSuccess = cache.LastSuccess,
                     LastPollDurationMs = cache.LastPollDuration?.TotalMilliseconds,
                     LastPollError = cache.ErrorMessage.HasValue() ? cache.ErrorMessage : null,
-                    HasData = cache.HasData(),
+                    HasData = cache.ContainsData,
                     Data = includeData ? cache.InnerCache : null
                 };
             }

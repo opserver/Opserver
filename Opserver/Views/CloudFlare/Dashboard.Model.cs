@@ -7,7 +7,6 @@
         public enum Views
         {
             Overview,
-            Railgun,
             DNS,
             Analytics
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
@@ -21,7 +22,7 @@ namespace StackExchange.Opserver.Data.Redis
         public string Host => ConnectionInfo.Host;
         public string ShortHost { get; internal set; }
 
-        public Version Version => Info.HasData() ? Info.Data.Server.Version : null;
+        public Version Version => Info.Data?.Server.Version;
 
         public string Password => ConnectionInfo.Password;
         public int Port => ConnectionInfo.Port;
@@ -139,15 +140,25 @@ namespace StackExchange.Opserver.Data.Redis
             return ConnectionMultiplexer.Connect(config);
         }
 
-        public Func<Cache<T>, Task> GetFromRedisAsync<T>(string opName, Func<ConnectionMultiplexer, Task<T>> getFromConnection) where T : class
+        private Cache<T> GetRedisCache<T>(
+            int cacheSeconds,
+            Func<Task<T>> get,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+            ) where T : class
         {
-            return UpdateCacheItem(description: "Redis Fetch: " + Name + ":" + opName,
-                                   getData: () => getFromConnection(Connection),
-                                   logExceptions: false,
-                                   addExceptionData: e => e.AddLoggedData("Server", Name)
-                                                           .AddLoggedData("Host", Host)
-                                                           .AddLoggedData("Port", Port.ToString()),
-                                   timeoutMs: 10000);
+            return new Cache<T>(this, "Redis Fetch: " + Name + ":" + memberName,
+                cacheSeconds,
+                get,
+                addExceptionData: e => e.AddLoggedData("Server", Name)
+                                        .AddLoggedData("Host", Host)
+                                        .AddLoggedData("Port", Port.ToString()),
+                timeoutMs: 10000,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
 
         public bool Equals(RedisInstance other)

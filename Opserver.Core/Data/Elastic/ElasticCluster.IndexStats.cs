@@ -6,12 +6,10 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<IndexStatsInfo> _indexStats;
-        public Cache<IndexStatsInfo> IndexStats => _indexStats ?? (_indexStats = new Cache<IndexStatsInfo>
-        {
-            CacheForSeconds = RefreshInterval,
-            UpdateCache = UpdateFromElastic(nameof(IndexStats),
-                async () => (await GetAsync<IndexStatsInfo>("_stats").ConfigureAwait(false)))
-        });
+        public Cache<IndexStatsInfo> IndexStats =>
+            _indexStats ?? (_indexStats = GetElasticCache(
+                    async () => await GetAsync<IndexStatsInfo>("_stats").ConfigureAwait(false))
+            );
 
         public class IndexStatsInfo
         {

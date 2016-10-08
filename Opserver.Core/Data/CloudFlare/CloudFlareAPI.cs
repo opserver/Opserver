@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using Jil;
@@ -38,9 +39,22 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Settings = Current.Settings.CloudFlare;
         }
 
-        public Func<Cache<T>, Task> CloudFlareFetch<T>(string opName, Func<CloudFlareAPI, Task<T>> get) where T : class
+        private Cache<T> GetCloudFlareCache<T>(
+            int cacheSeconds,
+            Func<Task<T>> get,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+            ) where T : class, new()
         {
-            return UpdateCacheItem("CloudFlare - API: " + opName, () => get(this), logExceptions: true);
+            return new Cache<T>(this, "CloudFlare - API: " + memberName,
+                cacheSeconds,
+                get,
+                logExceptions: true,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
         
         /// <summary>

@@ -8,23 +8,15 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<ResourceEvent>> _resourceHistory;
-        public Cache<List<ResourceEvent>> ResourceHistory
-        {
-            get
+
+        public Cache<List<ResourceEvent>> ResourceHistory =>
+            _resourceHistory ?? (_resourceHistory = GetSqlCache(nameof(ResourceHistory), async conn =>
             {
-                return _resourceHistory ?? (_resourceHistory = new Cache<List<ResourceEvent>>
-                {
-                    CacheForSeconds = RefreshInterval,
-                    UpdateCache = UpdateFromSql(nameof(ResourceHistory), async conn =>
-                    {
-                        var sql = GetFetchSQL<ResourceEvent>();
-                        var result = await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false);
-                        CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
-                        return result;
-                    })
-                });
-            }
-        }
+                var sql = GetFetchSQL<ResourceEvent>();
+                var result = await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false);
+                CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
+                return result;
+            }));
 
         public int? CurrentCPUPercent { get; set; }
 

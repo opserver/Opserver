@@ -9,74 +9,76 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<Database>> _databases;
-        public Cache<List<Database>> Databases
-        {
-            get
-            {
-                return _databases ?? (_databases = new Cache<List<Database>>
+
+        public Cache<List<Database>> Databases =>
+            _databases ?? (_databases = GetSqlCache(nameof(Databases),
+                async conn =>
                 {
-                    CacheForSeconds = 5 * 60, // TODO: Revisit
-                    UpdateCache = UpdateFromSql(nameof(Databases), async conn =>
-                    {
-                        var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
+                    var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
                             GetFetchSQL<Database>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseLastBackup>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseFile>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseVLF>(k.Item2)
-                            );
+                    );
 
-                        List<Database> dbs;
-                        using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
+                    List<Database> dbs;
+                    using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
+                    {
+                        dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                        var backups =
+                            await
+                                multi.ReadAsync<DatabaseLastBackup>()
+                                    .ConfigureAwait(false)
+                                    .AsList()
+                                    .ConfigureAwait(false);
+                        var files =
+                            await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                        var vlfs =
+                            await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+
+                        // Safe groups
+                        var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
+                        var fileLookup = files.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
+                        var vlfsLookup = vlfs.GroupBy(f => f.DatabaseId)
+                            .ToDictionary(g => g.Key, g => g.FirstOrDefault());
+
+                        foreach (var db in dbs)
                         {
-                            dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                            var backups = await multi.ReadAsync<DatabaseLastBackup>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                            var files = await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                            var vlfs = await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                            List<DatabaseLastBackup> b;
+                            db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseLastBackup>();
 
-                            // Safe groups
-                            var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
-                            var fileLookup = files.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
-                            var vlfsLookup = vlfs.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.FirstOrDefault());
+                            List<DatabaseFile> f;
+                            db.Files = fileLookup.TryGetValue(db.Id, out f) ? f : new List<DatabaseFile>();
 
-                            foreach (var db in dbs)
-                            {
-                                List<DatabaseLastBackup> b;
-                                db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseLastBackup>();
-
-                                List<DatabaseFile> f;
-                                db.Files = fileLookup.TryGetValue(db.Id, out f) ? f : new List<DatabaseFile>();
-
-                                DatabaseVLF v;
-                                db.VLFCount = vlfsLookup.TryGetValue(db.Id, out v) ? v?.VLFCount : null;
-                            }
+                            DatabaseVLF v;
+                            db.VLFCount = vlfsLookup.TryGetValue(db.Id, out v) ? v?.VLFCount : null;
                         }
-                        return dbs;
-                    })
-                });
-            }
-        }
-        
+                    }
+                    return dbs;
+                },
+                cacheSeconds: 5 * 60));
+
         public Cache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
             DatabaseFetch<DatabaseFile>(databaseName);
 
         public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
-            DatabaseFetch<DatabaseTable>(databaseName, 60, 5*60);
+            DatabaseFetch<DatabaseTable>(databaseName);
 
         public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
-            DatabaseFetch<DatabaseView>(databaseName, 60, 5*60);
+            DatabaseFetch<DatabaseView>(databaseName, 60);
 
         public Cache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
-    DatabaseFetch<StoredProcedure>(databaseName, 60, 5 * 60);
+    DatabaseFetch<StoredProcedure>(databaseName, 60);
 
 
         public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
-            DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, 60);
+            DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval);
 
         public Cache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
-            DatabaseFetch<MissingIndex>(databaseName, RefreshInterval, 60);
+            DatabaseFetch<MissingIndex>(databaseName, RefreshInterval);
 
         public Cache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
-            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, 60);
+            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval);
 
         public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
@@ -86,18 +88,17 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
-        private Cache<List<T>> DatabaseFetch<T>(string databaseName, int duration = 5*60, int staleDuration = 30*60)
+        private Cache<List<T>> DatabaseFetch<T>(string databaseName, int duration = 5*60)
             where T : ISQLVersioned, new() =>
-                Cache<List<T>>.WithKey(
-                    GetCacheKey(typeof (T).Name + "Info-" + databaseName),
-                    UpdateFromSql(typeof (T).Name + " Info for " + databaseName,
-                        conn =>
-                        {
-                            conn.ChangeDatabase(databaseName);
-                            return conn.QueryAsync<T>(GetFetchSQL<T>(), new { databaseName });
-                        },
-                        logExceptions: true),
-                    duration, staleDuration);
+            Cache.GetKeyedCache(GetCacheKey(typeof(T).Name + "Info-" + databaseName),
+                () => GetSqlCache(typeof(T).Name + " Info for " + databaseName,
+                    conn =>
+                    {
+                        conn.ChangeDatabase(databaseName);
+                        return conn.QueryAsync<T>(GetFetchSQL<T>(), new {databaseName});
+                    },
+                    cacheSeconds: duration,
+                    logExceptions: true));
 
         public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
             {

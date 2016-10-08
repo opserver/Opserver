@@ -97,19 +97,12 @@
       <DependentUpon>Current.cs</DependentUpon>
     </Compile>
     <Compile Include="Current.cs" />
-    <Compile Include="Data\CloudFlare\CloudFlareAPI.Actions.cs">
-      <DependentUpon>CloudFlareAPI.cs</DependentUpon>
+    <Compile Include="Data\Cloudflare\CloudFlareAPI.Actions.cs">
+      <DependentUpon>CloudflareAPI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\CloudFlareAPI.cs" />
-    <Compile Include="Data\CloudFlare\CloudFlareResponse.cs" />
-    <Compile Include="Data\CloudFlare\DataCenters.cs" />
-    <Compile Include="Data\CloudFlare\RailgunInstance.Cache.cs">
-      <DependentUpon>RailgunInstance.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\CloudFlare\RailgunInstance.cs" />
-    <Compile Include="Data\CloudFlare\RailgunInstance.Stats.cs">
-      <DependentUpon>RailgunInstance.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Data\Cloudflare\CloudflareAPI.cs" />
+    <Compile Include="Data\Cloudflare\CloudflareResponse.cs" />
+    <Compile Include="Data\Cloudflare\DataCenters.cs" />
     <Compile Include="Data\Dashboard\DashboardData.cs" />
     <Compile Include="Data\Dashboard\GraphPoint.cs" />
     <Compile Include="Data\Dashboard\HardwareSummary.cs" />
@@ -402,8 +395,8 @@
     <Compile Include="Data\Elastic\ElasticCluster.Aliases.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\CloudFlareAPI.Zones.cs">
-      <DependentUpon>CloudFlareAPI.cs</DependentUpon>
+    <Compile Include="Data\Cloudflare\CloudFlareAPI.Zones.cs">
+      <DependentUpon>CloudflareAPI.cs</DependentUpon>
     </Compile>
     <None Include="app.config" />
     <None Include="packages.config">

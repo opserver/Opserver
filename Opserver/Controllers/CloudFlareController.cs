@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 using StackExchange.Opserver.Data.CloudFlare;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -22,21 +23,10 @@ namespace StackExchange.Opserver.Controllers
             return RedirectToAction(nameof(DNS));
         }
 
-        [Route("cloudflare/railgun")]
-        public ActionResult Railguns() 
-        {
-            var vd = new RailgunsModel
-                {
-                    Railguns = RailgunInstance.AllInstances,
-                    View = DashboardModel.Views.Railgun
-                };
-            return View(vd);
-        }
-
         [Route("cloudflare/dns")]
-        public ActionResult DNS()
+        public async Task<ActionResult> DNS()
         {
-            CloudFlareAPI.Instance.WaitForFirstPoll(10000);
+            await CloudFlareAPI.Instance.PollAsync();
             var vd = new DNSModel
             {
                 View = DashboardModel.Views.DNS,
