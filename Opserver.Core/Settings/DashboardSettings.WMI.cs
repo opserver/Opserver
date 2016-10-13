@@ -36,7 +36,19 @@ namespace StackExchange.Opserver
         /// Password to use when polling (for non-domain testing)
         /// </summary>
         public string Password { get; set; }
-        
-        public void Normalize() {}
+
+        public IEnumerable<WMIAuthSettings> Auths { get; set; }
+
+        public void Normalize()
+        { }
+    }
+
+    public class WMIAuthSettings
+    {
+        public string Node { get; set; }
+
+        public string Username { get; set; }
+
+        public string Password { get; set; }
     }
 }
