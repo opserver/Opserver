@@ -67,7 +67,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public static IEnumerable<Node> GetNodesByIP(IPAddress ip)
         {
-            return _dataProviders.Count == 0
+            return _dataProviders.Count == 1
                 ? _dataProviders[0].GetNodesByIP(ip)
                 : _dataProviders.SelectMany(p => p.GetNodesByIP(ip));
         }
