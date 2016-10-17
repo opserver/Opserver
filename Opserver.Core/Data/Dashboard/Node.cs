@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             return HardwareType.Physical;
             
             // TODO: Detect network gear in a reliable way
-            return HardwareType.Unknown;
+            //return HardwareType.Unknown;
         }
 
         public string ManagementUrl { get; internal set; }
