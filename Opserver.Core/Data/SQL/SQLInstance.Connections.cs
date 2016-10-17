@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLConnectionSummaryInfo>> _connectionsSummary;
-        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30));
+        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30.Seconds()));
 
         private Cache<List<SQLConnectionInfo>> _connections;
         public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(RefreshInterval));

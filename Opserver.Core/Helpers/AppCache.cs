@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Helpers
                     {
                         return new List<IPAddress>();
                     }
-                }, 10*60, 24*60*60);
+                }, 10.Hours(), 24.Hours());
         }
 
         public static string GetHostName(string ip)
@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Helpers
                 {
                     return "Unknown";
                 }
-            }, 10 * 60, 24 * 60 * 60);
+            }, 10.Minutes(), 24.Hours());
         }
 
         #endregion

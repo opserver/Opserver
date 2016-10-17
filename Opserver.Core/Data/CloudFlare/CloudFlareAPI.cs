@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         }
 
         private Cache<T> GetCloudFlareCache<T>(
-            int cacheSeconds,
+            TimeSpan cacheDuration,
             Func<Task<T>> get,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             ) where T : class, new()
         {
             return new Cache<T>(this, "CloudFlare - API: " + memberName,
-                cacheSeconds,
+                cacheDuration,
                 get,
                 logExceptions: true,
                 memberName: memberName,

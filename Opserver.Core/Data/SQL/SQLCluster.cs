@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {
         public string Name => Settings.Name;
-        public int RefreshInterval { get; }
+        public TimeSpan RefreshInterval { get; }
         private SQLSettings.Cluster Settings { get; }
 
         public List<SQLNode> Nodes { get; }
@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Data.SQL
                            .Select(n => new SQLNode(this, n))
                            .Where(n => n.TryAddToGlobalPollers())
                            .ToList();
-            RefreshInterval = cluster.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds;
+            RefreshInterval = (cluster.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds();
         }
 
         public bool Equals(SQLCluster other)

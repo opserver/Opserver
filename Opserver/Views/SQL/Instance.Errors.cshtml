@@ -4,16 +4,16 @@
     const int errorMinutesToGet = 6 * 60;
     var ts = TimeSpan.FromMinutes(errorMinutesToGet);
     var errors = Model.GetErrorLog(errorMinutesToGet);
-    var data = errors.SafeData(true);
+    var data = errors.Data;
 }
-<h4 class="modal-title" title="Updated @(errors.LastPoll?.ToRelativeTime())">
+<h4 class="modal-title" title="Updated @(errors.LastFetch?.ToRelativeTime())">
     Errors last @ts.ToReadableString()
 </h4>
 <div class="alert alert-warning">
     <p>You clicked on Errors/sec, which is query errors. The below is a list of SQL Server's recent error log entries, which may not show the query errors.</p>
     <p>However, if you're looking to troubleshoot errors, you would want to see this list anyway just to check.</p>
 </div>
-@if (data.Any())
+@if (data?.Any() ?? false)
 {
     <table class="table table-striped table-hover table-super-condensed table-responsive">
         <thead>

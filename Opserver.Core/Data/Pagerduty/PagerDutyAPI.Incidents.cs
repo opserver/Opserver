@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         private Cache<List<Incident>> _incidents;
         public Cache<List<Incident>> Incidents => 
-            _incidents ?? (_incidents = GetPagerDutyCache(10*60, () =>
+            _incidents ?? (_incidents = GetPagerDutyCache(10.Minutes(), () =>
             {
                 string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
                        until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");

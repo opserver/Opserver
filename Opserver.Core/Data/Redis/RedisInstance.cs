@@ -141,7 +141,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
         private Cache<T> GetRedisCache<T>(
-            int cacheSeconds,
+            TimeSpan cacheDuration,
             Func<Task<T>> get,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -149,7 +149,7 @@ namespace StackExchange.Opserver.Data.Redis
             ) where T : class
         {
             return new Cache<T>(this, "Redis Fetch: " + Name + ":" + memberName,
-                cacheSeconds,
+                cacheDuration,
                 get,
                 addExceptionData: e => e.AddLoggedData("Server", Name)
                                         .AddLoggedData("Host", Host)

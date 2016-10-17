@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Net.Configuration;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -26,7 +24,7 @@ namespace StackExchange.Opserver.Data
         {
             get
             {
-                var tmp = DataTask;
+                var tmp = Data;
                 return tmp == null ? null : ((tmp as IList)?.Count.Pluralize("item") ?? "1 Item");
             }
         }
@@ -72,7 +70,7 @@ namespace StackExchange.Opserver.Data
             if (!_needsPoll && !IsStale) return Data;
 
             PollStatus = "Awaiting Semaphore";
-            await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
+            await _pollSemaphoreSlim.WaitAsync();
             bool errored = false;
             try
             {
@@ -80,11 +78,11 @@ namespace StackExchange.Opserver.Data
                 if (_isPolling) return Data;
                 CurrentPollDuration = Stopwatch.StartNew();
                 _isPolling = true;
-                Interlocked.Increment(ref _pollsTotal);
                 PollStatus = "UpdateCache";
-                await _updateFunc().ConfigureAwait(false);
+                await _updateFunc();
                 PollStatus = "UpdateCache Complete";
                 _needsPoll = false;
+                Interlocked.Increment(ref _pollsTotal);
                 if (DataTask != null)
                     Interlocked.Increment(ref _pollsSuccessful);
             }
@@ -127,7 +125,7 @@ namespace StackExchange.Opserver.Data
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
         public Cache(PollNode owner,
             string description,
-            int cacheForSeconds,
+            TimeSpan cacheDuration,
             Func<Task<T>> getData,
             int? timeoutMs = null,
             bool logExceptions = false, // TODO: Settings
@@ -136,12 +134,8 @@ namespace StackExchange.Opserver.Data
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
-            : base(cacheForSeconds, memberName, sourceFilePath, sourceLineNumber)
+            : base(cacheDuration, memberName, sourceFilePath, sourceLineNumber)
         {
-            ParentMemberName = memberName;
-            SourceFilePath = sourceFilePath;
-            SourceLineNumber = sourceLineNumber;
-
             miniProfilerDescription = "Poll: " + description; // contcat once
 
             _updateFunc = async () =>
@@ -215,13 +209,47 @@ namespace StackExchange.Opserver.Data
         }
     }
 
+    /// <summary>
+    /// A lightweight cache class for storing and handling overlap for cache refreshment for on-demand items
+    /// </summary>
+    /// <typeparam name="T">Type stored in this cache</typeparam>
+    public class LightweightCache<T> where T : class
+    {
+        public T Data { get; private set; }
+        public DateTime? LastFetch { get; private set; }
+        public Exception Error { get; private set; }
+        public bool Successful => Error == null;
+        public string ErrorMessage => Error?.Message + (Error?.InnerException != null ? "\n" + Error.InnerException.Message : "");
+
+        // Temp: all async when views can be in MVC Core
+        public static LightweightCache<T> Get(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
+        {
+            // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
+            return Current.LocalCache.GetSet<LightweightCache<T>>(key, (old, ctx) =>
+            {
+                var tc = new LightweightCache<T>();
+                try
+                {
+                    tc.Data = getData();
+                }
+                catch (Exception e)
+                {
+                    tc.Error = e;
+                    Current.LogException(e);
+                }
+                tc.LastFetch = DateTime.UtcNow;
+                return tc;
+            }, duration, staleDuration);
+        }
+    }
+
     public abstract class Cache : IMonitorStatus
     {
-        public int? CacheFailureForSeconds { get; set; } = 15;
-        public int CacheForSeconds { get; }
-        public bool AffectsNodeStatus { get; set; }
         public virtual Type Type => typeof(Cache);
         public Guid UniqueId { get; }
+        public TimeSpan CacheDuration { get; }
+        public TimeSpan? CacheFailureDuration { get; set; } = TimeSpan.FromSeconds(15);
+        public bool AffectsNodeStatus { get; set; }
         
         public bool ShouldPoll => _needsPoll || IsStale && !_isPolling;
 
@@ -229,16 +257,13 @@ namespace StackExchange.Opserver.Data
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
         public bool IsStale => (NextPoll ?? DateTime.MinValue) < DateTime.UtcNow;
-        public DateTime? NextPoll =>
-            LastPoll?.AddSeconds(LastPollSuccessful
-                ? CacheForSeconds
-                : CacheFailureForSeconds.GetValueOrDefault(CacheForSeconds));
 
         protected long _pollsTotal, _pollsSuccessful;
         public long PollsTotal => _pollsTotal;
         public long PollsSuccessful => _pollsSuccessful;
 
         public Stopwatch CurrentPollDuration { get; protected set; }
+        public DateTime? NextPoll { get; protected set; }
         public DateTime? LastPoll { get; internal set; }
         public TimeSpan? LastPollDuration { get; internal set; }
         public DateTime? LastSuccess { get; internal set; }
@@ -247,11 +272,12 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
         /// </summary>
-        public MiniProfiler Profiler { get; set; }
+        public MiniProfiler Profiler { get; protected set; }
 
         internal void SetSuccess()
         {
             LastSuccess = LastPoll = DateTime.UtcNow;
+            NextPoll = DateTime.UtcNow.Add(CacheDuration);
             LastPollSuccessful = true;
             ErrorMessage = "";
         }
@@ -259,6 +285,7 @@ namespace StackExchange.Opserver.Data
         internal void SetFail(string errorMessage)
         {
             LastPoll = DateTime.UtcNow;
+            NextPoll = DateTime.UtcNow.Add(CacheFailureDuration ?? CacheDuration);
             LastPollSuccessful = false;
             ErrorMessage = errorMessage;
         }
@@ -280,12 +307,10 @@ namespace StackExchange.Opserver.Data
                 return !LastPollSuccessful ? "Poll " + LastPoll?.ToRelativeTime() + " failed: " + ErrorMessage : null;
             }
         }
-
-        protected static readonly ConcurrentDictionary<string, object> NullLocks = new ConcurrentDictionary<string, object>();
-        protected static readonly ConcurrentDictionary<string, SemaphoreSlim> NullSlims = new ConcurrentDictionary<string, SemaphoreSlim>();
         
         public virtual bool ContainsData => false;
         internal virtual object InnerCache => null;
+        public Exception Error { get; internal set; }
         public string ErrorMessage { get; internal set; }
         public virtual string InventoryDescription => null;
 
@@ -294,35 +319,27 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// Info for monitoring the monitoring, debugging, etc.
         /// </summary>
-        public string ParentMemberName { get; protected set; }
-        public string SourceFilePath { get; protected set; }
-        public int SourceLineNumber { get; protected set; }
+        public string ParentMemberName { get; }
+        public string SourceFilePath { get; }
+        public int SourceLineNumber { get; }
 
         protected Cache(
-            int cacheForSeconds,
+            TimeSpan cacheDuration,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
             UniqueId = Guid.NewGuid();
-            CacheForSeconds = cacheForSeconds;
+            CacheDuration = cacheDuration;
             ParentMemberName = memberName;
             SourceFilePath = sourceFilePath;
             SourceLineNumber = sourceLineNumber;
         }
-        
+
         /// <summary>
         /// Gets a cache stored in LocalCache by key...these are not polled and expire when stale
         /// </summary>
-        public static Cache<T> GetKeyedCache<T>(string key, Func<Cache<T>> create) where T : class
-        {
-            var result = Current.LocalCache.Get<Cache<T>>(key);
-            if (result == null)
-            {
-                result = create();
-                Current.LocalCache.Set(key, result, result.CacheForSeconds);
-            }
-            return result;
-        }
+        public static LightweightCache<T> GetTimedCache<T>(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration) where T : class
+            => LightweightCache<T>.Get(key, getData, duration, staleDuration);
     }
 }

@@ -7,7 +7,7 @@
     var views = s.GetViewInfo(Model.Database);
     var columns = s.GetColumnInfo(Model.Database);
 }
-@if (views.Data == null || !views.LastPollSuccessful)
+@if (views.Data == null || !views.Successful)
 {
     <div class="alert alert-warning">
         <h5>There was an error fetching view info from @s.Name for @Model.Database</h5>

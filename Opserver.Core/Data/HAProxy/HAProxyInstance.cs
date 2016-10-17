@@ -64,7 +64,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         private Cache<List<Proxy>> _proxies;
         public Cache<List<Proxy>> Proxies =>
             _proxies ?? (_proxies = new Cache<List<Proxy>>(this, "HAProxy Fetch: " + Name,
-                cacheForSeconds: 10,
+                cacheDuration: 10.Seconds(),
                 getData: FetchHAProxyStatsAsync,
                 addExceptionData: e => e.AddLoggedData("Server", Name)
                     .AddLoggedData("Url", Url)

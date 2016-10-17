@@ -6,7 +6,7 @@
     var s = Model.Instance;
     var storedProcs = s.GetStoredProcedureInfo(Model.Database);
 }
-@if (storedProcs.Data == null || !storedProcs.LastPollSuccessful)
+@if (storedProcs.Data == null || !storedProcs.Successful)
 {
     <div class="alert alert-warning">
         <h5>There was an error fetching stored procedure info from @s.Name for @Model.Database</h5>

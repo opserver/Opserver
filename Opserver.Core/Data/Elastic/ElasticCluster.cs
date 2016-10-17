@@ -10,8 +10,9 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster : PollNode, ISearchableNode, IMonitedService
     {
         string ISearchableNode.Name => SettingsName;
-        string ISearchableNode.DisplayName => SettingsName; 
-        public int RefreshInterval => Settings.RefreshIntervalSeconds;
+        string ISearchableNode.DisplayName => SettingsName;
+        private TimeSpan? _refreshInteval;
+        public TimeSpan RefreshInterval => _refreshInteval ?? (_refreshInteval = Settings.RefreshIntervalSeconds.Seconds()).Value;
         string ISearchableNode.CategoryName => "elastic";
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;

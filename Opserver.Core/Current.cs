@@ -40,10 +40,11 @@ namespace StackExchange.Opserver
         /// <summary>
         /// record that an exception was logged in local cache for the specified length of time (default of 30 minutes)
         /// </summary>
-        private static void RecordLogged(string key, int? reLogDelaySeconds = 30 * 60 * 60)
+        private static void RecordLogged(string key, TimeSpan? reLogDelay = null)
         {
-            if (key.IsNullOrEmpty() || !reLogDelaySeconds.HasValue) return;
-            LocalCache.Set("ExceptionLogRetry-" + key, true, reLogDelaySeconds.Value);
+            reLogDelay = reLogDelay ?? 30.Minutes();
+            if (key.IsNullOrEmpty() || !reLogDelay.HasValue) return;
+            LocalCache.Set("ExceptionLogRetry-" + key, true, reLogDelay.Value);
         }
 
         /// <summary>

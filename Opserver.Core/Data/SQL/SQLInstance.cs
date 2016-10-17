@@ -15,7 +15,8 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance : PollNode, ISearchableNode
     {
         public string Name => Settings.Name;
-        public int RefreshInterval => Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds;
+        private TimeSpan? _refreshInterval;
+        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds()).Value;
         public string ObjectName { get; internal set; }
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
@@ -102,11 +103,16 @@ namespace StackExchange.Opserver.Data.SQL
         /// </summary>
         protected Task<DbConnection> GetConnectionAsync(int timeout = 5000) => Connection.GetOpenAsync(ConnectionString, connectionTimeout: timeout);
 
+        /// <summary>
+        /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
+        /// TODO: Remove with async views in MVC Core
+        /// </summary>
+        protected DbConnection GetConnection(int timeout = 5000) => Connection.GetOpen(ConnectionString, connectionTimeout: timeout);
+
         private string GetCacheKey(string itemName) { return $"SQL-Instance-{Name}-{itemName}"; }
 
         public Cache<List<T>> SqlCacheList<T>(
-            int cacheSeconds,
-            int? cacheFailureSeconds = null,
+            TimeSpan cacheDuration,
             bool affectsStatus = true,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -116,8 +122,7 @@ namespace StackExchange.Opserver.Data.SQL
             return GetSqlCache(memberName,
                 conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
                 () => Singleton<T>.Instance.MinVersion > Version,
-                cacheSeconds,
-                cacheFailureSeconds,
+                cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
                 sourceLineNumber: sourceLineNumber
@@ -125,8 +130,7 @@ namespace StackExchange.Opserver.Data.SQL
         }
 
         public Cache<T> SqlCacheSingle<T>(
-            int cacheSeconds,
-            int? cacheFailureSeconds = null,
+            TimeSpan cacheDuration,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
@@ -135,8 +139,7 @@ namespace StackExchange.Opserver.Data.SQL
             return GetSqlCache(memberName,
                 conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
                 () => Singleton<T>.Instance.MinVersion > Version,
-                cacheSeconds,
-                cacheFailureSeconds,
+                cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
                 sourceLineNumber: sourceLineNumber
@@ -147,8 +150,7 @@ namespace StackExchange.Opserver.Data.SQL
             string opName,
             Func<DbConnection, Task<T>> get,
             Func<bool> shouldRun = null,
-            int? cacheSeconds = null,
-            int? cacheFailureSeconds = null,
+            TimeSpan? cacheDuration = null,
             bool logExceptions = false,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -156,7 +158,7 @@ namespace StackExchange.Opserver.Data.SQL
             ) where T : class, new()
         {
             return new Cache<T>(this, "SQL Fetch: " + Name + ":" + opName,
-                cacheSeconds ?? RefreshInterval,
+                cacheDuration ?? RefreshInterval,
                 getData: async () =>
                 {
                     if (shouldRun != null && !shouldRun()) return new T();
@@ -171,6 +173,18 @@ namespace StackExchange.Opserver.Data.SQL
                 sourceFilePath: sourceFilePath,
                 sourceLineNumber: sourceLineNumber
             );
+        }
+
+        public LightweightCache<T> TimedCache<T>(string key, Func<DbConnection, T> get, TimeSpan duration, TimeSpan staleDuration) where T : class
+        {
+            return Cache.GetTimedCache(GetCacheKey(key),
+                () =>
+                {
+                    using (var conn = GetConnection())
+                    {
+                        return get(conn);
+                    }
+                }, duration, staleDuration);
         }
 
         public override string ToString() => Name;

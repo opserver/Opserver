@@ -29,23 +29,23 @@ namespace StackExchange.Opserver.Helpers
         /// <summary>
         /// Places an item of type T into local cache for the specified duration
         /// </summary>
-        public void Set<T>(string key, T value, int? durationSecs, bool sliding = false)
+        public void Set<T>(string key, T value, TimeSpan? duration, bool sliding = false)
         {
-            SetWithPriority<T>(key, value, durationSecs, sliding, CacheItemPriority.Default);
+            SetWithPriority<T>(key, value, duration, sliding, CacheItemPriority.Default);
         }
 
-        public void SetWithPriority<T>(string key, T value, int? durationSecs, bool isSliding, CacheItemPriority priority)
+        public void SetWithPriority<T>(string key, T value, TimeSpan? duration, bool isSliding, CacheItemPriority priority)
         {
-            RawSet(key, value, durationSecs, isSliding, priority);
+            RawSet(key, value, duration, isSliding, priority);
         }
 
-        private void RawSet(string cacheKey, object value, int? durationSecs, bool isSliding, CacheItemPriority priority)
+        private void RawSet(string cacheKey, object value, TimeSpan? duration, bool isSliding, CacheItemPriority priority)
         {
             var policy = new CacheItemPolicy { Priority = priority };
-            if (!isSliding && durationSecs.HasValue)
-                policy.AbsoluteExpiration = DateTime.UtcNow.AddSeconds(durationSecs.Value);
-            if (isSliding && durationSecs.HasValue)
-                policy.SlidingExpiration = TimeSpan.FromSeconds(durationSecs.Value);
+            if (!isSliding && duration.HasValue)
+                policy.AbsoluteExpiration = DateTime.UtcNow.Add(duration.Value);
+            if (isSliding && duration.HasValue)
+                policy.SlidingExpiration = duration.Value;
             
             Cache.Add(cacheKey, value, policy);
         }

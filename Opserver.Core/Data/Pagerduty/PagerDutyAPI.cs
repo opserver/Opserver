@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         private Cache<T> GetPagerDutyCache<T>(
-            int cacheSeconds,
+            TimeSpan cacheDuration,
             Func<Task<T>> get,
             bool logExceptions = true,
             [CallerMemberName] string memberName = "",
@@ -60,7 +60,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             ) where T : class
         {
             return new Cache<T>(this, "PagerDuty - API: " + memberName,
-                cacheSeconds,
+                cacheDuration,
                 get,
                 logExceptions: logExceptions,
                 memberName: memberName,
@@ -148,7 +148,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private Cache<List<PagerDutyPerson>> _allusers;
         public Cache<List<PagerDutyPerson>> AllUsers =>
-            _allusers ?? (_allusers = GetPagerDutyCache(60*60,
+            _allusers ?? (_allusers = GetPagerDutyCache(1.Hours(),
                     () => GetFromPagerDutyAsync("users/", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
             );
 

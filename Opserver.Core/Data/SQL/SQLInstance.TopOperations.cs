@@ -11,35 +11,29 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
-        public Cache<List<TopOperation>> GetTopOperations(TopSearchOptions options = null)
+        public LightweightCache<List<TopOperation>> GetTopOperations(TopSearchOptions options = null)
         {
-            return Cache.GetKeyedCache(
-                GetCacheKey(nameof(GetTopOperations) + "-" + (options?.GetHashCode() ?? 0).ToString()),
-                () => GetSqlCache("Top Operations",
-                    conn =>
-                    {
-                        var hasOptions = options != null;
-                        var sql = string.Format(GetFetchSQL<TopOperation>(),
-                            hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : "",
-                            hasOptions ? options.ToSQLSearch() : "");
-                        sql = sql.Replace("query_plan AS QueryPlan,", "")
-                            .Replace("CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp", "");
-                        return conn.QueryAsync<TopOperation>(sql, options);
-                    },
-                    cacheSeconds: 15));
+            return TimedCache(nameof(GetTopOperations) + "-" + (options?.GetHashCode() ?? 0).ToString(),
+                conn =>
+                {
+                    var hasOptions = options != null;
+                    var sql = string.Format(GetFetchSQL<TopOperation>(),
+                        hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : "",
+                        hasOptions ? options.ToSQLSearch() : "");
+                    sql = sql.Replace("query_plan AS QueryPlan,", "")
+                        .Replace("CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp", "");
+                    return conn.Query<TopOperation>(sql, options).AsList();
+                }, 15.Seconds(), 5.Minutes());
         }
 
-        public Cache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
+        public LightweightCache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
         {
             var clause = " And (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
             if (statementStartOffset.HasValue) clause += " And qs.statement_start_offset = @statementStartOffset";
             var sql = string.Format(GetFetchSQL<TopOperation>(), clause, "");
-            return Cache.GetKeyedCache(
-                GetCacheKey(nameof(GetTopOperation) + "-" + planHandle.GetHashCode().ToString() + "-" + statementStartOffset.ToString()),
-                () => GetSqlCache("Top Operation",
-                    conn => conn.QueryFirstOrDefaultAsync<TopOperation>(sql, new {planHandle, statementStartOffset, MaxResultCount = 1}),
-                    cacheSeconds: 60)
-            );
+            return TimedCache(nameof(GetTopOperation) + "-" + planHandle.GetHashCode().ToString() + "-" + statementStartOffset.ToString(),
+                conn => conn.QueryFirstOrDefault<TopOperation>(sql, new { planHandle, statementStartOffset, MaxResultCount = 1 }),
+                1.Minutes(), 1.Minutes());
         }
 
         public class TopOperation : ISQLVersioned

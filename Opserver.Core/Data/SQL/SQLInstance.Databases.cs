@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Dapper;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -56,49 +57,48 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                     return dbs;
                 },
-                cacheSeconds: 5 * 60));
+                cacheDuration: 5.Minutes()));
 
-        public Cache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
+        public LightweightCache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
             DatabaseFetch<DatabaseFile>(databaseName);
 
-        public Cache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
+        public LightweightCache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
             DatabaseFetch<DatabaseTable>(databaseName);
 
-        public Cache<List<DatabaseView>> GetViewInfo(string databaseName) =>
-            DatabaseFetch<DatabaseView>(databaseName, 60);
+        public LightweightCache<List<DatabaseView>> GetViewInfo(string databaseName) =>
+            DatabaseFetch<DatabaseView>(databaseName, 1.Minutes());
 
-        public Cache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
-    DatabaseFetch<StoredProcedure>(databaseName, 60);
+        public LightweightCache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
+            DatabaseFetch<StoredProcedure>(databaseName, 1.Minutes());
 
-
-        public Cache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
+        public LightweightCache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval);
 
-        public Cache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
+        public LightweightCache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
             DatabaseFetch<MissingIndex>(databaseName, RefreshInterval);
 
-        public Cache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
+        public LightweightCache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
             DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval);
 
-        public Cache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
+        public LightweightCache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
 
-        public Cache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
+        public LightweightCache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
             DatabaseFetch<DatabaseDataSpace>(databaseName);
 
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
-        private Cache<List<T>> DatabaseFetch<T>(string databaseName, int duration = 5*60)
-            where T : ISQLVersioned, new() =>
-            Cache.GetKeyedCache(GetCacheKey(typeof(T).Name + "Info-" + databaseName),
-                () => GetSqlCache(typeof(T).Name + " Info for " + databaseName,
-                    conn =>
-                    {
-                        conn.ChangeDatabase(databaseName);
-                        return conn.QueryAsync<T>(GetFetchSQL<T>(), new {databaseName});
-                    },
-                    cacheSeconds: duration,
-                    logExceptions: true));
+        private LightweightCache<List<T>> DatabaseFetch<T>(string databaseName, TimeSpan? duration = null) where T : ISQLVersioned, new()
+        {
+            return TimedCache(GetCacheKey(typeof(T).Name + "Info-" + databaseName),
+                conn =>
+                {
+                    conn.ChangeDatabase(databaseName);
+                    return conn.Query<T>(GetFetchSQL<T>(), new { databaseName }).AsList();
+                },
+                duration ?? 5.Minutes(),
+                staleDuration: 5.Minutes());
+        }
 
         public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
             {

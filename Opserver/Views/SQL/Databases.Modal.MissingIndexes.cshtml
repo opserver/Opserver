@@ -21,7 +21,7 @@
         <div><span class="text-muted">Include:</span> @i.IncludedColumns</div>
     }
 }
-@if (missingIndexList.Data == null || !missingIndexList.LastPollSuccessful)
+@if (missingIndexList.Data == null || !missingIndexList.Successful)
 {
     <div class="alert alert-warning">
         <h5>There was an error fetching missing indexes info from @s.Name for @Model.Database</h5>

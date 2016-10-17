@@ -232,6 +232,7 @@
       <DependentUpon>SQLNode.cs</DependentUpon>
     </Compile>
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="ExtensionMethods.Time.cs" />
     <Compile Include="ExtensionMethods.Sql.cs" />
     <Compile Include="Helpers\AppCache.cs" />
     <Compile Include="Helpers\Connection.cs" />

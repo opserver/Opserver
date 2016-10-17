@@ -90,7 +90,7 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 5 * 1, VaryByParam = "node;sort;options", VaryByContentEncoding = "gzip;deflate")]
         [Route("sql/top")]
-        public async Task<ActionResult> Top(string node, SQLInstance.TopSearchOptions options)
+        public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
         {
             var vd = GetOperationsModel(node, options);
             var i = vd.CurrentInstance;
@@ -98,7 +98,7 @@ namespace StackExchange.Opserver.Controllers
             if (i != null)
             {
                 var cache = i.GetTopOperations(options);
-                vd.TopOperations = await cache.GetData();
+                vd.TopOperations = cache.Data;
                 vd.ErrorMessage = cache.ErrorMessage;
             }
 
@@ -141,11 +141,11 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/top/plan")]
-        public async Task<ActionResult> TopPlan(string node, string handle)
+        public ActionResult TopPlan(string node, string handle)
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
             var i = SQLInstance.Get(node);
-            var op = await i.GetTopOperation(planHandle).GetData();
+            var op = i.GetTopOperation(planHandle).Data;
             if (op == null) return ContentNotFound("Plan was not found.");
 
             var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.QueryPlan));

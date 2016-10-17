@@ -94,8 +94,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         
         protected Cache<T> ProviderCache<T>(
             Func<Task<T>> fetch,
-            int cacheSeconds,
-            int? cacheFailureSeconds = null,
+            TimeSpan cacheDuration,
+            TimeSpan? cacheFailureDuration = null,
             bool affectsStatus = true,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
@@ -104,7 +104,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             return new Cache<T>(this,
                 "Data Provieder Fetch: " + NodeType + ":" + typeof(T).Name,
-                cacheSeconds,
+                cacheDuration,
                 fetch,
                 addExceptionData: e => e.AddLoggedData("NodeType", NodeType),
                 memberName: memberName,
@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 sourceLineNumber: sourceLineNumber)
             {
                 AffectsNodeStatus = affectsStatus,
-                CacheFailureForSeconds = cacheFailureSeconds
+                CacheFailureDuration = cacheFailureDuration
             };
         }
     }

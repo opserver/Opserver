@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private Cache<List<CommandTrace>> _slowLog;
         public Cache<List<CommandTrace>> SlowLog =>
-            _slowLog ?? (_slowLog = GetRedisCache(60, async () =>
+            _slowLog ?? (_slowLog = GetRedisCache(1.Minutes(), async () =>
             {
                 //TODO: Remove when StackExchange.Redis gets profiling
                 using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch.ToString()))
@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private Cache<string> _tieBreaker;
         public Cache<string> Tiebreaker =>
-            _tieBreaker ?? (_tieBreaker = GetRedisCache(10, () =>
+            _tieBreaker ?? (_tieBreaker = GetRedisCache(10.Seconds(), () =>
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
                 {

@@ -6,7 +6,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<VolumeInfo>> _volumes;
-        public Cache<List<VolumeInfo>> Volumes => _volumes ?? (_volumes = SqlCacheList<VolumeInfo>(10*60));
+        public Cache<List<VolumeInfo>> Volumes => _volumes ?? (_volumes = SqlCacheList<VolumeInfo>(10.Minutes()));
 
         public class VolumeInfo : ISQLVersioned
         {

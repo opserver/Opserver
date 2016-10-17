@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             _applications ?? (_applications = new Cache<List<Application>>(
                 this,
                 "Exceptions Fetch: " + Name + ":" + nameof(Applications),
-                Settings.PollIntervalSeconds,
+                Settings.PollIntervalSeconds.Seconds(),
                 async () =>
                 {
                     var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
@@ -71,7 +71,7 @@ Select ApplicationName as Name,
             _errorSummary ?? (_errorSummary = new Cache<List<Error>>(
                 this,
                 "Exceptions Fetch: " + Name + ":" + nameof(ErrorSummary),
-                Settings.PollIntervalSeconds,
+                Settings.PollIntervalSeconds.Seconds(),
                 () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r

@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
     {
         private Cache<List<CloudFlareZone>> _zones;
         public Cache<List<CloudFlareZone>> Zones => 
-            _zones ?? (_zones = GetCloudFlareCache(5*60, () => Get<List<CloudFlareZone>>("zones")));
+            _zones ?? (_zones = GetCloudFlareCache(5.Minutes(), () => Get<List<CloudFlareZone>>("zones")));
 
         private static readonly NameValueCollection _dnsRecordFetchParams = new NameValueCollection
         {
@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         private Cache<List<CloudFlareDNSRecord>> _dnsRecords;
 
         public Cache<List<CloudFlareDNSRecord>> DNSRecords =>
-            _dnsRecords ?? (_dnsRecords = GetCloudFlareCache(5*60, async () =>
+            _dnsRecords ?? (_dnsRecords = GetCloudFlareCache(5.Minutes(), async () =>
             {
                 var records = new List<CloudFlareDNSRecord>();
                 var data = await Zones.GetData(); // wait on zones to load first...

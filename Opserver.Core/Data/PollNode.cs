@@ -126,7 +126,7 @@ namespace StackExchange.Opserver.Data
         protected int _isPolling;
         public bool IsPolling => _isPolling > 0;
         public string PollStatus { get; protected set; }
-        
+
         public virtual void PollAndForget(bool force = false)
         {
             PollAsync(force).ContinueWith(t =>
@@ -136,9 +136,12 @@ namespace StackExchange.Opserver.Data
                     Current.LogException(t.Exception);
                 }
                 Interlocked.Add(ref _totalCachePolls, 1);
-            }, TaskContinuationOptions.ExecuteSynchronously).ConfigureAwait(false);
+            },
+            CancellationToken.None,
+            TaskContinuationOptions.ExecuteSynchronously,
+            TaskScheduler.Default);
         }
-        
+
         public virtual async Task PollAsync(bool force = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
@@ -156,6 +159,7 @@ namespace StackExchange.Opserver.Data
                 {
                     // We're already running, abort!'
                     // TODO: Date check for sanity and restart?
+                    return;
                 }
 
                 PollStatus = "Poll Started";
@@ -171,10 +175,14 @@ namespace StackExchange.Opserver.Data
                     }
 
                     PollStatus = "DataPollers Queueing";
-                    var tasks = DataPollers
-                        .Where(p => force || p.ShouldPoll)
-                        .Select(p => p.PollGenericAsync(force))
-                        .ToArray();
+                    var tasks = new List<Task>();
+                    foreach (var p in DataPollers)
+                    {
+                        if (force || p.ShouldPoll)
+                        {
+                            tasks.Add(p.PollGenericAsync(force));
+                        }
+                    }
 
                     // Hop out early, run nothing else
                     if (!tasks.Any())
@@ -196,8 +204,11 @@ namespace StackExchange.Opserver.Data
                 finally
                 {
                     Interlocked.Exchange(ref _isPolling, 0);
-                    CurrentPollDuration.Stop();
-                    LastPollDuration = CurrentPollDuration.Elapsed;
+                    if (CurrentPollDuration != null)
+                    {
+                        CurrentPollDuration.Stop();
+                        LastPollDuration = CurrentPollDuration.Elapsed;
+                    }
                     CurrentPollDuration = null;
                 }
                 PollStatus = "Poll Complete";

@@ -5,7 +5,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<SQLServerFeatures> _serverFeatures;
-        public Cache<SQLServerFeatures> ServerFeatures => _serverFeatures ?? (_serverFeatures = SqlCacheSingle<SQLServerFeatures>(60 * 60));
+        public Cache<SQLServerFeatures> ServerFeatures => _serverFeatures ?? (_serverFeatures = SqlCacheSingle<SQLServerFeatures>(1.Hours()));
 
         public class SQLServerFeatures : ISQLVersioned
         {

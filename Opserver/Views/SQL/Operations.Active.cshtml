@@ -20,11 +20,7 @@
 }
 else
 {
-    Cache<List<SQLInstance.ActiveOperation>> activeOps;
-    using (MiniProfiler.Current.Step(nameof(i.GetActiveOperations)))
-    {
-        activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
-    }
+    var activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
     var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
     if (activeOps.ErrorMessage.HasValue())
     {
@@ -36,7 +32,7 @@ else
     }
     else
     {
-        var data = activeOps.SafeData(true);
+        var data = activeOps.Data ?? new List<SQLInstance.ActiveOperation>();
         <h5 class="page-header">
             Current active queries on @i.Name:
             <span class="pull-right">

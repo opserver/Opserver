@@ -36,7 +36,7 @@ Having Sum(Hits) > 5000
                     results = await conn.QueryAsync<string>(sql).ConfigureAwait(false);
                 }
                 results.RemoveAll(h => !IsValidHost(h));
-                Current.LocalCache.Set(cacheKey, results, 5 * 60 * 60); // cache for 5 hours, this *very* rarely changes
+                Current.LocalCache.Set(cacheKey, results, 5.Hours()); // cache for 5 hours, this *very* rarely changes
             }
             return results;
         }
@@ -73,7 +73,7 @@ Select CreationDate,
                 using (var conn = await Connection.GetOpenAsync(ConnectionString).ConfigureAwait(false))
                 {
                     results = await conn.QueryAsync<TrafficDay>(sql, new { host, start = startDate, end = endDate }).ConfigureAwait(false);
-                    Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, that's the SQL recalc interval
+                    Current.LocalCache.Set(cacheKey, results, 60.Minutes()); // cache for an hour, that's the SQL recalc interval
                 }
             }
             if (!startDate.HasValue && !endDate.HasValue) return results;
@@ -120,7 +120,7 @@ Select RouteName,
                 {
                     results = await conn.QueryAsync<RouteHit>(sql, new {lastNdays, host}).ConfigureAwait(false);
                 }
-                Current.LocalCache.Set(cacheKey, results, 60 * 60); // cache for an hour, this only aggregates in sql once an hour
+                Current.LocalCache.Set(cacheKey, results, 60.Minutes()); // cache for an hour, this only aggregates in sql once an hour
             }
             return results;
         }

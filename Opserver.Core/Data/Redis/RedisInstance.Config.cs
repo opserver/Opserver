@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Redis
         private Cache<Dictionary<string, string>> _config;
 
         public Cache<Dictionary<string, string>> Config =>
-            _config ?? (_config = GetRedisCache(120, async () =>
+            _config ?? (_config = GetRedisCache(2.Minutes(), async () =>
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
                 {

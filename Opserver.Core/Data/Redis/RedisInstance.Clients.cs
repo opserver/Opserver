@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Data.Redis
     {
         private Cache<List<ClientInfo>> _clients;
         public Cache<List<ClientInfo>> Clients => 
-            _clients ?? (_clients = GetRedisCache(60, async () =>
+            _clients ?? (_clients = GetRedisCache(1.Minutes(), async () =>
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))
                 {
