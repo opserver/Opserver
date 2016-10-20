@@ -220,6 +220,8 @@
       <DependentUpon>compilerconfig.json</DependentUpon>
     </Content>
     <Content Include="Config\CloudFlareSettings.json.example" />
+    <Content Include="Config\DashboardSettings.json" />
+    <None Include="Config\ExceptionsSettings.json" />
     <None Include="Config\PagerDutySettings.json.example" />
     <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="Content\bootstrap\fonts\glyphicons-halflings-regular.ttf" />

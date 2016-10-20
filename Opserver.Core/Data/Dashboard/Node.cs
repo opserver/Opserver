@@ -7,11 +7,11 @@ using StackExchange.Opserver.Data.Dashboard.Providers;
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Node : IMonitorStatus, ISearchableNode
-    {   
+    {
         string ISearchableNode.DisplayName => PrettyName;
         string ISearchableNode.Name => PrettyName;
         string ISearchableNode.CategoryName => Category?.Name.Replace(" Servers", "") ?? "Unknown";
-        
+
         public DashboardDataProvider DataProvider { get; set; }
         public bool IsRealTimePollable => MachineType?.Contains("Windows") == true;
         public List<Issue<Node>> Issues { get; set; }
@@ -33,6 +33,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         private HardwareType? _hardwareType;
         public HardwareType HardwareType => _hardwareType ?? (_hardwareType = GetHardwareType()).Value;
 
+        public int? TotalCPU { get; set; }
         public short? CPULoad { get; internal set; }
         public float? TotalMemory { get; internal set; }
         public float? MemoryUsed { get; internal set; }
@@ -44,7 +45,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Model { get; internal set; }
         public string ServiceTag { get; internal set; }
         public Version KernelVersion { get; internal set; }
-        
+
         public string PrettyName => (Name ?? "").ToUpper();
         public TimeSpan? UpTime => DateTime.UtcNow - LastBoot;
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
@@ -75,7 +76,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             if (IsVM) return HardwareType.VirtualMachine;
             return HardwareType.Physical;
-            
+
             // TODO: Detect network gear in a reliable way
             return HardwareType.Unknown;
         }
@@ -87,8 +88,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get
             {
-                if (_searchString == null)
-                {
+                if (_searchString == null) {
                     var result = StringBuilderCache.Get();
                     const string delim = "-";
                     result.Append(MachineType)
@@ -122,7 +122,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
         }
 
-        public TimeSpan? PollInterval => PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null;
+        public TimeSpan? PollInterval => PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?)null;
 
         // Interfaces, Volumes and Applications are set by the provider
         public List<Interface> Interfaces { get; internal set; }
@@ -133,7 +133,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public Volume GetVolume(string id) => Volumes.FirstOrDefault(v => v.Id == id);
         public Application GetApp(string id) => Apps.FirstOrDefault(a => a.Id == id);
 
-        private static readonly List<IPNet> EmptyIPs = new List<IPNet>(); 
+        private static readonly List<IPNet> EmptyIPs = new List<IPNet>();
 
         public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
 
@@ -152,15 +152,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         public decimal? MemoryCriticalPercent => GetSetting(i => i.MemoryCriticalPercent);
         public decimal? DiskWarningPercent => GetSetting(i => i.DiskWarningPercent);
         public decimal? DiskCriticalPercent => GetSetting(i => i.DiskCriticalPercent);
-        
 
-        private List<Interface> _primaryInterfaces; 
+
+        private List<Interface> _primaryInterfaces;
         public List<Interface> PrimaryInterfaces
         {
             get
             {
-                if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
-                {
+                if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0)) {
                     var pattern = Settings?.PrimaryInterfacePatternRegex;
                     var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
                     _primaryInterfaces = (dbInterfaces.Any()

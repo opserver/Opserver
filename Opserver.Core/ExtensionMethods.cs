@@ -73,7 +73,7 @@ namespace StackExchange.Opserver
             t.IsGenericType
                 ? $"{t.Name.Split(StringSplits.Tilde)[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
                 : t.Name;
-        
+
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"
         /// </summary>
@@ -165,8 +165,7 @@ namespace StackExchange.Opserver
             MonitorStatus? result = null;
             if (cacheKey.HasValue())
                 result = Current.LocalCache.Get<MonitorStatus?>(cacheKey);
-            if (result == null)
-            {
+            if (result == null) {
                 result = GetWorstStatus(ims.Select(i => i.MonitorStatus));
                 if (cacheKey.HasValue())
                     Current.LocalCache.Set(cacheKey, result, durationSeconds);
@@ -178,7 +177,7 @@ namespace StackExchange.Opserver
 
         public static IOrderedEnumerable<T> OrderByWorst<T>(this IEnumerable<T> ims) where T : IMonitorStatus => OrderByWorst(ims, i => i.MonitorStatus);
 
-        public static IOrderedEnumerable<T> OrderByWorst<T>(this IEnumerable<T> ims, Func<T,MonitorStatus> getter) => ims.OrderByDescending(getter);
+        public static IOrderedEnumerable<T> OrderByWorst<T>(this IEnumerable<T> ims, Func<T, MonitorStatus> getter) => ims.OrderByDescending(getter);
 
         public static IOrderedEnumerable<T> ThenByWorst<T>(this IOrderedEnumerable<T> ims) where T : IMonitorStatus => ThenByWorst(ims, i => i.MonitorStatus);
 
@@ -191,8 +190,18 @@ namespace StackExchange.Opserver
         /// </summary>
         public static long ToEpochTime(this DateTime dt, bool toMilliseconds = false)
         {
-            var seconds = (long) (dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            var seconds = (long)(dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
             return toMilliseconds ? seconds * 1000 : seconds;
+        }
+
+        /// <summary>
+        /// Returns a ios 86 string
+        /// </summary>
+        /// <param name="dt"></param>
+        /// <returns></returns>
+        public static string ToIos86(this DateTime dt)
+        {
+            return dt.ToString("yyyy-MM-ddTHH:mm:ssZ");
         }
 
         /// <summary>
@@ -207,8 +216,7 @@ namespace StackExchange.Opserver
         public static string ToRelativeTime(this DateTime dt, bool includeTime = true, bool asPlusMinus = false, DateTime? compareTo = null, bool includeSign = true)
         {
             var comp = (compareTo ?? DateTime.UtcNow);
-            if (asPlusMinus)
-            {
+            if (asPlusMinus) {
                 return dt <= comp
                     ? ToRelativeTimeSimple(comp - dt, includeSign ? "-" : "")
                     : ToRelativeTimeSimple(dt - comp, includeSign ? "+" : "");
@@ -253,7 +261,7 @@ namespace StackExchange.Opserver
             if (utcNow.Year == dt.Year) return "on " + dt.ToString(includeTime ? "MMM %d 'at' %H:mmm" : "MMM %d");
             return "on " + dt.ToString(includeTime ? @"MMM %d \'yy 'at' %H:mmm" : @"MMM %d \'yy");
         }
-        
+
         private static string ToRelativeTimeSimple(TimeSpan ts, string sign)
         {
             var delta = ts.TotalSeconds;
@@ -273,7 +281,7 @@ namespace StackExchange.Opserver
                 : string.Join(joinSeparator, o.GetType()
                                               .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                                               .Select(p => p.Name + ":" + p.GetValue(o, null)));
-        
+
         /// <summary>
         /// Converts a raw long into a readable size
         /// </summary>
@@ -291,14 +299,12 @@ namespace StackExchange.Opserver
         {
             var sb = StringBuilderCache.Get();
             var elems = 0;
-            Action<string, int> add = (s, i) =>
-                {
-                    if (elems < maxElements && i > 0)
-                    {
-                        sb.AppendFormat("{0:0}{1} ", i, s);
-                        elems++;
-                    }
-                };
+            Action<string, int> add = (s, i) => {
+                if (elems < maxElements && i > 0) {
+                    sb.AppendFormat("{0:0}{1} ", i, s);
+                    elems++;
+                }
+            };
             add("d", span.Days);
             add("h", span.Hours);
             add("m", span.Minutes);
@@ -309,7 +315,7 @@ namespace StackExchange.Opserver
 
             return sb.ToStringRecycle().Trim();
         }
-        
+
         /// <summary>
         /// Adds a key/value pair for logging to an exception, one that'll appear in exceptional
         /// </summary>
@@ -339,19 +345,16 @@ namespace StackExchange.Opserver
         // return true if this caller won the race to load whatever would go at key
         private static bool GotCompeteLock(LocalCache cache, string key)
         {
-            while (true)
-            {
+            while (true) {
                 var competeKey = key + "-cload";
-                if (cache.SetNXSync(competeKey, DateTime.UtcNow))
-                {
+                if (cache.SetNXSync(competeKey, DateTime.UtcNow)) {
                     // Got it!
                     return true;
                 }
 
                 var x = cache.Get<DateTime>(competeKey);
                 // Did somebody abandoned the lock?
-                if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5))
-                {
+                if (DateTime.UtcNow - x > TimeSpan.FromMinutes(5)) {
                     // Yep, clear it and try again
                     cache.Remove(competeKey);
                     continue;
@@ -389,23 +392,18 @@ namespace StackExchange.Opserver
             var possiblyStale = cache.Get<GetSetWrapper<T>>(key);
             var localLockName = key;
             var nullLoadLock = _getSetNullLocks.AddOrUpdate(localLockName, k => new object(), (k, old) => old);
-            if (possiblyStale == null)
-            {
+            if (possiblyStale == null) {
                 // We can't prevent multiple web server's from running this (well, we can but its probably overkill) but we can
                 //   at least stop the query from running multiple times on *this* web server
-                lock (nullLoadLock)
-                {
+                lock (nullLoadLock) {
                     possiblyStale = cache.Get<GetSetWrapper<T>>(key);
 
-                    if (possiblyStale == null)
-                    {
+                    if (possiblyStale == null) {
                         T data;
-                        using (var ctx = new MicroContext())
-                        {
+                        using (var ctx = new MicroContext()) {
                             data = lookup(null, ctx);
                         }
-                        possiblyStale = new GetSetWrapper<T>
-                        {
+                        possiblyStale = new GetSetWrapper<T> {
                             Data = data,
                             StaleAfter = DateTime.UtcNow + TimeSpan.FromSeconds(durationSecs)
                         };
@@ -419,51 +417,40 @@ namespace StackExchange.Opserver
             if (possiblyStale.StaleAfter > DateTime.UtcNow) return possiblyStale.Data;
 
             bool gotCompeteLock = false;
-            if (Monitor.TryEnter(nullLoadLock, 0))
-            {   // it isn't actively being refreshed; we'll check for a mutex on the cache
-                try
-                {
+            if (Monitor.TryEnter(nullLoadLock, 0)) {   // it isn't actively being refreshed; we'll check for a mutex on the cache
+                try {
                     gotCompeteLock = GotCompeteLock(cache, key);
                 }
-                finally
-                {
+                finally {
                     Monitor.Exit(nullLoadLock);
                 }
             }
 
-            if (gotCompeteLock)
-            {
+            if (gotCompeteLock) {
                 var old = possiblyStale.Data;
-                var task = new Task(delegate
-                {
+                var task = new Task(delegate {
                     lock (nullLoadLock) // holding this lock allows us to locally short-circuit all the other threads that come asking
                     {
-                        try
-                        {
+                        try {
                             var updated = new GetSetWrapper<T>();
-                            using (var ctx = new MicroContext())
-                            {
+                            using (var ctx = new MicroContext()) {
                                 updated.Data = lookup(old, ctx);
                                 updated.StaleAfter = DateTime.UtcNow + TimeSpan.FromSeconds(durationSecs);
                             }
                             cache.Remove(key);
                             cache.Set(key, updated, durationSecs + serveStaleDataSecs);
                         }
-                        finally
-                        {
+                        finally {
                             ReleaseCompeteLock(cache, key);
                         }
                     }
                 });
-                task.ContinueWith(t =>
-                {
-                    if (t.IsFaulted)
-                    {
+                task.ContinueWith(t => {
+                    if (t.IsFaulted) {
                         Interlocked.Increment(ref totalGetSetAsyncError);
                         Current.LogException(t.Exception);
                     }
-                    else
-                    {
+                    else {
                         Interlocked.Increment(ref totalGetSetAsyncSuccess);
                     }
                 });
@@ -485,11 +472,9 @@ namespace StackExchange.Opserver
         private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
         public static string TraceDescription(this CommandTrace trace, int? truncateTo = null)
         {
-            if (truncateTo != null)
-            {
+            if (truncateTo != null) {
                 Match match;
-                if (trace.Arguments.Length >= 4 && (match = _traceRegex.Match(trace.Arguments[3])).Success)
-                {
+                if (trace.Arguments.Length >= 4 && (match = _traceRegex.Match(trace.Arguments[3])).Success) {
                     var str = string.Concat(string.Join(" ", trace.Arguments.Take(2)), " ", match.Groups[1].Value);
                     var bytesTotal = int.Parse(match.Groups[2].Value) + match.Groups[1].Value.Length;
                     return $"{str.TruncateWithEllipsis(truncateTo.Value)} ({bytesTotal.Pluralize("byte")} total)";
@@ -505,7 +490,7 @@ namespace StackExchange.Opserver
     {
         private const int DefaultPrecision = 2;
         private static readonly IList<string> Units = new List<string> { "", "K", "M", "G", "T" };
-        
+
         /// <summary>
         /// Formats the value as a filesize in bytes (KB, MB, etc.)
         /// </summary>
@@ -514,7 +499,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this int bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this int bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>
@@ -525,7 +510,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this long bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this long bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>
@@ -536,7 +521,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this float bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this float bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>

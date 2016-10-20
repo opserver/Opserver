@@ -13,24 +13,22 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get { return _dataProviders?.Any(p => p.HasData) ?? false; }
         }
-        
+
         private static readonly List<DashboardDataProvider> _dataProviders;
-    
+
         static DashboardData()
         {
             _dataProviders = new List<DashboardDataProvider>();
-            if (!Current.Settings.Dashboard.Enabled)
-            {
+            if (!Current.Settings.Dashboard.Enabled) {
                 _dataProviders.Add(new EmptyDataProvider("EmptyDataProvider"));
                 return;
             }
             var providers = Current.Settings.Dashboard.Providers;
 
-            foreach (var p in providers.All)
-            {
+            foreach (var p in providers.All) {
                 p?.Normalize();
             }
-            
+
             // Add each provider type here
             if (providers.Bosun != null)
                 _dataProviders.Add(new BosunDataProvider(providers.Bosun));
@@ -38,7 +36,8 @@ namespace StackExchange.Opserver.Data.Dashboard
                 _dataProviders.Add(new OrionDataProvider(providers.Orion));
             if (providers.WMI != null)
                 _dataProviders.Add(new WmiDataProvider(providers.WMI));
-
+            if (providers.Aliyun != null)
+                _dataProviders.Add(new AliyunDataProvider(providers.Aliyun));
 
             _dataProviders.ForEach(p => p.TryAddToGlobalPollers());
         }
@@ -75,8 +74,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         private static T FirstById<T>(Func<DashboardDataProvider, T> fetch) where T : class
         {
             if (!Current.Settings.Dashboard.Enabled) return null;
-            foreach (var p in _dataProviders)
-            {
+            foreach (var p in _dataProviders) {
                 var i = fetch(p);
                 if (i != null) return i;
             }

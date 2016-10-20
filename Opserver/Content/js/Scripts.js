@@ -1478,7 +1478,7 @@ Status.HAProxy = (function () {
     };
 
     var chartFunctions = {
-        tooltipTimeFormat: d3.time.format.utc('%A, %b %d %H:%M')
+        tooltipTimeFormat: d3.time.format('%A, %b %d %H:%M')
     };
 
     var waveHtml = '<div class="sk-wave loader"><div></div><div></div><div></div><div></div><div></div></div>',
@@ -1709,18 +1709,18 @@ Status.HAProxy = (function () {
                 width = options.width - margin.left - margin.right;
                 height = options.height - margin.top - margin.bottom;
 
-                var timeFormats = d3.time.format.utc.multi([
-                    ['.%L', function (d) { return d.getUTCMilliseconds(); }],
-                    [':%S', function (d) { return d.getUTCSeconds(); }],
-                    ['%H:%M', function (d) { return d.getUTCMinutes(); }],
-                    ['%H:%M', function (d) { return d.getUTCHours(); }],
-                    ['%a %d', function (d) { return d.getUTCDay() && d.getUTCDate() !== 1; }],
-                    ['%b %d', function (d) { return d.getUTCDate() !== 1; }],
-                    ['%B', function (d) { return d.getUTCMonth(); }],
+                var timeFormats = d3.time.format.multi([
+                    ['.%L', function (d) { return d.getMilliseconds(); }],
+                    [':%S', function (d) { return d.getSeconds(); }],
+                    ['%H:%M', function (d) { return d.getMinutes(); }],
+                    ['%H:%M', function (d) { return d.getHours(); }],
+                    ['%a %d', function (d) { return d.getDay() && d.getDate() !== 1; }],
+                    ['%b %d', function (d) { return d.getDate() !== 1; }],
+                    ['%B', function (d) { return d.getMonth(); }],
                     ['%Y', function () { return true; }]
                 ]);
 
-                x = d3.time.scale.utc().range([0, width]);
+                x = d3.time.scale().range([0, width]);
                 y = d3.scale.linear().range([height, 0]);
                 yr = d3.scale.linear().range([height, 0]);
 
@@ -1762,7 +1762,7 @@ Status.HAProxy = (function () {
                 if (!options.live) { // Summary elements
                     margin2 = { top: options.height - 77, right: 10, bottom: 20, left: options.leftMargin };
                     height2 = options.height - margin2.top - margin2.bottom;
-                    x2 = d3.time.scale.utc().range([0, width]);
+                    x2 = d3.time.scale().range([0, width]);
                     y2 = d3.scale.linear().range([height2, 0]);
                     xAxis2 = d3.svg.axis().scale(x2).orient('bottom').tickFormat(timeFormats);
 
@@ -2061,7 +2061,7 @@ Status.HAProxy = (function () {
                 var pos = d3.mouse(this),
                     date = x.invert(pos[0]),
                     bisector = d3.bisector(function(d) { return d.date; }).left,
-                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">UTC</span></div>',
+                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">LOCAL</span></div>',
                     data = options.ajaxZoom ? curData.points : curData.summary,
                     index = bisector(data, date, 1), // bisect the curData array to get the index of the hovered date
                     dateBefore = data[Math.max(index - 1, 0)], // get the date before the hover
@@ -2332,7 +2332,7 @@ Status.HAProxy = (function () {
                 width = options.width - margin.left - margin.right;
                 height = options.height - margin.top - margin.bottom;
 
-                x = d3.time.scale.utc().range([0, width]);
+                x = d3.time.scale().range([0, width]);
                 y = d3.scale.linear().range([height, 0]);
 
                 xAxis = d3.svg.axis().scale(x).orient('bottom');
@@ -2449,7 +2449,7 @@ Status.HAProxy = (function () {
                 var pos = d3.mouse(this),
                     date = x.invert(pos[0]),
                     bisector = d3.bisector(function (d) { return d.date; }).left,
-                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">UTC</span></div>';
+                    tooltip = '<div class="tooltip-date">' + chartFunctions.tooltipTimeFormat(date) + ' <span class="text-muted">LOCAL</span></div>';
 
                 // align the moons! or at least the series hover dots
                 series.forEach(function (s) {
