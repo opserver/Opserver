@@ -69,12 +69,16 @@ namespace StackExchange.Opserver.Models
                         result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
                         result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
 
+                        if (Current.Security.IsInternalIP(Current.RequestIP) || Current.Request.IsLocal)
+                        {
+                            result |= Roles.InternalRequest;
+                        }
+
                         _role = result;
                     }
                 }
-                return Current.Security.IsInternalIP(Current.RequestIP)
-                           ? _role.Value | Roles.InternalRequest
-                           : _role.Value;
+
+                return _role.Value;
             }
         }
 
