@@ -113,8 +113,12 @@
                     @pollingInfo.TotalPollers.ToComma()
                     <label>Caches <span class="text-muted">(<a href="@Url.Action(nameof(HomeController.AboutCaches))">view</a>)</span></label>
                 </div>
-                <h6 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h6>
-                <ul class="list-group">
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">@pollingInfo.NodeCount.Pluralize("Node")</div>
+            <div class="panel-body small">
+                <ul class="list-group col-xs-12">
                     @foreach (var ng in pollingInfo.NodeBreakdown)
                     {
                         <li class="list-group-item">
@@ -155,18 +159,36 @@
                         }
                     </li>
                     <li class="list-group-item">
-                        <span class="badge">@Current.Security.InternalNetworks.Count.ToComma()</span>
-                        <span class="text-muted">Internal Networks</span>
-                    </li>
-                    <li class="list-group-item">
                         <span class="text-muted">Admins:</span> @(SiteSettings.AdminGroups?.Replace(";", ", "))
+                        @if (SiteSettings.AdminGroups.IsNullOrEmpty())
+                        {
+                            <span class="text-muted">(none)</span>
+                        }
                     </li>
                     <li class="list-group-item">
                         <span class="text-muted">Viewers:</span> @(SiteSettings.ViewGroups?.Replace(";", ", "))
+                        @if (SiteSettings.ViewGroups.IsNullOrEmpty())
+                        {
+                            <span class="text-muted">(none)</span>
+                        }
                     </li>
                 </ul>
             </div>
         </div>
+        @if (Current.Security.InternalNetworks.Count > 0)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading">Internal Networks</div>
+                <div class="panel-body small">
+                    <ul class="list-group col-xs-12">
+                        @foreach (var n in Current.Security.InternalNetworks)
+                        {
+                            <li class="list-group-item">@n</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
     </div>
     <div class="col-md-4">
         @if (s.Dashboard.Enabled)
