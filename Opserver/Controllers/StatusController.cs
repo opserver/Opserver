@@ -79,7 +79,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var s = Current.Settings;
 
-            if (s.Dashboard.Enabled && s.Dashboard.HasAccess())
+            if (s.Dashboard.Enabled && (s.Dashboard.HasAccess() || Current.User.IsInRole(Roles.InternalRequest)))
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
             if (s.SQL.Enabled && s.SQL.HasAccess())
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
