@@ -8516,6 +8516,9 @@ h6.page-header {
 .row.inverse-panels .panel .panel-body {
   background: white;
 }
+.list-group:last-child {
+  margin-bottom: inherit;
+}
 .panel {
   margin-bottom: 8px;
   -webkit-box-shadow: none;
