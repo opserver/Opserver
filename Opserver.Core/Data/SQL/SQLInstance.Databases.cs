@@ -66,10 +66,10 @@ namespace StackExchange.Opserver.Data.SQL
             DatabaseFetch<DatabaseTable>(databaseName);
 
         public LightweightCache<List<DatabaseView>> GetViewInfo(string databaseName) =>
-            DatabaseFetch<DatabaseView>(databaseName, 1.Minutes());
+            DatabaseFetch<DatabaseView>(databaseName, 60.Seconds());
 
         public LightweightCache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
-            DatabaseFetch<StoredProcedure>(databaseName, 1.Minutes());
+            DatabaseFetch<StoredProcedure>(databaseName, 60.Seconds());
 
         public LightweightCache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
             DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval);
@@ -90,7 +90,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         private LightweightCache<List<T>> DatabaseFetch<T>(string databaseName, TimeSpan? duration = null) where T : ISQLVersioned, new()
         {
-            return TimedCache(GetCacheKey(typeof(T).Name + "Info-" + databaseName),
+            return TimedCache(typeof(T).Name + "Info-" + databaseName,
                 conn =>
                 {
                     conn.ChangeDatabase(databaseName);

@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         private Cache<List<CommandTrace>> _slowLog;
         public Cache<List<CommandTrace>> SlowLog =>
-            _slowLog ?? (_slowLog = GetRedisCache(1.Minutes(), async () =>
+            _slowLog ?? (_slowLog = GetRedisCache(60.Seconds(), async () =>
             {
                 //TODO: Remove when StackExchange.Redis gets profiling
                 using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch.ToString()))

@@ -32,6 +32,14 @@ namespace StackExchange.Opserver
             }
         }
 
+        public static async Task<T> QueryFirstOrDefaultAsync<T>(this DbConnection conn, string sql, dynamic param = null, int? commandTimeout = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
+        {
+            using (await conn.EnsureOpenAsync().ConfigureAwait(false))
+            {
+                return await conn.QueryFirstOrDefaultAsync<T>(MarkSqlString(sql, fromFile, onLine, comment), param as object, transaction, commandTimeout).ConfigureAwait(false);
+            }
+        }
+
         public static async Task<List<T>> QueryAsync<T>(this DbConnection conn, string sql, dynamic param = null, int? commandTimeout = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null)
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))

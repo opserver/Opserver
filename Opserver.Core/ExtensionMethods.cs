@@ -75,15 +75,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"
         /// </summary>
-        public static string Pluralize(this int count, string name, bool includeNumber = true)
-        {
-            var numString = includeNumber ? count.ToComma() + " " : null;
-            if (count == 1) return numString + name;
-            if (name.EndsWith("y")) return numString + name.Remove(name.Length - 1) + "ies";
-            if (name.EndsWith("s")) return numString + name.Remove(name.Length - 1) + "es";
-            if (name.EndsWith("ex")) return numString + name + "es";
-            return numString + name + "s";
-        }
+        public static string Pluralize(this int count, string name, bool includeNumber = true) => Pluralize((long)count, name, includeNumber);
 
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"

@@ -101,7 +101,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     await Task.WhenAll(c, m, n).ConfigureAwait(false); // parallel baby!
 
                     return result;
-                }, 1.Minutes(), 1.Hours()));
+                }, 60.Seconds(), 60.Minutes()));
             }
         }
         

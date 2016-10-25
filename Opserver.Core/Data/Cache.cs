@@ -224,22 +224,25 @@ namespace StackExchange.Opserver.Data
         // Temp: all async when views can be in MVC Core
         public static LightweightCache<T> Get(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
         {
-            // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
-            return Current.LocalCache.GetSet<LightweightCache<T>>(key, (old, ctx) =>
+            using (MiniProfiler.Current.Step("LightweightCache: " + key))
             {
-                var tc = new LightweightCache<T>();
-                try
+                // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
+                return Current.LocalCache.GetSet<LightweightCache<T>>(key, (old, ctx) =>
                 {
-                    tc.Data = getData();
-                }
-                catch (Exception e)
-                {
-                    tc.Error = e;
-                    Current.LogException(e);
-                }
-                tc.LastFetch = DateTime.UtcNow;
-                return tc;
-            }, duration, staleDuration);
+                    var tc = new LightweightCache<T>();
+                    try
+                    {
+                        tc.Data = getData();
+                    }
+                    catch (Exception e)
+                    {
+                        tc.Error = e;
+                        Current.LogException(e);
+                    }
+                    tc.LastFetch = DateTime.UtcNow;
+                    return tc;
+                }, duration, staleDuration);
+            }
         }
     }
 

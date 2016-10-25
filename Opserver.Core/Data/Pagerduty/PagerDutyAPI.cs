@@ -148,7 +148,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private Cache<List<PagerDutyPerson>> _allusers;
         public Cache<List<PagerDutyPerson>> AllUsers =>
-            _allusers ?? (_allusers = GetPagerDutyCache(1.Hours(),
+            _allusers ?? (_allusers = GetPagerDutyCache(60.Minutes(),
                     () => GetFromPagerDutyAsync("users/", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
             );
 

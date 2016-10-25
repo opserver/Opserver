@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private Cache<List<PagerDutyPerson>> _oncallusers;
         public Cache<List<PagerDutyPerson>> OnCallUsers =>
-            _oncallusers ?? (_oncallusers = GetPagerDutyCache(1.Hours(),
+            _oncallusers ?? (_oncallusers = GetPagerDutyCache(60.Minutes(),
                 () => GetFromPagerDutyAsync("users/on_call?include[]=contact_methods",
                     getFromJson: response => JSON.Deserialize<PagerDutyUserResponse>(response.ToString(), JilOptions).Users)
             ));

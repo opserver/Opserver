@@ -61,6 +61,8 @@ namespace StackExchange.Opserver.Data.SQL
             get
             {
                 yield return ServerProperties;
+                if (Version >= Singleton<SQLServerFeatures>.Instance.MinVersion)
+                    yield return ServerFeatures;
                 if (Version >= Singleton<SQLConfigurationOption>.Instance.MinVersion)
                     yield return Configuration;
                 if (Version >= Singleton<Database>.Instance.MinVersion)
@@ -73,8 +75,6 @@ namespace StackExchange.Opserver.Data.SQL
                     yield return PerfCounters;
                 if (Version >= Singleton<SQLMemoryClerkSummaryInfo>.Instance.MinVersion)
                     yield return MemoryClerkSummary;
-                if (Version >= Singleton<SQLServerFeatures>.Instance.MinVersion)
-                    yield return ServerFeatures;
                 if (Version >= Singleton<TraceFlagInfo>.Instance.MinVersion)
                     yield return TraceFlags;
                 if (Version >= Singleton<VolumeInfo>.Instance.MinVersion)
@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return GetSqlCache(memberName,
                 conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
-                () => Singleton<T>.Instance.MinVersion > Version,
+                () => Singleton<T>.Instance.MinVersion < Version,
                 cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
@@ -138,11 +138,12 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return GetSqlCache(memberName,
                 conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
-                () => Singleton<T>.Instance.MinVersion > Version,
+                () => Singleton<T>.Instance.MinVersion < Version,
                 cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
-                sourceLineNumber: sourceLineNumber
+                sourceLineNumber: sourceLineNumber,
+                logExceptions: true
             );
         }
         
@@ -176,16 +177,14 @@ namespace StackExchange.Opserver.Data.SQL
         }
 
         public LightweightCache<T> TimedCache<T>(string key, Func<DbConnection, T> get, TimeSpan duration, TimeSpan staleDuration) where T : class
-        {
-            return Cache.GetTimedCache(GetCacheKey(key),
-                () =>
+        => Cache.GetTimedCache(GetCacheKey(key),
+            () =>
+            {
+                using (var conn = GetConnection())
                 {
-                    using (var conn = GetConnection())
-                    {
-                        return get(conn);
-                    }
-                }, duration, staleDuration);
-        }
+                    return get(conn);
+                }
+            }, duration, staleDuration);
 
         public override string ToString() => Name;
     }
