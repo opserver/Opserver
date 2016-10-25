@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public string InstanceId { get; set; }
         }
-        
+
         public override async Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = default(int?))
         {
             var aliyunNode = node as AliyunNode;
@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            throw new NotImplementedException();
+            yield break;
         }
 
         protected override string GetMonitorStatusReason()
