@@ -106,7 +106,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Title = n.PrettyName,
                             Date = i.LastAbnormalTime.ToDateTime(),
                             Description = i.Subject,
-                            MonitorStatus = GetStatusFromString(i.Status)
+                            MonitorStatus = i.Active ? MonitorStatus.Good : GetStatusFromString(i.Status)
                         }).ToList();
                     }
 
@@ -288,7 +288,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private NodeStatus GetNodeStatus(BosunHost host)
         {
-            if (host.OpenIncidents?.Count > 0)
+            if (host.OpenIncidents?.Count(i => i.Active) > 0)
                 return NodeStatus.Warning;
             if (host.ICMPData?.Values.All(p => p.TimedOut) == true)
                 return NodeStatus.Unreachable;
