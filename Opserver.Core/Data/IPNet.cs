@@ -1,9 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Text;
 
 namespace StackExchange.Opserver.Data
 {
@@ -195,10 +196,14 @@ namespace StackExchange.Opserver.Data
             public IPNetParseException(string msg, params object[] format) : base(string.Format(msg, format)) { }
         }
 
+        [DataContract]
         public struct TinyIPAddress : IEquatable<TinyIPAddress>, IComparable<TinyIPAddress>
         {
+            [DataMember(Order = 1)]
             private readonly uint? IPv4Address;
+            [DataMember(Order = 2)]
             private readonly ulong? FirstV6Leg;
+            [DataMember(Order = 3)]
             private readonly ulong? LastV6Leg;
 
             public AddressFamily AddressFamily => IPv4Address.HasValue ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
@@ -207,42 +212,28 @@ namespace StackExchange.Opserver.Data
             {
                 get
                 {
+                    StringBuilder sb;
                     if (IPv4Address.HasValue)
                     {
-                        var ba = new BitArray(new[] {
-						(byte)(IPv4Address.Value >> 24),
-						(byte)(IPv4Address.Value >> 16),
-						(byte)(IPv4Address.Value >> 8),
-						(byte)(IPv4Address.Value)
-					});
-                        var bits = new bool[32];
-                        ba.CopyTo(bits, 0);
-                        return string.Concat(bits.Select(b => b ? "1" : "0"));
+                        sb = StringBuilderCache.Get(32);
+                        for (var i = 0; i < 32; i++)
+                        {
+                            sb.Append((IPv4Address.Value >> (31 - i)) & 1);
+                        }
                     }
                     else
                     {
-                        var ba = new BitArray(new[] {
-						(byte)(FirstV6Leg.Value >> 56),
-						(byte)(FirstV6Leg.Value >> 48),
-						(byte)(FirstV6Leg.Value >> 40),
-						(byte)(FirstV6Leg.Value >> 32),
-						(byte)(FirstV6Leg.Value >> 24),
-						(byte)(FirstV6Leg.Value >> 16),
-						(byte)(FirstV6Leg.Value >> 8),
-						(byte)(FirstV6Leg.Value),
-						(byte)(LastV6Leg.Value >> 56),
-						(byte)(LastV6Leg.Value >> 48),
-						(byte)(LastV6Leg.Value >> 40),
-						(byte)(LastV6Leg.Value >> 32),
-						(byte)(LastV6Leg.Value >> 24),
-						(byte)(LastV6Leg.Value >> 16),
-						(byte)(LastV6Leg.Value >> 8),
-						(byte)(LastV6Leg.Value)
-					});
-                        var bits = new bool[128];
-                        ba.CopyTo(bits, 0);
-                        return string.Concat(bits.Select(b => b ? "1" : "0"));
+                        sb = StringBuilderCache.Get(128);
+                        for (var i = 0; i < 64; i++)
+                        {
+                            sb.Append((FirstV6Leg.Value >> (63 - i)) & 1);
+                        }
+                        for (var i = 0; i < 64; i++)
+                        {
+                            sb.Append((LastV6Leg.Value >> (63 - i)) & 1);
+                        }
                     }
+                    return sb.ToStringRecycle();
                 }
             }
 
@@ -425,14 +416,8 @@ namespace StackExchange.Opserver.Data
                 return (a.IPv4Address.HasValue && b.IPv4Address.HasValue && a.IPv4Address != b.IPv4Address)
                     || (a.FirstV6Leg.HasValue && b.FirstV6Leg.HasValue && (a.FirstV6Leg != b.FirstV6Leg || a.LastV6Leg != b.LastV6Leg));
             }
-            public static bool operator <=(TinyIPAddress a, TinyIPAddress b)
-            {
-                return Compare(a, b) <= 0;
-            }
-            public static bool operator >=(TinyIPAddress a, TinyIPAddress b)
-            {
-                return Compare(a, b) >= 0;
-            }
+            public static bool operator <=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) <= 0;
+            public static bool operator >=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) >= 0;
 
             public override int GetHashCode()
             {
