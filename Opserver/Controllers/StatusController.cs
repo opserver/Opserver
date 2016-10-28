@@ -139,7 +139,12 @@ namespace StackExchange.Opserver.Controllers
             var pageTitle = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
             ViewData[ViewDataKeys.PageTitle] = pageTitle;
         }
-        
+
+        protected override void HandleUnknownAction(string actionName)
+        {
+            PageNotFound().ExecuteResult(ControllerContext);
+        }
+
         /// <summary>
         /// returns ContentResult with the parameter 'content' as its payload and "text/plain" as media type.
         /// </summary>

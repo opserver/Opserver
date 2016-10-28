@@ -13,7 +13,6 @@ using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling.Mvc;
-using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Opserver
 {
@@ -32,7 +31,7 @@ namespace StackExchange.Opserver
             routes.MapMvcAttributeRoutes();
 
             // MUST be the last route as a catch-all!
-            routes.MapRoute("", "{*url}", new { controller = "Error", action = "PageNotFound" });
+            routes.MapRoute("", "{*url}", new { controller = "Home", action = "PageNotFound" });
         }
 
         private static void RegisterBundles(BundleCollection bundles)
