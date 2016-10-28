@@ -72,7 +72,7 @@ namespace StackExchange.Opserver.Models
                         _role = result;
                     }
                 }
-                return Current.Security.IsInternalIP(Current.RequestIP)
+                return Current.Security.IsInternalIP(Current.RequestIP) || Current.Request.IsLocal
                            ? _role.Value | Roles.InternalRequest
                            : _role.Value;
             }
