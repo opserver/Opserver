@@ -44,9 +44,8 @@ namespace StackExchange.Opserver.Helpers
         {
             var alsoAllow = httpContext.Items.Contains(ItemsKey) ? (Roles)httpContext.Items[ItemsKey] : Roles.None;
             var allAllow = Roles | alsoAllow;
-            
-            var u = Current.User;
-            return u != null && u.IsInRole(allAllow); // when false, HandleUnauthorizedRequest executes
+
+            return Current.IsInRole(allAllow); // when false, HandleUnauthorizedRequest executes
         }
 
         protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)

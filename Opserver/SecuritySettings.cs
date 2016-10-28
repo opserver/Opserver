@@ -26,8 +26,12 @@ namespace StackExchange.Opserver
         [ConfigurationProperty("authPassword"), DefaultValue("")]
         public string AuthPassword => this["authPassword"] as string ?? "";
 
+        [ConfigurationProperty("apiKey"), DefaultValue("")]
+        public string ApiKey => this["apiKey"] as string ?? "";
+
         [ConfigurationProperty("InternalNetworks")]
         public SettingsCollection<Network> InternalNetworks => this["InternalNetworks"] as SettingsCollection<Network>;
+        
 
         public class Network : ConfigurationElement, ISettingsElementNamed
         {

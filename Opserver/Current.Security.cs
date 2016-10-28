@@ -1,4 +1,5 @@
-﻿using StackExchange.Opserver.Models.Security;
+﻿using StackExchange.Opserver.Models;
+using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver
 {
@@ -6,7 +7,7 @@ namespace StackExchange.Opserver
     {
         private static SecurityProvider _security;
         public static SecurityProvider Security => _security ?? (_security = GetSecurityProvider());
-
+        
         private static SecurityProvider GetSecurityProvider()
         {
             if (SecuritySettings.Current == null || !SecuritySettings.Current.Enabled)
@@ -22,6 +23,40 @@ namespace StackExchange.Opserver
                 default:
                     return new EveryonesReadOnlyProvider();
             }
+        }
+        
+        public static bool IsInRole(Roles roles)
+        {
+            if (User == null)
+            {
+                return RequestRoles.HasFlag(roles);
+            }
+            return ((User.Role | RequestRoles) & roles) != Roles.None || User.Role.HasFlag(Roles.GlobalAdmin);
+        }
+
+        public static Roles RequestRoles
+        {
+            get
+            {
+                var roles = Context.Items[nameof(RequestRoles)];
+                if (roles != null) return (Roles)roles;
+
+                var result = Roles.None;
+                if (Request.IsLocal) result |= Roles.LocalRequest;
+                if (Security.IsInternalIP(RequestIP)) result |= Roles.InternalRequest;
+                if (IsValidApiRequest()) result |= Roles.ApiRequest;
+
+                Context.Items[nameof(RequestRoles)] = result;
+                return result;
+            }
+        }
+
+        public static string ApiKey { get; } = SecuritySettings.Current?.ApiKey;
+
+        public static bool IsValidApiRequest()
+        {
+            // Only treat this as valid if there is an API key set at all
+            return ApiKey.HasValue() && string.Equals(ApiKey, Request?.QueryString["key"]);
         }
     }
 }

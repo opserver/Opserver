@@ -30,12 +30,7 @@ namespace StackExchange.Opserver.Models
         public bool IsInRole(string role)
         {
             Roles r;
-            return Enum.TryParse(role, out r) && IsInRole(r);
-        }
-
-        public bool IsInRole(Roles roles)
-        {
-            return (Role & roles) != Roles.None || Role.HasFlag(Roles.GlobalAdmin);
+            return Enum.TryParse(role, out r) && Current.IsInRole(r);
         }
 
         private Roles? _role;
@@ -72,9 +67,8 @@ namespace StackExchange.Opserver.Models
                         _role = result;
                     }
                 }
-                return Current.Security.IsInternalIP(Current.RequestIP) || Current.Request.IsLocal
-                           ? _role.Value | Roles.InternalRequest
-                           : _role.Value;
+
+                return _role.Value;
             }
         }
 
@@ -85,10 +79,10 @@ namespace StackExchange.Opserver.Models
             return Roles.None;
         }
 
-        public bool IsGlobalAdmin => IsInRole(Roles.GlobalAdmin);
-        public bool IsExceptionAdmin => IsInRole(Roles.ExceptionsAdmin);
-        public bool IsHAProxyAdmin => IsInRole(Roles.ExceptionsAdmin);
-        public bool IsRedisAdmin => IsInRole(Roles.RedisAdmin);
-        public bool IsSQLAdmin => IsInRole(Roles.SQLAdmin);
+        public bool IsGlobalAdmin => Current.IsInRole(Roles.GlobalAdmin);
+        public bool IsExceptionAdmin => Current.IsInRole(Roles.ExceptionsAdmin);
+        public bool IsHAProxyAdmin => Current.IsInRole(Roles.ExceptionsAdmin);
+        public bool IsRedisAdmin => Current.IsInRole(Roles.RedisAdmin);
+        public bool IsSQLAdmin => Current.IsInRole(Roles.SQLAdmin);
     }
 }

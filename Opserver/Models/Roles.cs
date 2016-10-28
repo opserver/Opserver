@@ -33,8 +33,10 @@ namespace StackExchange.Opserver.Models
         PagerDuty = 1 << 17,
         PagerDutyAdmin = 1 << 18,
 
-        InternalRequest = 1 << 19,
+        LocalRequest = 1 << 19,
+        InternalRequest = 1 << 20,
+        ApiRequest = 1 << 21,
 
-        GlobalAdmin = 1 << 20
+        GlobalAdmin = 1 << 22
     }
 }
