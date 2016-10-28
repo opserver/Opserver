@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Controllers
         /// <summary>
         /// Access our error log.
         /// </summary>
-        [Route("admin/errors/{resource?}/{subResource?}")]
+        [Route("admin/errors/{resource?}/{subResource?}"), AlsoAllow(Roles.LocalRequest)]
         public ActionResult InvokeErrorHandler(string resource, string subResource)
         {
             var context = System.Web.HttpContext.Current;
