@@ -8,7 +8,7 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public class HAProxyInstance : PollNode
+    public partial class HAProxyInstance : PollNode, INodeRoleProvider
     {
         public string Name => Settings.Name;
         public string Description => Settings.Description;

@@ -48,7 +48,14 @@ namespace StackExchange.Opserver.Data
         /// <returns>Whether the node was added to the list of global pollers</returns>
         public bool TryAddToGlobalPollers()
         {
-            return AddedToGlobalPollers = PollingEngine.TryAdd(this);
+            AddedToGlobalPollers = PollingEngine.TryAdd(this);
+            RegisterProviders();
+            return AddedToGlobalPollers;
+        }
+
+        private void RegisterProviders()
+        {
+            (this as INodeRoleProvider)?.Register();
         }
         
         private readonly object _monitorStatusLock = new object();

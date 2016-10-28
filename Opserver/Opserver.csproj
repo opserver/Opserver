@@ -148,6 +148,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controllers\ApiController.cs" />
     <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Helpers\Theme.cs" />
