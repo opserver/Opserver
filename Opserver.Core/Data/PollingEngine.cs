@@ -151,9 +151,16 @@ namespace StackExchange.Opserver.Data
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
+                // TODO: Refactor task kickoff, since Parallel enumeration is starved here
                 Parallel.ForEach(AllPollNodes, n =>
                 {
-                    n.PollAndForget(force);
+                    n.PollAsync(force).ContinueWith(t =>
+                        {
+                            if (t.IsFaulted) Current.LogException(t.Exception);
+                        },
+                        CancellationToken.None,
+                        TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
                 });
             }
             catch (Exception e)
@@ -173,9 +180,8 @@ namespace StackExchange.Opserver.Data
         /// <param name="nodeType">Type of node to poll</param>
         /// <param name="key">Unique key of the node to poll</param>
         /// <param name="cacheGuid">If included, the specific cache to poll</param>
-        /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
         /// <returns>Whether the poll was successful</returns>
-        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
+        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null)
         {
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
             if (node == null) return false;
@@ -190,14 +196,7 @@ namespace StackExchange.Opserver.Data
                 return cache?.LastPollSuccessful ?? false;
             }
             // Polling an entire server
-            if (sync)
-            {
-                await node.PollAsync(true);
-            }
-            else
-            {
-                node.PollAndForget(true);
-            }
+            await node.PollAsync(true);
             return true;
         }
         

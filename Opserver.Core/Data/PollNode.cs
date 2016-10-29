@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data
 {
     public abstract partial class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
     {
-        private int _totalPolls, _totalCachePolls;
+        private int _totalPolls;
 
         public abstract int MinSecondsBetweenPolls { get; }
         public abstract string NodeType { get; }
@@ -133,22 +133,7 @@ namespace StackExchange.Opserver.Data
         private int _isPolling;
         public bool IsPolling => _isPolling > 0;
         public string PollStatus { get; protected set; }
-
-        public virtual void PollAndForget(bool force = false)
-        {
-            PollAsync(force).ContinueWith(t =>
-            {
-                if (t.IsFaulted)
-                {
-                    Current.LogException(t.Exception);
-                }
-                Interlocked.Add(ref _totalCachePolls, 1);
-            },
-            CancellationToken.None,
-            TaskContinuationOptions.ExecuteSynchronously,
-            TaskScheduler.Default);
-        }
-
+        
         public virtual async Task PollAsync(bool force = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
