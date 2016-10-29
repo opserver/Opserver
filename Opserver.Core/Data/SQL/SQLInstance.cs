@@ -6,7 +6,6 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Dapper;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
 
