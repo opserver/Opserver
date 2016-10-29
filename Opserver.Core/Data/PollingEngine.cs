@@ -9,11 +9,11 @@ namespace StackExchange.Opserver.Data
     public static class PollingEngine
     {
         private static readonly object _addLock = new object();
+        private static readonly object _pollAllLock = new object();
+        public static HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
 
-        public static HashSet<PollNode> AllPollNodes;
         private static Thread _globalPollingThread;
         private static volatile bool _shuttingDown;
-        private static readonly object _pollAllLock;
         private static long _totalPollIntervals;
         internal static long _activePolls;
         private static DateTime? _lastPollAll;
@@ -21,8 +21,6 @@ namespace StackExchange.Opserver.Data
 
         static PollingEngine()
         {
-            _pollAllLock = new object();
-            AllPollNodes = new HashSet<PollNode>();
             StartPolling();
         }
         

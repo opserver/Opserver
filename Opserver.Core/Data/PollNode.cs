@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data
                             var handler = MonitorStatusChanged;
                             handler?.Invoke(this, new MonitorStatusArgs
                             {
-                                OldMonitorStatus = PreviousMonitorStatus.Value,
+                                OldMonitorStatus = PreviousMonitorStatus ?? MonitorStatus.Unknown,
                                 NewMonitorStatus = CachedMonitorStatus.Value
                             });
                             PreviousMonitorStatus = CachedMonitorStatus;
@@ -130,7 +130,7 @@ namespace StackExchange.Opserver.Data
             CachedMonitorStatus = null; // nullable type, not instruction level swappable
         }
 
-        protected int _isPolling;
+        private int _isPolling;
         public bool IsPolling => _isPolling > 0;
         public string PollStatus { get; protected set; }
 
@@ -153,13 +153,17 @@ namespace StackExchange.Opserver.Data
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
             {
-                // Don't poll more than once every n seconds, that's just rude
-                if (!force && DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls)) 
-                    return;
-                 
-                // If we're seeing a lot of poll failures in a row, back the hell off
-                if (!force && PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
-                    return;
+                // If not forced, perform our "should-run" checks
+                if (!force)
+                {
+                    // Don't poll more than once every n seconds, that's just rude
+                    if (DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls))
+                        return;
+
+                    // If we're seeing a lot of poll failures in a row, back the hell off
+                    if (PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
+                        return;
+                }
 
                 // Prevent multiple poll threads for this node from running at once
                 if (Interlocked.CompareExchange(ref _isPolling, 1, 0) != 0)
@@ -198,12 +202,11 @@ namespace StackExchange.Opserver.Data
                         return;
                     }
 
+                    PollStatus = "DataPollers Queued (Now awaiting)";
                     // Await all children (this itself will be a background fire and forget if desired
                     await Task.WhenAll(tasks);
                     PollStatus = "DataPollers Complete (Awaited)";
-
-                    // Old
-
+                    
                     LastPoll = DateTime.UtcNow;
                     Polled?.Invoke(this, new PollResultArgs());
                     Interlocked.Increment(ref _totalPolls);
