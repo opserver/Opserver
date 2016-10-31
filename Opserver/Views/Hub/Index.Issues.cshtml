@@ -1,5 +1,5 @@
 @{
-    var issues = IssueProvider.GetIssues().OrderByWorst().ToList();
+    var issues = Issue.GetAll().OrderByWorst().ToList();
 }
 <div class="panel panel-default">
     <div class="panel-heading">@((issues.Count > 0 ? MonitorStatus.Warning : MonitorStatus.Good).IconSpan()) @issues.Count.Pluralize("Issue")</div>

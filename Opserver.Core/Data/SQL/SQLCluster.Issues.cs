@@ -1,0 +1,17 @@
+﻿using System.Collections.Generic;
+
+namespace StackExchange.Opserver.Data.SQL
+{
+    public partial class SQLCluster : IIssuesProvider
+    {
+        string IIssuesProvider.Name => "SQL";
+
+        public IEnumerable<Issue> GetIssues()
+        {
+            foreach (var ag in AvailabilityGroups.WithIssues())
+            {
+                yield return new Issue<SQLNode.AGInfo>(ag, ag.Name) { IsCluster = true };
+            }
+        }
+    }
+}

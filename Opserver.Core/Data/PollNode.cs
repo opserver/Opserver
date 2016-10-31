@@ -56,6 +56,7 @@ namespace StackExchange.Opserver.Data
         private void RegisterProviders()
         {
             (this as INodeRoleProvider)?.Register();
+            (this as IIssuesProvider)?.Register();
         }
         
         private readonly object _monitorStatusLock = new object();

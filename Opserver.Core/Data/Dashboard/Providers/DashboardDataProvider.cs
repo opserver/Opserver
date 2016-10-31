@@ -17,12 +17,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
     }
 
-    public abstract class DashboardDataProvider : PollNode, IIssuesProviderInstance
+    public abstract class DashboardDataProvider : PollNode, IIssuesProvider
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
         
-        public bool Enabled => true;
         public virtual IEnumerable<Issue> GetIssues()
         {
             foreach (var n in AllNodes)
@@ -44,7 +43,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         protected DashboardDataProvider(IProviderSettings settings) : base(settings.Name + "Dashboard")
         {
             Name = settings.Name;
-            IssueProvider.AddProvider(this);
         }
 
         /// <summary>
