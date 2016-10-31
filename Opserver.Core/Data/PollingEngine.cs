@@ -144,24 +144,26 @@ namespace StackExchange.Opserver.Data
             }
         }
         
-        public static void PollAllAndForget(bool force = false)
+        public static void PollAllAndForget()
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
-                // TODO: Refactor task kickoff, since Parallel enumeration is starved here
-                Parallel.ForEach(AllPollNodes, n =>
+                foreach (var n in AllPollNodes)
                 {
-                    n.PollAsync(force).ContinueWith(t =>
-                        {
-                            if (t.IsFaulted) Current.LogException(t.Exception);
-                        },
-                        CancellationToken.None,
-                        TaskContinuationOptions.ExecuteSynchronously,
-                        TaskScheduler.Default);
-                });
+                    if (!n.IsPolling)
+                    {
+                        n.PollAsync().ContinueWith(t =>
+                            {
+                                if (t.IsFaulted) Current.LogException(t.Exception);
+                            },
+                            CancellationToken.None,
+                            TaskContinuationOptions.ExecuteSynchronously,
+                            TaskScheduler.Default);
+                    }
+                }
             }
             catch (Exception e)
             {

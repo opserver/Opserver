@@ -20,10 +20,10 @@
 }
 <h5 class="page-header">
     Pollers
+    <span class="text-muted small">(@pollingInfo.NodeCount.Pluralize("node"), @pollingInfo.TotalPollers.Pluralize("poller"), @pollingInfo.ActivePolls.ToComma() active)</span>
     <span class="pull-right">
         <a href="?refresh=@(Model.AutoRefresh ? "false" : "true")">@(Model.AutoRefresh ? "Disable" : "Enable") Auto Refresh</a>
         <a href="#" class="js-reload-link">Reload</a>
-        <a href="#" class="js-poll-all">Poll All</a>
     </span>
 </h5>
 <table class="table table-hover table-responsive text-nowrap table-super-condensed">

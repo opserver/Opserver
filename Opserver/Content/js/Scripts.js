@@ -352,20 +352,6 @@
                 });
             }
             return false;
-        }).on('click', '.js-poll-all', function (e) {
-            e.preventDefault();
-            var $link = $(this);
-            if ($link.hasClass('disabled')) { return; }
-
-            bootbox.confirm('Are you sure you want to force poll all nodes?', function(result) {
-                if (result) {
-                    $link.text('').prependWaveLoader().addClass('disabled');
-                    $.post(Status.options.rootPath + 'poll/all')
-                        .done(function() {
-                            window.location.reload(true);
-                        });
-                }
-            });
         }).on('click', '.js-dropdown-actions', function (e) {
             e.preventDefault();
             e.stopPropagation();

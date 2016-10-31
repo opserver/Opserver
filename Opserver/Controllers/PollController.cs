@@ -29,19 +29,5 @@ namespace StackExchange.Opserver.Controllers
                 return JsonError("Error polling node: " + e.Message);
             }
         }
-
-        [Route("poll/all"), HttpPost, OnlyAllow(Roles.GlobalAdmin)]
-        public ActionResult PollDown()
-        {
-            try
-            {
-                PollingEngine.PollAllAndForget(true);
-                return Json(true);
-            }
-            catch (Exception e)
-            {
-                return JsonError("Error polling all nodes: " + e.Message);
-            }
-        }
     }
 }

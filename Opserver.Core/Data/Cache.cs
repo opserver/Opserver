@@ -41,17 +41,15 @@ namespace StackExchange.Opserver.Data
 
         public Task<T> PollAsync(bool force = false)
         {
-            if (force) _needsPoll = true;
-
             // First call polls data.
             if ((_hasData == 0 && Interlocked.CompareExchange(ref _hasData, 1, 0) == 0) || force)
             {
-                DataTask = UpdateAsync();
+                DataTask = UpdateAsync(force);
             }
             // Force polls and replaces data when done.
             else if (IsStale)
             {
-                return UpdateAsync().ContinueWith(_ =>
+                return UpdateAsync(false).ContinueWith(_ =>
                     {
                         DataTask = _;
                         return _.GetAwaiter().GetResult();
@@ -63,25 +61,24 @@ namespace StackExchange.Opserver.Data
             return DataTask;
         }
 
-        private async Task<T> UpdateAsync()
+        private async Task<T> UpdateAsync(bool force)
         {
-            Interlocked.Increment(ref PollingEngine._activePolls);
             PollStatus = "UpdateAsync";
-            if (!_needsPoll && !IsStale) return Data;
+            if (!force && !IsStale) return Data;
 
+            Interlocked.Increment(ref PollingEngine._activePolls);
             PollStatus = "Awaiting Semaphore";
             await _pollSemaphoreSlim.WaitAsync();
             bool errored = false;
             try
             {
-                if (!_needsPoll && !IsStale) return Data;
+                if (!force && !IsStale) return Data;
                 if (_isPolling) return Data;
                 CurrentPollDuration = Stopwatch.StartNew();
                 _isPolling = true;
                 PollStatus = "UpdateCache";
                 await _updateFunc();
                 PollStatus = "UpdateCache Complete";
-                _needsPoll = false;
                 Interlocked.Increment(ref _pollsTotal);
                 if (DataTask != null)
                     Interlocked.Increment(ref _pollsSuccessful);
@@ -90,7 +87,7 @@ namespace StackExchange.Opserver.Data
             {
                 var errorMessage = e.Message;
                 if (e.InnerException != null) errorMessage += "\n" + e.InnerException.Message;
-                SetFail(errorMessage);
+                SetFail(e, errorMessage);
                 errored = true;
             }
             finally
@@ -195,7 +192,7 @@ namespace StackExchange.Opserver.Data
 #endif
                         if (e.InnerException != null) errorMessage.AppendLine().Append(e.InnerException.Message);
                         PollStatus = "Fetch Failed";
-                        SetFail(errorMessage.ToStringRecycle());
+                        SetFail(e, errorMessage.ToStringRecycle());
                     }
                     owner.PollComplete(this, success);
                 }
@@ -254,9 +251,8 @@ namespace StackExchange.Opserver.Data
         public TimeSpan? CacheFailureDuration { get; set; } = TimeSpan.FromSeconds(15);
         public bool AffectsNodeStatus { get; set; }
         
-        public bool ShouldPoll => _needsPoll || IsStale && !_isPolling;
-
-        internal volatile bool _needsPoll = true;
+        public bool ShouldPoll => IsStale && !_isPolling;
+        
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
         public bool IsStale => (NextPoll ?? DateTime.MinValue) < DateTime.UtcNow;
@@ -285,11 +281,12 @@ namespace StackExchange.Opserver.Data
             ErrorMessage = "";
         }
 
-        internal void SetFail(string errorMessage)
+        internal void SetFail(Exception e, string errorMessage)
         {
             LastPoll = DateTime.UtcNow;
             NextPoll = DateTime.UtcNow.Add(CacheFailureDuration ?? CacheDuration);
             LastPollSuccessful = false;
+            Error = e;
             ErrorMessage = errorMessage;
         }
         public string PollStatus { get; internal set; }
