@@ -153,16 +153,17 @@ namespace StackExchange.Opserver.Data
             {
                 foreach (var n in AllPollNodes)
                 {
-                    if (!n.IsPolling)
+                    if (n.IsPolling)
                     {
-                        n.PollAsync().ContinueWith(t =>
-                            {
-                                if (t.IsFaulted) Current.LogException(t.Exception);
-                            },
-                            CancellationToken.None,
-                            TaskContinuationOptions.ExecuteSynchronously,
-                            TaskScheduler.Default);
+                        continue;
                     }
+                    n.PollAsync().ContinueWith(t =>
+                        {
+                            if (t.IsFaulted) Current.LogException(t.Exception);
+                        },
+                        CancellationToken.None,
+                        TaskContinuationOptions.ExecuteSynchronously,
+                        TaskScheduler.Default);
                 }
             }
             catch (Exception e)
