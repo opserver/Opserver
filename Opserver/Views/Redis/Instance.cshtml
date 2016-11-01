@@ -113,8 +113,8 @@
                         <div class="redis-instance">
                             @i.IconSpan() <a href="?node=@i.HostAndPort">@i.HostAndPort</a> <span class="text-muted">(Current)</span>
                         </div>
-                        var slaves = i.SlaveInstances;
-                        if (slaves.Count > 0)
+                        var slaves = i.SlaveInstances.Where(s => s != null);
+                        if (slaves.Any())
                         {
                             <div class="redis-instance">
                                 @foreach (var s in slaves)
