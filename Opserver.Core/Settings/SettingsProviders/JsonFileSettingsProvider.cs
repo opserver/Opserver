@@ -22,12 +22,9 @@ namespace StackExchange.Opserver.SettingsProviders
 
         public override T GetSettings<T>()
         {
-            object cached;
-            if (_settingsCache.TryGetValue(typeof (T), out cached))
-                return (T) cached;
-
             lock (_loadLock)
             {
+                object cached;
                 if (_settingsCache.TryGetValue(typeof (T), out cached))
                     return (T) cached;
 
