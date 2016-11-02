@@ -101,7 +101,7 @@ namespace StackExchange.Opserver.Data.SQL
             public string Category { get; internal set; }
             public JobStatuses? LastRunStatus { get; internal set; }
             public string LastRunMessage { get; internal set; }
-            public JobRunSources LastRunRequestedSource { get; internal set; }
+            public JobRunSources? LastRunRequestedSource { get; internal set; }
             public DateTime? LastRunRequestedDate { get; internal set; }
             public DateTime? LastStartDate { get; internal set; }
             public int? LastRunDurationSeconds { get; internal set; }

@@ -29,6 +29,7 @@
         <tbody>
             @foreach (var j in data.OrderByDescending(j => j.LastRunRequestedDate))
             {
+                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.GetDescription() : "Unknown";
                 <tr class="@j.RowClass()@(j.IsRunning ? " info" : null)@(j.IsEnabled ? "" : " text-muted")" data-guid="@j.JobId.ToString()" title="@if(!j.IsEnabled){<text>(DISABLED) 
 </text>}Job: @j.Name
 @j.Description
@@ -38,7 +39,7 @@
 Category: @j.Category
 Created: @j.DateCreated.ToZuluTime()
                             
-Last Run Initiated by: @j.LastRunRequestedSource.GetDescription()
+Last Run Initiated by: @lastInitiator
 Last Run Message: @j.LastRunMessage">
                     <td>@j.IconSpan()</td>
                     <td>@j.Name
@@ -49,14 +50,14 @@ Last Run Message: @j.LastRunMessage">
                     </td>
                     @if (j.IsRunning)
                     {
-                        <td>Running (@j.LastRunRequestedSource.GetDescription())</td>
+                        <td>Running (@lastInitiator)</td>
                         <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td></td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
                     }
                     else if (j.LastRunStatus.HasValue)
                     {
-                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.GetDescription().IsNullOrEmptyReturn("Unknown")) (@j.LastRunRequestedSource.GetDescription())</td>
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.GetDescription().IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
                         <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
@@ -94,5 +95,5 @@ Last Run Message: @j.LastRunMessage">
 }
 else
 {
-    <div class="no-content">No memory clerk information available</div>
+    <div class="no-content">No jobs information available</div>
 }
