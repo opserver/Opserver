@@ -9,17 +9,16 @@ namespace StackExchange.Opserver.Data.Dashboard
     public class DashboardModule : StatusModule
     {
         public static bool Enabled => Providers.Count > 0; // Non-empty?
-        public static List<DashboardDataProvider> Providers { get; }
+        public static List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
 
         static DashboardModule()
-        {
-            Providers = new List<DashboardDataProvider>();
-            if (!Current.Settings.Dashboard.Enabled)
+        {   
+            var providers = Current.Settings.Dashboard.Providers;
+            if (providers == null || !providers.Any())
             {
                 Providers.Add(new EmptyDataProvider("EmptyDataProvider"));
                 return;
             }
-            var providers = Current.Settings.Dashboard.Providers;
 
             foreach (var p in providers.All)
             {
@@ -33,7 +32,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 Providers.Add(new OrionDataProvider(providers.Orion));
             if (providers.WMI != null)
                 Providers.Add(new WmiDataProvider(providers.WMI));
-            
+
             Providers.ForEach(p => p.TryAddToGlobalPollers());
         }
 
