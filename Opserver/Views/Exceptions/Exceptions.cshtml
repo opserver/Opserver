@@ -24,16 +24,16 @@
         {
             @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
         }
-        @if (ExceptionModule.Stores?.Any() == true)
+        @if (ExceptionsModule.Stores?.Any() == true)
         {
-            @Helpers.PollNow(ExceptionModule.Stores?.First().NodeType)
+            @Helpers.PollNow(ExceptionsModule.Stores?.First().NodeType)
         }
     </h5>
     <div class="js-exception-counts">
         @{ Html.RenderPartial("Exceptions.Navigation", Model); }
     </div>
 </div>
-@if (ExceptionModule.Stores?.Any(s => s.MonitorStatus == MonitorStatus.Good) ?? false)
+@if (ExceptionsModule.Stores?.Any(s => s.MonitorStatus == MonitorStatus.Good) ?? false)
 {
     <div class="js-refresh" data-name="exceptions-list">
         @Html.Partial("Exceptions.Table", Model)

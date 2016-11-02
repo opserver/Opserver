@@ -152,7 +152,7 @@
     <Compile Include="Data\Elastic\ShardStates.cs" />
     <Compile Include="Data\Elastic\ElasticModule.cs" />
     <Compile Include="Data\Exceptions\ExceptionSorts.cs" />
-    <Compile Include="Data\Exceptions\ExceptionModule.cs" />
+    <Compile Include="Data\Exceptions\ExceptionsModule.cs" />
     <Compile Include="Data\HAProxy\HAProxyModule.cs" />
     <Compile Include="Data\HAProxy\HAProxyGroup.Issues.cs">
       <DependentUpon>HAProxyGroup.cs</DependentUpon>

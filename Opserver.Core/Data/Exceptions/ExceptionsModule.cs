@@ -3,13 +3,13 @@ using System.Linq;
 
 namespace StackExchange.Opserver.Data.Exceptions
 {
-    public class ExceptionModule : StatusModule
+    public class ExceptionsModule : StatusModule
     {
         public static bool Enabled => Stores.Count > 0;
 
         public static List<ExceptionStore> Stores { get; }
 
-        static ExceptionModule()
+        static ExceptionsModule()
         {
             Stores = Current.Settings.Exceptions.Stores
                 .Select(s => new ExceptionStore(s))

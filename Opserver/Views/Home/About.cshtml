@@ -286,7 +286,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
                     </ul>
                     @foreach (var store in s.Exceptions.Stores)
                     {
-                        var es = ExceptionModule.Stores.First(ess => ess.Name == store.Name);
+                        var es = ExceptionsModule.Stores.First(ess => ess.Name == store.Name);
                         <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
                         <ul class="list-group">
                             <li class="list-group-item">
