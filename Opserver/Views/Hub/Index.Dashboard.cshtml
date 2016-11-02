@@ -34,5 +34,27 @@
                 </tr>
             </tfoot>
         </table>
+        <table class="table table-super-condensed table-striped col-md-12">
+            <tbody>
+                <tr>
+                    <th>Node</th>
+                    <th>CPU</th>
+                    <th>Memory</th>
+                    <th>Network</th>
+                </tr>
+                @foreach (var n in nodes) {
+                    <tr>
+                        <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : null)Last Updated: @(n.LastSync?.ToRelativeTime())">
+                            @n.IconSpan()
+                            <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass().Nullify()">@n.PrettyName</a>
+                        </td>
+                        <td title="@n.ApplicationCPUTextSummary().Nullify()" class="@n.CPUMonitorStatus().TextClass().Nullify()">@(n.CPULoad?.ToString("n0")) %</td>
+                        <td>@(n.PercentMemoryUsed?.ToString("n2", CultureInfo.InvariantCulture))%</td>
+                        <td>@n.PrettyTotalNetwork()</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
     </div>
 </div>

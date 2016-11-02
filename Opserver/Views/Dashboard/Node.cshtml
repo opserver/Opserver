@@ -17,20 +17,17 @@
         });
     </script>
 }
-@if (s == null)
-{
+@if (s == null) {
     <div class="no-content">Node not found.</div>
     return;
 }
 <h5 class="page-header">
     <span title="Status: @s.Status.GetDescription()">@s.IconSpan()</span>
     @s.PrettyName
-    @if (s.IsVM)
-    {
+    @if (s.IsVM) {
         <span class="text-muted">(Virtual Machine)</span>
     }
-    @if (s.ManagementUrl.HasValue())
-    {
+    @if (s.ManagementUrl.HasValue()) {
         <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
     }
     <span class="pull-right small" title="@if (s.PollIntervalSeconds.HasValue){<text>Polling Interval: @(s.PollInterval?.ToReadableString())</text>}">
@@ -42,20 +39,17 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 Info
-                @if (s.Hardware != null)
-                {
+                @if (s.Hardware != null) {
                     <span class="text-muted">(<a href="#/dashboard/summary/hardware">view hardware</a>)</span>
                 }
             </div>
             <div class="panel-body">
                 <div class="value-block small col-xs-6">
-                    @if (s.Manufacturer.IsNullOrEmpty() && s.IsVM)
-                    {
+                    @if (s.Manufacturer.IsNullOrEmpty() && s.IsVM) {
                         <a href="@Url.Action(nameof(DashboardController.Node), new {node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost})">@s.VMHost.PrettyName</a>
                         <label>VM Host</label>
                     }
-                    else
-                    {
+                    else {
                         @s.Manufacturer
                         <label>Manufacturer</label>
                     }
@@ -79,8 +73,7 @@
         <div class="panel panel-default">
             <div class="panel-heading">
                 Stats
-                @if (s.IsRealTimePollable)
-                {
+                @if (s.IsRealTimePollable) {
                     //<span class="text-muted">(<a href="#/dashboard/graph/@s.Id.UrlEncode()/@NodeGraphModel.KnownTypes.Live" class="js-realtime-cpu">live</a>)</span>
                 }
             </div>
@@ -88,7 +81,7 @@
                 <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary()">
                     <div class="progress">
                         <div class="progress-bar" style="width: @(s.CPULoad?.ToString(CultureInfo.InvariantCulture))%;"></div>
-                        <span>@s.CPUStatusSpan()</span>
+                        <span>@s.CPUStatusSpan() / @s.CPUCoreSpan()</span>
                     </div>
                     <label>CPU</label>
                 </div>
@@ -110,14 +103,12 @@
                     </label>
                 </div>
                 <div class="value-block small col-xs-6">
-                    @if (s.LastBoot != null)
-                    {
+                    @if (s.LastBoot != null) {
                         <span title="@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago">
                             @(s.LastBoot?.ToRelativeTimeSpan())
                         </span>
                     }
-                    else
-                    {
+                    else {
                         <span class="text-warning">Unknown</span>
                     }
                     <label>Last Boot</label>
@@ -129,10 +120,8 @@
         <div class="panel panel-default">
             <div class="panel-heading">Storage</div>
             <div class="panel-body">
-                @if (s.Volumes != null)
-                {
-                    foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
-                    {
+                @if (s.Volumes != null) {
+                    foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0)) {
                         <div class="value-block small col-xs-12" title="@v.Description: @(v.Used?.ToString("n0")) of @(v.Size?.ToString("n0")) bytes used">
                             <div class="progress">
                                 <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed?.ToString(CultureInfo.InvariantCulture))%;"></div>
@@ -149,14 +138,11 @@
 {
     <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.GetDescription()</a></li>
 }
-@if (Model.StatusTypes.Count() > 1)
-{ // only show nav if there's actual nav - save the vertical space on stats-only nodes
+@if (Model.StatusTypes.Count() > 1) { // only show nav if there's actual nav - save the vertical space on stats-only nodes
     <ul class="nav nav-tabs nav-tabs-right">
-        @foreach (var st in Model.StatusTypes.OrderBy(i => i))
-        {
+        @foreach (var st in Model.StatusTypes.OrderBy(i => i)) {
             // TODO: Re-vamp this whole section
-            switch (st)
-            {
+            switch (st) {
                 case CurrentStatusTypes.SQLInstance:
                     @SubnavItem(st, Url.Action(nameof(SQLController.Instance), "SQL", new { node = s.PrettyName }))
                     break;
@@ -183,8 +169,7 @@
     </ul>
 }
 <div data-node="@Model.CurrentNode.PrettyName">
-    @if (Model.CurrentStatusType != CurrentStatusTypes.None)
-    {
+    @if (Model.CurrentStatusType != CurrentStatusTypes.None) {
         @Html.Partial("Node." + Model.CurrentStatusType, s)
     }
 </div>

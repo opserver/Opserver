@@ -6,8 +6,12 @@ namespace StackExchange.Opserver
     public class ProvidersSettings
     {
         public BosunSettings Bosun { get; set; }
+
         public OrionSettings Orion { get; set; }
+
         public WMISettings WMI { get; set; }
+
+        public AliyunSettings Aliyun { get; set; }
 
         public bool Any() => All.Any(p => p != null);
 
@@ -18,13 +22,15 @@ namespace StackExchange.Opserver
                 yield return Bosun;
                 yield return Orion;
                 yield return WMI;
+                yield return Aliyun;
             }
         }
     }
-    
+
     public interface IProviderSettings
     {
         bool Enabled { get; }
+
         string Name { get; }
 
         void Normalize();

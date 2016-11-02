@@ -38,12 +38,10 @@ namespace StackExchange.Opserver.Models
         public static IHtmlString LastUpdatedSpan(this Node info)
         {
             var addClass = "";
-            if (info.LastSync < DateTime.UtcNow.AddMinutes(-30))
-            {
+            if (info.LastSync < DateTime.UtcNow.AddMinutes(-30)) {
                 addClass = MonitorStatus.Critical.TextClass();
             }
-            else if (info.LastSync < DateTime.UtcNow.AddMinutes(-15))
-            {
+            else if (info.LastSync < DateTime.UtcNow.AddMinutes(-15)) {
                 addClass = MonitorStatus.Warning.TextClass();
             }
             return info.LastSync?.ToRelativeTimeSpan(addClass) ?? "Unknown".AsHtml();
@@ -56,23 +54,23 @@ namespace StackExchange.Opserver.Models
         public static MonitorStatus MemoryMonitorStatus(this Node info)
         {
             if (!info.PercentMemoryUsed.HasValue) return MonitorStatus.Unknown;
-            if (info.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryCriticalPercent) return MonitorStatus.Critical;
-            if (info.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float) info.MemoryWarningPercent) return MonitorStatus.Warning;
+            if (info.MemoryCriticalPercent > 0 && info.PercentMemoryUsed > (float)info.MemoryCriticalPercent) return MonitorStatus.Critical;
+            if (info.MemoryWarningPercent > 0 && info.PercentMemoryUsed > (float)info.MemoryWarningPercent) return MonitorStatus.Warning;
             return MonitorStatus.Good;
         }
 
         public static IHtmlString MemoryStatusSpan(this Node info, bool includePercent = true)
         {
-            return info.MemoryUsed < 0 
+            return info.MemoryUsed < 0
                 ? MvcHtmlString.Empty
-                : includePercent 
+                : includePercent
                     ? $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()} ({info.PercentMemoryUsed?.ToString("n2")}%)</span>".AsHtml()
                     : $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()}</span>".AsHtml();
         }
 
         public static IHtmlString MemoryPercentStatusSpan(this Node info)
         {
-            return info.MemoryUsed < 0 
+            return info.MemoryUsed < 0
                 ? MvcHtmlString.Empty
                 : $@"<span title=""{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()}"" class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PercentMemoryUsed?.ToString("n0")}%</span>".AsHtml();
         }
@@ -91,6 +89,12 @@ namespace StackExchange.Opserver.Models
             return $@"<span class=""{info.CPUMonitorStatus().GetDescription()}"">{info.CPULoad?.ToString("n0")} %</span>".AsHtml();
         }
 
+        public static IHtmlString CPUCoreSpan(this Node info)
+        {
+            if (info == null || (info.TotalCPU ?? 0) <= 0) return MvcHtmlString.Empty;
+            return $@"<span class=""{info.CPUMonitorStatus().GetDescription()}"">{info.TotalCPU} Core</span>".AsHtml();
+        }
+
         public static string PrettyTotalNetwork(this Node info) =>
             info.TotalPrimaryNetworkbps < 0
                 ? null
@@ -101,8 +105,7 @@ namespace StackExchange.Opserver.Models
             var sb = StringBuilderCache.Get();
             sb.Append("Total Traffic: ").Append(info.TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
             sb.AppendFormat("Interfaces ({0} total):", info.Interfaces.Count.ToString()).AppendLine();
-            foreach (var i in info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps))
-            {
+            foreach (var i in info.PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps)) {
                 sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n", i.PrettyName,
                     (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
                     i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
@@ -117,10 +120,9 @@ namespace StackExchange.Opserver.Models
             var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool CPU: {0} %\n", info.Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)).ToString(CultureInfo.CurrentCulture));
             sb.AppendLine("App Pools:");
-            foreach (var a in info.Apps.OrderBy(a => a.NiceName))
-            {
+            foreach (var a in info.Apps.OrderBy(a => a.NiceName)) {
                 sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
-            } 
+            }
             return sb.ToStringRecycle();
         }
 
@@ -131,8 +133,7 @@ namespace StackExchange.Opserver.Models
             var sb = StringBuilderCache.Get();
             sb.AppendFormat("Total App Pool Memory: {0}\n", info.Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
             sb.AppendLine("App Pools:");
-            foreach (var a in info.Apps.OrderBy(a => a.NiceName))
-            {
+            foreach (var a in info.Apps.OrderBy(a => a.NiceName)) {
                 sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
             }
             return sb.ToStringRecycle();
@@ -142,7 +143,7 @@ namespace StackExchange.Opserver.Models
     public static class SQLExtenstions
     {
         private static readonly XslCompiledTransform _queryPlanTransform;
-        
+
         static SQLExtenstions()
         {
             _queryPlanTransform = new XslCompiledTransform();
@@ -155,11 +156,9 @@ namespace StackExchange.Opserver.Models
             if (op.QueryPlan == null) return null;
 
             using (var sr = new StringReader(op.QueryPlan))
-            using (var xmlr = XmlReader.Create(sr))
-            {
+            using (var xmlr = XmlReader.Create(sr)) {
                 using (var sw = new StringWriter())
-                using (var xmlw = XmlWriter.Create(sw, _queryPlanTransform.OutputSettings))
-                {
+                using (var xmlw = XmlWriter.Create(sw, _queryPlanTransform.OutputSettings)) {
                     _queryPlanTransform.Transform(xmlr, xmlw);
                     return sw.ToString().AsHtml();
                 }

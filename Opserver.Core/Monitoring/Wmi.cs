@@ -19,12 +19,10 @@ namespace StackExchange.Opserver.Monitoring
 
         static Wmi()
         {
-            _localOptions = new ConnectionOptions
-            {
+            _localOptions = new ConnectionOptions {
                 EnablePrivileges = true
             };
-            _remoteOptions = new ConnectionOptions
-            {
+            _remoteOptions = new ConnectionOptions {
                 EnablePrivileges = true,
                 Authentication = AuthenticationLevel.Packet,
                 Timeout = TimeSpan.FromSeconds(30)
@@ -34,11 +32,10 @@ namespace StackExchange.Opserver.Monitoring
                 password = Current.Settings.Dashboard.Providers?.WMI?.Password ??
                            Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(null);
 
-            if (username.HasValue() && password.HasValue())
-            {
+            if (username.HasValue() && password.HasValue()) {
                 _remoteOptions.Username = username;
                 _remoteOptions.Password = password;
-            }       
+            }
         }
 
         private static ConnectionOptions GetConnectOptions(string machineName)
@@ -46,8 +43,14 @@ namespace StackExchange.Opserver.Monitoring
             if (machineName == Environment.MachineName)
                 return _localOptions;
 
-            switch (machineName)
-            {
+            var auths = Current.Settings.Dashboard.Providers?.WMI?.Auths;
+            var auth = auths.FirstOrDefault(a => a.Node == machineName);
+            if (auth != null) {
+                _remoteOptions.Username = auth.Username;
+                _remoteOptions.Password = auth.Password;
+            }
+
+            switch (machineName) {
                 case "localhost":
                 case "127.0.0.1":
                 case "::1":
@@ -73,15 +76,14 @@ namespace StackExchange.Opserver.Monitoring
 
                 var connectionOptions = GetConnectOptions(machineName);
                 var scope = new ManagementScope($@"\\{machineName}\{wmiNamespace}", connectionOptions);
-                _searcher = new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions{Timeout = connectionOptions.Timeout});
+                _searcher = new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout });
             }
 
             public Task<ManagementObjectCollection> Result
             {
                 get
                 {
-                    if (_searcher == null)
-                    {
+                    if (_searcher == null) {
                         throw new InvalidOperationException("Attempt to use disposed query.");
                     }
 
@@ -122,13 +124,11 @@ namespace StackExchange.Opserver.Monitoring
 
             public override bool TryGetMember(GetMemberBinder binder, out object result)
             {
-                try
-                {
+                try {
                     result = _obj.Properties[binder.Name].Value;
                     return true;
                 }
-                catch (ManagementException)
-                {
+                catch (ManagementException) {
                     result = null;
                     return false;
                 }
