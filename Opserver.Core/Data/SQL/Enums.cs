@@ -291,6 +291,7 @@ namespace StackExchange.Opserver.Data.SQL
 
     public enum JobRunSources
     {
+        Unknown = 0,
         Scheduler = 1,
         Alerter = 2,
         Boot = 3,
