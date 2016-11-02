@@ -62,20 +62,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     node.Status = NodeStatus.Unreachable;
                 }
 
-                var staticDataCache = ProviderCache(
-                    () => node.PollNodeInfoAsync(), 
+                node.Caches.Add(ProviderCache(
+                    () => node.PollNodeInfoAsync(),
                     _config.StaticDataTimeoutSeconds.Seconds(),
-                    memberName: node.Name + "-Static");
-                node.Caches.Add(staticDataCache);
+                    memberName: node.Name + "-Static"));
 
                 node.Caches.Add(ProviderCache(
-                    () => node.PollStats(), 
+                    () => node.PollStats(),
                     _config.DynamicDataTimeoutSeconds.Seconds(),
                     memberName: node.Name + "-Dynamic"));
-
-                //Force update static host data, incuding os info, volumes, interfaces.
-                Task.WaitAll(staticDataCache.PollAsync(true));
-
+                
                 nodesList.Add(node);
             }
             return nodesList;
