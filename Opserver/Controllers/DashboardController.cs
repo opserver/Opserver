@@ -20,10 +20,10 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new DashboardModel
                 {
-                    Nodes = DashboardData.AllNodes.ToList(),
-                    ErrorMessages = DashboardData.ProviderExceptions.ToList(),
+                    Nodes = DashboardModule.AllNodes.ToList(),
+                    ErrorMessages = DashboardModule.ProviderExceptions.ToList(),
                     Filter = filter,
-                    IsStartingUp = DashboardData.AnyDoingFirstPoll
+                    IsStartingUp = DashboardModule.AnyDoingFirstPoll
                 };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }
@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/json")]
         public ActionResult DashboardJson(string filter)
         {
-            var categories = DashboardData.AllNodes
+            var categories = DashboardModule.AllNodes
                 .GroupBy(n => n.Category)
                 .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
                 .OrderBy(g => g.Key.Index);
@@ -73,7 +73,7 @@ namespace StackExchange.Opserver.Controllers
             }).ToList();
             return Json(new
             {
-                DashboardData.HasData,
+                DashboardModule.HasData,
                 Categories = resultCategories
             }, Options.ExcludeNulls);
         }
@@ -83,7 +83,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new NodeModel
             {
-                CurrentNode = DashboardData.GetNodeByName(node),
+                CurrentNode = DashboardModule.GetNodeByName(node),
                 CurrentStatusType = view
             };
 
@@ -93,7 +93,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/node/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
-            var n = DashboardData.GetNodeByName(node);
+            var n = DashboardModule.GetNodeByName(node);
             switch (type)
             {
                 case "hardware":
@@ -109,7 +109,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/graph/{nodeId}/{type}/{subId?}")]
         public async Task<ActionResult> NodeGraph(string nodeId, string type, string subId)
         {
-            var n = DashboardData.GetNodeById(nodeId);
+            var n = DashboardModule.GetNodeById(nodeId);
             var vd = new NodeGraphModel
             {
                 Node = n,

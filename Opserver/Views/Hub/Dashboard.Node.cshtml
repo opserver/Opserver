@@ -15,7 +15,7 @@
 }
 @helper Graph(Node s, string type)
 {
-    if (!DashboardData.HasData)
+    if (!DashboardModule.HasData)
     {
         <div class="text-muted">No Data Available</div>
         return;

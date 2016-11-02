@@ -7,7 +7,7 @@
     var s = Model.CurrentNode;
 
     this.SetPageTitle((s?.PrettyName ?? "Unknown Node") + " Status");
-    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", Model.CurrentNode);
+    this.SetTopNodes(DashboardModule.AllNodes, "Dashboard", Model.CurrentNode);
 }
 @section head {
     <script>

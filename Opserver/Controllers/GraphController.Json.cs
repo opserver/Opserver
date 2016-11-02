@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/cpu/json")]
         public async Task<ActionResult> CPUJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node == null) return JsonNotFound();
             var data = await CPUData(node, start, end, summary);
             if (data == null) return JsonNotFound();
@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/memory/json")]
         public async Task<ActionResult> MemoryJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node == null) return JsonNotFound();
             var data = await MemoryData(node, start, end, summary);
             if (data == null) return JsonNotFound();
@@ -78,7 +78,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/network/json")]
         public async Task<ActionResult> NetworkJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
         {
-            var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
+            var iface = DashboardModule.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return JsonNotFound();
             var data = await NetworkData(iface, start, end, summary);
             if (data == null) return JsonNotFound();

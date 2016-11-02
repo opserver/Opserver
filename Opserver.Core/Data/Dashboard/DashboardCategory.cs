@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get
             {
-                var servers = DashboardData.AllNodes.Where(n => PatternRegex.IsMatch(n.Name)).ToList();
+                var servers = DashboardModule.AllNodes.Where(n => PatternRegex.IsMatch(n.Name)).ToList();
 
                 var excluder = Current.Settings.Dashboard.ExcludePatternRegex;
                 if (excluder != null)

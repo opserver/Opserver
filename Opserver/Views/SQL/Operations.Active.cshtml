@@ -112,7 +112,7 @@ else
                         }
                     </td>
                     <td title="Program: @w.ProgramName">
-                        @if (enableDashboardLinks && DashboardData.GetNodeByName(w.HostName) != null)
+                        @if (enableDashboardLinks && DashboardModule.GetNodeByName(w.HostName) != null)
                         {
                             <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = w.HostName })">@w.HostName</a>
                         }

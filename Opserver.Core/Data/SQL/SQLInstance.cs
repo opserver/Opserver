@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data.SQL
             return Databases.Data?.GetReasonSummary();
         }
 
-        public Node ServerInfo => DashboardData.GetNodeByName(Name);
+        public Node ServerInfo => DashboardModule.GetNodeByName(Name);
 
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT

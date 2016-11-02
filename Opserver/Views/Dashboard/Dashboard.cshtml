@@ -4,7 +4,7 @@
 @model DashboardModel
 @{
     this.SetPageTitle("Dashboard");
-    this.SetTopNodes(DashboardData.AllNodes, "Dashboard", url: Url.Action(nameof(DashboardController.Node)));
+    this.SetTopNodes(DashboardModule.AllNodes, "Dashboard", url: Url.Action(nameof(DashboardController.Node)));
 }
 @section head {
     <script>

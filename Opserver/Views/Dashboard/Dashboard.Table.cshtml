@@ -13,7 +13,7 @@
 }
 @helper Graph(Node n, string type)
 {
-if (DashboardData.HasData)
+if (DashboardModule.HasData)
 {
 <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark?id=@n.Id" alt="" /></a>}
 else

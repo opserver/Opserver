@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Views.Hub
         static HubView()
         {
             var s = Current.Settings;
-            Register(() => s.Dashboard.Enabled, () => DashboardData.AllNodes.GetWorstStatus(), "Index.Dashboard");
+            Register(() => DashboardModule.Enabled, () => DashboardModule.AllNodes.GetWorstStatus(), "Index.Dashboard");
             Register(() => SQLModule.Enabled, () => SQLModule.AllInstances.GetWorstStatus(), "Index.SQL");
             Register(() => ElasticModule.Enabled, () => ElasticModule.Clusters.GetWorstStatus(), "Index.Elastic");
             Register(() => HAProxyModule.Enabled, () => HAProxyModule.Groups.GetWorstStatus(), "Index.HAProxy");

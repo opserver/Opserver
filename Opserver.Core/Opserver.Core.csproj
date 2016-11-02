@@ -104,6 +104,7 @@
     <Compile Include="Data\Cloudflare\CloudflareResponse.cs" />
     <Compile Include="Data\Cloudflare\DataCenters.cs" />
     <Compile Include="Data\Dashboard\DashboardData.cs" />
+    <Compile Include="Data\Dashboard\DashboardModule.cs" />
     <Compile Include="Data\Dashboard\GraphPoint.cs" />
     <Compile Include="Data\Dashboard\HardwareSummary.cs" />
     <Compile Include="Data\Dashboard\HardwareType.cs" />

@@ -2,6 +2,7 @@
 using System.Net;
 using System.Web.Mvc;
 using Jil;
+using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Data.HAProxy;
@@ -86,7 +87,7 @@ namespace StackExchange.Opserver.Controllers
 
             // TODO: Plugin registrations - middleware?
             // Order could be interesting here, needs to be tied to top tabs
-            if (s.Dashboard.Enabled && s.Dashboard.HasAccess())
+            if (DashboardModule.Enabled && s.Dashboard.HasAccess())
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
             if (SQLModule.Enabled && s.SQL.HasAccess())
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");

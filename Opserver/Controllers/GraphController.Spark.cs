@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> CPUSparkSvg(string id)
         {
             MiniProfiler.Stop(true);
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node == null) return ContentNotFound();
             var points = await node.GetCPUUtilization(SparkStart, null, SparkPoints);
 
@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> MemorySpark(string id)
         {
             MiniProfiler.Stop(true);
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node?.TotalMemory == null) return ContentNotFound($"Could not determine total memory for '{id}'");
             var points = await node.GetMemoryUtilization(SparkStart, null, SparkPoints);
 
@@ -56,7 +56,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> NetworkSpark(string id)
         {
             MiniProfiler.Stop(true);
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node == null) return ContentNotFound();
             var points = await node.GetNetworkUtilization(SparkStart, null, SparkPoints);
 
@@ -70,7 +70,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> InterfaceSpark(string direction, string id, string iid)
         {
             MiniProfiler.Stop(true);
-            var iface = DashboardData.GetNodeById(id)?.GetInterface(iid);
+            var iface = DashboardModule.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return ContentNotFound();
             var points = await iface.GetUtilization(SparkStart, null, SparkPoints);
 
