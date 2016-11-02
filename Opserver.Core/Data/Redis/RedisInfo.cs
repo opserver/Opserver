@@ -155,7 +155,7 @@ namespace StackExchange.Opserver.Data.Redis
 
             public RedisInstance GetServer()
             {
-                return RedisInstance.GetInstance(Port, IPAddress);
+                return RedisInstance.Get(Port, IPAddress);
             }
         }
 

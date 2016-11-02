@@ -2,6 +2,7 @@
 using System.Net;
 using System.Web.Mvc;
 using Jil;
+using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Views.Shared;
 using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
@@ -13,7 +14,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Authenticated)]
     public partial class StatusController : Controller
     {
-        public virtual ISecurableSection SettingsSection => null;
+        public virtual ISecurableModule SettingsModule => null;
         public virtual TopTab TopTab => null;
 
         private IDisposable _betweenInitializeAndActionExecuting,
@@ -39,7 +40,7 @@ namespace StackExchange.Opserver.Controllers
                 TopTabs.SetCurrent(filterContext.Controller.GetType());
             }
 
-            var iSettings = SettingsSection as Settings;
+            var iSettings = SettingsModule as Settings;
             if (iSettings != null && !iSettings.Enabled)
                 filterContext.Result = DefaultAction();
             else
@@ -79,9 +80,10 @@ namespace StackExchange.Opserver.Controllers
         {
             var s = Current.Settings;
 
+            // TODO: Plugin registrations
             if (s.Dashboard.Enabled && s.Dashboard.HasAccess())
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
-            if (s.SQL.Enabled && s.SQL.HasAccess())
+            if (SQLModule.Enabled && s.SQL.HasAccess())
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
             if (s.Redis.Enabled && s.Redis.HasAccess())
                 return RedirectToAction(nameof(RedisController.Dashboard), "Redis");

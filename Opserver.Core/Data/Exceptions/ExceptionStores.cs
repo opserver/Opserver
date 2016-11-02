@@ -8,16 +8,12 @@ using StackExchange.Exceptional;
 namespace StackExchange.Opserver.Data.Exceptions
 {
     public class ExceptionStores
-    {   
-        public static List<ExceptionStore> Stores { get; } =
-            Current.Settings.Exceptions.Stores
-                .Select(s => new ExceptionStore(s))
-                .Where(s => s.TryAddToGlobalPollers())
-                .ToList();
+    {
+        private static readonly object _updateLock = new object();
+
         public static HashSet<string> KnownApplications { get; } =
             GetConfiguredApplicationGroups().SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
 
-        private static readonly object _updateLock = new object();
         public static List<Application> Applications { get; private set; }
         private static ApplicationGroup CatchAll { get; set; }
         public static List<ApplicationGroup> ApplicationGroups { get; private set; } = GetConfiguredApplicationGroups();
@@ -33,7 +29,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                 int total = TotalExceptionCount,
                     recent = TotalRecentExceptionCount;
 
-                if (Stores.Any(s => s.MonitorStatus == MonitorStatus.Critical))
+                if (ExceptionModule.Stores.Any(s => s.MonitorStatus == MonitorStatus.Critical))
                     return MonitorStatus.Critical;
 
                 if (settings.CriticalCount > 0 && total > settings.CriticalCount)
@@ -143,7 +139,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         {
             var stores = GetApps(appName).Where(a => a.Store != null).Select(a => a.Store).Distinct();
             // if we have no error stores hooked up, return all stores to search
-            return stores.Any() ? stores : Stores;
+            return stores.Any() ? stores : ExceptionModule.Stores;
         }
 
         private static IEnumerable<Error> GetSorted(IEnumerable<Error> source, ExceptionSorts? sort = ExceptionSorts.TimeDesc)
@@ -194,17 +190,20 @@ namespace StackExchange.Opserver.Data.Exceptions
         {
             using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (group.HasValue() ? " (group:" + group + ")" : "") + (app.HasValue() ? " (app:" + app + ")" : "")))
             {
-                IEnumerable<Error> allErrors;
-                if (Stores.Count == 1)
+                var stores = ExceptionModule.Stores;
+                IEnumerable <Error> allErrors;
+                if (stores.Count == 1)
                 {
-                    allErrors = await Stores[0].GetErrorSummary(maxPerApp, group, app);
+                    allErrors = await stores[0].GetErrorSummary(maxPerApp, group, app);
                 }
                 else
                 {
+                    var tasks = stores.Select(s => s.GetErrorSummary(maxPerApp, group, app));
+                    var taskResults = await Task.WhenAll(tasks);
                     var combined = new List<Error>();
-                    foreach (var s in Stores)
+                    foreach (var r in taskResults)
                     {
-                        combined.AddRange(await s.GetErrorSummary(maxPerApp, group, app));
+                        combined.AddRange(r);
                     }
                     allErrors = combined;
                 }
@@ -223,7 +222,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static async Task<List<Error>> FindErrorsAsync(string searchText, string group = null, string app = null, int max = 200, bool includeDeleted = false, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             if (searchText.IsNullOrEmpty()) return new List<Error>();
-            var stores = app.HasValue() ? GetStores(app) : Stores; // Apps are across stores, group doesn't matter here
+            var stores = app.HasValue() ? GetStores(app) : ExceptionModule.Stores; // Apps are across stores, group doesn't matter here
             var errorFetches = stores.Select(s => s.FindErrorsAsync(searchText, max, includeDeleted, GetAppNames(group, app)));
             var results = (await Task.WhenAll(errorFetches).ConfigureAwait(false)).SelectMany(e => e);
             return GetSorted(results, sort).ToList();
@@ -235,7 +234,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             lock (_updateLock) // In the case of multiple stores, it's off to the races.
             {
                 var result = ApplicationGroups;
-                var apps = Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
+                var apps = ExceptionModule.Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
                 // Loop through all configured groups and hook up applications returned from the queries
                 foreach (var g in result)
                 {

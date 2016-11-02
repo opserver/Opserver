@@ -223,8 +223,8 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
 }
     @if (s.SQL.Enabled)
     {
-        var clusters = SQLCluster.AllClusters;
-        var instances = SQLInstance.AllStandalone;
+        var clusters = SQLModule.Clusters;
+        var instances = SQLModule.StandaloneInstances;
         <div class="col-md-4">
             <div class="panel panel-default panel-@instances.GetWorstStatus().RawClass(showGood: true)">
                 <div class="panel-heading">SQL Instances</div>
@@ -286,7 +286,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
                     </ul>
                     @foreach (var store in s.Exceptions.Stores)
                     {
-                        var es = ExceptionStores.Stores.First(ess => ess.Name == store.Name);
+                        var es = ExceptionModule.Stores.First(ess => ess.Name == store.Name);
                         <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
                         <ul class="list-group">
                             <li class="list-group-item">
@@ -309,9 +309,9 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
     }
     @if (s.HAProxy.Enabled)
     {
-        var groups = HAProxyGroup.AllGroups;
+        var groups = HAProxyModule.Groups;
         <div class="col-md-4">
-            <div class="panel panel-default panel-@HAProxyGroup.AllGroups.GetWorstStatus().RawClass(showGood: true)">
+            <div class="panel panel-default panel-@HAProxyModule.Groups.GetWorstStatus().RawClass(showGood: true)">
                 <div class="panel-heading">HAProxy</div>
                 <div class="panel-body small">
                     <ul class="list-group">

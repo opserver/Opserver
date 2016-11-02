@@ -1,23 +1,41 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public partial class RedisConnectionInfo
+    public class RedisModule : StatusModule
     {
-        public static List<RedisConnectionInfo> AllConnections { get; } = LoadRedisConnections();
+        public static bool Enabled => Instances.Count > 0;
+        public static List<RedisInstance> Instances { get; }
+        public static List<RedisConnectionInfo> Connections { get; }
+
+        static RedisModule()
+        {
+            Connections = LoadRedisConnections();
+            Instances = Connections
+                .Select(rci => new RedisInstance(rci))
+                .Where(rsi => rsi.TryAddToGlobalPollers())
+                .ToList();
+        }
         
+        public override bool IsMember(string node) 
+        {
+            foreach (var i in Instances)
+            {
+                // TODO: Dictionary
+                if (string.Equals(i.Host, node, StringComparison.InvariantCultureIgnoreCase)) return true;
+            }
+            return false;
+        }
+
         private static List<RedisConnectionInfo> LoadRedisConnections()
         {
             var result = new List<RedisConnectionInfo>();
-            if (!Current.Settings.Redis.Enabled) return result;
-
-            var servers = Current.Settings.Redis.Servers;
-
             var defaultServerInstances = Current.Settings.Redis.Defaults.Instances;
             var allServerInstances = Current.Settings.Redis.AllServers.Instances;
 
-            foreach (var s in servers)
+            foreach (var s in Current.Settings.Redis.Servers)
             {
                 var count = result.Count;
                 // Add instances that belong to any servers
@@ -32,11 +50,6 @@ namespace StackExchange.Opserver.Data.Redis
                     defaultServerInstances.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
             }
             return result;
-        }
-
-        public static RedisConnectionInfo FromCache(string host, int port)
-        {
-            return AllConnections.FirstOrDefault(i => i.Host == host && i.Port == port);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.PagerDuty;
+        public override ISecurableModule SettingsModule => Current.Settings.PagerDuty;
 
         public override TopTab TopTab => new TopTab("PagerDuty", nameof(Dashboard), this, 45)
         {

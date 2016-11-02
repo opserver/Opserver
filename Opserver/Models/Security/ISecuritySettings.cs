@@ -2,11 +2,11 @@
 {
     public static class SecuritySettingsExtensions
     {
-        public static bool HasAccess(this ISecurableSection settings)
+        public static bool HasAccess(this ISecurableModule settings)
         {
             return Current.Security.InReadGroups(settings);
         }
-        public static bool IsAdmin(this ISecurableSection settings)
+        public static bool IsAdmin(this ISecurableModule settings)
         {
             return Current.Security.InAdminGroups(settings);
         }

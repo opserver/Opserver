@@ -40,9 +40,9 @@ namespace StackExchange.Opserver.Views.Hub
         {
             var s = Current.Settings;
             Register(() => s.Dashboard.Enabled, () => DashboardData.AllNodes.GetWorstStatus(), "Index.Dashboard");
-            Register(() => s.SQL.Enabled, () => SQLInstance.AllInstances.GetWorstStatus(), "Index.SQL");
-            Register(() => s.Elastic.Enabled, () => ElasticCluster.AllClusters.GetWorstStatus(), "Index.Elastic");
-            Register(() => s.HAProxy.Enabled, () => HAProxyGroup.AllGroups.GetWorstStatus(), "Index.HAProxy");
+            Register(() => SQLModule.Enabled, () => SQLModule.AllInstances.GetWorstStatus(), "Index.SQL");
+            Register(() => ElasticModule.Enabled, () => ElasticModule.Clusters.GetWorstStatus(), "Index.Elastic");
+            Register(() => HAProxyModule.Enabled, () => HAProxyModule.Groups.GetWorstStatus(), "Index.HAProxy");
         }
     }
 }

@@ -9,23 +9,23 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.Redis;
+        public override ISecurableModule SettingsModule => Current.Settings.Redis;
 
         public override TopTab TopTab => new TopTab("Redis", nameof(Dashboard), this, 20)
         {
-            GetMonitorStatus = () => RedisInstance.AllInstances.GetWorstStatus()
+            GetMonitorStatus = () => RedisModule.Instances.GetWorstStatus()
         };
 
         [Route("redis")]
         public ActionResult Dashboard(string node)
         {
-            var instance = RedisInstance.GetInstance(node);
+            var instance = RedisInstance.Get(node);
             if (instance != null)
                 return RedirectToAction(nameof(Instance), new {node});
 
             var vd = new DashboardModel
             {
-                Instances = RedisInstance.AllInstances,
+                Instances = RedisModule.Instances,
                 View = node.HasValue() ? RedisViews.Server : RedisViews.All,
                 CurrentRedisServer = node,
                 Refresh = true
@@ -36,11 +36,11 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance")]
         public ActionResult Instance(string node)
         {
-            var instance = RedisInstance.GetInstance(node);
+            var instance = RedisInstance.Get(node);
 
             var vd = new DashboardModel
             {
-                Instances = RedisInstance.AllInstances,
+                Instances = RedisModule.Instances,
                 CurrentInstance = instance,
                 View = RedisViews.Instance,
                 CurrentRedisServer = node,
@@ -53,7 +53,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/get-config/{host}-{port}-config.zip")]
         public ActionResult DownloadConfiguration(string host, int port)
         {
-            var instance = RedisInstance.GetInstance(host, port);
+            var instance = RedisInstance.Get(host, port);
             var configZip = instance.GetConfigZip();
             return new FileContentResult(configZip, "application/zip");
         }
@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
-            var i = RedisInstance.GetInstance(node);
+            var i = RedisInstance.Get(node);
             if (i == null) return ContentNotFound("Could not find instance " + node);
 
             switch (type)
@@ -82,7 +82,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/analyze/memory")]
         public ActionResult Analysis(string node, int db, bool runOnMaster = false)
         {
-            var instance = RedisInstance.GetInstance(node);
+            var instance = RedisInstance.Get(node);
             if (instance == null)
                 return TextPlain("Instance not found");
             var analysis = instance.GetDatabaseMemoryAnalysis(db, runOnMaster);
@@ -93,7 +93,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/analyze/memory/clear")]
         public ActionResult ClearAnalysis(string node, int db)
         {
-            var instance = RedisInstance.GetInstance(node);
+            var instance = RedisInstance.Get(node);
             if (instance == null)
                 return TextPlain("Instance not found");
             instance.ClearDatabaseMemoryAnalysisCache(db);

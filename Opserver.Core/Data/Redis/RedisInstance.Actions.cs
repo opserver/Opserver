@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             var newMaster = EndPointCollection.TryParse(address);
             await _connection.GetSingleServer().SlaveOfAsync(newMaster).ConfigureAwait(false);
-            var newMasterInstance = GetInstance(address);
+            var newMasterInstance = Get(address);
             if (newMasterInstance != null)
             {
                 await newMasterInstance.PublishSERedisReconfigureAsync().ConfigureAwait(false);
@@ -129,7 +129,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                return AllInstances.Where(s => s.Port == Port && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s).ToList();
+                return RedisModule.Instances.Where(s => s.Port == Port && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s).ToList();
             }
         }
     }

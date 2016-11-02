@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         public static HAProxyGroup GetGroup(string name)
         {
-            return AllGroups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
+            return HAProxyModule.Groups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>
@@ -65,8 +65,8 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         public static List<Proxy> GetAllProxies()
         {
-            if (!Current.Settings.HAProxy.Enabled) return new List<Proxy>();
-            var instances = AllGroups.SelectMany(g => g.Instances).ToList();
+            if (!HAProxyModule.Enabled) return new List<Proxy>();
+            var instances = HAProxyModule.Groups.SelectMany(g => g.Instances).ToList();
             return GetProxies(instances);
         }
 
@@ -75,7 +75,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         public List<Proxy> GetProxies()
         {
-            if (!Current.Settings.HAProxy.Enabled) return new List<Proxy>();
+            if (!HAProxyModule.Enabled) return new List<Proxy>();
             return GetProxies(Instances);
         }
 

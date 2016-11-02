@@ -5,7 +5,7 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("Redis Dashboard");
-    this.SetTopNodes(RedisInstance.AllInstances, "Redis Servers", Model.CurrentInstance);
+    this.SetTopNodes(RedisModule.Instances, "Redis Servers", Model.CurrentInstance);
 }
 @helper TabLink(RedisViews view, string action, string name, bool includeParams = true)
 {

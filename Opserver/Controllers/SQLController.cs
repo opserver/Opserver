@@ -15,11 +15,11 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.SQL;
+        public override ISecurableModule SettingsModule => Current.Settings.SQL;
 
         public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
         {
-            GetMonitorStatus = () => SQLInstance.AllInstances.GetWorstStatus()
+            GetMonitorStatus = () => SQLModule.AllInstances.GetWorstStatus()
         };
 
         [Route("sql")]
@@ -33,8 +33,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new ServersModel
                 {
-                    StandaloneInstances = SQLInstance.AllStandalone,
-                    Clusters = SQLCluster.AllClusters,
+                    StandaloneInstances = SQLModule.StandaloneInstances,
+                    Clusters = SQLModule.Clusters,
                     Refresh = node.HasValue() ? 10 : 5
                 };
 

@@ -5,7 +5,7 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("elasticsearch Dashboard");
-    this.SetTopNodes(ElasticCluster.AllClusters,
+    this.SetTopNodes(ElasticModule.Clusters,
         "elastic clusters",
         Model.CurrentCluster);
 }

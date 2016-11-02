@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Controllers
 {
     public class HubController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.Dashboard;
+        public override ISecurableModule SettingsModule => Current.Settings.Dashboard;
         
         [Route("hub"), Route("headsup"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult Index()

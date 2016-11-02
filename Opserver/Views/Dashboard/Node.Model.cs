@@ -31,22 +31,23 @@ namespace StackExchange.Opserver.Views.Dashboard
 
                 yield return CurrentStatusTypes.Stats;
 
-                //TODO: Redis, SQL, etc node recognition - pluggable?
-                if (SQLInstance.IsSQLServer(CurrentNode.PrettyName))
+                // TODO: Redis, SQL, etc node recognition - more pluggable?
+                // Need to nuke the enum here...
+                if (CurrentNode.IsMember<SQLModule>())
                 {
                     yield return CurrentStatusTypes.SQLInstance;
                     yield return CurrentStatusTypes.SQLTop;
                     yield return CurrentStatusTypes.SQLActive;
                 }
-                if (RedisInstance.IsRedisServer(CurrentNode.PrettyName))
+                if (CurrentNode.IsMember<RedisModule>())
                 {
                     yield return CurrentStatusTypes.Redis;
                 }
-                if (ElasticCluster.IsElasticServer(CurrentNode.PrettyName))
+                if (CurrentNode.IsMember<ElasticModule>())
                 {
                     yield return CurrentStatusTypes.Elastic;
                 }
-                if (HAProxyGroup.IsHAProxyServer(CurrentNode.PrettyName))
+                if (CurrentNode.IsMember<HAProxyModule>())
                 {
                     yield return CurrentStatusTypes.HAProxy;
                 }

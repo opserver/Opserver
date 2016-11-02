@@ -27,8 +27,7 @@ namespace StackExchange.Opserver.Data.SQL
             new ConcurrentDictionary<Tuple<string, Version>, string>();
 
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
-        public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() =>
-            Singleton<T>.Instance.GetFetchSQL(v);
+        public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
 
         public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
         {
@@ -49,7 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public static SQLInstance Get(string name)
         {
-            return AllInstances.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
+            return SQLModule.AllInstances.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public override string NodeType => "SQL";
@@ -60,30 +59,32 @@ namespace StackExchange.Opserver.Data.SQL
             get
             {
                 yield return ServerProperties;
-                if (Version >= Singleton<SQLServerFeatures>.Instance.MinVersion)
+                if (Supports<SQLServerFeatures>())
                     yield return ServerFeatures;
-                if (Version >= Singleton<SQLConfigurationOption>.Instance.MinVersion)
+                if (Supports<SQLConfigurationOption>())
                     yield return Configuration;
-                if (Version >= Singleton<Database>.Instance.MinVersion)
+                if (Supports<Database>())
                     yield return Databases;
-                if (Version >= Singleton<ResourceEvent>.Instance.MinVersion)
+                if (Supports<ResourceEvent>())
                     yield return ResourceHistory;
-                if (Version >= Singleton<SQLJobInfo>.Instance.MinVersion)
+                if (Supports<SQLJobInfo>())
                     yield return JobSummary;
-                if (Version >= Singleton<PerfCounterRecord>.Instance.MinVersion)
+                if (Supports<PerfCounterRecord>())
                     yield return PerfCounters;
-                if (Version >= Singleton<SQLMemoryClerkSummaryInfo>.Instance.MinVersion)
+                if (Supports<SQLMemoryClerkSummaryInfo>())
                     yield return MemoryClerkSummary;
-                if (Version >= Singleton<TraceFlagInfo>.Instance.MinVersion)
+                if (Supports<TraceFlagInfo>())
                     yield return TraceFlags;
-                if (Version >= Singleton<VolumeInfo>.Instance.MinVersion)
+                if (Supports<VolumeInfo>())
                     yield return Volumes;
-                if (Version >= Singleton<SQLConnectionInfo>.Instance.MinVersion)
+                if (Supports<SQLConnectionInfo>())
                     yield return Connections;
-                if (Version >= Singleton<SQLConnectionSummaryInfo>.Instance.MinVersion)
+                if (Supports<SQLConnectionSummaryInfo>())
                     yield return ConnectionsSummary;
             }
         }
+
+        public bool Supports<T>() where T : ISQLVersioned, new() => Version >= Singleton<T>.Instance.MinVersion;
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
@@ -120,7 +121,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return GetSqlCache(memberName,
                 conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
-                () => Singleton<T>.Instance.MinVersion < Version,
+                Supports<T>,
                 cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
@@ -137,7 +138,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return GetSqlCache(memberName,
                 conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
-                () => Singleton<T>.Instance.MinVersion < Version,
+                Supports<T>,
                 cacheDuration,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,

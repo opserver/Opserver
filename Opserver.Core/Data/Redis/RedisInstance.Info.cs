@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data.Redis
                 var lastRole = Replication?.RedisInstanceRole;
                 // If we think we're a master and the last poll failed - look to other nodes for info
                 if (!Info.LastPollSuccessful && lastRole == RedisInfo.RedisInstanceRole.Master &&
-                    AllInstances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                    RedisModule.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
                     return RedisInfo.RedisInstanceRole.Slave;
                 return lastRole ?? RedisInfo.RedisInstanceRole.Unknown;
             }
@@ -89,7 +89,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public RedisInstance Master
         {
-            get { return Replication?.MasterHost.HasValue() == true ? GetInstance(Replication.MasterHost, Replication.MasterPort) : AllInstances.FirstOrDefault(i => i.SlaveInstances.Contains(this)); }
+            get { return Replication?.MasterHost.HasValue() == true ? Get(Replication.MasterHost, Replication.MasterPort) : RedisModule.Instances.FirstOrDefault(i => i.SlaveInstances.Contains(this)); }
         }
 
         public int SlaveCount => Replication?.ConnectedSlaves ?? 0;

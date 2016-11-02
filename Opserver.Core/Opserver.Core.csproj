@@ -131,9 +131,6 @@
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.Cache.cs">
-      <DependentUpon>ElasticCluster.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Elastic\ElasticCluster.HealthStatus.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
@@ -153,10 +150,10 @@
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Elastic\ShardStates.cs" />
+    <Compile Include="Data\Elastic\ElasticModule.cs" />
     <Compile Include="Data\Exceptions\ExceptionSorts.cs" />
-    <Compile Include="Data\HAProxy\HAProxyGroup.Cache.cs">
-      <DependentUpon>HAProxyGroup.cs</DependentUpon>
-    </Compile>
+    <Compile Include="Data\Exceptions\ExceptionModule.cs" />
+    <Compile Include="Data\HAProxy\HAProxyModule.cs" />
     <Compile Include="Data\HAProxy\HAProxyGroup.Issues.cs">
       <DependentUpon>HAProxyGroup.cs</DependentUpon>
     </Compile>
@@ -183,9 +180,6 @@
     <Compile Include="Data\PagerDuty\PagerDutyAPI.Schedules.cs">
       <DependentUpon>PagerDutyAPI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
-      <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Redis\RedisInstance.Actions.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
     </Compile>
@@ -208,16 +202,11 @@
     <Compile Include="Data\Redis\RedisInstance.SlowLog.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Redis\RedisModule.cs" />
     <Compile Include="Data\SearchResult.cs" />
     <Compile Include="Data\SinglePollNode.cs" />
-    <Compile Include="Data\SQL\SQLCluster.Cache.cs">
-      <DependentUpon>SQLCluster.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\SQL\SQLCluster.Issues.cs">
       <DependentUpon>SQLCluster.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\SQL\SQLInstance.Cache.cs">
-      <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\SQL\SQLInstance.Configuration.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
@@ -228,6 +217,7 @@
     <Compile Include="Data\SQL\SQLInstance.WaitStats.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\SQL\SQLModule.cs" />
     <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGDatabaseReplica.cs">
       <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
     </Compile>
@@ -254,7 +244,8 @@
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />
     <Compile Include="Data\IPNet.cs" />
     <Compile Include="Helpers\LocalCache.cs" />
-    <Compile Include="Helpers\Singleton.cs" />
+    <Compile Include="StatusModule.cs" />
+    <Compile Include="Singleton.cs" />
     <Compile Include="Helpers\WindowsKernelVersions.cs" />
     <Compile Include="IMinVersioned.cs" />
     <Compile Include="ISeachableNode.cs" />

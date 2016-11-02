@@ -10,12 +10,12 @@ namespace StackExchange.Opserver.Models.Security
         public virtual bool IsAdmin => InGroups(SiteSettings.AdminGroups);
         public virtual bool IsViewer => InGroups(SiteSettings.ViewGroups);
 
-        internal virtual bool InReadGroups(ISecurableSection settings)
+        internal virtual bool InReadGroups(ISecurableModule settings)
         {
             return IsViewer || (settings != null && (InGroups(settings.ViewGroups) || InAdminGroups(settings)));
         }
 
-        internal virtual bool InAdminGroups(ISecurableSection settings)
+        internal virtual bool InAdminGroups(ISecurableModule settings)
         {
             return IsAdmin || (settings != null && InGroups(settings.AdminGroups));
         }

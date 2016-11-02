@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Exceptions)] 
     public class ExceptionsController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.Exceptions;
+        public override ISecurableModule SettingsModule => Current.Settings.Exceptions;
 
         public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
         {

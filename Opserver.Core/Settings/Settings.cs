@@ -72,7 +72,7 @@ namespace StackExchange.Opserver
         }
     }
 
-    public abstract class Settings : INotifyPropertyChanged, ISecurableSection
+    public abstract class Settings : INotifyPropertyChanged, ISecurableModule
     {
         /// <summary>
         /// Whether this section is enabled (has servers, has connection, etc.)

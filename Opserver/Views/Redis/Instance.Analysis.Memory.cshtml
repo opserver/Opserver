@@ -3,7 +3,7 @@
 @model RedisMemoryAnalysis
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    var serverInfo = RedisInstance.GetInstance(Model.ConnectionInfo);
+    var serverInfo = RedisInstance.Get(Model.ConnectionInfo);
 }
 @helper TopKeys(KeyStats ks) {
     foreach (var tk in ks.TopKeys)

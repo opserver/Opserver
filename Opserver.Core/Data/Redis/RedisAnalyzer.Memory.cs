@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.Redis
         static RedisAnalyzer()
         {
             KeyMatchers = new Dictionary<RedisConnectionInfo, List<KeyMatcher>>();
-            foreach (var i in RedisInstance.AllInstances.Select(rci => rci.ConnectionInfo))
+            foreach (var i in RedisModule.Instances.Select(rci => rci.ConnectionInfo))
             {
                 KeyMatchers[i] = i.Settings.AnalysisRegexes
                                   .Where(r => r.Value.HasValue())

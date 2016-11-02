@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Helpers
+﻿namespace StackExchange.Opserver
 {
     public static class Singleton<T> where T : new()
     {

@@ -1,7 +1,7 @@
 @using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Elastic
 @{
-    var all = ElasticCluster.AllClusters;
+    var all = ElasticModule.Clusters;
 }
 <div class="panel panel-default">
     <div class="panel-heading">@all.GetWorstStatus().IconSpan() Elasticsearch</div>

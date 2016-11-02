@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Models
         public Type ControllerType { get; set; }
         public string Action { get; set; }
         public int Order { get; set; }
-        public ISecurableSection SecurableSection { get; set; }
+        public ISecurableModule SecurableModule { get; set; }
         public Func<MonitorStatus> GetMonitorStatus { get; set; }
         public Func<string> GetTooltip { get; set; }
         public Func<int> GetBadgeCount { get; set; }
@@ -80,10 +80,10 @@ namespace StackExchange.Opserver.Models
         {
             get
             {
-                if (SecurableSection != null)
+                if (SecurableModule != null)
                 {
-                    if (!SecurableSection.Enabled) return false;
-                    if (!SecurableSection.HasAccess()) return false;
+                    if (!SecurableModule.Enabled) return false;
+                    if (!SecurableModule.HasAccess()) return false;
                 }
                 return true;
             }
@@ -97,7 +97,7 @@ namespace StackExchange.Opserver.Models
             Controller = controller.GetType().Name.Replace("Controller", "");
             ControllerType = controller.GetType();
             Action = action;
-            SecurableSection = controller.SettingsSection;
+            SecurableModule = controller.SettingsModule;
             Order = order;
         }
     }

@@ -7,7 +7,7 @@
     {
         public override bool IsAdmin => true;
 
-        internal override bool InAdminGroups(ISecurableSection settings) { return true; }
+        internal override bool InAdminGroups(ISecurableModule settings) { return true; }
         public override bool InGroups(string groupNames, string accountName) { return true; }
         public override bool ValidateUser(string userName, string password) { return true; }
     }

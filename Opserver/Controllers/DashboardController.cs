@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.Dashboard;
+        public override ISecurableModule SettingsModule => Current.Settings.Dashboard;
 
         public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
         

@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.CloudFlare)]
     public class CloudFlareController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.CloudFlare;
+        public override ISecurableModule SettingsModule => Current.Settings.CloudFlare;
 
         public override TopTab TopTab => new TopTab("CloudFlare", nameof(Dashboard), this, 40)
         {

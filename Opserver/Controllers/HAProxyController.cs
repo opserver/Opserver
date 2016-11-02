@@ -12,11 +12,11 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.HAProxy;
+        public override ISecurableModule SettingsModule => Current.Settings.HAProxy;
 
         public override TopTab TopTab => new TopTab("HAProxy", nameof(Dashboard), this, 60)
         {
-            GetMonitorStatus = () => HAProxyGroup.AllGroups.GetWorstStatus()
+            GetMonitorStatus = () => HAProxyModule.Groups.GetWorstStatus()
         };
 
         [Route("haproxy")]
@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Controllers
             var vd = new HAProxyModel
             {
                 SelectedGroup = haGroup,
-                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyGroup.AllGroups,
+                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyModule.Groups,
                 Proxies = proxies,
                 View = HAProxyModel.Views.Dashboard,
                 Refresh = !norefresh,

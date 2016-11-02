@@ -72,10 +72,10 @@ namespace StackExchange.Opserver.Models
             }
         }
 
-        public Roles GetRoles(ISecurableSection section, Roles user, Roles admin)
+        public Roles GetRoles(ISecurableModule module, Roles user, Roles admin)
         {
-            if (section.IsAdmin()) return admin | user;
-            if (section.HasAccess()) return user;
+            if (module.IsAdmin()) return admin | user;
+            if (module.HasAccess()) return user;
             return Roles.None;
         }
 

@@ -1,8 +1,8 @@
 ﻿@using StackExchange.Opserver.Data.SQL
 @{
     Layout = null;
-    var clusters = SQLCluster.AllClusters;
-    var standalone = SQLInstance.AllStandalone;
+    var clusters = SQLModule.Clusters;
+    var standalone = SQLModule.StandaloneInstances;
 }
 @helper RenderInstances(IEnumerable<SQLInstance> instances)
 {

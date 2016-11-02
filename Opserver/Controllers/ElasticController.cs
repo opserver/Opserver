@@ -11,11 +11,11 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Elastic)]
     public class ElasticController : StatusController
     {
-        public override ISecurableSection SettingsSection => Current.Settings.Elastic;
+        public override ISecurableModule SettingsModule => Current.Settings.Elastic;
 
         public override TopTab TopTab => new TopTab("Elastic", nameof(Dashboard), this, 30)
         {
-            GetMonitorStatus = () => ElasticCluster.AllClusters.GetWorstStatus()
+            GetMonitorStatus = () => ElasticModule.Clusters.GetWorstStatus()
         };
 
         [Route("elastic")]
@@ -89,7 +89,7 @@ namespace StackExchange.Opserver.Controllers
         {
             // Cluster names are not unique, names + node names should be though
             // If we see too many people with crazy combos, then node GUIDs it is.
-            var cc = ElasticCluster.AllClusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
+            var cc = ElasticModule.Clusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
                                              && (node.IsNullOrEmpty() || (c.Nodes.Data?.Get(node) != null)));
             var cn = cc?.Nodes.Data.Get(node);
 

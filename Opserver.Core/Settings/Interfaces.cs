@@ -1,6 +1,6 @@
 ﻿namespace StackExchange.Opserver
 {
-    public interface ISecurableSection
+    public interface ISecurableModule
     {
         bool Enabled { get; }
         string ViewGroups { get; }

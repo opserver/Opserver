@@ -1,6 +1,6 @@
 @using StackExchange.Opserver.Data.HAProxy
 @{
-    var allGroups = HAProxyGroup.AllGroups;
+    var allGroups = HAProxyModule.Groups;
     var allProxies = HAProxyGroup.GetAllProxies();
     var allServers = allProxies.SelectMany(p => p.Servers).ToList();
     var totalUp = allServers.Count(s => s.MonitorStatus == MonitorStatus.Good);
@@ -8,10 +8,10 @@
     var totalDown = allServers.Count(s => s.MonitorStatus != MonitorStatus.Good && !s.OutOfRotation);
 }
 <div class="panel panel-default">
-    <div class="panel-heading">@HAProxyGroup.AllGroups.GetWorstStatus().IconSpan() HAProxy</div>
+    <div class="panel-heading">@HAProxyModule.Groups.GetWorstStatus().IconSpan() HAProxy</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            @Gauges.Circle("Group", HAProxyGroup.AllGroups)
+            @Gauges.Circle("Group", HAProxyModule.Groups)
         </div>
         <div class="col-xs-4">
             @Gauges.Circle("Proxy", allProxies)

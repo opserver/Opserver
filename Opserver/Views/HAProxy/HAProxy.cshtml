@@ -6,8 +6,8 @@
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("HAProxy");
-    var allGroups = HAProxyGroup.AllGroups;
-    this.SetTopNodes(HAProxyGroup.AllGroups, "HAProxy Groups", Model.SelectedGroup);
+    var allGroups = HAProxyModule.Groups;
+    this.SetTopNodes(HAProxyModule.Groups, "HAProxy Groups", Model.SelectedGroup);
 }
 @section head {
 @if (Model.IsInstanceFilterable)
