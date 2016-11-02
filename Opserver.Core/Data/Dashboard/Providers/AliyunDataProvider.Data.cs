@@ -410,11 +410,19 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 var rawResult = await wc.DownloadStringTaskAsync(disksApiUri).ConfigureAwait(false);
                 var disks = Newtonsoft.Json.JsonConvert.DeserializeObject<AliyunDisks>(rawResult);
 
+                var cent = 100 * disks.Disks.Disk.Count();
+
+                // 如果多块云盘合并成一块
+                if (disks.Disks.Disk.Count() > 1) {
+                    disks.Disks.Disk.First().Size = disks.Disks.Disk.Sum(d => d.Size);
+                    disks.Disks.Disk = new List<AliyunDisks.Disk>() { disks.Disks.Disk.First() };
+                }
+
                 foreach (var d in disks.Disks.Disk) {
                     decimal usedBytes = 0;
                     foreach (var mountpoint in new string[] { "C:", "D:", "E:", "F:", "G:" }) {
                         var value = ((await GetDiskUtilization(instanceId, mountpoint)).Datapoints.FirstOrDefault()?.Average ?? 0);
-                        usedBytes += Convert.ToDecimal(value) / 100 * d.TotalBytes;
+                        usedBytes += Convert.ToDecimal(value) / cent * d.TotalBytes;
                     }
 
                     d.UsedBytes = usedBytes;
