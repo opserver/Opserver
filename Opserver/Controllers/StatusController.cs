@@ -2,6 +2,10 @@
 using System.Net;
 using System.Web.Mvc;
 using Jil;
+using StackExchange.Opserver.Data.Elastic;
+using StackExchange.Opserver.Data.Exceptions;
+using StackExchange.Opserver.Data.HAProxy;
+using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Views.Shared;
 using StackExchange.Profiling;
@@ -80,18 +84,19 @@ namespace StackExchange.Opserver.Controllers
         {
             var s = Current.Settings;
 
-            // TODO: Plugin registrations
+            // TODO: Plugin registrations - middleware?
+            // Order could be interesting here, needs to be tied to top tabs
             if (s.Dashboard.Enabled && s.Dashboard.HasAccess())
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
             if (SQLModule.Enabled && s.SQL.HasAccess())
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
-            if (s.Redis.Enabled && s.Redis.HasAccess())
+            if (RedisModule.Enabled && s.Redis.HasAccess())
                 return RedirectToAction(nameof(RedisController.Dashboard), "Redis");
-            if (s.Elastic.Enabled && s.Elastic.HasAccess())
+            if (ElasticModule.Enabled && s.Elastic.HasAccess())
                 return RedirectToAction(nameof(ElasticController.Dashboard), "Elastic");
-            if (s.Exceptions.Enabled && s.Exceptions.HasAccess())
+            if (ExceptionsModule.Enabled && s.Exceptions.HasAccess())
                 return RedirectToAction(nameof(ExceptionsController.Exceptions), "Exceptions");
-            if (s.HAProxy.Enabled && s.HAProxy.HasAccess())
+            if (HAProxyModule.Enabled && s.HAProxy.HasAccess())
                 return RedirectToAction(nameof(HAProxyController.Dashboard), "HAProxy");
 
             return View("NoConfiguration");
