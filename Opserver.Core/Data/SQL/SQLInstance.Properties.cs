@@ -55,6 +55,8 @@ namespace StackExchange.Opserver.Data.SQL
             public int MaxWorkersCount { get; internal set; }
             public int SchedulerCount { get; internal set; }
             public int SchedulerTotalCount { get; internal set; }
+            public string TimeZoneId { get; internal set; }
+            public TimeZoneInfo TimeZoneInfo => TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId);
             public DateTime SQLServerStartTime { get; internal set; }
             public VirtualMachineTypes VirtualMachineType { get; internal set; }
 
@@ -98,6 +100,11 @@ namespace StackExchange.Opserver.Data.SQL
 
             internal const string FetchSQL = @"Declare @sql nvarchar(4000);
 Set @sql = '
+DECLARE @TimeZone VARCHAR(50)
+EXEC MASTER.dbo.xp_regread ''HKEY_LOCAL_MACHINE'',
+''SYSTEM\CurrentControlSet\Control\TimeZoneInformation'',
+''TimeZoneKeyName'',@TimeZone OUT
+
 Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        @@VERSION FullVersion,
        Cast(SERVERPROPERTY(''ProductLevel'') as nvarchar(128)) Level,
@@ -120,7 +127,8 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        stack_size_in_bytes StackSizeBytes,
        max_workers_count MaxWorkersCount,
        scheduler_count SchedulerCount,
-       scheduler_total_count SchedulerTotalCount,'
+       scheduler_total_count SchedulerTotalCount,
+	   @TimeZone TimeZoneId,'
        
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
 	Set @sql = @sql + '
