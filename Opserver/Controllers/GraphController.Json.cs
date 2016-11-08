@@ -152,7 +152,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/volumePerformance/json")]
         public async Task<ActionResult> VolumePerformanceJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
         {
-            var iface = DashboardData.GetNodeById(id)?.GetVolume(iid);
+            var iface = DashboardModule.GetNodeById(id)?.GetVolume(iid);
             if (iface == null) return JsonNotFound();
             var data = await VolumePerformanceData(iface, start, end, summary);
             if (data == null) return JsonNotFound();

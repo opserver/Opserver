@@ -88,18 +88,20 @@
                     width: 858,
                     live: @(Model.IsLive ? "true" : "false"),
                     data: @Model.NetworkData.ToJson()
-                    });
+                });
         </script>
-        case NodeGraphModel.KnownTypes.VolumePerformance:
+    }
+    if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance) // Intentionally not included yet in live view
+    { 
             <script>
                 $('.js-dashboard-chart').volumePerformanceGraph({
                     id: '@Model.Node.Id',
                     iid: '@(Model.Volume?.Id)',
                     width: 858,
-                    data: @Model.GraphData.ToJson()
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.VolumePerformanceData.ToJson()
                     });
             </script>
-            break;
     }
 }
 else

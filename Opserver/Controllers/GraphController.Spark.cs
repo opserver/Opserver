@@ -87,7 +87,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> VolumeSpark(string id)
         {
             MiniProfiler.Stop(true);
-            var node = DashboardData.GetNodeById(id);
+            var node = DashboardModule.GetNodeById(id);
             if (node == null) return ContentNotFound();
             var points = await node.GetVolumePerformanceUtilization(SparkStart, null, SparkPoints);
 
@@ -101,7 +101,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> VolumeSpark(string direction, string id, string iid)
         {
             MiniProfiler.Stop(true);
-            var volume = DashboardData.GetNodeById(id)?.GetVolume(iid);
+            var volume = DashboardModule.GetNodeById(id)?.GetVolume(iid);
             if (volume == null) return ContentNotFound();
             var points = await volume.GetPerformanceUtilization(SparkStart, null, SparkPoints);
 

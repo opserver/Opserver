@@ -71,13 +71,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 var staticDataCache = ProviderCache(
                     () => node.PollNodeInfoAsync(),
-                    _config.StaticDataTimeoutSeconds,
+                    _config.StaticDataTimeoutSeconds.Seconds(),
                     memberName: node.Name + "-Static");
                 node.Caches.Add(staticDataCache);
 
                 var dynamicDataCache = this.ProviderCache(
                     () => node.PollStats(),
-                    this._config.DynamicDataTimeoutSeconds,
+                    this._config.DynamicDataTimeoutSeconds.Seconds(),
                     memberName: node.Name + "-Dynamic");
                 node.Caches.Add(dynamicDataCache);
 

@@ -129,20 +129,8 @@ namespace StackExchange.Opserver.Controllers
                     case NodeGraphModel.KnownTypes.Memory:
                     case NodeGraphModel.KnownTypes.Network:
                     case NodeGraphModel.KnownTypes.Volume:
-                        await PopulateModel(vd, type, subId);
-                        break;
                     case NodeGraphModel.KnownTypes.VolumePerformance:
-                        if (subId.HasValue())
-                        {
-                            var v = vd.Node.GetVolume(subId);
-                            vd.Volume = v;
-                            vd.Title = "Volume Utilization (" + (v?.PrettyName ?? "Unknown") + ")";
-                        }
-                        else
-                        {
-                            vd.Title = "Volume Utilization (" + (n.PrettyName ?? "Unknown") + ")";
-                            vd.GraphData = await GraphController.VolumePerformanceData(n, summary: true);
-                        }
+                        await PopulateModel(vd, type, subId);
                         break;
                 }
             }
@@ -178,10 +166,26 @@ namespace StackExchange.Opserver.Controllers
                     }
                     break;
                 case NodeGraphModel.KnownTypes.Volume:
-                    var v = vd.Node.GetVolume(subId);
-                    vd.Volume = v;
-                    vd.Title = "Volume Usage (" + (v?.PrettyName ?? "Unknown") + ")";
-                    // TODO: Volume data
+                    {
+                        var v = vd.Node.GetVolume(subId);
+                        vd.Volume = v;
+                        vd.Title = "Volume Usage (" + (v?.PrettyName ?? "Unknown") + ")";
+                        // TODO: Volume data
+                    }
+                    break;
+                case NodeGraphModel.KnownTypes.VolumePerformance:
+                    if (subId.HasValue())
+                    {
+                        var v = vd.Node.GetVolume(subId);
+                        vd.Volume = v;
+                        vd.Title = "Volume Utilization (" + (v?.PrettyName ?? "Unknown") + ")";
+                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(v, summary: true);
+                    }
+                    else
+                    {
+                        vd.Title = "Volume Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(n, summary: true);
+                    }
                     break;
             }
         }

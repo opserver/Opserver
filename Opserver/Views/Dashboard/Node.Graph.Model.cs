@@ -16,6 +16,7 @@ namespace StackExchange.Opserver.Views.Dashboard
         public object MemoryData { get; set; }
         public object NetworkData { get; set; }
         public object VolumeData { get; set; }
+        public object VolumePerformanceData { get; set; }
 
         public static class KnownTypes
         {
