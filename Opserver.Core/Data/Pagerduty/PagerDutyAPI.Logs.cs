@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string AgentId { get; set; }
         [DataMember(Name="type")]
         public string Service { get; set; }
-        public PagerDutyPerson Person => PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == AgentId);
+        public PagerDutyPerson Person => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == AgentId);
     }
     public class Notification
     {
