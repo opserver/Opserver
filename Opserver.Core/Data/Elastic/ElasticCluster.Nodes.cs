@@ -88,8 +88,16 @@ namespace StackExchange.Opserver.Data.Elastic
             public string Name { get; internal set; }
             //[DataMember(Name = "transport_address")]
             //public string TransportAddress { get; internal set; }
-            [DataMember(Name = "host")]
+
+            // Elasticsearch 5.0 changed this, for reasons passing understanding.
+            [DataMember(Name = "hostname")]
             public string Hostname { get; internal set; }
+            [DataMember(Name = "host")]
+            internal string ElasticSearchJustLovesChangingPropertiesWithNoClueOfImpactOnActualApplications
+            {
+                set { Hostname = value; }
+            }
+
             [DataMember(Name = "version")]
             public string VersionString { get; internal set; }
             //[DataMember(Name = "build")]
