@@ -52,6 +52,10 @@
         {
             <div class="dashboard-chart js-graph-network"></div>
         }
+        if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance)
+        {
+            <div class="dashboard-chart js-graph-volumePerformance"></div>
+        }
     }
     if (ShowType(NodeGraphModel.KnownTypes.CPU))
     {
@@ -94,7 +98,7 @@
     if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance) // Intentionally not included yet in live view
     { 
             <script>
-                $('.js-dashboard-chart').volumePerformanceGraph({
+                $('.js-graph-volumePerformance').volumePerformanceGraph({
                     id: '@Model.Node.Id',
                     iid: '@(Model.Volume?.Id)',
                     width: 858,
