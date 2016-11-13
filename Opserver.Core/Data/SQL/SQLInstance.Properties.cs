@@ -126,20 +126,20 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        
 DECLARE @TimeZone VARCHAR(50)
 If (EXISTS(SELECT * FROM sys.fn_my_permissions('sys.xp_regread', 'OBJECT') WHERE permission_name = 'EXECUTE'))
-	EXEC sys.xp_regread
-		'HKEY_LOCAL_MACHINE',
-		'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
-		'TimeZoneKeyName',
-		@TimeZone OUT
+    EXEC sys.xp_regread
+        'HKEY_LOCAL_MACHINE',
+        'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
+        'TimeZoneKeyName',
+        @TimeZone OUT
 Else If (EXISTS(SELECT * FROM sys.fn_my_permissions('sys.xp_instance_regread', 'OBJECT') WHERE permission_name = 'EXECUTE'))
-	EXEC sys.xp_instance_regread
-		'HKEY_LOCAL_MACHINE',
-		'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
-		'TimeZoneKeyName',
-		@TimeZone OUT
+    EXEC sys.xp_instance_regread
+        'HKEY_LOCAL_MACHINE',
+        'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
+        'TimeZoneKeyName',
+        @TimeZone OUT
 
 If (LEN(@TimeZone) > 0)
-	Set @sql = @sql + '
+    Set @sql = @sql + '
        ''' + @TimeZone + ''' TimeZoneId,';
 
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
