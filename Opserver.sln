@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opserver.Core", "Opserver.Core\Opserver.Core.csproj", "{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}"
 EndProject
@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opserver", "Opserver\Opserv
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52AF00E9-833A-44FE-BE7B-0DC7B84E2814}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		Build.bat = Build.bat
 		WebEssentials-Settings.json = WebEssentials-Settings.json
 	EndProjectSection
