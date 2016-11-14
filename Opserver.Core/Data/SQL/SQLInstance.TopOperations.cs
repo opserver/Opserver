@@ -16,6 +16,13 @@ namespace StackExchange.Opserver.Data.SQL
             return TimedCache(nameof(GetTopOperations) + "-" + (options?.GetHashCode() ?? 0).ToString(),
                 conn =>
                 {
+                    if (options != null && options.LastRunSeconds.HasValue)
+                    {
+                        var offset = ServerProperties.Data.TimeZoneInfo.GetUtcOffset(DateTime.UtcNow);
+
+                        options.LastRunSeconds -= (Int32)offset.TotalSeconds;
+                    }
+
                     var hasOptions = options != null;
                     var sql = string.Format(GetFetchSQL<TopOperation>(),
                         hasOptions ? options.ToSQLWhere() + options.ToSQLOrder() : "",
