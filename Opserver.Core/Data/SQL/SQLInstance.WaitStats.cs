@@ -8,10 +8,19 @@ namespace StackExchange.Opserver.Data.SQL
         private Cache<List<WaitStatRecord>> _waitStats;
         public Cache<List<WaitStatRecord>> WaitStats =>
             _waitStats ?? (_waitStats = GetSqlCache(
-                nameof(WaitStats), conn =>
+                nameof(WaitStats), async conn =>
                 {
                     var sql = GetFetchSQL<WaitStatRecord>();
-                    return conn.QueryAsync<WaitStatRecord>(sql, new {secondsBetween = 15});
+                    var results = await conn.QueryAsync<WaitStatRecord>(sql, new {secondsBetween = 15});
+
+                    var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                    foreach (var result in results)
+                    {
+                        result.CreationDate = result.CreationDate.ToUniversalTime(timezone);
+                    }
+
+                    return results;
                 }));
 
         public class WaitStatRecord : ISQLVersioned

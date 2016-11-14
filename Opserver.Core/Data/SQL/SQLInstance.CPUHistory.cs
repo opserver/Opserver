@@ -13,9 +13,17 @@ namespace StackExchange.Opserver.Data.SQL
             _resourceHistory ?? (_resourceHistory = GetSqlCache(nameof(ResourceHistory), async conn =>
             {
                 var sql = GetFetchSQL<ResourceEvent>();
-                var result = await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false);
-                CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
-                return result;
+                var results = await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false);
+                CurrentCPUPercent = results.Count > 0 ? results.Last().ProcessUtilization : (int?) null;
+
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.EventTime = result.EventTime.ToUniversalTime(timezone);
+                }
+
+                return results;
             }));
 
         public int? CurrentCPUPercent { get; set; }

@@ -18,6 +18,8 @@ namespace StackExchange.Opserver.Data.SQL
                         {
                             CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
                         }
+
+                        result.SQLServerStartTime = result.SQLServerStartTime.ToUniversalTime(result.TimeZoneInfo);
                     }
                     return result;
                 }));

@@ -11,7 +11,25 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLJobInfo>> _jobSummary;
-        public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2.Minutes()));
+
+        public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2.Minutes(), async items =>
+        {
+            var timezone = ServerProperties.Data.TimeZoneInfo;
+
+            var results = await items;
+
+            foreach (var result in results)
+            {
+                result.DateCreated = result.DateCreated.ToUniversalTime(timezone);
+                result.DateModified = result.DateModified.ToUniversalTime(timezone);
+                result.LastRunRequestedDate = result.LastRunRequestedDate.ToUniversalTime(timezone);
+                result.LastStartDate = result.LastStartDate.ToUniversalTime(timezone);
+                result.LastStopDate = result.LastStopDate.ToUniversalTime(timezone);
+                result.NextRunDate = result.NextRunDate.ToUniversalTime(timezone);
+            }
+
+            return results;
+        }));
 
         /// <summary>
         /// Enables or disables an agent job

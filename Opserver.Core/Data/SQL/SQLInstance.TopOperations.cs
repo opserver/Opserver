@@ -22,18 +22,35 @@ namespace StackExchange.Opserver.Data.SQL
                         hasOptions ? options.ToSQLSearch() : "");
                     sql = sql.Replace("query_plan AS QueryPlan,", "")
                         .Replace("CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp", "");
-                    return conn.Query<TopOperation>(sql, options).AsList();
+                    var operations = conn.Query<TopOperation>(sql, options).AsList();
+
+                    var timezone = ServerProperties.Data.TimeZoneInfo;
+                    foreach (var operation in operations)
+                    {
+                        ConvertDateTimesToUtc(operation, timezone);
+                    }
+
+                    return operations;
                 }, 10.Seconds(), 5.Minutes());
         }
 
         public LightweightCache<TopOperation> GetTopOperation(byte[] planHandle, int? statementStartOffset = null)
         {
+            var timezone = ServerProperties.Data.TimeZoneInfo;
             var clause = " And (qs.plan_handle = @planHandle OR qs.sql_handle = @planHandle)";
             if (statementStartOffset.HasValue) clause += " And qs.statement_start_offset = @statementStartOffset";
             var sql = string.Format(GetFetchSQL<TopOperation>(), clause, "");
             return TimedCache(nameof(GetTopOperation) + "-" + planHandle.GetHashCode().ToString() + "-" + statementStartOffset.ToString(),
-                conn => conn.QueryFirstOrDefault<TopOperation>(sql, new { planHandle, statementStartOffset, MaxResultCount = 1 }),
+                conn => ConvertDateTimesToUtc(conn.QueryFirstOrDefault<TopOperation>(sql, new { planHandle, statementStartOffset, MaxResultCount = 1 }), timezone),
                 60.Seconds(), 60.Seconds());
+        }
+
+        private TopOperation ConvertDateTimesToUtc(TopOperation operation, TimeZoneInfo timezone)
+        {
+            operation.PlanCreationTime = operation.PlanCreationTime.ToUniversalTime(timezone);
+            operation.LastExecutionTime = operation.LastExecutionTime.ToUniversalTime(timezone);
+
+            return operation;
         }
 
         public class TopOperation : ISQLVersioned

@@ -113,14 +113,20 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Cache<List<T>> SqlCacheList<T>(
             TimeSpan cacheDuration,
+            Func<Task<List<T>>, Task<List<T>>> transform = null,
             bool affectsStatus = true,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
             where T : class, ISQLVersioned, new()
         {
+            if (transform == null)
+            {
+                transform = items => items;
+            }
+
             return GetSqlCache(memberName,
-                conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
+                conn => transform(conn.QueryAsync<T>(GetFetchSQL<T>())),
                 Supports<T>,
                 cacheDuration,
                 memberName: memberName,

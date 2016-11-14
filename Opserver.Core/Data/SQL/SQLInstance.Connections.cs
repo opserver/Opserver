@@ -7,10 +7,35 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLConnectionSummaryInfo>> _connectionsSummary;
-        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30.Seconds()));
+        public Cache<List<SQLConnectionSummaryInfo>> ConnectionsSummary => _connectionsSummary ?? (_connectionsSummary = SqlCacheList<SQLConnectionSummaryInfo>(30.Seconds(), async items =>
+        {
+            var timezone = ServerProperties.Data.TimeZoneInfo;
+
+            var results = await items;
+
+            foreach (var result in results)
+            {
+                result.LastConnectTime = result.LastConnectTime.ToUniversalTime(timezone);
+            }
+
+            return results;
+        }));
 
         private Cache<List<SQLConnectionInfo>> _connections;
-        public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(RefreshInterval));
+        public Cache<List<SQLConnectionInfo>> Connections => _connections ?? (_connections = SqlCacheList<SQLConnectionInfo>(RefreshInterval, async items =>
+        {
+            var timezone = ServerProperties.Data.TimeZoneInfo;
+
+            var results = await items;
+
+            foreach (var result in results)
+            {
+                result.ConnectTime = result.ConnectTime.ToUniversalTime(timezone);
+                result.LoginTime = result.LoginTime.ToUniversalTime(timezone);
+            }
+
+            return results;
+        }));
 
         public class SQLConnectionSummaryInfo : ISQLVersioned
         {
