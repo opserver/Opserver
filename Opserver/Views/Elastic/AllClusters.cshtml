@@ -12,8 +12,8 @@
 
     if (nodes != null && nodes.Any())
     {
-        Version minVersion = nodes.Min(n => n.Version),
-        maxVersion = nodes.Max(n => n.Version);
+        var minVersion = nodes.Min(n => n.Version);
+        var maxVersion = nodes.Max(n => n.Version);
         var versionString = minVersion == maxVersion ? minVersion.ToString() : (minVersion + "-" + maxVersion);
         @:- Version @versionString
     }

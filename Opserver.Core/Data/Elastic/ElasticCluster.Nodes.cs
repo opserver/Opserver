@@ -73,9 +73,12 @@ namespace StackExchange.Opserver.Data.Elastic
             public MonitorStatus MonitorStatus => MonitorStatus.Good;
             public string MonitorStatusReason => null;
 
-            private Version _version;
+            //private Version _version;
+            //[IgnoreDataMember]
+            //public Version Version => _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0"));
+
             [IgnoreDataMember]
-            public Version Version => _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0"));
+            public string Version => VersionString;
 
             public bool IsClient => GetAttribute("client") == "true";
             public bool IsDataNode => GetAttribute("data") == "true";
