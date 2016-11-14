@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.SettingsProviders
                 // A race on reloads can happen - ignore as this is during shutdown
                 if (!e.Message.Contains("The process cannot access the file"))
                     Opserver.Current.LogException("Error loading settings from " + path, e);
-                return default(T);
+                return new T();
             }
         }
     }
