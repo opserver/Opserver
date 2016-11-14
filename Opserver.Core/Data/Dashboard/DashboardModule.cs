@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public class DashboardModule : StatusModule
     {
-        public static bool Enabled => Providers.Count > 0; // Non-empty?
+        public static bool Enabled { get; }
         public static List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
 
         static DashboardModule()
@@ -20,6 +20,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 return;
             }
 
+            Enabled = true;
             foreach (var p in providers.All)
             {
                 p?.Normalize();

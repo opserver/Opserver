@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -11,18 +12,23 @@ namespace StackExchange.Opserver.Data.Elastic
         public Cache<ClusterNodesInfo> Nodes => 
             _nodes ?? (_nodes = GetElasticCache(async () =>
             {
-                var result = (await GetAsync<ClusterNodesInfo>("_nodes").ConfigureAwait(false))?.Prep();
-                if (result == null) return null;
+                var resultTask = GetAsync<ClusterNodesInfo>("_nodes");
+                // Note without ?all, we have dropped support for < v0.90
+                var statsTask = GetAsync<ClusterNodesStats>("_nodes/stats"); 
 
-                var stats = await GetAsync<ClusterNodesStats>("_nodes/stats?all").ConfigureAwait(false);
-                if (stats == null) return result;
-
-                foreach (var s in stats.Nodes)
+                await Task.WhenAll(resultTask, statsTask);
+                var result = (await resultTask)?.Prep();
+                var stats = await statsTask;
+                
+                if (result != null && stats != null && result.RawNodes != null)
                 {
-                    var node = result.Nodes.FirstOrDefault(n => n.GUID == s.Key);
-                    if (node != null)
+                    foreach (var s in stats.Nodes)
                     {
-                        node.Stats = s.Value;
+                        NodeInfo node;
+                        if (result.RawNodes.TryGetValue(s.Key, out node))
+                        {
+                            node.Stats = s.Value;
+                        }
                     }
                 }
                 return result;
@@ -88,8 +94,16 @@ namespace StackExchange.Opserver.Data.Elastic
             public string Name { get; internal set; }
             //[DataMember(Name = "transport_address")]
             //public string TransportAddress { get; internal set; }
-            [DataMember(Name = "host")]
+
+            // Elasticsearch 5.0 changed this, for reasons passing understanding.
+            [DataMember(Name = "hostname")]
             public string Hostname { get; internal set; }
+            [DataMember(Name = "host")]
+            internal string ElasticSearchJustLovesChangingPropertiesWithNoClueOfImpactOnActualApplications
+            {
+                set { Hostname = value; }
+            }
+
             [DataMember(Name = "version")]
             public string VersionString { get; internal set; }
             //[DataMember(Name = "build")]

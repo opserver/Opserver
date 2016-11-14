@@ -818,8 +818,8 @@ Select t.object_id Id,
        t.modify_date LastModifiedDate,
        Count(i.index_id) IndexCount,
        Max(ddps.row_count) [RowCount],
-       Sum(Case When i.type <= 1 Then a.total_pages Else 0 End) * 8 DataTotalSpaceKB,
-       Sum(Case When i.type > 1 Then a.total_pages Else 0 End) * 8 IndexTotalSpaceKB,
+       Sum(Case When i.type In (0, 1, 5) Then a.total_pages Else 0 End) * 8 DataTotalSpaceKB,
+       Sum(Case When i.type Not In (0, 1, 5) Then a.total_pages Else 0 End) * 8 IndexTotalSpaceKB,
        Sum(a.used_pages) * 8 UsedSpaceKB,
        Sum(a.total_pages) * 8 TotalSpaceKB,
        (Case Max(i.type) When 0 Then 0 Else 1 End) as TableType
@@ -840,7 +840,7 @@ Select t.object_id Id,
        Left Join sys.dm_db_partition_stats ddps
          On i.object_id = ddps.object_id
          And i.index_id = ddps.index_id
-         And i.type < 2         
+         And i.type In (0, 1, 5) -- Heap, Clustered, Clustered Columnstore        
  Where t.is_ms_shipped = 0
    And i.object_id > 255
 Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name";
