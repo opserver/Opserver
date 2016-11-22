@@ -256,13 +256,19 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Returns a string with all the DBML-mapped property names and their values. Each tuple will be separated by 'joinSeparator'.
         /// </summary>
-        public static string GetPropertyNamesAndValues(this object o, string joinSeparator = "\n") =>
-            o == null
-                ? ""
-                : string.Join(joinSeparator, o.GetType()
-                                              .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                                              .Select(p => p.Name + ":" + p.GetValue(o, null)));
-        
+        public static string GetPropertyNamesAndValues(this object o, string joinSeparator = "\n", string prefix = "")
+        {
+            if (o == null) return "";
+            var props = o.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+            var sb = StringBuilderCache.Get();
+            foreach (var p in props)
+            {
+                if (sb.Length > 0) sb.Append(joinSeparator);
+                sb.Append(prefix).Append(p.Name).Append(": ").Append(p.GetValue(o, null));
+            }
+            return sb.ToStringRecycle();
+        }
+
         /// <summary>
         /// Converts a raw long into a readable size
         /// </summary>
