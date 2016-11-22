@@ -133,9 +133,10 @@
                             }
                             @if (stats?.Process != null)
                             {
-                                <td title="@c.HealthStatus.Data.Indexes.Count.ToComma() indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
+                                var indexCount = c.HealthStatus.Data?.Indexes?.Count.ToComma() ?? "<unknown>";
+                                <td title="@indexCount indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
                                     <a href="@Url.Action(nameof(ElasticController.Indexes), new { cluster = c.Name, node = n.Name })">
-                                        @c.HealthStatus.Data.Indexes.Count.ToComma()
+                                        @indexCount
                                     </a> <span class="text-muted">@(stats.Indexes.Store.SizeInBytes > 0 ? "(" + stats.Indexes.Store.SizeInBytes.ToSize() + ")" : "")</span>
                                 </td>
                                 <td>@stats.Indexes.Search.QueryTotal.ToComma()</td>
