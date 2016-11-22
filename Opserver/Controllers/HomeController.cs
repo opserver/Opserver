@@ -58,11 +58,12 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Debug()
         {
             var sb = StringBuilderCache.Get()
-                .AppendFormat("Request IP: {0}\n", Current.RequestIP)
-                .AppendFormat("Request User: {0}\n", Current.User.AccountName)
-                .AppendFormat("Request Roles: {0}\n", Current.User.RawRoles)
+                .AppendLine("Request Info")
+                .Append("  IP: ").AppendLine(Current.RequestIP)
+                .Append("  User: ").AppendLine(Current.User.AccountName)
+                .Append("  Roles: ").AppendLine(Current.User.Role.ToString())
                 .AppendLine()
-                .AppendLine("Headers:");
+                .AppendLine("Headers");
             foreach (string k in Request.Headers.Keys)
             {
                 sb.AppendFormat("  {0}: {1}\n", k, Request.Headers[k]);
@@ -70,8 +71,8 @@ namespace StackExchange.Opserver.Controllers
             
             var ps = PollingEngine.GetPollingStatus();
             sb.AppendLine()
-              .AppendLine("Polling Info:")
-              .AppendLine(ps.GetPropertyNamesAndValues());
+              .AppendLine("Polling Info")
+              .AppendLine(ps.GetPropertyNamesAndValues(prefix: "  "));
             return TextPlain(sb.ToStringRecycle());
         }
 
