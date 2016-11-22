@@ -33,7 +33,7 @@
             }).ThenBy(i => i.Name))
             {
                 ElasticCluster.IndexStatsInfo.IndexStats iStats = null;
-                stats?.Indexes.TryGetValue(i.Name, out iStats);
+                stats?.Indexes?.TryGetValue(i.Name, out iStats);
                 <tr class="@i.RowClass()">
                     <td>@i.IconSpan() @c.GetIndexAliasedName(i.Name)</td>
                     @if (iStats != null)

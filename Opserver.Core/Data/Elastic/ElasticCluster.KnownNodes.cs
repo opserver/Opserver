@@ -65,6 +65,8 @@ namespace StackExchange.Opserver.Data.Elastic
                 Url = $"http://{Host}:{Port.ToString()}/";
             }
 
+            public override string ToString() => Host;
+
             public async Task<T> GetAsync<T>(string path) where T : class
             {
                 var wc = new WebClient();
