@@ -75,7 +75,7 @@
                     <tr class="category-row">
                         <th colspan="11">
                             <h5>
-                                @hs.IconSpan() <a href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name})">@c.Name</a>
+                                @hs.IconSpan() <a class="@hs.TextClass()" href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name})">@c.Name</a>
                                 <span class="text-muted small">(@string.Join(", ", attribs))@CommonVersionHeader(c)</span>
                             </h5>
                         </th>
