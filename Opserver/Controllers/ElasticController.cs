@@ -30,9 +30,9 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic/cluster")]
-        public ActionResult Cluster(string cluster)
+        public ActionResult Cluster(string cluster, string node)
         {
-            var vd = GetViewData(cluster);
+            var vd = GetViewData(cluster, node);
             vd.View = DashboardModel.Views.Cluster;
             return View("Cluster", vd);
         }
