@@ -187,9 +187,11 @@ namespace StackExchange.Opserver.Controllers
             {
                 View = SQLViews.Connections,
                 CurrentInstance = i,
-                Cache = i.Connections,
-                Connections = await i.Connections.GetData()
+                Cache = i?.Connections
             };
+            var d = i?.Connections?.GetData();
+            if (d != null) vd.Connections = await d;
+
             return View(vd);
         }
 
