@@ -1099,6 +1099,28 @@ Status.Exceptions = (function () {
             return false;
         });
 
+        var protectedElementMarkup = '<span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>';
+
+        //Exception details page- Protect
+        $('.js-content').on('click', 'a.js-protect-link', function () {
+            var link = $(this);
+            link.addClass('icon-rotate-flip');
+
+            $.post(link.attr('href'), { id: link.data('id'), log: link.data('log') })
+                .done(function (data) {
+                    link.closest('.protected-icon-container').html(protectedElementMarkup);
+                    refreshCounts(data);
+                })
+                .fail(function (xhr) {
+                    link.closest('p').errorPopupFromJSON(xhr, 'An error occurred protecting');
+                })
+                .always(function () {
+                    link.removeClass('icon-rotate-flip');
+                });
+            return false;
+        });
+        //Exception details page- Protect
+
         // ajax the protection on the list page
         $('.js-content').on('click', '.js-exceptions a.js-protect-link', function () {
             var url = $(this).attr('href'),
@@ -1114,7 +1136,7 @@ Status.Exceptions = (function () {
                 success: function (data) {
                     $(this).siblings('.js-delete-link').attr('title', 'Delete this error')
                            .end()
-                           .replaceWith('<span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>');
+                           .replaceWith(protectedElementMarkup);
                     jRow.addClass('js-protected protected').removeClass('deleted');
                     refreshCounts(data);
                 },
