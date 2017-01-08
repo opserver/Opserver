@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public Task<BosunMetricResponse> GetMetric(string metricName, DateTime start, DateTime? end = null, string host = "*", IDictionary<string, string> tags = null)
         {
-            metricName = BosunMetric.GetDenormalized(metricName, host);
+            metricName = BosunMetric.GetDenormalized(metricName, host, NodeMetricCache.Data);
             var query = new TSDBQuery(start, end);
             query.AddQuery(metricName, host, BosunMetric.IsCounter(metricName, host), tags);
             return RunTSDBQueryAsync(query, 500);
@@ -212,7 +212,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public static string GetDenormalized(string metric, string host)
+        public static string GetDenormalized(string metric, string host, Dictionary<string, List<string>> metricCache)
         {
             if (host != null && !host.Contains("*") && !host.Contains("|"))
             {
@@ -225,7 +225,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     case Globals.NetTunnelBytes:
                     case Globals.NetVirtualBytes:
                     case Globals.NetBytes:
-                        return $"__{host}.{metric}";
+                        var result = $"__{host}.{metric}";
+                        List<string> hostMetrics;
+                        // Only return this denormalized metric optimization if it's actually configured in the Bosun relay
+                        if (metricCache != null && metricCache.TryGetValue(host, out hostMetrics) && hostMetrics.Contains(result))
+                            return result;
+                        break;
                 }
             }
             return metric;
