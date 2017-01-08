@@ -6,12 +6,15 @@ namespace StackExchange.Opserver.Views.Dashboard
     {
         [Description("None")]
         None = 0,
+        [Description("Stats")]
         Stats = 1,
+        [Description("Interfaces")]
         Interfaces = 2,
         [Description("VM Info")]
         VMHost = 3,
         [Description("Elastic")]
         Elastic = 4,
+        [Description("HAProxy")]
         HAProxy = 5,
         [Description("SQL Instance")]
         SQLInstance = 6,
