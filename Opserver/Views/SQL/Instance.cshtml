@@ -80,14 +80,14 @@ if (counter == null)
             }
         </div>
     }
-    <div class="row">
+    <div class="row small">
         <div class="col-md-6">
             @{
                 var pd = i.ServerProperties.Data;
                 if (pd != null)
                 {
                     <div class="panel panel-default">
-                        <div class="panel-heading">Summary <span class="small text-muted">(<a href="#/sql/summary/configuration">view config</a>)</span></div>
+                        <div class="panel-heading"><i class="fa fa-server" aria-hidden="true"></i> Summary <span class="small text-muted">(<a href="#/sql/summary/configuration">view config</a>)</span></div>
                         <div class="panel-body small">
                             <div class="value-block col-md-3 col-sm-6">
                                 @pd.MachineName
@@ -154,7 +154,7 @@ if (counter == null)
                         </div>
                     </div>
                     <div class="panel panel-default">
-                        <div class="panel-heading">Stats</div>
+                        <div class="panel-heading"><i class="fa fa-area-chart" aria-hidden="true"></i> Stats</div>
                         <div class="panel-body small">
                             <div class="value-block col-md-3">
                                 <div class="progress">
@@ -253,7 +253,7 @@ Top Users:
                     if (volumes?.Any() ?? false)
                     {
                         <div class="panel panel-default">
-                            <div class="panel-heading">Volumes <span class="text-muted small">(<a href="#/sql/summary/db-files">view files</a>)</span></div>
+                            <div class="panel-heading"><i class="fa fa-hdd-o" aria-hidden="true"></i> Volumes <span class="text-muted small">(<a href="#/sql/summary/db-files">view files</a>)</span></div>
                             <div class="panel-body small">
                                 @foreach (var v in volumes.OrderBy(v => v.VolumeId))
                                 {
@@ -279,7 +279,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                 if (ci != null)
                 {
                     <div class="panel panel-default">
-                        <div class="panel-heading">Cluster Members</div>
+                        <div class="panel-heading"><i class="fa fa-share-alt" aria-hidden="true"></i> Cluster Members</div>
                         <div class="panel-body small">
                             @foreach (var cn in ci.Cluster.Nodes)
                             {
@@ -296,7 +296,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                     if (ags?.Any() ?? false)
                     {
                         <div class="panel panel-default">
-                            <div class="panel-heading">Availability Groups</div>
+                            <div class="panel-heading"><i class="fa fa-share-alt" aria-hidden="true"></i> Availability Groups</div>
                             <div class="panel-body small">
                                 @foreach (var ag in ags)
                                 {
@@ -345,7 +345,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
             @if (counters.Any())
             {
             <div class="panel panel-default">
-                <div class="panel-heading">Performance</div>
+                <div class="panel-heading"><i class="fa fa-bar-chart" aria-hidden="true"></i> Performance</div>
                 <div class="panel-body small">
                     @{
                             var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
@@ -365,7 +365,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Memory & Storage</div>
+                <div class="panel-heading"><i class="fa fa-microchip" aria-hidden="true"></i> Memory & Storage</div>
                 <div class="panel-body small">
                     @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
                     @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
@@ -379,7 +379,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Cache</div>
+                <div class="panel-heading"><i class="fa fa-usd" aria-hidden="true"></i> Cache</div>
                 <div class="panel-body small">
                     @{
                             Func<string, string, string, string> getCacheSize = (o, c, j) =>
@@ -401,7 +401,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading">Waits</div>
+                <div class="panel-heading"><i class="fa fa-clock-o" aria-hidden="true"></i> Waits</div>
                 <div class="panel-body small">
                     @RenderPerSecCounter("Lock", "Wait Statistics", "Lock waits", "Waits started per second", showTotal: false)
                     @RenderPerSecCounter("Log Buffer", "Wait Statistics", "Log buffer waits", "Waits started per second", showTotal: false)

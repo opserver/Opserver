@@ -275,14 +275,14 @@
                                     @if (showAdmin)
                                     {
                                         <a href="#" data-action="@Action.Ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(anyDown ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-plus-circle text-success hover-pulsate@(anyDown ? null : " disabled")"
                                            title="put all servers server into rotation for this backend"></a>
                                         <a href="#" data-action="@Action.Drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(anyUp ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-minus-circle text-danger hover-pulsate@(anyUp ? null : " disabled")"
                                            title="take all servers out of rotation for this backend"></a>
                                         <div class="btn-group dropdown js-dropdown-actions" data-actions="@GetActions(g)">
                                             <a href="#" class="hover-spin" title="Actions for all servers in this group">
-                                                <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+                                                <span class="fa fa-cog"></span><span class="caret"></span>
                                             </a>
                                         </div>
                                     }
@@ -317,7 +317,7 @@
                                     {
                                         <div class="btn-group dropdown js-dropdown-actions" data-actions="@GetActions(s)">
                                             <a href="#" class="hover-spin" title="Actions for this server">
-                                                <span class="glyphicon glyphicon-cog"></span><span class="caret"></span>
+                                                <i class="fa fa-cog" aria-hidden="true"></i><span class="caret"></span>
                                             </a>
                                         </div>
                                     }
@@ -422,10 +422,10 @@
                                 <tr class="status @status.RowClass()">
                                     <td>
                                         <a href="#" data-group="@g.Name" data-action="@Action.Ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(gOut > 0 ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-plus-circle text-success hover-pulsate@(gOut > 0 ? null : " disabled")"
                                            title="put all proxies in this group into rotation"></a>
                                         <a href="#" data-group="@g.Name" data-action="@Action.Drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(gIn + gDown > 0 ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-minus-circle text-danger hover-pulsate@(gIn + gDown > 0 ? null : " disabled")"
                                            title="take all proxies in this group out of rotation"></a>
                                     </td>
                                     <td>@status.IconSpan() @g.Name</td>
@@ -456,10 +456,10 @@
                                 <tr class="status @s.MonitorStatus.RowClass()">
                                     <td>
                                         <a href="#" data-server="@s.Server" data-action="@Action.Ready"
-                                           class="js-haproxy-action glyphicon glyphicon-plus-sign text-success hover-pulsate@(s.Out > 0 ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-plus-circle text-success hover-pulsate@(s.Out > 0 ? null : " disabled")"
                                            title="put this server into rotation everywhere"></a>
                                         <a href="#" data-server="@s.Server" data-action="@Action.Drain"
-                                           class="js-haproxy-action glyphicon glyphicon-minus-sign text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")"
+                                           class="js-haproxy-action fa fa-minus-circle text-danger hover-pulsate@(s.Up + s.Down > 0 ? null : " disabled")"
                                            title="take this server out of rotation everywhere"></a>
                                     </td>
                                     <td>@status.IconSpan() @s.Server</td>
@@ -475,18 +475,18 @@
         </div>
         <div class="js-haproxy-server-dropdown">
             <ul class="dropdown-menu js-haproxy-actions">
-                <li><a href="#" data-action="@Action.Ready"><span class="glyphicon glyphicon-plus-sign text-success"></span> Enable Server (READY)</a></li>
-                <li><a href="#" data-action="@Action.Drain"><span class="glyphicon glyphicon-minus-sign text-primary"></span> Disable Server (DRAIN)</a></li>
-                <li><a href="#" data-action="@Action.Maintenance"><span class="glyphicon glyphicon-wrench text-warning"></span> Disable Server (MAINT)</a></li>
+                <li><a href="#" data-action="@Action.Ready"><i class="fa fa-plus-circle fa-fw text-success" aria-hidden="true"></i> Enable Server (READY)</a></li>
+                <li><a href="#" data-action="@Action.Drain"><i class="fa fa-minus-circle fa-fw text-primary" aria-hidden="true"></i> Disable Server (DRAIN)</a></li>
+                <li><a href="#" data-action="@Action.Maintenance"><i class="fa fa-wrench fa-fw text-warning" aria-hidden="true"></i> Disable Server (MAINT)</a></li>
                 <li class="divider"></li>
-                <li><a href="#" data-action="@Action.HealthCheckEnable"><span class="glyphicon glyphicon-heart-empty text-success"></span> Health: Enable Checks</a></li>
-                <li><a href="#" data-action="@Action.HealthCheckDisable"><span class="glyphicon glyphicon-heart-empty text-danger"></span> Health: Disable Checks</a></li>
+                <li><a href="#" data-action="@Action.HealthCheckEnable"><i class="fa fa-heartbeat fa-fw text-success" aria-hidden="true"></i> Health: Enable Checks</a></li>
+                <li><a href="#" data-action="@Action.HealthCheckDisable"><i class="fa fa-heartbeat fa-fw text-danger" aria-hidden="true"></i> Health: Disable Checks</a></li>
                 <li class="divider"></li>
-                <li><a href="#" data-action="@Action.HealthForceUp"><span class="glyphicon glyphicon-collapse-up text-success"></span> Health: Force UP</a></li>
-                <li><a href="#" data-action="@Action.HealthForceNoLB"><span class="glyphicon glyphicon-unchecked text-warning"></span> Health: Force NOLB</a></li>
-                <li><a href="#" data-action="@Action.HealthForceDown"><span class="glyphicon glyphicon-collapse-down text-danger"></span> Health: Force DOWN</a></li>
+                <li><a href="#" data-action="@Action.HealthForceUp"><i class="fa fa-caret-square-o-up fa-fw text-success" aria-hidden="true"></i> Health: Force UP</a></li>
+                <li><a href="#" data-action="@Action.HealthForceNoLB"><i class="fa fa-square-o fa-fw text-warning" aria-hidden="true"></i> Health: Force NOLB</a></li>
+                <li><a href="#" data-action="@Action.HealthForceDown"><i class="fa fa-caret-square-o-down fa-fw text-danger" aria-hidden="true"></i> Health: Force DOWN</a></li>
                 <li class="divider"></li>
-                <li><a href="#" data-action="@Action.KillSessions"><span class="glyphicon glyphicon-fire text-danger"></span> Kill all sessions</a></li>
+                <li><a href="#" data-action="@Action.KillSessions"><i class="fa fa-bomb fa-fw text-danger" aria-hidden="true"></i> Kill all sessions</a></li>
             </ul>
         </div>
     }

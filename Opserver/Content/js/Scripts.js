@@ -301,8 +301,8 @@
             if (data.type && data.key) {
                 // Node to refresh, do it
                 if ($(this).hasClass('active')) return;
-                var link = $(this).addClass('active').prependDiamondLoader();
-                link.find('.glyphicon').hide();
+                var link = $(this).addClass('active');
+                link.find('.fa').addClass('fa-spin');
                 link.find('.js-text').text('Polling...');
                 Status.refresh.pause();
                 $.post(Status.options.rootPath + 'poll', data)
@@ -1114,7 +1114,7 @@ Status.Exceptions = (function () {
                 success: function (data) {
                     $(this).siblings('.js-delete-link').attr('title', 'Delete this error')
                            .end()
-                           .replaceWith('<span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>');
+                           .replaceWith('<span class="js-protected fa fa-lock fa-fw text-primary" title="This error is protected"></span>');
                     jRow.addClass('js-protected protected').removeClass('deleted');
                     refreshCounts(data);
                 },
@@ -1202,7 +1202,7 @@ Status.Exceptions = (function () {
                 id = jThis.data('id') || options.id;
             bootbox.confirm('Really delete all non-protected errors' + (id ? ' like this one' : '') + '?', function(result) {
                 if (result) {
-                    jThis.find('.glyphicon').addClass('icon-rotate-flip');
+                    jThis.find('.fa').addClass('icon-rotate-flip');
                     $.ajax({
                         type: 'POST',
                         data: {
@@ -1215,7 +1215,7 @@ Status.Exceptions = (function () {
                             window.location.href = data.url;
                         },
                         error: function(xhr) {
-                            jThis.find('.glyphicon').removeClass('icon-rotate-flip');
+                            jThis.find('.fa').removeClass('icon-rotate-flip');
                             jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing this log');
                         }
                     });
@@ -1230,7 +1230,7 @@ Status.Exceptions = (function () {
                 if (result)
                 {
                     var ids = $('.js-error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
-                    jThis.find('.glyphicon').addClass('icon-rotate-flip');
+                    jThis.find('.fa').addClass('icon-rotate-flip');
 
                     $.ajax({
                         type: 'POST',
@@ -1241,7 +1241,7 @@ Status.Exceptions = (function () {
                             window.location.href = data.url;
                         },
                         error: function (xhr) {
-                            jThis.find('.glyphicon').removeClass('icon-rotate-flip');
+                            jThis.find('.fa').removeClass('icon-rotate-flip');
                             jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing visible exceptions');
                         }
                     });
@@ -1372,8 +1372,8 @@ Status.HAProxy = (function () {
                 };
 
             function haproxyAction() {
-                jThis.find('.glyphicon').addBack('.glyphicon').addClass('icon-rotate-flip');
-                var cog = jThis.closest('.js-dropdown-actions').find('.hover-spin > .glyphicon').addClass('spin');
+                jThis.find('.fa').addBack('.fa').addClass('icon-rotate-flip');
+                var cog = jThis.closest('.js-dropdown-actions').find('.hover-spin > .fa').addClass('spin');
                 $.ajax({
                     type: 'POST',
                     data: data,
@@ -1467,22 +1467,15 @@ Status.HAProxy = (function () {
         tooltipTimeFormat: d3.time.format.utc('%A, %b %d %H:%M')
     };
 
-    var waveHtml = '<div class="sk-wave loader"><div></div><div></div><div></div><div></div><div></div></div>',
-        diamondHtml = '<div class="sk-folding-cube loader"><div></div><div></div><div></div><div></div></div>';
+    var waveHtml = '<div class="sk-wave loader"><div></div><div></div><div></div><div></div><div></div></div>';
 
     // Creating jQuery plguins...
     $.fn.extend({
         findWithSelf: function (selector) {
             return this.find(selector).andSelf().filter(selector);
         },
-        appendDiamondLoader: function () {
-            return this.append(diamondHtml);
-        },
         appendWaveLoader: function () {
             return this.append(waveHtml);
-        },
-        prependDiamondLoader: function () {
-            return this.prepend(diamondHtml);
         },
         prependWaveLoader: function () {
             return this.prepend(waveHtml);

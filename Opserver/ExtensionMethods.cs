@@ -85,14 +85,14 @@ namespace StackExchange.Opserver
             switch (node.HardwareType)
             {
                 case HardwareType.Physical:
-                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-tasks"" title=""Physical""></span>".AsHtml();
+                    return $@"<i class=""{monitorStatusClass} fa fa-server"" aria-hidden=""true"" title=""Physical""></i>".AsHtml();
                 case HardwareType.VirtualMachine:
-                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-cloud"" title=""Virtual Machine""></span>".AsHtml();
+                    return $@"<i class=""{monitorStatusClass} fa fa-cloud"" aria-hidden=""true"" title=""Virtual Machine""></i>".AsHtml();
                 case HardwareType.Network:
-                    return $@"<span class=""{monitorStatusClass} glyphicon glyphicon-transfer"" title=""Network""></span>".AsHtml();
+                    return $@"<i class=""{monitorStatusClass} fa fa-exchange"" aria-hidden=""true"" title=""Network""></i>".AsHtml();
                 //case HardwareType.Unknown:
                 default:
-                    return $@"<span class=""{monitorStatusClass}"" title=""Unknown hardware type"">●</span>".AsHtml();
+                    return $@"<i class=""{monitorStatusClass} fa fa-question-circle-o"" aria-hidden=""true"" title=""Unknown hardware type""></i>".AsHtml();
             }
         }
 

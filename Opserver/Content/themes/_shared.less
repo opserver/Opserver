@@ -1,4 +1,5 @@
 ﻿@import "../../bootstrap/less/bootstrap.less";
+@import "../../font-awesome/less/font-awesome.less";
 @import "_shared/_variables.less";
 @import "_shared/_bootswatch.less";
 @import "_shared/animations.less";
@@ -106,7 +107,7 @@
     display: block;
     line-height: 28px;
     border-bottom: solid 1px #eee;
-    text-align: center;
+    padding-left: 10px;
     font-size: 12px;
     &:hover {
       background-color: #3d85b0;
@@ -169,10 +170,6 @@ h4, h5, h6 {
     &.small {
       margin-top: 6px;
     }
-  }
-
-  .glyphicon {
-    font-size: 0.8em;
   }
 
   a.pull-right + a.pull-right:after {
@@ -318,16 +315,16 @@ h4, h5, h6 {
   &:hover {
     text-decoration: none;
 
-    span, span.glyphicon {
+    i, i.fa {
       opacity: 1;
     }
   }
 
-  span {
+  i {
     transition: opacity 0.2s ease;
     opacity: 0.8;
 
-    &.glyphicon {
+    &.fa {
       font-size: 0.7em;
       transition: opacity 0.2s ease;
       opacity: 0.2;
@@ -392,7 +389,7 @@ h4, h5, h6 {
   .box-shadow(none);
 
   .panel-heading {
-    padding: 5px 9px;
+    padding: 4px 9px;
   }
 
   &.panel-default > .panel-heading {
@@ -633,7 +630,7 @@ h4, h5, h6 {
 
 .table-actions {
   h5 {
-    a.glyphicon, a .glyphicon {
+    a.fa, a .fa {
       font-size: 12px;
     }
   }
@@ -641,18 +638,18 @@ h4, h5, h6 {
     &.disabled {
       opacity: 0.2;
     }
-    .glyphicon, &.glyphicon, &.icon-rotate-flip:hover .glyphicon {
+    .fa, &.fa, &.icon-rotate-flip:hover .fa {
       opacity: 0.6;
       &.disabled {
         opacity: 0.2;
       }
     }
 
-    &.glyphicon {
+    &.fa {
       text-decoration: none;
     }
 
-    &:hover .glyphicon, &.glyphicon:hover, .glyphicon.solid {
+    &:hover .fa, &.fa:hover, .fa.solid {
       opacity: 1;
       &.disabled {
         opacity: 0.2;

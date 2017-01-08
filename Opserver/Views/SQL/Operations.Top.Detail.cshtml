@@ -28,7 +28,7 @@
         <div class="row small">
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-dashboard"></span> CPU</div>
+                    <div class="panel-heading"><i class="fa fa-bar-chart fa-fw"></i> CPU</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @ReadableTime(op.TotalCPU)
@@ -47,7 +47,7 @@
             </div>
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-search"></span> Reads</div>
+                    <div class="panel-heading"><i class="fa fa-search fa-fw"></i> Reads</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @op.TotalReads.ToComma()
@@ -66,7 +66,7 @@
             </div>
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-play"></span> Executions</div>
+                    <div class="panel-heading"><i class="fa fa-play fa-fw"></i> Executions</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @op.ExecutionCount.ToComma()
@@ -85,7 +85,7 @@
             </div>
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-time"></span> Time</div>
+                    <div class="panel-heading"><i class="fa fa-clock-o fa-fw"></i> Time</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @ReadableTime(op.TotalDuration)
@@ -104,7 +104,7 @@
             </div>
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-list"></span> Rows</div>
+                    <div class="panel-heading"><i class="fa fa-list fa-fw"></i> Rows</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @op.TotalReturnedRows.ToComma()
@@ -123,7 +123,7 @@
             </div>
             <div class="col-md-2">
                 <div class="panel panel-default panel-condensed">
-                    <div class="panel-heading"><span class="glyphicon glyphicon-info-sign"></span> Info</div>
+                    <div class="panel-heading"><i class="fa fa-info-circle fa-fw"></i> Info</div>
                     <div class="panel-body">
                         <div class="value-block">
                             @op.PlanCreationTime.ToRelativeTimeSpan()

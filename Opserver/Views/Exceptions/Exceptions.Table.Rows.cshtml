@@ -27,18 +27,18 @@
 {
     <tr class="js-error@(e.IsProtected ? " protected js-protected" : "")@(e.DeletionDate.HasValue ? " deleted js-deleted" : "")" data-id="@e.GUID" data-log="@e.ApplicationName">
         <td class="@(showActions ? null : " hidden")">
-            <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="hover-pulsate js-delete-link@(e.DeletionDate.HasValue ? " disabled" : null)" href="~/exceptions/delete"><span class="glyphicon glyphicon-remove text-danger"></span></a>
+            <a title="@(e.DeletionDate.HasValue ? "Error is already deleted" : "Delete this error")" class="hover-pulsate js-delete-link@(e.DeletionDate.HasValue ? " disabled" : null)" href="~/exceptions/delete"><i class="fa fa-times text-danger" aria-hidden="true"></i></a>
             @if (e.DeletionDate.HasValue)
             {
-                <a title="Undelete and protect this error" class="hover-pulsate text-warning js-protect-link" href="~/exceptions/protect"><span class="glyphicon glyphicon-lock"></span></a>
+                <a title="Undelete and protect this error" class="hover-pulsate text-warning js-protect-link" href="~/exceptions/protect"><i class="fa fa-lock fa-fw" aria-hidden="true"></i></a>
             }
             else if (!e.IsProtected)
             {
-                <a title="Protect this error from automatic deletion" class="hover-pulsate text-warning js-protect-link" href="~/exceptions/protect"><span class="glyphicon glyphicon-lock"></span></a>
+                <a title="Protect this error from automatic deletion" class="hover-pulsate text-warning js-protect-link" href="~/exceptions/protect"><i class="fa fa-lock fa-fw" aria-hidden="true"></i></a>
             }
             else
             {
-                <span class="js-protected glyphicon glyphicon-lock text-primary" title="This error is protected"></span>
+                <i class="js-protected fa fa-lock text-primary fa-fw" aria-hidden="true" title="This error is protected"></i>
             }
         </td>
         <td class="@ErrorStyle(e)" data-val="@e.CreationDate.ToEpochTime()">@e.CreationDate.ToRelativeTimeSpanMini()</td>

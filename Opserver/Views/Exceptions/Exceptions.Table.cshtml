@@ -25,11 +25,11 @@
             <span class="pull-right">
                 @if (Model.ClearLinkForVisibleOnly)
                 {
-                    <a class="text-danger hover-pulsate js-clear-visible" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteList))"><span class="glyphicon glyphicon-remove"></span> Clear visible errors</a>
+                    <a class="text-danger hover-pulsate js-clear-visible" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteList))"><i class="fa fa-times" aria-hidden="true"></i> Clear visible errors</a>
                 }
                 else
                 {
-                    <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteAll))"><span class="glyphicon glyphicon-remove"></span> Clear all non-protected errors</a>
+                    <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteAll))"><i class="fa fa-times" aria-hidden="true"></i> Clear all non-protected errors</a>
                 }
             </span>
         }

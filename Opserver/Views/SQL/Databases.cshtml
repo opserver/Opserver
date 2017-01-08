@@ -70,7 +70,7 @@
             SQLNode.AGDatabaseReplica replica;
                 <tr class="database-row @db.RowClass()" data-dbname="@db.Name" title="VLF Count @(db.VLFCount?.ToComma() ?? "unknown")">
                     <td>
-                        <span class="glyphicon glyphicon-tasks @DatabasesModel.GetDatabaseClass(db)"></span>
+                        <i class="fa fa-database @DatabasesModel.GetDatabaseClass(db)" aria-hidden="true"></i>
                         @db.Name
                         @if (db.IsReadOnly)
                         {

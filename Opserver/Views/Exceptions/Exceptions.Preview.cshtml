@@ -22,7 +22,7 @@ else
             <span class="text-muted">|</span>
             <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
             <span class="text-muted">|</span>
-            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@error.ApplicationName" data-id="@error.GUID"><span class="glyphicon glyphicon-remove"></span> Clear all similar</a>
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@error.ApplicationName" data-id="@error.GUID"><i class="fa fa-times" aria-hidden="true"></i> Clear all similar</a>
         </span>
     </h6>
     <p class="small text-danger">@error.Message</p>
