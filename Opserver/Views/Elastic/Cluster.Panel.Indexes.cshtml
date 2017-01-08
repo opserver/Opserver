@@ -7,7 +7,7 @@
     var indexStats = Model.IndexStats.Data?.Indexes;
 }
 <div class="panel panel-default">
-    <div class="panel-heading">Cluster Indexes <span class="small text-muted">(<a href="#/elastic/cluster/indexes">View Detail</a>)</span></div>
+    <div class="panel-heading"><i class="fa fa-share-alt" aria-hidden="true"></i> Cluster Indexes <span class="small text-muted">(<a href="#/elastic/cluster/indexes">View Detail</a>)</span></div>
     <div class="panel-body small">
         @if (indexStats?.Count > 0 && (indexes?.Any() ?? false))
         {

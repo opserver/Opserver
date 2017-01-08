@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Elastic
@@ -264,6 +265,8 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public class HTTPInfo
             {
+                private static readonly Regex _inetStrip = new Regex(@"inet\[/(.*)\]", RegexOptions.Compiled);
+
                 [DataMember(Name = "bound_address")]
                 public dynamic BoundAddress { get; internal set; }
                 [DataMember(Name = "publish_address")]
@@ -273,8 +276,8 @@ namespace StackExchange.Opserver.Data.Elastic
                 [DataMember(Name = "max_content_length_in_bytes")]
                 public long MaxContentLengthInBytes { get; internal set; }
 
-                // TODO: Pretty
-                public string PublishAddressPretty => PublishAddress;
+                private string _publishPrettyAddress;
+                public string PublishAddressPretty => _publishPrettyAddress ?? (_publishPrettyAddress = _inetStrip.Replace(PublishAddress, "$1"));
             }
         }
 
