@@ -28,7 +28,7 @@
         <td>
             @if (Current.User.IsRedisAdmin)
             {
-                <a href="#/redis/actions/@server.HostAndPort" class="hover-spin"><i class="fa fa-cog" aria-hidden="true"></i></a>
+                <a href="#/redis/actions/@server.HostAndPort" class="hover-spin">@Icon.Cog</a>
             }
             @server.ConnectionInfo.Name
         </td>

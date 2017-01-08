@@ -16,7 +16,7 @@
         <div class="col-md-6">
             @Html.Partial("Cluster.Panel.Stats", c)
             <div class="panel panel-default">
-                <div class="panel-heading"><i class="fa fa-server" aria-hidden="true"></i> @(c.Nodes?.Data?.Nodes?.Count.Pluralize("Node"))</div>
+                <div class="panel-heading">@Icon.Server @(c.Nodes?.Data?.Nodes?.Count.Pluralize("Node"))</div>
                 <div class="panel-body small">
                     @foreach (var n in nodes)
                     {

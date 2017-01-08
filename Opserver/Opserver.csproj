@@ -149,6 +149,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ApiController.cs" />
+    <Compile Include="Helpers\Icon.cs" />
     <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Helpers\Theme.cs" />

@@ -21,7 +21,7 @@
     <div class="row small js-refresh" data-name="node-summary">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading"><i class="fa fa-server" aria-hidden="true"></i> Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/node/settings">View Settings</a>)</span></div>
+                <div class="panel-heading">@Icon.Server Summary for @n.GUID <span class="small text-muted">(<a href="#/elastic/node/settings">View Settings</a>)</span></div>
                 <div class="panel-body small">
                     <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
 Transport: @n.Stats?.TransportAddress">
@@ -46,7 +46,7 @@ Transport: @n.Stats?.TransportAddress">
                 </div>
             </div>
             <div class="panel panel-default">
-                <div class="panel-heading"><i class="fa fa-area-chart" aria-hidden="true"></i> System</div>
+                <div class="panel-heading">@Icon.Stats System</div>
                 <div class="panel-body small">
                     <div class="value-block col-md-3 col-sm-6">
                         @if (jvm?.UptimeInMilliseconds > 0)
@@ -113,7 +113,7 @@ Transport: @n.Stats?.TransportAddress">
                 var uptime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
                 var gcTime = TimeSpan.FromMilliseconds(jvm.GC.CollectionTimeInMilliseconds);
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-cloud" aria-hidden="true"></i> Java Virtual Machine <span class="small text-muted">(PID: @(cnd?.JVM.PID.ToString()))</span></div>
+                    <div class="panel-heading">@Icon.VM Java Virtual Machine <span class="small text-muted">(PID: @(cnd?.JVM.PID.ToString()))</span></div>
                     <div class="panel-body small">
                         <div class="value-block col-md-4 col-sm-6" title="@uptime.ToReadableString()">
                             @uptime.ToTimeStringMini(3)
@@ -154,7 +154,7 @@ Transport: @n.Stats?.TransportAddress">
             @if (transport != null)
             {
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-exchange" aria-hidden="true"></i> Network</div>
+                    <div class="panel-heading">@Icon.Network Network</div>
                     <div class="panel-body small">
                         <div class="value-block col-md-3 col-sm-6">
                             @(n?.HTTP?.PublishAddressPretty)
@@ -178,7 +178,7 @@ Transport: @n.Stats?.TransportAddress">
             @if (fs?.Data != null)
             {
                 <div class="panel panel-default">
-                    <div class="panel-heading"><i class="fa fa-hdd-o" aria-hidden="true"></i> File System Mounts</div>
+                    <div class="panel-heading">@Icon.Disk File System Mounts</div>
                     <div class="panel-body small">
                         @foreach (var fsd in fs.Data)
                         {
