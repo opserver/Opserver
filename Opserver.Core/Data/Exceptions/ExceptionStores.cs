@@ -128,6 +128,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public static IEnumerable<Application> GetApps(string appName)
         {
+            if (Applications == null) yield break;
             foreach (var a in Applications)
             {
                 if (a.Name == appName || appName == null)
