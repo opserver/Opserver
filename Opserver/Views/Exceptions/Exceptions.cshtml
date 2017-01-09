@@ -14,7 +14,7 @@
 }
 @section head {
     <script>
-        $(function() { Status.Exceptions.init({ refresh: 120, group: '@group', log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function() { Status.Exceptions.init({ refresh: 120, group: '@group.AsHtml()', log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">

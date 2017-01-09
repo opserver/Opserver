@@ -967,7 +967,7 @@ Status.Exceptions = (function () {
         });
         if (Status.Exceptions.options.search) return;
         function setTitle(name, count) {
-            $('.js-exception-title').text(count.toLocaleString() + ' ' + name + ' Exception' + (count !== 1 ? 's' : ''));
+            $('.js-exception-title').html(count.toLocaleString() + ' ' + name + ' Exception' + (count !== 1 ? 's' : ''));
         }
 
         if (log) {
