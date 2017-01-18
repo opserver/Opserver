@@ -70,17 +70,20 @@
     {
         @possibleLink
     }
-    if (Regex.IsMatch(possibleLink, @"%[A-Z0-9][A-Z0-9]"))
+    if (possibleLink != null)
     {
-        possibleLink = Server.UrlDecode(possibleLink);
-    }
-    if (possibleLink != null && Regex.IsMatch(possibleLink, "^(https?|ftp|file)://"))
-    {
-        var sane = SanitizeUrl(possibleLink);
-        if (sane == possibleLink) // only link if it's not suspicious
+        if (Regex.IsMatch(possibleLink, @"%[A-Z0-9][A-Z0-9]"))
         {
-            <a href="@sane">@possibleLink</a>
-            return;
+            possibleLink = Server.UrlDecode(possibleLink);
+        }
+        if (Regex.IsMatch(possibleLink, "^(https?|ftp|file)://"))
+        {
+            var sane = SanitizeUrl(possibleLink);
+            if (sane == possibleLink) // only link if it's not suspicious
+            {
+                <a href="@sane">@possibleLink</a>
+                return;
+            }
         }
     }
     @possibleLink
