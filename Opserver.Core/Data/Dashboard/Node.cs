@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         private string GetPrettyMachineType()
         {
-            if (MachineType.StartsWith("Linux")) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
+            if (MachineType?.StartsWith("Linux") ?? false) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
             return MachineType?.Replace("Microsoft Windows ", "");
         }
 
