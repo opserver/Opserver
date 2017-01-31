@@ -38,6 +38,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     if (Current.Settings.Dashboard.ExcludePatternRegex?.IsMatch(h.Name) ?? false)
                         continue;
 
+                    if (h.Name == "unspecified")
+                        continue;
+
                     Version kernelVersion;
                     // Note: we can't follow this pattern, we'll need to refresh existing nodes 
                     // not wholesale replace on poll
