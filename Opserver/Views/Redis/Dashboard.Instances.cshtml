@@ -61,7 +61,7 @@ foreach (var s in server.SlaveConnections) {
         }
         <td>@server.Info.ToPollSpan()</td>
     </tr>
-    if (server.SlaveCount <= 0 || server.Replication == null) { return; }
+    if (Model.View == RedisViews.Server || server.SlaveCount <= 0 || server.Replication == null) { return; }
     foreach (var s in server.SlaveInstances)
     {
         if (s?.Replication == null) { continue; }
@@ -73,8 +73,9 @@ foreach (var s in server.SlaveConnections) {
     var masters = instances.Where(i => i.IsMaster).ToList();
     var slaving = instances.Where(i => i.IsSlaving).ToList();
     var missing = instances.Where(i => !slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();
-    var mastersWithSlaves = masters.Where(m => m.SlaveCount > 0).ToList();
-    var standAloneMasters = masters.Where(m => m.SlaveCount == 0).ToList();
+    // In the single server view, everything is top level
+    var heads = Model.View == RedisViews.Server ? instances.ToList() : masters.Where(m => m.SlaveCount > 0).ToList();
+    var standAloneMasters = Model.View == RedisViews.Server ? new List<RedisInstance>() : masters.Where(m => m.SlaveCount == 0).ToList();
 }
 <div class="js-refresh" data-name="redis-overview">
     @if (slaving.Any())
@@ -191,12 +192,12 @@ foreach (var s in server.SlaveConnections) {
             </tbody>
         </table>
     }
-    @if (mastersWithSlaves.Any())
+    @if (heads.Any())
     {
         <h5 class="page-header">
-            @mastersWithSlaves.GetWorstStatus().IconSpan() @mastersWithSlaves.Count.Pluralize("Group")
-            <span class="small">(@((mastersWithSlaves.Count + mastersWithSlaves.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
-            @Helpers.PollNow(mastersWithSlaves.Union(mastersWithSlaves.SelectMany(s => s.GetAllSlavesInChain())))
+            @heads.GetWorstStatus().IconSpan() @heads.Count.Pluralize("Group")
+            <span class="small">(@((heads.Count + heads.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
+            @Helpers.PollNow(heads.Union(heads.SelectMany(s => s.GetAllSlavesInChain())))
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
@@ -217,7 +218,7 @@ foreach (var s in server.SlaveConnections) {
             </thead>
             <tbody>
                 @{ var prevMaster = ""; }
-                @foreach (var m in mastersWithSlaves)
+                @foreach (var m in heads)
                 {
                     @ServerRow(m, prevMaster: prevMaster)
                     prevMaster = m.Name;

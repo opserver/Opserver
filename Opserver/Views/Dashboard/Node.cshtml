@@ -166,9 +166,9 @@
                 case CurrentStatusTypes.SQLTop:
                     @SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }))
                     break;
-                //case CurrentStatusTypes.Redis:
-                //@SubnavItem(st, "/redis?node=" + s.PrettyName)
-                //break;
+                case CurrentStatusTypes.Redis:
+                    @SubnavItem(st, Url.Action(nameof(RedisController.Dashboard), "Redis", new { node = s.PrettyName }))
+                    break;
                 case CurrentStatusTypes.HAProxy:
                     @SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }))
                     break;

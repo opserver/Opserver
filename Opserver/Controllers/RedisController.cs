@@ -19,13 +19,15 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis")]
         public ActionResult Dashboard(string node)
         {
-            var instance = RedisInstance.Get(node);
-            if (instance != null)
-                return RedirectToAction(nameof(Instance), new {node});
-
+            var instances = RedisInstance.GetAll(node);
+            if (instances.Count == 1 && instances[0] != null)
+            {
+                // In the 1 case, redirect
+                return RedirectToAction(nameof(Instance), new { node });
+            }
             var vd = new DashboardModel
             {
-                Instances = RedisModule.Instances,
+                Instances = instances.Count > 1 ? instances : RedisModule.Instances,
                 View = node.HasValue() ? RedisViews.Server : RedisViews.All,
                 CurrentRedisServer = node,
                 Refresh = true
