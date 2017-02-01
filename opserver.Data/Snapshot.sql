@@ -1,0 +1,28 @@
+﻿CREATE TABLE [dbo].[Snapshot]
+(
+	[SnapshotID] INT NOT NULL PRIMARY KEY, 
+    [BatchRequestsSec] INT NULL, 
+    [SQLCompilationsSec] INT NULL, 
+    [TransactionsSec] INT NULL, 
+    [IndexSearchesSec] INT NULL, 
+    [LockRequestsSec] INT NULL, 
+    [ErrorsSec] INT NULL, 
+    [CPU] INT NULL, 
+    [RAM] INT NULL, 
+    [Connections] INT NULL, 
+    [Sessions] INT NULL, 
+    [MaxWorkers] INT NULL, 
+    [TotalServerMemory] INT NULL, 
+    [TargetServerMemory] INT NULL, 
+    [DatabaseCacheMemory] INT NULL, 
+    [FreeMemory] INT NULL, 
+    [DataFilesSize] INT NULL, 
+    [LogFileSize] INT NULL, 
+    [LogFileUsedSize] INT NULL, 
+    [FreeSpaceinTempDB] INT NULL, 
+    [PageLifeExpectancy] INT NULL, 
+    [PageLookupsSec] INT NULL, 
+    [DatabasePages] INT NULL, 
+    [ObjectsInCache] INT NULL, 
+    [CacheHitRatio] FLOAT NULL
+)
