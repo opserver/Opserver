@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -163,7 +164,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private string ConvertToBosun(DateTime? date, DateTime valueIfNull)
         {
-            return (date.HasValue ? date.Value : valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss");
+            return (date.HasValue ? date.Value : valueIfNull).ToString("yyyy/MM/dd-HH:mm:ss", CultureInfo.InvariantCulture);
         }
 
         public string GetJsonQuery(string metric, string host = "*", DateTime? start = null, DateTime? end = null, bool counter = true)
@@ -226,6 +227,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     // TODO: Parallel
                     addMetric(DashboardMetric.CPUUsed);
                     addMetric(DashboardMetric.MemoryUsed);
+                    addMetric(DashboardMetric.MemoryTotal);
                     addMetric(DashboardMetric.NetBytes);
 
                     UpdateHostLasts(result, HostCache.Data);
@@ -248,6 +250,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Dictionary<string, PointSeries>
                     cpu = intervalCache.CPUUsed,
                     memory = intervalCache.MemoryUsed,
+                    memoryTotal = intervalCache.MemoryTotal,
                     network = intervalCache.NetBytes;
 
                 Func<string, Dictionary<string, PointSeries>, float?> getLast = (host, dict) =>
@@ -265,6 +268,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     n.Value.CPULoad = (int?) getLast(n.Key, cpu);
                     n.Value.MemoryUsed = (long?) getLast(n.Key, memory);
+                    n.Value.TotalMemory = (long?) getLast(n.Key, memoryTotal);
                     n.Value.Networkbps = (long?) getLast(n.Key, network)*8;
                 }
             }
@@ -280,6 +284,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public Dictionary<string, PointSeries> CPUUsed { get { return Series[DashboardMetric.CPUUsed]; } }
             public Dictionary<string, PointSeries> MemoryUsed { get { return Series[DashboardMetric.MemoryUsed]; } }
+            public Dictionary<string, PointSeries> MemoryTotal { get { return Series[DashboardMetric.MemoryTotal]; } }
             public Dictionary<string, PointSeries> NetBytes { get { return Series[DashboardMetric.NetBytes]; } }
 
             public ConcurrentDictionary<string, Dictionary<string, PointSeries>> Series { get; set; }
@@ -343,7 +348,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     /// </summary>
     public class PointSeries
     {
-        private static readonly Regex HostRegex = new Regex(@"\{host=(.*)[,|\}]", RegexOptions.Compiled);
+        private static readonly char[] _splComma = {','};
+        private static readonly char[] _splEq = {'='};
         private string _host;
         public string Host
         {
@@ -351,8 +357,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 if (_host == null)
                 {
-                    var match = HostRegex.Match(Name);
-                    _host = match.Success ? match.Groups[1].Value : "Unknown";
+                    string h;
+                    _host = TryGetHost(Name, out h) ? h : "Unknown";
                 }
                 return _host;
             }
@@ -369,6 +375,39 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             _host = host;
             Data = new List<float[]>();
+        }
+
+        /// <summary>
+        /// Extract the host value from the Name expression string
+        /// 
+        /// Example input/output:
+        ///     "this_should_fail"                            --> null
+        ///     "os.net.bytes{host=}"                         --> ""
+        ///     "os.net.bytes{host=fancy_machine}"            --> "fancy_machine"
+        ///     "os.net.bytes{host=fancy_machine,iface=eth0}" --> "fancy_machine"
+        /// </summary>
+        private static bool TryGetHost(string s, out string host)
+        {
+            host = null;
+            int beg = s.IndexOf('{');
+            int end = s.LastIndexOf('}');
+            if (-1 == beg) { return false; }
+            if (end < beg) { return false; }
+            int subBeg = beg + 1;
+            int subLen = end - 1 - beg;
+            if (subLen < 1) { return false; }
+            var pairs = s.Substring(subBeg, subLen).Split(_splComma);
+            for (int i = 0; i < pairs.Length; i++)
+            {
+                var kv = pairs[i].Split(_splEq);
+                if (kv.Length != 2) { continue; }
+                if ("host" == kv[0])
+                {
+                    host = kv[1];
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

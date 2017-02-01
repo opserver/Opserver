@@ -4,6 +4,7 @@
     {
         public const string CPUUsed = "os.cpu";
         public const string MemoryUsed = "os.mem.used";
+        public const string MemoryTotal = "os.mem.total";
         public const string NetBytes = "os.net.bytes";
         public const string DiskUsed = "os.disk.fs.space_used";
 
