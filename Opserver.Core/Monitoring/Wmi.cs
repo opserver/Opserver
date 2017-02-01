@@ -30,9 +30,9 @@ namespace StackExchange.Opserver.Monitoring
                 Timeout = TimeSpan.FromSeconds(30)
             };
             string username = Current.Settings.Dashboard.Providers?.WMI?.Username ??
-                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn(null),
+                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn(() => null),
                 password = Current.Settings.Dashboard.Providers?.WMI?.Password ??
-                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(null);
+                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(() => null);
 
             if (username.HasValue() && password.HasValue())
             {
