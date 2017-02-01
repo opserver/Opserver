@@ -84,6 +84,24 @@ namespace StackExchange.Opserver
             }
         }
 
+        public static IHtmlString IconSpan(this Data.Dashboard.HTTPUnitResult r)
+        {
+            if (r.Error)
+            {
+                return StatusIndicator.IconSpan(StatusIndicator.DownClass);
+            }
+            return StatusIndicator.IconSpan(StatusIndicator.UpClass);
+        }
+
+        public static string GetStatusText(this Data.Dashboard.HTTPUnitResult r)
+        {
+            if (r.Error)
+            {
+                return "ERROR";
+            }
+            return "OK";
+        }
+
         public static IHtmlString IconSpan(this IMonitorStatus status)
         {
             if (status == null)
@@ -152,7 +170,16 @@ namespace StackExchange.Opserver
                     return "unknown-row";
             }
         }
-        
+
+        public static string RowClass(this Data.Dashboard.HTTPUnitResult r)
+        {
+            if (r.Error)
+            {
+                return "critical critical-row";
+            }
+            return "good good-row";
+        }
+
         public static IHtmlString ToPollSpan(this Cache cache, bool mini = true, bool lastSuccess = false)
         {
             if (cache == null)

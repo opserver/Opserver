@@ -20,9 +20,19 @@ namespace StackExchange.Opserver.Data.Exceptions
             get { return Applications.Sum(a => a.ExceptionCount); }
         }
 
+        public static int TotalIssueCount
+        {
+            get { return Applications.Sum(a => a.IssueCount); }
+        }
+
         public static int TotalRecentExceptionCount
         {
             get { return Applications.Sum(a => a.RecentExceptionCount); }
+        }
+
+        public static int TotalRecentIssueCount
+        {
+            get { return Applications.Sum(a => a.RecentIssueCount); }
         }
 
         public static MonitorStatus MonitorStatus
@@ -30,8 +40,8 @@ namespace StackExchange.Opserver.Data.Exceptions
             get
             {
                 var settings = Current.Settings.Exceptions;
-                int total = TotalExceptionCount,
-                    recent = TotalRecentExceptionCount;
+                int total = TotalExceptionCount;
+                int recent = TotalRecentExceptionCount;
 
                 if (Stores.Any(s => s.MonitorStatus == MonitorStatus.Critical))
                     return MonitorStatus.Critical;
@@ -81,8 +91,10 @@ namespace StackExchange.Opserver.Data.Exceptions
                     }
                     if (a.Store != null)
                     {
+                        a.Store.Issues.Purge();
                         a.Store.Applications.Purge();
                         a.Store.ErrorSummary.Purge();
+                        a.Store.IssueSummary.Purge();
                     }
                 });
             return result;
@@ -149,6 +161,15 @@ namespace StackExchange.Opserver.Data.Exceptions
             using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
             {
                 var allErrors = Stores.SelectMany(s => s.GetErrorSummary(maxPerApp, appName));
+                return GetSorted(allErrors, sort).ToList();
+            }
+        }
+
+        public static List<Error> GetAllIssues(string appName = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        {
+            using (MiniProfiler.Current.Step("GetAllIssues() - All Stores" + (appName.HasValue() ? " (app:" + appName + ")" : "")))
+            {
+                var allErrors = Stores.SelectMany(s => s.GetIssueSummary(maxPerApp, appName));
                 return GetSorted(allErrors, sort).ToList();
             }
         }

@@ -47,6 +47,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract PointSeries GetSeries(string metric, string host, int secondsAgo, int? pointCount = null, params Tuple<string, string>[] tags);
         public abstract PointSeries GetSeries(string metric, string host, DateTime? start, DateTime? end, int? pointCount = null, params Tuple<string, string>[] tags);
 
+        public virtual List<HTTPUnitResult> GetHTTPUnitResults()
+        { 
+            return new List<HTTPUnitResult>();
+        }
+
         #region Cache
 
         protected Cache<T> ProviderCache<T>(
@@ -71,7 +76,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<T> fetch, bool logExceptions = false) where T : class
         {
-            return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
+            return UpdateCacheItem(description: "Data Provider Fetch: " + NodeType + ":" + opName,
                                    getData: fetch,
                                    logExceptions: logExceptions,
                                    addExceptionData: e => e.AddLoggedData("NodeType", NodeType));

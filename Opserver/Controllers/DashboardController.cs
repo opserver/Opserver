@@ -20,11 +20,12 @@ namespace StackExchange.Opserver.Controllers
             SetMainTab(MainTab.Dashboard);
 
             var vd = new DashboardModel
-                {
-                    Nodes = DashboardData.Current.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
-                    ErrorMessages = DashboardData.Current.GetExceptions(),
-                    Filter = filter
-                };
+            {
+                Nodes = DashboardData.Current.AllNodes.Where(n => !Current.Settings.Dashboard.ExcludePatternRegex.IsMatch(n.Name)).ToList(),
+                ErrorMessages = DashboardData.Current.GetExceptions(),
+                Filter = filter,
+                HTTPUnitResults = DashboardData.Current.GetHTTPUnitResults()
+            };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }
 

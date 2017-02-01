@@ -93,13 +93,19 @@ namespace StackExchange.Opserver
             /// </summary>
             public string ConnectionString { get; set; }
 
+            /// <summary>
+            /// Filters with exceptions will appear in Issues tab
+            /// </summary>
+            public string[] IssuesExceptionFilter { get; set; }
+
             public bool Equals(Store other)
             {
                 return string.Equals(Name, other.Name)
                        && string.Equals(Description, other.Description)
                        && QueryTimeoutMs == other.QueryTimeoutMs
                        && PollIntervalSeconds == other.PollIntervalSeconds
-                       && string.Equals(ConnectionString, other.ConnectionString);
+                       && string.Equals(ConnectionString, other.ConnectionString)
+                       && IssuesExceptionFilter.SequenceEqual(other.IssuesExceptionFilter);
             }
 
             public override bool Equals(object obj)
@@ -119,6 +125,7 @@ namespace StackExchange.Opserver
                     hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
                     hashCode = (hashCode*397) ^ PollIntervalSeconds;
                     hashCode = (hashCode*397) ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
+                    hashCode = (hashCode*397) ^ (IssuesExceptionFilter != null ? IssuesExceptionFilter.GetHashCode() : 0);
                     return hashCode;
                 }
             }

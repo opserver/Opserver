@@ -14,5 +14,7 @@ namespace StackExchange.Opserver.Views.Dashboard
             get { return _nodes ?? DashboardData.Current.AllNodes; }
             set { _nodes = value; }
         }
+
+        public List<HTTPUnitResult> HTTPUnitResults { get; set; }
     }
 }

@@ -4,6 +4,7 @@
     {
         Dashboard,
         Exceptions,
+        Issues,
         AllServers,
         SQL,
         Redis,
