@@ -143,10 +143,18 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
                     }
 
+                    var include = Current.Settings.Dashboard.IncludePatternRegex;
+                    if (include != null)
+                    {
+                        var candidateNodes = nodes.Where(n => include.IsMatch(n.Name)).ToList();
+                        nodes = nodes.Where(n => include.IsMatch(n.Name) || (n.IsVMHost && candidateNodes.Any(x => x.IsVM && x.VMHostID == n.Id))).ToList();
+                    }
+
                     var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
                     if (exclude != null)
                     {
-                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.IsVM && x.VMHostID == n.Id))).ToList();
+                        var candidateNodes = nodes.Where(n => !include.IsMatch(n.Name)).ToList();
+                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && candidateNodes.Any(x => x.IsVM && x.VMHostID == n.Id))).ToList();
                     }
 
                     foreach (var n in nodes)
