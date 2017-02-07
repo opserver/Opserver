@@ -56,7 +56,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_prettyName == null)
                 {
-                    _prettyName = Caption ?? Name ?? "";
+                    _prettyName = Name ?? Caption ?? "";
                     foreach (var p in _prettyNameReplacements)
                     {
                         _prettyName = _prettyName.Replace(p.Key, p.Value);
