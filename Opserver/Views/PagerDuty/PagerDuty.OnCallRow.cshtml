@@ -1,7 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.PagerDuty
-@model OnCallAssignment
+@model OnCall
 <tr class="@Model.RowClass()" title="@Model.MonitorStatusReason">
-    <td>@Model.Person.FullName</td>
+    <td>@Model.AssignedUser.FullName</td>
     <td>
         @if (Model.IsPrimary)
         {
@@ -16,6 +16,6 @@
             <span class="text-muted">(<strong class="text-danger">Override</strong>)</span>
         }
     </td>
-    <td><a href="mailto:@Model.Person.Email">@Model.Person.Email</a></td>
-    <td>@Model.Person.Phone</td>
+    <td><a href="mailto:@Model.AssignedUser.Email">@Model.AssignedUser.Email</a></td>
+    <td>@PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == @Model.AssignedUser.Id).Phone</td>
 </tr>

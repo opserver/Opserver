@@ -40,18 +40,29 @@
                     Status.popup('pagerduty/escalation/' + val);
                 }
             });
-            $(".js-incident-action").on('click', function(e) {
+            $(Document).on('click', '.js-incident-action',function(e) {
                 e.preventDefault();
-                $.post('/pagerduty/action/incident/updatestatus', {
-                    'newStatus': $(this).data('action'),
-                    'incident': $(this).closest('[data-incident]').data('incident')
-                }).done(function() {
+                console.log("In Action");
+
+                console.log(data);
+                $.post('/pagerduty/action/incident/updatestatus',{
+                    newStatus: $(this).data('action'),
+                    incident: $(this).closest('[data-incident]').data('incident')
+                })
+                  .done(function () {
                     Status.refresh.run();
+                }).fail(function (xhr, textStatus, errorThrown) {
+                    console.log(xhr);
+                    console.log(textStatus);
+                    console.log(errorThrown);
                 });
             });
-            $(".js-override-action").on('click', function (e) {
+            $(Document).on('click', '.js-override-action',function (e) {
                 e.preventDefault();
-                $.post('/pagerduty/action/oncall/override').done(function () {
+                $.post('/pagerduty/action/oncall/override').done(function (data, status, xhr) {
+                    console.log(data);
+                    console.log(status);
+                    console.log(xhr);
                     Status.refresh.run();
                 });
             });
@@ -147,7 +158,7 @@
                     <span class="@i.TextClass()">@i.Status.GetDescription()</span>
                     @if (i.LastChangedBy != null)
                     {
-                        <span class="text-muted">(@i.LastChangedBy.FullName)</span>
+                        <span class="text-muted">(@i.LastChangedBy.Summary)</span>
                     }
                     @if (i.Status == IncidentStatus.triggered || i.Status == IncidentStatus.acknowledged)
                     {
@@ -155,9 +166,9 @@
                     }
                 </td>
                 <td>
-                    @if (i.SummaryData.Keys.Contains("subject"))
+                    @if (i.Summary != null)//.Keys.Contains("subject"))
                     {
-                        @i.SummaryData["subject"]
+                        @i.Summary;
                     }
                 </td>
             </tr>

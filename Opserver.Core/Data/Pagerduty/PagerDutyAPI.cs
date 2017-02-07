@@ -25,9 +25,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (OnCallUsers.ContainsData)
+            if (OnCallInfo.ContainsData)
             {
-                foreach (var a in GetSchedule())
+                foreach (var a in OnCallInfo.Data)
                     yield return a.MonitorStatus;
             }
             if (Incidents.ContainsData)
@@ -44,10 +44,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-                yield return OnCallUsers;
+
                 yield return AllUsers;
+                yield return OnCallInfo;
                 yield return Incidents;
                 yield return AllSchedules;
+                yield return AllUsers;
             }
         }
 
@@ -73,6 +75,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyAPI()
         {
             Settings = Current.Settings.PagerDuty;
+            //CacheItemFetched += (sender, args) => { _scheduleCache = null; };
+
         }
 
         /// <summary>
@@ -84,16 +88,24 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <param name="httpMethod"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null)
+        public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null, Dictionary<string,string> extraHeaders = null)
         {
-            var url = Settings.APIBaseUrl;
+            var url = "https://api.pagerduty.com/"; //Settings.APIBaseUrl;
             var fullUri = url + path;
             
             using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
             {
                 var req = (HttpWebRequest)WebRequest.Create(fullUri);
                 req.Method = httpMethod;
+                req.Accept = "application/vnd.pagerduty+json;version=2";
                 req.Headers.Add("Authorization: Token token=" + APIKey);
+                if (extraHeaders != null)
+                {
+                    foreach (var h in extraHeaders.Keys)
+                    {
+                        req.Headers.Add(h, extraHeaders[h]);
+                    }
+                }
 
                 if (httpMethod == "POST" || httpMethod == "PUT")
                 {
@@ -117,7 +129,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         using (var sr = new StreamReader(rs))
                         {
                             var result = getFromJson(sr.ReadToEnd());
-                            _scheduleCache = null;
+                            //_scheduleCache = null;
                             return result;
                         }
                     }
@@ -135,7 +147,15 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             }
                         }
                     }
-                    catch { /* we gave it a shot, but don't boom in the boom that feeds */ }
+                    catch(Exception ex)
+                    {
+                         /* we gave it a shot, but don't boom in the boom that feeds */
+                         // TEMPORARY (LOL) for troubleshooting
+
+                        Current.LogException(
+                            ex
+                            );
+                    }
 
                     Current.LogException(
                         e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
@@ -150,9 +170,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private Cache<List<PagerDutyPerson>> _allusers;
         public Cache<List<PagerDutyPerson>> AllUsers =>
             _allusers ?? (_allusers = GetPagerDutyCache(60.Minutes(),
-                    () => GetFromPagerDutyAsync("users/", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
+                    () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
             );
 
-        public PagerDutyPerson GetPerson(string id) => AllUsers.Data.FirstOrDefault(u => u.Id == id);
+      
+
     }
 }
