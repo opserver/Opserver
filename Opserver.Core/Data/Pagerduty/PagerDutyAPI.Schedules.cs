@@ -21,14 +21,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        public string PrimaryScheduleId
-        {
-            get
-            {
-                var schedule = PrimarySchedule;
-                return schedule != null ? schedule.Id : "";
-            }
-        }
+        public string PrimaryScheduleId => PrimarySchedule?.Id ?? "";
+
         private Cache<List<PagerDutySchedule>> _schedules;
 
         public Cache<List<PagerDutySchedule>> AllSchedules =>
@@ -49,7 +43,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
     }
 
-    class PagerDutyScheduleResponse
+    public class PagerDutyScheduleResponse
     {
         [DataMember(Name="schedules")]
         public List<PagerDutySchedule> Schedules { get; set; }
@@ -72,13 +66,17 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     start,
                     end,
-                    user_id = pdPerson.Id
+                    user = new 
+                    {
+                        id = pdPerson.Id,
+                        type = "user_reference"
+                    }
                 }
             };
             var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
                 getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData).ConfigureAwait(false);
 
-            await PagerDutyAPI.Instance.OnCallUsers.PollAsync(true).ConfigureAwait(false);
+            await PagerDutyAPI.Instance.OnCallInfo.PollAsync(true).ConfigureAwait(false);
             await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
             return result;
         }

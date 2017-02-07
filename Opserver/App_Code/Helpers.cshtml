@@ -51,3 +51,16 @@
         @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
     }
 }
+@helper CacheEmpty(Cache cache, string message)
+{
+    if (!cache.LastPollSuccessful)
+    {
+        <div class="alert alert-info">
+            <h5>@message</h5>
+            @if (cache.ErrorMessage.HasValue())
+            {
+                <p class="error-stack">@cache.ErrorMessage</p>
+            }
+        </div>
+    }
+}
