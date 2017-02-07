@@ -5,11 +5,15 @@
     <td>
         @if (Model.IsPrimary)
         {
-            <strong>@Model.EscalationLevelDescription</strong>
+            <b>@Model.EscalationLevelDescription</b>
         }
         else
         {
             @Model.EscalationLevelDescription
+        }
+        @if (Model.Schedule != null)
+        {
+            @:(@Model.Schedule.Title)
         }
         @if (Model.IsOverride)
         {

@@ -157,17 +157,34 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Type { get; set; }
     }
 
-    public class EscalationPolicy
-    {
-        public string Id;
-        public string Type;
-        public string Summary;
-    }
-
     public class OnCallUser
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
+        [DataMember(Name = "summary")]
+        public string Name { get; set; }
+        [DataMember(Name = "html_url")]
+        public string Url { get; set; }
+    }
+
+    public class OnCallEscalationPolicy
+    {
+        [DataMember(Name = "id")]
+        public string Id;
+        [DataMember(Name = "summary")]
+        public string Title { get; set; }
+        [DataMember(Name = "html_url")]
+        public string Url { get; set; }
+    }
+
+    public class OnCallSchedule
+    {
+        [DataMember(Name = "id")]
+        public string Id { get; set; }
+        [DataMember(Name = "summary")]
+        public string Title { get; set; }
+        [DataMember(Name = "html_url")]
+        public string Url { get; set; }
     }
     public class OnCall : IMonitorStatus
     {
@@ -178,9 +195,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "end")]
         public DateTime? EndDate { get; set; }
         [DataMember(Name = "escalation_policy")]
-        public EscalationPolicy Policy { get; set; } 
+        public OnCallEscalationPolicy Policy { get; set; }
         [DataMember(Name = "user")]
         public OnCallUser User { get; set; }
+        [DataMember(Name = "schedule")]
+        public OnCallSchedule Schedule { get; set; }
 
         public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == User.Id);
 
