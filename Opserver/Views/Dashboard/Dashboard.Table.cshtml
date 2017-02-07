@@ -20,6 +20,16 @@ else
 {
 <div class="text-muted">No Data Available</div>}
 }
+@helper GraphAll(Node n, string type)
+{
+if (DashboardModule.HasData)
+{
+<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark/all#@n.Id" alt="" /></a>
+}
+else
+{
+<div class="text-muted">No Data Available</div>}
+}
 @helper DiskText(Node n)
 {
     var worst = n.Volumes?.Where(v => v?.PercentUsed.HasValue ?? false).DefaultIfEmpty().Max(v => v?.PercentUsed);
