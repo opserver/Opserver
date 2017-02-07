@@ -21,14 +21,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
         }
 
-        public string PrimaryScheduleId
-        {
-            get
-            {
-                var schedule = PrimarySchedule;
-                return schedule != null ? schedule.Id : "";
-            }
-        }
+        public string PrimaryScheduleId => PrimarySchedule?.Id ?? "";
+
         private Cache<List<PagerDutySchedule>> _schedules;
 
         public Cache<List<PagerDutySchedule>> AllSchedules =>
@@ -47,7 +41,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10.Minutes(), PrimarySchedule.GetOverridesAsync));
             }
         }
-
     }
 
     public class PagerDutyScheduleResponse

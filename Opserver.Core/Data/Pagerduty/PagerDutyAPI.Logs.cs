@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
@@ -9,7 +8,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI
     {
-
         public Task<List<LogEntry>> GetIncidentEntriesAsync(string id)
         {
             try
@@ -39,6 +37,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string LogId { get; set; }
         [DataMember(Name ="summary")]
         public string Summary { get; set; }
+        [DataMember(Name = "html_url")]
+        public string Url { get; set; }
         [DataMember(Name="created_at")]
         public DateTime? CreationTime { get; set; }
         [DataMember(Name = "type")]

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
@@ -12,16 +11,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public async Task<Incident> UpdateIncidentStatusAsync(string incidentId, PagerDutyPerson person, IncidentStatus newStatus)
         {
             if (person == null) throw new ArgumentNullException(nameof(person));
-            /*
-            var data = new PagerDutyIncidentPut
-            {
-                Incidents = new List<Incident>
-                {
-                    new Incident {Id = incidentId, Status = newStatus}
-                },
-                RequesterId = person.Id
-            };
-            */
             var data = new
             {
                 incident = new
@@ -29,12 +18,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     type = "incident_reference",
                     status = newStatus.ToString()
                 }
-                
             };
 
-            var headers = new Dictionary<string,string>()
+            var headers = new Dictionary<string,string>
             {
-                {  "From", person.Email}
+                { "From", person.Email}
             };
             try
             {
@@ -55,12 +43,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     );
                 return null;
             }
-           
-
-        
         }
-
-
+        
         public class PagerDutyIncidentUpdateResp
         {
             [DataMember(Name = "incident")]

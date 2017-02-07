@@ -11,15 +11,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public partial class PagerDutyAPI
     {
         // TODO: We need to able able to handle when people have more than one on call schedule
-        public PagerDutyPerson PrimaryOnCall
-        {
-            get { return OnCallInfo.Data.FirstOrDefault(p => p.EscalationLevel == 1).AssignedUser; }
-        }
+        public PagerDutyPerson PrimaryOnCall => 
+            OnCallInfo.Data?.FirstOrDefault(p => p.EscalationLevel == 1)?.AssignedUser;
 
-        public PagerDutyPerson SecondaryOnCall
-        {
-            get { return OnCallInfo.Data.FirstOrDefault(p => p.EscalationLevel == 2).AssignedUser; }
-        }
+        public PagerDutyPerson SecondaryOnCall => 
+            OnCallInfo.Data?.FirstOrDefault(p => p.EscalationLevel == 2)?.AssignedUser;
 
         private Cache<List<OnCall>> _oncallinfo;
         public Cache<List<OnCall>> OnCallInfo => _oncallinfo ?? (_oncallinfo = new Cache<List<OnCall>>(
@@ -29,25 +25,33 @@ namespace StackExchange.Opserver.Data.PagerDuty
             getData: GetOnCallUsers,
             logExceptions: true));
 
-        private Task<List<OnCall>> GetOnCallUsers()
+        private async Task<List<OnCall>> GetOnCallUsers()
         {
             try
             {
-                return GetFromPagerDutyAsync("oncalls", getFromJson:
+                var users = await GetFromPagerDutyAsync("oncalls", getFromJson:
                     response => JSON.Deserialize<PagerDutyOnCallResponse>(response.ToString(), JilOptions).OnCallInfo);
+
+                users.Sort((a, b) =>
+                    a.EscalationLevel.GetValueOrDefault(int.MaxValue)
+                        .CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
+
+                if (users.Count > 1 && users[0].AssignedUser?.Id == users[1].AssignedUser?.Id)
+                {
+                    var secondary = users[1];
+                    secondary.MonitorStatus = MonitorStatus.Warning;
+                    secondary.MonitorStatusReason = "Primary and secondary on call are the same";
+                }
+                return users;
             }
             catch (DeserializationException de)
             {
                 Current.LogException(
                     de.AddLoggedData("Snippet After", de.SnippetAfterError)
-                    .AddLoggedData("Message", de.Message)
-                    );
+                      .AddLoggedData("Message", de.Message));
                 return null;
             }
-            
-
         }
-       
     }
 
     public class PagerDutyOnCallResponse
@@ -92,7 +96,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     // The PagerDuty API does not always return a full contact. HANDLE IT.
                     var m = ContactMethods?.FirstOrDefault(cm => cm.Type == "phone_contact_method" || cm.Type == "sms_contact_method");
-                    _phone = m != null ? m.FormattedAddress : "n/a";
+                    _phone = m?.FormattedAddress ?? "n/a";
                 }
                 return _phone;
             }
@@ -118,13 +122,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         private string _emailusername;
-        public string EmailUserName
-        {
-            get
-            {
-                return _emailusername = (_emailusername ?? (Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : ""));
-            }
-        }
+        public string EmailUserName => _emailusername ?? (_emailusername = Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : "");
     }
 
     public class PagerDutyContactMethod
@@ -157,8 +155,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
         [DataMember(Name = "type")]
         public string Type { get; set; }
-
-       
     }
 
     public class EscalationPolicy
@@ -186,17 +182,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "user")]
         public OnCallUser User { get; set; }
 
-        public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == User.Id);
+        public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == User.Id);
 
-        public bool IsOverride
-        {
-            get
-            {
-                return
-                    PagerDutyAPI.Instance.PrimaryScheduleOverrides.Data?.Any(
-                        o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == AssignedUser.Id) ?? false;
-            }
-        }
+        public bool IsOverride =>
+            PagerDutyAPI.Instance.PrimaryScheduleOverrides.Data?.Any(
+                o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == AssignedUser.Id) ?? false;
 
         public bool IsPrimary => EscalationLevel == 1;
 
@@ -218,10 +208,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             return EscalationLevel.Value + "th";
                     }
                 }
-                else
-                {
-                    return "unknown";
-                }
+
+                return "unknown";
             }
         }
 
@@ -240,6 +228,5 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Summary { get; set; }
         [DataMember(Name = "self")]
         public string ApiLink { get; set; }
-
     }
 }

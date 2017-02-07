@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -44,7 +43,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
-
                 yield return AllUsers;
                 yield return OnCallInfo;
                 yield return Incidents;
@@ -75,8 +73,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyAPI()
         {
             Settings = Current.Settings.PagerDuty;
-            //CacheItemFetched += (sender, args) => { _scheduleCache = null; };
-
         }
 
         /// <summary>
@@ -129,7 +125,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         using (var sr = new StreamReader(rs))
                         {
                             var result = getFromJson(sr.ReadToEnd());
-                            //_scheduleCache = null;
                             return result;
                         }
                     }
@@ -147,21 +142,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             }
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception)
                     {
-                         /* we gave it a shot, but don't boom in the boom that feeds */
-                         // TEMPORARY (LOL) for troubleshooting
-
-                        Current.LogException(
-                            ex
-                            );
+                        // ignored, best effort
                     }
 
                     Current.LogException(
                         e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
                          .AddLoggedData("Endpoint", fullUri)
                          .AddLoggedData("Headers", req.Headers.ToString())
-                         .AddLoggedData("Contecnt Type", req.ContentType));
+                         .AddLoggedData("Content Type", req.ContentType));
                     return getFromJson("fail");
                 }
             }
@@ -172,8 +162,5 @@ namespace StackExchange.Opserver.Data.PagerDuty
             _allusers ?? (_allusers = GetPagerDutyCache(60.Minutes(),
                     () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
             );
-
-      
-
     }
 }

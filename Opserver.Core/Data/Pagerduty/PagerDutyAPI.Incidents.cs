@@ -24,7 +24,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         .ToList()
                     );
             }));
-
     }
     
     public class IncidentResponse
@@ -47,41 +46,46 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public int Number { get; set; }
         [DataMember(Name = "created_at")]
         public DateTime? CreationDate { get; set; }
+        [DataMember(Name = "urgency")]
+        public string Urgency { get; set; }
         [DataMember(Name = "html_url")]
         public string Uri { get; set; }
         [DataMember(Name = "assigned_to")]
         public List<PagerDutyPerson> AssignedTo { get; set; }
-        [DataMember(Name = "last_status_change_on")]
+        [DataMember(Name = "last_status_change_at")]
         public DateTime? LastChangedOn { get; set; }
         [DataMember(Name = "last_status_change_by")]
         public PagerDutyInfoReference LastChangedBy { get; set; }
         [DataMember(Name = "resolved_by_user")]
-        public string ResolvedBy {
-            get
-            {
-                return Logs.Result.FirstOrDefault(r => r.LogType == "resolve_log_entry").Agent.Person;
-            }
-        }
+        public string ResolvedBy => Logs.Result.FirstOrDefault(r => r.LogType == "resolve_log_entry")?.Agent.Person;
+        [DataMember(Name = "resolve_reason")]
+        public string ResolveReason { get; set; }
+
         [DataMember(Name = "acknowledgers")]
-        public List<Acknowledgement> AcknowledgedBy {
+        public List<Acknowledgement> AcknowledgedBy
+        {
             get
             {
                 var a = new List<Acknowledgement>();
-                foreach(var i in Logs.Result.FindAll(l => l.LogType == "acknowledge_log_entry"))
+                foreach (var i in Logs.Result.FindAll(l => l.LogType == "acknowledge_log_entry"))
                 {
                     a.Add(new Acknowledgement()
                     {
                         AckPerson = i.Agent.Person,
                         AckTime = i.CreationTime
                     });
-                    
+
                 }
                 return a;
             }
         }
-        [DataMember(Name="summary")]
+
+        [DataMember(Name = "title")]
+        public string Title { get; set; }
+        [DataMember(Name = "description")]
+        public string Description { get; set; }
+        [DataMember(Name = "summary")]
         public string Summary { get; set; }
-        //public Dictionary<string, string> SummaryData { get; set; }
         [DataMember(Name = "service")]
         public PagerDutyService AffectedService { get; set; }
         [DataMember(Name = "number_of_escalations")]

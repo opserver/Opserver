@@ -3,21 +3,11 @@
     Layout = null;
     this.SetPageTitle("PagerDuty Incident Detail");
     var i = Model.Incident;
-    var isSubjectOnly = i.Summary != null;
 }
 <h4 class="modal-title">
-    Incident: @i.Number.ToString()
+    Incident @i.Number.ToString()@if (i.Title.HasValue()){<text>: @i.Title</text>}
 </h4>
 <div>
-    @if (isSubjectOnly)
-    {
-        <div class="row small">
-            <div class="value-block col-md-12">
-                @i.Summary
-                <label>Subject</label>
-            </div>
-        </div>
-    }
     <div class="row small">
         <div class="value-block col-md-6">
             @i.AffectedService.Name
@@ -40,7 +30,7 @@
             }
             <label>Acknowledged By</label>
         </div>
-        <div class="value-block col-md-4 @i.MonitorStatus.BackgroundClass()">
+        <div class="value-block col-md-4 @i.MonitorStatus.BackgroundClass()" title="@i.ResolveReason">
             @(i.ResolvedBy)
             @if (i.ResolvedBy == null)
             {
@@ -60,23 +50,33 @@
             <label>Last Change</label>
         </div>
     </div>
-   
+
     <h5 class="page-header">Incident Log</h5>
     <table class="table table-striped table-hover table-responsive text-nowrap table-super-condensed">
         <thead>
-            <tr>
-                <th>Time</th>
-                <th>Type</th>
-                <th>Message</th>
-                <th>Notes</th>
-            </tr>
+        <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Message</th>
+            <th>Notes</th>
+        </tr>
         </thead>
         <tbody>
         @foreach (var l in Model.Logs)
         {
+            var type = l.LogType?.Replace("_log_entry", "").ToTitleCase();
             <tr>
                 <td>@(l.CreationTime?.ToRelativeTimeSpan())</td>
-                <td>@l.LogType.ToTitleCase()</td>
+                <td>
+                    @if (l.Url.HasValue())
+                    {
+                        <a href="@l.Url">@type</a>
+                    }
+                    else
+                    {
+                        @type
+                    }
+                </td>
                 <td>@l.Summary</td>
                 <td>@l.Note</td>
             </tr>

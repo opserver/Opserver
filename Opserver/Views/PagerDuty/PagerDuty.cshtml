@@ -40,29 +40,19 @@
                     Status.popup('pagerduty/escalation/' + val);
                 }
             });
-            $(Document).on('click', '.js-incident-action',function(e) {
+            $(document).on('click', '.js-incident-action',function(e) {
                 e.preventDefault();
-                console.log("In Action");
-
-                console.log(data);
                 $.post('/pagerduty/action/incident/updatestatus',{
                     newStatus: $(this).data('action'),
                     incident: $(this).closest('[data-incident]').data('incident')
                 })
                   .done(function () {
                     Status.refresh.run();
-                }).fail(function (xhr, textStatus, errorThrown) {
-                    console.log(xhr);
-                    console.log(textStatus);
-                    console.log(errorThrown);
                 });
             });
-            $(Document).on('click', '.js-override-action',function (e) {
+            $(document).on('click', '.js-override-action',function (e) {
                 e.preventDefault();
-                $.post('/pagerduty/action/oncall/override').done(function (data, status, xhr) {
-                    console.log(data);
-                    console.log(status);
-                    console.log(xhr);
+                $.post('/pagerduty/action/oncall/override').done(function () {
                     Status.refresh.run();
                 });
             });
@@ -102,10 +92,7 @@
             <tbody>
                 <tr>
                     <td colspan="4">
-                        <div class="alert alert-warning">
-                            <h5>Error fetching schedule from PagerDuty</h5>
-                            <p class="error-stack">@PagerDutyAPI.Instance.AllSchedules.ErrorMessage</p>
-                        </div>
+                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.AllSchedules, "No schedules loaded from PagerDuty")
                     </td>
                 </tr>
             </tbody>
@@ -138,11 +125,8 @@
         {
             <tbody>
                 <tr>
-                    <td colspan="5">
-                        <div class="alert alert-warning">
-                            <h5>Error fetching incidents from PagerDuty</h5>
-                            <p class="error-stack">@PagerDutyAPI.Instance.Incidents.ErrorMessage</p>
-                        </div>
+                    <td colspan="4">
+                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.Incidents, "No incidents loaded from PagerDuty")
                     </td>
                 </tr>
             </tbody>
@@ -165,12 +149,7 @@
                         @GetIncidentAction(i.Status)
                     }
                 </td>
-                <td>
-                    @if (i.Summary != null)//.Keys.Contains("subject"))
-                    {
-                        @i.Summary;
-                    }
-                </td>
+                <td>@i.Title</td>
             </tr>
         }
         </tbody>

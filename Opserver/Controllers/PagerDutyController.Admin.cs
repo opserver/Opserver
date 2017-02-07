@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.PagerDuty;
@@ -14,7 +13,6 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Person Not Found for " + Current.User.AccountName);
             
-
             var newIncident = await PagerDutyAPI.Instance.UpdateIncidentStatusAsync(incident, pdUser, newStatus);
             return Json(newIncident?.Status == newStatus);
         }
