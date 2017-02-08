@@ -146,7 +146,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                     var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
                     if (exclude != null)
                     {
-                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.IsVM && x.VMHostID == n.Id))).ToList();
+                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.VMHostID == n.Id))).ToList();
                     }
 
                     foreach (var n in nodes)
