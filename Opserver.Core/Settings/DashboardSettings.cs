@@ -22,14 +22,6 @@ namespace StackExchange.Opserver
         #region Direct Properties
 
         /// <summary>
-        /// The Pattern to match on server names to display on the dashboard. This is evaluated before the <see cref="ExcludePattern"/>.
-        /// </summary>
-        public string IncludePattern { get; set; }
-
-        private Regex _includePatternRegEx;
-        public Regex IncludePatternRegex => _includePatternRegEx ?? (IncludePattern.HasValue() ? _includePatternRegEx = new Regex(IncludePattern, RegexOptions.IgnoreCase | RegexOptions.Singleline) : null);
-
-        /// <summary>
         /// The Pattern to match on server names for hiding from the dashboard
         /// </summary>
         public string ExcludePattern { get; set; }
