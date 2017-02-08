@@ -24,6 +24,10 @@ namespace StackExchange.Opserver.Models
     public static class VolumeExtensionMethods
     {
         public static string PercentFreeSpace(this Volume vol) => (100 - vol.PercentUsed)?.ToString("n0") + "% Free";
+
+        public static string PrettyRead(this Volume i) => i.ReadBps?.ToSpeed();
+
+        public static string PrettyWrite(this Volume i) => i.WriteBps?.ToSpeed();
     }
 
     public static class InterfaceExtensionMethods
@@ -95,6 +99,11 @@ namespace StackExchange.Opserver.Models
             info.TotalPrimaryNetworkbps < 0
                 ? null
                 : info.TotalPrimaryNetworkbps.ToSpeed();
+
+        public static string PrettyTotalVolumePerformance(this Node info) =>
+            info.TotalVolumePerformancekbps < 0
+                ? null
+                : info.TotalVolumePerformancekbps.ToSpeed();
 
         public static string NetworkTextSummary(this Node info)
         {

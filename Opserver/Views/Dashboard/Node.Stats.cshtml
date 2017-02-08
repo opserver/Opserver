@@ -29,3 +29,8 @@
 {
     @Html.Partial("Node.Interfaces", Model)
 }
+
+@if (Model.Volumes.Any())
+{
+    @Html.Partial("Node.Volumes", Model)
+}

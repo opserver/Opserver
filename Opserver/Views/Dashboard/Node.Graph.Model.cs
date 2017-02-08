@@ -16,6 +16,7 @@ namespace StackExchange.Opserver.Views.Dashboard
         public object MemoryData { get; set; }
         public object NetworkData { get; set; }
         public object VolumeData { get; set; }
+        public object VolumePerformanceData { get; set; }
 
         public static class KnownTypes
         {
@@ -23,6 +24,7 @@ namespace StackExchange.Opserver.Views.Dashboard
             public const string Memory = "memory";
             public const string Network = "network";
             public const string Volume = "volume";
+            public const string VolumePerformance = "volumePerformance";
             public const string Live = "live";
         }
     }
