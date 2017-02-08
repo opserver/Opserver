@@ -1568,7 +1568,7 @@ Status.HAProxy = (function () {
                 min: 'auto',
                 leftMargin: 60,
                 areaTooltipFormat: function (value, series, name) {
-                    return '<span>Bandwidth (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>';
+                    return '<span>I/O (<span class="series-' + name + '">' + series + '</span>): </span><b>' + Status.helpers.bytesToSize(value, false) + '/s</b>';
                 },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }

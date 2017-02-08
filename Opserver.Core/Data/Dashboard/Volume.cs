@@ -57,10 +57,13 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (!PercentUsed.HasValue)
                     return MonitorStatus.Unknown;
-                if (Node.DiskCriticalPercent.HasValue && PercentUsed > Node.DiskCriticalPercent.Value)
-                    return MonitorStatus.Critical;
-                if (Node.DiskWarningPercent.HasValue && PercentUsed > Node.DiskWarningPercent.Value)
-                    return MonitorStatus.Warning;
+                if (Node != null)
+                {
+                    if (Node.DiskCriticalPercent.HasValue && PercentUsed > Node.DiskCriticalPercent.Value)
+                        return MonitorStatus.Critical;
+                    if (Node.DiskWarningPercent.HasValue && PercentUsed > Node.DiskWarningPercent.Value)
+                        return MonitorStatus.Warning;
+                }
                 return MonitorStatus.Good;
             }
         }

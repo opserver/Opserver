@@ -14,13 +14,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private partial class WmiNode
         {
-            private static readonly string MachineDomainName;
+            private static readonly string _machineDomainName;
 
             static WmiNode()
             {
                 try
                 {
-                    MachineDomainName = Domain.GetComputerDomain().Name;
+                    _machineDomainName = Domain.GetComputerDomain().Name;
                 }
                 catch (ActiveDirectoryObjectNotFoundException) { }
                 catch (Exception e)
@@ -37,7 +37,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     SetReferences();
 
-                    this.nodeInfoAvailable = true;
+                    // first run, do a follow-up poll for all stats on the first pass
+                    if (_nodeInfoAvailable == false)
+                    {
+                        _nodeInfoAvailable = true;
+                        await PollStats();
+                    }
                 }
                 catch (COMException e)
                 {
@@ -49,7 +54,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public async Task<Node> PollStats()
             {
-                if (this.nodeInfoAvailable == false)
+                if (_nodeInfoAvailable == false)
                 {
                     return this;
                 }
@@ -76,18 +81,18 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Model,
                 NumberOfLogicalProcessors
                 FROM Win32_ComputerSystem";
-                using (var q = Wmi.Query(this.Endpoint, machineQuery))
+                using (var q = Wmi.Query(Endpoint, machineQuery))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data != null)
                     {
-                        this.Model = data.Model;
-                        this.Manufacturer = data.Manufacturer;
+                        Model = data.Model;
+                        Manufacturer = data.Manufacturer;
                         // Only use domain if we're on one - not for things like workgroups
-                        this.Name = MachineDomainName.HasValue() && data.Domain != MachineDomainName
+                        Name = _machineDomainName.HasValue() && data.Domain != _machineDomainName
                                    ? $"{data.DNSHostName}.{data.Domain}"
                                    : data.DNSHostName;
-                        this.NumberOfLogicalProcessors = data.NumberOfLogicalProcessors;
+                        NumberOfLogicalProcessors = data.NumberOfLogicalProcessors;
                     }
                 }
 
@@ -100,26 +105,26 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Version
                 FROM Win32_OperatingSystem";
 
-                using (var q = Wmi.Query(this.Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data != null)
                     {
-                        this.LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
-                        this.TotalMemory = data.TotalVisibleMemorySize * 1024;
-                        this.MemoryUsed = this.TotalMemory - data.FreePhysicalMemory * 1024;
-                        this.KernelVersion = Version.Parse(data.Version);
-                        this.MachineType = data.Caption.ToString() + " " + data.Version.ToString();
+                        LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
+                        TotalMemory = data.TotalVisibleMemorySize * 1024;
+                        MemoryUsed = TotalMemory - data.FreePhysicalMemory * 1024;
+                        KernelVersion = Version.Parse(data.Version);
+                        MachineType = data.Caption.ToString() + " " + data.Version.ToString();
                     }
                 }
 
-                this.LastSync = DateTime.UtcNow;
-                this.Status = NodeStatus.Active;
+                LastSync = DateTime.UtcNow;
+                Status = NodeStatus.Active;
 
-                this.IsVMHost = await this.GetIsVMHost().ConfigureAwait(false);
+                IsVMHost = await GetIsVMHost().ConfigureAwait(false);
 
-                this.canQueryAdapterUtilization = await this.GetCanQueryAdapterUtilization().ConfigureAwait(false);
-                this.canQueryTeamingInformation = await Wmi.ClassExists(this.Endpoint, "MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
+                _canQueryAdapterUtilization = await GetCanQueryAdapterUtilization().ConfigureAwait(false);
+                _canQueryTeamingInformation = await Wmi.ClassExists(Endpoint, "MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
             }
 
             private async Task GetAllInterfacesAsync()
@@ -138,46 +143,47 @@ SELECT Name,
                 //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
 
                 var indexMap = new Dictionary<uint, Interface>();
-                using (var q = Wmi.Query(this.Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         string id = $"{data.DeviceID}";
-                        var i = this.Interfaces.FirstOrDefault(x => x.Id == id);
-                        if (i == null)
-                        {
-                            i = new Interface();
-                            this.Interfaces.Add(i);
-                        }
+                        var i = Interfaces.FirstOrDefault(x => x.Id == id) ?? new Interface();
                         indexMap[data.InterfaceIndex] = i;
 
                         i.Id = id;
                         i.Alias = "!alias";
                         i.Caption = data.NetConnectionID;
                         i.FullName = data.Description;
-                        i.NodeId = this.Id;
+                        i.NodeId = Id;
                         i.LastSync = DateTime.UtcNow;
-                        i.Name = await this.GetRealAdapterName(data.PNPDeviceID).ConfigureAwait(false);
+                        i.Name = await GetRealAdapterName(data.PNPDeviceID).ConfigureAwait(false);
                         i.PhysicalAddress = data.MACAddress;
                         i.Speed = data.Speed;
                         i.Status = NodeStatus.Active;
                         i.TypeDescription = "";
                         i.IPs = new List<IPNet>();
                         i.TeamMembers = new List<string>();
+
+                        if (i.Node == null)
+                        {
+                            i.Node = this;
+                            Interfaces.Add(i);
+                        }
                     }
                 }
 
-                if (this.canQueryTeamingInformation)
+                if (_canQueryTeamingInformation)
                 {
                     const string teamsQuery = "SELECT InstanceID, Name FROM MSFT_NetLbfoTeam";
                     var teamNamesToInterfaces = new Dictionary<string, Interface>();
 
-                    using (var q = Wmi.Query(this.Endpoint, teamsQuery, @"root\standardcimv2"))
+                    using (var q = Wmi.Query(Endpoint, teamsQuery, @"root\standardcimv2"))
                     {
                         foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
-                            var teamInterface = this.Interfaces.FirstOrDefault(x => x.Caption == data.Name);
-                            //var teamInterface = this.Interfaces.FirstOrDefault(x => x.Id == data.InstanceID);
+                            var teamInterface = Interfaces.FirstOrDefault(x => x.Caption == data.Name);
+                            //var teamInterface = Interfaces.FirstOrDefault(x => x.Id == data.InstanceID);
 
                             if (teamInterface == null)
                             {
@@ -189,7 +195,7 @@ SELECT Name,
                     }
 
                     const string teamMembersQuery = "SELECT InstanceID, Name, Team FROM MSFT_NetLbfoTeamMember";
-                    using (var q = Wmi.Query(this.Endpoint, teamMembersQuery, @"root\standardcimv2"))
+                    using (var q = Wmi.Query(Endpoint, teamMembersQuery, @"root\standardcimv2"))
                     {
                         foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
@@ -199,9 +205,9 @@ SELECT Name,
                             if (teamNamesToInterfaces.TryGetValue(teamName, out teamInterface))
                             {
                                 var adapterName = data.Name;
-                                var memberInterface = this.Interfaces.FirstOrDefault(x => x.Name == adapterName);
+                                var memberInterface = Interfaces.FirstOrDefault(x => x.Name == adapterName);
                                 //var adapterId = data.InstanceID;
-                                //var memberInterface = this.Interfaces.FirstOrDefault(x => x.Id == adapterId);
+                                //var memberInterface = Interfaces.FirstOrDefault(x => x.Id == adapterId);
 
                                 if (memberInterface == null)
                                 {
@@ -219,7 +225,7 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
   FROM WIn32_NetworkAdapterConfiguration 
  WHERE IPEnabled = 'True'";
 
-                using (var q = Wmi.Query(this.Endpoint, ipQuery))
+                using (var q = Wmi.Query(Endpoint, ipQuery))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -272,12 +278,7 @@ SELECT Caption,
                     foreach (var disk in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         var id = $"{disk.DeviceID}";
-                        var v = Volumes.FirstOrDefault(x => x.Id == id);
-                        if (v == null)
-                        {
-                            v = new Volume();
-                            Volumes.Add(v);
-                        }
+                        var v = Volumes.FirstOrDefault(x => x.Id == id) ?? new Volume();
 
                         v.Id = $"{disk.DeviceID}";
                         v.Available = disk.FreeSpace;
@@ -293,17 +294,22 @@ SELECT Caption,
                         {
                             v.PercentUsed = 100 * v.Used / v.Size;
                         }
+                        if (v.Node == null)
+                        {
+                            v.Node = this;
+                            Volumes.Add(v);
+                        }
                     }
                 }
             }
 
             private async Task PollCpuUtilizationAsync()
             {
-                var query = this.IsVMHost
+                var query = IsVMHost
                     ? @"SELECT Name, Timestamp_Sys100NS, PercentTotalRunTime FROM Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
                     : @"SELECT Name, Timestamp_Sys100NS, PercentProcessorTime FROM Win32_PerfRawData_PerfOS_Processor WHERE Name = '_Total'";
 
-                var property = this.IsVMHost
+                var property = IsVMHost
                     ? "PercentTotalRunTime"
                     : "PercentProcessorTime";
 
@@ -315,9 +321,9 @@ SELECT Caption,
 
                     var perfData = new PerfRawData(this, data);
 
-                    if (this.IsVMHost)
+                    if (IsVMHost)
                     {
-                        CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / this.NumberOfLogicalProcessors);
+                        CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / NumberOfLogicalProcessors);
                     }
                     else
                     {
@@ -371,7 +377,7 @@ SELECT Caption,
 
             private async Task PollNetworkUtilizationAsync()
             {
-                var utilizationTable = this.canQueryAdapterUtilization
+                var utilizationTable = _canQueryAdapterUtilization
                                            ? "Win32_PerfRawData_Tcpip_NetworkAdapter"
                                            : "Win32_PerfRawData_Tcpip_NetworkInterface";
 
@@ -392,13 +398,13 @@ SELECT Caption,
                     OutAvgBps = 0
                 };
 
-                using (var q = Wmi.Query(this.Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         var perfData = new PerfRawData(this, data);
                         var name = perfData.Identifier;
-                        var iface = this.Interfaces.FirstOrDefault(i => name == GetCounterName(i.Name));
+                        var iface = Interfaces.FirstOrDefault(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
                         iface.InBps = (float)perfData.GetCalculatedValue("BytesReceivedPersec", 10000000);
@@ -413,10 +419,10 @@ SELECT Caption,
                             OutAvgBps = iface.OutBps
                         };
 
-                        var netData = this.NetHistory.GetOrAdd(iface.Name, k => new List<Interface.InterfaceUtilization>(1024));
-                        this.UpdateHistoryStorage(netData, util);
+                        var netData = NetHistory.GetOrAdd(iface.Name, k => new List<Interface.InterfaceUtilization>(1024));
+                        UpdateHistoryStorage(netData, util);
 
-                        if (this.PrimaryInterfaces.Contains(iface))
+                        if (PrimaryInterfaces.Contains(iface))
                         {
                             combinedUtil.InAvgBps += util.InAvgBps;
                             combinedUtil.OutAvgBps += util.OutAvgBps;
@@ -424,7 +430,7 @@ SELECT Caption,
                     }
                 }
 
-                this.UpdateHistoryStorage(this.CombinedNetHistory, combinedUtil);
+                UpdateHistoryStorage(CombinedNetHistory, combinedUtil);
             }
 
             private async Task PollVolumePerformanceUtilizationAsync()
@@ -444,14 +450,14 @@ SELECT Caption,
                     WriteAvgBps = 0
                 };
 
-                using (var q = Wmi.Query(this.Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
                         var perfData = new PerfRawData(this, data);
 
                         var name = perfData.Identifier;
-                        var iface = this.Volumes.FirstOrDefault(i => name == GetCounterName(i.Name));
+                        var iface = Volumes.FirstOrDefault(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
                         iface.ReadBps = (float)perfData.GetCalculatedValue("DiskReadBytesPersec", 10000000);
@@ -464,10 +470,10 @@ SELECT Caption,
                             WriteAvgBps = iface.WriteBps
                         };
 
-                        var netData = this.VolumePerformanceHistory.GetOrAdd(iface.Name, k => new List<Volume.VolumePerformanceUtilization>(1024));
-                        this.UpdateHistoryStorage(netData, util);
+                        var netData = VolumePerformanceHistory.GetOrAdd(iface.Name, k => new List<Volume.VolumePerformanceUtilization>(1024));
+                        UpdateHistoryStorage(netData, util);
 
-                        //if (this.PrimaryInterfaces.Contains(iface))
+                        //if (PrimaryInterfaces.Contains(iface))
                         {
                             combinedUtil.ReadAvgBps += util.ReadAvgBps;
                             combinedUtil.WriteAvgBps += util.WriteAvgBps;
@@ -475,7 +481,7 @@ SELECT Caption,
                     }
                 }
 
-                this.UpdateHistoryStorage(this.CombinedVolumePerformanceHistory, combinedUtil);
+                UpdateHistoryStorage(CombinedVolumePerformanceHistory, combinedUtil);
             }
 
             #region private helpers
@@ -484,7 +490,7 @@ SELECT Caption,
             {
                 const string query = "SELECT Name FROM Win32_OptionalFeature WHERE (Name = 'Microsoft-Hyper-V' OR Name = 'Microsoft-Hyper-V-Hypervisor') AND InstallState = 1";
 
-                using (var q = Wmi.Query(this.Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     return data != null;
@@ -494,7 +500,7 @@ SELECT Caption,
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {
                 var query = $"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'";
-                var data = await Wmi.Query(this.Endpoint, query).GetFirstResultAsync().ConfigureAwait(false);
+                var data = await Wmi.Query(Endpoint, query).GetFirstResultAsync().ConfigureAwait(false);
 
                 return data?.Name;
             }
@@ -506,7 +512,7 @@ SELECT Caption,
 
                 try
                 {
-                    using (var q = Wmi.Query(this.Endpoint, query))
+                    using (var q = Wmi.Query(Endpoint, query))
                     {
                         await q.GetFirstResultAsync().ConfigureAwait(false);
                     }

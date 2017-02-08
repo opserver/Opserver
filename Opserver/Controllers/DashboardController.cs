@@ -178,12 +178,12 @@ namespace StackExchange.Opserver.Controllers
                     {
                         var v = vd.Node.GetVolume(subId);
                         vd.Volume = v;
-                        vd.Title = "Volume Utilization (" + (v?.PrettyName ?? "Unknown") + ")";
+                        vd.Title = "Volume Performance (" + (v?.PrettyName ?? "Unknown") + ")";
                         vd.VolumePerformanceData = await GraphController.VolumePerformanceData(v, summary: true);
                     }
                     else
                     {
-                        vd.Title = "Volume Utilization (" + (n.PrettyName ?? "Unknown") + ")";
+                        vd.Title = "Volume Performance (" + (n.PrettyName ?? "Unknown") + ")";
                         vd.VolumePerformanceData = await GraphController.VolumePerformanceData(n, summary: true);
                     }
                     break;

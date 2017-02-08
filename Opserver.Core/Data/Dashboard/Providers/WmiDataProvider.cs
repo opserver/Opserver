@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
@@ -10,26 +9,20 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         private readonly WMISettings _config;
         private readonly List<WmiNode> _wmiNodes = new List<WmiNode>();
-        private Dictionary<string, WmiNode> _wmiNodeLookup;
+        private readonly Dictionary<string, WmiNode> _wmiNodeLookup;
 
         public WmiDataProvider(WMISettings settings) : base(settings)
         {
             _config = settings;
 
-            Task.Run(() => this.Initialize());
-        }
-
-        private void Initialize()
-        {
-            this._wmiNodes.AddRange(InitNodeList(_config.Nodes).OrderBy(x => x.Endpoint).ToList());
-
+            _wmiNodes.AddRange(InitNodeList(_config.Nodes).OrderBy(x => x.Endpoint).ToList());
             // Do this ref cast list once
-            this.AllNodes.AddRange(this._wmiNodes.Cast<Node>().ToList());
+            AllNodes.AddRange(_wmiNodes.Cast<Node>().ToList());
             // For fast lookups
-            this._wmiNodeLookup = new Dictionary<string, WmiNode>(this._wmiNodes.Count);
-            foreach (var n in this._wmiNodes)
+            _wmiNodeLookup = new Dictionary<string, WmiNode>(_wmiNodes.Count);
+            foreach (var n in _wmiNodes)
             {
-                this._wmiNodeLookup[n.Id] = n;
+                _wmiNodeLookup[n.Id] = n;
             }
         }
 
@@ -41,10 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             var nodesList = new List<WmiNode>(names.Count);
             var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
-
-            var staticDataCaches = new List<Task>();
-            var dynamicDataCaches = new List<Task>();
-
+            
             foreach (var nodeName in names)
             {
                 if (exclude?.IsMatch(nodeName) ?? false)
@@ -82,30 +72,27 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     memberName: node.Name + "-Static");
                 node.Caches.Add(staticDataCache);
 
-                var dynamicDataCache = this.ProviderCache(
+                var dynamicDataCache = ProviderCache(
                     () => node.PollStats(),
-                    this._config.DynamicDataTimeoutSeconds.Seconds(),
+                    _config.DynamicDataTimeoutSeconds.Seconds(),
                     memberName: node.Name + "-Dynamic");
                 node.Caches.Add(dynamicDataCache);
-
-                staticDataCaches.Add(staticDataCache.PollAsync(true));
-                dynamicDataCaches.Add(dynamicDataCache.PollAsync(true));
 
                 nodesList.Add(node);
             }
 
-            // Force update static host data, incuding os info, volumes, interfaces.
-            {
-                var caches = staticDataCaches.ToArray();
-                Task.WaitAll(caches);
-            }
+            //// Force update static host data, incuding os info, volumes, interfaces.
+            //{
+            //    var caches = staticDataCaches.ToArray();
+            //    Task.WaitAll(caches);
+            //}
 
-            // Force first dynamic polling of utilization.
-            // This is needed because we use PerfRawData performance counters and we need this as a first starting point for our calculations.
-            {
-                var caches = dynamicDataCaches.ToArray();
-                Task.WaitAll(caches);
-            }
+            //// Force first dynamic polling of utilization.
+            //// This is needed because we use PerfRawData performance counters and we need this as a first starting point for our calculations.
+            //{
+            //    var caches = dynamicDataCaches.ToArray();
+            //    Task.WaitAll(caches);
+            //}
 
             return nodesList;
         }

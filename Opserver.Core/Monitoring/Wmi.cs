@@ -82,11 +82,11 @@ namespace StackExchange.Opserver.Monitoring
 
         internal class WmiQuery : IDisposable
         {
-            private static readonly ConcurrentDictionary<string, ManagementScope> scopeCache = new ConcurrentDictionary<string, ManagementScope>();
-            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
+            private static readonly ConcurrentDictionary<string, ManagementScope> _scopeCache = new ConcurrentDictionary<string, ManagementScope>();
+            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> _searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
 
-            ManagementObjectCollection _data;
-            ManagementObjectSearcher _searcher;
+            private ManagementObjectCollection _data;
+            private readonly ManagementObjectSearcher _searcher;
             private readonly string _machineName;
             private readonly string _rawQuery;
 
@@ -100,8 +100,8 @@ namespace StackExchange.Opserver.Monitoring
                 var connectionOptions = GetConnectOptions(machineName);
 
                 var path = $@"\\{machineName}\{wmiNamespace}";
-                var scope = scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
-                _searcher = searcherCache.GetOrAdd(path + q, x => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
+                var scope = _scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
+                _searcher = _searcherCache.GetOrAdd(path + q, x => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
             }
 
             public Task<ManagementObjectCollection> Result
@@ -150,7 +150,7 @@ namespace StackExchange.Opserver.Monitoring
             {
                 if (binder.Type == typeof(ManagementObject))
                 {
-                    result = this._obj;
+                    result = _obj;
                     return true;
                 }
 

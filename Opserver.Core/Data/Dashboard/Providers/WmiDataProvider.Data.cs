@@ -18,9 +18,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             internal readonly List<MemoryUtilization> MemoryHistory;
             internal readonly List<CPUUtilization> CPUHistory;
             internal readonly List<Interface.InterfaceUtilization> CombinedNetHistory;
+            internal readonly List<Volume.VolumePerformanceUtilization> CombinedVolumePerformanceHistory;
             private readonly ConcurrentDictionary<string, List<Interface.InterfaceUtilization>> NetHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
-            internal readonly List<Volume.VolumePerformanceUtilization> CombinedVolumePerformanceHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>> VolumePerformanceHistory;
 
             internal readonly ConcurrentDictionary<string, PerfRawData> previousPerfDataCache = new ConcurrentDictionary<string, PerfRawData>();
@@ -29,11 +29,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             /// Defines if we can use "Win32_PerfFormattedData_Tcpip_NetworkAdapter" to query adapter utilization or not.
             /// This is needed because "Win32_PerfFormattedData_Tcpip_NetworkAdapter" was first introduced in Windows 8 and Windows 2012.
             /// </summary>
-            private bool canQueryAdapterUtilization;
-
-            private bool canQueryTeamingInformation;
-
-            private bool nodeInfoAvailable;
+            private bool _canQueryAdapterUtilization;
+            private bool _canQueryTeamingInformation;
+            private bool _nodeInfoAvailable;
 
             public uint NumberOfLogicalProcessors { get; private set; }
 
@@ -91,9 +89,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 List<Volume.VolumePerformanceUtilization> result;
                 if (iface != null
                     && Volumes.FirstOrDefault(x => x == iface) != null
-                    && this.VolumePerformanceHistory.ContainsKey(iface.Name))
+                    && VolumePerformanceHistory.ContainsKey(iface.Name))
                 {
-                    result = this.VolumePerformanceHistory[iface.Name];
+                    result = VolumePerformanceHistory[iface.Name];
                 }
                 else
                 {
@@ -180,48 +178,42 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         private class PerfRawData
         {
-            private readonly ManagementObject data;
-            private readonly string cacheKey;
-            private PerfRawData previousData;
+            private readonly ManagementObject _data;
+            private PerfRawData _previousData;
 
-            public PerfRawData(WmiNode node, dynamic data)
-                : this(node, (ManagementObject)data)
-            {
-            }
+            public string Identifier { get; }
+            private string Classname { get; }
+            private ulong Timestamp { get; }
+
+            public PerfRawData(WmiNode node, dynamic data) : this(node, (ManagementObject)data) { }
 
             public PerfRawData(WmiNode node, ManagementObject data)
             {
-                this.data = data;
+                _data = data;
 
-                this.Classname = data.ClassPath.ClassName;
-                this.Identifier = (string)this.data["Name"];
-                this.Timestamp = Convert.ToUInt64(this.data["Timestamp_Sys100NS"]);
+                Classname = data.ClassPath.ClassName;
+                Identifier = (string)_data["Name"];
+                Timestamp = Convert.ToUInt64(_data["Timestamp_Sys100NS"]);
 
-                this.cacheKey = $"{this.Classname}.{this.Identifier}";
+                string cacheKey = $"{Classname}.{Identifier}";
 
                 // "previous.previousData = null" to cleanup previousData from previousData. Otherwise we get a linked list which never cleans up.
-                node.previousPerfDataCache.AddOrUpdate(this.cacheKey, s => this.previousData = this, (s, previous) => { previous.previousData = null; this.previousData = previous; return this; });
+                node.previousPerfDataCache.AddOrUpdate(cacheKey, s => _previousData = this, (s, previous) =>
+                {
+                    previous._previousData = null;
+                    _previousData = previous;
+                    return this;
+                });
             }
-
-            public string Classname { get; }
-
-            public string Identifier { get; }
-
-            public ulong Timestamp { get; }
-
-            public double GetCalculatedValue(string property, double scale = 1D)
-            {
-                return this.GetCalculatedValue(this.previousData, property, scale);
-            }
+            
+            public double GetCalculatedValue(string property, double scale = 1D) => GetCalculatedValue(_previousData, property, scale);
 
             private double GetCalculatedValue(PerfRawData previousData, string property, double scale)
             {
-                var timestampDiff = Math.Max(1, this.Timestamp - previousData.Timestamp);
-                var valueDiff = Convert.ToUInt64(this.data[property]) - Convert.ToUInt64(previousData.data[property]);
-                var scaledValueDiff = valueDiff * scale;
-                // ReSharper disable once PossibleLossOfFraction                    
-                var calculatedValue = scaledValueDiff / timestampDiff;
-                return calculatedValue;
+                var timestampDiff = Math.Max(1, Timestamp - previousData.Timestamp);
+                var valueDiff = Convert.ToUInt64(_data[property]) - Convert.ToUInt64(previousData._data[property]);
+                var scaledValueDiff = valueDiff * scale;                
+                return scaledValueDiff / timestampDiff;
             }
         }
     }

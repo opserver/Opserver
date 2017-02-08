@@ -320,11 +320,79 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
             }
         }
 
-        public override Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null) => Task.FromResult(new List<DoubleGraphPoint>());
-
-        public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(new List<DoubleGraphPoint>());
+            const string allSql = @"
+Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
+       Sum(vp.AvgDiskWrites) WriteAvgBps,
+       Sum(vp.AvgDiskReads) ReadAvgBps
+  From VolumePerformance vp
+ Where vp.VolumeID In @Ids
+   And {dateRange}
+ Group By vp.DateTime
+ Order By vp.DateTime
+";
+
+            const string sampledSql = @"
+Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
+       Sum(vp.WriteAvgBps) WriteAvgBps,
+       Sum(vp.ReadAvgBps) ReadAvgBps
+  From (Select vp.DateTime,
+		       vp.AvgDiskWrites WriteAvgBps,
+		       vp.AvgDiskReads ReadAvgBps,
+		       Row_Number() Over(Order By vp.DateTime) RowNumber
+          From VolumePerformance vp
+         Where vp.VolumeID In @Ids
+           And {dateRange}) vp
+ Where vp.RowNumber % ((Select Count(*) + @intervals
+						   From VolumePerformance vp
+					      Where vp.VolumeID In @Ids
+                            And {dateRange})/@intervals) = 0
+ Group By vp.DateTime
+ Order By vp.DateTime";
+            
+            using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+            {
+                var result = await conn.QueryAsync<Volume.VolumePerformanceUtilization>(
+                    (pointCount.HasValue ? sampledSql : allSql)
+                        .Replace("{dateRange}", GetOptionalDateClause("vp.DateTime", start, end)),
+                    new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = pointCount }).ConfigureAwait(false);
+                return result.ToList<DoubleGraphPoint>();
+            }
+        }
+
+        public override async Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            const string allSql = @"
+Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
+       Sum(vp.AvgDiskWrites) WriteAvgBps,
+       Sum(vp.AvgDiskReads) ReadAvgBps
+  From VolumePerformance vp
+ Where vp.VolumeID = @Id
+   And {dateRange}
+ Group By vp.DateTime
+ Order By vp.DateTime
+";
+
+            const string sampledSql = @"
+Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
+       Sum(vp.WriteAvgBps) WriteAvgBps,
+       Sum(vp.ReadAvgBps) ReadAvgBps
+  From (Select vp.DateTime,
+		       vp.AvgDiskWrites WriteAvgBps,
+		       vp.AvgDiskReads ReadAvgBps,
+		       Row_Number() Over(Order By vp.DateTime) RowNumber
+          From VolumePerformance vp
+         Where vp.VolumeID = @Id
+           And {dateRange}) vp
+ Where vp.RowNumber % ((Select Count(*) + @intervals
+						   From VolumePerformance vp
+					      Where vp.VolumeID = @Id
+                            And {dateRange})/@intervals) = 0
+ Group By vp.DateTime
+ Order By vp.DateTime";
+
+            return (await UtilizationQueryAsync<Volume.VolumePerformanceUtilization>(volume.Id, allSql, sampledSql, "vp.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<DoubleGraphPoint>();
         }
 
         public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)

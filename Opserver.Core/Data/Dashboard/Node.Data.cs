@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         }
 
         /// <summary>
-        /// Gets network usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// Gets volume I/O utilization for this node (optionally) for the given time period, optionally sampled if pointCount is specified
         /// </summary>
         /// <param name="start">Start date, unbounded if null</param>
         /// <param name="end">End date, unbounded if null</param>

@@ -20,8 +20,8 @@ namespace StackExchange.Opserver.Data.Dashboard
             public float? ReadAvgBps { get; internal set; }
             public float? WriteAvgBps { get; internal set; }
 
-            public override double? Value => this.ReadAvgBps;
-            public override double? BottomValue => this.WriteAvgBps;
+            public override double? Value => ReadAvgBps;
+            public override double? BottomValue => WriteAvgBps;
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         }
 
         /// <summary>
-        /// Gets usage for this volume (optionally) for the given time period, optionally sampled if pointCount is specified
+        /// Gets I/O utilization for this volume (optionally) for the given time period, optionally sampled if pointCount is specified
         /// </summary>
         /// <param name="start">Start date, unbounded if null</param>
         /// <param name="end">End date, unbounded if null</param>

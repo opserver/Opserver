@@ -101,9 +101,9 @@ namespace StackExchange.Opserver.Models
                 : info.TotalPrimaryNetworkbps.ToSpeed();
 
         public static string PrettyTotalVolumePerformance(this Node info) =>
-            info.TotalVolumePerformancekbps < 0
+            info.TotalVolumePerformancebps < 0
                 ? null
-                : info.TotalVolumePerformancekbps.ToSpeed();
+                : info.TotalVolumePerformancebps.ToSpeed();
 
         public static string NetworkTextSummary(this Node info)
         {
