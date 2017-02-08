@@ -56,6 +56,11 @@ namespace StackExchange.Opserver
         /// </summary>
         public decimal? DiskCriticalPercent { get; set; }
 
+        /// <summary>
+        /// Whether to show volume performance on the dashboard
+        /// </summary>
+        public bool ShowVolumePerformance { get; set; }
+
         #endregion
 
         /// <summary>

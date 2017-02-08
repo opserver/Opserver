@@ -51,7 +51,7 @@ else
     }
 }
 <div class="js-refresh" data-name="dashboard-overview">
-    @if (!Model.Nodes.Any())
+    @if (!Model.Nodes.Any() || Model.IsStartingUp)
     {
         var errors = Model.ErrorMessages;
         <div class="row">
@@ -69,7 +69,7 @@ else
                 }
             </div>
         </div>
-        if (errors.Any())
+        if (errors != null && errors.Any())
         {
             <script>
                 @foreach (var e in errors)
@@ -98,6 +98,10 @@ else
                             <th colspan="2">CPU</th>
                             <th colspan="2">Memory</th>
                             <th colspan="2">Network</th>
+                            @if (Current.Settings.Dashboard.ShowVolumePerformance)
+                            {
+                            <th colspan="2">Disk (Perf)</th>
+                            }
                             <th colspan="2">Disk</th>
                         </tr>
                         @foreach (var n in g.OrderBy(n => n.PrettyName))
@@ -113,14 +117,19 @@ else
                                     <span class="@n.MemoryMonitorStatus().TextClass().Nullify()">@n.PrettyMemoryUsed() / @n.PrettyTotalMemory() (@(n.PercentMemoryUsed?.ToString("n2"))%)</span>
                                     @if (n.MemoryUsed >= 0)
                                     {
-                                    <div class="progress" style="width: 215px;">
-                                        <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
-                                    </div>
+                                        <div class="progress" style="width: 215px;">
+                                            <div class="progress-bar @n.MemoryMonitorStatus().ProgressBarClass()" style="width: @(n.PercentMemoryUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
+                                        </div>
                                     }
                                 </td>
                                 <td>@Graph(n, "memory")</td>
                                 <td>@n.PrettyTotalNetwork()</td>
                                 <td>@Graph(n, "network")</td>
+                                @if (Current.Settings.Dashboard.ShowVolumePerformance)
+                                {
+                                <td>@n.PrettyTotalVolumePerformance()</td>
+                                <td>@Graph(n, "volumePerformance")</td>
+                                }
                                 <td>@DiskText(n)</td>
                                 <td>@DiskGraphs(n)</td>
                             </tr>

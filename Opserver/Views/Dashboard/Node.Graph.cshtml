@@ -52,6 +52,10 @@
         {
             <div class="dashboard-chart js-graph-network"></div>
         }
+        if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance)
+        {
+            <div class="dashboard-chart js-graph-volumePerformance"></div>
+        }
     }
     if (ShowType(NodeGraphModel.KnownTypes.CPU))
     {
@@ -90,6 +94,18 @@
                     data: @Model.NetworkData.ToJson()
                 });
         </script>
+    }
+    if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance) // Intentionally not included yet in live view
+    { 
+            <script>
+                $('.js-graph-volumePerformance').volumePerformanceGraph({
+                    id: '@Model.Node.Id',
+                    iid: '@(Model.Volume?.Id)',
+                    width: 858,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.VolumePerformanceData.ToJson()
+                    });
+            </script>
     }
 }
 else

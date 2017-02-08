@@ -21,6 +21,7 @@
   "memoryCriticalPercent": 90,
   "diskWarningPercent": 85,
   "diskCriticalPercent": 95,
+  "showVolumePerformance":  true, 
   "categories": [
     {
       "name": "Database Servers",

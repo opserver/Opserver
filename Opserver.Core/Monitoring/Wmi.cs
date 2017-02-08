@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
@@ -10,9 +11,31 @@ namespace StackExchange.Opserver.Monitoring
 {
     internal static class Wmi
     {
-        internal static WmiQuery Query(string machineName, string query, string wmiNamespace = @"root\cimv2")
+        private const string defaultWmiNamespace = @"root\cimv2";
+
+        internal static WmiQuery Query(string machineName, string query, string wmiNamespace = defaultWmiNamespace)
         {
             return new WmiQuery(machineName, query, wmiNamespace);
+        }
+
+        internal static async Task<bool> ClassExists(string machineName, string @class, string wmiNamespace = defaultWmiNamespace)
+        {
+            // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
+            var query = $"SELECT * FROM {@class}";
+
+            try
+            {
+                using (var q = Query(machineName, query, wmiNamespace))
+                {
+                    await q.GetFirstResultAsync().ConfigureAwait(false);
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static readonly ConnectionOptions _localOptions, _remoteOptions;
@@ -38,7 +61,7 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _remoteOptions.Username = username;
                 _remoteOptions.Password = password;
-            }       
+            }
         }
 
         private static ConnectionOptions GetConnectOptions(string machineName)
@@ -59,8 +82,11 @@ namespace StackExchange.Opserver.Monitoring
 
         internal class WmiQuery : IDisposable
         {
-            ManagementObjectCollection _data;
-            ManagementObjectSearcher _searcher;
+            private static readonly ConcurrentDictionary<string, ManagementScope> _scopeCache = new ConcurrentDictionary<string, ManagementScope>();
+            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> _searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
+
+            private ManagementObjectCollection _data;
+            private readonly ManagementObjectSearcher _searcher;
             private readonly string _machineName;
             private readonly string _rawQuery;
 
@@ -72,8 +98,10 @@ namespace StackExchange.Opserver.Monitoring
                     throw new ArgumentException("machineName should not be empty.");
 
                 var connectionOptions = GetConnectOptions(machineName);
-                var scope = new ManagementScope($@"\\{machineName}\{wmiNamespace}", connectionOptions);
-                _searcher = new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions{Timeout = connectionOptions.Timeout});
+
+                var path = $@"\\{machineName}\{wmiNamespace}";
+                var scope = _scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
+                _searcher = _searcherCache.GetOrAdd(path + q, x => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
             }
 
             public Task<ManagementObjectCollection> Result
@@ -107,8 +135,6 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _data?.Dispose();
                 _data = null;
-                _searcher?.Dispose();
-                _searcher = null;
             }
         }
 
@@ -118,6 +144,17 @@ namespace StackExchange.Opserver.Monitoring
             public WmiDynamic(ManagementObject obj)
             {
                 _obj = obj;
+            }
+
+            public override bool TryConvert(ConvertBinder binder, out object result)
+            {
+                if (binder.Type == typeof(ManagementObject))
+                {
+                    result = _obj;
+                    return true;
+                }
+
+                return base.TryConvert(binder, out result);
             }
 
             public override bool TryGetMember(GetMemberBinder binder, out object result)

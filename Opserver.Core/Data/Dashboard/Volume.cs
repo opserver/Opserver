@@ -6,7 +6,7 @@ namespace StackExchange.Opserver.Data.Dashboard
     public partial class Volume : IMonitorStatus
     {
         public Node Node { get; set; }
-        
+
         public string Id { get; internal set; }
         public string NodeId { get; internal set; }
         public DateTime? LastSync { get; internal set; }
@@ -16,6 +16,9 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Description { get; internal set; }
         public string Type { get; internal set; }
         public NodeStatus Status { get; internal set; }
+
+        public float? ReadBps { get; internal set; }
+        public float? WriteBps { get; internal set; }
 
         public decimal? Size { get; internal set; }
         public decimal? Used { get; internal set; }
@@ -54,10 +57,13 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (!PercentUsed.HasValue)
                     return MonitorStatus.Unknown;
-                if (Node.DiskCriticalPercent.HasValue && PercentUsed > Node.DiskCriticalPercent.Value)
-                    return MonitorStatus.Critical;
-                if (Node.DiskWarningPercent.HasValue && PercentUsed > Node.DiskWarningPercent.Value)
-                    return MonitorStatus.Warning;
+                if (Node != null)
+                {
+                    if (Node.DiskCriticalPercent.HasValue && PercentUsed > Node.DiskCriticalPercent.Value)
+                        return MonitorStatus.Critical;
+                    if (Node.DiskWarningPercent.HasValue && PercentUsed > Node.DiskWarningPercent.Value)
+                        return MonitorStatus.Warning;
+                }
                 return MonitorStatus.Good;
             }
         }
