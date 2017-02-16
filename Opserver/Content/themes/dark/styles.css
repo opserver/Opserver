@@ -9822,6 +9822,8 @@ h6.page-header {
 .page-header .pull-right .btn-xs {
   padding-top: 1px;
   padding-bottom: 1px;
+  border-radius: 3px;
+  min-width: 58px;
 }
 .actions .sk-wave,
 .page-header .pull-right .sk-wave {

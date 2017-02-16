@@ -66,25 +66,25 @@ Last Run Message: @j.LastRunMessage">
                     {
                         <td colspan="4" class="text-muted">no run history found</td>   
                     }
-                    <td class="@(j.IsEnabled ? "text-success" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
+                    <td class="@(j.IsEnabled ? "" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
                     @if (Current.IsInRole(Roles.SQLAdmin))
                     {
                         <td class="actions">
                             @if (j.IsEnabled)
                             {
-                                <a href="#" class="js-sql-job-action btn btn-xs btn-warning" data-action="toggle" data-enable="false">disable</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-warning" data-action="toggle" data-enable="false">Disable</a>
                             }
                             else
                             {
-                                <a href="#" class="js-sql-job-action btn btn-xs btn-success" data-action="toggle" data-enable="true">enable</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-success" data-action="toggle" data-enable="true">Enable</a>
                             }
                             @if (!j.IsRunning)
                             {
-                                <a href="#" class="js-sql-job-action btn btn-xs btn-primary" data-action="start" data-guid="@j.JobId.ToString()">start job</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-primary" data-action="start" data-guid="@j.JobId.ToString()">Start</a>
                             }
                             else
                             {
-                                <a href="#" class="js-sql-job-action btn btn-xs btn-danger" data-action="stop" data-guid="@j.JobId.ToString()">stop job</a>
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-danger" data-action="stop" data-guid="@j.JobId.ToString()">Stop</a>
                             }
                         </td>
                     }
