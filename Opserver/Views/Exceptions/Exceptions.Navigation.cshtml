@@ -1,10 +1,11 @@
 ﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@using StackExchange.Opserver.Controllers
 @{
     Layout = null;
 }
 @if (Model.Groups.Count > 1)
 {
-    <a href="/exceptions" class="btn btn-xs@(Model.ShowAll ? " btn-primary" : null)">View All</a>
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions))" title="View All" class="btn btn-xs@(Model.ShowAll ? " btn-primary" : null)">View All</a>
 }
 @foreach (var g in Model.Groups)
 {
