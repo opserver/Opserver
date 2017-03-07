@@ -21,27 +21,40 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public Cache<List<OnCall>> OnCallInfo => _oncallinfo ?? (_oncallinfo = new Cache<List<OnCall>>(
             Instance,
             "On Call information for Pagerduty",
-            new TimeSpan(0,5,0),
+            5.Minutes(),
             getData: GetOnCallUsers,
             logExceptions: true));
+
+        private List<OnCall> GetOnCall(int maxPerSchedule)
+        {
+            return OnCallInfo.SafeData(true).Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= maxPerSchedule).ToList();
+        }
 
         private async Task<List<OnCall>> GetOnCallUsers()
         {
             try
             {
                 var users = await GetFromPagerDutyAsync("oncalls", getFromJson:
-                    response => JSON.Deserialize<PagerDutyOnCallResponse>(response.ToString(), JilOptions).OnCallInfo);
+                    response => JSON.Deserialize<PagerDutyOnCallResponse>(response, JilOptions).OnCallInfo);
 
                 users.Sort((a, b) =>
                     a.EscalationLevel.GetValueOrDefault(int.MaxValue)
                         .CompareTo(b.EscalationLevel.GetValueOrDefault(int.MaxValue)));
 
-                if (users.Count > 1 && users[0].AssignedUser?.Id == users[1].AssignedUser?.Id)
+                // Loop over each schedule
+                foreach (var p in users.GroupBy(u => u.PolicyTitle))
                 {
-                    var secondary = users[1];
-                    secondary.MonitorStatus = MonitorStatus.Warning;
-                    secondary.MonitorStatusReason = "Primary and secondary on call are the same";
+                    foreach (var u in p)
+                    {
+                        u.SharedLevelCount = p.Count(tu => tu.EscalationLevel == u.EscalationLevel);
+                        if (p.Count(pu => pu.AssignedUser.Id == u.AssignedUser.Id) > 1)
+                        {
+                            u.MonitorStatus = MonitorStatus.Warning;
+                            u.MonitorStatusReason = "Multiple escalations for the same user";
+                        }
+                    }
                 }
+
                 return users;
             }
             catch (DeserializationException de)
@@ -201,6 +214,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "schedule")]
         public OnCallSchedule Schedule { get; set; }
 
+        public string ScheduleTitle => Schedule?.Title ?? "Default";
+        public string PolicyTitle => Policy?.Title;
+
         public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == User.Id);
 
         public bool IsOverride =>
@@ -208,6 +224,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == AssignedUser.Id) ?? false;
 
         public bool IsPrimary => EscalationLevel == 1;
+        public bool IsOnlyPrimary => IsPrimary && SharedLevelCount < 2;
+
+        /// <summary>
+        /// The number of people that share this escalation level
+        /// </summary>
+        public int SharedLevelCount { get; set; }
 
         public string EscalationLevelDescription
         {
@@ -231,6 +253,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return "unknown";
             }
         }
+
+        public string SharedLevelDescription => SharedLevelCount > 1 ? " (1 of " + SharedLevelCount + ")" : null;
 
         public MonitorStatus MonitorStatus { get; set; }
 

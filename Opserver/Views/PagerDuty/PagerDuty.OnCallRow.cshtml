@@ -1,25 +1,22 @@
 ﻿@using StackExchange.Opserver.Data.PagerDuty
 @model OnCall
-<tr class="@Model.RowClass()" title="@Model.MonitorStatusReason">
+<tr class="@Model.RowClass()@(Model.IsOnlyPrimary ? " info" : null)" title="@Model.MonitorStatusReason">
     <td>@Model.AssignedUser.FullName</td>
     <td>
         @if (Model.IsPrimary)
         {
-            <b>@Model.EscalationLevelDescription</b>
+            <b>@Model.EscalationLevelDescription</b>@Model.SharedLevelDescription
         }
         else
         {
-            @Model.EscalationLevelDescription
-        }
-        @if (Model.Schedule != null)
-        {
-            @:(@Model.Schedule.Title)
+            @Model.EscalationLevelDescription@Model.SharedLevelDescription
         }
         @if (Model.IsOverride)
         {
             <span class="text-muted">(<strong class="text-danger">Override</strong>)</span>
         }
     </td>
+    <td>@Model.PolicyTitle</td>
     <td><a href="mailto:@Model.AssignedUser.Email">@Model.AssignedUser.Email</a></td>
     <td>@PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == @Model.AssignedUser.Id).Phone</td>
 </tr>

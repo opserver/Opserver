@@ -83,6 +83,7 @@
             <tr>
                 <th>Name</th>
                 <th>Level</th>
+                <th>Policy</th>
                 <th>Email</th>
                 <th>Phone</th>
             </tr>
@@ -91,14 +92,18 @@
         {
             <tbody>
                 <tr>
-                    <td colspan="4">
+                    <td colspan="5">
                         @Helpers.CacheEmpty(PagerDutyAPI.Instance.AllSchedules, "No schedules loaded from PagerDuty")
                     </td>
                 </tr>
             </tbody>
         }
         <tbody>
-        @foreach (var a in Model.Schedule.Take(Model.OnCallToShow))
+        @{ 
+            Model.OnCallToShow = 2;
+            var schedule = Model.Schedule.Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= Model.OnCallToShow).ToList();
+        }
+        @foreach (var a in schedule) //Model.Schedule) //.Take(Model.OnCallToShow))
         {
             @Html.Partial("PagerDuty.OnCallRow", a)
         }
