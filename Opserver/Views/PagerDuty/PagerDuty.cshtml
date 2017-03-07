@@ -99,11 +99,7 @@
             </tbody>
         }
         <tbody>
-        @{ 
-            Model.OnCallToShow = 2;
-            var schedule = Model.Schedule.Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= Model.OnCallToShow).ToList();
-        }
-        @foreach (var a in schedule) //Model.Schedule) //.Take(Model.OnCallToShow))
+        @foreach (var a in Model.Schedule)
         {
             @Html.Partial("PagerDuty.OnCallRow", a)
         }

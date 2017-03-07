@@ -40,8 +40,7 @@ namespace StackExchange.Opserver.Controllers
 
             var vd = new PagerDutyModel
             {
-                Schedule = i.OnCallInfo.SafeData(true),
-                OnCallToShow = i.Settings.OnCallToShow,
+                Schedule = i.GetOnCall(),
                 CachedDays = i.Settings.DaysToCache,
                 AllIncidents = i.Incidents.SafeData(true),
                 CurrentPagerDutyPerson = CurrentPagerDutyPerson

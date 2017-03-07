@@ -25,10 +25,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
             getData: GetOnCallUsers,
             logExceptions: true));
 
-        private List<OnCall> GetOnCall(int maxPerSchedule)
-        {
-            return OnCallInfo.SafeData(true).Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= maxPerSchedule).ToList();
-        }
+        public List<OnCall> GetOnCall(int? maxPerSchedule = null) =>
+            OnCallInfo.SafeData(true).Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= (maxPerSchedule ?? Settings.OnCallToShow)).ToList();
 
         private async Task<List<OnCall>> GetOnCallUsers()
         {
