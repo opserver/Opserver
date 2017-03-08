@@ -18,6 +18,8 @@ namespace StackExchange.Opserver.Data.SQL
                         {
                             CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
                         }
+
+                        result.SQLServerStartTime = result.SQLServerStartTime.ToUniversalTime(result.TimeZoneInfo);
                     }
                     return result;
                 }));
@@ -55,6 +57,8 @@ namespace StackExchange.Opserver.Data.SQL
             public int MaxWorkersCount { get; internal set; }
             public int SchedulerCount { get; internal set; }
             public int SchedulerTotalCount { get; internal set; }
+            public string TimeZoneId { get; internal set; }
+            public TimeZoneInfo TimeZoneInfo => TimeZoneInfo.FindSystemTimeZoneById(TimeZoneId ?? "UTC");
             public DateTime SQLServerStartTime { get; internal set; }
             public VirtualMachineTypes VirtualMachineType { get; internal set; }
 
@@ -122,6 +126,24 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        scheduler_count SchedulerCount,
        scheduler_total_count SchedulerTotalCount,'
        
+DECLARE @TimeZone VARCHAR(50)
+If (EXISTS(SELECT * FROM sys.fn_my_permissions('sys.xp_regread', 'OBJECT') WHERE permission_name = 'EXECUTE'))
+    EXEC sys.xp_regread
+        'HKEY_LOCAL_MACHINE',
+        'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
+        'TimeZoneKeyName',
+        @TimeZone OUT
+Else If (EXISTS(SELECT * FROM sys.fn_my_permissions('sys.xp_instance_regread', 'OBJECT') WHERE permission_name = 'EXECUTE'))
+    EXEC sys.xp_instance_regread
+        'HKEY_LOCAL_MACHINE',
+        'SYSTEM\CurrentControlSet\Control\TimeZoneInformation',
+        'TimeZoneKeyName',
+        @TimeZone OUT
+
+If (LEN(@TimeZone) > 0)
+    Set @sql = @sql + '
+       ''' + @TimeZone + ''' TimeZoneId,';
+
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
 	Set @sql = @sql + '
        sqlserver_start_time SQLServerStartTime,';

@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             return TimedCache("ActiveOperations-" + options.GetHashCode().ToString(),
                 conn => conn.Query<WhoIsActiveRow>(options.ToSQLQuery(), options, commandTimeout: 300)
-                                .Select(row => new ActiveOperation(row))
+                                .Select(row => new ActiveOperation(row, ServerProperties.Data.TimeZoneInfo))
                                 .ToList(),
                 10.Seconds(), 5.Minutes());
         }
@@ -122,7 +122,7 @@ namespace StackExchange.Opserver.Data.SQL
                 }
             }
 
-            public ActiveOperation(WhoIsActiveRow row)
+            public ActiveOperation(WhoIsActiveRow row, TimeZoneInfo timezone)
             {
                 SessionId = row.session_id;
                 SqlText = row.sql_text;
@@ -144,15 +144,15 @@ namespace StackExchange.Opserver.Data.SQL
                 UsedMemory = row.used_memory;
 
                 Status = row.status;
-                TransactionStartTime = row.tran_start_time;
+                TransactionStartTime = row.tran_start_time.ToUniversalTime(timezone);
                 OpenTransactionCount = row.open_tran_count;
                 HostName = row.host_name;
                 DatabaseName = row.database_name;
 
                 ProgramName = row.program_name;
-                StartTime = row.start_time;
-                LoginTime = row.login_time;
-                CollectionTime = row.collection_time;
+                StartTime = row.start_time.ToUniversalTime(timezone);
+                LoginTime = row.login_time.ToUniversalTime(timezone);
+                CollectionTime = row.collection_time.ToUniversalTime(timezone);
             }
 
             internal const string FetchSQL = @"

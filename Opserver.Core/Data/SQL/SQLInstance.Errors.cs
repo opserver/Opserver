@@ -12,7 +12,16 @@ namespace StackExchange.Opserver.Data.SQL
                 conn =>
                 {
                     var sql = GetFetchSQL<SQLErrorLogInfo>();
-                    return conn.Query<SQLErrorLogInfo>(sql, new { minutesAgo }).AsList();
+                    var results = conn.Query<SQLErrorLogInfo>(sql, new { minutesAgo }).AsList();
+
+                    var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                    foreach (var result in results)
+                    {
+                        result.LogDate = result.LogDate.ToUniversalTime(timezone);
+                    }
+
+                    return results;
                 }, RefreshInterval, 5.Minutes());
         }
 

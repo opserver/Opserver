@@ -37,6 +37,16 @@ namespace StackExchange.Opserver.Data.SQL
                         var vlfs =
                             await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
 
+                        var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                        foreach (var backup in backups)
+                        {
+                            backup.LastBackupStartDate = backup.LastBackupStartDate.ToUniversalTime(timezone);
+                            backup.LastBackupFinishDate = backup.LastBackupFinishDate.ToUniversalTime(timezone);
+                            backup.LastFullBackupStartDate = backup.LastFullBackupStartDate.ToUniversalTime(timezone);
+                            backup.LastFullBackupFinishDate = backup.LastFullBackupFinishDate.ToUniversalTime(timezone);
+                        }
+
                         // Safe groups
                         var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
                         var fileLookup = files.GroupBy(f => f.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
@@ -63,22 +73,79 @@ namespace StackExchange.Opserver.Data.SQL
             DatabaseFetch<DatabaseFile>(databaseName);
 
         public LightweightCache<List<DatabaseTable>> GetTableInfo(string databaseName) =>
-            DatabaseFetch<DatabaseTable>(databaseName);
+            DatabaseFetch<DatabaseTable>(databaseName, tranform: results =>
+            {
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.CreationDate = result.CreationDate.ToUniversalTime(timezone);
+                    result.LastModifiedDate = result.LastModifiedDate.ToUniversalTime(timezone);
+                }
+
+                return results;
+            });
 
         public LightweightCache<List<DatabaseView>> GetViewInfo(string databaseName) =>
-            DatabaseFetch<DatabaseView>(databaseName, 60.Seconds());
+            DatabaseFetch<DatabaseView>(databaseName, 60.Seconds(), results =>
+            {
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.CreationDate = result.CreationDate.ToUniversalTime(timezone);
+                    result.LastModifiedDate = result.LastModifiedDate.ToUniversalTime(timezone);
+                }
+
+                return results;
+            });
 
         public LightweightCache<List<StoredProcedure>> GetStoredProcedureInfo(string databaseName) =>
-            DatabaseFetch<StoredProcedure>(databaseName, 60.Seconds());
+            DatabaseFetch<StoredProcedure>(databaseName, 60.Seconds(), results =>
+            {
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.CreationDate = result.CreationDate.ToUniversalTime(timezone);
+                    result.LastModifiedDate = result.LastModifiedDate.ToUniversalTime(timezone);
+                    result.LastExecuted = result.LastExecuted.ToUniversalTime(timezone);
+                }
+
+                return results;
+            });
 
         public LightweightCache<List<DatabaseBackup>> GetBackupInfo(string databaseName) =>
-            DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval);
+            DatabaseFetch<DatabaseBackup>(databaseName, RefreshInterval, results =>
+            {
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.StartDate = result.StartDate.ToUniversalTime(timezone);
+                    result.FinishDate = result.FinishDate.ToUniversalTime(timezone);
+                }
+
+                return results;
+            });
 
         public LightweightCache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
             DatabaseFetch<MissingIndex>(databaseName, RefreshInterval);
 
         public LightweightCache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
-            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval);
+            DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval, results =>
+            {
+                var timezone = ServerProperties.Data.TimeZoneInfo;
+
+                foreach (var result in results)
+                {
+                    result.RestoreFinishDate = result.RestoreFinishDate.ToUniversalTime(timezone);
+                    result.BackupStartDate = result.BackupStartDate.ToUniversalTime(timezone);
+                    result.BackupFinishDate = result.BackupFinishDate.ToUniversalTime(timezone);
+                }
+
+                return results;
+            });
 
         public LightweightCache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
@@ -88,13 +155,17 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
-        private LightweightCache<List<T>> DatabaseFetch<T>(string databaseName, TimeSpan? duration = null) where T : ISQLVersioned, new()
+        private LightweightCache<List<T>> DatabaseFetch<T>(string databaseName, TimeSpan? duration = null, Func<List<T>, List<T>> tranform = null) where T : ISQLVersioned, new()
         {
             return TimedCache(typeof(T).Name + "Info-" + databaseName,
                 conn =>
                 {
                     conn.ChangeDatabase(databaseName);
-                    return conn.Query<T>(GetFetchSQL<T>(), new { databaseName }).AsList();
+                    var results = conn.Query<T>(GetFetchSQL<T>(), new { databaseName }).AsList();
+
+                    return tranform != null
+                        ? tranform(results)
+                        : results;
                 },
                 duration ?? 5.Minutes(),
                 staleDuration: 5.Minutes());
