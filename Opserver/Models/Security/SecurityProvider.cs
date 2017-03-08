@@ -19,13 +19,13 @@ namespace StackExchange.Opserver.Models.Security
         {
             return IsAdmin || (settings != null && InGroups(settings.AdminGroups));
         }
-        
+
         private bool InGroups(string groupNames)
         {
             if (groupNames.IsNullOrEmpty() || Current.User.AccountName.IsNullOrEmpty()) return false;
             return groupNames == "*" || InGroups(groupNames, Current.User.AccountName);
         }
-        
+
         public abstract bool InGroups(string groupNames, string accountName);
         public abstract bool ValidateUser(string userName, string password);
 
@@ -33,6 +33,7 @@ namespace StackExchange.Opserver.Models.Security
         {
             return new List<string>();
         }
+
         public virtual void PurgeCache() { }
 
         public List<IPNet> InternalNetworks;

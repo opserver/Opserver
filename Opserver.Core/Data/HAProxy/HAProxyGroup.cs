@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         public string Name => Settings.Name;
         public string Description => Settings.Description;
         public List<HAProxyInstance> Instances { get; }
-        
+
         public MonitorStatus MonitorStatus => Instances.GetWorstStatus();
 
         public string MonitorStatusReason => Instances.GetReasonSummary();
@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             return string.Concat(Name, " - ", Instances != null ? Instances.Count.ToString() + " instances" : "");
         }
-        
+
         /// <summary>
         /// Gets the HAProxy instance with the given name, null if it doesn't exist
         /// </summary>

@@ -11,6 +11,7 @@ namespace StackExchange.Opserver.Views.Redis
         Server,
         Instance
     }
+
     public class DashboardModel
     {
         public List<RedisInstance> Instances { get; set; }

@@ -10,17 +10,17 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<ClusterNodesInfo> _nodes;
-        public Cache<ClusterNodesInfo> Nodes => 
+        public Cache<ClusterNodesInfo> Nodes =>
             _nodes ?? (_nodes = GetElasticCache(async () =>
             {
                 var resultTask = GetAsync<ClusterNodesInfo>("_nodes");
                 // Note without ?all, we have dropped support for < v0.90
-                var statsTask = GetAsync<ClusterNodesStats>("_nodes/stats"); 
+                var statsTask = GetAsync<ClusterNodesStats>("_nodes/stats");
 
                 await Task.WhenAll(resultTask, statsTask);
                 var result = (await resultTask)?.Prep();
                 var stats = await statsTask;
-                
+
                 if (result != null && stats != null && result.RawNodes != null)
                 {
                     foreach (var s in stats.Nodes)
@@ -55,6 +55,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 Nodes = RawNodes?.Values.OrderBy(n => n.Name).ToList() ?? new List<NodeInfo>();
                 return this;
             }
+
             public NodeInfo Get(string nameOrGuid)
             {
                 return Nodes.FirstOrDefault(
@@ -503,7 +504,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         [DataMember(Name = "total_time_in_millis")]
                         public double TotalTimeInMilliseconds { get; set; }
                     }
-                    
+
                     public class FlushStats
                     {
                         [DataMember(Name = "total")]
@@ -783,7 +784,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         public string DiskQueue { get; internal set; }
                     }
                 }
-                
+
                 public class TransportStats
                 {
                     [DataMember(Name = "server_open")]

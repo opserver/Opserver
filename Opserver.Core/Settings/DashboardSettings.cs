@@ -15,8 +15,8 @@ namespace StackExchange.Opserver
         public List<NodeSettings> PerNodeSettings { get; set; } = new List<NodeSettings>();
 
         public bool ShowOther { get; set; } = true;
-        
-        public NodeSettings GetNodeSettings(string node) => 
+
+        public NodeSettings GetNodeSettings(string node) =>
             PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node)) ?? NodeSettings.Empty;
 
         #region Direct Properties
@@ -136,7 +136,7 @@ namespace StackExchange.Opserver
         {
             public static NodeSettings Empty { get; } = new NodeSettings();
             string ISettingsCollectionItem.Name => Pattern;
-            
+
             /// <summary>
             /// The name that appears for this category
             /// </summary>

@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Controllers
             // Entire group
             if (proxy.IsNullOrEmpty() && server.IsNullOrEmpty() && group.HasValue())
                 return Json(await HAProxyAdmin.PerformGroupActionAsync(group, act));
-            
+
             var haGroup = HAProxyGroup.GetGroup(group);
             var proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies()).Where(pr => pr.Name == proxy);
 

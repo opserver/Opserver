@@ -20,6 +20,7 @@ namespace StackExchange.Opserver.Data.Redis
             throw new InvalidOperationException(sb.ToStringRecycle());
         }
     }
+
     public partial class RedisInstance
     {
         //Specially caching this since it's accessed so often

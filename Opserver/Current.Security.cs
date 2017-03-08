@@ -3,11 +3,11 @@ using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver
 {
-    public partial class Current
+    public static partial class Current
     {
         private static SecurityProvider _security;
         public static SecurityProvider Security => _security ?? (_security = GetSecurityProvider());
-        
+
         private static SecurityProvider GetSecurityProvider()
         {
             if (SecuritySettings.Current == null || !SecuritySettings.Current.Enabled)
@@ -24,7 +24,7 @@ namespace StackExchange.Opserver
                     return new EveryonesReadOnlyProvider();
             }
         }
-        
+
         public static bool IsInRole(Roles roles)
         {
             if (User == null)

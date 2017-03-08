@@ -5,11 +5,11 @@ namespace StackExchange.Opserver.Helpers
 {
     public class TestItem : IMonitorStatus
     {
-        public static TestItem Good = new TestItem(MonitorStatus.Good);
-        public static TestItem Warning = new TestItem(MonitorStatus.Warning);
-        public static TestItem Maintenance = new TestItem(MonitorStatus.Maintenance);
-        public static TestItem Critical = new TestItem(MonitorStatus.Critical);
-        public static TestItem Unknown = new TestItem(MonitorStatus.Unknown);
+        public static readonly TestItem Good = new TestItem(MonitorStatus.Good);
+        public static readonly TestItem Warning = new TestItem(MonitorStatus.Warning);
+        public static readonly TestItem Maintenance = new TestItem(MonitorStatus.Maintenance);
+        public static readonly TestItem Critical = new TestItem(MonitorStatus.Critical);
+        public static readonly TestItem Unknown = new TestItem(MonitorStatus.Unknown);
 
         public MonitorStatus MonitorStatus { get; }
         public string MonitorStatusReason { get; }
@@ -32,6 +32,6 @@ namespace StackExchange.Opserver.Helpers
                 yield return Critical;
             for (var i = 0; i < unknown; i++)
                 yield return Unknown;
-        } 
+        }
     }
 }

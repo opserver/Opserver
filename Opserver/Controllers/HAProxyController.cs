@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (!Current.Settings.HAProxy.Traffic.Enabled)
                 return DefaultAction();
-            
+
             var hosts = HAProxyTraffic.GetHostsAsync();
             var topRoutes = HAProxyTraffic.GetTopPageRotuesAsync(30, host);
 

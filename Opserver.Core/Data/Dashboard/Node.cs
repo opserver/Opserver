@@ -6,11 +6,11 @@ using StackExchange.Opserver.Data.Dashboard.Providers;
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Node : IMonitorStatus, ISearchableNode
-    {   
+    {
         string ISearchableNode.DisplayName => PrettyName;
         string ISearchableNode.Name => PrettyName;
         string ISearchableNode.CategoryName => Category?.Name.Replace(" Servers", "") ?? "Unknown";
-        
+
         public DashboardDataProvider DataProvider { get; set; }
         public bool IsRealTimePollable => MachineType?.Contains("Windows") == true;
         public List<Issue<Node>> Issues { get; set; }
@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string Model { get; internal set; }
         public string ServiceTag { get; internal set; }
         public Version KernelVersion { get; internal set; }
-        
+
         public string PrettyName => (Name ?? "").ToUpper();
         public TimeSpan? UpTime => DateTime.UtcNow - LastBoot;
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
@@ -74,7 +74,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             if (IsVM) return HardwareType.VirtualMachine;
             return HardwareType.Physical;
-            
+
             // TODO: Detect network gear in a reliable way
             //return HardwareType.Unknown;
         }
@@ -136,6 +136,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
             return null;
         }
+
         public Volume GetVolume(string id)
         {
             foreach (var v in Volumes)
@@ -144,6 +145,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             }
             return null;
         }
+
         public Application GetApp(string id)
         {
             foreach (var a in Apps)
@@ -153,7 +155,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             return null;
         }
 
-        private static readonly List<IPNet> EmptyIPs = new List<IPNet>(); 
+        private static readonly List<IPNet> EmptyIPs = new List<IPNet>();
 
         public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
 
@@ -173,9 +175,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         public decimal? MemoryCriticalPercent => GetSetting(i => i.MemoryCriticalPercent);
         public decimal? DiskWarningPercent => GetSetting(i => i.DiskWarningPercent);
         public decimal? DiskCriticalPercent => GetSetting(i => i.DiskCriticalPercent);
-        
 
-        private List<Interface> _primaryInterfaces; 
+        private List<Interface> _primaryInterfaces;
         public List<Interface> PrimaryInterfaces
         {
             get

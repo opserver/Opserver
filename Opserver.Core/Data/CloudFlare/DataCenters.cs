@@ -5,7 +5,7 @@ using System.Net;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public class DataCenters
+    public static class DataCenters
     {
         private static Dictionary<string, List<IPNet>> _allDCs;
 

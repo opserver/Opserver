@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         // TODO: Settings
         private static readonly Regex _compactReplacer = new Regex(@"-\d+$", RegexOptions.Compiled);
         private string _compactServerName;
-        public string CompactServerName => 
+        public string CompactServerName =>
             _compactServerName ?? (_compactServerName = _compactReplacer.Replace(ServerName, ""));
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                 //Get the property info for this position
                 var propInfo = StatProperty.AllOrdered[i].PropertyInfo;
-                
+
                 //Get the property type
                 var type = propInfo.PropertyType;
                 //Cast to the underlying type for nullables
@@ -466,6 +466,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 }
             }
         }
+
         public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.GetDescription();
 
         public bool IsChecked => Status != "no check";

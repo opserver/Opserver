@@ -57,11 +57,11 @@ namespace StackExchange.Opserver.Monitoring
             _wrapped?.ReaderFinish(reader);
         }
 
-        public void OnError(IDbCommand profiledDbCommand, SqlExecuteType executeType, Exception e)
+        public void OnError(IDbCommand profiledDbCommand, SqlExecuteType executeType, Exception exception)
         {
             var formatter = new Profiling.SqlFormatters.SqlServerFormatter();
             var parameters = SqlTiming.GetCommandParameters(profiledDbCommand);
-            e.Data["SQL"] = formatter.FormatSql(profiledDbCommand.CommandText, parameters);
+            exception.Data["SQL"] = formatter.FormatSql(profiledDbCommand.CommandText, parameters);
         }
 
         public bool IsActive => true;

@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.Controllers
 
             return Json(data);
         }
-        
+
         public static async Task<object> NetworkData(Node n, long? start = null, long? end = null, bool? summary = false)
         {
             var traffic = await n.GetNetworkUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);

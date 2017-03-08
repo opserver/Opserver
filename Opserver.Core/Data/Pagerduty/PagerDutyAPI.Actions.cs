@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return null;
             }
         }
-        
+
         public class PagerDutyIncidentUpdateResp
         {
             [DataMember(Name = "incident")]

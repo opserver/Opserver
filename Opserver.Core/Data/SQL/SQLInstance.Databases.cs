@@ -77,7 +77,7 @@ namespace StackExchange.Opserver.Data.SQL
         public LightweightCache<List<MissingIndex>> GetMissingIndexes(string databaseName) =>
             DatabaseFetch<MissingIndex>(databaseName, RefreshInterval);
 
-        public LightweightCache<List<RestoreHistory>> GetRestoreInfo(string databaseName) => 
+        public LightweightCache<List<RestoreHistory>> GetRestoreInfo(string databaseName) =>
             DatabaseFetch<RestoreHistory>(databaseName, RefreshInterval);
 
         public LightweightCache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
@@ -147,6 +147,7 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
+
             public string MonitorStatusReason
             {
                 get
@@ -261,7 +262,7 @@ From sys.databases db
 
             public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
-            
+
             public char? LastBackupType { get; internal set; }
             public string LastBackupTypeDescription => DatabaseBackup.GetTypeDescription(LastBackupType);
             public DateTime? LastBackupStartDate { get; internal set; }
@@ -341,6 +342,7 @@ Select db.database_id DatabaseId,
                 return FetchSQL;
             }
         }
+
         public class MissingIndex : ISQLVersioned
         {
             public string SchemaName { get; internal set; }
@@ -355,7 +357,7 @@ Select db.database_id DatabaseId,
             public string IncludedColumns { get; internal set; }
             public decimal EstimatedImprovement { get; internal set; }
             public Version MinVersion => SQLServerVersions.SQL2008.SP1;
-            
+
             public string GetFetchSQL(Version v)
             {
                 return @"
@@ -381,7 +383,6 @@ Select db.database_id DatabaseId,
   Order By EstimatedImprovement Desc";
             }
         }
-
 
         public class StoredProcedure : ISQLVersioned
         {
@@ -418,6 +419,7 @@ Select p.object_id,
  Where p.is_ms_shipped = 0
  Group By p.object_id, s.name, p.name, p.create_date, p.modify_date, sm.definition";
         }
+
         public class RestoreHistory : ISQLVersioned
         {
             public DateTime RestoreFinishDate { get; internal set; }
@@ -466,13 +468,14 @@ Select r.restore_date RestoreFinishDate,
          On r.backup_set_id = bs.backup_set_id
        Join [msdb].[dbo].[backupmediafamily] bmf 
          On bs.media_set_id = bmf.media_set_id
- Where r.destination_database_name = @databaseName"; 
+ Where r.destination_database_name = @databaseName";
             }
         }
+
         public class DatabaseBackup : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
-            
+
             public char? Type { get; internal set; }
             public string TypeDescription => GetTypeDescription(Type);
             public DateTime? StartDate { get; internal set; }
@@ -568,7 +571,7 @@ Select Top 100
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
                     _shortPhysicalName ?? (_shortPhysicalName = _ShortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
-            
+
             public string GrowthDescription
             {
                 get
@@ -774,7 +777,7 @@ Select t.object_id Id,
    And i.object_id > 255
 Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name";
         }
-        
+
         public class DatabaseView : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
@@ -954,8 +957,6 @@ Order By 1, 2, 3";
 
                 return string.Format(FetchSQL, "");
             }
-
         }
-
     }
 }

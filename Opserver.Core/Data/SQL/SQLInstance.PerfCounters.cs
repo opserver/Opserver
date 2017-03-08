@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.SQL
             }));
 
         public long? BatchesPerSec => (long?)GetPerfCounter("SQL Statistics", "Batch Requests/sec", "")?.CalculatedValue;
-        
+
         public PerfCounterRecord GetPerfCounter(string category, string name, string instance)
         {
             // TODO Split fields on fetch and compare each rather than a concat per lookup

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Monitoring
 {
-    public class PerfCounters
+    public static class PerfCounters
     {
-        public class Windows
+        public static class Windows
         {
             public static Task<QueryResult<CPUUtilization>> GetCPUUtilization(string machineName)
             {

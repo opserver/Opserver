@@ -33,10 +33,12 @@ namespace StackExchange.Opserver.Data.HAProxy
         {
             get { yield return Proxies; }
         }
+
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
             yield return Proxies.Data?.GetWorstStatus() ?? MonitorStatus.Warning;
         }
+
         protected override string GetMonitorStatusReason()
         {
             if (Proxies.Data == null) return Name + ": No Data";

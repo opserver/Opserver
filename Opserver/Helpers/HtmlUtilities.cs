@@ -8,17 +8,17 @@ namespace StackExchange.Opserver.Helpers
     {
         // filters control characters but allows only properly-formed surrogate sequences
         private static readonly Regex SanitizeUrlRegex = new Regex(@"[^-a-z0-9+&@#/%?=~_|!:,.;\(\)]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-        
+
         /// <summary>
         /// This string is already correctly encoded html and can be sent to the client "as is" without additional encoding.
         /// </summary>
         public static IHtmlString AsHtml(this string html) => MvcHtmlString.Create(html);
-        
+
         /// <summary>
         /// returns "safe" URL, stripping anything outside normal charsets for URL
         /// </summary>
         public static string SanitizeUrl(string url) => url.IsNullOrEmpty() ? url : SanitizeUrlRegex.Replace(url, "");
-        
+
         /// <summary>
         /// fast (and maybe a bit inaccurate) check to see if the querystring contains the specified key
         /// </summary>

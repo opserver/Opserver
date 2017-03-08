@@ -1,8 +1,8 @@
 ﻿namespace StackExchange.Opserver
 {
-    internal partial class Current
+    internal static partial class Current
     {
-        public static Helpers.LocalCache LocalCache = new Helpers.LocalCache();
+        public static readonly Helpers.LocalCache LocalCache = new Helpers.LocalCache();
     }
 
     public static class CoreCurrent

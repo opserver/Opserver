@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 sb.AppendFormat("  {0}: {1}\n", k, Request.Headers[k]);
             }
-            
+
             var ps = PollingEngine.GetPollingStatus();
             sb.AppendLine()
               .AppendLine("Polling Info")

@@ -28,10 +28,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public class LogEntries
     {
         [DataMember(Name="log_entries")]
-        public List<LogEntry> Logs { get; set; } 
+        public List<LogEntry> Logs { get; set; }
     }
 
-    public class LogEntry 
+    public class LogEntry
     {
         [DataMember(Name="id")]
         public string LogId { get; set; }
@@ -62,16 +62,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
         // Temp till we get the AllUsers fixed up
         [DataMember(Name ="summary")]
         public string Person { get; set; }
-       // public PagerDutyPerson Person => PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == AgentId);
     }
+
     public class NotificationChannel
     {
         [DataMember(Name = "type")]
         public string ChannelType { get; set; }
         [DataMember(Name = "notification")]
         public Notification NotificationInfo { get; set; }
-
     }
+
     public class Notification
     {
         [DataMember(Name = "type")]

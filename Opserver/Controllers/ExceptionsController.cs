@@ -14,7 +14,7 @@ using static StackExchange.Opserver.Data.Exceptions.ExceptionStores;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.Exceptions)] 
+    [OnlyAllow(Roles.Exceptions)]
     public class ExceptionsController : StatusController
     {
         public override ISecurableModule SettingsModule => Current.Settings.Exceptions;
@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Controllers
         {
             Response.Cache.SetCacheability(HttpCacheability.NoCache);
             Response.Cache.SetNoStore();
-            base.OnActionExecuting(filterContext); 
+            base.OnActionExecuting(filterContext);
         }
 
         private void FixNames(ref string group, ref string log)

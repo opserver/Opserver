@@ -58,7 +58,7 @@ namespace StackExchange.Opserver.Data
             (this as INodeRoleProvider)?.Register();
             (this as IIssuesProvider)?.Register();
         }
-        
+
         private readonly object _monitorStatusLock = new object();
         protected MonitorStatus? PreviousMonitorStatus;
         protected MonitorStatus? CachedMonitorStatus;
@@ -107,8 +107,9 @@ namespace StackExchange.Opserver.Data
                 return CachedMonitorStatus.GetValueOrDefault(MonitorStatus.Unknown);
             }
         }
+
         public string MonitorStatusReason { get; private set; }
-        
+
         public DateTime? LastPoll { get; protected set; }
         public TimeSpan LastPollDuration { get; protected set; }
         public Stopwatch CurrentPollDuration { get; protected set; }
@@ -134,7 +135,7 @@ namespace StackExchange.Opserver.Data
         private int _isPolling;
         public bool IsPolling => _isPolling > 0;
         public string PollStatus { get; protected set; }
-        
+
         public virtual async Task PollAsync(bool force = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
@@ -192,7 +193,7 @@ namespace StackExchange.Opserver.Data
                     // Await all children (this itself will be a background fire and forget if desired
                     await Task.WhenAll(tasks);
                     PollStatus = "DataPollers Complete (Awaited)";
-                    
+
                     LastPoll = DateTime.UtcNow;
                     Polled?.Invoke(this, new PollResultArgs());
                     Interlocked.Increment(ref _totalPolls);

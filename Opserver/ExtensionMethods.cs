@@ -56,7 +56,7 @@ namespace StackExchange.Opserver
                     return s.HtmlEncode().AsHtml();
             }
         }
-        
+
         /// <summary>
         /// Returns an icon span representation of this MonitorStatus
         /// </summary>
@@ -217,7 +217,7 @@ namespace StackExchange.Opserver
 
             if (lastSuccess)
                 return mini ? cache.LastSuccess?.ToRelativeTimeSpanMini() : cache.LastSuccess?.ToRelativeTimeSpan();
-            
+
             var lf = cache.LastPoll;
             if (lf == null)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
@@ -304,7 +304,6 @@ namespace StackExchange.Opserver
             return dt.ToString(includeTimeForOldDates ? @"MMM %d \'yy 'at' %H:mmm" : @"MMM %d \'yy").ToLowerInvariant();
         }
 
-
         /// <summary>
         /// returns a very *small* humanized string indicating how long ago something happened, e.g. "3d 10m" or "2m 10s"
         /// </summary>
@@ -369,7 +368,7 @@ namespace StackExchange.Opserver
         {
             if (number >= 1000000)
                 return ((double)number / 1000000).ToString("0.0m");
-            
+
             if (number >= 1000)
                 return ((double)number / 1000).ToString("0k");
 
@@ -402,7 +401,7 @@ namespace StackExchange.Opserver
         {
             return value ? YesHtml : NoHtml;
         }
-        
+
         /// <summary>
         /// Micro representation of a time in millisecs 
         /// </summary>
@@ -501,7 +500,7 @@ namespace StackExchange.Opserver
                 };
         }
     }
-    
+
     public static class EnumExtensions
     {
         public static IHtmlString ToSpan(this SynchronizationStates? state, string tooltip = null)
@@ -519,6 +518,7 @@ namespace StackExchange.Opserver
                     return StatusIndicator.UnknownCustomSpan(state.Value.GetDescription(), tooltip);
             }
         }
+
         public static IHtmlString ToSpan(this ReplicaRoles? state, string tooltip = null, bool abbreviate = false)
         {
             var desc = state.HasValue ? state.Value.GetDescription() : "";

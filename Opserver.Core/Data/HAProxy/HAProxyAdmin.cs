@@ -10,10 +10,10 @@ using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public class HAProxyAdmin
+    public static class HAProxyAdmin
     {
         public const string AllServersKey = "*";
-        
+
         private class ActionPair
         {
             public Proxy Proxy { get; set; }
@@ -43,17 +43,17 @@ namespace StackExchange.Opserver.Data.HAProxy
             return PostActionsAsync(pairs, action);
         }
 
-        public static async Task<bool> PerformGroupActionAsync(string group, Action action)
+        public static Task<bool> PerformGroupActionAsync(string group, Action action)
         {
             var haGroup = HAProxyGroup.GetGroup(group);
-            if (haGroup == null) return false;
+            if (haGroup == null) return Task.FromResult(false);
 
             var pairs = haGroup.GetProxies()
                 .SelectMany(p => p.Servers
                     .Select(s => new ActionPair {Proxy = p, Server = s})
                 ).ToList();
-
-            return await PostActionsAsync(pairs, action).ConfigureAwait(true);
+            
+            return PostActionsAsync(pairs, action);
         }
 
         private static async Task<bool> PostActionsAsync(List<ActionPair> pairs, Action action)
@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             await Task.WhenAll(instanceTasks);
             return result;
         }
-        
+
         private static async Task<bool> PostAction(Proxy p, Server server, Action action)
         {
             var instance = p.Instance;
@@ -111,7 +111,6 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
     }
-    
 
     [Flags]
     public enum Action

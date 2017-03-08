@@ -15,7 +15,7 @@ namespace StackExchange.Opserver
         private static StringBuilder _perThread;
         // and one secondary that is shared between threads
         private static StringBuilder _shared;
-        
+
         private const int DefaultCapacity = 0x10;
 
         /// <summary>

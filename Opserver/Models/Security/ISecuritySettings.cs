@@ -6,6 +6,7 @@
         {
             return Current.Security.InReadGroups(settings);
         }
+
         public static bool IsAdmin(this ISecurableModule settings)
         {
             return Current.Security.InAdminGroups(settings);

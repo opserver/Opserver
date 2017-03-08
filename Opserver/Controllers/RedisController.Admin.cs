@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var i = RedisInstance.Get(node);
             if (i == null) return JsonNotFound();
-            
+
             try
             {
                 var removed = await i.KeyPurge(db, key);

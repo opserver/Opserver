@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Controllers
 
         private readonly Func<string, IDisposable> _startStep = name => MiniProfiler.Current.Step(name);
         private readonly Action<IDisposable> _stopStep = s => s?.Dispose();
-        
+
         protected override void Initialize(System.Web.Routing.RequestContext requestContext)
         {
             _betweenInitializeAndActionExecuting = _startStep(nameof(Initialize));
@@ -61,6 +61,7 @@ namespace StackExchange.Opserver.Controllers
             }
             base.OnActionExecuted(filterContext);
         }
+
         protected override void OnResultExecuting(ResultExecutingContext filterContext)
         {
             if (!filterContext.IsChildAction)
@@ -102,7 +103,7 @@ namespace StackExchange.Opserver.Controllers
 
             return View("NoConfiguration");
         }
-        
+
         [Route("no-config")]
         public ViewResult NoConfig()
         {

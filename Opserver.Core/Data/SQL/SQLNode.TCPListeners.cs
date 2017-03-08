@@ -33,6 +33,7 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
+
             public string MonitorStatusReason => State == TCPListenerStates.Online ? null : State.GetDescription();
 
             public int ListenerId { get; internal set; }
@@ -42,7 +43,7 @@ namespace StackExchange.Opserver.Data.SQL
             public TCPListenerTypes Type { get; internal set; }
             public TCPListenerStates State { get; internal set; }
             public DateTime StartTime { get; internal set; }
-            
+
             public string GetFetchSQL(Version v) => @"
 select listener_id ListenerId,
        ip_address IPAddress,
@@ -53,6 +54,5 @@ select listener_id ListenerId,
        start_time StartTime
 from sys.dm_tcp_listener_states";
         }
-        
     }
 }

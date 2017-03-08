@@ -15,6 +15,7 @@ namespace StackExchange.Opserver.Data.Redis
             }
             return null;
         }
+
         public static RedisInstance Get(string connectionString)
         {
             if (connectionString.IsNullOrEmpty()) return null;
@@ -31,6 +32,7 @@ namespace StackExchange.Opserver.Data.Redis
             }
             return null;
         }
+
         public static RedisInstance Get(string host, int port)
         {
             foreach (var ri in RedisModule.Instances)

@@ -12,6 +12,7 @@ namespace StackExchange.Opserver.Views.HAProxy
             Detailed,
             Traffic
         }
+
         public Views View { get; set; }
         public bool AdminMode { get; set; }
 

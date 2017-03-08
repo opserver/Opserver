@@ -32,6 +32,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             var result = CloudFlareAPI.Instance.Post<CloudFlareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
             return result.Success;
         }
+
         public static bool PurgeFiles(this CloudFlareZone zone, IEnumerable<string> files)
         {
             var nvc = new NameValueCollection {{"files", JSON.Serialize(files)}};

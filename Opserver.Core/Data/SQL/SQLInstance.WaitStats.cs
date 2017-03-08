@@ -69,7 +69,7 @@ namespace StackExchange.Opserver.Data.SQL
             public double AverageWaitTime => (double)WaitTimeMs/SecondsBetween;
 
             public double AverageTaskCount => (double)WaitTaskCount / SecondsBetween;
-            
+
             public string GetFetchSQL(Version v) => @"
 Declare @delayInterval char(8) = Convert(Char(8), DateAdd(Second, @secondsBetween, '00:00:00'), 108);
 

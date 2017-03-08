@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
         public bool IsMinor
         {
-            get { 
+            get {
                 switch (StatementType)
                 {
                     case "COND":

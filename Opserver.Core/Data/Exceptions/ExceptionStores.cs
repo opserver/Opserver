@@ -7,7 +7,7 @@ using StackExchange.Exceptional;
 
 namespace StackExchange.Opserver.Data.Exceptions
 {
-    public class ExceptionStores
+    public static class ExceptionStores
     {
         private static readonly object _updateLock = new object();
 
@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                 return MonitorStatus.Good;
             }
         }
-        
+
         private static List<ApplicationGroup> GetConfiguredApplicationGroups()
         {
             var settings = Current.Settings.Exceptions;
@@ -228,7 +228,7 @@ namespace StackExchange.Opserver.Data.Exceptions
             var results = (await Task.WhenAll(errorFetches).ConfigureAwait(false)).SelectMany(e => e);
             return GetSorted(results, sort).ToList();
         }
-        
+
         internal static List<ApplicationGroup> UpdateApplicationGroups()
         {
             using (MiniProfiler.Current.Step("UpdateApplicationGroups() - All Stores"))
@@ -250,7 +250,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                                 break;
                             }
                         }
-                    }   
+                    }
                 }
                 // Clear all dynamic apps from the CatchAll group
                 CatchAll.Applications.RemoveAll(a => !KnownApplications.Contains(a.Name));

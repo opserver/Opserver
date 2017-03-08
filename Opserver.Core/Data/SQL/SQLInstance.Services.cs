@@ -35,6 +35,7 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
+
             public string MonitorStatusReason
             {
                 get
@@ -59,8 +60,8 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTimeOffset? LastStartupTime { get; internal set; }
             public string IsClustered { get; internal set; }
             public bool IsClusteredBool => IsClustered == "Y";
-            
-            public string GetFetchSQL(Version version) => @"
+
+            public string GetFetchSQL(Version v) => @"
 Select servicename ServiceName,
        service_account ServiceAccount, 
        process_id ProcessId, 

@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Models.Security
                                       return members != null && members.Contains(accountName, StringComparer.InvariantCultureIgnoreCase);
                                   });
         }
-        
+
         public override void PurgeCache()
         {
             //Current.LocalCache.RemoveAll("AD-Members-*");

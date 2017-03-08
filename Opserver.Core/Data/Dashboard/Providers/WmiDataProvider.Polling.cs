@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     SetReferences();
 
                     // first run, do a follow-up poll for all stats on the first pass
-                    if (_nodeInfoAvailable == false)
+                    if (!_nodeInfoAvailable)
                     {
                         _nodeInfoAvailable = true;
                         await PollStats();
@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             public async Task<Node> PollStats()
             {
-                if (_nodeInfoAvailable == false)
+                if (!_nodeInfoAvailable)
                 {
                     return this;
                 }

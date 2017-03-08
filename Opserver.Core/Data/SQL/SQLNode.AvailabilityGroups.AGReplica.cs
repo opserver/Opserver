@@ -87,6 +87,7 @@ namespace StackExchange.Opserver.Data.SQL
                     return Databases.GetWorstStatus();
                 }
             }
+
             public string MonitorStatusReason
             {
                 get

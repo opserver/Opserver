@@ -9,14 +9,14 @@ namespace StackExchange.Opserver.Data.CloudFlare
     public partial class CloudFlareAPI
     {
         private Cache<List<CloudFlareZone>> _zones;
-        public Cache<List<CloudFlareZone>> Zones => 
+        public Cache<List<CloudFlareZone>> Zones =>
             _zones ?? (_zones = GetCloudFlareCache(5.Minutes(), () => Get<List<CloudFlareZone>>("zones")));
 
         private static readonly NameValueCollection _dnsRecordFetchParams = new NameValueCollection
         {
             {"per_page", "100"}
         };
-        
+
         private Cache<List<CloudFlareDNSRecord>> _dnsRecords;
 
         public Cache<List<CloudFlareDNSRecord>> DNSRecords =>
@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         /// <returns>Root IP Addresses for this host</returns>
         public List<IPAddress> GetIPs(string host)
         {
-            if (DNSRecords.Data == null) 
+            if (DNSRecords.Data == null)
                 return null;
             var records = DNSRecords.Data.Where(r => string.Equals(host, r.Name, StringComparison.InvariantCultureIgnoreCase) && (r.Type == DNSRecordType.A || r.Type == DNSRecordType.AAAA || r.Type == DNSRecordType.CNAME)).ToList();
             var cNameRecord = records.FirstOrDefault(r => r.Type == DNSRecordType.CNAME);

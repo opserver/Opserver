@@ -49,6 +49,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             yield return DataPollers.GetWorstStatus();
         }
+
         protected override string GetMonitorStatusReason()
         {
             var reason = HealthStatus.Data?.Indexes?.Values.GetReasonSummary();
@@ -80,7 +81,6 @@ namespace StackExchange.Opserver.Data.Elastic
         //                                        ? (int?)null
         //                                        : ConfigSettings.DownRefreshIntervalSeconds;
         //}
-
 
         private Cache<T> GetElasticCache<T>(
             Func<Task<T>> get,

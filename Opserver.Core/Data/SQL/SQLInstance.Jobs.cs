@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Task<bool> StartJobAsync(Guid jobId)
         {
-            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));    
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
         }
 
         public Task<bool> StopJobAsync(Guid jobId)
@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime? NextRunDate { get; internal set; }
 
             public TimeSpan? LastRunDuration => LastRunDurationSeconds.HasValue ? TimeSpan.FromSeconds(LastRunDurationSeconds.Value) : (TimeSpan?)null;
-            
+
             public string GetFetchSQL(Version v) => @"
 Select j.job_id JobId,
        j.name Name,

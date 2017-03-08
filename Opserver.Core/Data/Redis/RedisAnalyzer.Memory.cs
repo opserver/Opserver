@@ -13,7 +13,7 @@ using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public class RedisAnalyzer
+    public static class RedisAnalyzer
     {
         internal static readonly Dictionary<RedisConnectionInfo, List<KeyMatcher>> KeyMatchers;
         static RedisAnalyzer()
@@ -107,7 +107,7 @@ namespace StackExchange.Opserver.Data.Redis
                                .OrderByDescending(tk => tk.TotalBytes)
                                .Take(50);
             }
-        }  
+        }
 
         public MonitorStatus MonitorStatus
         {
@@ -122,6 +122,7 @@ namespace StackExchange.Opserver.Data.Redis
                 return MonitorStatus.Good;
             }
         }
+
         public string MonitorStatusReason
         {
             get
@@ -185,7 +186,7 @@ namespace StackExchange.Opserver.Data.Redis
             AnalysisTime = sw.Elapsed;
             sw.Stop();
         }
-        
+
         public RedisMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
             CreationDate = DateTime.UtcNow;

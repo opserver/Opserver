@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
-        
+
         public virtual IEnumerable<Issue> GetIssues()
         {
             foreach (var n in AllNodes)
@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
-        
+
         public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip)
         {
             return AllNodes.Where(n => n.IPs?.Any(i => i.Contains(ip)) == true);
@@ -86,12 +86,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
 
         public abstract Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume iface, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
 
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 
         #endregion
-        
+
         protected Cache<T> ProviderCache<T>(
             Func<Task<T>> fetch,
             TimeSpan cacheDuration,

@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public int Index { get; private set; }
 
         public DashboardSettings.Category Settings { get; }
-        
+
         public DashboardCategory() { }
         public DashboardCategory(DashboardSettings.Category settingsCategory)
         {

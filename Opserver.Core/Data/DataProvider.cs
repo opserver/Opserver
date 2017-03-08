@@ -7,7 +7,7 @@ using StackExchange.Opserver.Data.SQL;
 
 namespace StackExchange.Opserver.Data
 {
-    public class DataProvider
+    public static class DataProvider
     {
         private static readonly JsonSerializerSettings _serializationSettings = new JsonSerializerSettings
         {
@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Data
                 return property;
             }
         }
-        
+
         public static string GetNodeJSON(string type, string key = null, string property = null, bool includeCaches = false)
         {
             if (key.IsNullOrEmpty())

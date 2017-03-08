@@ -11,12 +11,12 @@ namespace StackExchange.Opserver.Data.SQL
         private SQLSettings.Cluster Settings { get; }
 
         public List<SQLNode> Nodes { get; }
-        
+
         public List<SQLNode.AGInfo> AvailabilityGroups
         {
             get { return Nodes.SelectMany(n => n.AvailabilityGroups.Data?.Where(ag => ag.IsPrimaryReplica) ?? Enumerable.Empty<SQLNode.AGInfo>()).ToList(); }
         }
-        
+
         public IEnumerable<SQLNode.AGInfo> GetAvailabilityGroups(string node, string agName)
         {
             Func<SQLNode.AGInfo, bool> agMatch = ag => agName.IsNullOrEmpty() || ag.Name == agName;

@@ -33,7 +33,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         protected override string GetMonitorStatusReason() { return null; }
 
         public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
-        
 
         private string GetUrl(string path)
         {
@@ -85,7 +84,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         public override string GetManagementUrl(Node node)
-        {   
+        {
             return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id.UrlEncode()}&time=1d-ago";
         }
 
@@ -164,14 +163,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return Task.FromResult(new List<DoubleGraphPoint>());
         }
 
-        public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface nodeInteface, DateTime? start, DateTime? end, int? pointCount = null)
+        public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null)
         {
             var apiResponse = await GetMetric(
-                InterfaceMetricName(nodeInteface),
+                InterfaceMetricName(iface),
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
-                nodeInteface.NodeId,
-                TagCombos.AllDirectionsForInterface(nodeInteface.Id)).ConfigureAwait(false);
+                iface.NodeId,
+                TagCombos.AllDirectionsForInterface(iface.Id)).ConfigureAwait(false);
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
@@ -211,6 +210,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     Value = i.Value,
                     BottomValue = o.Value
                 }).ToList();
-        } 
+        }
     }
 }

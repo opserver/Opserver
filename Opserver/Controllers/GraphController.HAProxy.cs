@@ -6,7 +6,7 @@ using StackExchange.Opserver.Data.HAProxy;
 namespace StackExchange.Opserver.Controllers
 {
     public partial class GraphController
-    { 
+    {
         [OutputCache(Duration = 60 * 60, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/traffic/json")]
         public async Task<ActionResult> HAProxyTrafficJson(string host, long start, long end, bool? summary = false)

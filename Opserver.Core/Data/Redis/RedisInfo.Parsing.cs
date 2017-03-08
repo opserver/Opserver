@@ -75,9 +75,9 @@ namespace StackExchange.Opserver.Data.Redis
                 string key = splits[0], value = splits[1];
                 currentSection.AddLine(key, value);
 
-                if (currentSection.IsUnrecognized) 
+                if (currentSection.IsUnrecognized)
                     continue;
-                
+
                 PropertyInfo propertyInfo;
                 var prop = _propertyMappings[currentSection.GetType()].TryGetValue(key, out propertyInfo) ? propertyInfo : null;
                 if (prop == null)
@@ -118,6 +118,7 @@ namespace StackExchange.Opserver.Data.Redis
                 var splits = infoLine.Split(StringSplits.Colon, 2);
                 if (splits.Length == 2) MapUnrecognizedLine(splits[0], splits[1]);
             }
+
             public virtual void MapUnrecognizedLine(string key, string value) { }
 
             public RedisInfoSection()
@@ -155,10 +156,10 @@ namespace StackExchange.Opserver.Data.Redis
                     "tcp_port",
                     "master_port"
                 };
-            
+
             private static string GetInfoValue(string label, string value)
             {
-                long l;              
+                long l;
 
                 switch (label)
                 {

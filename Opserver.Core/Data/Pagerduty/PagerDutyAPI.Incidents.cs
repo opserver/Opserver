@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         private Cache<List<Incident>> _incidents;
 
-        public Cache<List<Incident>> Incidents => 
+        public Cache<List<Incident>> Incidents =>
             _incidents ?? (_incidents = GetPagerDutyCache(10.Minutes(), () =>
             {
                 string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     );
             }));
     }
-    
+
     public class IncidentResponse
     {
         [DataMember(Name = "incidents")]
@@ -74,7 +74,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         AckPerson = i.Agent.Person,
                         AckTime = i.CreationTime
                     });
-
                 }
                 return a;
             }
@@ -90,7 +89,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public PagerDutyService AffectedService { get; set; }
         [DataMember(Name = "number_of_escalations")]
         public int? NumberOfEscalations { get; set; }
-        
+
         public Task<List<LogEntry>> Logs => PagerDutyAPI.Instance.GetIncidentEntriesAsync(Id);
 
         public MonitorStatus MonitorStatus
@@ -110,7 +109,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             }
         }
-        
+
         public string MonitorStatusReason => "Status is " + Status.GetDescription();
     }
 

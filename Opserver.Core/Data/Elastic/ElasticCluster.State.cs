@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
         public IEnumerable<ClusterStateInfo.ShardState> TroubledShards => AllShards.Where(s => s.State != "STARTED");
         public List<ClusterStateInfo.ShardState> AllShards => State.Data?.AllShards ?? new List<ClusterStateInfo.ShardState>();
-        
+
         public class ClusterStateInfo : IMonitorStatus
         {
             private MonitorStatus? _monitorStatus;
@@ -76,6 +76,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 [DataMember(Name = "attributes")]
                 public Dictionary<string, string> Attributes { get; internal set; }
             }
+
             public class RoutingTableState
             {
                 [DataMember(Name = "indices")]
@@ -140,6 +141,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         }
                     }
                 }
+
                 public string PrettyState
                 {
                     get

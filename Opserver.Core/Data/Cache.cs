@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data
 
         // TODO: Find name that doesn't suck, has to override so...
         public override Task PollGenericAsync(bool force = false) => PollAsync(force);
-        
+
         // This makes more semantic sense...
         public Task<T> GetData() => PollAsync();
 
@@ -250,9 +250,9 @@ namespace StackExchange.Opserver.Data
         public TimeSpan CacheDuration { get; }
         public TimeSpan? CacheFailureDuration { get; set; } = TimeSpan.FromSeconds(15);
         public bool AffectsNodeStatus { get; set; }
-        
+
         public bool ShouldPoll => IsStale && !_isPolling;
-        
+
         protected volatile bool _isPolling;
         public bool IsPolling => _isPolling;
         public bool IsStale => (NextPoll ?? DateTime.MinValue) < DateTime.UtcNow;
@@ -289,6 +289,7 @@ namespace StackExchange.Opserver.Data
             Error = e;
             ErrorMessage = errorMessage;
         }
+
         public string PollStatus { get; internal set; }
 
         public MonitorStatus MonitorStatus
@@ -299,6 +300,7 @@ namespace StackExchange.Opserver.Data
                 return LastPollSuccessful ? MonitorStatus.Good : MonitorStatus.Critical;
             }
         }
+
         public string MonitorStatusReason
         {
             get
@@ -307,7 +309,7 @@ namespace StackExchange.Opserver.Data
                 return !LastPollSuccessful ? "Poll " + LastPoll?.ToRelativeTime() + " failed: " + ErrorMessage : null;
             }
         }
-        
+
         public virtual bool ContainsData => false;
         internal virtual object InnerCache => null;
         public Exception Error { get; internal set; }

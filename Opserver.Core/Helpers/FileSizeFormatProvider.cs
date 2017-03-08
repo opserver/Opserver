@@ -63,7 +63,6 @@ namespace StackExchange.Opserver.Helpers
             string precision = format.Substring(2);
             if (precision.IsNullOrEmpty()) precision = "2";
             return string.Format("{0:N" + precision + "}{1}", size, suffix);
-
         }
 
         private static string defaultFormat(string format, object arg, IFormatProvider formatProvider)
@@ -75,6 +74,5 @@ namespace StackExchange.Opserver.Helpers
             }
             return arg.ToString();
         }
-
     }
 }

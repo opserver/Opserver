@@ -104,6 +104,7 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
+
             public bool IsBufferPool => ClerkType == "MEMORYCLERK_SQLBUFFERPOOL";
             public bool IsPlanCache => ClerkType == "CACHESTORE_SQLCP";
 
@@ -116,14 +117,13 @@ namespace StackExchange.Opserver.Data.SQL
  Group By [type]
  Order By Sum(pages_kb) Desc";
 
-            public string GetFetchSQL(Version version)
+            public string GetFetchSQL(Version v)
             {
-                if (version < SQLServerVersions.SQL2012.RTM)
+                if (v < SQLServerVersions.SQL2012.RTM)
                     return FetchSQL.Replace("pages_kb", "(single_pages_kb + multi_pages_kb)");
 
                 return FetchSQL;
             }
         }
-
     }
 }

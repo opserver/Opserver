@@ -6,7 +6,7 @@ using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public class HAProxyTraffic
+    public static class HAProxyTraffic
     {
         public static string ConnectionString
         {
@@ -77,7 +77,7 @@ Select CreationDate,
                 }
             }
             if (!startDate.HasValue && !endDate.HasValue) return results;
-            
+
             // filter! like brita but with more enumerables and lambdatastic goodness
             IEnumerable<TrafficDay> fResults = results;
             if (startDate.HasValue) fResults = fResults.Where(td => td.CreationDate >= startDate);

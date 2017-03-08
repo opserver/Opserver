@@ -67,16 +67,16 @@ namespace StackExchange.Opserver.Models
 
         public static IHtmlString MemoryStatusSpan(this Node info, bool includePercent = true)
         {
-            return info.MemoryUsed < 0 
+            return info.MemoryUsed < 0
                 ? MvcHtmlString.Empty
-                : includePercent 
+                : includePercent
                     ? $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()} ({info.PercentMemoryUsed?.ToString("n2")}%)</span>".AsHtml()
                     : $@"<span class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()}</span>".AsHtml();
         }
 
         public static IHtmlString MemoryPercentStatusSpan(this Node info)
         {
-            return info.MemoryUsed < 0 
+            return info.MemoryUsed < 0
                 ? MvcHtmlString.Empty
                 : $@"<span title=""{info.PrettyMemoryUsed()} / {info.PrettyTotalMemory()}"" class=""{info.MemoryMonitorStatus().TextClass()}"">{info.PercentMemoryUsed?.ToString("n0")}%</span>".AsHtml();
         }
@@ -129,7 +129,7 @@ namespace StackExchange.Opserver.Models
             foreach (var a in info.Apps.OrderBy(a => a.NiceName))
             {
                 sb.AppendFormat("  {0}: {1} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
-            } 
+            }
             return sb.ToStringRecycle();
         }
 
@@ -151,7 +151,7 @@ namespace StackExchange.Opserver.Models
     public static class SQLExtenstions
     {
         private static readonly XslCompiledTransform _queryPlanTransform;
-        
+
         static SQLExtenstions()
         {
             _queryPlanTransform = new XslCompiledTransform();

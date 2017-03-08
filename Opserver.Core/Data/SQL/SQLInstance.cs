@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Data.SQL
         protected string ConnectionString { get; set; }
         public Version Version { get; internal set; } = new Version(); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
-        
+
         protected static readonly ConcurrentDictionary<Tuple<string, Version>, string> QueryLookup =
             new ConcurrentDictionary<Tuple<string, Version>, string>();
 
@@ -91,6 +91,7 @@ namespace StackExchange.Opserver.Data.SQL
             if (Databases.Data != null)
                 yield return Databases.Data.GetWorstStatus();
         }
+
         protected override string GetMonitorStatusReason()
         {
             return Databases.Data?.GetReasonSummary();
@@ -146,7 +147,7 @@ namespace StackExchange.Opserver.Data.SQL
                 logExceptions: true
             );
         }
-        
+
         protected Cache<T> GetSqlCache<T>(
             string opName,
             Func<DbConnection, Task<T>> get,

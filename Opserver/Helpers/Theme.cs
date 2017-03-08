@@ -7,9 +7,9 @@ using System.Web.Hosting;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public class Theme
+    public static class Theme
     {
-        public static List<string> Options { get; } 
+        public static List<string> Options { get; }
 
         public const string Default = "light";
         private const string CookieName = "Op-Theme";
@@ -18,7 +18,7 @@ namespace StackExchange.Opserver.Helpers
         // I chose at random from https://en.wikipedia.org/wiki/List_of_dates_predicted_for_apocalyptic_events
         // "Members predict that the world will end in 2026, when an asteroid would collide with Earth..."
         private static readonly DateTime CookieExpirationDate = new DateTime(2026, 1, 1);
-        
+
         public static string Current => Opserver.Current.Request.Cookies[CookieName]?.Value ?? Default;
 
         static Theme()
@@ -30,7 +30,6 @@ namespace StackExchange.Opserver.Helpers
                                .OrderBy(f => f != Default)
                                .ThenBy(f => f).ToList();
         }
-
 
         public static void Set(string theme)
         {

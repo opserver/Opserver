@@ -157,13 +157,13 @@ namespace StackExchange.Opserver
 
             if (split < 0) return sql;
             split++; // just for Craver
-            
+
             var ret = sql.Substring(0, i) + " /* " + path.Substring(split) + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap + sql.Substring(i);
             // Cache, don't allocate all this pass again
             _markedSql[key] = ret;
             return ret;
         }
-        
+
         public static async Task<int> SetReadUncommittedAsync(this DbConnection connection)
         {
             if (connection == null) throw new ArgumentNullException(nameof(connection));
@@ -182,6 +182,7 @@ namespace StackExchange.Opserver
             {
                 _connection = connection;
             }
+
             public void Dispose()
             {
                 var cn = _connection;

@@ -36,6 +36,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
             yield return MonitorStatus.Good;
         }
+
         protected override string GetMonitorStatusReason() => "";
         public string APIKey => Settings.APIKey;
 
@@ -88,7 +89,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             var url = "https://api.pagerduty.com/"; //Settings.APIBaseUrl;
             var fullUri = url + path;
-            
+
             using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
             {
                 var req = (HttpWebRequest)WebRequest.Create(fullUri);
@@ -105,7 +106,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
                 if (httpMethod == "POST" || httpMethod == "PUT")
                 {
-                    
                     if (data != null)
                     {
                         var stringData = JSON.Serialize(data, JilOptions);

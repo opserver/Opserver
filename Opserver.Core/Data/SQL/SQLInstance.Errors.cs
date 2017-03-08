@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime LogDate { get; internal set; }
             public string ProcessInfo { get; internal set; }
             public string Text { get; internal set; }
-            
+
             public string GetFetchSQL(Version v) => @"
 Declare @Time_Start varchar(30);
 Set @Time_Start = DATEADD(mi, -@minutesAgo, GETDATE());

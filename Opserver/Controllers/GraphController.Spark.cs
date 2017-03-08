@@ -180,7 +180,7 @@ namespace StackExchange.Opserver.Controllers
                 .AppendFormat("\t\tline {{ stroke:{0}; stroke-width:1 }}\n", AxisColor)
                 .AppendFormat("\t\tpath {{ fill:{0}; stroke:none; }}\n", Color)
                 .AppendLine("\t</style>");
-            
+
             var pointsLookup = new ConcurrentDictionary<string, List<T>>();
             var maxLookup = new ConcurrentDictionary<string, long>();
             var lookups = new List<Task>(nodes.Count);
@@ -204,7 +204,7 @@ namespace StackExchange.Opserver.Controllers
                   .AppendFormat("\t<g transform=\"translate(0, {0})\">\n", currentYTop)
                   .AppendFormat("\t\t<line x1=\"0\" y1=\"{0}\" x2=\"{1}\" y2=\"{0}\" />\n", SparkHeight.ToString(), width.ToString())
                   .AppendFormat("\t\t<path d=\"M0 {0} L", SparkHeight);
-                
+
                 var first = true;
                 long divisor = maxLookup[pl.Key] / SparkHeight;
                 foreach (var p in pl.Value)

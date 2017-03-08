@@ -29,7 +29,7 @@ namespace StackExchange.Opserver
         /// Is the current request ajax? Determined by checking the X-Requested-With header
         /// </summary>
         public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-        
+
         /// <summary>
         /// Gets the current user from the request
         /// </summary>
@@ -42,7 +42,7 @@ namespace StackExchange.Opserver
              Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
 
         private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-        
+
         /// <summary>
         /// Gets the IP this request came from, gets the real IP when behind a proxy
         /// </summary>
@@ -70,7 +70,7 @@ namespace StackExchange.Opserver
         private static bool IsPrivateIP(string s)
         {
             //TODO: convert to IPNet check and include 172.16.0.0/12
-            return (s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0."));
+            return s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0.");
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace StackExchange.Opserver
             if (key.IsNullOrEmpty()) return true;
             return !LocalCache.Get<bool?>("ExceptionLogRetry-"+key).GetValueOrDefault();
         }
-        
+
         public static void LogRequest() { Interlocked.Increment(ref requestCount); }
         private static int requestCount;
     }

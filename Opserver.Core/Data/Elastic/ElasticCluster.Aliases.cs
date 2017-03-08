@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Data.Elastic
     public partial class ElasticCluster
     {
         private Cache<IndexAliasInfo> _aliases;
-        public Cache<IndexAliasInfo> Aliases => 
+        public Cache<IndexAliasInfo> Aliases =>
             _aliases ?? (_aliases = GetElasticCache(async () =>
             {
                 var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases").ConfigureAwait(false);

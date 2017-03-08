@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public double? Speed { get; internal set; }
         public bool IsTeamMember => Node.Interfaces.Any(i => i.TeamMembers?.Contains(Id) ?? false);
         public List<string> TeamMembers { get; internal set; }
-        public List<Interface> TeamMemberInterfaces => Node.Interfaces.Where(i => TeamMembers.Contains(i.Id)).ToList(); 
+        public List<Interface> TeamMemberInterfaces => Node.Interfaces.Where(i => TeamMembers.Contains(i.Id)).ToList();
         public List<IPNet> IPs { get; internal set; }
         public bool DHCPEnabled { get; internal set; }
 
@@ -101,7 +101,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             : Name.ToLower().EndsWith("team") ||
               Name.ToLower().StartsWith("bond") ||
               Name.Contains("Microsoft Network Adapter Multiplexor Driver");
-        
+
         public Interface() {}
         public Interface(string id) { Id = id; }
     }

@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data.SQL
                 //yield return TCPListeners;
             }
         }
-        
+
         public bool IsAllAGsPrimary
         {
             get { return AvailabilityGroups.Data?.Where(ag => ag.HasDatabases).All(ag => ag.IsPrimaryReplica) ?? false; }

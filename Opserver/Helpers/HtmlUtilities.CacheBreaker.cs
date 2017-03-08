@@ -10,7 +10,7 @@ using System.Web.Mvc;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public partial class HtmlUtilities
+    public static partial class HtmlUtilities
     {
         public static IHtmlString CacheBreaker(this UrlHelper url, string path) => MvcHtmlString.Create(GetCacheBreakerUrl(path));
 
@@ -37,9 +37,9 @@ namespace StackExchange.Opserver.Helpers
             }
             else
                 file = path;
-            
+
             var breaker = GetCacheBreakerForLocalFile(file);
-            
+
             if (path.StartsWith("~/"))
                 path = HostingEnvironment.ApplicationVirtualPath == "/"
                     ? path.Substring(1)

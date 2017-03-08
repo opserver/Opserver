@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return null; }
-        
+
         public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)
         {
             Settings = settings;
@@ -99,7 +99,6 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
                              .Where(g => apps.Contains(g.Key))
                              .SelectMany(e => e.Take(maxPerApp))
                              .ToList();
-
             }
             // all apps, 1000
             if (maxPerApp == PerAppSummaryCount)
@@ -186,7 +185,7 @@ Update Exceptions
    And IsProtected = 0 
    And GUID In @ids", new { ids });
         }
-        
+
         public async Task<Error> GetErrorAsync(Guid guid)
         {
             try

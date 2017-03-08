@@ -258,7 +258,7 @@ namespace StackExchange.Opserver.Controllers
             };
             return View("Databases.Modal.Tables", vd);
         }
-        
+
         private ActionResult NoInstanceRedirect(string node)
         {
             if (Current.IsAjaxRequest)

@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data
         {
             StartPolling();
         }
-        
+
         /// <summary>
         /// Adds a node to the global polling list ONLY IF IT IS NEW
         /// If a node with the same unique key was already added, it will not be added again
@@ -143,7 +143,7 @@ namespace StackExchange.Opserver.Data
                 Thread.Sleep(1000);
             }
         }
-        
+
         public static void PollAllAndForget()
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
@@ -202,7 +202,7 @@ namespace StackExchange.Opserver.Data
             await node.PollAsync(true);
             return true;
         }
-        
+
         public static List<PollNode> GetNodes(string type)
         {
             return AllPollNodes.Where(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase)).ToList();

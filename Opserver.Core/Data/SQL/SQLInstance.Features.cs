@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.SQL
         public class SQLServerFeatures : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2000.RTM;
-            
+
             public bool HasSPWhoIsActive { get; internal set; }
             public bool HasSPBlitz { get; internal set; }
             public bool HasSPBlitzIndex { get; internal set; }
@@ -54,6 +54,5 @@ Select (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_whoIsActive') a
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_BlitzIndex') as HasSPBlitzIndex,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_AskBrent') as HasSPAskBrent";
         }
-        
     }
 }

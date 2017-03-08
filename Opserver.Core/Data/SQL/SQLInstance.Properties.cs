@@ -146,14 +146,12 @@ Exec (@sql + '
 
         public class SQLServerPermissions
         {
-
             // IsNull(Cast(IS_SRVROLEMEMBER ('sysadmin') as Bit), 0) IsSysadmin
             public bool HasSyadmin { get; internal set; }
 
             // TODO: HasViewServerState permission, but SQL 2000 needs love
             // IsNull(Cast((Select 1 From fn_my_permissions(NULL, 'SERVER') Where permission_name = 'VIEW SERVER STATE') as Bit), 0) HasViewServerState
             public bool HasViewServerState { get; internal set; }
-
 
             internal const string FetchSQL = @"
 Select IsNull(Cast(IS_SRVROLEMEMBER ('sysadmin') as Bit), 0) IsSysadmin,

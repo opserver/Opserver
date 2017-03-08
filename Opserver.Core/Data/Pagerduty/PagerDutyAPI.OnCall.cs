@@ -11,10 +11,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public partial class PagerDutyAPI
     {
         // TODO: We need to able able to handle when people have more than one on call schedule
-        public PagerDutyPerson PrimaryOnCall => 
+        public PagerDutyPerson PrimaryOnCall =>
             OnCallInfo.Data?.FirstOrDefault(p => p.EscalationLevel == 1)?.AssignedUser;
 
-        public PagerDutyPerson SecondaryOnCall => 
+        public PagerDutyPerson SecondaryOnCall =>
             OnCallInfo.Data?.FirstOrDefault(p => p.EscalationLevel == 2)?.AssignedUser;
 
         private Cache<List<OnCall>> _oncallinfo;
@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     foreach (var u in p)
                     {
                         u.SharedLevelCount = p.Count(tu => tu.EscalationLevel == u.EscalationLevel);
-                        if (p.Count(pu => pu.AssignedUser.Id == u.AssignedUser.Id) > 1)
+                        if (p.Count(pu => pu.AssignedUser?.Id == u.AssignedUser?.Id) > 1)
                         {
                             u.MonitorStatus = MonitorStatus.Warning;
                             u.MonitorStatusReason = "Multiple escalations for the same user";
@@ -112,6 +112,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return _phone;
             }
         }
+
         [DataMember(Name = "escalation_level")]
         public int? EscalationLevel { get; set; }
 
@@ -164,6 +165,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             }
         }
+
         [DataMember(Name = "type")]
         public string Type { get; set; }
     }
@@ -197,6 +199,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "html_url")]
         public string Url { get; set; }
     }
+
     public class OnCall : IMonitorStatus
     {
         [DataMember(Name = "escalation_level")]

@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Data.SQL
             public int MemoryUtilization { get; internal set; }
             public int SystemIdle { get; internal set; }
             public int ExternalProcessUtilization => 100 - SystemIdle - ProcessUtilization;
-            
+
             public string GetFetchSQL(Version v) => @"
 Select DateAdd(s, (timestamp - (osi.cpu_ticks / Convert(Float, (osi.cpu_ticks / osi.ms_ticks)))) / 1000, GETDATE()) AS EventTime,
 	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,

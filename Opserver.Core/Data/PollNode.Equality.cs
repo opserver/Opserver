@@ -8,6 +8,7 @@
             if (ReferenceEquals(this, other)) return true;
             return other.GetType() == GetType() && string.Equals(UniqueKey, other.UniqueKey);
         }
+
         public override int GetHashCode() => UniqueKey?.GetHashCode() ?? 0;
 
         public static bool operator ==(PollNode left, PollNode right) => Equals(left, right);

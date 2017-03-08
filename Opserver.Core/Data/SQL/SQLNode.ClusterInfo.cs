@@ -63,7 +63,7 @@ Select cluster_name ClusterName,
             public ClusterMemberStates State { get; internal set; }
             public int? Votes { get; internal set; }
             public bool IsLocal { get; internal set; }
-            
+
             public string GetFetchSQL(Version v) => @"
 Select member_name MemberName,
        member_type Type,

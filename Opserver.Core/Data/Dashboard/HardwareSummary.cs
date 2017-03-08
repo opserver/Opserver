@@ -11,14 +11,14 @@ namespace StackExchange.Opserver.Data.Dashboard
 
     public class HardwareSummary
     {
-        public List<ProcessorInfo> Processors { get; internal set; } = new List<ProcessorInfo>(); 
+        public List<ProcessorInfo> Processors { get; internal set; } = new List<ProcessorInfo>();
         public List<MemoryModuleInfo> MemoryModules { get; internal set; } = new List<MemoryModuleInfo>();
         public List<ComponentInfo> Components { get; internal set; } = new List<ComponentInfo>();
         public StorageInfo Storage { get; internal set; } = new StorageInfo();
         public List<TemperatureInfo> Temps { get; internal set; } = new List<TemperatureInfo>();
         public List<PowerSupplyInfo> PowerSupplies { get; internal set; } = new List<PowerSupplyInfo>();
         public BoardPowerInfo BoardPowerReading { get; internal set; } = new BoardPowerInfo();
-        
+
         public class ComponentInfo : IMonitorStatus
         {
             public string Name { get; internal set; }
@@ -59,7 +59,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                     }
                     return _label;
                 }
-            } 
+            }
         }
 
         public class StorageInfo

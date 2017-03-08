@@ -56,7 +56,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 sourceLineNumber: sourceLineNumber
             );
         }
-        
+
         /// <summary>
         /// Gets a response from the CloudFlare API via GET
         /// </summary>
@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         /// <param name="values">Variables to pass into this method</param>
         /// <returns>The CloudFlare API response</returns>
         public T Post<T>(string path, NameValueCollection values = null) => Action<T>("POST", path, values);
-        
+
         /// <summary>
         /// Gets a response from the CloudFlare API via DELETE
         /// </summary>

@@ -94,7 +94,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         else
                             result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host.NormalizeForCache());
                     };
-                    
+
                     var c = addMetric(BosunMetric.Globals.CPU, null);
                     var m = addMetric(BosunMetric.Globals.MemoryUsed, null);
                     var n = addMetric(BosunMetric.Globals.NetBytes, new[] {BosunMetric.Tags.Direction});
@@ -104,7 +104,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }, 60.Seconds(), 60.Minutes()));
             }
         }
-        
+
         public class IntervalCache
         {
             public TimeSpan TimeSpan { get; set; }
@@ -126,7 +126,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
     }
-    
+
     public class BosunMetric
     {
         public BosunMetricType? Type { get; set; }
@@ -291,11 +291,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public List<float[]> Data { get; set; }
 
         private List<GraphPoint> _pointData;
-        public List<GraphPoint> PointData => (_pointData ?? (_pointData = Data.Select(p => new GraphPoint
+        public List<GraphPoint> PointData => _pointData ?? (_pointData = Data.Select(p => new GraphPoint
         {
             DateEpoch = (long) p[0],
             Value = p[1]
-        }).ToList()));
+        }).ToList());
 
         public PointSeries() { }
         public PointSeries(string host)

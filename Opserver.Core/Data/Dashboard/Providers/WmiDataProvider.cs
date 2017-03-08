@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             var nodesList = new List<WmiNode>(names.Count);
             var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
-            
+
             foreach (var nodeName in names)
             {
                 if (exclude?.IsMatch(nodeName) ?? false)

@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Data.SQL
             public long? tempdb_allocations { get; internal set; }
             public long? tempdb_current { get; internal set; }
             public short? blocking_session_id { get; internal set; }
-            
+
             public long? reads { get; internal set; }
             public long? writes { get; internal set; }
             public long? physical_reads { get; internal set; }
@@ -72,6 +72,7 @@ namespace StackExchange.Opserver.Data.SQL
                 get { return _sqlText; }
                 set { _sqlText = value.IsNullOrEmptyReturn("").Replace("<?query --\r\n", "").Replace("\r\n--?>", ""); }
             }
+
             public string SqlCommand { get; internal set; }
             private string _loginName;
             public string LoginName
@@ -79,6 +80,7 @@ namespace StackExchange.Opserver.Data.SQL
                 get { return _loginName; }
                 set { _loginName = _loginLookups.ContainsKey(value) ? _loginLookups[value] : value.Split(StringSplits.BackSlash).Last(); }
             }
+
             public string WaitInfo { get; internal set; }
             public short? Tasks { get; internal set; }
             public string TransactionLogWrites { get; internal set; }
@@ -111,7 +113,7 @@ namespace StackExchange.Opserver.Data.SQL
             public DateTime CollectionTime { get; internal set; }
 
             // TODO: Additional Info
-            
+
             public ShowPlanXML GetShowPlanXML()
             {
                 if (QueryPlan == null) return new ShowPlanXML();
@@ -239,11 +241,11 @@ Exec sp_WhoIsActive @format_output = 0;
             public bool WildcardSearch { get; set; }
 
             public string FilterFieldString => FilterField.ToString().ToLower();
-            
+
             public string FilterValueString => FilterValue.HasValue() ? string.Format("{0}{1}{0}", WildcardSearch ? "%" : "", FilterValue) : "";
 
             //TODO: Sort Order
-            
+
             public ActiveSearchOptions()
             {
                 // Setup the default options

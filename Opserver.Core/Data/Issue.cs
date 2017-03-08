@@ -17,6 +17,7 @@ namespace StackExchange.Opserver.Data
             MonitorStatus = item.MonitorStatus;
             Description = item.MonitorStatusReason;
         }
+
         public Issue(T item, string title, DateTime? date = null) : this(item, date)
         {
             Title = title;
@@ -36,7 +37,6 @@ namespace StackExchange.Opserver.Data
         public DateTime Date { get; set; }
         public MonitorStatus MonitorStatus { get; set; }
         public string MonitorStatusReason => Description;
-
 
         public static List<Issue> GetAll()
         {

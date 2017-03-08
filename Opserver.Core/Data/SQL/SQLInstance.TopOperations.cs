@@ -74,7 +74,7 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 get { return string.Join(string.Empty, PlanHandle.Select(x => x.ToString("X2"))); }
             }
-            
+
             public ShowPlanXML GetShowPlanXML()
             {
                 if (QueryPlan == null) return new ShowPlanXML();
@@ -214,7 +214,7 @@ FROM (SELECT TOP (@MaxResultCount)
             public string Search { get; set; }
             public int? MaxResultCount { get; set; }
             public int? Database { get; set; }
-            
+
             public static readonly TopSearchOptions Default = new TopSearchOptions().SetDefaults();
 
             private const int DefaultMinExecs = 25;

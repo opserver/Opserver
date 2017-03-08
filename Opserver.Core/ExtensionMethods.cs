@@ -53,7 +53,6 @@ namespace StackExchange.Opserver
                 ? s
                 : s.Substring(0, s.Length - toTrim.Length);
 
-
         /// <summary>
         /// returns Url Encoded string
         /// </summary>
@@ -71,7 +70,7 @@ namespace StackExchange.Opserver
             t.IsGenericType
                 ? $"{t.Name.Split(StringSplits.Tilde)[0]}<{string.Join(",", t.GetGenericArguments().Select(a => a.Name))}>"
                 : t.Name;
-        
+
         /// <summary>
         /// A brain dead pluralizer. 1.Pluralize("time") => "1 time"
         /// </summary>
@@ -195,7 +194,7 @@ namespace StackExchange.Opserver
         /// </summary>
         public static string ToRelativeTime(this DateTime dt, bool includeTime = true, bool asPlusMinus = false, DateTime? compareTo = null, bool includeSign = true)
         {
-            var comp = (compareTo ?? DateTime.UtcNow);
+            var comp = compareTo ?? DateTime.UtcNow;
             if (asPlusMinus)
             {
                 return dt <= comp
@@ -242,7 +241,7 @@ namespace StackExchange.Opserver
             if (utcNow.Year == dt.Year) return "on " + dt.ToString(includeTime ? "MMM %d 'at' %H:mmm" : "MMM %d");
             return "on " + dt.ToString(includeTime ? @"MMM %d \'yy 'at' %H:mmm" : @"MMM %d \'yy");
         }
-        
+
         private static string ToRelativeTimeSimple(TimeSpan ts, string sign)
         {
             var delta = ts.TotalSeconds;
@@ -304,7 +303,7 @@ namespace StackExchange.Opserver
 
             return sb.ToStringRecycle().Trim();
         }
-        
+
         /// <summary>
         /// Adds a key/value pair for logging to an exception, one that'll appear in exceptional
         /// </summary>
@@ -500,7 +499,7 @@ namespace StackExchange.Opserver
     {
         private const int DefaultPrecision = 2;
         private static readonly IList<string> Units = new List<string> { "", "K", "M", "G", "T" };
-        
+
         /// <summary>
         /// Formats the value as a filesize in bytes (KB, MB, etc.)
         /// </summary>
@@ -509,7 +508,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this int bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this int bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>
@@ -520,7 +519,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this long bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this long bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>
@@ -531,7 +530,7 @@ namespace StackExchange.Opserver
         /// <param name="precision">How much precision to show, defaults to 2</param>
         /// <param name="zero">String to show if the value is 0</param>
         /// <returns>Filesize and quantifier formatted as a string.</returns>
-        public static string ToSize(this float bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") => 
+        public static string ToSize(this float bytes, string unit = "B", int precision = DefaultPrecision, string zero = "n/a") =>
             ToSize((double)bytes, unit, precision, zero: zero);
 
         /// <summary>
