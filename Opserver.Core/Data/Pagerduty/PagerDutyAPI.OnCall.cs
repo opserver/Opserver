@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                     foreach (var u in p)
                     {
                         u.SharedLevelCount = p.Count(tu => tu.EscalationLevel == u.EscalationLevel);
-                        if (p.Count(pu => pu.AssignedUser?.Id == u.AssignedUser?.Id) > 1)
+                        if (p.Count(pu => pu.User?.Id == u.User?.Id) > 1)
                         {
                             u.MonitorStatus = MonitorStatus.Warning;
                             u.MonitorStatusReason = "Multiple escalations for the same user";
