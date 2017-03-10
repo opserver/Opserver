@@ -331,6 +331,7 @@ namespace StackExchange.Opserver.Data
             /// Gets the number of bits set in a uint, taken from 
             /// https://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
             /// </summary>
+            /// <param name="i">The value to check</param>
             private static int NumberOfSetBitsImpl(uint i)
             {
                 i -= (i >> 1) & 0x55555555U;
@@ -342,6 +343,7 @@ namespace StackExchange.Opserver.Data
             /// Gets the number of bits set in a ulong, taken from 
             /// https://stackoverflow.com/questions/2709430/count-number-of-bits-in-a-64-bit-long-big-integer
             /// </summary>
+            /// <param name="i">The value to check</param>
             private static int NumberOfSetBitsImpl(ulong i)
             {
                 i -= (i >> 1) & 0x5555555555555555UL;

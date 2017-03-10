@@ -17,6 +17,8 @@ namespace StackExchange.Opserver.Helpers
         /// <summary>
         /// Gets an item of type T from local cache
         /// </summary>
+        /// <typeparam name="T">The type to get from cache</typeparam>
+        /// <param name="key">The cache key</param>
         public T Get<T>(string key)
         {
             var o = Cache[key];
@@ -29,12 +31,17 @@ namespace StackExchange.Opserver.Helpers
         /// <summary>
         /// Places an item of type T into local cache for the specified duration
         /// </summary>
+        /// <typeparam name="T">The type to put in cache</typeparam>
+        /// <param name="key">The cache key</param>
+        /// <param name="value">The value to stick in cache</param>
+        /// <param name="duration">The duration of time to cache the <paramref name="value"/></param>
+        /// <param name="sliding">Whether the expiration should be sliding</param>
         public void Set<T>(string key, T value, TimeSpan? duration, bool sliding = false)
         {
-            SetWithPriority<T>(key, value, duration, sliding, CacheItemPriority.Default);
+            SetWithPriority(key, value, duration, sliding, CacheItemPriority.Default);
         }
 
-        public void SetWithPriority<T>(string key, T value, TimeSpan? duration, bool isSliding, CacheItemPriority priority)
+        private void SetWithPriority<T>(string key, T value, TimeSpan? duration, bool isSliding, CacheItemPriority priority)
         {
             RawSet(key, value, duration, isSliding, priority);
         }
@@ -53,10 +60,8 @@ namespace StackExchange.Opserver.Helpers
         /// <summary>
         /// Removes an item from local cache
         /// </summary>
-        public void Remove(string key)
-        {
-            Cache.Remove(key);
-        }
+        /// <param name="key">The cache key</param>
+        public void Remove(string key) => Cache.Remove(key);
 
         public bool SetNXSync<T>(string key, T val)
         {
@@ -64,7 +69,7 @@ namespace StackExchange.Opserver.Helpers
             {
                 if (Get<T>(key).Equals(default(T)))
                 {
-                    Set<T>(key, val, null, false);
+                    Set(key, val, null, false);
                     return true;
                 }
                 return false;

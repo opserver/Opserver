@@ -12,12 +12,14 @@ namespace StackExchange.Opserver.Helpers
     public static class Connection
     {
         /// <summary>
-        /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect
+        /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect.
         /// </summary>
-        /// <param name="connectionString">The connection string to use for the connection</param>
-        /// <param name="connectionTimeout">Milliseconds to wait to connect, optional</param>
-        /// <returns>A READ UNCOMMITTED connection to the specified connection string</returns>
-        public static DbConnection GetOpen(string connectionString, int? connectionTimeout = null)
+        /// <param name="connectionString">The connection string to use for the connection.</param>
+        /// <param name="connectionTimeoutMs">(Optional) Milliseconds to wait to connect.</param>
+        /// <returns>A READ UNCOMMITTED connection to the specified connection string.</returns>
+        /// <exception cref="Exception">Throws if a connection isn't able to be made.</exception>
+        /// <exception cref="TimeoutException">Throws if a connection can't be made in <paramref name="connectionTimeoutMs"/>.</exception>
+        public static DbConnection GetOpen(string connectionString, int? connectionTimeoutMs = null)
         {
             var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
             Action<DbConnection> setReadUncommitted = c =>
@@ -29,7 +31,7 @@ namespace StackExchange.Opserver.Helpers
                     }
                 };
 
-            if (connectionTimeout.GetValueOrDefault(0) == 0)
+            if (connectionTimeoutMs.GetValueOrDefault(0) == 0)
             {
                 conn.OpenAsync();
                 setReadUncommitted(conn);
@@ -48,7 +50,7 @@ namespace StackExchange.Opserver.Helpers
                     catch (SqlException e)
                     {
                         var csb = new SqlConnectionStringBuilder(connectionString);
-                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeoutMs.ToComma()} ms";
                         throw new Exception(sqlException, e)
                                 .AddLoggedData("Timeout", conn.ConnectionTimeout.ToString());
                     }
@@ -59,23 +61,25 @@ namespace StackExchange.Opserver.Helpers
                 {
                     var b = new SqlConnectionStringBuilder { ConnectionString = connectionString };
 
-                    throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.ToComma()} ms");
+                    throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeoutMs.ToComma()} ms");
                 }
             }
             return conn;
         }
 
         /// <summary>
-        /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect
+        /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect.
         /// </summary>
-        /// <param name="connectionString">The connection string to use for the connection</param>
-        /// <param name="connectionTimeout">Milliseconds to wait to connect, optional</param>
-        /// <returns>A READ UNCOMMITTED connection to the specified connection string</returns>
-        public static async Task<DbConnection> GetOpenAsync(string connectionString, int? connectionTimeout = null)
+        /// <param name="connectionString">The connection string to use for the connection.</param>
+        /// <param name="connectionTimeoutMs">(Optional) Milliseconds to wait to connect.</param>
+        /// <returns>A READ UNCOMMITTED connection to the specified connection string.</returns>
+        /// <exception cref="Exception">Throws if a connection isn't able to be made.</exception>
+        /// <exception cref="TimeoutException">Throws if a connection can't be made in <paramref name="connectionTimeoutMs"/>.</exception>
+        public static async Task<DbConnection> GetOpenAsync(string connectionString, int? connectionTimeoutMs = null)
         {
             var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
 
-            if (connectionTimeout.GetValueOrDefault(0) == 0)
+            if (connectionTimeoutMs.GetValueOrDefault(0) == 0)
             {
                 await conn.OpenAsync().ConfigureAwait(false);
                 await conn.SetReadUncommittedAsync().ConfigureAwait(false);
@@ -88,7 +92,7 @@ namespace StackExchange.Opserver.Helpers
                 using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
                 using (var tokenSource = new CancellationTokenSource())
                 {
-                    tokenSource.CancelAfter(connectionTimeout.Value);
+                    tokenSource.CancelAfter(connectionTimeoutMs.Value);
                     try
                     {
                         await conn.OpenAsync(tokenSource.Token).ConfigureAwait(false); // Throwing Null Refs
@@ -98,7 +102,7 @@ namespace StackExchange.Opserver.Helpers
                     {
                         conn.Close();
                         var csb = new SqlConnectionStringBuilder(connectionString);
-                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource}, timeout out at {connectionTimeout.ToComma()} ms";
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource}, timeout out at {connectionTimeoutMs.ToComma()} ms";
                         throw new Exception(sqlException, e);
                     }
                     catch (SqlException e)
@@ -112,7 +116,7 @@ namespace StackExchange.Opserver.Helpers
                     {
                         tokenSource.Cancel();
                         var b = new SqlConnectionStringBuilder {ConnectionString = connectionString};
-                        throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeout.Value.ToComma()} ms");
+                        throw new TimeoutException($"Timeout expired connecting to {b.InitialCatalog} on {b.DataSource} on in the alloted {connectionTimeoutMs.Value.ToComma()} ms");
                     }
                 }
             }

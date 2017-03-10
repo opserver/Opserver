@@ -3,6 +3,7 @@
     /// <summary>
     /// For instances where you want a singleton static instance of a poller. For example a single API endpoint like CloudFlare or pagerduty.
     /// </summary>
+    /// <typeparam name="T">The type of node (of which there will be a single instance)</typeparam>
     public abstract class SinglePollNode<T> : PollNode where T : SinglePollNode<T>, new()
     {
         public static T Instance { get; } = new T();

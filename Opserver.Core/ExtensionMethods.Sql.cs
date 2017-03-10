@@ -113,6 +113,10 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Takes a SQL query, and inserts the path and line in as a comment. Ripped right out of Stack Overflow proper.
         /// </summary>
+        /// <param name="sql">The SQL that needs commenting</param>
+        /// <param name="path">The path of the calling file</param>
+        /// <param name="lineNumber">The line number of the calling function</param>
+        /// <param name="comment">The specific manual comment to add</param>
         private static string MarkSqlString(string sql, string path, int lineNumber, string comment)
         {
             if (path.IsNullOrEmpty() || lineNumber == 0) return sql;

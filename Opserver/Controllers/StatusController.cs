@@ -145,16 +145,16 @@ namespace StackExchange.Opserver.Controllers
         public void SetTitle(string title)
         {
             title = title.HtmlEncode();
-            var pageTitle = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
-            ViewData[ViewDataKeys.PageTitle] = pageTitle;
+            ViewData[ViewDataKeys.PageTitle] = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
         }
 
         /// <summary>
         /// returns ContentResult with the parameter 'content' as its payload and "text/plain" as media type.
         /// </summary>
-        protected ContentResult TextPlain(object content)
+        /// <param name="content">The text content to render</param>
+        protected ContentResult TextPlain(string content)
         {
-            return new ContentResult { Content = content.ToString(), ContentType = "text/plain" };
+            return new ContentResult { Content = content, ContentType = "text/plain" };
         }
 
         protected ContentResult ContentNotFound(string message = null)

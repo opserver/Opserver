@@ -17,6 +17,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Updates this settings object, return true if there was an actual change
         /// </summary>
+        /// <param name="newSettings">The new settings object (freshly loaded)</param>
         public virtual bool UpdateSettings(T newSettings)
         {
             //Current.LogException("Settings updated! " + GetType(), null);

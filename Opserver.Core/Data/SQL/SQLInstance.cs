@@ -102,13 +102,15 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
         /// </summary>
-        protected Task<DbConnection> GetConnectionAsync(int timeout = 5000) => Connection.GetOpenAsync(ConnectionString, connectionTimeout: timeout);
+        /// <param name="timeoutMs">Maximum milliseconds to wait when opening the connection.</param>
+        protected Task<DbConnection> GetConnectionAsync(int timeoutMs = 5000) => Connection.GetOpenAsync(ConnectionString, connectionTimeoutMs: timeoutMs);
 
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
         /// TODO: Remove with async views in MVC Core
         /// </summary>
-        protected DbConnection GetConnection(int timeout = 5000) => Connection.GetOpen(ConnectionString, connectionTimeout: timeout);
+        /// <param name="timeoutMs">Maximum milliseconds to wait when opening the connection.</param>
+        protected DbConnection GetConnection(int timeoutMs = 5000) => Connection.GetOpen(ConnectionString, connectionTimeoutMs: timeoutMs);
 
         private string GetCacheKey(string itemName) { return $"SQL-Instance-{Name}-{itemName}"; }
 

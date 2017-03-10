@@ -8,6 +8,7 @@ namespace StackExchange.Opserver.Data.SQL
         /// <summary>
         /// Removes a query plan from the cache
         /// </summary>
+        /// <param name="planHandle">The handle of the plan to fetch</param>
         public async Task<int> RemovePlanAsync(byte[] planHandle)
         {
             try

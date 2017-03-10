@@ -112,8 +112,10 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
         }
 
         /// <summary>
-        /// Get all current errors, possibly per application
+        /// Get all current errors, possibly per application.
         /// </summary>
+        /// <param name="maxPerApp">Count of exceptions to fetch per application.</param>
+        /// <param name="apps">(Optional) The list of applications to fetch exceptions for.</param>
         /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
         public Task<List<Error>> GetAllErrorsAsync(int maxPerApp, IEnumerable<string> apps = null)
         {

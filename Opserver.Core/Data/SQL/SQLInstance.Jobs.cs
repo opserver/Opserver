@@ -14,18 +14,28 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2.Minutes()));
 
         /// <summary>
-        /// Enables or disables an agent job
+        /// Enables or disables a SQL agent job
         /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
+        /// <param name="enabled">Whether to enable or disable the job (<c>true</c>: enable, <c>false</c>: disable)</param>
         public Task<bool> ToggleJobAsync(Guid jobId, bool enabled)
         {
             return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
         }
 
+        /// <summary>
+        /// Starts a SQL agent job
+        /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
         public Task<bool> StartJobAsync(Guid jobId)
         {
             return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
         }
 
+        /// <summary>
+        /// Stops a SQL agent job
+        /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
         public Task<bool> StopJobAsync(Guid jobId)
         {
             return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));

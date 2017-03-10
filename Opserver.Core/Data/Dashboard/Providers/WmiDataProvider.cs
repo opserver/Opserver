@@ -27,15 +27,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         /// <summary>
-        /// Make list of nodes as per configuration. 
-        /// When adding, a node's ip address is resolved via Dns.
+        /// Make list of nodes as per configuration.
+        /// When adding, a node's IP address is resolved via DNS.
         /// </summary>
-        private IEnumerable<WmiNode> InitNodeList(IList<string> names)
+        /// <param name="nodeNames">The names of the server nodes to monitor.</param>
+        private IEnumerable<WmiNode> InitNodeList(IList<string> nodeNames)
         {
-            var nodesList = new List<WmiNode>(names.Count);
+            var nodesList = new List<WmiNode>(nodeNames.Count);
             var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
 
-            foreach (var nodeName in names)
+            foreach (var nodeName in nodeNames)
             {
                 if (exclude?.IsMatch(nodeName) ?? false)
                 {

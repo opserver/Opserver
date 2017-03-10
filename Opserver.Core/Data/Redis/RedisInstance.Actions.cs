@@ -11,6 +11,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Slave this instance to another instance
         /// </summary>
+        /// <param name="address">The address of the <see cref="RedisInstance"/> to slave to.</param>
         public async Task<bool> SlaveToAsync(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
@@ -24,7 +25,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
         /// <summary>
-        /// Promote this instance to a master
+        /// Promote this instance to a master.
         /// </summary>
         public string PromoteToMaster()
         {
@@ -36,8 +37,10 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
         /// <summary>
-        /// Get the keys matching a pattern from this instance
+        /// Get the keys matching a pattern from this instance.
         /// </summary>
+        /// <param name="db">The database ID to purge from.</param>
+        /// <param name="key">The key to purge.</param>
         public async Task<int> KeyPurge(int db, string key)
         {
             if (db == -1)
@@ -74,10 +77,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// <summary>
         /// Gets the current value of the StackExchange.Redis tiebreaker key on this node.
         /// </summary>
-        public Task<string> GetSERedisTiebreakerAsync()
-        {
-            return GetSERedisTiebreakerAsync(_connection);
-        }
+        public Task<string> GetSERedisTiebreakerAsync() => GetSERedisTiebreakerAsync(_connection);
 
         private async Task<string> GetSERedisTiebreakerAsync(IConnectionMultiplexer conn)
         {
@@ -101,16 +101,14 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
         /// <summary>
-        /// Instructs the redis node to broadcast a reconfiguration request to all StackExchange.Redis clients.
+        /// Instructs the redis node to broadcast a reconfiguration request to all StackExchange.Redis clients
         /// </summary>
-        public Task<long> PublishSERedisReconfigureAsync()
-        {
-            return _connection.PublishReconfigureAsync();
-        }
+        public Task<long> PublishSERedisReconfigureAsync() => _connection.PublishReconfigureAsync();
 
         /// <summary>
         /// Kill a particular client's connection
         /// </summary>
+        /// <param name="address">The address or the client to kill</param>
         public async Task<bool> KillClientAsync(string address)
         {
             var endpoint = EndPointCollection.TryParse(address);

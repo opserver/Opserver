@@ -77,14 +77,15 @@ namespace StackExchange.Opserver.Data.PagerDuty
         }
 
         /// <summary>
-        /// Gets content from the PagerDuty API
+        /// Gets content from the PagerDuty API.
         /// </summary>
-        /// <typeparam name="T">Type to return</typeparam>
-        /// <param name="path">The path to return, including any query string</param>
-        /// <param name="getFromJson"></param>
-        /// <param name="httpMethod"></param>
-        /// <param name="data"></param>
-        /// <returns></returns>
+        /// <typeparam name="T">The Type to return (deserialized from the returned JSON).</typeparam>
+        /// <param name="path">The path to return, including any query string.</param>
+        /// <param name="getFromJson">The deserialize function.</param>
+        /// <param name="httpMethod">The HTTP method to use for this API call.</param>
+        /// <param name="data">Data to serialize for the request.</param>
+        /// <param name="extraHeaders">Headers to add to the API request.</param>
+        /// <returns>The deserialized content from the PagerDuty API.</returns>
         public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null, Dictionary<string,string> extraHeaders = null)
         {
             const string baseUrl = "https://api.pagerduty.com/";

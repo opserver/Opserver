@@ -73,8 +73,10 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="innerException">The inner exception to log.</param>
         public static void LogException(string message, Exception innerException)
         {
             var ex = new Exception(message, innerException);
@@ -82,18 +84,22 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
-        public static void LogException(Exception ex, string key = null)
+        /// <param name="exception">The <see cref="Exception"/> to log.</param>
+        /// <param name="key">(Optional) The throttle cache key.</param>
+        public static void LogException(Exception exception, string key = null)
         {
             if (!ShouldLog(key)) return;
-            ErrorStore.LogException(ex, Context, appendFullStackTrace: true);
+            ErrorStore.LogException(exception, Context, appendFullStackTrace: true);
             RecordLogged(key);
         }
 
         /// <summary>
-        /// record that an exception was logged in local cache for the specified length of time (default of 30 minutes)
+        /// Record that an exception was logged in local cache for the specified length of time.
         /// </summary>
+        /// <param name="key">The throttle cache key.</param>
+        /// <param name="relogDelay">The duration of time to wait before logging again (default: 30 minutes).</param>
         private static void RecordLogged(string key, TimeSpan? relogDelay = null)
         {
             relogDelay = relogDelay ?? 30.Minutes();
@@ -102,15 +108,13 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// see if an exception with the given key should be logged, based on if it was logged recently
+        /// See if an exception with the given key should be logged, based on if it was logged recently.
         /// </summary>
+        /// <param name="key">The throttle cache key.</param>
         private static bool ShouldLog(string key)
         {
             if (key.IsNullOrEmpty()) return true;
             return !LocalCache.Get<bool?>("ExceptionLogRetry-"+key).GetValueOrDefault();
         }
-
-        public static void LogRequest() { Interlocked.Increment(ref requestCount); }
-        private static int requestCount;
     }
 }

@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Data.HAProxy
     {
         public static bool Enabled => Groups.Count > 0;
         public static List<HAProxyGroup> Groups { get; }
-        
+
         static HAProxyModule()
         {
             Groups = Current.Settings.HAProxy.Groups.Select(g => new HAProxyGroup(g))

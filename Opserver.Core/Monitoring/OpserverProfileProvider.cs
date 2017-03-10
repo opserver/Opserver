@@ -77,7 +77,7 @@ namespace StackExchange.Opserver.Monitoring
         {
             var profiler = GetContextProfiler();
             if (profiler == null) return;
-            
+
             StopProfiler(profiler);
             SaveProfiler(profiler);
             CallContext.LogicalSetData(LocalContextKey, null);

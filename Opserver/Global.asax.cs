@@ -102,7 +102,6 @@ namespace StackExchange.Opserver
 
         protected void Application_BeginRequest()
         {
-            Current.LogRequest();
             if (ShouldProfile())
                 MiniProfiler.Start();
         }

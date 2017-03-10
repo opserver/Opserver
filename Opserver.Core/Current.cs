@@ -10,8 +10,10 @@ namespace StackExchange.Opserver
         public static SettingsProvider Settings => SettingsProvider.Current;
 
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
+        /// <param name="message">The exception message to log.</param>
+        /// <param name="innerException">The exception to wrap in an outer exception with <paramref name="message"/>.</param>
         public static void LogException(string message, Exception innerException)
         {
             var ex = new Exception(message, innerException);
@@ -19,37 +21,42 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
-        public static void LogException(Exception ex, string key = null)
+        /// <param name="exception">The <see cref="Exception"/> to log.</param>
+        /// <param name="key">(Optional) The throttle cache key.</param>
+        public static void LogException(Exception exception, string key = null)
         {
             if (!ShouldLog(key)) return;
 
-            var deserializationException = ex as DeserializationException;
+            var deserializationException = exception as DeserializationException;
             if (deserializationException != null)
             {
-                ex.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
+                exception.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
                   .AddLoggedData("Position", deserializationException.Position.ToString())
                   .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
             }
 
-            ErrorStore.LogExceptionWithoutContext(ex, appendFullStackTrace: true);
+            ErrorStore.LogExceptionWithoutContext(exception, appendFullStackTrace: true);
             RecordLogged(key);
         }
 
         /// <summary>
-        /// record that an exception was logged in local cache for the specified length of time (default of 30 minutes)
+        /// Record that an exception was logged in local cache for the specified length of time.
         /// </summary>
-        private static void RecordLogged(string key, TimeSpan? reLogDelay = null)
+        /// <param name="key">The throttle cache key.</param>
+        /// <param name="relogDelay">The duration of time to wait before logging again (default: 30 minutes).</param>
+        private static void RecordLogged(string key, TimeSpan? relogDelay = null)
         {
-            reLogDelay = reLogDelay ?? 30.Minutes();
-            if (key.IsNullOrEmpty() || !reLogDelay.HasValue) return;
-            LocalCache.Set("ExceptionLogRetry-" + key, true, reLogDelay.Value);
+            relogDelay = relogDelay ?? 30.Minutes();
+            if (key.IsNullOrEmpty() || !relogDelay.HasValue) return;
+            LocalCache.Set("ExceptionLogRetry-" + key, true, relogDelay.Value);
         }
 
         /// <summary>
-        /// see if an exception with the given key should be logged, based on if it was logged recently
+        /// See if an exception with the given key should be logged, based on if it was logged recently.
         /// </summary>
+        /// <param name="key">The throttle cache key.</param>
         private static bool ShouldLog(string key)
         {
             if (key.IsNullOrEmpty()) return true;
