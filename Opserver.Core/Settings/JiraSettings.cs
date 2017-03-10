@@ -6,7 +6,7 @@ namespace StackExchange.Opserver
 {
     public class JiraSettings : Settings<JiraSettings>
     {
-        public override bool Enabled => Actions.Any();
+        public override bool Enabled => Actions.Count > 0;
 
         public List<JiraAction> Actions { get; set; } = new List<JiraAction>();
 
@@ -32,18 +32,16 @@ namespace StackExchange.Opserver
         /// Default project key for all actions
         /// </summary>
         public string DefaultProjectKey { get; set; }
-        
+
         public List<JiraAction> GetActionsForApplication(string application)
         {
             var isValidApp = Applications.Any(a => a.Equals(application, StringComparison.OrdinalIgnoreCase));
             if (!isValidApp)
                 return null;
-            var actions = Actions.Where(i => i.Applications == null
+            return Actions.Where(i => i.Applications == null
                 || i.Applications.Count == 0
                 || i.Applications.Contains(application, StringComparer.OrdinalIgnoreCase)
                 ).Select(i => i).ToList();
-
-            return actions;
         }
     }
 
@@ -89,18 +87,15 @@ namespace StackExchange.Opserver
         /// </summary>
         public string Labels { get; set; }
 
-        public List<object> GetComponentsForApplication(string application)
+        public List<string> GetComponentsForApplication(string application)
         {
             if (Components == null || Components.Count == 0)
-                return new List<object>();
+                return new List<string>();
 
-            var components = Components
+            return Components
                 .Where(c => c.Application != null && application.Equals(c.Application, StringComparison.OrdinalIgnoreCase))
-                .Select(c => c).ToList();
-
-
-            return (from c in components
-                    select new { name = c.Name }).ToList<object>();
+                .Select(c => c.Name)
+                .ToList();
         }
     }
 

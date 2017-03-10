@@ -29,14 +29,11 @@ namespace StackExchange.Opserver.Models.Security
         public abstract bool InGroups(string groupNames, string accountName);
         public abstract bool ValidateUser(string userName, string password);
 
-        public virtual List<string> GetGroupMembers(string groupName)
-        {
-            return new List<string>();
-        }
+        public virtual List<string> GetGroupMembers(string groupName) => new List<string>();
 
         public virtual void PurgeCache() { }
 
-        public List<IPNet> InternalNetworks;
+        public readonly List<IPNet> InternalNetworks;
         protected SecurityProvider()
         {
             InternalNetworks = new List<IPNet>();

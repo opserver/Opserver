@@ -92,7 +92,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                                 .ToDictionary(s => s.Key.NormalizeForCache(), s => s.ToList());
                         }
                         else
+                        {
                             result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host.NormalizeForCache());
+                        }
                     };
 
                     var c = addMetric(BosunMetric.Globals.CPU, null);
@@ -167,11 +169,15 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public static class TagCombos
         {
             public static readonly Dictionary<string, string>
-                AllNetDirections = new Dictionary<string, string> {{Tags.Direction, "*"}},
-                AllDisks = new Dictionary<string, string> {{Tags.Disk, "*"}};
+                AllNetDirections = new Dictionary<string, string> {[Tags.Direction] = "*" },
+                AllDisks = new Dictionary<string, string> {[Tags.Disk] = "*" };
 
             public static Dictionary<string, string> AllDirectionsForInterface(string ifaceId)
-                => new Dictionary<string, string> {{Tags.Direction, "*"}, {Tags.IFace, ifaceId}};
+                => new Dictionary<string, string>
+                {
+                    [Tags.Direction] = "*",
+                    [Tags.IFace] = ifaceId
+                };
         }
 
         public static bool IsCounter(string metric, string host)
@@ -239,9 +245,9 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
     public enum BosunMetricType
     {
-        gauge,
-        counter,
-        rate
+        gauge = 0,
+        counter = 1,
+        rate = 2
     }
 
     public class BosunMetricDescription

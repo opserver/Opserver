@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data
     {
         private static readonly object _addLock = new object();
         private static readonly object _pollAllLock = new object();
-        public static HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
+        public static readonly HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
 
         private static Thread _globalPollingThread;
         private static volatile bool _shuttingDown;
@@ -53,15 +53,12 @@ namespace StackExchange.Opserver.Data
         public static void StartPolling()
         {
             _startTime = DateTime.UtcNow;
-            if (_globalPollingThread == null)
-            {
-                _globalPollingThread = new Thread(MonitorPollingLoop)
+            _globalPollingThread = _globalPollingThread ?? new Thread(MonitorPollingLoop)
                 {
                     Name = "GlobalPolling",
                     Priority = ThreadPriority.Lowest,
                     IsBackground = true
                 };
-            }
             if (!_globalPollingThread.IsAlive)
                 _globalPollingThread.Start();
         }

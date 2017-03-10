@@ -48,9 +48,11 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 var lastRole = Replication?.RedisInstanceRole;
                 // If we think we're a master and the last poll failed - look to other nodes for info
-                if (!Info.LastPollSuccessful && lastRole == RedisInfo.RedisInstanceRole.Master &&
-                    RedisModule.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                if (!Info.LastPollSuccessful && lastRole == RedisInfo.RedisInstanceRole.Master
+                    && RedisModule.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                {
                     return RedisInfo.RedisInstanceRole.Slave;
+                }
                 return lastRole ?? RedisInfo.RedisInstanceRole.Unknown;
             }
         }

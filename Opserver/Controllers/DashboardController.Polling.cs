@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 1, VaryByParam = "node", VaryByContentEncoding = "gzip;deflate")]
         [Route("dashboard/node/poll/cpu")]
-        public async Task<JsonResult> PollCPU(string id = null, string node = null, string range = null)
+        public async Task<JsonResult> PollCPU(string id = null, string node = null)
         {
             var n = id.HasValue() ? DashboardModule.GetNodeById(id) : DashboardModule.GetNodeByName(node);
             if (n == null)

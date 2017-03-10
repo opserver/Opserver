@@ -172,12 +172,12 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
     public enum ZoneStatus
     {
-        [DataMember(Name = "active")] Active,
-        [DataMember(Name = "Pending")] Pending,
-        [DataMember(Name = "initializing")] Initializing,
-        [DataMember(Name = "moved")] Moved,
-        [DataMember(Name = "deleted")] Deleted,
-        [DataMember(Name = "deactivated")] Deactivated
+        [DataMember(Name = "active")] Active = 0,
+        [DataMember(Name = "Pending")] Pending = 1,
+        [DataMember(Name = "initializing")] Initializing = 2,
+        [DataMember(Name = "moved")] Moved = 3,
+        [DataMember(Name = "deleted")] Deleted = 4,
+        [DataMember(Name = "deactivated")] Deactivated = 5
     }
 
     public class CloudFlareDNSRecord
@@ -243,15 +243,15 @@ namespace StackExchange.Opserver.Data.CloudFlare
     public enum DNSRecordType
     {
         // ReSharper disable InconsistentNaming
-        A,
-        AAAA,
-        CNAME,
-        TXT,
-        SRV,
-        LOC,
-        MX,
-        NS,
-        SPF
+        A = 0,
+        AAAA = 1,
+        CNAME = 2,
+        TXT = 3,
+        SRV = 4,
+        LOC = 5,
+        MX = 6,
+        NS = 7,
+        SPF = 8
         // ReSharper restore InconsistentNaming
     }
 }

@@ -5,7 +5,7 @@ using System.Net;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    partial class WmiDataProvider : DashboardDataProvider<WMISettings>
+    internal partial class WmiDataProvider : DashboardDataProvider<WMISettings>
     {
         private readonly WMISettings _config;
         private readonly List<WmiNode> _wmiNodes = new List<WmiNode>();
@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     var hostEntry = Dns.GetHostEntry(node.Name);
-                    if (hostEntry.AddressList.Any())
+                    if (hostEntry.AddressList.Length > 0)
                     {
                         node.Ip = hostEntry.AddressList[0].ToString();
                         node.Status = NodeStatus.Active;

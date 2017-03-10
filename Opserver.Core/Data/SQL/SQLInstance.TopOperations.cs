@@ -70,10 +70,7 @@ namespace StackExchange.Opserver.Data.SQL
             public long LastReturnedRows { get; internal set; }
             public string CompiledOnDatabase { get; internal set; }
 
-            public string ReadablePlanHandle
-            {
-                get { return string.Join(string.Empty, PlanHandle.Select(x => x.ToString("X2"))); }
-            }
+            public string ReadablePlanHandle => string.Concat(PlanHandle.Select(x => x.ToString("X2")));
 
             public ShowPlanXML GetShowPlanXML()
             {
@@ -173,23 +170,23 @@ FROM (SELECT TOP (@MaxResultCount)
 
         public enum TopSorts
         {
-            [Description("Average CPU")] AvgCPU,
-            [Description("Average CPU per minute")] AvgCPUPerMinute,
-            [Description("Total CPU")] TotalCPU,
-            [Description("Percent of Total CPU")] PercentCPU,
-            [Description("Average Duration")] AvgDuration,
-            [Description("Total Duration")] TotalDuration,
-            [Description("Percent of Total Duration")] PercentDuration,
-            [Description("Average Reads")] AvgReads,
-            [Description("Total Reads")] TotalReads,
-            [Description("Average Rows")] AvgReturnedRows,
-            [Description("Total Rows")] TotalReturnedRows,
-            [Description("Percent of Total Reads")] PercentReads,
-            [Description("Execution Count")] ExecutionCount,
-            [Description("Percent of Total Executions")] PercentExecutions,
-            [Description("Executions per minute")] ExecutionsPerMinute,
-            [Description("Plan Creation Time")] PlanCreationTime,
-            [Description("Last Execution Time")] LastExecutionTime
+            [Description("Average CPU")] AvgCPU = 0,
+            [Description("Average CPU per minute")] AvgCPUPerMinute = 1,
+            [Description("Total CPU")] TotalCPU = 2,
+            [Description("Percent of Total CPU")] PercentCPU = 3,
+            [Description("Average Duration")] AvgDuration = 4,
+            [Description("Total Duration")] TotalDuration = 5,
+            [Description("Percent of Total Duration")] PercentDuration = 6,
+            [Description("Average Reads")] AvgReads = 7,
+            [Description("Total Reads")] TotalReads = 8,
+            [Description("Average Rows")] AvgReturnedRows = 9,
+            [Description("Total Rows")] TotalReturnedRows = 10,
+            [Description("Percent of Total Reads")] PercentReads = 11,
+            [Description("Execution Count")] ExecutionCount = 12,
+            [Description("Percent of Total Executions")] PercentExecutions = 13,
+            [Description("Executions per minute")] ExecutionsPerMinute = 14,
+            [Description("Plan Creation Time")] PlanCreationTime = 15,
+            [Description("Last Execution Time")] LastExecutionTime = 16
         }
 
         public class TopSearchOptions
@@ -252,7 +249,7 @@ FROM (SELECT TOP (@MaxResultCount)
                 if (MinLastRunDate.HasValue) clauses.Add("qs.last_execution_time >= @MinLastRunDate");
                 if (Database.HasValue) clauses.Add("Cast(pa.value as Int) = @Database");
 
-                return clauses.Any() ? "\n       And " + string.Join("\n       And ", clauses) : "";
+                return clauses.Count > 0 ? "\n       And " + string.Join("\n       And ", clauses) : "";
             }
 
             public string ToSQLSearch()

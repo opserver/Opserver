@@ -95,7 +95,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/similar")]
-        public async Task<ActionResult> Similar(string group, string log, Guid id, ExceptionSorts? sort = null, bool truncate = true, bool byTime = false)
+        public async Task<ActionResult> Similar(string group, string log, Guid id, ExceptionSorts? sort = null, bool byTime = false)
         {
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
@@ -131,7 +131,7 @@ namespace StackExchange.Opserver.Controllers
                 return RedirectToAction(nameof(Exceptions), new { group, log });
 
             var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value);
-            if (!errors.Any() && !showDeleted)
+            if (errors.Count == 0 && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
                 return RedirectToAction(nameof(Search), new { q, group, log, showDeleted = true });
@@ -262,7 +262,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> JiraAction(string log, Guid id, int actionid, bool redirect = false)
+        public async Task<ActionResult> JiraAction(string log, Guid id, int actionid)
         {
             var e = await GetError(log, id);
             var user = Current.User;

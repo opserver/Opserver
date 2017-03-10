@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public Cache<List<PagerDutySchedule>> AllSchedules =>
             _schedules ?? (_schedules = GetPagerDutyCache(10.Minutes(),
                 () => GetFromPagerDutyAsync("schedules",
-                        response => JSON.Deserialize<PagerDutyScheduleResponse>(response.ToString(), JilOptions).Schedules)
+                        response => JSON.Deserialize<PagerDutyScheduleResponse>(response, JilOptions).Schedules)
             ));
 
         private Cache<List<PagerDutyScheduleOverride>> _primaryScheduleOverrides;
@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     start,
                     end,
-                    user = new 
+                    user = new
                     {
                         id = pdPerson.Id,
                         type = "user_reference"
@@ -74,24 +74,24 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             };
             var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
-                getFromJson: response => response.ToString(), httpMethod: "POST", data: overrideData).ConfigureAwait(false);
+                getFromJson: response => response, httpMethod: "POST", data: overrideData).ConfigureAwait(false);
 
             await PagerDutyAPI.Instance.OnCallInfo.PollAsync(true).ConfigureAwait(false);
             await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
             return result;
         }
-        
+
         public Task<List<PagerDutyScheduleOverride>> GetOverridesAsync()
         {
             string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
                     until = DateTime.UtcNow.AddDays(1).ToString("s");
 
             return PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
-                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response.ToString(), PagerDutyAPI.JilOptions).Overrides);
+                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response, PagerDutyAPI.JilOptions).Overrides);
         }
     }
 
-    class PagerDutyScheduleOverrideResponse
+    internal class PagerDutyScheduleOverrideResponse
     {
         [DataMember(Name = "total")]
         public int Total { get; set; }

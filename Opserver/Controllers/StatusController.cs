@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Controllers
             }
 
             var iSettings = SettingsModule as Settings;
-            if (iSettings != null && !iSettings.Enabled)
+            if (iSettings?.Enabled == false)
                 filterContext.Result = DefaultAction();
             else
                 base.OnActionExecuting(filterContext);

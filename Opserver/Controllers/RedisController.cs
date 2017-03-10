@@ -51,7 +51,6 @@ namespace StackExchange.Opserver.Controllers
             return View(vd);
         }
 
-
         [Route("redis/instance/get-config/{host}-{port}-config.zip")]
         public ActionResult DownloadConfiguration(string host, int port)
         {

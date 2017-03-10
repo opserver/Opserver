@@ -57,11 +57,6 @@ namespace StackExchange.Opserver.Data
             return JsonConvert.SerializeObject(cacheToSerialize, _serializationSettings);
         }
 
-        public class NodeList
-        {
-            public List<NodeData> Nodes;
-        }
-
         public class NodeData
         {
             public string Name;

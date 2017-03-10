@@ -2,9 +2,9 @@
 {
     public enum HardwareType
     {
-        Unknown,
-        Physical,
-        VirtualMachine,
-        Network
+        Unknown = 0,
+        Physical = 1,
+        VirtualMachine = 2,
+        Network = 3
     }
 }

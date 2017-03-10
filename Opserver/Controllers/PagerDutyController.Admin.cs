@@ -25,9 +25,11 @@ namespace StackExchange.Opserver.Controllers
 
             var currentPrimarySchedule = PagerDutyAPI.Instance.PrimarySchedule;
             if (currentPrimarySchedule == null)
+            {
                 return ContentNotFound(PagerDutyAPI.Instance.Settings.PrimaryScheduleName.IsNullOrEmpty()
-                    ? "PagerDuty PrimarySchedule is not defined (\"PrimaryScheduleName\" in config)."
-                    : "PagerDuty Schedule '" + PagerDutyAPI.Instance.Settings.PrimaryScheduleName + "' not found.");
+                   ? "PagerDuty PrimarySchedule is not defined (\"PrimaryScheduleName\" in config)."
+                   : "PagerDuty Schedule '" + PagerDutyAPI.Instance.Settings.PrimaryScheduleName + "' not found.");
+            }
 
             start = start ?? DateTime.UtcNow;
 

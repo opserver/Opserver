@@ -31,7 +31,6 @@ namespace StackExchange.Opserver
 
         [ConfigurationProperty("InternalNetworks")]
         public SettingsCollection<Network> InternalNetworks => this["InternalNetworks"] as SettingsCollection<Network>;
-        
 
         public class Network : ConfigurationElement, ISettingsElementNamed
         {

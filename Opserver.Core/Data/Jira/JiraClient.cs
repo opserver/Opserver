@@ -69,21 +69,21 @@ namespace StackExchange.Opserver.Data.Jira
 
             var fields = new Dictionary<string, object>
             {
-                {"project", new {key = projectKey}},
-                {"issuetype", new {name = action.Name}},
-                {"summary", error.Message.CleanCRLF().TruncateWithEllipsis(255)},
-                {"description", RenderDescription(error, accountName)}
+                ["project"] = new { key = projectKey },
+                ["issuetype"] = new { name = action.Name },
+                ["summary"] = error.Message.CleanCRLF().TruncateWithEllipsis(255),
+                ["description"] = RenderDescription(error, accountName)
             };
             var components = action.GetComponentsForApplication(error.ApplicationName);
 
-            if (components != null && components.Count > 0)
+            if (components?.Count > 0)
                 fields.Add("components", components);
 
             var labels = action.Labels.IsNullOrEmpty()
                 ? null
                 : action.Labels.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
-            if (labels != null && labels.Length > 0)
+            if (labels?.Length > 0)
                 fields.Add("labels", labels);
 
             var payload = new { fields };

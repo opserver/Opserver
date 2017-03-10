@@ -7,10 +7,10 @@ namespace StackExchange.Opserver.Views.HAProxy
     {
         public enum Views
         {
-            Admin,
-            Dashboard,
-            Detailed,
-            Traffic
+            Admin = 0,
+            Dashboard = 1,
+            Detailed = 2,
+            Traffic = 3
         }
 
         public Views View { get; set; }

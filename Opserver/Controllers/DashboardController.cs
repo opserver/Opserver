@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("dashboard/json")]
-        public ActionResult DashboardJson(string filter)
+        public ActionResult DashboardJson()
         {
             var categories = DashboardModule.AllNodes
                 .GroupBy(n => n.Category)

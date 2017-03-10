@@ -33,11 +33,7 @@ namespace StackExchange.Opserver.Models.Security
             var groups = groupNames.Split(StringSplits.Comma_SemiColon);
             if (groupNames.Length == 0) return false;
 
-            return groups.Any(g =>
-                                  {
-                                      var members = GetGroupMembers(g);
-                                      return members != null && members.Contains(accountName, StringComparer.InvariantCultureIgnoreCase);
-                                  });
+            return groups.Any(g => GetGroupMembers(g)?.Contains(accountName, StringComparer.InvariantCultureIgnoreCase) == true);
         }
 
         public override void PurgeCache()
@@ -66,7 +62,7 @@ namespace StackExchange.Opserver.Models.Security
 
         public T RunCommand<T>(Func<PrincipalContext, T> command, int retries = 3)
         {
-            if (Servers != null && Servers.Any())
+            if (Servers?.Count > 0)
             {
                 foreach (var s in Servers) // try all servers in order, the first success will win
                 {
@@ -75,7 +71,9 @@ namespace StackExchange.Opserver.Models.Security
                         using (var pc = UserAuth
                                             ? new PrincipalContext(ContextType.Domain, s, AuthUser, AuthPassword)
                                             : new PrincipalContext(ContextType.Domain, s))
+                        {
                             return command(pc);
+                        }
                     }
                     catch (Exception ex)
                     {

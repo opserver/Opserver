@@ -18,8 +18,8 @@ namespace StackExchange.Opserver.Data.Redis
                 .Where(rsi => rsi.TryAddToGlobalPollers())
                 .ToList();
         }
-        
-        public override bool IsMember(string node) 
+
+        public override bool IsMember(string node)
         {
             foreach (var i in Instances)
             {
@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Data.Redis
                 allServerInstances?.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
 
                 // Add instances defined on this server
-                if (s.Instances.Any())
+                if (s.Instances.Count > 0)
                     s.Instances.ForEach(i => result.Add(new RedisConnectionInfo(s.Name, i)));
 
                 // If we have no instances added at this point, defaults it is!

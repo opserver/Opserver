@@ -14,7 +14,6 @@ namespace StackExchange.Opserver.Views.Elastic
         public ElasticCluster CurrentCluster { get; set; }
         public ElasticCluster.NodeInfo CurrentNode { get; set; }
 
-
         //TODO: Global settings pre-websockets
         public int Refresh { get; set; } = 10;
         public bool WarningsOnly { get; set; }
@@ -23,11 +22,11 @@ namespace StackExchange.Opserver.Views.Elastic
 
         public enum Views
         {
-            AllClusters,
-            Cluster,
-            Node,
-            Indexes,
-            Shards
+            AllClusters = 0,
+            Cluster = 1,
+            Node = 2,
+            Indexes = 3,
+            Shards = 4
         }
     }
 }

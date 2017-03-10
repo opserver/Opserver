@@ -70,13 +70,13 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 var orig = StatementTextWithoutInitialParams;
-                return orig == "" ? "" : initParamsTrimRegex.Replace(orig, "").Trim();
+                return orig?.Length == 0 ? string.Empty : initParamsTrimRegex.Replace(orig, string.Empty).Trim();
             }
         }
 
         private string GetDeclareStatement(QueryPlanType queryPlan)
         {
-            if (queryPlan?.ParameterList == null || !queryPlan.ParameterList.Any()) return "";
+            if (queryPlan?.ParameterList == null || queryPlan.ParameterList.Length == 0) return "";
 
             var result = StringBuilderCache.Get();
             var paramTypeList = paramRegex.Match(StatementText);

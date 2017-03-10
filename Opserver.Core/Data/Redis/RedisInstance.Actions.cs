@@ -125,12 +125,9 @@ namespace StackExchange.Opserver.Data.Redis
         ///  - Any slaves in the chain (circles bad, k?)
         ///  - Itself
         /// </summary>
-        public List<RedisInstance> RecommendedMasterTargets
-        {
-            get
-            {
-                return RedisModule.Instances.Where(s => s.Port == Port && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s).ToList();
-            }
-        }
+        public List<RedisInstance> RecommendedMasterTargets =>
+            RedisModule.Instances
+            .Where(s => s.Port == Port && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s)
+            .ToList();
     }
 }

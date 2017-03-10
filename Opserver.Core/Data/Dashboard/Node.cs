@@ -103,17 +103,21 @@ namespace StackExchange.Opserver.Data.Dashboard
                           .Append(ServiceTag)
                           .Append(delim);
                     if (IPs != null)
-                        result.Append(delim)
-                              .Append(string.Join(",", IPs));
+                    {
+                        result.Append(delim).Append(string.Join(",", IPs));
+                    }
                     if (Apps != null)
-                        result.Append(delim)
-                              .Append(string.Join(",", Apps.Select(a => a.NiceName)));
+                    {
+                        result.Append(delim).Append(string.Join(",", Apps.Select(a => a.NiceName)));
+                    }
                     if (IsVM && VMHost != null)
-                        result.Append(delim)
-                              .Append(VMHost.PrettyName);
+                    {
+                        result.Append(delim).Append(VMHost.PrettyName);
+                    }
                     if (IsVMHost && VMs != null)
-                        result.Append(delim)
-                              .Append(string.Join(",", VMs));
+                    {
+                        result.Append(delim).Append(string.Join(",", VMs));
+                    }
 
                     _searchString = result.ToStringRecycle().ToLower();
                 }
@@ -185,7 +189,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 {
                     var pattern = Settings?.PrimaryInterfacePatternRegex;
                     var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
-                    _primaryInterfaces = (dbInterfaces.Any()
+                    _primaryInterfaces = (dbInterfaces.Count > 0
                         ? dbInterfaces.OrderBy(i => i.Name)
                         : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
                 }

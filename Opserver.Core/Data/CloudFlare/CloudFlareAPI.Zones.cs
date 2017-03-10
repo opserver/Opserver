@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
         private static readonly NameValueCollection _dnsRecordFetchParams = new NameValueCollection
         {
-            {"per_page", "100"}
+            ["per_page"] = "100"
         };
 
         private Cache<List<CloudFlareDNSRecord>> _dnsRecords;

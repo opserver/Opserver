@@ -40,17 +40,20 @@ namespace StackExchange.Opserver.Helpers
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
                 using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
-                try
                 {
-                    conn.Open();
+                    try
+                    {
+                        conn.Open();
+                    }
+                    catch (SqlException e)
+                    {
+                        var csb = new SqlConnectionStringBuilder(connectionString);
+                        var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
+                        throw new Exception(sqlException, e)
+                                .AddLoggedData("Timeout", conn.ConnectionTimeout.ToString());
+                    }
                 }
-                catch (SqlException e)
-                {
-                    var csb = new SqlConnectionStringBuilder(connectionString);
-                    var sqlException = $"Error opening connection to {csb.InitialCatalog} at {csb.DataSource} timeout was: {connectionTimeout.ToComma()} ms";
-                    throw new Exception(sqlException, e)
-                            .AddLoggedData("Timeout", conn.ConnectionTimeout.ToString());
-                }
+
                 setReadUncommitted(conn);
                 if (conn.State == ConnectionState.Connecting)
                 {

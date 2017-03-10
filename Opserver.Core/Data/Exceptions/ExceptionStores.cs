@@ -232,40 +232,42 @@ namespace StackExchange.Opserver.Data.Exceptions
         internal static List<ApplicationGroup> UpdateApplicationGroups()
         {
             using (MiniProfiler.Current.Step("UpdateApplicationGroups() - All Stores"))
-            lock (_updateLock) // In the case of multiple stores, it's off to the races.
             {
-                var result = ApplicationGroups;
-                var apps = ExceptionsModule.Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
-                // Loop through all configured groups and hook up applications returned from the queries
-                foreach (var g in result)
+                lock (_updateLock) // In the case of multiple stores, it's off to the races.
                 {
-                    for (var i = 0; i < g.Applications.Count; i++)
+                    var result = ApplicationGroups;
+                    var apps = ExceptionsModule.Stores.SelectMany(s => s.Applications?.Data ?? Enumerable.Empty<Application>()).ToList();
+                    // Loop through all configured groups and hook up applications returned from the queries
+                    foreach (var g in result)
                     {
-                        var a = g.Applications[i];
-                        foreach (var app in apps)
+                        for (var i = 0; i < g.Applications.Count; i++)
                         {
-                            if (app.Name == a.Name)
+                            var a = g.Applications[i];
+                            foreach (var app in apps)
                             {
-                                g.Applications[i] = app;
-                                break;
+                                if (app.Name == a.Name)
+                                {
+                                    g.Applications[i] = app;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-                // Clear all dynamic apps from the CatchAll group
-                CatchAll.Applications.RemoveAll(a => !KnownApplications.Contains(a.Name));
-                // Check for the any dyanmic/unconfigured apps
-                foreach (var app in apps.OrderBy(a => a.Name))
-                {
-                    if (!KnownApplications.Contains(app.Name))
+                    // Clear all dynamic apps from the CatchAll group
+                    CatchAll.Applications.RemoveAll(a => !KnownApplications.Contains(a.Name));
+                    // Check for the any dyanmic/unconfigured apps
+                    foreach (var app in apps.OrderBy(a => a.Name))
                     {
-                        // This dynamic app needs a home!
-                        CatchAll.Applications.Add(app);
+                        if (!KnownApplications.Contains(app.Name))
+                        {
+                            // This dynamic app needs a home!
+                            CatchAll.Applications.Add(app);
+                        }
                     }
+                    Applications = apps;
+                    ApplicationGroups = result;
+                    return result;
                 }
-                Applications = apps;
-                ApplicationGroups = result;
-                return result;
             }
         }
     }

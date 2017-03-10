@@ -434,7 +434,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                     public class VirtualDiskInfo : ComponentInfo
                     {
-
                     }
                 }
 

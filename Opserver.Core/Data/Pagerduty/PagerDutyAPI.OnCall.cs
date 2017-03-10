@@ -68,13 +68,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public class PagerDutyOnCallResponse
     {
         [DataMember(Name = "oncalls")]
-        public List<OnCall> OnCallInfo;
+        public List<OnCall> OnCallInfo { get; set; }
     }
 
     public class PagerDutyUserResponse
     {
         [DataMember(Name = "users")]
-        public List<PagerDutyPerson> Users;
+        public List<PagerDutyPerson> Users { get; set; }
     }
 
     public class PagerDutyPerson
@@ -183,7 +183,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
     public class OnCallEscalationPolicy
     {
         [DataMember(Name = "id")]
-        public string Id;
+        public string Id { get; set; }
         [DataMember(Name = "summary")]
         public string Title { get; set; }
         [DataMember(Name = "html_url")]

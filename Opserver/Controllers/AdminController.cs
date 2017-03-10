@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Controllers
     public class AdminController : StatusController
     {
         [Route("admin/purge-security-cache")]
-        public ActionResult Dashboard(string view)
+        public ActionResult Dashboard()
         {
             Current.Security.PurgeCache();
             return TextPlain("Cache Purged");

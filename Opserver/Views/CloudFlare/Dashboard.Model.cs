@@ -6,9 +6,9 @@
 
         public enum Views
         {
-            Overview,
-            DNS,
-            Analytics
+            Overview = 0,
+            DNS = 1,
+            Analytics = 2
         }
     }
 }

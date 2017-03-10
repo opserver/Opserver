@@ -13,16 +13,16 @@ namespace StackExchange.Opserver.Views.SQL
         // TODO: Remove for extensibility, create a dictionary instead and nameof()
         public enum Views
         {
-            Tables,
-            Backups,
-            Views,
-            BlitzIndex,
-            MissingIndexes,
-            UnusedIndexes,
-            Storage,
-            Other,
-            Restores,
-            StoredProcedures
+            Tables = 0,
+            Backups = 1,
+            Views = 2,
+            BlitzIndex = 3,
+            MissingIndexes = 4,
+            UnusedIndexes = 5,
+            Storage = 6,
+            Other = 7,
+            Restores = 8,
+            StoredProcedures = 9
         }
 
         public static string GetDatabaseClass(SQLInstance.Database db)

@@ -1,39 +1,82 @@
-﻿using System.Text.RegularExpressions;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Mvc;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public static partial class HtmlUtilities
+    public static class HtmlUtilities
     {
-        // filters control characters but allows only properly-formed surrogate sequences
-        private static readonly Regex SanitizeUrlRegex = new Regex(@"[^-a-z0-9+&@#/%?=~_|!:,.;\(\)]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        public static IHtmlString CacheBreaker(this UrlHelper url, string path) => MvcHtmlString.Create(GetCacheBreakerUrl(path));
 
         /// <summary>
-        /// This string is already correctly encoded html and can be sent to the client "as is" without additional encoding.
+        /// Given the URL to a static file, returns the URL together with a cache breaker, i.e. ?v=123abc... appended.
+        /// The cache breaker will always be based on the local version of the file, even if the URL points to sstatic.net,
+        /// and only calculated once.
         /// </summary>
-        public static IHtmlString AsHtml(this string html) => MvcHtmlString.Create(html);
+        /// <param name="path">The path to get a cache breaker for.</param>
+        public static string GetCacheBreakerUrl(string path) => CacheBreakerUrls.GetOrAdd(path, CalculateCacheBreakerUrl);
+
+        internal static IEnumerable<KeyValuePair<string, string>> GetAllCacheBreakerUrls() => CacheBreakerUrls.ToList();
+
+        private static readonly ConcurrentDictionary<string, string> CacheBreakers = new ConcurrentDictionary<string, string>();
+        private static readonly ConcurrentDictionary<string, string> CacheBreakerUrls = new ConcurrentDictionary<string, string>();
+
+        private static string CalculateCacheBreakerUrl(string path)
+        {
+            string file;
+
+            if (Uri.IsWellFormedUriString(path, UriKind.Absolute))
+            {
+                var webPath = new Uri(path, UriKind.Absolute);
+                file = "/content/" + webPath.AbsolutePath;
+            }
+            else
+            {
+                file = path;
+            }
+
+            var breaker = GetCacheBreakerForLocalFile(file);
+
+            if (path.StartsWith("~/"))
+            {
+                path = HostingEnvironment.ApplicationVirtualPath == "/"
+                   ? path.Substring(1)
+                   : HostingEnvironment.ApplicationVirtualPath + "/" + path.Substring(2);
+            }
+
+            if (breaker == null)
+                return path;
+
+            return path + "?v=" + breaker;
+        }
 
         /// <summary>
-        /// returns "safe" URL, stripping anything outside normal charsets for URL
+        /// Returns the cache breaker for the given file; a 12-digit hex string that's guaranteed
+        /// to be stable if the file contents don't change.
         /// </summary>
-        public static string SanitizeUrl(string url) => url.IsNullOrEmpty() ? url : SanitizeUrlRegex.Replace(url, "");
+        /// <param name="path">The path to the file, relative to the application directory (this will usually start with "/content")</param>
+        internal static string GetCacheBreakerForLocalFile(string path) =>
+            CacheBreakers.GetOrAdd(path, CalculateBreaker);
 
-        /// <summary>
-        /// fast (and maybe a bit inaccurate) check to see if the querystring contains the specified key
-        /// </summary>
-        public static bool QueryStringContains(string url, string key) => url.Contains(key + "=");
+        private static string CalculateBreaker(string path)
+        {
+            var fullpath = path.StartsWith("~/")
+                ? HostingEnvironment.MapPath(path)
+                : AppDomain.CurrentDomain.BaseDirectory + path;
+            if (!File.Exists(fullpath))
+                return null;
 
-        /// <summary>
-        /// removes the specified key, and any value, from the querystring. 
-        /// for www.example.com/bar.foo?x=1&amp;y=2&amp;z=3 if you pass "y" you'll get back 
-        /// www.example.com/bar.foo?x=1&amp;z=3
-        /// </summary>
-        public static string QueryStringRemove(string url, string key) => url.IsNullOrEmpty() ? "" : Regex.Replace(url, @"[?&]" + key + "=[^&]*", "");
+            var sha = new SHA1Managed();
+            var hash = ToHex(sha.ComputeHash(File.ReadAllBytes(fullpath)));
+            return hash.Substring(0, 12);
+        }
 
-        /// <summary>
-        /// returns the value, if any, of the specified key in the querystring
-        /// </summary>
-        public static string QueryStringValue(string url, string key) => url.IsNullOrEmpty() ? "" : Regex.Match(url, key + "=.*").ToString().Replace(key + "=", "");
+        private static string ToHex(byte[] buffer) => string.Concat(buffer.Select(b => b.ToString("x2")));
     }
 }

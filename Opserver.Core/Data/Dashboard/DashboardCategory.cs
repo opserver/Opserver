@@ -11,20 +11,14 @@ namespace StackExchange.Opserver.Data.Dashboard
                 .Select(sc => new DashboardCategory(sc))
                 .ToList();
 
-        public static DashboardCategory Unknown { get; private set; }
-
-        static DashboardCategory()
+        public static DashboardCategory Unknown { get; } = new DashboardCategory(new DashboardSettings.Category
         {
-            var unknownSettings = new DashboardSettings.Category
-                {
-                    Name = "Other Nodes",
-                    Pattern = ""
-                };
-            Unknown = new DashboardCategory(unknownSettings)
-                {
-                    Index = int.MaxValue - 100
-                };
-        }
+            Name = "Other Nodes",
+            Pattern = ""
+        })
+        {
+            Index = int.MaxValue - 100
+        };
 
         public string Name => Settings.Name;
         public Regex PatternRegex => Settings.PatternRegex;

@@ -21,6 +21,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Obtain a StringBuilder instance; this could be a recycled instance, or could be new
         /// </summary>
+        /// <param name="capacity">The capaity to start the fetched <see cref="StringBuilder"/> at.</param>
         public static StringBuilder Get(int capacity = DefaultCapacity)
         {
             var tmp = _perThread;
@@ -40,36 +41,41 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Get the string contents of a StringBuilder and recyle the instance at the same time
         /// </summary>
-        public static string ToStringRecycle(this StringBuilder obj)
+        /// <param name="builder">The <see cref="StringBuilder"/> to recycle.</param>
+        public static string ToStringRecycle(this StringBuilder builder)
         {
-            var s = obj.ToString();
-            Recycle(obj);
+            var s = builder.ToString();
+            Recycle(builder);
             return s;
         }
 
         /// <summary>
         /// Get the string contents of a StringBuilder and recycle the instance at the same time
         /// </summary>
-        public static string ToStringRecycle(this StringBuilder obj, int startIndex, int length)
+        /// <param name="builder">The <see cref="StringBuilder"/> to recycle.</param>
+        /// <param name="startIndex">The index to start at.</param>
+        /// <param name="length">The amount of characters to get.</param>
+        public static string ToStringRecycle(this StringBuilder builder, int startIndex, int length)
         {
-            var s = obj.ToString(startIndex, length);
-            Recycle(obj);
+            var s = builder.ToString(startIndex, length);
+            Recycle(builder);
             return s;
         }
 
         /// <summary>
         /// Recycles a StringBuilder instance if possible
         /// </summary>
-        public static void Recycle(StringBuilder obj)
+        /// <param name="builder">The <see cref="StringBuilder"/> to recycle.</param>
+        public static void Recycle(StringBuilder builder)
         {
-            if (obj == null) return;
+            if (builder == null) return;
             if (_perThread == null)
             {
-                _perThread = obj;
+                _perThread = builder;
             }
             else
             {
-                Interlocked.CompareExchange(ref _shared, obj, null);
+                Interlocked.CompareExchange(ref _shared, builder, null);
             }
         }
     }

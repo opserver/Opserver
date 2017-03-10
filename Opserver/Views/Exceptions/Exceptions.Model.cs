@@ -22,8 +22,7 @@ namespace StackExchange.Opserver.Views.Exceptions
         public List<ApplicationGroup> Groups { get; set; }
         public List<Error> Errors { get; set; }
         private int? _shownCount;
-        public int ShownCount { get { return _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value; } }
-        
+        public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
         public bool ClearLinkForVisibleOnly { get; set; }
 
         public bool ShowClearLink

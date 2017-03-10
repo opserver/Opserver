@@ -91,7 +91,7 @@ namespace StackExchange.Opserver.Controllers
             var traffic = await n.GetNetworkUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (traffic == null) return null;
 
-            var anyTraffic = traffic.Any();
+            var anyTraffic = traffic.Count > 0;
 
             return new
             {
@@ -122,7 +122,7 @@ namespace StackExchange.Opserver.Controllers
             var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (traffic == null) return null;
 
-            var anyTraffic = traffic.Any();
+            var anyTraffic = traffic.Count > 0;
 
             return new
             {
@@ -165,7 +165,7 @@ namespace StackExchange.Opserver.Controllers
             var traffic = await n.GetVolumePerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (traffic == null) return null;
 
-            var anyTraffic = traffic.Any();
+            var anyTraffic = traffic.Count > 0;
 
             return new
             {
@@ -196,7 +196,7 @@ namespace StackExchange.Opserver.Controllers
             var traffic = await volume.GetPerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
             if (traffic == null) return null;
 
-            var anyTraffic = traffic.Any();
+            var anyTraffic = traffic.Count > 0;
 
             return new
             {

@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                        until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
                 var url = $"incidents?since={since}&until={until}&sort_by=created_at:desc";
                 return GetFromPagerDutyAsync(url, getFromJson: response =>
-                    JSON.Deserialize<IncidentResponse>(response.ToString(), JilOptions)
+                    JSON.Deserialize<IncidentResponse>(response, JilOptions)
                         .Incidents.OrderBy(ic => ic.CreationDate)
                         .ToList()
                     );

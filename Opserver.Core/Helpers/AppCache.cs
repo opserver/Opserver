@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Helpers
                 try
                 {
                     var entry = Dns.GetHostEntry(ip);
-                    return entry != null ? entry.HostName.Split(StringSplits.Period).First() : "Unknown";
+                    return entry != null ? entry.HostName.Split(StringSplits.Period)[0] : "Unknown";
                 }
                 catch
                 {

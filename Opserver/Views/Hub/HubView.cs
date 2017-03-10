@@ -14,10 +14,10 @@ namespace StackExchange.Opserver.Views.Hub
         private static List<HubView> _registered { get; } = new List<HubView>();
         public static List<HubView> Views => _registered.Where(v => v.IsEnabled).OrderByWorst().ToList();
 
-        readonly Func<bool> _isEnabled;
+        private readonly Func<bool> _isEnabled;
         public bool IsEnabled => _isEnabled();
 
-        readonly Func<MonitorStatus> _getStatus;
+        private readonly Func<MonitorStatus> _getStatus;
         public MonitorStatus MonitorStatus => _getStatus();
         public string MonitorStatusReason => "Status is " + MonitorStatus;
 

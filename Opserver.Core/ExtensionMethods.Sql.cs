@@ -12,12 +12,6 @@ namespace StackExchange.Opserver
 {
     public static partial class ExtensionMethods
     {
-        /// <summary>
-        /// Obtains the data as a list; if it is *already* a list, the original object is returned 
-        /// without any duplication; otherwise, ToList() is invoked. 
-        /// </summary>
-        public static List<T> AsList<T>(this IEnumerable<T> source) => source is List<T> ? (List<T>)source : source.ToList();
-
         public static async Task<List<T>> AsList<T>(this ConfiguredTaskAwaitable<IEnumerable<T>> source)
         {
             var result = await source;
@@ -52,7 +46,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -60,7 +54,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -68,7 +62,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -76,7 +70,7 @@ namespace StackExchange.Opserver
         {
             using (await conn.EnsureOpenAsync().ConfigureAwait(false))
             {
-                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn).ConfigureAwait(false).AsList().ConfigureAwait(false);
+                return await conn.QueryAsync(MarkSqlString(sql, fromFile, onLine, comment), map, param as object, transaction, true, splitOn, commandTimeout).ConfigureAwait(false).AsList().ConfigureAwait(false);
             }
         }
 
@@ -126,10 +120,10 @@ namespace StackExchange.Opserver
             int key = 17;
             unchecked
             {
-                key = key * 23 + sql.GetHashCode();
-                key = key * 23 + path.GetHashCode();
-                key = key * 23 + lineNumber.GetHashCode();
-                if (comment.HasValue()) key = key * 23 + comment.GetHashCode();
+                key = (key * 23) + sql.GetHashCode();
+                key = (key * 23) + path.GetHashCode();
+                key = (key * 23) + lineNumber.GetHashCode();
+                if (comment.HasValue()) key = (key * 23) + comment.GetHashCode();
             }
 
             // Have we seen this before???
@@ -177,7 +171,7 @@ namespace StackExchange.Opserver
 
         private class ConnectionCloser : IDisposable
         {
-            DbConnection _connection;
+            private DbConnection _connection;
             public ConnectionCloser(DbConnection connection)
             {
                 _connection = connection;

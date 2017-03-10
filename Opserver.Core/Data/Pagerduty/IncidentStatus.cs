@@ -6,11 +6,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
     {
         // ReSharper disable InconsistentNaming
         [Description("Triggered")]
-        triggered,
+        triggered = 0,
         [Description("Acknowledged")]
-        acknowledged,
+        acknowledged = 1,
         [Description("Resolved")]
-        resolved
+        resolved = 2
         // ReSharper restore InconsistentNaming
     }
 }

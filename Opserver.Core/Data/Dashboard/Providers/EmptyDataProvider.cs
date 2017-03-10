@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -12,13 +13,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override int MinSecondsBetweenPolls => 10;
         public override string NodeType => "None";
-        public override IEnumerable<Cache> DataPollers { get { yield break; } }
-        protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
+        public override IEnumerable<Cache> DataPollers => Enumerable.Empty<Cache>();
+        protected override IEnumerable<MonitorStatus> GetMonitorStatus() => Enumerable.Empty<MonitorStatus>();
         protected override string GetMonitorStatusReason() => null;
 
         private static readonly List<Node> EmptyAllNodes = new List<Node>();
 
-        public override IEnumerable<string> GetExceptions() { yield break; }
+        public override IEnumerable<string> GetExceptions() => Enumerable.Empty<string>();
 
         public override List<Node> AllNodes => EmptyAllNodes;
         public override IEnumerable<Node> GetNodesByIP(IPAddress ip) => EmptyAllNodes;

@@ -329,22 +329,22 @@ namespace StackExchange.Opserver.Data
 
             ///<summary>
             /// Gets the number of bits set in a uint, taken from 
-            /// http://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
+            /// https://stackoverflow.com/questions/109023/how-to-count-the-number-of-set-bits-in-a-32-bit-integer
             /// </summary>
             private static int NumberOfSetBitsImpl(uint i)
             {
-                i = i - ((i >> 1) & 0x55555555U);
+                i -= (i >> 1) & 0x55555555U;
                 i = (i & 0x33333333U) + ((i >> 2) & 0x33333333U);
                 return (int)((((i + (i >> 4)) & 0x0F0F0F0FU) * 0x01010101U) >> 24);
             }
 
             ///<summary>
             /// Gets the number of bits set in a ulong, taken from 
-            /// http://stackoverflow.com/questions/2709430/count-number-of-bits-in-a-64-bit-long-big-integer
+            /// https://stackoverflow.com/questions/2709430/count-number-of-bits-in-a-64-bit-long-big-integer
             /// </summary>
             private static int NumberOfSetBitsImpl(ulong i)
             {
-                i = i - ((i >> 1) & 0x5555555555555555UL);
+                i -= (i >> 1) & 0x5555555555555555UL;
                 i = (i & 0x3333333333333333UL) + ((i >> 2) & 0x3333333333333333UL);
                 return (int)(unchecked(((i + (i >> 4)) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL) >> 56);
             }
@@ -355,8 +355,10 @@ namespace StackExchange.Opserver.Data
                 {
                     if (IPv4Address.HasValue) return IsValidSubnetImpl(IPv4Address.Value);
                     if (FirstV6Leg.HasValue && LastV6Leg.HasValue)
+                    {
                         return (FirstV6Leg == ulong.MaxValue && IsValidSubnetImpl(LastV6Leg.Value))
-                            || (LastV6Leg == ulong.MinValue && IsValidSubnetImpl(FirstV6Leg.Value));
+                           || (LastV6Leg == ulong.MinValue && IsValidSubnetImpl(FirstV6Leg.Value));
+                    }
                     return false;
                 }
             }

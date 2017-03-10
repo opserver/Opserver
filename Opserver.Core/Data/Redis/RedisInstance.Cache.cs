@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 if (ri.Host == host && ri.Port == port) return ri;
             }
-            var shortHost = host.Split(StringSplits.Period).First();
+            var shortHost = host.Split(StringSplits.Period)[0];
             foreach (var ri in RedisModule.Instances)
             {
                 if (ri.Port == port && ri.ShortHost == shortHost) return ri;

@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.SQL
         public class SQLConnectionSummaryInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.SP2;
-            
+
             public string LoginName { get; internal set; }
             public string HostName { get; internal set; }
             public TransactionIsolationLevel TransactionIsolationLevel { get; internal set; }
@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.SQL
             public int ConnectionCount { get; internal set; }
             public long TotalReads { get; internal set; }
             public long TotalWrites { get; internal set; }
-            
+
             public string GetFetchSQL(Version v) => @"
 Select s.login_name LoginName,
        s.host_name HostName,
@@ -41,7 +41,7 @@ Select s.login_name LoginName,
         public class SQLConnectionInfo : ISQLVersioned
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
-            
+
             public Guid Id { get; internal set; }
             public DateTime ConnectTime { get; internal set; }
             public byte[] PlanHandle { get; internal set; }
@@ -61,11 +61,7 @@ Select s.login_name LoginName,
             public string HostName { get; internal set; }
             public string ProgramName { get; internal set; }
 
-            public string ReadablePlanHandle
-            {
-                get { return string.Join(string.Empty, PlanHandle.Select(x => x.ToString("X2"))); }
-            }
-
+            public string ReadablePlanHandle => string.Concat(PlanHandle.Select(x => x.ToString("X2")));
             internal const string FetchSQL2005SP2Colums = @"
        s.host_process_id HostProcessId,
        s.login_name LoginName,

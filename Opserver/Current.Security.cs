@@ -29,9 +29,9 @@ namespace StackExchange.Opserver
         {
             if (User == null)
             {
-                return RequestRoles.HasFlag(roles);
+                return (RequestRoles & roles) != 0;
             }
-            return ((User.Role | RequestRoles) & roles) != Roles.None || User.Role.HasFlag(Roles.GlobalAdmin);
+            return ((User.Role | RequestRoles) & roles) != Roles.None || (User.Role & Roles.GlobalAdmin) != 0;
         }
 
         public static Roles RequestRoles

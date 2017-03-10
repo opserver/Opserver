@@ -543,7 +543,7 @@ Select Top 100
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             private string _volumeMountPoint;
-            public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon).First());
+            public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon)[0]);
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
             public int FileId { get; internal set; }

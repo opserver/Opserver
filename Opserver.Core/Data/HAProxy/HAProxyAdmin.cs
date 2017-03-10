@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 .SelectMany(p => p.Servers
                     .Select(s => new ActionPair {Proxy = p, Server = s})
                 ).ToList();
-            
+
             return PostActionsAsync(pairs, action);
         }
 

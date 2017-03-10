@@ -61,10 +61,10 @@ namespace StackExchange.Opserver
 
         public enum ProfilingModes
         {
-            Enabled,
-            Disabled,
-            LocalOnly,
-            AdminOnly
+            Enabled = 0,
+            Disabled = 1,
+            LocalOnly = 2,
+            AdminOnly = 3
         }
     }
 }

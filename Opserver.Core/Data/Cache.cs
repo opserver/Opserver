@@ -106,7 +106,7 @@ namespace StackExchange.Opserver.Data
             return Data;
         }
 
-        private string miniProfilerDescription { get; }
+        private string MiniProfilerDescription { get; }
 
         /// <summary>
         /// Creates a cache poller
@@ -114,11 +114,15 @@ namespace StackExchange.Opserver.Data
         /// <typeparam name="T">Type of item in the cache</typeparam>
         /// <param name="owner">The PollNode owner of this Cache</param>
         /// <param name="description">Description of the operation, used purely for profiling</param>
+        /// <param name="cacheDuration">The length of time to cache data for</param>
         /// <param name="getData">The operation used to actually get data, e.g. <code>using (var conn = GetConnectionAsync()) { return getFromConnection(conn); }</code></param>
         /// <param name="timeoutMs">The timeout in milliseconds for this poll to complete before aborting.</param>
         /// <param name="logExceptions">Whether to log any exceptions to the log</param>
         /// <param name="addExceptionData">Optionally add exception data, e.g. <code>e => e.AddLoggedData("Server", Name)</code></param>
         /// <param name="afterPoll">An optional action to run after polling has completed successfully</param>
+        /// <param name="memberName"></param>
+        /// <param name="sourceFilePath"></param>
+        /// <param name="sourceLineNumber"></param>
         /// <returns>A cache update action, used when creating a <see cref="Cache"/>.</returns>
         public Cache(PollNode owner,
             string description,
@@ -133,7 +137,7 @@ namespace StackExchange.Opserver.Data
             [CallerLineNumber] int sourceLineNumber = 0)
             : base(cacheDuration, memberName, sourceFilePath, sourceLineNumber)
         {
-            miniProfilerDescription = "Poll: " + description; // contcat once
+            MiniProfilerDescription = "Poll: " + description; // contcat once
 
             _updateFunc = async () =>
             {
@@ -141,7 +145,7 @@ namespace StackExchange.Opserver.Data
                 PollStatus = "UpdateCacheItem";
                 if (OpserverProfileProvider.EnablePollerProfiling)
                 {
-                    Profiler = OpserverProfileProvider.CreateContextProfiler(miniProfilerDescription, UniqueId,
+                    Profiler = OpserverProfileProvider.CreateContextProfiler(MiniProfilerDescription, UniqueId,
                         store: false);
                 }
                 using (MiniProfiler.Current.Step(description))
@@ -339,8 +343,13 @@ namespace StackExchange.Opserver.Data
         }
 
         /// <summary>
-        /// Gets a cache stored in LocalCache by key...these are not polled and expire when stale
+        /// Gets a cache stored in LocalCache by key...these are not polled and expire when stale.
         /// </summary>
+        /// <typeparam name="T">The type this cache contains.</typeparam>
+        /// <param name="key">The cache key to use for this cache.</param>
+        /// <param name="getData">The getter for this cache.</param>
+        /// <param name="duration">The duration to cache results for.</param>
+        /// <param name="staleDuration">The duration to serve stale results for after expiration (which a background refresh happens).</param>
         public static LightweightCache<T> GetTimedCache<T>(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration) where T : class
             => LightweightCache<T>.Get(key, getData, duration, staleDuration);
     }

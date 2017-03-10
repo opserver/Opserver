@@ -44,17 +44,10 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 if (_connection == null || !_connection.IsConnected)
                 {
-                    // TODO: deadlocks - rethink
-                    //lock (_connectionLock)
+                    _connection = _connection ?? GetConnection(allowAdmin: true);
+                    if (!_connection.IsConnected)
                     {
-                        if (_connection == null)
-                        {
-                            _connection = GetConnection(allowAdmin: true);
-                        }
-                        if (!_connection.IsConnected)
-                        {
-                            _connection.Configure();
-                        }
+                        _connection.Configure();
                     }
                 }
                 return _connection;
@@ -104,7 +97,7 @@ namespace StackExchange.Opserver.Data.Redis
         public RedisInstance(RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
         {
             ConnectionInfo = connectionInfo;
-            ShortHost = Host.Split(StringSplits.Period).First();
+            ShortHost = Host.Split(StringSplits.Period)[0];
         }
 
         public string GetServerName(string hostOrIp)
@@ -121,7 +114,7 @@ namespace StackExchange.Opserver.Data.Redis
         }
 
         // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
-        public static SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
+        public static readonly SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
 
         private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 10000)
         {
@@ -177,13 +170,15 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 // no slaves, and a master - boom
                 if (SlaveCount == 0)
+                {
                     return new RedisMemoryAnalysis(ConnectionInfo, database)
                     {
                         ErrorMessage = "Cannot run memory analysis on a master - it hurts."
                     };
+                }
 
                 // Go to the first slave, automagically
-                ci = SlaveInstances.First().ConnectionInfo;
+                ci = SlaveInstances[0].ConnectionInfo;
             }
 
             return RedisAnalyzer.AnalyzeDatabaseMemory(ci, database);

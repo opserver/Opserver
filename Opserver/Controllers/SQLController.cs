@@ -187,7 +187,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 View = SQLViews.Connections,
                 CurrentInstance = i,
-                Cache = i == null ? null : i.Connections,
+                Cache = i?.Connections,
                 Connections = i == null ? null : await i.Connections.GetData()
             };
             return View(vd);

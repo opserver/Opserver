@@ -20,14 +20,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             };
 
-            var headers = new Dictionary<string,string>
+            var headers = new Dictionary<string, string>
             {
-                { "From", person.Email}
+                ["From"] = person.Email
             };
             try
             {
                var result = await Instance.GetFromPagerDutyAsync($"incidents/{incidentId}",
-               response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response.ToString(), JilOptions),
+               response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response, JilOptions),
                httpMethod: "PUT",
                data: data,
                extraHeaders: headers).ConfigureAwait(false);

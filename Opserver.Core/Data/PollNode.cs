@@ -183,7 +183,7 @@ namespace StackExchange.Opserver.Data
                     }
 
                     // Hop out early, run nothing else
-                    if (!tasks.Any())
+                    if (tasks.Count == 0)
                     {
                         PollStatus = "DataPollers Complete (None to run)";
                         return;

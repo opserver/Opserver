@@ -308,7 +308,7 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
  Group By itd.DateTime
  Order By itd.DateTime";
 
-            if (!node.PrimaryInterfaces.Any()) return new List<DoubleGraphPoint>();
+            if (node.PrimaryInterfaces.Count == 0) return new List<DoubleGraphPoint>();
 
             using (var conn = await GetConnectionAsync().ConfigureAwait(false))
             {

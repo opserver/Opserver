@@ -6,12 +6,12 @@ namespace StackExchange.Opserver.Views.SQL
 {
     public enum SQLViews
     {
-        Servers,
-        Instance,
-        Active,
-        Top,
-        Connections,
-        Databases
+        Servers = 0,
+        Instance = 1,
+        Active = 2,
+        Top = 3,
+        Connections = 4,
+        Databases = 5
     }
 
     public class DashboardModel
@@ -24,10 +24,10 @@ namespace StackExchange.Opserver.Views.SQL
 
         public enum LastRunInterval
         {
-            Week = 7*24*60*60,
-            Day = 24*60*60,
-            Hour = 60*60,
-            FiveMinutes = 5*60
+            FiveMinutes = 5 * 60,
+            Hour = 60 * 60,
+            Day = 24 * 60 * 60,
+            Week = 7 * 24 * 60 * 60
         }
 
         public List<SQLInstance.SQLConnectionInfo> Connections { get; set; }

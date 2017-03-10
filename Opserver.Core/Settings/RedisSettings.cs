@@ -1,11 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace StackExchange.Opserver
 {
     public class RedisSettings : Settings<RedisSettings>
     {
-        public override bool Enabled => Servers.Any();
+        public override bool Enabled => Servers.Count > 0;
 
         public List<Server> Servers { get; set; } = new List<Server>();
 

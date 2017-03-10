@@ -534,9 +534,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Helpers\DataKeys.cs" />
-    <Compile Include="Helpers\HtmlUtilities.CacheBreaker.cs">
-      <DependentUpon>HtmlUtilities.cs</DependentUpon>
-    </Compile>
     <Compile Include="Helpers\HtmlUtilities.cs" />
     <Compile Include="Helpers\Status.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

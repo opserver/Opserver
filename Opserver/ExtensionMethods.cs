@@ -20,13 +20,21 @@ namespace StackExchange.Opserver
     public static class WebExtensionMethods
     {
         /// <summary>
-        /// Title cases a string given the current culture
+        /// This string is already correctly encoded HTML and can be sent to the client "as is" without additional encoding.
         /// </summary>
+        /// <param name="html">The already-encoded HTML string.</param>
+        public static IHtmlString AsHtml(this string html) => MvcHtmlString.Create(html);
+
+        /// <summary>
+        /// Title cases a string given the current culture.
+        /// </summary>
+        /// <param name="s">The string to convert to title case.</param>
         public static string ToTitleCase(this string s) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
 
         /// <summary>
         /// Encodes an object as JSON for direct use without quote crazy
         /// </summary>
+        /// <param name="o">The object to serialize.</param>
         public static IHtmlString ToJson(this object o) => JSON.Serialize(o).AsHtml();
 
         public static IHtmlString ToStatusSpan(this Data.HAProxy.Item item)
@@ -58,8 +66,9 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Returns an icon span representation of this MonitorStatus
+        /// Returns an icon span representation of this MonitorStatus.
         /// </summary>
+        /// <param name="status">The status to get an icon for.</param>
         public static IHtmlString IconSpan(this MonitorStatus status)
         {
             switch (status)
@@ -76,6 +85,11 @@ namespace StackExchange.Opserver
             }
         }
 
+        /// <summary>
+        /// Gets an icon representing the current status of a <see cref="Node"/>.
+        /// </summary>
+        /// <param name="node">The node to represent.</param>
+        /// <returns>An icon representing the node and its current status.</returns>
         public static IHtmlString IconSpan(this Node node)
         {
             if (node == null)
@@ -224,8 +238,10 @@ namespace StackExchange.Opserver
 
             var dateToUse = cache.LastSuccess ?? cache.LastPoll;
             if (!cache.LastPollSuccessful)
+            {
                 return MonitorStatus.Warning.Span(mini ? dateToUse?.ToRelativeTime() : dateToUse?.ToRelativeTimeMini(),
-                    $"Last Poll: {lf.Value.ToZuluTime()} ({lf.Value.ToRelativeTime()})\nError: {cache.ErrorMessage}");
+                   $"Last Poll: {lf.Value.ToZuluTime()} ({lf.Value.ToRelativeTime()})\nError: {cache.ErrorMessage}");
+            }
 
             return mini ? lf.Value.ToRelativeTimeSpanMini() : lf.Value.ToRelativeTimeSpan();
         }
@@ -237,16 +253,15 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Convert a datetime to a zulu string
+        /// Convert a datetime to a zulu string.
         /// </summary>
-        public static string ToZuluTime(this DateTime dt)
-        {
-            return dt.ToString("u");
-        }
+        /// <param name="dt">The time to represent as zulu.</param>
+        public static string ToZuluTime(this DateTime dt) => dt.ToString("u");
 
         /// <summary>
-        /// Converts a timespan to a readable string adapted from http://stackoverflow.com/a/4423615
+        /// Converts a timespan to a readable string adapted from https://stackoverflow.com/a/4423615
         /// </summary>
+        /// <param name="span">The span of time to represent.</param>
         public static string ToReadableString(this TimeSpan span)
         {
             var dur = span.Duration();
@@ -261,9 +276,13 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// returns a html span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
+        /// Gets a HTML span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
         /// assumes time is *already* stored in UTC format!
         /// </summary>
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="cssClass">(Optional) CSS class sting to add.</param>
+        /// <param name="asPlusMinus">(Optional) Whether to render a +/- in front of the text.</param>
+        /// <param name="compareTo">(Optional) The date to be relative to (defaults to <see cref="DateTime.UtcNow"/>).</param>
         public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssClass = null, bool asPlusMinus = false, DateTime? compareTo = null)
         {
             // TODO: Make this a setting?
@@ -273,8 +292,11 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// returns a very *small* humanized string indicating how long ago something happened, eg "3d ago"
+        /// Gets a very *small* humanized string indicating how long ago something happened, eg "3d ago".
         /// </summary>
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="includeTimeForOldDates">(Optional) Whether to include the time portion for dates 12+ months ago.</param>
+        /// <param name="includeAgo">(Optional) Whether to include the "ago" suffix on the end.</param>
         public static string ToRelativeTimeMini(this DateTime dt, bool includeTimeForOldDates = true, bool includeAgo = true)
         {
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
@@ -307,6 +329,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// returns a very *small* humanized string indicating how long ago something happened, e.g. "3d 10m" or "2m 10s"
         /// </summary>
+        /// <param name="dt">The time to represent, compared to <see cref="DateTime.UtcNow"/></param>
         public static string ToRelativeTimeMiniAll(this DateTime dt)
         {
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
@@ -328,9 +351,11 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// returns AN HTML SPAN ELEMENT with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
+        /// Gets an HTML span element with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
         /// assumes time is *already* stored in UTC format!
         /// </summary>
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="includeTimeForOldDates">(Optional) Whether to include the time portion for dates 12+ months ago.</param>
         public static IHtmlString ToRelativeTimeSpanMini(this DateTime dt, bool includeTimeForOldDates = true)
         {
             return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
@@ -339,6 +364,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Mini number, e.g. 1.1k
         /// </summary>
+        /// <param name="number">The number to represent.</param>
         public static string Mini(this int number)
         {
             if (number >= 1000000)
@@ -349,21 +375,18 @@ namespace StackExchange.Opserver
 
             return number.ToString("#,##0");
         }
-        /// <summary>
-        /// Full representation of a number
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        public static string Full(this int number)
-        {
-            return number.ToString("#,##0");
-        }
 
         /// <summary>
-        /// Micro representation of a number
+        /// Full representation of a number.
         /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
+        /// <param name="number">The number to represent.</param>
+        /// <returns>A formatted number, with commas.</returns>
+        public static string Full(this int number) => number.ToString("#,##0");
+
+        /// <summary>
+        /// Micro representation of a number.
+        /// </summary>
+        /// <param name="number">The number to represent.</param>
         public static string Micro(this int number)
         {
             if (number >= 1000000)
@@ -376,8 +399,9 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Converts seconds to a human readable timespan
+        /// Converts seconds to a human readable timespan.
         /// </summary>
+        /// <param name="seconds">The number of seconds to represent.</param>
         public static IHtmlString ToTimeString(this int seconds)
         {
             if (seconds == 0) return MvcHtmlString.Empty;
@@ -403,8 +427,9 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Micro representation of a time in millisecs 
+        /// Micro representation of a number in bytes. 
         /// </summary>
+        /// <param name="unit">The number of bytes to represent.</param>
         public static IHtmlString MicroUnit(this long unit)
         {
             const string format = "<span title='{0}'>{1}</span>";

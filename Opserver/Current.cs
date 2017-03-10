@@ -28,7 +28,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Is the current request ajax? Determined by checking the X-Requested-With header
         /// </summary>
-        public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
+        public static bool IsAjaxRequest => Request?.Headers["X-Requested-With"] == "XMLHttpRequest";
 
         /// <summary>
         /// Gets the current user from the request
@@ -38,8 +38,7 @@ namespace StackExchange.Opserver
         public static bool IsSecureConnection =>
             Request.IsSecureConnection ||
             // This can be "http", "https", or the more fun "https, http, https, https" even.
-            (Request.Headers["X-Forwarded-Proto"] != null &&
-             Request.Headers["X-Forwarded-Proto"].StartsWith("https"));
+            (Request.Headers["X-Forwarded-Proto"]?.StartsWith("https") == true);
 
         private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 
@@ -76,7 +75,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(string message, Exception innerException, string key = null, int? reLogDelaySeconds = null)
+        public static void LogException(string message, Exception innerException)
         {
             var ex = new Exception(message, innerException);
             LogException(ex);
@@ -85,7 +84,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(Exception ex, string key = null, int? reLogDelaySeconds = null)
+        public static void LogException(Exception ex, string key = null)
         {
             if (!ShouldLog(key)) return;
             ErrorStore.LogException(ex, Context, appendFullStackTrace: true);

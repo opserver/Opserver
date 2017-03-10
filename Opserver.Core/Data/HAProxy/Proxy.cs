@@ -38,10 +38,10 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public bool HasContent => Frontend != null || Backend != null || (Servers != null && Servers.Count > 0);
+        public bool HasContent => Frontend != null || Backend != null || Servers?.Count > 0;
 
         public bool HasFrontend => Frontend != null;
-        public bool HasServers => Servers != null && Servers.Count > 0;
+        public bool HasServers => Servers?.Count > 0;
         public bool HasBackend => Backend != null;
 
         public MonitorStatus MonitorStatus

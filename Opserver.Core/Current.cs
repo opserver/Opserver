@@ -12,7 +12,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(string message, Exception innerException, string key = null, int? reLogDelaySeconds = null)
+        public static void LogException(string message, Exception innerException)
         {
             var ex = new Exception(message, innerException);
             LogException(ex);
@@ -21,7 +21,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// manually write an exception to our standard exception log
         /// </summary>
-        public static void LogException(Exception ex, string key = null, int? reLogDelaySeconds = null)
+        public static void LogException(Exception ex, string key = null)
         {
             if (!ShouldLog(key)) return;
 

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    partial class WmiDataProvider
+    internal partial class WmiDataProvider
     {
         /// <summary>
         /// Contains node's data and stores utilizastion history

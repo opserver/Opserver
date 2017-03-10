@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     {
                         LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
                         TotalMemory = data.TotalVisibleMemorySize * 1024;
-                        MemoryUsed = TotalMemory - data.FreePhysicalMemory * 1024;
+                        MemoryUsed = TotalMemory - (data.FreePhysicalMemory * 1024);
                         KernelVersion = Version.Parse(data.Version);
                         MachineType = data.Caption.ToString() + " " + data.Version.ToString();
                     }

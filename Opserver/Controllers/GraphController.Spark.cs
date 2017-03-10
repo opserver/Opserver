@@ -162,7 +162,7 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
-        public static async Task<ActionResult> SparkSvgAll<T>(Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
+        public static async Task<ActionResult> SparkSvgAll<T>(Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
         {
             MiniProfiler.Stop(true);
             const int width = SparkPoints;
@@ -220,7 +220,7 @@ namespace StackExchange.Opserver.Controllers
                         first = false;
                     }
                     sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
-                      .Append((SparkHeight - getVal(p) / divisor).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                      .Append((SparkHeight - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
                 }
                 sb.Append(width)
                   .Append(" ")
@@ -262,7 +262,7 @@ namespace StackExchange.Opserver.Controllers
                     first = false;
                 }
                 sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
-                  .Append((height - getVal(p) / divisor).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                  .Append((height - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
             }
             sb.Append(width)
               .Append(" ")

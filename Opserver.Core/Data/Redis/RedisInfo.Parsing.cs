@@ -54,8 +54,7 @@ namespace StackExchange.Opserver.Data.Redis
                     else
                     {
                         currentSection = new RedisInfoSection {Name = sectionName, IsUnrecognized = true};
-                        if (info.UnrecognizedSections == null)
-                            info.UnrecognizedSections = new List<RedisInfoSection>();
+                        info.UnrecognizedSections = info.UnrecognizedSections ?? new List<RedisInfoSection>();
                         info.UnrecognizedSections.Add(currentSection);
                     }
                     continue;
@@ -111,7 +110,11 @@ namespace StackExchange.Opserver.Data.Redis
             public bool IsGlobal { get; internal set; }
             public bool IsUnrecognized { get; internal set; }
             protected string _name { get; set; }
-            public virtual string Name { get { return _name ?? Regex.Replace(GetType().Name, "Info$", ""); } internal set { _name = value; } }
+            public virtual string Name
+            {
+                get { return _name ?? Regex.Replace(GetType().Name, "Info$", ""); }
+                internal set { _name = value; }
+            }
 
             public virtual void MapUnrecognizedLine(string infoLine)
             {

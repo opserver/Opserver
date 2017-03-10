@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI : SinglePollNode<PagerDutyAPI>
     {
-        internal static Options JilOptions = new Options(
+        internal static readonly Options JilOptions = new Options(
             dateFormat: DateTimeFormat.ISO8601,
             unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC,
             excludeNulls: true
@@ -87,8 +87,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
         /// <returns></returns>
         public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null, Dictionary<string,string> extraHeaders = null)
         {
-            var url = "https://api.pagerduty.com/"; //Settings.APIBaseUrl;
-            var fullUri = url + path;
+            const string baseUrl = "https://api.pagerduty.com/";
+            var fullUri = baseUrl + path;
 
             using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
             {
@@ -124,8 +124,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         if (rs == null) return getFromJson(null);
                         using (var sr = new StreamReader(rs))
                         {
-                            var result = getFromJson(sr.ReadToEnd());
-                            return result;
+                            return getFromJson(sr.ReadToEnd());
                         }
                     }
                 }
@@ -160,7 +159,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         private Cache<List<PagerDutyPerson>> _allusers;
         public Cache<List<PagerDutyPerson>> AllUsers =>
             _allusers ?? (_allusers = GetPagerDutyCache(60.Minutes(),
-                    () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r.ToString(), JilOptions).Users))
+                    () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r, JilOptions).Users))
             );
     }
 }

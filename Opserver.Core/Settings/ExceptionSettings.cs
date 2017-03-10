@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace StackExchange.Opserver
 {
     public class ExceptionsSettings : Settings<ExceptionsSettings>
     {
-        public override bool Enabled => Stores.Any();
+        public override bool Enabled => Stores.Count > 0;
 
         public List<Store> Stores { get; set; } = new List<Store>();
 
         public List<ExceptionsGroup> Groups { get; set; } = new List<ExceptionsGroup>();
 
         public List<string> Applications { get; set; } = new List<string>();
-        
+
         /// <summary>
         /// How many exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
         /// </summary>

@@ -41,13 +41,13 @@ namespace StackExchange.Opserver.Data.Dashboard
         public string MonitorStatusReason => null;
 
         private static readonly Dictionary<string, string> _prettyNameReplacements = new Dictionary<string, string>
-            {
-                {"Microsoft Network Adapter Multiplexor Driver", "Microsoft Team"},
-                {"Quad Port Server Adapter", "Quad Port SA"},
-                {"Microsoft Load Balancing/Failover Provider", "Microsoft LB/FP"},
-                {"Microsoft Load Balancing", "Microsoft LB"},
-                {"Intel(R) Ethernet", "Intel" }
-            };
+        {
+            ["Microsoft Network Adapter Multiplexor Driver"] = "Microsoft Team",
+            ["Quad Port Server Adapter"] = "Quad Port SA",
+            ["Microsoft Load Balancing/Failover Provider"] = "Microsoft LB/FP",
+            ["Microsoft Load Balancing"] = "Microsoft LB",
+            ["Intel(R) Ethernet"] = "Intel"
+        };
 
         private string _prettyName;
         public string PrettyName
@@ -83,7 +83,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 while (iSpeed >= 1000 && order + 1 < _speedSizes.Length)
                 {
                     order++;
-                    iSpeed = iSpeed/1000;
+                    iSpeed /= 1000;
                 }
                 return $"{iSpeed:0} {_speedSizes[order]}ps";
             }
@@ -95,12 +95,12 @@ namespace StackExchange.Opserver.Data.Dashboard
                 : PhysicalAddress;
 
         internal bool IsLikelyPrimary(Regex pattern) => pattern != null
-            ? (FullName != null && pattern.IsMatch(FullName)) ||
-              (Name != null && pattern.IsMatch(Name)) ||
-              (Caption != null && pattern.IsMatch(Caption))
-            : Name.ToLower().EndsWith("team") ||
-              Name.ToLower().StartsWith("bond") ||
-              Name.Contains("Microsoft Network Adapter Multiplexor Driver");
+            ? (FullName != null && pattern.IsMatch(FullName))
+              || (Name != null && pattern.IsMatch(Name))
+              || (Caption != null && pattern.IsMatch(Caption))
+            : Name.ToLower().EndsWith("team")
+              || Name.ToLower().StartsWith("bond")
+              || Name.Contains("Microsoft Network Adapter Multiplexor Driver");
 
         public Interface() {}
         public Interface(string id) { Id = id; }

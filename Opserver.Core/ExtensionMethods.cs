@@ -21,7 +21,7 @@ namespace StackExchange.Opserver
     /// </summary>
     public static partial class ExtensionMethods
     {
-        public static string ExceptionLogPrefix = "ErrorLog-";
+        public static readonly string ExceptionLogPrefix = "ErrorLog-";
 
         /// <summary>
         /// Answers true if this String is either null or empty.
@@ -305,22 +305,17 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Adds a key/value pair for logging to an exception, one that'll appear in exceptional
+        /// Adds a key/value pair for logging to an <see cref="Exception"/>, one that'll appear in exceptional
         /// </summary>
+        /// <typeparam name="T">The type of exception bring logged.</typeparam>
+        /// <param name="ex">The exception to add data to.</param>
+        /// <param name="key">The key to add.</param>
+        /// <param name="value">The value to add.</param>
         public static T AddLoggedData<T>(this T ex, string key, string value) where T : Exception
         {
             ex.Data[ExceptionLogPrefix + key] = value;
             return ex;
         }
-
-        /// <summary>
-        /// Does a Step with the location of caller as the label.
-        /// </summary>
-        public static IDisposable StepHere(this MiniProfiler profiler,
-            [CallerMemberName] string memberName = "",
-            [CallerFilePath] string sourceFilePath = "",
-            [CallerLineNumber] int sourceLineNumber = 0) =>
-                profiler?.Step($"{memberName} - {Path.GetFileName(sourceFilePath)}:{sourceLineNumber.ToString()}");
 
         private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new ConcurrentDictionary<string, object>();
 
@@ -368,15 +363,16 @@ namespace StackExchange.Opserver
                 Interlocked.CompareExchange(ref totalGetSetAsyncError, 0, 0));
 
         /// <summary>
-        /// 
-        /// lookup refreshes the data if necessary, passing the old data if we have it.
-        /// 
-        /// durationSecs is the "time before stale" for the data
-        /// serveStaleSecs is the maximum amount of time to serve data once it becomes stale
-        /// 
-        /// Note that one unlucky caller when the data is stale will block to fill the cache,
-        /// everybody else will get stale data though.
+        /// Gets the current data via <paramref name="lookup"/>. 
+        /// When data is missing or stale (older than <paramref name="duration"/>), a background refresh is 
+        /// initiated on stale fetches still within <paramref name="staleDuration"/> after <paramref name="duration"/>.
         /// </summary>
+        /// <typeparam name="T">The type of value to get.</typeparam>
+        /// <param name="cache">The cache to use.</param>
+        /// <param name="key">The cache key to use.</param>
+        /// <param name="lookup">Refreshes the data if necessary, passing the old data if we have it.</param>
+        /// <param name="duration">The time to cache the data, before it's considered stale.</param>
+        /// <param name="staleDuration">The time available to serve stale data, while a background fetch is performed.</param>
         public static T GetSet<T>(this LocalCache cache, string key, Func<T, MicroContext, T> lookup, TimeSpan duration, TimeSpan staleDuration)
             where T : class
         {

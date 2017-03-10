@@ -175,9 +175,9 @@ namespace StackExchange.Opserver.Data.Redis
                             {
                                 TallyDebugLine(key, x.Result);
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
-                                TallyError(e);
+                                TallyError();
                             }
                         });
                 }
@@ -237,7 +237,7 @@ namespace StackExchange.Opserver.Data.Redis
             return null;
         }
 
-        internal void TallyError(Exception e)
+        internal void TallyError()
         {
             Interlocked.Increment(ref _errorCount);
         }
@@ -271,7 +271,7 @@ namespace StackExchange.Opserver.Data.Redis
         public long ValueByteSize => _valueByteSize;
         public long TotalByteSize => _keyByteSize + _valueByteSize;
 
-        public SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
+        public readonly SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
 
         public void Tally(string key, long keySize, long valueSize)
         {
@@ -288,7 +288,7 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
-        class DescLongCompare : IComparer<long>
+        private class DescLongCompare : IComparer<long>
         {
             public int Compare(long x, long y)
             {

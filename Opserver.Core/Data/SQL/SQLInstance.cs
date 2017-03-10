@@ -114,7 +114,6 @@ namespace StackExchange.Opserver.Data.SQL
 
         public Cache<List<T>> SqlCacheList<T>(
             TimeSpan cacheDuration,
-            bool affectsStatus = true,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)

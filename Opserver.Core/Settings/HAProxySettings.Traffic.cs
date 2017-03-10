@@ -9,7 +9,7 @@ namespace StackExchange.Opserver
 
         public class HAProxyTrafficSettings
         {
-            public bool Enabled => Connections.Any();
+            public bool Enabled => Connections.Count > 0;
 
             /// <summary>
             /// Connections for

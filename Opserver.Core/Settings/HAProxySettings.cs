@@ -6,7 +6,7 @@ namespace StackExchange.Opserver
 {
     public partial class HAProxySettings : Settings<HAProxySettings>
     {
-        public override bool Enabled => Instances.Any() || Groups.Any();
+        public override bool Enabled => Instances.Count > 0 || Groups.Count > 0;
 
         public List<Group> Groups { get; set; } = new List<Group>();
 

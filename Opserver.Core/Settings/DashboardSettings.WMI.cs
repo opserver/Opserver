@@ -5,7 +5,7 @@ namespace StackExchange.Opserver
 {
     public class WMISettings : IProviderSettings
     {
-        public bool Enabled => Nodes.Any();
+        public bool Enabled => Nodes.Count > 0;
         public string Name => "WMI";
 
         /// <summary>

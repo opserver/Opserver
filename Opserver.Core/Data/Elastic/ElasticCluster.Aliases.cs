@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             List<string> aliases;
             return Aliases.Data.Aliases.TryGetValue(index, out aliases)
-                       ? aliases.First().IsNullOrEmptyReturn(index)
+                       ? aliases[0].IsNullOrEmptyReturn(index)
                        : index;
         }
 

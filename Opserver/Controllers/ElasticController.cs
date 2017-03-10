@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
         };
 
         [Route("elastic")]
-        public ActionResult Dashboard(string cluster, string node)
+        public ActionResult Dashboard()
         {
             var vd = new DashboardModel
             {
@@ -44,7 +44,6 @@ namespace StackExchange.Opserver.Controllers
             vd.View = DashboardModel.Views.Node;
             return View("Node", vd);
         }
-
 
         [Route("elastic/node/modal/{type}")]
         public ActionResult NodeModal(string cluster, string node, string type)
@@ -73,7 +72,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic/index/modal/{type}")]
-        public ActionResult IndexModal(string cluster, string node, string index, string type, string subtype)
+        public ActionResult IndexModal(string cluster, string node, string index, string type)
         {
             var vd = GetViewData(cluster, node, index);
             switch (type)

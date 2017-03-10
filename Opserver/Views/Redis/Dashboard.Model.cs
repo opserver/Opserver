@@ -7,9 +7,9 @@ namespace StackExchange.Opserver.Views.Redis
 {
     public enum RedisViews
     {
-        All,
-        Server,
-        Instance
+        All = 0,
+        Server = 1,
+        Instance = 2
     }
 
     public class DashboardModel
@@ -23,12 +23,9 @@ namespace StackExchange.Opserver.Views.Redis
         public bool? _allVersionsMatch;
         public bool AllVersionsMatch
         {
-            get { return _allVersionsMatch ?? (_allVersionsMatch = Instances != null && Instances.All(i => i.Version == Instances.First().Version)).Value; }
+            get { return _allVersionsMatch ?? (_allVersionsMatch = Instances?.All(i => i.Version == Instances[0].Version) == true).Value; }
         }
 
-        public Version CommonVersion
-        {
-            get { return AllVersionsMatch ? Instances.First().Version : null; }
-        }
+        public Version CommonVersion => AllVersionsMatch ? Instances[0].Version : null;
     }
 }

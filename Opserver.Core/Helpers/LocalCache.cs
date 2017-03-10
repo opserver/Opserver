@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Helpers
         private static readonly MemoryCache Cache = new MemoryCache(nameof(LocalCache));
 
         private readonly object _lock = new object();
-        
+
         public bool Exists(string key)
         {
             return Cache[key] != null;
@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Helpers
                 policy.AbsoluteExpiration = DateTime.UtcNow.Add(duration.Value);
             if (isSliding && duration.HasValue)
                 policy.SlidingExpiration = duration.Value;
-            
+
             Cache.Add(cacheKey, value, policy);
         }
 
@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Helpers
         {
             Cache.Remove(key);
         }
-        
+
         public bool SetNXSync<T>(string key, T val)
         {
             lock (_lock)
