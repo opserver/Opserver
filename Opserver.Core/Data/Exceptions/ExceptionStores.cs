@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static HashSet<string> KnownApplications { get; } =
             GetConfiguredApplicationGroups().SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
 
-        public static List<Application> Applications { get; private set; }
+        public static List<Application> Applications { get; private set; } = new List<Application>();
         private static ApplicationGroup CatchAll { get; set; }
         public static List<ApplicationGroup> ApplicationGroups { get; private set; } = GetConfiguredApplicationGroups();
 
