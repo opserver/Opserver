@@ -119,8 +119,8 @@ namespace StackExchange.Opserver.Data.Exceptions
                 {
                     result = aResult;
                 }
-                toPoll.Add(s.Applications.PollAsync(true));
-                toPoll.Add(s.ErrorSummary.PollAsync(true));
+                toPoll.Add(s.Applications.PollAsync(!s.Applications.IsPolling));
+                toPoll.Add(s.ErrorSummary.PollAsync(!s.ErrorSummary.IsPolling));
             }
             await Task.WhenAll(toPoll).ConfigureAwait(false);
             return result;
