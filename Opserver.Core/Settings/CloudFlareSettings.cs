@@ -17,7 +17,7 @@ namespace StackExchange.Opserver
         /// APIKey for the CloudFlare account
         /// </summary>
         public string APIKey { get; set; }
-        
+
         public class DataCenter : ISettingsCollectionItem
         {
             /// <summary>

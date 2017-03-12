@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.Elastic
     {
         public static bool Enabled => Clusters.Count > 0;
         public static List<ElasticCluster> Clusters { get; }
-        
+
         static ElasticModule()
         {
             Clusters = Current.Settings.Elastic.Clusters

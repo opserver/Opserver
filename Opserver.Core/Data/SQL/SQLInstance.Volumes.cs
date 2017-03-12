@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.SQL
             public bool IsCompressed { get; internal set; }
             public decimal AvgReadStallMs { get; internal set; }
             public decimal AvgWriteStallMs { get; internal set; }
-            
+
             public string GetFetchSQL(Version v) => @"
 Select vs.volume_mount_point VolumeMountPoint, 
        vs.volume_id VolumeId, 
