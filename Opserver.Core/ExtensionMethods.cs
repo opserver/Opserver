@@ -130,14 +130,6 @@ namespace StackExchange.Opserver
                 : count == 1 ? single : plural;
 
         /// <summary>
-        /// Returns the pluralized version of 'noun' when required by 'number'.
-        /// </summary>
-        public static string Pluralize(this string noun, int number, string pluralForm = null) =>
-            number == 1
-                ? noun
-                : pluralForm.IsNullOrEmptyReturn((noun ?? "") + "s");
-
-        /// <summary>
         /// Truncates a string to <paramref name="maxLength"/>.
         /// </summary>
         /// <param name="s">The string to truncate</param>
