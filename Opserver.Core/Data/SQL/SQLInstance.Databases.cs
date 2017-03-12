@@ -743,6 +743,10 @@ Drop Table #vlfTemp;";
             public TableTypes TableType { get; internal set; }
 
             public string GetFetchSQL(Version v) => @"
+Select object_id, index_id, type Into #indexes From sys.indexes;
+Select object_id, index_id, partition_id Into #parts From sys.partitions;
+Select object_id, index_id, row_count Into #partStats From sys.dm_db_partition_stats;
+
 Select t.object_id Id,
        s.name SchemaName,
        t.name TableName,
@@ -758,9 +762,9 @@ Select t.object_id Id,
   From sys.tables t
        Join sys.schemas s
          On t.schema_id = s.schema_id
-       Join sys.indexes i 
+       Join #indexes i 
          On t.object_id = i.object_id
-       Join sys.partitions p 
+       Join #parts p 
          On i.object_id = p.object_id 
          And i.index_id = p.index_id
        Join (Select container_id,
@@ -769,13 +773,17 @@ Select t.object_id Id,
                From sys.allocation_units
            Group By container_id) a
          On p.partition_id = a.container_id
-       Left Join sys.dm_db_partition_stats ddps
+       Left Join #partStats ddps
          On i.object_id = ddps.object_id
          And i.index_id = ddps.index_id
          And i.type In (0, 1, 5) -- Heap, Clustered, Clustered Columnstore        
  Where t.is_ms_shipped = 0
    And i.object_id > 255
-Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name";
+Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name;
+
+Drop Table #indexes;
+Drop Table #parts;
+Drop Table #partStats;";
         }
 
         public class DatabaseView : ISQLVersioned
