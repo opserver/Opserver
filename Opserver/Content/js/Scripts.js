@@ -258,11 +258,9 @@
                     if (tabs.length) {
                         $('.js-top-tabs').replaceWith(tabs);
                     }
-                    // TODO: Just replace issues completely if not expanded, otherwise skip when expanded
                     var issuesList = $('.js-issues-button', resp);
                     var curList = $('.js-issues-button');
                     if (issuesList.length) {
-                        // TODO: Fix replacement
                         // Re-think what comes down here, plan for websockets
                         var issueCount = issuesList.data('count');
                         // TODO: don't if hovering
@@ -282,6 +280,12 @@
                 }).fail(Status.UI.ajaxError);
             }, Status.options.HeaderRefresh * 1000);
         }
+        
+        registerLoaders({
+            '#/issues': function (val) {
+                Status.popup('issues');
+            }
+        });
 
         var resizeTimer, dropdownPause;
         $(window).resize(function() {

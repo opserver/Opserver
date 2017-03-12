@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             if (MonitorStatus != MonitorStatus.Good)
             {
-                yield return new Issue<SQLInstance>(this, Name);
+                yield return new Issue<SQLInstance>(this, "SQL Server", Name);
             }
         }
     }

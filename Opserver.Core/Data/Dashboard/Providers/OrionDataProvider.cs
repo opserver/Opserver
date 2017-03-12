@@ -169,10 +169,9 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         {
                             n.Issues = new List<Issue<Node>>
                             {
-                                new Issue<Node>(n)
+                                new Issue<Node>(n, "Orion", n.PrettyName)
                                 {
                                     Date = n.LastSync ?? DateTime.UtcNow,
-                                    Title = n.PrettyName,
                                     Description = n.StatusDescription,
                                     MonitorStatus = n.Status.ToMonitorStatus()
                                 }

@@ -8,9 +8,9 @@ namespace StackExchange.Opserver.Data.Redis
 
         public IEnumerable<Issue> GetIssues()
         {
-            if (MonitorStatus != MonitorStatus.Good)
+            if (MonitorStatus != MonitorStatus.Good && LastPoll.HasValue)
             {
-                yield return new Issue<RedisInstance>(this, Name);
+                yield return new Issue<RedisInstance>(this, "Redis", Name);
             }
         }
     }

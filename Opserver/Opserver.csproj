@@ -7,7 +7,8 @@
     <LangVersion>6</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion></ProductVersion>
+    <ProductVersion>
+    </ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}</ProjectGuid>
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
@@ -700,7 +701,7 @@
     <Content Include="Views\Elastic\Node.cshtml" />
     <Content Include="Views\Redis\Instance.cshtml" />
     <Content Include="Views\Redis\Instance.Selector.cshtml" />
-    <Content Include="Views\Shared\IssuesList.cshtml" />
+    <Content Include="Views\Shared\IssuesButton.cshtml" />
     <Content Include="Views\Shared\TopRefresh.cshtml" />
     <Content Include="Views\Shared\NoConfiguration.cshtml" />
     <Content Include="Views\SQL\Servers.cshtml" />
@@ -716,6 +717,7 @@
     <Content Include="Opserver.ruleset">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Views\Shared\Issues.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

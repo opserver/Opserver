@@ -10545,6 +10545,27 @@ table .text-muted,
 .ul-plain:last-child {
   margin-bottom: 0;
 }
+.list-group-sm {
+  margin-bottom: 0;
+}
+.list-group-sm .list-group-item {
+  padding: 5px 10px;
+}
+.list-group-sm .list-group-item.bg-primary {
+  border-left: solid 2px #008cba;
+}
+.list-group-sm .list-group-item.bg-success {
+  border-left: solid 2px #43ac6a;
+}
+.list-group-sm .list-group-item.bg-info {
+  border-left: solid 2px #5bc0de;
+}
+.list-group-sm .list-group-item.bg-warning {
+  border-left: solid 2px #E99002;
+}
+.list-group-sm .list-group-item.bg-danger {
+  border-left: solid 2px #F04124;
+}
 /* Cache Dashboard */
 tr.cache-sub-item td:first-child {
   padding-left: 15px;

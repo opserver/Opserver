@@ -45,7 +45,7 @@
             </div>
 
             <div class="collapse navbar-collapse" id="topbar-collapse">
-                @Html.Partial("IssuesList")
+                @Html.Partial("IssuesButton")
                 @if (topNodes?.SearchOnly ?? false)
                 {
                     <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">

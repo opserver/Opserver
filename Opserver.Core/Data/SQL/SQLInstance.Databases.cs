@@ -153,14 +153,14 @@ namespace StackExchange.Opserver.Data.SQL
                 get
                 {
                     if (IsReadOnly)
-                        return Name + " is read-only";
+                        return Name + " database is read-only";
 
                     switch (State)
                     {
                         case DatabaseStates.Online:
                             return null;
                         default:
-                            return "Database State: " + State.GetDescription();
+                            return Name + " database is " + State.GetDescription();
                     }
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -8,9 +9,9 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public IEnumerable<Issue> GetIssues()
         {
-            if (MonitorStatus != MonitorStatus.Good)
+            if (MonitorStatus != MonitorStatus.Good && Instances.Any(i => i.LastPoll.HasValue))
             {
-                yield return new Issue<HAProxyGroup>(this, Name);
+                yield return new Issue<HAProxyGroup>(this, "HAProxy", Name);
             }
         }
     }

@@ -750,6 +750,33 @@ h4, h5, h6 {
   }
 }
 
+.list-group-sm {
+    .list-group-item {
+        padding: 5px 10px;
+
+        &.bg-primary {
+            border-left: solid 2px @brand-primary;
+        }
+
+        &.bg-success {
+            border-left: solid 2px @brand-success;
+        }
+
+        &.bg-info {
+            border-left: solid 2px @brand-info;
+        }
+
+        &.bg-warning {
+            border-left: solid 2px @brand-warning;
+        }
+
+        &.bg-danger {
+            border-left: solid 2px @brand-danger;
+        }
+    }
+    margin-bottom: 0;
+}
+
 /* Cache Dashboard */
 tr.cache-sub-item td:first-child {
     padding-left: 15px;

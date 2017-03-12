@@ -104,12 +104,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                     if (h.OpenIncidents?.Count > 0)
                     {
-                        n.Issues = h.OpenIncidents.Select(i => new Issue<Node>(n)
+                        n.Issues = h.OpenIncidents.Select(i => new Issue<Node>(n, "Bosun", n.PrettyName)
                         {
-                            Title = n.PrettyName,
                             Date = i.LastAbnormalTime.ToDateTime(),
                             Description = i.Subject,
-                            MonitorStatus = i.Active ? MonitorStatus.Good : GetStatusFromString(i.Status)
+                            MonitorStatus = !i.Active ? MonitorStatus.Good : GetStatusFromString(i.Status)
                         }).ToList();
                     }
 
@@ -279,10 +278,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             switch (status)
             {
+                case "critical":
+                    return MonitorStatus.Critical;
                 case "normal":
                     return MonitorStatus.Good;
                 case "warning":
-                    return MonitorStatus.Warning; // critical?
+                    return MonitorStatus.Warning;
                 default:
                 //case "unknown":
                     return MonitorStatus.Unknown;

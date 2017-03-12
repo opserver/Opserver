@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             foreach (var ag in AvailabilityGroups.WithIssues())
             {
-                yield return new Issue<SQLNode.AGInfo>(ag, ag.Name) { IsCluster = true };
+                yield return new Issue<SQLNode.AGInfo>(ag, "SQL Availability Group", ag.Name) { IsCluster = true };
             }
         }
     }

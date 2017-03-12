@@ -8,8 +8,8 @@
         {
             <div>
                 <h6>
-                    @i.MonitorStatus.IconSpan() @i.Title
-                    <span class="pull-right">@i.Date.ToRelativeTimeSpan()</span>
+                    @i.MonitorStatus.IconSpan() @i.Title <span class="text-muted">(@(i.Type ?? "Unknown Type"))</span>
+                    <span class="pull-right small">@i.Date.ToRelativeTimeSpan()</span>
                 </h6>
                 <div>@i.Description</div>
                 <p></p>

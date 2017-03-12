@@ -8,9 +8,9 @@ namespace StackExchange.Opserver.Data.Elastic
 
         public IEnumerable<Issue> GetIssues()
         {
-            if (MonitorStatus != MonitorStatus.Good)
+            if (MonitorStatus != MonitorStatus.Good && LastPoll.HasValue)
             {
-                yield return new Issue<ElasticCluster>(this, Name) { IsCluster = true };
+                yield return new Issue<ElasticCluster>(this, "Elastic", Name) { IsCluster = true };
             }
         }
     }

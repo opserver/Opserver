@@ -10,17 +10,15 @@ namespace StackExchange.Opserver.Data
     public class Issue<T> : Issue where T : IMonitorStatus
     {
         public T Item { get; set; }
-        public Issue(T item, DateTime? date = null)
+
+        public Issue(T item, string type, string title, DateTime? date = null)
         {
+            Type = type;
+            Title = title;
             Date = date ?? DateTime.UtcNow;
             Item = item;
             MonitorStatus = item.MonitorStatus;
             Description = item.MonitorStatusReason;
-        }
-
-        public Issue(T item, string title, DateTime? date = null) : this(item, date)
-        {
-            Title = title;
         }
     }
 
@@ -30,6 +28,7 @@ namespace StackExchange.Opserver.Data
 
         public string Title { get; set; }
         public string Description { get; set; }
+        public string Type { get; set; }
         /// <summary>
         /// Whether this issue is a service rather than a node - presumably an entire service being offline is worse
         /// </summary>

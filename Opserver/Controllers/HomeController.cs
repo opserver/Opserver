@@ -30,11 +30,11 @@ namespace StackExchange.Opserver.Controllers
             return View(vd);
         }
 
+        [Route("issues")]
+        public ActionResult Issues() => View();
+
         [Route("about"), AlsoAllow(Roles.InternalRequest)]
-        public ActionResult About()
-        {
-            return View();
-        }
+        public ActionResult About() => View();
 
         [Route("about/caches"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult AboutCaches(string filter, bool refresh = true)
