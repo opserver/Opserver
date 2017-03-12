@@ -40,12 +40,12 @@ namespace StackExchange.Opserver.Controllers
             if (log.HasValue())
             {
                 var dLog = log;
-                var a = Applications.FirstOrDefault(app => app.Name == dLog) ?? Applications.FirstOrDefault(app => app.ShortName == dLog);
+                var a = Applications.Find(app => app.Name == dLog) ?? Applications.Find(app => app.ShortName == dLog);
                 log = a != null ? a.Name : log;
                 if (a != null && group.IsNullOrEmpty())
                 {
                     // Old links, that didn't know about groups
-                    var g = ApplicationGroups.FirstOrDefault(gr => gr[a.Name] != null);
+                    var g = ApplicationGroups.Find(gr => gr[a.Name] != null);
                     if (g != null) group = g.Name;
                 }
             }
@@ -58,14 +58,14 @@ namespace StackExchange.Opserver.Controllers
             count = count ?? 250;
             sort = sort ?? ExceptionSorts.TimeDesc;
 
-            var vd = await GetExceptionsModel(group, log, sort.Value, count.Value, loadAsync: 500);
+            var vd = await GetExceptionsModel(group, log, sort.Value, count.Value, loadAsync: 500).ConfigureAwait(false);
             return View(vd);
         }
 
         [Route("exceptions/load-more")]
         public async Task<ActionResult> LoadMore(string group, string log, ExceptionSorts sort, int? count = null, Guid? prevLast = null)
         {
-            var vd = await GetExceptionsModel(group, log, sort, count, prevLast);
+            var vd = await GetExceptionsModel(group, log, sort, count, prevLast).ConfigureAwait(false);
             return View("Exceptions.Table.Rows", vd);
         }
 
@@ -73,7 +73,7 @@ namespace StackExchange.Opserver.Controllers
         {
             FixNames(ref group, ref log);
 
-            var errors = await GetAllErrors(group, log, sort: sort);
+            var errors = await GetAllErrors(group, log, sort: sort).ConfigureAwait(false);
 
             var startIndex = 0;
             if (prevLast.HasValue)
@@ -100,11 +100,11 @@ namespace StackExchange.Opserver.Controllers
             // Defaults
             sort = sort ?? ExceptionSorts.TimeDesc;
             FixNames(ref group, ref log);
-            var e = await GetError(log, id);
+            var e = await GetError(log, id).ConfigureAwait(false);
             if (e == null)
                 return View("Exceptions.Detail", null);
 
-            var errors = await GetSimilarErrorsAsync(e, byTime, sort: sort.Value);
+            var errors = await GetSimilarErrorsAsync(e, byTime, sort: sort.Value).ConfigureAwait(false);
             var vd = new ExceptionsModel
             {
                 Sort = sort.Value,
@@ -130,7 +130,7 @@ namespace StackExchange.Opserver.Controllers
             if (q.IsNullOrEmpty())
                 return RedirectToAction(nameof(Exceptions), new { group, log });
 
-            var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value);
+            var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value).ConfigureAwait(false);
             if (errors.Count == 0 && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
@@ -154,21 +154,21 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/detail")]
         public async Task<ActionResult> Detail(string app, Guid id)
         {
-            var e = await GetError(app, id);
+            var e = await GetError(app, id).ConfigureAwait(false);
             return View("Exceptions.Detail", e);
         }
 
         [Route("exceptions/preview")]
         public async Task<ActionResult> Preview(string app, Guid id)
         {
-            var e = await GetError(app, id);
+            var e = await GetError(app, id).ConfigureAwait(false);
             return View("Exceptions.Preview", e);
         }
 
         [Route("exceptions/detail/json"), AlsoAllow(Roles.Anonymous)]
         public async Task<JsonResult> DetailJson(string app, Guid id)
         {
-            var e = await GetError(app, id);
+            var e = await GetError(app, id).ConfigureAwait(false);
             return e != null
                        ? Json(new
                        {
@@ -194,7 +194,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/protect"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> Protect(string log, Guid id)
         {
-            var success = await ActionAsync(log, s => s.ProtectErrorAsync(id));
+            var success = await ActionAsync(log, s => s.ProtectErrorAsync(id)).ConfigureAwait(false);
             return success ? Counts() : JsonError("Unable to protect, error was not found in the log");
         }
 
@@ -203,7 +203,7 @@ namespace StackExchange.Opserver.Controllers
         {
             // we don't care about success...if it's *already* deleted, that's fine
             // if we throw an exception trying to delete, that's another matter
-            await ActionAsync(log, s => s.DeleteErrorAsync(id));
+            await ActionAsync(log, s => s.DeleteErrorAsync(id)).ConfigureAwait(false);
 
             return redirect ? Json(new { url = Url.Action("Exceptions", new { log }) }) : Counts();
         }
@@ -211,7 +211,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> DeleteAll(string log)
         {
-            await ActionAsync(log, s => s.DeleteAllErrorsAsync(new List<string> {log}));
+            await ActionAsync(log, s => s.DeleteAllErrorsAsync(new List<string> {log})).ConfigureAwait(false);
 
             return Json(new { url = Url.Action("Exceptions") });
         }
@@ -219,8 +219,8 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/delete-similar"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> DeleteSimilar(string log, Guid id)
         {
-            var e = await GetError(log, id);
-            await ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrorsAsync(e));
+            var e = await GetError(log, id).ConfigureAwait(false);
+            await ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrorsAsync(e)).ConfigureAwait(false);
 
             return Json(new { url = Url.Action("Exceptions", new { log }) });
         }
@@ -229,7 +229,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> DeleteList(Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
-            await ActionAsync(null, s => s.DeleteErrorsAsync(ids.ToList()));
+            await ActionAsync(null, s => s.DeleteErrorsAsync(ids.ToList())).ConfigureAwait(false);
 
             return returnCounts ? Counts() : Json(new { url = Url.Action("Exceptions") });
         }
@@ -264,11 +264,11 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/jiraaction"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
         public async Task<ActionResult> JiraAction(string log, Guid id, int actionid)
         {
-            var e = await GetError(log, id);
+            var e = await GetError(log, id).ConfigureAwait(false);
             var user = Current.User;
-            var action = JiraSettings.Actions.FirstOrDefault(i => i.Id == actionid);
+            var action = JiraSettings.Actions.Find(i => i.Id == actionid);
             var jiraClient = new JiraClient(JiraSettings);
-            var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName);
+            var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName).ConfigureAwait(false);
 
             if (result.Key.IsNullOrWhiteSpace())
             {

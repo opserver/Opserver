@@ -51,79 +51,49 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public int TotalCount { get; set; }
     }
 
-    public class CloudFlarePlan
-    {
-        [DataMember(Name = "id")]
-        public string Id { get; private set; }
-
-        [DataMember(Name = "name")]
-        public string Name { get; private set; }
-
-        [DataMember(Name = "price")]
-        public double Price { get; private set; }
-
-        [DataMember(Name = "currency")]
-        public string Currency { get; private set; }
-
-        [DataMember(Name = "frequency")]
-        public string Frequency { get; private set; }
-
-        [DataMember(Name = "legacy_id")]
-        public string LegacyId { get; private set; }
-
-        [DataMember(Name = "is_subscribed")]
-        public bool IsSubscribed { get; private set; }
-
-        [DataMember(Name = "can_subscribe")]
-        public bool CanSubscribe { get; private set; }
-
-        [DataMember(Name = "externally_managed")]
-        public bool ExternallyManaged { get; private set; }
-    }
-
     public class CloudFlareZone : IMonitorStatus
     {
         [DataMember(Name = "id")]
-        public string Id { get; private set; }
+        public string Id { get; set; }
 
         [DataMember(Name = "name")]
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         [DataMember(Name = "status")]
-        public ZoneStatus Status { get; private set; }
+        public ZoneStatus Status { get; set; }
 
         [DataMember(Name = "paused")]
-        public bool Paused { get; private set; }
+        public bool Paused { get; set; }
 
         [DataMember(Name = "type")]
-        public string Type { get; private set; }
+        public string Type { get; set; }
 
         [DataMember(Name = "development_mode")]
-        public int DevelopmentMode { get; private set; }
+        public int DevelopmentMode { get; set; }
 
         [DataMember(Name = "name_servers")]
-        public List<string> NameServers { get; private set; }
+        public List<string> NameServers { get; set; }
 
         [DataMember(Name = "original_name_servers")]
-        public List<string> OriginalNameServers { get; private set; }
+        public List<string> OriginalNameServers { get; set; }
 
         [DataMember(Name = "original_registrar")]
-        public string OriginalRegistrar { get; private set; }
+        public string OriginalRegistrar { get; set; }
 
         [DataMember(Name = "original_dnshost")]
-        public string OriginalDNSHost { get; private set; }
+        public string OriginalDNSHost { get; set; }
 
         [DataMember(Name = "created_on")]
-        public DateTimeOffset? CreatedOn { get; private set; }
+        public DateTimeOffset? CreatedOn { get; set; }
 
         [DataMember(Name = "modified_on")]
-        public DateTimeOffset? ModifiedOn { get; private set; }
+        public DateTimeOffset? ModifiedOn { get; set; }
 
         [DataMember(Name = "vanity_name_servers")]
-        public List<string> VanityNameServers { get; private set; }
+        public List<string> VanityNameServers { get; set; }
 
         [DataMember(Name = "permissions")]
-        public List<string> Permissons { get; private set; }
+        public List<string> Permissons { get; set; }
 
         // TODO: Meta:
         //"meta": {
@@ -183,31 +153,31 @@ namespace StackExchange.Opserver.Data.CloudFlare
     public class CloudFlareDNSRecord
     {
         [DataMember(Name = "id")]
-        public string Id { get; private set; }
+        public string Id { get; set; }
         [DataMember(Name = "type")]
-        public DNSRecordType Type { get; private set; }
+        public DNSRecordType Type { get; set; }
         [DataMember(Name = "name")]
-        public string Name { get; private set; }
+        public string Name { get; set; }
         [DataMember(Name = "content")]
-        public string Content { get; private set; }
+        public string Content { get; set; }
         [DataMember(Name = "proxiable")]
-        public bool Proxiable { get; private set; }
+        public bool Proxiable { get; set; }
         [DataMember(Name = "proxied")]
-        public bool Proxied { get; private set; }
+        public bool Proxied { get; set; }
         [DataMember(Name = "ttl")]
-        public int TTL { get; private set; }
+        public int TTL { get; set; }
         [DataMember(Name = "locked")]
-        public bool Locked { get; private set; }
+        public bool Locked { get; set; }
         [DataMember(Name = "zone_id")]
-        public string ZoneId { get; private set; }
+        public string ZoneId { get; set; }
         [DataMember(Name = "zone_name")]
-        public string ZoneName { get; private set; }
+        public string ZoneName { get; set; }
         [DataMember(Name = "created_on")]
-        public DateTimeOffset CreatedOn { get; private set; }
+        public DateTimeOffset CreatedOn { get; set; }
         [DataMember(Name = "modified_on")]
-        public DateTimeOffset ModifiedOn { get; private set; }
+        public DateTimeOffset ModifiedOn { get; set; }
         [DataMember(Name = "data")]
-        public object Data { get; private set; }
+        public object Data { get; set; }
 
         public bool IsAutoTTL => TTL == 1; // 1 is auto in CloudFlare land
 
@@ -242,7 +212,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
 
     public enum DNSRecordType
     {
-        // ReSharper disable InconsistentNaming
         A = 0,
         AAAA = 1,
         CNAME = 2,
@@ -252,6 +221,5 @@ namespace StackExchange.Opserver.Data.CloudFlare
         MX = 6,
         NS = 7,
         SPF = 8
-        // ReSharper restore InconsistentNaming
     }
 }

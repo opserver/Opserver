@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Controllers
             try
             {
                 var polls = key.Select(k => PollingEngine.PollAsync(type, k, guid));
-                var results = await Task.WhenAll(polls);
+                var results = await Task.WhenAll(polls).ConfigureAwait(false);
                 return Json(results.Aggregate(true, (current, r) => current & r));
             }
             catch (Exception e)

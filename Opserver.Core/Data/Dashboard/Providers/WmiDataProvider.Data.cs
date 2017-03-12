@@ -72,7 +72,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 List<Interface.InterfaceUtilization> result;
                 if (iface != null
-                    && Interfaces.FirstOrDefault(x => x == iface) != null
+                    && Interfaces.Find(x => x == iface) != null
                     && NetHistory.ContainsKey(iface.Name))
                 {
                     result = NetHistory[iface.Name];
@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 List<Volume.VolumePerformanceUtilization> result;
                 if (iface != null
-                    && Volumes.FirstOrDefault(x => x == iface) != null
+                    && Volumes.Find(x => x == iface) != null
                     && VolumePerformanceHistory.ContainsKey(iface.Name))
                 {
                     result = VolumePerformanceHistory[iface.Name];

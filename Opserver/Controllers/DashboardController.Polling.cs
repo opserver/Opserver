@@ -15,11 +15,11 @@ namespace StackExchange.Opserver.Controllers
             if (n == null)
                 return JsonNotFound();
 
-            var data = await n.GetCPUUtilization();
+            var data = await n.GetCPUUtilization().ConfigureAwait(false);
             if (data?.Data == null)
                 return JsonNotFound();
 
-            var total = data.Data.FirstOrDefault(c => c.Name == "Total");
+            var total = data.Data.Find(c => c.Name == "Total");
 
             return Json(new
                 {

@@ -22,7 +22,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (!Current.IsInRole(Roles.ApiRequest)) return JsonError("Invalid API key");
 
-            await NodeRole.EnableAllAsync(node);
+            await NodeRole.EnableAllAsync(node).ConfigureAwait(false);
             return NodeRoles(node);
         }
 
@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (!Current.IsInRole(Roles.ApiRequest)) return JsonError("Invalid API key");
 
-            await NodeRole.DisableAllAsync(node);
+            await NodeRole.DisableAllAsync(node).ConfigureAwait(false);
             return NodeRoles(node);
         }
 

@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare/dns")]
         public async Task<ActionResult> DNS()
         {
-            await CloudFlareAPI.Instance.PollAsync();
+            await CloudFlareAPI.Instance.PollAsync().ConfigureAwait(false);
             var vd = new DNSModel
             {
                 View = DashboardModel.Views.DNS,

@@ -100,8 +100,8 @@ namespace StackExchange.Opserver.Data.Exceptions
         public static async Task<Error> GetError(string app, Guid guid)
         {
             var stores = GetStores(app);
-            var result = await Task.WhenAll(stores.Select(s => s.GetErrorAsync(guid)));
-            return result.FirstOrDefault(e => e != null);
+            var result = await Task.WhenAll(stores.Select(s => s.GetErrorAsync(guid))).ConfigureAwait(false);
+            return Array.Find(result, e => e != null);
         }
 
         public static async Task<T> ActionAsync<T>(string appName, Func<ExceptionStore, Task<T>> action)
@@ -122,7 +122,7 @@ namespace StackExchange.Opserver.Data.Exceptions
                 toPoll.Add(s.Applications.PollAsync(true));
                 toPoll.Add(s.ErrorSummary.PollAsync(true));
             }
-            await Task.WhenAll(toPoll);
+            await Task.WhenAll(toPoll).ConfigureAwait(false);
             return result;
         }
 
@@ -195,12 +195,12 @@ namespace StackExchange.Opserver.Data.Exceptions
                 IEnumerable <Error> allErrors;
                 if (stores.Count == 1)
                 {
-                    allErrors = await stores[0].GetErrorSummary(maxPerApp, group, app);
+                    allErrors = await stores[0].GetErrorSummary(maxPerApp, group, app).ConfigureAwait(false);
                 }
                 else
                 {
                     var tasks = stores.Select(s => s.GetErrorSummary(maxPerApp, group, app));
-                    var taskResults = await Task.WhenAll(tasks);
+                    var taskResults = await Task.WhenAll(tasks).ConfigureAwait(false);
                     var combined = new List<Error>();
                     foreach (var r in taskResults)
                     {

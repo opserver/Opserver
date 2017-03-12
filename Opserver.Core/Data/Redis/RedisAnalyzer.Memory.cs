@@ -29,14 +29,9 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
-        public static void AnalyzerInstanceMemory(RedisConnectionInfo connectionInfo)
-        {
-            //TODO: Get databases, suck in cache for each
-        }
-
         private static string GetMemoryAnalysisKey(RedisConnectionInfo connectionInfo, int database)
         {
-            return $"redis-memory-analysis-{connectionInfo.Host}:{connectionInfo.Port.ToString()}:{database.ToString()}";
+            return $"redis-memory-analysis-{connectionInfo.Host}:{connectionInfo.Port}:{database}";
         }
 
         public static RedisMemoryAnalysis AnalyzeDatabaseMemory(RedisConnectionInfo connectionInfo, int database)

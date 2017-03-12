@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var node = DashboardModule.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var data = await CPUData(node, start, end, summary);
+            var data = await CPUData(node, start, end, summary).ConfigureAwait(false);
             if (data == null) return JsonNotFound();
 
             return Json(data);
@@ -25,7 +25,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> CPUData(Node node, long? start = null, long? end = null, bool? summary = false)
         {
-            var points = await node.GetCPUUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var points = await node.GetCPUUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (points == null) return null;
             return new
             {
@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Controllers
                     date = p.DateEpoch,
                     value = p.Value ?? 0
                 }),
-                summary = summary.GetValueOrDefault(false) ? (await node.GetCPUUtilization(null, null, 2000)).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetCPUUtilization(null, null, 2000).ConfigureAwait(false)).Select(p => new
                 {
                     date = p.DateEpoch,
                     value = p.Value ?? 0
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var node = DashboardModule.GetNodeById(id);
             if (node == null) return JsonNotFound();
-            var data = await MemoryData(node, start, end, summary);
+            var data = await MemoryData(node, start, end, summary).ConfigureAwait(false);
             if (data == null) return JsonNotFound();
 
             return Json(data);
@@ -56,7 +56,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> MemoryData(Node node, long? start = null, long? end = null, bool? summary = false)
         {
-            var points = await node.GetMemoryUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var points = await node.GetMemoryUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (points == null) return null;
 
             return new
@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Controllers
                     date = p.DateEpoch,
                     value = (int)(p.Value / 1024 / 1024 ?? 0)
                 }),
-                summary = summary.GetValueOrDefault(false) ? (await node.GetMemoryUtilization(null, null, 1000)).Select(p => new
+                summary = summary.GetValueOrDefault(false) ? (await node.GetMemoryUtilization(null, null, 1000).ConfigureAwait(false)).Select(p => new
                 {
                     date = p.DateEpoch,
                     value = (int)(p.Value / 1024 / 1024 ?? 0)
@@ -80,7 +80,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var iface = DashboardModule.GetNodeById(id)?.GetInterface(iid);
             if (iface == null) return JsonNotFound();
-            var data = await NetworkData(iface, start, end, summary);
+            var data = await NetworkData(iface, start, end, summary).ConfigureAwait(false);
             if (data == null) return JsonNotFound();
 
             return Json(data);
@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> NetworkData(Node n, long? start = null, long? end = null, bool? summary = false)
         {
-            var traffic = await n.GetNetworkUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var traffic = await n.GetNetworkUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (traffic == null) return null;
 
             var anyTraffic = traffic.Count > 0;
@@ -107,7 +107,7 @@ namespace StackExchange.Opserver.Controllers
                     main_out = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
-                    ? (await n.GetNetworkUtilization(null, null, 2000)).Select(i => new
+                    ? (await n.GetNetworkUtilization(null, null, 2000).ConfigureAwait(false)).Select(i => new
                     {
                         date = i.DateEpoch,
                         main_in = (long)i.Value.GetValueOrDefault(),
@@ -119,7 +119,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> NetworkData(Interface iface, long? start = null, long? end = null, bool? summary = false)
         {
-            var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var traffic = await iface.GetUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (traffic == null) return null;
 
             var anyTraffic = traffic.Count > 0;
@@ -138,7 +138,9 @@ namespace StackExchange.Opserver.Controllers
                     main_out = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
-                    ? (await iface.GetUtilization(null, null, 2000)).Select(i => new
+                    ? (await iface
+                        .GetUtilization(null, null, 2000)
+                        .ConfigureAwait(false)).Select(i => new
                     {
                         date = i.DateEpoch,
                         main_in = (long)i.Value.GetValueOrDefault(),
@@ -154,7 +156,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var iface = DashboardModule.GetNodeById(id)?.GetVolume(iid);
             if (iface == null) return JsonNotFound();
-            var data = await VolumePerformanceData(iface, start, end, summary);
+            var data = await VolumePerformanceData(iface, start, end, summary).ConfigureAwait(false);
             if (data == null) return JsonNotFound();
 
             return Json(data);
@@ -162,7 +164,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> VolumePerformanceData(Node n, long? start = null, long? end = null, bool? summary = false)
         {
-            var traffic = await n.GetVolumePerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var traffic = await n.GetVolumePerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (traffic == null) return null;
 
             var anyTraffic = traffic.Count > 0;
@@ -181,7 +183,7 @@ namespace StackExchange.Opserver.Controllers
                     main_write = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
-                    ? (await n.GetVolumePerformanceUtilization(null, null, 2000)).Select(i => new
+                    ? (await n.GetVolumePerformanceUtilization(null, null, 2000).ConfigureAwait(false)).Select(i => new
                     {
                         date = i.DateEpoch,
                         main_read = (long)i.Value.GetValueOrDefault(),
@@ -193,7 +195,7 @@ namespace StackExchange.Opserver.Controllers
 
         public static async Task<object> VolumePerformanceData(Volume volume, long? start = null, long? end = null, bool? summary = false)
         {
-            var traffic = await volume.GetPerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            var traffic = await volume.GetPerformanceUtilization(start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000).ConfigureAwait(false);
             if (traffic == null) return null;
 
             var anyTraffic = traffic.Count > 0;
@@ -212,7 +214,7 @@ namespace StackExchange.Opserver.Controllers
                     main_write = (long)i.BottomValue.GetValueOrDefault()
                 }),
                 summary = summary.GetValueOrDefault()
-                    ? (await volume.GetPerformanceUtilization(null, null, 2000)).Select(i => new
+                    ? (await volume.GetPerformanceUtilization(null, null, 2000).ConfigureAwait(false)).Select(i => new
                     {
                         date = i.DateEpoch,
                         main_read = (long)i.Value.GetValueOrDefault(),

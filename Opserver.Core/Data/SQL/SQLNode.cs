@@ -46,7 +46,7 @@ namespace StackExchange.Opserver.Data.SQL
         public ClusterMemberTypes ClusterType => AGClusterMember.Type;
 
         public AGClusterMemberInfo AGClusterMember =>
-            AGClusterInfo.Data?.Members.FirstOrDefault(c => c.IsLocal) ?? new AGClusterMemberInfo();
+            AGClusterInfo.Data?.Members.Find(c => c.IsLocal) ?? new AGClusterMemberInfo();
 
         public bool Equals(SQLNode other)
         {

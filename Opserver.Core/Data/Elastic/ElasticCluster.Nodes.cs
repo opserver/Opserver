@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 // Note without ?all, we have dropped support for < v0.90
                 var statsTask = GetAsync<ClusterNodesStats>("_nodes/stats");
 
-                await Task.WhenAll(resultTask, statsTask);
+                await Task.WhenAll(resultTask, statsTask).ConfigureAwait(false);
                 var result = (await resultTask)?.Prep();
                 var stats = await statsTask;
 
@@ -58,7 +58,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public NodeInfo Get(string nameOrGuid)
             {
-                return Nodes.FirstOrDefault(
+                return Nodes.Find(
                     n => string.Equals(n.Name, nameOrGuid, StringComparison.InvariantCultureIgnoreCase)
                          || string.Equals(n.GUID, nameOrGuid, StringComparison.InvariantCultureIgnoreCase));
             }

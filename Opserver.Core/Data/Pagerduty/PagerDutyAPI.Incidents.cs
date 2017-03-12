@@ -57,7 +57,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "last_status_change_by")]
         public PagerDutyInfoReference LastChangedBy { get; set; }
         [DataMember(Name = "resolved_by_user")]
-        public string ResolvedBy => Logs.Result.FirstOrDefault(r => r.LogType == "resolve_log_entry")?.Agent.Person;
+        public string ResolvedBy => Logs.Result.Find(r => r.LogType == "resolve_log_entry")?.Agent.Person;
         [DataMember(Name = "resolve_reason")]
         public string ResolveReason { get; set; }
 

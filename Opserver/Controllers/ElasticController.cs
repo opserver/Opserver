@@ -88,8 +88,9 @@ namespace StackExchange.Opserver.Controllers
         {
             // Cluster names are not unique, names + node names should be though
             // If we see too many people with crazy combos, then node GUIDs it is.
-            var cc = ElasticModule.Clusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
-                                             && (node.IsNullOrEmpty() || (c.Nodes.Data?.Get(node) != null)));
+            var cc = ElasticModule.Clusters.Find(
+                c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
+                  && (node.IsNullOrEmpty() || (c.Nodes.Data?.Get(node) != null)));
             var cn = cc?.Nodes.Data.Get(node);
 
             return new DashboardModel
@@ -111,7 +112,7 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("elastic/reroute/{type}")]
-        public ActionResult Reroute(string type, string index, int shard, string node)
+        public ActionResult Reroute(string type) //, string index, int shard, string node)
         {
             bool result = false;
             switch (type)

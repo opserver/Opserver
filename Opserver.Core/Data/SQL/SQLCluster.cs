@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Data.SQL
         public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : Nodes.GetReasonSummary();
 
         public SQLNode.AGClusterState ClusterStatus =>
-            Nodes.FirstOrDefault(n => n.AGClusterInfo.Data?.ClusterName.HasValue() ?? false)?.AGClusterInfo.Data;
+            Nodes.Find(n => n.AGClusterInfo.Data?.ClusterName.HasValue() ?? false)?.AGClusterInfo.Data;
 
         public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
         public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
@@ -46,14 +46,10 @@ namespace StackExchange.Opserver.Data.SQL
             RefreshInterval = (cluster.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds();
         }
 
-        public bool Equals(SQLCluster other)
-        {
-            return other != null && string.Equals(Name, other.Name);
-        }
+        public bool Equals(SQLCluster other) =>
+            other != null && string.Equals(Name, other.Name);
 
-        public SQLNode GetNode(string name)
-        {
-            return Nodes.FirstOrDefault(n => string.Equals(n.Name, name, StringComparison.InvariantCultureIgnoreCase));
-        }
+        public SQLNode GetNode(string name) =>
+            Nodes.Find(n => string.Equals(n.Name, name, StringComparison.InvariantCultureIgnoreCase));
     }
 }

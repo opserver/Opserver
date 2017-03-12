@@ -59,7 +59,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// <param name="name">The name of the <see cref="HAProxyGroup"/> to fetch.</param>
         public static HAProxyGroup GetGroup(string name)
         {
-            return HAProxyModule.Groups.FirstOrDefault(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
+            return HAProxyModule.Groups.Find(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         /// <summary>

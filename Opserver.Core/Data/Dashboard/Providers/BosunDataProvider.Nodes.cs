@@ -268,7 +268,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 foreach (var n in nodes)
                 {
                     n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
-                    n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
+                    n.VMHost = nodes.Find(on => n.VMHostID == on.Id);
                 }
 
                 return nodes;

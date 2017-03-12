@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public static SQLInstance Get(string name)
         {
-            return SQLModule.AllInstances.FirstOrDefault(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
+            return SQLModule.AllInstances.Find(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public override string NodeType => "SQL";

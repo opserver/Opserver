@@ -28,7 +28,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public DateTime? LastSeen { get; private set; }
             public Exception LastException { get; private set; }
-            public NodeHomeInfo LastStatus { get; private set; }
+            public NodeHomeInfo LastStatus { get; set; }
 
             public ElasticNode(string hostAndPort)
             {
@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Elastic
                     Host = hostAndPort;
                     Port = DefaultElasticPort;
                 }
-                Url = $"http://{Host}:{Port.ToString()}/";
+                Url = $"http://{Host}:{Port}/";
             }
 
             public override string ToString() => Host;

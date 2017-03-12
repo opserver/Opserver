@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 return JsonError("Could not find server " + node);
             }
-            var result = await instance.RemovePlanAsync(planHandle);
+            var result = await instance.RemovePlanAsync(planHandle).ConfigureAwait(false);
 
             return result != 0 ? Json(true) : JsonError("There was an error removing the plan from cache");
         }
@@ -28,21 +28,21 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ToggleAgentJob(string node, Guid guid, bool enable)
         {
             var instance = SQLInstance.Get(node);
-            return Json(await instance.ToggleJobAsync(guid, enable));
+            return Json(await instance.ToggleJobAsync(guid, enable).ConfigureAwait(false));
         }
 
         [Route("sql/start-agent-job"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
         public async Task<ActionResult> StartAgentJob(string node, Guid guid)
         {
             var instance = SQLInstance.Get(node);
-            return Json(await instance.StartJobAsync(guid));
+            return Json(await instance.StartJobAsync(guid).ConfigureAwait(false));
         }
 
         [Route("sql/stop-agent-job"), HttpPost, OnlyAllow(Roles.SQLAdmin)]
         public async Task<ActionResult> StopAgentJob(string node, Guid guid)
         {
             var instance = SQLInstance.Get(node);
-            return Json(await instance.StopJobAsync(guid));
+            return Json(await instance.StopJobAsync(guid).ConfigureAwait(false));
         }
     }
 }

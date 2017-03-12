@@ -12,7 +12,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public static List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
 
         static DashboardModule()
-        {   
+        {
             var providers = Current.Settings.Dashboard.Providers;
             if (providers == null || !providers.Any())
             {
@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public static bool HasData => Providers?.Any(p => p.HasData) ?? false;
 
         public static bool AnyDoingFirstPoll => Providers.Any(p => p.LastPoll == null);
-        
+
         public static IEnumerable<string> ProviderExceptions =>
             Providers.Count == 1
                 ? Providers[0].GetExceptions()
@@ -61,7 +61,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public static Node GetNodeByName(string hostName)
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
-            return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
+            return AllNodes.Find(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
 
         public static IEnumerable<Node> GetNodesByIP(IPAddress ip) =>

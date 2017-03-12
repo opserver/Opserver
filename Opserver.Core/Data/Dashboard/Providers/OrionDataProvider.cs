@@ -157,7 +157,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         n.Volumes = volumes.Where(v => v.NodeId == n.Id).ToList();
                         n.Apps = apps.Where(a => a.NodeId == n.Id).ToList();
                         n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
-                        n.VMHost = nodes.FirstOrDefault(on => n.VMHostID == on.Id);
+                        n.VMHost = nodes.Find(on => n.VMHostID == on.Id);
                         n.SetReferences();
 
                         if (Settings.ChildStatusForHealthy && n.Status == NodeStatus.Up && n.ChildStatus.HasValue)

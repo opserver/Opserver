@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
             var hosts = HAProxyTraffic.GetHostsAsync();
             var topRoutes = HAProxyTraffic.GetTopPageRotuesAsync(30, host);
 
-            await Task.WhenAll(hosts, topRoutes);
+            await Task.WhenAll(hosts, topRoutes).ConfigureAwait(false);
 
             var vd = new HAProxyModel
             {

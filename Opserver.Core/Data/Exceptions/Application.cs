@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver.Data.Exceptions
-{        
+{
     /// <summary>
     /// Represents an application and its store location
     /// </summary>
@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public int Total => Applications.Sum(a => a.ExceptionCount);
 
         public Application this[string name] =>
-            Applications.FirstOrDefault(a => a.Name == name) ?? Applications.FirstOrDefault(a => a.ShortName == name);
+            Applications.Find(a => a.Name == name) ?? Applications.Find(a => a.ShortName == name);
     }
 
     public class JSONApplication

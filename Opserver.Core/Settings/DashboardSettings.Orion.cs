@@ -24,7 +24,7 @@
         /// Whether to show child statuses if the node is overall healthy. Example: warning if any drives are in warning state.
         /// </summary>
         public bool ChildStatusForHealthy { get; set; } = false;
-            
+
         public void Normalize()
         {
             Host = Host.NormalizeHostOrFQDN();

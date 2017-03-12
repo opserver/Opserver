@@ -851,7 +851,7 @@ Select v.object_id Id,
                             break;
                         case "decimal":
                         case "numeric":
-                            props.Add($"{DataType}({Scale.ToString()},{Precision.ToString()})");
+                            props.Add($"{DataType}({Scale},{Precision})");
                             break;
                         default:
                             props.Add(DataType);

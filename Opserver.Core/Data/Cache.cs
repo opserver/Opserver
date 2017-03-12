@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data
 
             Interlocked.Increment(ref PollingEngine._activePolls);
             PollStatus = "Awaiting Semaphore";
-            await _pollSemaphoreSlim.WaitAsync();
+            await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
             bool errored = false;
             try
             {
@@ -77,7 +77,7 @@ namespace StackExchange.Opserver.Data
                 CurrentPollDuration = Stopwatch.StartNew();
                 _isPolling = true;
                 PollStatus = "UpdateCache";
-                await _updateFunc();
+                await _updateFunc().ConfigureAwait(false);
                 PollStatus = "UpdateCache Complete";
                 Interlocked.Increment(ref _pollsTotal);
                 if (DataTask != null)
@@ -158,7 +158,7 @@ namespace StackExchange.Opserver.Data
                             var task = getData();
                             if (timeoutMs.HasValue)
                             {
-                                if (await Task.WhenAny(task, Task.Delay(timeoutMs.Value)) == task)
+                                if (await Task.WhenAny(task, Task.Delay(timeoutMs.Value)).ConfigureAwait(false) == task)
                                 {
                                     // Re-await for throws.
                                     Data = await task;
@@ -166,7 +166,7 @@ namespace StackExchange.Opserver.Data
                                 else
                                 {
                                     // This means the whenany returned the timeout first...boom.
-                                    throw new TimeoutException($"Fetch timed out after {timeoutMs.ToString()} ms.");
+                                    throw new TimeoutException($"Fetch timed out after {timeoutMs} ms.");
                                 }
                             }
                             else

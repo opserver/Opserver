@@ -2,7 +2,7 @@
 {
     public partial class ElasticCluster
     {
-        public bool AllocateShard(string index, int shard, string node)
+        public bool AllocateShard() //string index, int shard, string node)
         {
             // TODO: Implementation
             // if node is null - take a stab at a random one!
@@ -11,14 +11,14 @@
             return false;
         }
 
-        public bool MoveShard(string index, int shard, string fromNode, string toNode)
+        public bool MoveShard() //string index, int shard, string fromNode, string toNode)
         {
             // TODO: Implementation
             return false;
             //return PostAction("/_clusterreroute", GetRerouteCommand(new { move = new {index, shard, from_node = fromNode, to_node = toNode} }));
         }
 
-        public bool CancelInitialization(string index, int shard, string node)
+        public bool CancelInitialization() //string index, int shard, string node)
         {
             // TODO: Implementation
             return false;

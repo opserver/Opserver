@@ -59,11 +59,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         public List<Node> VMs { get; internal set; }
 
         private DashboardCategory _category;
-        public DashboardCategory Category
-        {
-            get { return _category ?? (_category = DashboardCategory.AllCategories.FirstOrDefault(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown); }
-        }
-
+        public DashboardCategory Category =>
+            _category ?? (_category = DashboardCategory.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown);
         private string GetPrettyMachineType()
         {
             if (MachineType?.StartsWith("Linux") ?? false) return MachineOSVersion.IsNullOrEmptyReturn("Linux");

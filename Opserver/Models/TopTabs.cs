@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Models
 
         public static void SetCurrent(Type type)
         {
-            var tab = Tabs.FirstOrDefault(t => t.ControllerType == type);
+            var tab = Tabs.Find(t => t.ControllerType == type);
             if (tab != null) CurrentTab = tab.Name;
         }
 

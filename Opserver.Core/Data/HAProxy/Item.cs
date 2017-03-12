@@ -409,7 +409,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 case StatusType.Socket:
                     return new Socket();
                 default:
-                    throw new NotImplementedException("Unrecognized StatusType " + typeNum);
+                    throw new ArgumentOutOfRangeException("Unrecognized StatusType " + typeNum);
             }
         }
 

@@ -12,7 +12,7 @@ namespace StackExchange.Opserver
 
         public List<Instance> Instances { get; set; } = new List<Instance>();
 
-        public Dictionary<string, string> Aliases { get; private set; } = new Dictionary<string, string>();
+        public Dictionary<string, string> Aliases { get; set; } = new Dictionary<string, string>();
 
         public InstanceSettings GetInstanceSettings(Instance instance, Group group)
         {

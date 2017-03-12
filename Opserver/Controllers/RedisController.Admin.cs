@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 var message = i.PromoteToMaster();
                 // We want these to be synchronous
-                await i.PollAsync(true);
+                await i.PollAsync(true).ConfigureAwait(false);
                 await oldMaster?.PollAsync(true);
                 return Json(new { message });
             }
@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Controllers
 
             try
             {
-                var removed = await i.KeyPurge(db, key);
+                var removed = await i.KeyPurge(db, key).ConfigureAwait(false);
                 return Json(new {removed});
             }
             catch (Exception ex)
@@ -88,10 +88,10 @@ namespace StackExchange.Opserver.Controllers
 
             try
             {
-                var success = await action(i);
+                var success = await action(i).ConfigureAwait(false);
                 if (poll)
                 {
-                    await i.PollAsync(true);
+                    await i.PollAsync(true).ConfigureAwait(false);
                 }
                 return Json(new { success });
             }

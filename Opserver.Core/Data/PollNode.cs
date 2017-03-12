@@ -191,7 +191,7 @@ namespace StackExchange.Opserver.Data
 
                     PollStatus = "DataPollers Queued (Now awaiting)";
                     // Await all children (this itself will be a background fire and forget if desired
-                    await Task.WhenAll(tasks);
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
                     PollStatus = "DataPollers Complete (Awaited)";
 
                     LastPoll = DateTime.UtcNow;

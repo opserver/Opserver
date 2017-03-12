@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.Data.SQL
             public List<AGListener> Listeners { get; internal set; }
 
             public AGReplica LocalReplica =>
-                Replicas.FirstOrDefault(r => r.IsLocal.GetValueOrDefault());
+                Replicas.Find(r => r.IsLocal.GetValueOrDefault());
 
             public IEnumerable<AGReplica> RemoteReplicas =>
                 Replicas.Where(r => !r.IsLocal.GetValueOrDefault());

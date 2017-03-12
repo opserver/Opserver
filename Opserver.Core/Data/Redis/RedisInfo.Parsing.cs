@@ -170,7 +170,7 @@ namespace StackExchange.Opserver.Data.Redis
                         if (long.TryParse(value, out l))
                         {
                             var ts = TimeSpan.FromSeconds(l);
-                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours.ToString()}h {ts.Minutes.ToString()}m {ts.Seconds.ToString()}s)";
+                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours}h {ts.Minutes}m {ts.Seconds}s)";
                         }
                         break;
                     case "last_save_time":
@@ -189,7 +189,7 @@ namespace StackExchange.Opserver.Data.Redis
                     case "used_memory_rss":
                         if (long.TryParse(value, out l))
                         {
-                            return $"{l.ToString()} ({l.ToSize(precision: 1)})";
+                            return $"{l} ({l.ToSize(precision: 1)})";
                         }
                         break;
                     default:

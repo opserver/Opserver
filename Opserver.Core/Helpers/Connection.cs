@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Helpers
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
                 {
                     try
                     {
@@ -89,7 +89,7 @@ namespace StackExchange.Opserver.Helpers
                 // In the case of remote monitoring, the timeout will be at the NIC level, not responding to traffic,
                 // in that scenario, connection timeouts don't really do much, because they're never reached, the timeout happens
                 // before their timer starts.  Because of that, we need to spin up our own overall timeout
-                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout.ToString()}"))
+                using (MiniProfiler.Current.Step($"Opening Connection, Timeout: {conn.ConnectionTimeout}"))
                 using (var tokenSource = new CancellationTokenSource())
                 {
                     tokenSource.CancelAfter(connectionTimeoutMs.Value);

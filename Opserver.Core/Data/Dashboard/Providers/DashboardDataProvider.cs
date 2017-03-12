@@ -61,21 +61,16 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public abstract List<Node> AllNodes { get; }
 
-        public Node GetNodeById(string id)
-        {
-            return AllNodes.FirstOrDefault(s => s.Id == id);
-        }
+        public Node GetNodeById(string id) => AllNodes.Find(s => s.Id == id);
 
         public Node GetNodeByHostname(string hostName)
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
-            return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
+            return AllNodes.Find(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
 
-        public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip)
-        {
-            return AllNodes.Where(n => n.IPs?.Any(i => i.Contains(ip)) == true);
-        }
+        public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip) =>
+            AllNodes.Where(n => n.IPs?.Any(i => i.Contains(ip)) == true);
 
         public virtual string GetManagementUrl(Node node) { return null; }
         public abstract Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);

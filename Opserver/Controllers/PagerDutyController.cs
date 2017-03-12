@@ -25,10 +25,10 @@ namespace StackExchange.Opserver.Controllers
             {
                 var currentAccount = Current.User.AccountName;
                 var allUsers = PagerDutyAPI.Instance.AllUsers.SafeData(true);
-                var pdMap = PagerDutyAPI.Instance.Settings.UserNameMap.FirstOrDefault(un => un.OpServerName == currentAccount);
+                var pdMap = PagerDutyAPI.Instance.Settings.UserNameMap.Find(un => un.OpServerName == currentAccount);
                 return pdMap != null
                     ? allUsers.Find(u => u.EmailUserName == pdMap.EmailUser)
-                    : allUsers.FirstOrDefault(u => string.Equals(u.EmailUserName, currentAccount, StringComparison.OrdinalIgnoreCase));
+                    : allUsers.Find(u => string.Equals(u.EmailUserName, currentAccount, StringComparison.OrdinalIgnoreCase));
             }
         }
 
@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> Dashboard()
         {
             var i = PagerDutyAPI.Instance;
-            await i.PollAsync();
+            await i.PollAsync().ConfigureAwait(false);
 
             var vd = new PagerDutyModel
             {

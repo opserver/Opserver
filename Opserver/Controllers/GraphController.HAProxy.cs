@@ -9,9 +9,9 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 60 * 60, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/traffic/json")]
-        public async Task<ActionResult> HAProxyTrafficJson(string host, long start, long end, bool? summary = false)
+        public async Task<ActionResult> HAProxyTrafficJson(string host, bool? summary = false)
         {
-            var traffic = await HAProxyTraffic.GetTrafficSummaryAsync(host, null, null);
+            var traffic = await HAProxyTraffic.GetTrafficSummaryAsync(host, null, null).ConfigureAwait(false);
 
             return Json(new
                 {
@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-hits")]
         public async Task<ActionResult> HAProxyRouteHits(string route, int days, string host)
         {
-            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host).ConfigureAwait(false);
 
             return Json(dataPoints);
         }
@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-performance")]
         public async Task<ActionResult> HaProxyRoutePerformance(string route, int days, string host)
         {
-            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, days, host: host).ConfigureAwait(false);
 
             return Json(dataPoints);
         }
@@ -59,7 +59,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("graph/haproxy/route-performance/json")]
         public async Task<ActionResult> HaProxyRoutePerformanceJson(string route, int days = 30, string host = null, bool? summary = false)
         {
-            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, summary.GetValueOrDefault() ? null : (int?)days, host: host);
+            var dataPoints = await HAProxyTraffic.GetRouteDataAsync(route, summary.GetValueOrDefault() ? null : (int?)days, host: host).ConfigureAwait(false);
 
             return Json(new
                 {

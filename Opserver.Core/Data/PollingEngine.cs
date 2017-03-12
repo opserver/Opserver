@@ -196,7 +196,7 @@ namespace StackExchange.Opserver.Data
                 return cache?.LastPollSuccessful ?? false;
             }
             // Polling an entire server
-            await node.PollAsync(true);
+            await node.PollAsync(true).ConfigureAwait(false);
             return true;
         }
 

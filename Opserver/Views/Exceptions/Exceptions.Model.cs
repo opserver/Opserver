@@ -42,10 +42,10 @@ namespace StackExchange.Opserver.Views.Exceptions
             {
                 return ExceptionStores.TotalExceptionCount;
             }
-            var group = Groups.FirstOrDefault(g => g.Name == SelectedGroup);
+            var group = Groups.Find(g => g.Name == SelectedGroup);
             if (group != null && SelectedLog.HasValue())
             {
-                return group.Applications.FirstOrDefault(a => a.Name == SelectedLog)?.ExceptionCount ?? 0;
+                return group.Applications.Find(a => a.Name == SelectedLog)?.ExceptionCount ?? 0;
             }
             return group?.Total ?? 0;
         }

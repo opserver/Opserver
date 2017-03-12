@@ -23,7 +23,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             _dnsRecords ?? (_dnsRecords = GetCloudFlareCache(5.Minutes(), async () =>
             {
                 var records = new List<CloudFlareDNSRecord>();
-                var data = await Zones.GetData(); // wait on zones to load first...
+                var data = await Zones.GetData().ConfigureAwait(false); // wait on zones to load first...
                 if (data == null) return records;
                 foreach (var z in data)
                 {
@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             if (DNSRecords.Data == null)
                 return null;
             var records = DNSRecords.Data.Where(r => string.Equals(host, r.Name, StringComparison.InvariantCultureIgnoreCase) && (r.Type == DNSRecordType.A || r.Type == DNSRecordType.AAAA || r.Type == DNSRecordType.CNAME)).ToList();
-            var cNameRecord = records.FirstOrDefault(r => r.Type == DNSRecordType.CNAME);
+            var cNameRecord = records.Find(r => r.Type == DNSRecordType.CNAME);
             return cNameRecord != null ? GetIPs(cNameRecord.Content) : records.Select(r => r.IPAddress).ToList();
         }
     }

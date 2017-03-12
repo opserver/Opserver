@@ -21,7 +21,7 @@ namespace StackExchange.Opserver
             }
         }
     }
-    
+
     public interface IProviderSettings
     {
         bool Enabled { get; }

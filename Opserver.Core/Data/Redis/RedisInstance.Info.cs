@@ -90,10 +90,10 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
-        public RedisInstance Master
-        {
-            get { return Replication?.MasterHost.HasValue() == true ? Get(Replication.MasterHost, Replication.MasterPort) : RedisModule.Instances.FirstOrDefault(i => i.SlaveInstances.Contains(this)); }
-        }
+        public RedisInstance Master =>
+            Replication?.MasterHost.HasValue() == true
+            ? Get(Replication.MasterHost, Replication.MasterPort)
+            : RedisModule.Instances.Find(i => i.SlaveInstances.Contains(this));
 
         public int SlaveCount => Replication?.ConnectedSlaves ?? 0;
 
