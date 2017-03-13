@@ -10,6 +10,7 @@
     var columnLookup = columns.Data
         .GroupBy(c => Tuple.Create(c.SchemaName, c.TableName))
         .ToDictionary(g => g.Key, g => g.ToList());
+    var indexes = s.GetIndexInfo(Model.Database);
 }
 @if (tables.Data == null || !tables.Successful)
 {
@@ -51,6 +52,7 @@
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="6">
                         @Html.Partial("Databases.Modal.Columns", columnLookup[Tuple.Create(t.SchemaName, t.TableName)])
+                        @Html.Partial("Databases.Modal.Indexes", indexes.Data.Where(c => c.TableName == t.TableName))
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>

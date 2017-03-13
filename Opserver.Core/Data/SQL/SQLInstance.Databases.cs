@@ -83,6 +83,9 @@ namespace StackExchange.Opserver.Data.SQL
         public LightweightCache<List<DatabaseColumn>> GetColumnInfo(string databaseName) =>
             DatabaseFetch<DatabaseColumn>(databaseName);
 
+        public LightweightCache<List<TableIndex>> GetIndexInfo(string databaseName) =>
+            DatabaseFetch<TableIndex>(databaseName);
+        
         public LightweightCache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
             DatabaseFetch<DatabaseDataSpace>(databaseName);
 
@@ -382,6 +385,60 @@ Select db.database_id DatabaseId,
     And avg_total_user_cost * avg_user_impact * (user_seeks + user_scans) > 0
   Order By EstimatedImprovement Desc";
             }
+        }
+        
+        public class TableIndex : ISQLVersioned
+        {
+            public string TableName { get; internal set; }
+            public string IndexName { get; internal set; }
+            public DateTime? LastUpdated { get; internal set; }
+            public IndexType Type { get; internal set; }
+            public bool IsUnique { get; internal set; }
+            public bool IsPrimaryKey { get; internal set; }
+            public string ColumnNames { get; internal set; }
+            public string IncludedColumnNames { get; internal set; }
+            public bool HasFilter { get; internal set; }
+            public string FilterDefinition { get; internal set; }
+            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
+
+            public string GetFetchSQL(Version v) => @"
+  Select t.name TableName,
+		i.name IndexName, 
+        Stats_Date(s.object_id, s.stats_id) LastUpdated,   
+		i.type,
+        i.is_unique IsUnique,
+        i.is_primary_key IsPrimaryKey,
+		i.is_disabled IsDisabled,
+		Stuff((Select ', ' + c.name 
+                 From sys.index_columns ic 
+				      Join sys.columns c 
+				        On ic.object_id = c.object_id 
+				       And ic.column_id = c.column_id 
+                Where i.object_id = ic.object_id 
+				  And i.index_id = ic.index_id
+				  and ic.is_included_column = 0
+		     Order By ic.key_ordinal
+                  For Xml Path('')), 1, 2, '') ColumnNames,
+		Stuff((Select ', ' + c.name
+                 From sys.index_columns ic 
+				      Join sys.columns c 
+				        On ic.object_id = c.object_id 
+				       And ic.column_id = c.column_id 
+                Where i.object_id = ic.object_id 
+				  And i.index_id = ic.index_id
+				  and ic.is_included_column = 1
+		     Order By ic.key_ordinal
+                  For Xml Path('')), 1, 2, '') IncludedColumnNames,
+		i.has_filter HasFilter,
+		i.filter_definition FilterDefinition
+  From sys.indexes i 
+       Join sys.tables t
+         On i.object_id = t.object_id 
+       Join sys.stats s 
+         On i.object_id = s.object_id
+        And i.index_id = s.stats_id
+ Where t.is_ms_shipped = 0 
+Order By t.name, i.index_id";
         }
 
         public class StoredProcedure : ISQLVersioned
