@@ -818,9 +818,9 @@ Select v.object_id Id,
         {
             public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
-            public string Id => Schema + "." + TableName + "." + ColumnName;
+            public string Id => SchemaName + "." + TableName + "." + ColumnName;
 
-            public string Schema { get; internal set; }
+            public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
             public string ViewName { get; internal set; }
             public int Position { get; internal set; }
@@ -872,7 +872,7 @@ Select v.object_id Id,
 
 // For non-SQL later
 //            internal const string FetchSQL = @"
-//Select c.TABLE_SCHEMA [Schema],
+//Select c.TABLE_SCHEMA SchemaName,
 //       c.TABLE_NAME TableName,
 //       c.ORDINAL_POSITION Position,
 //       c.COLUMN_NAME ColumnName,
@@ -921,7 +921,7 @@ Select v.object_id Id,
 ";
 
             internal const string FetchSQL = @"
-Select s.name [Schema],
+Select s.name SchemaName,
        t.name TableName,
        v.name ViewName,
        c.column_id Position,

@@ -6,6 +6,10 @@
     var s = Model.Instance;
     var views = s.GetViewInfo(Model.Database);
     var columns = s.GetColumnInfo(Model.Database);
+    // TODO: Move this into core storage?
+    var columnLookup = columns.Data
+        .GroupBy(c => Tuple.Create(c.SchemaName, c.ViewName))
+        .ToDictionary(g => g.Key, g => g.ToList());
 }
 @if (views.Data == null || !views.Successful)
 {
@@ -39,7 +43,7 @@ else {
                 </tr>
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="4">
-                        @Html.Partial("Databases.Modal.Columns", columns.Data.Where(c => c.Schema == v.SchemaName && c.ViewName == v.ViewName))
+                        @Html.Partial("Databases.Modal.Columns", columnLookup[Tuple.Create(v.SchemaName, v.ViewName)])
                         <pre class="pre-code prettyprint lang-sql">@v.Definition.Trim()</pre>
                     </td>
                 </tr>
