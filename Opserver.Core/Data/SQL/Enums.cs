@@ -333,4 +333,16 @@ namespace StackExchange.Opserver.Data.SQL
         [Description("Offline")] Offline = 6,
         [Description("Defunct")] Defunct = 7
     }
+
+    public enum IndexType : byte
+    {
+        [Description("Heap")] Heap = 0,
+        [Description("Clustered")] Clustered = 1,
+        [Description("Nonclustered")] Nonclustered = 2,
+        [Description("XML")] XML = 3,
+        [Description("Spatial")] Spatial = 4,
+        [Description("Clustered Columnstore")] ClusteredColumnstore = 5,
+        [Description("Nonclustered Columnstore")] NonclusteredColumnstore = 6,
+        [Description("Nonclustered Hash")] NonclusteredHash = 7
+    }
 }
