@@ -170,6 +170,9 @@ namespace StackExchange.Opserver.Monitoring
                     return false;
                 }
             }
+
+            public override IEnumerable<string> GetDynamicMemberNames()
+                => _obj.Properties.Cast<PropertyData>().Select(x => x.Name);
         }
     }
 }
