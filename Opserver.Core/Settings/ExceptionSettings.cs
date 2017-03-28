@@ -46,7 +46,6 @@ namespace StackExchange.Opserver
         /// </summary>
         public bool EnablePreviews { get; set; } = true;
 
-
         public class ExceptionsGroup : ISettingsCollectionItem
         {
             /// <summary>
