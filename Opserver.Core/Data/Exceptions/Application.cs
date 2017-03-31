@@ -32,6 +32,13 @@ namespace StackExchange.Opserver.Data.Exceptions
                            MostRecent = MostRecent?.ToRelativeTime()
                        };
         }
+
+        public void ClearCounts()
+        {
+            ExceptionCount = 0;
+            RecentExceptionCount = 0;
+            MostRecent = null;
+        }
     }
 
     public class ApplicationGroup

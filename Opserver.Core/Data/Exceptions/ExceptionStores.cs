@@ -264,6 +264,16 @@ namespace StackExchange.Opserver.Data.Exceptions
                             CatchAll.Applications.Add(app);
                         }
                     }
+                    // Cleanout those with no errors right now
+                    var foundNames = apps.Select(a => a.Name).ToHashSet();
+                    foreach (var a in result.SelectMany(g => g.Applications))
+                    {
+                        if (!foundNames.Contains(a.Name))
+                        {
+                            a.ClearCounts();
+                        }
+                    }
+
                     Applications = apps;
                     ApplicationGroups = result;
                     return result;
