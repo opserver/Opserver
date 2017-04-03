@@ -22,7 +22,6 @@
 }
 @functions
 {
-
     private static readonly HashSet<string> HiddenHttpKeys = new HashSet<string>
     {
         "ALL_HTTP",
@@ -64,6 +63,7 @@
         return url.IsNullOrEmpty() ? url : _sanitizeUrl.Replace(url, "");
     }
 }
+
 @helper Linkify(string possibleLink)
 {
     if (possibleLink.IsNullOrEmpty())
@@ -140,6 +140,66 @@
         </div>
     </div>
 }
+@helper RenderDetail(string detail)
+{
+    var pos = 0;
+    while (pos < detail.Length)
+    {
+        var offset = pos;
+        var matches = Current.Settings.Exceptions.StackTraceReplacements
+            .Select(x => new
+            {
+                pattern = x.RegexPattern(),
+                match = x.RegexPattern().Match(detail, offset),
+                replacement = x.Replacement,
+                name = x.Name,
+            })
+            .Where(x => x.match.Success)
+            .OrderBy(x => x.match.Index)
+            .ThenByDescending(x => x.match.Length)
+            .ToArray();
+
+        if (matches.Length == 0)
+        {
+            break;
+        }
+
+        var next = matches[0];
+
+        var prefixLength =  next.match.Index - pos;
+        if (prefixLength > 0)
+        {
+            Write(detail.Substring(pos, prefixLength));
+        }
+
+        var nextPos = next.match.Index + next.match.Length;
+
+        // log ambigous matches, take first one
+        var overlapping = matches.Skip(1).FirstOrDefault(x => x.match.Index < nextPos);
+        if (overlapping != null)
+        {
+            Current.LogException($"Ambigous source link pattern match between '{next.name}' and '{overlapping.name}'", new Exception("Ambigous SourceLink configuration"));
+        }
+        try
+        {
+            var replacement = next.match.Result(next.replacement);
+            WriteLiteral(replacement); // allow HTML in the replacement
+        }
+        catch (Exception ex)
+        {
+            Current.LogException($"Error while applying source link pattern replacement for '{next.name}'", ex);
+            Write(next.match.Value);
+        }
+
+        pos = nextPos;
+    }
+
+    var tailLength = detail.Length - pos;
+    if (tailLength > 0)
+    {
+        Write(detail.Substring(pos, tailLength));
+    }
+}
 <div id="ErrorInfo">
     @if (error == null)
     {
@@ -165,7 +225,7 @@
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
         <div class="error-info">
-            <pre class="pre-code error-detail">@error.Detail.TrimEnd()</pre>
+            <pre class="pre-code error-detail">@RenderDetail(error.Detail)</pre>
             <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
             @if (!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin)
             {

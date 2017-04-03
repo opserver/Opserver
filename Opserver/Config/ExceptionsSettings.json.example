@@ -66,5 +66,12 @@
       "pollIntervalSeconds": 10,
       "connectionString": "Server=ny-sql03.ds.stackexchange.com;Database=NY.Exceptions;Integrated Security=SSPI;"
     }
+  ],
+  "stackTraceReplacements": [
+    {
+      "name": "github",
+      "pattern": "(?<= in )https?://raw.githubusercontent.com/([^/]+/)([^/]+/)([^/]+/)(.*?):line (\\d+)",
+      "replacement": "<a href=\"https://github.com/$1$2blob/$3$4#L$5\">$4:line $5</a>"
+    }
   ]
 }
