@@ -150,6 +150,7 @@ namespace StackExchange.Opserver.Data.SQL
                 Status = row.status;
                 TransactionStartTime = row.tran_start_time;
                 OpenTransactionCount = row.open_tran_count;
+                PercentComplete = row.percent_complete;
                 HostName = row.host_name;
                 DatabaseName = row.database_name;
 
