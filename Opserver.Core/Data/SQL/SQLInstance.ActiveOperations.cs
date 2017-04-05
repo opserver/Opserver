@@ -298,22 +298,22 @@ Exec sp_WhoIsActive
 
             public enum ShowSleepingSessionOptions
             {
-                None = 0,
+                [Description("None")] None = 0,
                 [Description("Open Transactions")] OpenTransaction = 1,
-                All = 2
+                [Description("All")] All = 2
             }
 
             public enum GetPlansOptions
             {
-                None = 0,
+                [Description("None")] None = 0,
                 [Description("By Statement Offset")] ByStatementOffset = 1,
                 [Description("By Plan Handle")] ByPlanHandle = 2
             }
 
             public enum GetTaskInfoOptions
             {
-                None = 0,
-                Lightweight = 1,
+                [Description("None")] None = 0,
+                [Description("Lightweight")] Lightweight = 1,
                 [Description("AllAvailable")] AllAvailable = 2
             }
 
