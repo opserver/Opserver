@@ -10354,6 +10354,10 @@ a.value-block.bg-danger:focus {
   max-width: 550px;
   max-height: 100px;
   overflow: auto;
+  margin: 0 0 4.5px;
+}
+.progress-limited {
+  max-width: 550px;
 }
 .error-stack {
   white-space: pre-wrap;
@@ -10425,6 +10429,13 @@ table .text-muted,
   padding: 0;
   border: none;
   margin-bottom: 0;
+}
+.table > tbody .progress.progress-embed,
+.table-striped > tbody .progress.progress-embed,
+.table > thead .progress.progress-embed,
+.table-striped > thead .progress.progress-embed {
+  height: 16px;
+  line-height: 16px;
 }
 .table > tbody .progress.vertical,
 .table-striped > tbody .progress.vertical,

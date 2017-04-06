@@ -103,13 +103,7 @@ else
                     <td>@w.CPU.ToComma()</td>
                     <td>@w.Reads.ToComma()</td>
                     <td>@w.Writes.ToComma()</td>
-                    <td title="@w.WaitInfo">
-                        @w.Status
-                        @if (w.PercentComplete.HasValue)
-                        {
-                            <div>@(w.PercentComplete.Value.ToString("##0.##"))<span class="text-muted">% done</span></div>
-                        }
-                    </td>
+                    <td title="@w.WaitInfo">@w.Status</td>
                     <td title="Program: @w.ProgramName">
                         @if (enableDashboardLinks && DashboardModule.GetNodeByName(w.HostName) != null)
                         {
@@ -151,7 +145,15 @@ else
                         {
                             <pre class="pre-code pre-limited prettyprint lang-sql">@w.SqlText</pre>
                         }
+                        @if (w.PercentComplete.HasValue && w.TimeLeft.HasValue)
+                        {
+                            <div class="progress progress-embed progress-limited" title="ETA: @((w.CollectionTime + w.TotalTime).Value.ToZuluTime())">
+                                <div class="progress-bar" style="width: @w.PercentComplete.Value.ToString(CultureInfo.InvariantCulture)%;"></div>
+                                <span>Progress: @w.PercentComplete.Value.ToString("##0.##")% (ETA: @(w.TimeLeft.Value.ToReadableString()))</span>
+                            </div>
+                        }
                     </td>
+
                 </tr>
             }
             @if (!data.Any())

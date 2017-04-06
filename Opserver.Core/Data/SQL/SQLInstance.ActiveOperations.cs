@@ -66,6 +66,11 @@ namespace StackExchange.Opserver.Data.SQL
         public class ActiveOperation
         {
             public TimeSpan Duration => CollectionTime - StartTime;
+            public TimeSpan? TotalTime => PercentComplete == null
+                ? default(TimeSpan)
+                : TimeSpan.FromTicks((long)(Duration.Ticks * 100 / PercentComplete));
+            public TimeSpan? TimeLeft => TotalTime - Duration;
+
             public short SessionId { get; internal set; }
 
             private string _sqlText;
