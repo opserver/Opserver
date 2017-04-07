@@ -26,6 +26,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string Password => ConnectionInfo.Password;
         public int Port => ConnectionInfo.Port;
+        public bool UseSsl => ConnectionInfo.Settings.Ssl;
 
         private string _hostAndPort;
         public string HostAndPort => _hostAndPort ?? (_hostAndPort = Host + ":" + Port.ToString());
@@ -124,6 +125,7 @@ namespace StackExchange.Opserver.Data.Redis
                 ConnectTimeout = 20000,
                 AllowAdmin = allowAdmin,
                 Password = Password,
+                Ssl=UseSsl,
                 EndPoints =
                 {
                     { Host, Port }
