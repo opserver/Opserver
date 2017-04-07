@@ -483,16 +483,9 @@ SELECT Caption,
 
             #region private helpers
 
-            private async Task<bool> GetIsVMHost()
-            {
-                const string query = "SELECT Name FROM Win32_OptionalFeature WHERE (Name = 'Microsoft-Hyper-V' OR Name = 'Microsoft-Hyper-V-Hypervisor') AND InstallState = 1";
+            private Task<bool> GetIsVMHost()
+                => Wmi.ClassExists(Endpoint, "Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor");
 
-                using (var q = Wmi.Query(Endpoint, query))
-                {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
-                    return data != null;
-                }
-            }
 
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {

@@ -89,11 +89,13 @@ namespace StackExchange.Opserver.Monitoring
             private readonly ManagementObjectSearcher _searcher;
             private readonly string _machineName;
             private readonly string _rawQuery;
+            private readonly string _wmiNamespace;
 
             public WmiQuery(string machineName, string q, string wmiNamespace = @"root\cimv2")
             {
                 _machineName = machineName;
                 _rawQuery = q;
+                _wmiNamespace = wmiNamespace;
                 if (machineName.IsNullOrEmpty())
                     throw new ArgumentException("machineName should not be empty.");
 
@@ -113,7 +115,11 @@ namespace StackExchange.Opserver.Monitoring
                         throw new InvalidOperationException("Attempt to use disposed query.");
                     }
 
-                    return _data != null ? Task.FromResult(_data) : Task.Run(() => _data = _searcher.Get());
+                    return _data != null ? Task.FromResult(_data) : Task.Run(() =>
+                    {
+                        try { return _data = _searcher.Get(); }
+                        catch (Exception ex) { throw new Exception($"Failed to query {_wmiNamespace} on {_machineName}", ex); }
+                    });
                 }
             }
 
@@ -170,6 +176,9 @@ namespace StackExchange.Opserver.Monitoring
                     return false;
                 }
             }
+
+            public override IEnumerable<string> GetDynamicMemberNames()
+                => _obj.Properties.Cast<PropertyData>().Select(x => x.Name);
         }
     }
 }
