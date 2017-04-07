@@ -52,7 +52,7 @@ namespace StackExchange.Opserver
             /// <summary>
             /// Specify if ssl should be used. Defaults to false.
             /// </summary>
-            public bool Ssl { get; set; } = false;
+            public bool UseSSL { get; set; } = false;
 
             /// <summary>
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage

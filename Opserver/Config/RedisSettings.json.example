@@ -44,7 +44,7 @@
         { "name": "co-redis02" },
         {
           "name": "ny-mlredis01",
-          "instances": [ { "name": "Machine Learning", "port": "6379", "ssl":  "true" } ]
+          "instances": [ { "name": "Machine Learning", "port": "6379", "useSSL":  "true" } ]
         }
     ]
 }

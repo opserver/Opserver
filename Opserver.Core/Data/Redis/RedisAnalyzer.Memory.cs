@@ -55,7 +55,7 @@ namespace StackExchange.Opserver.Data.Redis
                 AllowAdmin = true,
                 ClientName = "Status-MemoryAnalyzer",
                 Password = connectionInfo.Password,
-                Ssl = connectionInfo.Settings.Ssl,
+                Ssl = connectionInfo.Settings.UseSSL,
                 EndPoints =
                 {
                     { connectionInfo.Host, connectionInfo.Port }

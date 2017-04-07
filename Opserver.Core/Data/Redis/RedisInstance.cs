@@ -26,7 +26,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string Password => ConnectionInfo.Password;
         public int Port => ConnectionInfo.Port;
-        public bool UseSsl => ConnectionInfo.Settings.Ssl;
+        public bool UseSsl => ConnectionInfo.Settings.UseSSL;
 
         private string _hostAndPort;
         public string HostAndPort => _hostAndPort ?? (_hostAndPort = Host + ":" + Port.ToString());
