@@ -55,6 +55,11 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 try
                 {
+                    if (Settings.APIKey.HasValue())
+                    {
+                        wc.Headers.Add("X-Access-Token", Settings.APIKey);
+                    }
+
                     using (var s = await wc.OpenReadTaskAsync(url).ConfigureAwait(false))
                     using (var sr = new StreamReader(s))
                     {
@@ -85,7 +90,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override string GetManagementUrl(Node node)
         {
-            return !Host.HasValue() ? null : $"http://{Host}/host?host={node.Id.UrlEncode()}&time=1d-ago";
+            return !Host.HasValue() ? null : $"{Host}host?host={node.Id.UrlEncode()}&time=1d-ago";
         }
 
         public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
