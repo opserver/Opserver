@@ -117,21 +117,20 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         MachineType = data.Caption.ToString() + " " + data.Version.ToString();
                     }
                 }
-                if (this.Manufacturer.ToLower().Contains("dell"))
-                {
-                    const string servicetagquery = @"SELECT 
+
+                const string servicetagquery = @"SELECT 
                     SerialNumber
                     FROM Win32_BIOS";
 
-                    using (var q = Wmi.Query(Endpoint, servicetagquery))
+                using (var q = Wmi.Query(Endpoint, servicetagquery))
+                {
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    if (data != null)
                     {
-                        var data = await q.GetFirstResultAsync().ConfigureAwait(false);
-                        if (data != null)
-                        {
-                            ServiceTag = data.SerialNumber;
-                        }
+                        ServiceTag = data.SerialNumber;
                     }
                 }
+
                 LastSync = DateTime.UtcNow;
                 Status = NodeStatus.Active;
 
