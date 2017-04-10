@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     const string servicetagquery = @"SELECT 
                     SerialNumber
-                    FROM Win32_SystemEnclosure";
+                    FROM Win32_BIOS";
 
                     using (var q = Wmi.Query(Endpoint, servicetagquery))
                     {
