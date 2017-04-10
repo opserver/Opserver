@@ -162,7 +162,7 @@ namespace StackExchange.Opserver
         {
             if (!s.HasValue()) return s;
             if (!s.StartsWith("http://") && !s.StartsWith("https://")) return $"{(defaultToHttps ? "https" : "http")}://{s}/";
-            return s.EndsWith("/") ? s : $"{s}/";
+            return s.EndsWith("/") ? s : s + "/";
         }
 
         public static T SafeData<T>(this Cache<T> cache, bool emptyIfMissing = false) where T : class, new() =>

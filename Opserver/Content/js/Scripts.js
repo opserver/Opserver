@@ -1683,6 +1683,7 @@ Status.HAProxy = (function () {
                 refreshTimer,
                 urlPath = Status.options.rootPath + 'graph/' + options.type + (options.subtype ? '/' + options.subtype : '') + '/json',
                 params = { summary: true },
+                curDataRequest,
                 stack, stackArea, stackSummaryArea, stackFunc; // stacked specific vars
             
             if (options.id) params.id = options.id;
@@ -2233,7 +2234,10 @@ Status.HAProxy = (function () {
                     //refresh with high-res goodness
                     clearTimeout(refreshTimer);
                     refreshTimer = setTimeout(function () {
-                        $.getJSON(urlPath, { id: options.id, start: start, end: end }, function (newData) {
+                        if (curDataRequest) {
+                            curDataRequest.abort();
+                        }
+                        curDataRequest = $.getJSON(urlPath, { id: options.id, start: start, end: end }, function (newData) {
                             postProcess(newData);
                             rescaleYAxis(newData, true);
                             series.forEach(function (s) {
