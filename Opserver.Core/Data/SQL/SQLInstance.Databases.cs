@@ -792,6 +792,7 @@ Drop Table #vlfTemp;";
             public DateTime LastModifiedDate { get; internal set; }
             public int IndexCount { get; internal set; }
             public long RowCount { get; internal set; }
+            public long PartitionCount { get; internal set; }
             public long DataTotalSpaceKB { get; internal set; }
             public long IndexTotalSpaceKB { get; internal set; }
             public long UsedSpaceKB { get; internal set; }
@@ -809,7 +810,7 @@ Select t.object_id Id,
        t.name TableName,
        t.create_date CreationDate,
        t.modify_date LastModifiedDate,
-       Count(i.index_id) IndexCount,
+       Count(Distinct i.index_id) IndexCount,
        Max(ddps.row_count) [RowCount],
        Sum(Case When i.type In (0, 1, 5) Then a.total_pages Else 0 End) * 8 DataTotalSpaceKB,
        Sum(Case When i.type Not In (0, 1, 5) Then a.total_pages Else 0 End) * 8 IndexTotalSpaceKB,
