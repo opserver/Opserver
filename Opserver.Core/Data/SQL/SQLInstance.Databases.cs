@@ -389,6 +389,7 @@ Select db.database_id DatabaseId,
         
         public class TableIndex : ISQLVersioned
         {
+            public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
             public string IndexName { get; internal set; }
             public DateTime? LastUpdated { get; internal set; }
@@ -402,10 +403,11 @@ Select db.database_id DatabaseId,
             public Version MinVersion => SQLServerVersions.SQL2008.SP1;
 
             public string GetFetchSQL(Version v) => @"
-  Select t.name TableName,
+ Select sc.name SchemaName,
+        t.name TableName,
 		i.name IndexName, 
         Stats_Date(s.object_id, s.stats_id) LastUpdated,   
-		i.type,
+		i.type Type,
         i.is_unique IsUnique,
         i.is_primary_key IsPrimaryKey,
 		i.is_disabled IsDisabled,
@@ -434,6 +436,8 @@ Select db.database_id DatabaseId,
   From sys.indexes i 
        Join sys.tables t
          On i.object_id = t.object_id 
+       Join sys.schemas sc
+         On t.schema_id = sc.schema_id
        Join sys.stats s 
          On i.object_id = s.object_id
         And i.index_id = s.stats_id
