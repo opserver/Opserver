@@ -1062,9 +1062,7 @@ Order By 1, 2, 3";
                     if (RangeValue is DateTime)
                     {
                         var date = (DateTime)RangeValue;
-                        return (date.TimeOfDay.Ticks == 0)
-                            ? date.ToString("yyyy-MM-dd")
-                            : date.ToString("u");
+                        return date.ToString(date.TimeOfDay.Ticks == 0 ? "yyyy-MM-dd" : "u");
                     }
                     return RangeValue.ToString();
                 }
