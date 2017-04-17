@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Jil;
@@ -209,9 +210,11 @@ namespace StackExchange.Opserver.Data.Jira
 
         public class JiraCreateIssueResponse
         {
+            [DataMember(Name = "id")]
+            public string Id { get; set; }
+            [DataMember(Name = "key")]
             public string Key { get; set; }
-            public int Id { get; set; }
-
+            [DataMember(Name = "self")]
             public string Self { get; set; }
 
             public string Host { get; set; }
