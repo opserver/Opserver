@@ -5,6 +5,7 @@ using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Net;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Jil;
@@ -122,7 +123,7 @@ namespace StackExchange.Opserver.Data.Jira
                 body = comment
             };
 
-            var resource = $"issue/{createResponse.key}/comment";
+            var resource = $"issue/{createResponse.Key}/comment";
 
             var response = await client.PostAsync<string, object>(resource, payload).ConfigureAwait(false);
             return response;
@@ -209,15 +210,18 @@ namespace StackExchange.Opserver.Data.Jira
 
         public class JiraCreateIssueResponse
         {
-			public string id { get; set; }
-			public string key { get; set; }
-			public string self { get; set; }
+            [DataMember(Name = "id")]
+            public string Id { get; set; }
+            [DataMember(Name = "key")]
+            public string Key { get; set; }
+            [DataMember(Name = "self")]
+            public string Self { get; set; }
 
-			public string Host { get; set; }
+            public string Host { get; set; }
 
-            public string BrowseUrl => Host.IsNullOrEmpty() || key.IsNullOrEmpty()
+            public string BrowseUrl => Host.IsNullOrEmpty() || Key.IsNullOrEmpty()
                 ? string.Empty
-                : $"{Host.TrimEnd(StringSplits.ForwardSlash)}/browse/{key}";
+                : $"{Host.TrimEnd(StringSplits.ForwardSlash)}/browse/{Key}";
         }
     }
 
