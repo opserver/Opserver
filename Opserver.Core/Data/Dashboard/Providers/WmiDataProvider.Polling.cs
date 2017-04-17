@@ -118,6 +118,19 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     }
                 }
 
+                const string servicetagquery = @"SELECT 
+                    SerialNumber
+                    FROM Win32_BIOS";
+
+                using (var q = Wmi.Query(Endpoint, servicetagquery))
+                {
+                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    if (data != null)
+                    {
+                        ServiceTag = data.SerialNumber;
+                    }
+                }
+
                 LastSync = DateTime.UtcNow;
                 Status = NodeStatus.Active;
 
