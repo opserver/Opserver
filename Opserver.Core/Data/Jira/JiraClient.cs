@@ -122,7 +122,7 @@ namespace StackExchange.Opserver.Data.Jira
                 body = comment
             };
 
-            var resource = $"issue/{createResponse.Key}/comment";
+            var resource = $"issue/{createResponse.key}/comment";
 
             var response = await client.PostAsync<string, object>(resource, payload).ConfigureAwait(false);
             return response;
@@ -209,16 +209,15 @@ namespace StackExchange.Opserver.Data.Jira
 
         public class JiraCreateIssueResponse
         {
-            public string Key { get; set; }
-            public int Id { get; set; }
+			public string id { get; set; }
+			public string key { get; set; }
+			public string self { get; set; }
 
-            public string Self { get; set; }
+			public string Host { get; set; }
 
-            public string Host { get; set; }
-
-            public string BrowseUrl => Host.IsNullOrEmpty() || Key.IsNullOrEmpty()
+            public string BrowseUrl => Host.IsNullOrEmpty() || key.IsNullOrEmpty()
                 ? string.Empty
-                : $"{Host.TrimEnd(StringSplits.ForwardSlash)}/browse/{Key}";
+                : $"{Host.TrimEnd(StringSplits.ForwardSlash)}/browse/{key}";
         }
     }
 

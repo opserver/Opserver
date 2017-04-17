@@ -270,7 +270,7 @@ namespace StackExchange.Opserver.Controllers
             var jiraClient = new JiraClient(JiraSettings);
             var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName).ConfigureAwait(false);
 
-            if (result.Key.IsNullOrWhiteSpace())
+            if (result.key.IsNullOrWhiteSpace())
             {
                 return Json(new
                 {
@@ -282,7 +282,7 @@ namespace StackExchange.Opserver.Controllers
             return Json(new
             {
                 success = true,
-                issueKey = result.Key,
+                issueKey = result.key,
                 browseUrl = result.BrowseUrl
             });
         }
