@@ -85,9 +85,12 @@ namespace StackExchange.Opserver.Data.SQL
 
         public LightweightCache<List<TableIndex>> GetIndexInfo(string databaseName) =>
             DatabaseFetch<TableIndex>(databaseName);
-        
+
         public LightweightCache<List<DatabaseDataSpace>> GetDataSpaceInfo(string databaseName) =>
             DatabaseFetch<DatabaseDataSpace>(databaseName);
+
+        public LightweightCache<List<DatabasePartition>> GetPartitionInfo(string databaseName) =>
+            DatabaseFetch<DatabasePartition>(databaseName);
 
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
@@ -386,7 +389,7 @@ Select db.database_id DatabaseId,
   Order By EstimatedImprovement Desc";
             }
         }
-        
+
         public class TableIndex : ISQLVersioned
         {
             public string SchemaName { get; internal set; }
@@ -1028,6 +1031,96 @@ Order By 1, 2, 3";
 
                 return string.Format(FetchSQL, "");
             }
+        }
+
+        public class DatabasePartition : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
+            public string SchemaName { get; internal set; }
+            public string TableName { get; internal set; }
+            public string IndexName { get; internal set; }
+            public int PartitionNumber { get; internal set; }
+            public string Filegroup { get; internal set; }
+            public string Scheme { get; internal set; }
+            public string Function { get; internal set; }
+            public string FunctionType { get; internal set; }
+            public int Fanout { get; internal set; }
+            public bool IsRight { get; internal set; }
+            public object RangeValue { get; internal set; }
+            public PartitionDataCompression DataCompression { get; internal set; }
+            public long RowCount { get; internal set; }
+            public long ReservedSpaceKB { get; internal set; }
+            public int IndexCount { get; internal set; }
+
+            public string RangeValueString
+            {
+                // TODO: C# 7 switch goodness
+                get
+                {
+                    if (RangeValue == null) return string.Empty;
+                    if (RangeValue is DateTime)
+                    {
+                        var date = (DateTime)RangeValue;
+                        return (date.TimeOfDay.Ticks == 0)
+                            ? date.ToString("yyyy-MM-dd")
+                            : date.ToString("u");
+                    }
+                    return RangeValue.ToString();
+                }
+            }
+
+            public string GetFetchSQL(Version v) => @"
+  Select s.name SchemaName,
+         t.name TableName,
+         i.name IndexName,
+         p.partition_number PartitionNumber,
+         ds.name [Filegroup],
+         ps.name Scheme,
+         pf.name [Function],
+         pf.type_desc FunctionType,
+         pf.fanout Fanout,
+         pf.boundary_value_on_right IsRight,
+         prv.value RangeValue,
+         p.data_compression DataCompression,
+         Sum(Case When i.index_id In (1, 0) Then p.rows Else 0 End) [RowCount],
+         Sum(dbps.reserved_page_count) * 8 ReservedSpaceKB,
+         Sum(Case IsNull(i.index_id, 0) When 0 Then 0 Else 1 End) IndexCount
+    From sys.destination_data_spaces dds
+         Join sys.data_spaces ds 
+           On dds.data_space_id = ds.data_space_id
+         Join sys.partition_schemes ps 
+           On dds.partition_scheme_id = ps.data_space_id
+         Join sys.partition_functions pf 
+           On ps.function_id = pf.function_id
+         Left Join sys.partition_range_values prv 
+           On pf.function_id = prv.function_id
+           And dds.destination_id = (Case pf.boundary_value_on_right When 0 Then prv.boundary_id Else prv.boundary_id + 1 End)
+         Left Join sys.indexes i 
+           On dds.partition_scheme_id = i.data_space_id
+         Left Join sys.tables t
+           On i.object_id = t.object_id
+         Left Join sys.schemas s
+           On t.schema_id = s.schema_id
+         Left Join sys.partitions p 
+           On i.object_id = p.object_id
+           And i.index_id = p.index_id
+           And dds.destination_id = p.partition_number
+         Left Join sys.dm_db_partition_stats dbps 
+           On p.object_id = dbps.object_id
+           And p.partition_id = dbps.partition_id
+Group By t.name,
+         s.name,
+         i.name,
+         p.partition_number,
+         ds.name,
+         ps.name,
+         pf.name,
+         pf.type_desc,
+         pf.fanout,
+         pf.boundary_value_on_right,
+         prv.value,
+         p.data_compression";
         }
     }
 }

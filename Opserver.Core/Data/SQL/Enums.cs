@@ -345,4 +345,13 @@ namespace StackExchange.Opserver.Data.SQL
         [Description("Nonclustered Columnstore")] NonclusteredColumnstore = 6,
         [Description("Nonclustered Hash")] NonclusteredHash = 7
     }
+
+    public enum PartitionDataCompression : byte
+    {
+        [Description("None")] None = 0,
+        [Description("Row")] Row = 1,
+        [Description("Page")] Page = 2,
+        [Description("Columnstore")] Columnstore = 3,
+        [Description("Columnstore (Archive)")] ColumnstoreArchive = 4
+    }
 }

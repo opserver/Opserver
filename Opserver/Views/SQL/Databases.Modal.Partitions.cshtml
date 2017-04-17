@@ -1,0 +1,67 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model IEnumerable<SQLInstance.DatabasePartition>
+@{
+    var partitions = Model.ToList();
+    if (partitions.Count == 0)
+    {
+        return;
+    }
+    var sample = partitions[0];
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h6>
+            @partitions.Count.Pluralize("Partition")
+            <span class="smaller">
+                <span class="text-muted"> - Scheme:</span> @sample.Scheme
+                <span class="text-muted">, Function:</span> @sample.Function
+            </span>
+        </h6>
+    </div>
+    <div class="panel-body">
+        <table class="table-striped col-xs-12">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Filegroup</th>
+                    <th>@(sample.IsRight ? "Right" : "Left") Boundary</th>
+                    <th>Compression</th>
+                    <th>Rows</th>
+                    <th>Reserved Space</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var p in partitions.OrderBy(p => p.RangeValue))
+            {
+                <tr data-id="@p.PartitionNumber">
+                    <td><i class="fa fa-columns fa-fw text-muted" aria-hidden="true"></i> @p.PartitionNumber</td>
+                    <td>@p.Filegroup</td>
+                    <td>
+                    @if (p.RangeValue == null)
+                    {
+                        <span class="text-muted">(null)</span>
+                    }
+                    else
+                    {
+                        @p.RangeValueString
+                    }
+                    </td>
+                    <td>
+                        @switch (p.DataCompression)
+                        {
+                            case PartitionDataCompression.Row:
+                            case PartitionDataCompression.Page:
+                            case PartitionDataCompression.ColumnstoreArchive:
+                                <i class="fa fa-archive fa-fw text-muted" aria-hidden="true"></i>
+                                break;
+                        }
+                        @p.DataCompression.GetDescription()
+                    </td>    
+                    <td>@p.RowCount.ToComma()</td>
+                    <td>@((p.ReservedSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
