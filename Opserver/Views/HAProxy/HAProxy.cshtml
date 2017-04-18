@@ -51,8 +51,8 @@
                 var erroring = g.Instances.FirstOrDefault(i => i.Proxies.ErrorMessage.HasValue());
                 <li class="@(g == Model.SelectedGroup ? "active" : null)" data-name="@g.Name" title="@g.Name:
 Last Poll: @(lastPoll?.ToRelativeTime() ?? "Not yet polled")
-Last Success: @(lastSuccess?.ToRelativeTime() ?? "never")@if (erroring != null) {
-@:Error: @(erroring.Proxies.ErrorMessage)
+Last Success: @(lastSuccess?.ToRelativeTime() ?? "never")@if (erroring != null) {<text>
+Error: @(erroring.Proxies.ErrorMessage)</text>
 }">
                     <a href="?group=@g.Name.UrlEncode()" class="@g.TextClass()">@g.Name</a>
                     <span class="badge alert-@g.RawClass()">@count.ToComma()</span>
@@ -60,5 +60,6 @@ Last Success: @(lastSuccess?.ToRelativeTime() ?? "never")@if (erroring != null) 
             }
         </ul>
     }
+    @Helpers.PollInfo(allGroups.SelectMany(g => g.Instances), "HAProxy")
 </div>
 @RenderBody()

@@ -88,6 +88,10 @@ namespace StackExchange.Opserver.Data.SQL
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
+            if (!HasPolled)
+                yield return MonitorStatus.Unknown;
+            if (HasPolled && !HasPolledCacheSuccessfully)
+                yield return MonitorStatus.Critical;
             if (Databases.Data != null)
                 yield return Databases.Data.GetWorstStatus();
         }

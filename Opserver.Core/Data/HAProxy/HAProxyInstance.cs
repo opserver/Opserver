@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            yield return Proxies.Data?.GetWorstStatus() ?? MonitorStatus.Warning;
+            yield return Proxies.Data?.GetWorstStatus() ?? MonitorStatus.Unknown;
         }
 
         protected override string GetMonitorStatusReason()

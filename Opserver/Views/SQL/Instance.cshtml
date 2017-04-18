@@ -70,16 +70,7 @@ if (counter == null)
         @i.IconSpan() @i.Name
         @Helpers.PollNow(i)
     </h5>
-    @if (i.LastFetch?.LastSuccess == null)
-    {
-        <div class="alert alert-danger">
-            <h5>No data successfully fetched for @i.Name</h5>
-            @if (i.LastFetch?.ErrorMessage.HasValue() ?? false)
-            {
-                <p class="error-stack">@i.LastFetch.ErrorMessage</p>
-            }
-        </div>
-    }
+    @Helpers.PollInfo(i, i.Name)
     <div class="row small">
         <div class="col-md-6">
             @{
@@ -276,7 +267,7 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                     }
                 }
                 var ci = i as SQLNode;
-                if (ci != null)
+                if (ci != null && i.HasPolledCacheSuccessfully)
                 {
                     <div class="panel panel-default">
                         <div class="panel-heading">@Icon.Cluster Cluster Members</div>

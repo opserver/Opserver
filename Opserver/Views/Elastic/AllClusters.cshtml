@@ -19,6 +19,10 @@
     }
 }
 <div class="js-refresh" data-name="elastic-overview">
+    @if (knownClusters.Count == 0)
+    {
+        @Helpers.PollInfo(knownClusters, "Elastic")
+    }
     @foreach (var c in unknownClusters)
     {
         <h5 class="page-header">
@@ -38,8 +42,8 @@
             <tbody>
                 @foreach (var n in c.KnownNodes)
                 {
-                    <tr class="@(MonitorStatus.Critical.RowClass())">
-                        <td>@(MonitorStatus.Critical.IconSpan())</td>
+                    <tr class="@(MonitorStatus.Unknown.RowClass())">
+                        <td>@(MonitorStatus.Unknown.IconSpan())</td>
                         <td>@n.Url</td>
                         <td class="text-muted">Unknown</td>
                         <td title="@(n.LastException?.Message)">@(n.LastException?.Message.TruncateWithEllipsis(100))</td>

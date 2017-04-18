@@ -33,7 +33,11 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
+        protected override IEnumerable<MonitorStatus> GetMonitorStatus()
+        {
+            yield return DataPollers.GetWorstStatus();
+        }
+
         protected override string GetMonitorStatusReason() { return null; }
 
         public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)

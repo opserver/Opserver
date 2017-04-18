@@ -11,6 +11,7 @@ namespace StackExchange.Opserver.Data
     public abstract partial class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
     {
         private int _totalPolls;
+        private int _totalCacheSuccesses;
 
         public abstract int MinSecondsBetweenPolls { get; }
         public abstract string NodeType { get; }
@@ -123,6 +124,7 @@ namespace StackExchange.Opserver.Data
             Interlocked.Exchange(ref _lastFetch, cache);
             if (success)
             {
+                Interlocked.Increment(ref _totalCacheSuccesses);
                 Interlocked.Exchange(ref PollFailsInaRow, 0);
             }
             else
@@ -135,6 +137,14 @@ namespace StackExchange.Opserver.Data
         private int _isPolling;
         public bool IsPolling => _isPolling > 0;
         public string PollStatus { get; protected set; }
+        /// <summary>
+        /// Whether this node has ever completed a poll
+        /// </summary>
+        public bool HasPolled => _totalPolls > 0;
+        /// <summary>
+        /// Whether this node has ever completed a cache poll successfully
+        /// </summary>
+        public bool HasPolledCacheSuccessfully => _totalCacheSuccesses > 0;
 
         public virtual async Task PollAsync(bool force = false)
         {
