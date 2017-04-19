@@ -2,6 +2,7 @@
 @{
     this.SetPageTitle("About - Caches");
     var pollingInfo = PollingEngine.GetPollingStatus();
+    var ts = PollingEngine.GetThreadStats();
     var pollerNodes = pollingInfo.Nodes
         .OrderByWorst(n => n.DataPollers.GetWorstStatus())
         .ThenByDescending(n => n.IsPolling)
@@ -26,6 +27,24 @@
         <a href="#" class="js-reload-link">Reload</a>
     </span>
 </h5>
+<div class="row">
+    <div class="col-xs-12">
+        <div class="panel panel-default small">
+            <div class="panel-heading">Thread Pool</div>
+            <div class="panel-body js-refresh" data-name="threadpool-stats">
+                <div>
+                    <label>IO Completion</label>:
+                    <span class="text-muted">Busy:</span> @ts.BusyIOThreads.ToComma()<span class="text-muted">, Free:</span> @ts.AvailableIOThreads.ToComma()<span class="text-muted">, Min:</span> @ts.MinIOThreads.ToComma()<span class="text-muted">, Max:</span> @ts.MaxIOThreads.ToComma()
+                </div>
+                <div>
+                    <label>Worker</label>:
+                    <span class="text-muted">Busy:</span> @ts.BusyWorkerThreads.ToComma()<span class="text-muted">, Free:</span> @ts.AvailableWorkerThreads.ToComma()<span class="text-muted">, Min:</span> @ts.MinWorkerThreads.ToComma()<span class="text-muted">, Max:</span> @ts.MaxWorkerThreads.ToComma()
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <table class="table table-hover table-responsive text-nowrap table-super-condensed">
     <thead>
         <tr>

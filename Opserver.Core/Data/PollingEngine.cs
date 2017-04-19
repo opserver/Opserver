@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Hosting;
 
 namespace StackExchange.Opserver.Data
 {
@@ -150,17 +151,11 @@ namespace StackExchange.Opserver.Data
             {
                 foreach (var n in AllPollNodes)
                 {
-                    if (n.IsPolling)
+                    if (n.IsPolling || !n.NeedsPoll)
                     {
                         continue;
                     }
-                    n.PollAsync().ContinueWith(t =>
-                        {
-                            if (t.IsFaulted) Current.LogException(t.Exception);
-                        },
-                        CancellationToken.None,
-                        TaskContinuationOptions.ExecuteSynchronously,
-                        TaskScheduler.Default);
+                    HostingEnvironment.QueueBackgroundWorkItem(ct => n.PollAsync());
                 }
             }
             catch (Exception e)
@@ -220,6 +215,39 @@ namespace StackExchange.Opserver.Data
                 }
             }
             return null;
+        }
+
+        public static ThreadStats GetThreadStats() => new ThreadStats();
+
+        public class ThreadStats
+        {
+            private readonly int _minWorkerThreads;
+            public int MinWorkerThreads => _minWorkerThreads;
+
+            private readonly int _minIOThreads;
+            public int MinIOThreads => _minIOThreads;
+
+            private readonly int _availableWorkerThreads;
+            public int AvailableWorkerThreads => _availableWorkerThreads;
+
+            private readonly int _availableIOThreads;
+            public int AvailableIOThreads => _availableIOThreads;
+
+            private readonly int _maxIOThreads;
+            public int MaxIOThreads => _maxIOThreads;
+
+            private readonly int _maxWorkerThreads;
+            public int MaxWorkerThreads => _maxWorkerThreads;
+
+            public int BusyIOThreads => _maxIOThreads - _availableIOThreads;
+            public int BusyWorkerThreads => _maxWorkerThreads - _availableWorkerThreads;
+
+            public ThreadStats()
+            {
+                ThreadPool.GetMinThreads(out _minWorkerThreads, out _minIOThreads);
+                ThreadPool.GetAvailableThreads(out _availableWorkerThreads, out _availableIOThreads);
+                ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxIOThreads);
+            }
         }
     }
 }

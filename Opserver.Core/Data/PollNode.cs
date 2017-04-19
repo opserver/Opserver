@@ -136,7 +136,7 @@ namespace StackExchange.Opserver.Data
 
         private int _isPolling;
         public bool IsPolling => _isPolling > 0;
-        public string PollStatus { get; protected set; }
+        public string PollStatus { get; protected set; } = "Not Started";
         /// <summary>
         /// Whether this node has ever completed a poll
         /// </summary>
@@ -146,20 +146,30 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         public bool HasPolledCacheSuccessfully => _totalCacheSuccesses > 0;
 
+        public bool NeedsPoll
+        {
+            get
+            {
+                // Don't poll more than once every n seconds, that's just rude
+                if (DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls))
+                    return false;
+
+                // If we're seeing a lot of poll failures in a row, back the hell off
+                if (PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
+                    return false;
+
+                return true;
+            }
+        }
+
         public virtual async Task PollAsync(bool force = false)
         {
             using (MiniProfiler.Current.Step("Poll - " + UniqueKey))
             {
                 // If not forced, perform our "should-run" checks
-                if (!force)
+                if (!force && !NeedsPoll)
                 {
-                    // Don't poll more than once every n seconds, that's just rude
-                    if (DateTime.UtcNow < LastPoll.GetValueOrDefault().AddSeconds(MinSecondsBetweenPolls))
-                        return;
-
-                    // If we're seeing a lot of poll failures in a row, back the hell off
-                    if (PollFailsInaRow >= FailsBeforeBackoff && DateTime.UtcNow < LastPoll.GetValueOrDefault() + BackoffDuration)
-                        return;
+                    return;
                 }
 
                 // Prevent multiple poll threads for this node from running at once
