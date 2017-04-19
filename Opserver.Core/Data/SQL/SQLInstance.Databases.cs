@@ -810,7 +810,7 @@ Drop Table #vlfTemp;";
             public string GetFetchSQL(Version v) => @"
 Select object_id, index_id, type Into #indexes From sys.indexes;
 Select object_id, index_id, partition_id Into #parts From sys.partitions;
-Select object_id, index_id, row_count Into #partStats From sys.dm_db_partition_stats;
+Select object_id, index_id, row_count, partition_id Into #partStats From sys.dm_db_partition_stats;
 
 Select t.object_id Id,
        s.name SchemaName,
@@ -842,7 +842,8 @@ Select t.object_id Id,
        Left Join #partStats ddps
          On i.object_id = ddps.object_id
          And i.index_id = ddps.index_id
-         And i.type In (0, 1, 5) -- Heap, Clustered, Clustered Columnstore        
+         And i.type In (0, 1, 5) -- Heap, Clustered, Clustered Columnstore      
+         And p.partition_id = ddps.partition_id  
  Where t.is_ms_shipped = 0
    And i.object_id > 255
 Group By t.object_id, t.Name, t.create_date, t.modify_date, s.name;
