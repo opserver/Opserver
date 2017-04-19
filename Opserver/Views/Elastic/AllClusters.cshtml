@@ -21,37 +21,40 @@
 <div class="js-refresh" data-name="elastic-overview">
     @if (knownClusters.Count == 0)
     {
-        @Helpers.PollInfo(knownClusters, "Elastic")
+        @Helpers.PollInfo(knownClusters, "any Elastic clusters")
     }
-    @foreach (var c in unknownClusters)
+    else
     {
-        <h5 class="page-header">
-            @c.IconSpan() @(((ISearchableNode)c).DisplayName)
-            <span class="cluster-info">(unknown)</span>
-        </h5>
-        <table class="table table-striped table-hover table-responsive table-super-condensed">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Node</th>
-                    <th>Healthy</th>
-                    <th>Error</th>
-                    <th>Last Seen</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var n in c.KnownNodes)
-                {
-                    <tr class="@(MonitorStatus.Unknown.RowClass())">
-                        <td>@(MonitorStatus.Unknown.IconSpan())</td>
-                        <td>@n.Url</td>
-                        <td class="text-muted">Unknown</td>
-                        <td title="@(n.LastException?.Message)">@(n.LastException?.Message.TruncateWithEllipsis(100))</td>
-                        <td>@(n.LastSeen?.ToRelativeTimeSpan() ?? "Never".AsHtml())</td>
+        foreach (var c in unknownClusters)
+        {
+            <h5 class="page-header">
+                @c.IconSpan() @(((ISearchableNode)c).DisplayName)
+                <span class="cluster-info">(unknown)</span>
+            </h5>
+            <table class="table table-striped table-hover table-responsive table-super-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Node</th>
+                        <th>Healthy</th>
+                        <th>Error</th>
+                        <th>Last Seen</th>
                     </tr>
-                }
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach (var n in c.KnownNodes)
+                    {
+                        <tr class="@(MonitorStatus.Unknown.RowClass())">
+                            <td>@(MonitorStatus.Unknown.IconSpan())</td>
+                            <td>@n.Url</td>
+                            <td class="text-muted">Unknown</td>
+                            <td title="@(n.LastException?.Message)">@(n.LastException?.Message.TruncateWithEllipsis(100))</td>
+                            <td>@(n.LastSeen?.ToRelativeTimeSpan() ?? "Never".AsHtml())</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
     }
     @if (knownClusters.Any())
     {
@@ -81,6 +84,7 @@
                             <h5>
                                 @hs.IconSpan() <a class="@hs.TextClass()" href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name})">@c.Name</a>
                                 <span class="text-muted small">(@string.Join(", ", attribs))@CommonVersionHeader(c)</span>
+                                <span class="pull-right small"> @Helpers.PollNow(c)</span>
                             </h5>
                         </th>
                     </tr>

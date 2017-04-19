@@ -21,14 +21,16 @@
 <div class="js-refresh" data-name="exceptions-header">
     <h5 class="page-header">
         Exception Logs
-        @if (!Model.ShowAll)
-        {
-            @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
-        }
-        @if (ExceptionsModule.Stores?.Any() == true)
-        {
-            @Helpers.PollNow(ExceptionsModule.Stores?.First().NodeType)
-        }
+        <span class="pull-right">
+            @if (!Model.ShowAll)
+            {
+                @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
+            }
+            @if (ExceptionsModule.Stores?.Any() == true)
+            {
+                @Helpers.PollNow(ExceptionsModule.Stores)
+            }
+        </span>
     </h5>
     @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
     @if (anyLoaded)

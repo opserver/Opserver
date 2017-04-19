@@ -82,7 +82,7 @@ foreach (var s in server.SlaveConnections) {
     {
         <h5 class="page-header">
             @MonitorStatus.Warning.IconSpan() @slaving.Count.Pluralize("Slaving Instance") <span class="small">@CommonVersionHeader()</span>
-            @Helpers.PollNow(slaving)
+            <span class="pull-right small"> @Helpers.PollNow(slaving)</span>
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
@@ -163,7 +163,7 @@ foreach (var s in server.SlaveConnections) {
     {
         <h5 class="page-header">
             @MonitorStatus.Critical.IconSpan() @missing.Count.Pluralize("Missing/Unknown Instance")
-            @Helpers.PollNow(missing)
+            <span class="pull-right small"> @Helpers.PollNow(missing)</span>
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
@@ -197,7 +197,7 @@ foreach (var s in server.SlaveConnections) {
         <h5 class="page-header">
             @heads.GetWorstStatus().IconSpan() @heads.Count.Pluralize("Group")
             <span class="small">(@((heads.Count + heads.Sum(m => m.TotalSlaveCount)).Pluralize("instance")))@CommonVersionHeader()</span>
-            @Helpers.PollNow(heads.Union(heads.SelectMany(s => s.GetAllSlavesInChain())))
+            <span class="pull-right small"> @Helpers.PollNow(heads.Union(heads.SelectMany(s => s.GetAllSlavesInChain())))</span>
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>
@@ -231,7 +231,7 @@ foreach (var s in server.SlaveConnections) {
         <h5 class="page-header">
             @standAloneMasters.GetWorstStatus().IconSpan() @standAloneMasters.Count.Pluralize("Standalone")
             <span class="small">(All Masters)@CommonVersionHeader()</span>
-            @Helpers.PollNow(standAloneMasters)
+            <span class="pull-right small"> @Helpers.PollNow(standAloneMasters)</span>
         </h5>
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
             <thead>

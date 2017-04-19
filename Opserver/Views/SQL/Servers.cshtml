@@ -70,7 +70,7 @@ var props = i.ServerProperties.SafeData(true);
                     <th colspan="8">
                         <h5>
                             @standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone
-                            @Helpers.PollNow(standalone)
+                            <span class="pull-right small"> @Helpers.PollNow(standalone)</span>
                         </h5>
                     </th>
                 </tr>
@@ -107,7 +107,7 @@ var props = i.ServerProperties.SafeData(true);
         </table>
     }
 
-    <div class="ag-container refresh-group row" data-name="ag-summary">
+    <div class="ag-container refresh-group row small" data-name="ag-summary">
         @foreach (var c in Model.Clusters)
         {
             foreach (var ag in c.AvailabilityGroups)
