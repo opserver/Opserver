@@ -1,7 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.SQL
 @model IEnumerable<SQLInstance.DatabasePartition>
 @{
-    var partitions = Model.ToList();
+    var partitions = Model.OrderBy(p => p.RangeValue).ToList();
     if (partitions.Count == 0)
     {
         return;
@@ -24,15 +24,16 @@
                 <tr>
                     <th>#</th>
                     <th>Filegroup</th>
-                    <th>@(sample.IsRight ? "Right" : "Left") Boundary</th>
+                    <th>Boundary <span class="text-muted">(@(sample.IsRight ? "Right" : "Left"))</span></th>
                     <th>Compression</th>
                     <th>Rows</th>
                     <th>Reserved Space</th>
                 </tr>
             </thead>
             <tbody>
-            @foreach (var p in partitions.OrderBy(p => p.RangeValue))
+            @for (var i = 0; i < partitions.Count; i++)
             {
+                var p = partitions[i];
                 var icon = "fa-columns";
                 switch (p.DataCompression)
                 {
@@ -46,18 +47,24 @@
                     <td><i class="fa @icon fa-fw text-muted" aria-hidden="true"></i> @p.PartitionNumber</td>
                     <td>@p.Filegroup</td>
                     <td>
-                    @if (p.RangeValue == null)
-                    {
-                        <span class="text-muted">(null)</span>
-                    }
-                    else
-                    {
-                        @p.RangeValueString
-                    }
+                        @if (p.RangeValue == null)
+                        {
+                            if (partitions.Count > i)
+                            {
+                                var np = partitions[i + 1];
+                                // so tempted to make this ugly just to get p = np
+                                <span class="text-muted">@(np.IsRight ? "< " : ">= ") </span> @np.RangeValueString
+                            }
+                            <span class="text-muted"> (null)</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">@(sample.IsRight ? ">=" : "<") </span> @p.RangeValueString
+                        }
                     </td>
                     <td>
                         @p.DataCompression.GetDescription()
-                    </td>    
+                    </td>
                     <td>@p.RowCount.ToComma()</td>
                     <td>@((p.ReservedSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
                 </tr>
