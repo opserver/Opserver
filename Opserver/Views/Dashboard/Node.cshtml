@@ -56,20 +56,20 @@
                     }
                     else
                     {
-                        @s.Manufacturer
+                        @s.Manufacturer.IsNullOrEmptyReturn("Unknown")
                         <label>Manufacturer</label>
                     }
                 </div>
                 <div class="value-block small col-xs-6">
-                    @s.Model
+                    @s.Model.IsNullOrEmptyReturn("Unknown")
                     <label>Model</label>
                 </div>
                 <div class="value-block small col-xs-6">
-                    @(s.ServiceTag ?? "Unknown")
+                    @s.ServiceTag.IsNullOrEmptyReturn("Unknown")
                     <label>Serial</label>
                 </div>
                 <div class="value-block small col-xs-6" title="@s.MachineType">
-                    @s.MachineTypePretty
+                    @s.MachineTypePretty.IsNullOrEmptyReturn("Unknown")
                     <label>Type</label>
                 </div>
             </div>
