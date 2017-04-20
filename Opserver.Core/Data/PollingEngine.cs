@@ -178,6 +178,12 @@ namespace StackExchange.Opserver.Data
         /// <returns>Whether the poll was successful</returns>
         public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null)
         {
+            if (nodeType == Cache.TimedCacheKey)
+            {
+                Cache.Purge(key);
+                return true;
+            }
+
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
             if (node == null) return false;
 

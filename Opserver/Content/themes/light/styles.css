@@ -9807,6 +9807,9 @@ h6.page-header {
 .page-header .pull-right {
   font-size: 0.9em;
 }
+.modal-header h4 .pull-right {
+  padding: 4px 10px 0 0;
+}
 .page-footer {
   position: absolute;
   bottom: 0;

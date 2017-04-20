@@ -5,6 +5,9 @@
     var s = Model.Instance;
     var restoreList = s.GetRestoreInfo(Model.Database);
 }
+@section top {
+    <span class="pull-right small">@Helpers.PollNow(restoreList)</span>
+}
 @if (restoreList.Data == null || !restoreList.Successful)
 {
     <div class="alert alert-warning">

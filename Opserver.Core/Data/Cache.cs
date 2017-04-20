@@ -214,7 +214,7 @@ namespace StackExchange.Opserver.Data
     /// A lightweight cache class for storing and handling overlap for cache refreshment for on-demand items
     /// </summary>
     /// <typeparam name="T">Type stored in this cache</typeparam>
-    public class LightweightCache<T> where T : class
+    public class LightweightCache<T> : LightweightCache where T : class
     {
         public T Data { get; private set; }
         public DateTime? LastFetch { get; private set; }
@@ -230,7 +230,7 @@ namespace StackExchange.Opserver.Data
                 // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
                 return Current.LocalCache.GetSet<LightweightCache<T>>(key, (old, ctx) =>
                 {
-                    var tc = new LightweightCache<T>();
+                    var tc = new LightweightCache<T>() { Key = key };
                     try
                     {
                         tc.Data = getData();
@@ -245,6 +245,11 @@ namespace StackExchange.Opserver.Data
                 }, duration, staleDuration);
             }
         }
+    }
+
+    public class LightweightCache
+    {
+        public string Key { get; protected set; }
     }
 
     public abstract class Cache : IMonitorStatus
@@ -352,5 +357,13 @@ namespace StackExchange.Opserver.Data
         /// <param name="staleDuration">The duration to serve stale results for after expiration (which a background refresh happens).</param>
         public static LightweightCache<T> GetTimedCache<T>(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration) where T : class
             => LightweightCache<T>.Get(key, getData, duration, staleDuration);
+
+        /// <summary>
+        /// Purge an existing cache from storage, thereby forcing a fresh fetch next time.
+        /// </summary>
+        /// <param name="key">The key to purge.</param>
+        public static void Purge(string key) => Current.LocalCache.Remove(key);
+
+        public const string TimedCacheKey = "TimedCache";
     }
 }

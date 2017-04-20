@@ -13,6 +13,9 @@
     var indexes = s.GetIndexInfo(Model.Database);
     var partitions = s.GetPartitionInfo(Model.Database);
 }
+@section top {
+    <span class="pull-right small">@Helpers.PollNow(tables, columns, indexes, partitions)</span>
+}
 @if (tables.Data == null || !tables.Successful)
 {
     <div class="alert alert-warning">

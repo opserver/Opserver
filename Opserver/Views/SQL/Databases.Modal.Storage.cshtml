@@ -7,10 +7,15 @@
     var db = i?.GetDatabase(Model.Database);
     var filesRaw = i?.GetFileInfo(Model.Database);
     var files = filesRaw?.Data?.Where(f => f.DatabaseId == db?.Id).OrderBy(f => f.FileType).ThenBy(f => f.PhysicalName);
-    var tables = i?.GetTableInfo(Model.Database).Data?.OrderByDescending(t => t.TotalSpaceKB).ThenBy(t => t.TableName).ToList();
+    var tablesRaw = i?.GetTableInfo(Model.Database);
+    var tables = tablesRaw.Data?.OrderByDescending(t => t.TotalSpaceKB).ThenBy(t => t.TableName).ToList();
     var spaceIds = files?.Select(f => f.DataSpaceId).Where(id => id > 0).ToHashSet() ?? new HashSet<int>();
-    var spaces = i?.GetDataSpaceInfo(Model.Database).Data?.Where(ds => spaceIds.Contains(ds.Id)) ?? new List<SQLInstance.DatabaseDataSpace>();
+    var spacesRaw = i?.GetDataSpaceInfo(Model.Database);
+    var spaces = spacesRaw.Data?.Where(ds => spaceIds.Contains(ds.Id)) ?? new List<SQLInstance.DatabaseDataSpace>();
     const int topTableShowCount = 10;
+}
+@section top {
+    <span class="pull-right small">@Helpers.PollNow(filesRaw, tablesRaw, spacesRaw)</span>
 }
 @if (db == null)
 {

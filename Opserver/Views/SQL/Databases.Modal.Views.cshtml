@@ -11,6 +11,9 @@
         .GroupBy(c => Tuple.Create(c.SchemaName, c.ViewName))
         .ToDictionary(g => g.Key, g => g.ToList());
 }
+@section top {
+    <span class="pull-right small">@Helpers.PollNow(views, columns)</span>
+}
 @if (views.Data == null || !views.Successful)
 {
     <div class="alert alert-warning">

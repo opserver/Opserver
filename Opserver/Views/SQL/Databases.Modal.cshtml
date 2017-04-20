@@ -6,6 +6,7 @@
 }
 <h4 class="modal-title">
     Database details for @db
+    @RenderSection("top", false)
 </h4>
 @helper RenderLink(DatabasesModel.Views view, string text, string icon, bool disabled = false)
 {
