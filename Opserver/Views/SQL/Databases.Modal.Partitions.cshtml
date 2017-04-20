@@ -33,8 +33,17 @@
             <tbody>
             @foreach (var p in partitions.OrderBy(p => p.RangeValue))
             {
+                var icon = "fa-columns";
+                switch (p.DataCompression)
+                {
+                    case PartitionDataCompression.Row:
+                    case PartitionDataCompression.Page:
+                    case PartitionDataCompression.ColumnstoreArchive:
+                        icon = "fa-archive";
+                        break;
+                }
                 <tr data-id="@p.PartitionNumber">
-                    <td><i class="fa fa-columns fa-fw text-muted" aria-hidden="true"></i> @p.PartitionNumber</td>
+                    <td><i class="fa @icon fa-fw text-muted" aria-hidden="true"></i> @p.PartitionNumber</td>
                     <td>@p.Filegroup</td>
                     <td>
                     @if (p.RangeValue == null)
@@ -47,14 +56,6 @@
                     }
                     </td>
                     <td>
-                        @switch (p.DataCompression)
-                        {
-                            case PartitionDataCompression.Row:
-                            case PartitionDataCompression.Page:
-                            case PartitionDataCompression.ColumnstoreArchive:
-                                <i class="fa fa-archive fa-fw text-muted" aria-hidden="true"></i>
-                                break;
-                        }
                         @p.DataCompression.GetDescription()
                     </td>    
                     <td>@p.RowCount.ToComma()</td>
