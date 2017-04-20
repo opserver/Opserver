@@ -47,6 +47,7 @@ Select RTrim(spi.object_name) object_name, RTrim(spi.counter_name) counter_name,
   From sys.dm_os_performance_counters spi
  Where spi.instance_name Not In (Select name From sys.databases)
    And spi.object_name Not Like 'SQLServer:Backup Device%'
+   And spi.object_name Not Like 'SQL Server 2016 XTP%'
 
 WAITFOR DELAY '00:00:01'
 
@@ -62,6 +63,7 @@ Select RTrim(spi.object_name) object_name, RTrim(spi.counter_name) counter_name,
   From sys.dm_os_performance_counters spi
  Where spi.instance_name Not In (Select name From sys.databases)
    And spi.object_name Not Like 'SQLServer:Backup Device%'
+   And spi.object_name Not Like 'SQL Server 2016 XTP%'
 
 Select cc.object_name ObjectName,
        cc.counter_name CounterName,
