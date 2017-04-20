@@ -202,7 +202,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 View = SQLViews.Databases,
                 CurrentInstance = i,
-                Refresh = 10*60
+                Refresh = 2*60
             };
             return View(vd);
         }

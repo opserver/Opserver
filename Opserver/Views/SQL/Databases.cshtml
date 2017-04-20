@@ -35,6 +35,7 @@
         header.prependTo('.js-databases-table thead');
     })
 </script>
+<div class="js-refresh" data-name="databases">
 <h5 class="page-header">
     @dbs.GetWorstStatus().IconSpan() @(dbs?.Count.Pluralize("Database") ?? "No Databases") on @i.Name:
     @Helpers.PollNow(i, dbCache)
@@ -134,3 +135,4 @@ Used: @((db.LogSizeUsedMB.Value*1024*1024).ToSize())
         </tfoot>
     </table>
 }
+</div>
