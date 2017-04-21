@@ -34,7 +34,7 @@ else
     {
         var data = activeOps.Data ?? new List<SQLInstance.ActiveOperation>();
         <h5 class="page-header">
-            Current active queries on @i.Name:
+            @data.Count Active queries currently on @i.Name:  
             <span class="pull-right">
                 <a href="#/sql/active/filters" class="hover-pulsate@(Model.ActiveSearchOptions.IsNonDefault ? " text-warning" : "")"><i class="fa fa-filter" aria-hidden="true"></i></a>
                 <a href="#" class="js-reload-link">Reload</a>
