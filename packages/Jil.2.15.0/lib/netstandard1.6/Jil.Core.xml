@@ -1,0 +1,573 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Jil.Core</name>
+    </assembly>
+    <members>
+        <member name="T:Jil.DateTimeFormat">
+            <summary>
+            Specifies the format of DateTimes and TimeSpans produced or expected by Jil.
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.NewtonsoftStyleMillisecondsSinceUnixEpoch">
+            <summary>
+            Obsolete: Use MicrosoftStyleMillisecondsSinceUnixEpoch instead
+            
+            DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
+            number of milliseconds since the unix epoch (January 1st, 1970 UTC).
+            
+            TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.MillisecondsSinceUnixEpoch">
+            <summary>
+            DateTimes will be formatted as ##...##, where ##...## is the number
+            of milliseconds since the unix epoch (January 1st, 1970 UTC).
+            
+            This is format can be passed directly to JavaZcript's Date constructor.
+            
+            TimeSpans will be formatted as ##...##, where ##...## is the TotalMilliseconds
+            property of the TimeSpan.
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.SecondsSinceUnixEpoch">
+            <summary>
+            DateTimes will be formatted as ##...##, where ##...## is the number
+            of seconds since the unix epoch (January 1st, 1970 UTC).
+            
+            TimeSpans will be formatted as ##...##, where ##...## is the TotalSeconds
+            property of the TimeSpan.
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.ISO8601">
+            <summary>
+            DateTimes will be formatted as "yyyy-MM-ddThh:mm:ssZ" where
+            yyyy is the year, MM is the month (starting at 01), dd is the day (starting at 01),
+            hh is the hour (starting at 00, continuing to 24), mm is the minute (start at 00),
+            and ss is the second (starting at 00).
+            
+            Examples:
+                2011-07-14T19:43:37Z
+                2012-01-02T03:04:05Z
+                
+            TimeSpans will be formatted as ISO8601 durations.
+            
+            Examples:
+                P123DT11H30M2.3S
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.RFC1123">
+            <summary>
+            DateTimes will be formatted as "ddd, dd MMM yyyy HH:mm:ss GMT" where
+            ddd is the abbreviation of a day, dd is the day (starting at 01), MMM is the abbreviation of a month,
+            yyyy is the year, HH is the hour (starting at 00, continuing to 24), mm is the minute (start at 00),
+            and ss is the second (starting at 00), and GMT is a literal indicating the timezone (always GMT).
+            
+            Examples:
+                Thu, 10 Apr 2008 13:30:00 GMT
+                Tue, 10 Mar 2015 00:14:34 GMT
+                
+            TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+            </summary>
+        </member>
+        <member name="F:Jil.DateTimeFormat.MicrosoftStyleMillisecondsSinceUnixEpoch">
+            <summary>
+            DateTimes will be formatted as "\/Date(##...##)\/" where ##...## is the 
+            number of milliseconds since the unix epoch (January 1st, 1970 UTC).
+            See: https://msdn.microsoft.com/en-us/library/bb299886.aspx
+            
+            Example:
+                "\/Date(628318530718)\/"
+                
+            TimeSpans will be formatted as "days.hours:minutes:seconds.fractionalSeconds"
+            </summary>
+        </member>
+        <member name="T:Jil.DeserializationException">
+            <summary>
+            An exception thrown when Jil encounters an error when deserializing a stream.
+            </summary>
+        </member>
+        <member name="P:Jil.DeserializationException.Position">
+            <summary>
+            The position in the TextReader where an error occurred, if it is available.
+            
+            This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
+            and throw an exception is an implementation detail.
+            </summary>
+        </member>
+        <member name="P:Jil.DeserializationException.SnippetAfterError">
+            <summary>
+            A snippet of text immediately after an error occurred.
+            
+            This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
+            and throw an exception is an implementation detail.
+            </summary>
+        </member>
+        <member name="P:Jil.DeserializationException.EndedUnexpectedly">
+            <summary>
+            Whether or not the TextReader ended sooner than Jil expected.
+            
+            This is meant for debugging purposes only, as exactly when Jil decides to abandon deserialization
+            and throw an exception is an implementation detail.
+            </summary>
+        </member>
+        <member name="P:Jil.DeserializationException.Message">
+            <summary>
+            Gets a message that describes the current exception.
+            </summary>
+        </member>
+        <member name="T:Jil.InfiniteRecursionException">
+            <summary>
+            An exception throw when Jil suspects it's in an infinite recursive case.
+            
+            Note that this is detected heuristically, exactly how many recursions must occur
+            before it is thrown depends on the configuration and version of Jil, as well as the object being serialized.
+            </summary>
+        </member>
+        <member name="P:Jil.InfiniteRecursionException.Message">
+            <summary>
+            Gets a message that describes the current exception.
+            </summary>
+        </member>
+        <member name="T:Jil.JilDirectiveAttribute">
+            <summary>
+            Alternative to using [DataMember] and [IgnoreDataMember], for 
+            when their use isn't possible.
+            
+            When applied to a property or field, allows configuration
+            of the name (de)serialized, whether to (de)serialize at all,
+            and the primitive type to treat an enum type as.
+            
+            Takes precedence over [DataMember] and [IgnoreDataMember].
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.Ignore">
+            <summary>
+            If true, the decorated member will not be serialized or deserialized.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.Name">
+            <summary>
+            If non-null, the decorated member's name in serialization will match
+            the value of Name.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.TreatEnumerationAs">
+            <summary>
+            If true and the member annotated is an enum, will cause Jil to convert
+            the enum to the appropriate primitive type before serializing; and expect
+            that primitive type when deserializing, converting back to the enum when
+            constructing the final object.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.IsUnion">
+            <summary>
+            If true then multiple members (each of a different type) can have the same Name, forming a discriminant union.
+            This can be used to handle JSON which puts different types of values under the same key.
+            
+            When deserializing if Jil encounters a value under the name of a union, it will set whichever member has a matching type.
+            When serializing, Jil will check each member under the name of the union and write whichever one has a non-default value.
+            </summary>
+        </member>
+        <member name="P:Jil.JilDirectiveAttribute.IsUnionType">
+            <summary>
+            If true, and the annotated member is a Type, and the annotated member is part of a union then:
+              - the annotated member will be set to whichever Type was deserialized for the indicated union
+              - if no value was provided, the annotated member will be null
+              
+            There can be only one member of a union which has IsUnionType set.
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor">
+            <summary>
+            Create a new JilDirectiveAttribute
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor(System.String)">
+            <summary>
+            Create a new JilDirectiveAttribute, with a name override.
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor(System.Boolean)">
+            <summary>
+            Create a new JilDirectiveAttribute, optionally ignoring the decorated member.
+            </summary>
+        </member>
+        <member name="M:Jil.JilDirectiveAttribute.#ctor(System.Type)">
+            <summary>
+            Create a new JilDirectiveAttribute, treating the decorate member of an enum type
+            as the given primitive type (ie. byte, sbyte, short, ushort, int, uint, long, or ulong).
+            </summary>
+        </member>
+        <member name="T:Jil.JilPrimitiveWrapper">
+            <summary>
+            Marks the given class as a simple wrapper around primitive type.
+            The marked class should either:
+            - have a non default ctor, with this only value.
+            - have only one property or field, which will be used to set and read primitive value from.
+            </summary>
+        </member>
+        <member name="T:Jil.JSON">
+            <summary>
+            Fast JSON serializer.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.SetDefaultOptions(Jil.Options)">
+            <summary>
+            Sets the Options object that Jil will use to calls of Serialize(Dynamic) and Deserialize(Dynamic)
+            if no Options object is provided.
+            
+            By default, Jil will use the Options.Default object.
+            
+            The current default Options can be retrieved with GetDefaultOptions().
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.GetDefaultOptions">
+            <summary>
+            Gets the Options object that Jil will use to calls of Serialize(Dynamic) and Deserialize(Dynamic)
+            if no Options object is provided.
+            
+            By default, Jil will use the Options.Default object.
+            
+            The default Options can be set with SetDefaultOptions(Options options).
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.SerializeDynamic(System.Object,System.IO.TextWriter,Jil.Options)">
+            <summary>
+            Serializes the given data to the provided TextWriter.
+            
+            Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+            the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            
+            Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
+            This is not as fast as calling Serialize with a known type.
+            
+            Objects with participate in the DLR will be serialized appropriately, all other types
+            will be serialized via reflection.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.SerializeDynamic(System.Object,Jil.Options)">
+            <summary>
+            Serializes the given data, returning it as a string.
+            
+            Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+            the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            
+            Unlike Serialize, this method will inspect the Type of data to determine what serializer to invoke.
+            This is not as fast as calling Serialize with a known type.
+            
+            Objects with participate in the DLR will be serialized appropriately, all other types
+            will be serialized via reflection.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Serialize``1(``0,System.IO.TextWriter,Jil.Options)">
+            <summary>
+            Serializes the given data to the provided TextWriter.
+            
+            Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+            the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.GetWriterAction``1(Jil.Options)">
+            <summary>
+            Generated giant switch of option finding via OptionsGeneration.linq
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.GetThunkerDelegate``1(Jil.Options)">
+            <summary>
+            Generated giant switch of option finding via OptionsGeneration.linq
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Serialize``1(``0,Jil.Options)">
+            <summary>
+            Serializes the given data, returning the output as a string.
+            
+            Pass an Options object to configure the particulars (such as whitespace, and DateTime formats) of
+            the produced JSON.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Deserialize(System.IO.TextReader,System.Type,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given TextReader as the passed type.
+            
+            This is equivalent to calling Deserialize&lt;T&gt;(TextReader, Options), except
+            without requiring a generic parameter.  For true dynamic deserialization, you 
+            should use DeserializeDynamic instead.
+            
+            Pass an Options object to specify the particulars (such as DateTime formats) of
+            the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Deserialize(System.String,System.Type,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given string as the passed type.
+            
+            This is equivalent to calling Deserialize&lt;T&gt;(string, Options), except
+            without requiring a generic parameter.  For true dynamic deserialization, you 
+            should use DeserializeDynamic instead.
+            
+            Pass an Options object to specify the particulars (such as DateTime formats) of
+            the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Deserialize``1(System.IO.TextReader,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given TextReader.
+            
+            Pass an Options object to specify the particulars (such as DateTime formats) of
+            the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.Deserialize``1(System.String,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given string.
+            
+            Pass an Options object to specify the particulars (such as DateTime formats) of
+            the JSON being deserialized.  If omitted Options.Default is used, unless JSON.SetDefaultOptions(Options) has been
+            called with a different Options object.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.DeserializeDynamic(System.IO.TextReader,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given TextReader, inferring types from the structure of the JSON text.
+            
+            For the best performance, use the strongly typed Deserialize method when possible.
+            </summary>
+        </member>
+        <member name="M:Jil.JSON.DeserializeDynamic(System.String,Jil.Options)">
+            <summary>
+            Deserializes JSON from the given string, inferring types from the structure of the JSON text.
+            
+            For the best performance, use the strongly typed Deserialize method when possible.
+            </summary>
+        </member>
+        <member name="T:Jil.Options">
+            <summary>
+            Configuration options for Jil serialization, passed to the JSON.Serialize method.
+            </summary>
+        </member>
+        <member name="M:Jil.Options.#ctor(System.Boolean,System.Boolean,System.Boolean,Jil.DateTimeFormat,System.Boolean,Jil.UnspecifiedDateTimeKindBehavior)">
+            <summary>
+            For compatibility with earlier Jil versions.
+            
+            Configuration for Jil serialization options.
+            
+            Available options:
+              prettyPrint - whether or not to include whitespace and newlines for ease of reading
+              excludeNulls - whether or not to write object members whose value is null
+              jsonp - whether or not the serialized json should be valid for use with JSONP
+              dateFormat - the style in which to serialize DateTimes and TimeSpans
+              includeInherited - whether or not to serialize members declared by an objects base types
+              unspecifiedDateTimeKindBehavior - how to treat DateTime's with a DateTimeKind of Unspecified (Jil converts all DateTimes to Utc for serialization, use DateTimeOffset to preserve time zone information)
+            </summary>
+        </member>
+        <member name="M:Jil.Options.#ctor(System.Boolean,System.Boolean,System.Boolean,Jil.DateTimeFormat,System.Boolean,Jil.UnspecifiedDateTimeKindBehavior,Jil.SerializationNameFormat)">
+            <summary>
+            Configuration for Jil serialization options.
+            
+            Available options:
+              prettyPrint - whether or not to include whitespace and newlines for ease of reading
+              excludeNulls - whether or not to write object members whose value is null
+              jsonp - whether or not the serialized json should be valid for use with JSONP
+              dateFormat - the style in which to serialize DateTimes and TimeSpans
+              includeInherited - whether or not to serialize members declared by an objects base types
+              unspecifiedDateTimeKindBehavior - how to treat DateTime's with a DateTimeKind of Unspecified (Jil converts all DateTimes to Utc for serialization, use DateTimeOffset to preserve time zone information)
+              serializationNameFormat - how to serialize names of properties/objects unless specified explicitly by an attribute
+            </summary>
+        </member>
+        <member name="M:Jil.Options.ToString">
+            <summary>
+            Returns a string representation of this Options object.
+            
+            The format of this may change at any time, it is only meant for debugging.
+            </summary>
+        </member>
+        <member name="M:Jil.Options.GetHashCode">
+            <summary>
+            Returns a code that uniquely identifies this set of Options.
+            </summary>
+        </member>
+        <member name="M:Jil.Options.Equals(System.Object)">
+            <summary>
+            Returns true if two Options are equal, and false otherwise
+            </summary>
+        </member>
+        <member name="T:Jil.SerializationNameFormat">
+            <summary>
+            Specifies how to serialize names when not specified explicitly via an attribute.
+            
+            If an attrbiute is defined specifying the name (such as [JilDirective(Name="prop-name")] or [DataMember(Name="prop-name")]), 
+            that attribute will be used. If there is no attribute, the specified SerializationNameFormat will be used.
+            </summary>
+        </member>
+        <member name="F:Jil.SerializationNameFormat.Verbatim">
+            <summary>
+            Names for classes and properties will be seraialized exactly as they appear or as attributes define them.
+            
+            This is the default.
+            </summary>
+        </member>
+        <member name="F:Jil.SerializationNameFormat.CamelCase">
+            <summary>
+            Names for classes and properties (unless specified exactly via attribute) will be serialized to CamelCase.
+            
+            Example:
+                "MyClass" => "myClass"
+            
+            If an attrbiute is defined specifying the name (such as [JilDirective(Name="prop-name")] or [DataMember(Name="prop-name")]), 
+            that attribute will be used. If there is no attribute, the specified SerializationNameFormat will be used.
+            </summary>
+        </member>
+        <member name="T:Jil.SerializationNameFormatVerbatim">
+            <summary>
+            Class for generic caching differentiation
+            </summary>
+        </member>
+        <member name="T:Jil.SerializationNameFormatCamelCase">
+            <summary>
+            Class for generic caching differentiation
+            </summary>
+        </member>
+        <member name="T:Jil.SerializerException">
+            <summary>
+            An exception thrown when Jil encounters an error while serializing an object.
+            </summary>
+        </member>
+        <member name="P:Jil.SerializerException.Message">
+            <summary>
+            Gets a message that describes the current exception.
+            </summary>
+        </member>
+        <member name="T:Jil.UnspecifiedDateTimeKindBehavior">
+            <summary>
+            Specifies what to convert a DateTime to if it has DateTimeKind.Unspecified as it's Kind.
+            </summary>
+        </member>
+        <member name="F:Jil.UnspecifiedDateTimeKindBehavior.IsLocal">
+            <summary>
+            Indicates that the DateTime is actually in the Local time.
+            
+            This is the default.
+            </summary>
+        </member>
+        <member name="F:Jil.UnspecifiedDateTimeKindBehavior.IsUTC">
+            <summary>
+            Indicates that the DateTime is actually in UTC time.
+            </summary>
+        </member>
+        <member name="P:Jil.Common.ConstructionException.Message">
+            <summary>
+            Gets a message that describes the current exception.
+            </summary>
+        </member>
+        <member name="M:Jil.Common.ExtensionMethods.IsAnonymouseClass(System.Type)">
+            <summary>
+            HACK: This is a best effort attempt to divine if a type is anonymous based on the language spec.
+            
+            Reference section 7.6.10.6 of the C# language spec as of 2012/11/19
+            
+            It checks:
+                - is a class
+                - descends directly from object
+                - has [CompilerGenerated]
+                - has a single constructor
+                - that constructor takes exactly the same parameters as its public properties
+                - all public properties are not writable
+                - has a private field for every public property
+                - overrides Equals(object)
+                - overrides GetHashCode()
+            </summary>
+        </member>
+        <member name="F:Jil.Common.UnionCharsetArrays.UnionNull">
+            <summary>
+            Special case, this shouldn't be used in conjuction with types like string or int?; only for the exact null value.
+            </summary>
+        </member>
+        <member name="M:Jil.Common.Utils.GetAnonymousNameToConstructorMap(System.Type)">
+            <summary>
+            This returns a map of "name of member" => [Type of member, index of argument to constructor].
+            We need this for anonymous types because we can't set properties (they're read-only).
+            </summary>
+        </member>
+        <member name="M:Jil.Common.Utils.GetAnonymousNameToConstructorMap_Guess(System.Type,System.Reflection.ConstructorInfo)">
+            <summary>
+            This returns a map of "name of member" => [Type of member, index of argument to constructor].
+            We need this for anonymous types because we can't set properties (they're read-only).
+            
+            How this works is kind of fun.
+            
+            By spec, the arguments to the constructor are in declaration order for an anonymous type.
+            So: new { A, B, C } => new SomeType(A a, B b, C c)
+            
+            However there is no way to get declaration order via reflection, it's just not data that's
+            preserved.  Furthermore, the names of backing fields for those read-only properties are not
+            defined by the spec.
+            
+            IF we have decompliation facilities, then we can do this "properly" (see GetAnonymousNameToConstructorMap_Decompile).
+            But if we don't, we can still take a decent guess.
+            
+            First, group properties by type.  If there are no duplicate types, then there's a one-to-one mapping between
+            each parameter to the constructor and each property.
+            
+            For groups with multiple properties, compare the names of the property and the constructor parameter.  Take
+            exact matches, assuming there aren't any collisions (don't think that's possible, but just in case...).
+            
+            This sort of exact matching isn't supported by the spec at all, but works for current implementations so
+            as long as there's a "oh shit, invariant broken"-bail I'm OK with it.
+            </summary>
+        </member>
+        <member name="M:Jil.Common.Utils.GetAnonymousNameToConstructorMap_Decompile(System.Type,System.Reflection.ConstructorInfo,System.Collections.Generic.List{System.Tuple{System.Reflection.Emit.OpCode,System.Nullable{System.Int32},System.Nullable{System.Int64},System.Nullable{System.Double},System.Reflection.FieldInfo}})">
+            <summary>
+            This returns a map of "name of member" => [Type of member, index of argument to constructor].
+            We need this for anonymous types because we can't set properties (they're read-only).
+            
+            How this works is kind of fun.
+            
+            By spec, the arguments to the constructor are in declaration order for an anonymous type.
+            So: new { A, B, C } => new SomeType(A a, B b, C c)
+            
+            However there is no way to get declaration order via reflection, it's just not data that's
+            preserved.  Furthermore, the names of backing fields for those read-only properties are not
+            defined by the spec.
+            
+            So I got clever.
+            
+            This method decompiles the constructor to find out which fields are set by which arguments (by index).
+            It then decompiles all properties to find out which fields back which properties.
+            Then it finally works backwards from each property, taking the property's name type and using it's backing
+            field to lookup which index to pass it in as when constructing the anonymous object.
+            </summary>
+        </member>
+        <member name="M:Jil.Common.Utils.CreateArray``1(System.Int32,System.Func{System.Int32,``0})">
+            <summary>
+            Functional-style helper method for creating and initializing a new array.
+            </summary>
+            <typeparam name="T">The element type of the array.</typeparam>
+            <param name="count">The length of the array to create.</param>
+            <param name="generator">
+            The function used to initialize each element of the array.
+            The integer applied to the function represents the index of the element being initialized.
+            </param>
+            <returns>An array with element type <typeparamref>T</typeparamref> and length <paramref>count</paramref>.</returns>
+        </member>
+        <member name="T:Jil.Deserialize.UnionLookup`1">
+            <summary>
+            Based on the given generic parameter, this classes memebers end up as follows.
+            
+            MinimumChar is the smallest legal char allowed for the lookup, when constructing a switch subtract this from the
+               character to be looked up.
+            
+            Lookup is an array of indexes where you lookup by character (after subtracting MinimumCharacter), and get an index into
+                CharsetOrder.  Whatever exists at CharsetOrder is the type corresponding to the looked up character.  If the index
+                fetched from Lookup is out of range, that means their is no mapped type.
+            </summary>
+        </member>
+    </members>
+</doc>
