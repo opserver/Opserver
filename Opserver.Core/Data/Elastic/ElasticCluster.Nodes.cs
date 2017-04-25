@@ -533,6 +533,7 @@ namespace StackExchange.Opserver.Data.Elastic
                         public int User { get; internal set; }
                         [DataMember(Name = "idle")]
                         public int Idle { get; internal set; }
+                        public int Used => 100 - Idle;
                     }
 
                     public class BaseMemoryStats

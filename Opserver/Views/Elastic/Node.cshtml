@@ -63,7 +63,15 @@ Transport: @n.Stats?.TransportAddress">
                         <label>Uptime</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
-                        @if (proc?.CPU != null)
+                        @if (os?.CPU?.Used != null)
+                        {
+                            var percentCpu = os?.CPU?.Used.ToString();
+                            <div class="progress">
+                                <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                <span>@percentCpu%</span>
+                            </div>
+                        }
+                        else if (proc?.CPU != null)
                         {
                             var percentCpu = proc.CPU.Percent.ToString();
                             <div class="progress">

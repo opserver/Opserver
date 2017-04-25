@@ -119,7 +119,13 @@
                                 <a class="@n.TextClass()" href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">@c.ShortName(n)</a>
                             </td>
                             <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
-                            @if (stats?.Process?.CPU != null)
+                            @if (stats?.OS?.CPU?.Used != null)
+                            {
+                                <td title="Process CPU: @stats.OS.CPU.Used.ToComma()% load average @(stats.OS.LoadAverageString ?? "Unknown")">
+                                    @(stats.OS.CPU.Used.ToComma())%
+                                </td>
+                            }
+                            else if (stats?.Process?.CPU != null)
                             {
                                 <td title="Process CPU: @stats.Process.CPU.Percent.ToComma()% load average @(stats.OS.LoadAverageString ?? "Unknown")">
                                     @(stats.Process.CPU.Percent.ToComma())%
