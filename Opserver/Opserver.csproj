@@ -716,7 +716,9 @@
       <SubType>Designer</SubType>
     </Content>
     <Content Include="Views\Shared\Issues.cshtml" />
-    <None Include="Views\SQL\Databases.Modal.Partitions.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.Partitions.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

@@ -33,52 +33,53 @@ else
             <p class="error-stack">@(filesRaw.ErrorMessage)</p>
         </div>
     }
-    <table class="table table-striped text-nowrap table-super-condensed table-responsive">
-        @foreach (var ds in spaces.OrderBy(ds => ds.Id))
-        {
-            <tbody>
-            @if (spaceIds.Count > 1)
-            {
-                <tr class="category-row">
-                    <th colspan="7">
-                        <h6>Group: @(ds.Name == "PRIMARY" ? "Primary" : ds.Name)</h6>
-                    </th>
-                </tr>
-            }
-            <tr>
-                <th>Type</th>
-                <th>Path</th>
-                <th>Size</th>
-                <th>Reads</th>
-                <th>Writes</th>
-                <th>Avg Read</th>
-                <th>Avg Write</th>
-            </tr>
-            @foreach (var f in files.Where(f => f.DataSpaceId == ds.Id || (ds.Id == 1 && f.FileType == DatabaseFileTypes.Log)).OrderBy(f => f.FileType).ThenBy(f => f.PhysicalName))
-            {
-                var percentFull = f.UsedSizeBytes*1.0/f.TotalSizeBytes*100;
-                <tr>
-                    <td>@f.FileType.GetDescription()</td>
-                    <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
-                    <td>
-                        @f.UsedSizeBytes.ToHumanReadableSize() / @f.TotalSizeBytes.ToHumanReadableSize() <span class="text-muted">(@percentFull.ToString("n2")%)</span>
-                        <div class="progress" style="width: 200px;">
-                            <div class="progress-bar" style="width: @percentFull.ToString("n2", CultureInfo.InvariantCulture)%"></div>
-                        </div>
-                    </td>
-                    <td>@f.NumReads.ToComma()</td>
-                    <td>@f.NumWrites.ToComma()</td>
-                    <td title="Stalled: @f.StallReadMs.ToComma()">
-                        @f.AvgReadStallMs.ToString("F") <span class="text-muted">ms</span>
-                    </td>
-                    <td title="Stalled: @f.StallWriteMs.ToComma()">
-                        @f.AvgWriteStallMs.ToString("F") <span class="text-muted">ms</span>
-                    </td>
-                </tr>
-            }
-            </tbody>
-        }
-    </table>
+
+    foreach (var ds in spaces.OrderBy(ds => ds.Id))
+    {
+        var isPrimary = ds.Name == "PRIMARY";
+    <div class="panel panel-@(isPrimary ? "primary" : "info") small">
+        <div class="panel-heading">Filegroup: @(isPrimary ? "Primary" : ds.Name)</div>
+        <div class="panel-body">
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Path</th>
+                        <th>Size</th>
+                        <th>Reads</th>
+                        <th>Writes</th>
+                        <th>Avg Read</th>
+                        <th>Avg Write</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in files.Where(f => f.DataSpaceId == ds.Id || (ds.Id == 1 && f.FileType == DatabaseFileTypes.Log)).OrderBy(f => f.FileType).ThenBy(f => f.PhysicalName))
+                    {
+                        var percentFull = f.UsedSizeBytes * 1.0 / f.TotalSizeBytes * 100;
+                        <tr>
+                            <td>@f.FileType.GetDescription()</td>
+                            <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
+                            <td>
+                                @f.UsedSizeBytes.ToHumanReadableSize() / @f.TotalSizeBytes.ToHumanReadableSize() <span class="text-muted">(@percentFull.ToString("n2")%)</span>
+                                <div class="progress" style="width: 200px;">
+                                    <div class="progress-bar" style="width: @percentFull.ToString("n2", CultureInfo.InvariantCulture)%"></div>
+                                </div>
+                            </td>
+                            <td>@f.NumReads.ToComma()</td>
+                            <td>@f.NumWrites.ToComma()</td>
+                            <td title="Stalled: @f.StallReadMs.ToComma()">
+                                @f.AvgReadStallMs.ToString("F") <span class="text-muted">ms</span>
+                            </td>
+                            <td title="Stalled: @f.StallWriteMs.ToComma()">
+                                @f.AvgWriteStallMs.ToString("F") <span class="text-muted">ms</span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    }
     <div class="panel panel-default small">
         <div class="panel-heading">Biggest Tables (Showing top @(Math.Min(tables.Count, topTableShowCount).ToComma()) of @tables.Count.ToComma())</div>
         <div class="panel-body">
@@ -95,35 +96,35 @@ else
                     </tr>
                 </thead>
                 <tbody>
-                @{
-                    var totalSpace = db.TotalSizeMB - (db.LogSizeMB ?? 0);
-                }
-                @foreach (var t in tables.Take(10))
-                {
-                    var percentUsed = t.TotalSpaceKB/10.24/totalSpace;
-                    <tr title="@(t.SchemaName).@(t.TableName) created @t.CreationDate.ToLongDateString()">
-                        <td>
-                            <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
-                            @if (t.TableType == TableTypes.Heap)
-                            {
-                                <span class="text-muted"> (Heap)</span>
-                            }
-                        </td>
-                        <td>@t.RowCount.ToComma()</td>
-                        <td>@t.IndexCount.ToComma()</td>
-                        <td>@((t.DataTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
-                        <td>@((t.IndexTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
-                        <td>@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
-                        <td>
-                            <div class="progress-embed" style="min-width: 100px;">
-                                <div class="progress-bar" style="width: @percentUsed.ToString("n2", CultureInfo.InvariantCulture)%"></div>
-                                <span>@(percentUsed.ToString("#0.###"))%</span>
-                            </div>
-                        </td>
-                    </tr>
-                }
+                    @{
+                        var totalSpace = db.TotalSizeMB - (db.LogSizeMB ?? 0);
+                    }
+                    @foreach (var t in tables.Take(10))
+                    {
+                        var percentUsed = t.TotalSpaceKB / 10.24 / totalSpace;
+                        <tr title="@(t.SchemaName).@(t.TableName) created @t.CreationDate.ToLongDateString()">
+                            <td>
+                                <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
+                                @if (t.TableType == TableTypes.Heap)
+                                {
+                                    <span class="text-muted"> (Heap)</span>
+                                }
+                            </td>
+                            <td>@t.RowCount.ToComma()</td>
+                            <td>@t.IndexCount.ToComma()</td>
+                            <td>@((t.DataTotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                            <td>@((t.IndexTotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                            <td>@((t.TotalSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                            <td>
+                                <div class="progress-embed" style="min-width: 100px;">
+                                    <div class="progress-bar" style="width: @percentUsed.ToString("n2", CultureInfo.InvariantCulture)%"></div>
+                                    <span>@(percentUsed.ToString("#0.###"))%</span>
+                                </div>
+                            </td>
+                        </tr>
+                    }
                 </tbody>
-        </table>
-</div>
+            </table>
+        </div>
     </div>
-}
+                        }
