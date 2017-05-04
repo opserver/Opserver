@@ -53,7 +53,7 @@
             }
         </td>
         <td>
-            <a class="js-exception-link @(e.Message.StartsWith("Failed to retrieve error log:") ? "bad-error" : null)" href="~/exceptions/detail?id=@e.GUID&app=@e.ApplicationName.UrlEncode()">
+            <a class="text-wordbreak js-exception-link @(e.Message.StartsWith("Failed to retrieve error log:") ? "bad-error" : null)" href="~/exceptions/detail?id=@e.GUID&app=@e.ApplicationName.UrlEncode()">
                 @(e.Message.TruncateWithEllipsis(110))
             </a>
         </td>
