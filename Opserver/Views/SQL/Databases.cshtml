@@ -119,7 +119,10 @@ Used: @((db.LogSizeUsedMB.Value*1024*1024).ToSize())
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td><strong>@((dbs.Sum(db => db.TotalSizeMB) * 1024 * 1024).ToSize())</strong></td>
+                    <td>
+                        @((dbs.Sum(db => db.TotalSizeMB) * 1024 * 1024).ToSize())
+                        <span class="text-muted"> / @((dbs.Sum(db => db.LogSizeMB ?? 0) * 1024 * 1024).ToSize())</span>
+                    </td>
                     <td></td>
                     <td></td>
                 </tr>
