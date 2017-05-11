@@ -212,7 +212,8 @@ namespace StackExchange.Opserver.Data.SQL
      Left Join (Select mf.database_id, vs.volume_id LogVolumeId
                   From sys.master_files mf
                        Cross Apply sys.dm_os_volume_stats(mf.database_id, mf.file_id) vs
-                 Where type = 1) v On db.database_id = v.database_id
+                 Where type = 1 
+                Group by mf.database_id, vs.volume_id ) v On db.database_id = v.database_id
 ";
 
             internal const string FetchSQL = @"
