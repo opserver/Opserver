@@ -16,6 +16,7 @@
     <thead>
         <tr>
             <th>Interface</th>
+            <th>Name</th>
             <th>Speed</th>
             <th>In</th>
             <th></th>
@@ -33,6 +34,7 @@
                 @i.IconSpan()
                 @i.PrettyName
             </td>
+            <td data-val="@i.FullName">@i.FullName</td>
             <td class="@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
             <td data-val="@(i.InBps?.ToString("F0"))">@i.PrettyIn()</td>
             <td data-val="@(i.InBps?.ToString("F0"))">@Graph(i, "in")</td>
