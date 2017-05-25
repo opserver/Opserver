@@ -130,7 +130,7 @@ namespace StackExchange.Opserver.Controllers
             if (q.IsNullOrEmpty())
                 return RedirectToAction(nameof(Exceptions), new { group, log });
 
-            var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 2000, sort: sort.Value).ConfigureAwait(false);
+            var errors = await FindErrorsAsync(q, group, log, includeDeleted: showDeleted, max: 10000, sort: sort.Value).ConfigureAwait(false);
             if (errors.Count == 0 && !showDeleted)
             {
                 // If we didn't find any current errors, go ahead and search deleted as well
@@ -152,17 +152,24 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/detail")]
-        public async Task<ActionResult> Detail(string app, Guid id)
+        public async Task<ActionResult> Detail(string log, string app, Guid id)
         {
-            var e = await GetError(app, id).ConfigureAwait(false);
+            log = log ?? app; // app is here for compat with old links
+            var e = await GetError(log, id).ConfigureAwait(false);
             return View("Exceptions.Detail", e);
         }
 
         [Route("exceptions/preview")]
-        public async Task<ActionResult> Preview(string app, Guid id)
+        public async Task<ActionResult> Preview(string group, string log, Guid id)
         {
-            var e = await GetError(app, id).ConfigureAwait(false);
-            return View("Exceptions.Preview", e);
+            var e = await GetError(log, id).ConfigureAwait(false);
+            var vd = new ExceptionsModel
+            {
+                Exception = e,
+                SelectedGroup = group,
+                SelectedLog = log
+            };
+            return View("Exceptions.Preview", vd);
         }
 
         [Route("exceptions/detail/json"), AlsoAllow(Roles.Anonymous)]
@@ -217,21 +224,21 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/delete-similar"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> DeleteSimilar(string log, Guid id)
+        public async Task<ActionResult> DeleteSimilar(string group, string log, Guid id)
         {
             var e = await GetError(log, id).ConfigureAwait(false);
             await ActionAsync(e.ApplicationName, s => s.DeleteSimilarErrorsAsync(e)).ConfigureAwait(false);
 
-            return Json(new { url = Url.Action("Exceptions", new { log }) });
+            return Json(new { url = Url.Action("Exceptions", new { log, group }) });
         }
 
         [Route("exceptions/delete-list"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> DeleteList(Guid[] ids, bool returnCounts = false)
+        public async Task<ActionResult> DeleteList(string group, string log, Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
             await ActionAsync(null, s => s.DeleteErrorsAsync(ids.ToList())).ConfigureAwait(false);
 
-            return returnCounts ? Counts() : Json(new { url = Url.Action("Exceptions") });
+            return returnCounts ? Counts() : Json(new { url = Url.Action("Exceptions", new { log, group }) });
         }
 
         [Route("exceptions/counts")]

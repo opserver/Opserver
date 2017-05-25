@@ -1,9 +1,9 @@
 ﻿@using StackExchange.Opserver
 @using StackExchange.Opserver.Controllers
-@model StackExchange.Exceptional.Error
+@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     Layout = null;
-    var error = Model;
+    var error = Model.Exception;
 }
 <div class="error-preview">
 @if (error == null)
@@ -16,13 +16,18 @@
 else
 {
     <h6 class="page-header">
+        <span class="title-prefix">@error.ApplicationName: </span>
         <strong>@error.Type</strong>
+        @if (error.DuplicateCount > 1)
+        {
+            <span class="text-danger">(x@(error.DuplicateCount.ToComma()))</span>
+        }
         <span class="pull-right">
-            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })" title="View exceptions with the same message in the same log">View Similar</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup })" title="View exceptions with the same message in the same log">View Similar</a>
             <span class="text-muted">|</span>
-            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
             <span class="text-muted">|</span>
-            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@error.ApplicationName" data-id="@error.GUID">@Icon.X Clear all similar</a>
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@Model.SelectedLog" data-group="@Model.SelectedGroup" data-id="@error.GUID">@Icon.X Clear all similar</a>
         </span>
     </h6>
     <p class="small text-danger">@error.Message</p>

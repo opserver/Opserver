@@ -9323,11 +9323,15 @@ svg .stroke-muted.filled {
   position: absolute;
   background: #2B3E50;
   width: calc(90%);
-  left: 5px;
+  left: 52px;
+  margin-top: -19px;
   padding: 10px;
   z-index: 2;
   font-size: 15px;
   box-shadow: 3px 3px 10px #555555;
+}
+.error-preview-popup .title-prefix {
+  color: #555555;
 }
 .error-preview-popup h6 {
   margin-top: 0;

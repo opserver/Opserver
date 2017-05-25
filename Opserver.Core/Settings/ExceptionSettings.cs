@@ -46,6 +46,11 @@ namespace StackExchange.Opserver
         /// </summary>
         public bool EnablePreviews { get; set; } = true;
 
+        /// <summary>
+        /// Count to cache in memory per app, defaults to 5000
+        /// </summary>
+        public int PerAppCacheCount { get; set; } = 5000;
+
         public class ExceptionsGroup : ISettingsCollectionItem
         {
             /// <summary>

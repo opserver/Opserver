@@ -1267,32 +1267,54 @@ Status.Exceptions = (function () {
 
         /* Error previews */
         if (options.enablePreviews) {
-            var previewTimer = 0;
+            var activePreview,
+                lastId,
+                previewTimer = 0;
+
+            function clearPreview(parent) {
+                lastId = null;
+                $('.error-preview-popup', parent).fadeOut(125, function () { $(this).remove(); });
+            }
+
             $('.js-content').on({
                 mouseenter: function (e) {
-                    if ($(e.target).closest('.js-error td:nth-child(4)').length) {
-                        var jThis = $(this).find('.js-exception-link'),
-                            url = jThis.attr('href').replace('/detail', '/preview');
+                    var jThis = $(this),
+                        url = jThis.find('a').attr('href').replace('/detail', '/preview'),
+                        id = jThis.closest('tr').data('id');
 
+                    if (lastId == id) {
+                        // We're moved between eye and popup
+                        // Due to position: absolute, mouse events fire here, unfortunately
                         clearTimeout(previewTimer);
-                        previewTimer = setTimeout(function() {
-                                $.get(url,
-                                    function(resp) {
-                                        var sane = $(resp).filter('.error-preview');
-                                        if (!sane.length) return;
-
-                                        $('.error-preview-popup').fadeOut(125, function() { $(this).remove(); });
-                                        var errDiv = $('<div class="error-preview-popup" />').append(resp);
-                                        errDiv.appendTo(jThis.parent()).fadeIn('fast');
-                                    });
-                            }, 600);
+                        return;
+                    } else {
+                        lastId = id;
                     }
+                    if (activePreview) {
+                        activePreview.abort();
+                    }
+
+                    jThis.find('.fa').addClass('icon-rotate-flip');
+                    activePreview = $.get(url, function (resp) {
+                        $('.js-preview .fa.icon-rotate-flip').removeClass('icon-rotate-flip');
+                        if (!$(resp).filter('.error-preview').length) return;
+                        
+                        var errDiv = $('<div class="error-preview-popup" />').append(resp);
+                        errDiv.appendTo(jThis).fadeIn('fast');
+                    });
                 },
-                mouseleave: function () {
-                    clearTimeout(previewTimer);
-                    $('.error-preview-popup', this).fadeOut(125, function () { $(this).remove(); });
+                mouseleave: function(e) {
+                    if (activePreview) {
+                        activePreview.abort();
+                        $('.js-preview .fa.icon-rotate-flip').removeClass('icon-rotate-flip');
+                    }
+                    var parent = this;
+                    // hack due to position: absolute firing leave even on the child popup
+                    previewTimer = setTimeout(function () {
+                        clearPreview(parent);
+                    }, 25);
                 }
-            }, '.js-exceptions tbody tr');
+            }, '.js-exceptions .js-preview');
         }
 
         /* Error detail handlers*/

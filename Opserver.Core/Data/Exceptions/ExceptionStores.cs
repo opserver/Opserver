@@ -187,19 +187,20 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        public static async Task<List<Error>> GetAllErrors(string group = null, string app = null, int maxPerApp = 5000, ExceptionSorts sort = ExceptionSorts.TimeDesc)
+        public static async Task<List<Error>> GetAllErrors(string group = null, string app = null, int? maxPerApp = null, ExceptionSorts sort = ExceptionSorts.TimeDesc)
         {
             using (MiniProfiler.Current.Step("GetAllErrors() - All Stores" + (group.HasValue() ? " (group:" + group + ")" : "") + (app.HasValue() ? " (app:" + app + ")" : "")))
             {
+                maxPerApp = maxPerApp ?? Current.Settings.Exceptions.PerAppCacheCount;
                 var stores = ExceptionsModule.Stores;
                 IEnumerable <Error> allErrors;
                 if (stores.Count == 1)
                 {
-                    allErrors = await stores[0].GetErrorSummary(maxPerApp, group, app).ConfigureAwait(false);
+                    allErrors = await stores[0].GetErrorSummary(maxPerApp.Value, group, app).ConfigureAwait(false);
                 }
                 else
                 {
-                    var tasks = stores.Select(s => s.GetErrorSummary(maxPerApp, group, app));
+                    var tasks = stores.Select(s => s.GetErrorSummary(maxPerApp.Value, group, app));
                     var taskResults = await Task.WhenAll(tasks).ConfigureAwait(false);
                     var combined = new List<Error>();
                     foreach (var r in taskResults)
