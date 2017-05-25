@@ -50,7 +50,7 @@ In order to use Jira
 [Jira action screenshots](http://imgur.com/a/XtW0j)
 
 ### PagerDuty Configuration
-You can connect OpServer to your pagerduty istallation.
+You can connect OpServer to your pagerduty installation.
 
 You need a PagerDuty ReadWrite API Key (RO will work for viewing but will throw errors when you do a RW action). 
 
