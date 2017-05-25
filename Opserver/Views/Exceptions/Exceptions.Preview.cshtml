@@ -23,11 +23,11 @@ else
             <span class="text-danger">(x@(error.DuplicateCount.ToComma()))</span>
         }
         <span class="pull-right">
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@Model.SelectedLog" data-group="@Model.SelectedGroup" data-id="@error.GUID">@Icon.X Clear all similar</a>
+            <span class="text-muted">|</span>
             <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup })" title="View exceptions with the same message in the same log">View Similar</a>
             <span class="text-muted">|</span>
             <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
-            <span class="text-muted">|</span>
-            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@Model.SelectedLog" data-group="@Model.SelectedGroup" data-id="@error.GUID">@Icon.X Clear all similar</a>
         </span>
     </h6>
     <p class="small text-danger">@error.Message</p>
