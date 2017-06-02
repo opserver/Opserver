@@ -1,4 +1,4 @@
-﻿// This config is for the SQL Server dashboard
+﻿/* Configuration for the SQL Server dashboard */
 {
   // The default connection string used unless specifically provided on a node
   // $ServerName$ gets replaces with the name property of the instance

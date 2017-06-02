@@ -58,7 +58,6 @@ namespace StackExchange.Opserver
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage
             /// </summary>
             public Dictionary<string, string> AnalysisRegexes { get; set; } = new Dictionary<string, string>();
-            
         }
     }
 }

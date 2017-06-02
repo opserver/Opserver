@@ -17,14 +17,14 @@ namespace StackExchange.Opserver
         public List<StackTraceSourceLinkPattern> StackTraceReplacements { get; set; } = new List<StackTraceSourceLinkPattern>();
 
         /// <summary>
-        /// How many exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
+        /// How many exceptions before the exceptions are highlighted as a warning in the header, null (default) is ignored
         /// </summary>
-        public int WarningCount { get; set; }
+        public int? WarningCount { get; set; }
 
         /// <summary>
-        /// How many exceptions before the exceptions are highlighted as critical in the header, 0 (default) is ignored
+        /// How many exceptions before the exceptions are highlighted as critical in the header, null (default) is ignored
         /// </summary>
-        public int CriticalCount { get; set; }
+        public int? CriticalCount { get; set; }
 
         /// <summary>
         /// How many seconds a error is considered "recent"
@@ -32,14 +32,14 @@ namespace StackExchange.Opserver
         public int RecentSeconds { get; set; } = 600;
 
         /// <summary>
-        /// How many recent exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
+        /// How many recent exceptions before the exceptions are highlighted as a warning in the header, null (default) is ignored
         /// </summary>
-        public int WarningRecentCount { get; set; }
+        public int? WarningRecentCount { get; set; }
 
         /// <summary>
-        /// How many recent exceptions before the exceptions are highlighted as critical in the header, 0 (default) is ignored
+        /// How many recent exceptions before the exceptions are highlighted as critical in the header, null (default) is ignored
         /// </summary>
-        public int CriticalRecentCount { get; set; }
+        public int? CriticalRecentCount { get; set; }
 
         /// <summary>
         /// Default maximum timeout in milliseconds before giving up on an sources
@@ -100,7 +100,7 @@ namespace StackExchange.Opserver
 
             /// <summary>
             /// A replacement pattern for rendering links from a <see cref="Pattern"/> match.
-            /// matches via <see cref="System.Text.RegularExpressions.Regex.Replace(string, string, string)"/>.
+            /// matches via <see cref="Regex.Replace(string, string, string)"/>.
             /// </summary>
             public string Replacement { get; set; }
 

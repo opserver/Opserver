@@ -7,7 +7,6 @@ namespace StackExchange.Opserver
         public override bool Enabled => APIKey.HasValue();
 
         public string APIKey { get; set; }
-        public string APIBaseUrl { get; set; }
         public List<EmailMapping> UserNameMap { get; set; } = new List<EmailMapping>();
 
         public int OnCallToShow { get; set; } = 2;

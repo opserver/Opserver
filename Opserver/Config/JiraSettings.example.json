@@ -1,0 +1,38 @@
+﻿/* Configuration for JIRA actions on the exceptions dashboard */
+{
+  "defaultUrl": "http://yourserver/rest/api/latest", // Default URL to use (unless specified) for actions
+  "host": "http://yourserver", // JIRA host
+  "defaultUsername": "username", // JIRA username
+  "defaultPassword": "password", // JIRA password
+  "defaultProjectKey": "PRJ1", // JIRA project key
+  /* Applications to use for options, e.g. things to create a ticket under */
+  "applications": [
+    "Optional",
+    "APP1",
+    "APP2"
+  ],
+  /* Actions added to the UI */
+  "actions": [
+    {
+      "caption": "Create Bug", // Text for the button
+      "name": "Bug", // Name of this action
+      "projectKey": "PRJ1", // JIRA Project key (if it differs from the default above)
+      "host": "optional host", // JIRA Host (if it differs from the default above)
+      "url": "optional url", // JIRA URL (if it differs from the default above)
+      "labels": "Label1,Label2", // Labels to use
+      // Available applications (if it differs from the default list above)
+      "applications": [
+        "Optional",
+        "APP1",
+        "APP2"
+      ],
+      // Per-application components to send to JIRA, based on the application chosen
+      "components": [
+        {
+          "application": "APP1",
+          "name": "component name"
+        }
+      ]
+    }
+  ]
+}

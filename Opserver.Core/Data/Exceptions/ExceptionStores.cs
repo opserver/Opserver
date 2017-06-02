@@ -32,14 +32,14 @@ namespace StackExchange.Opserver.Data.Exceptions
                 if (ExceptionsModule.Stores.Any(s => s.MonitorStatus == MonitorStatus.Critical))
                     return MonitorStatus.Critical;
 
-                if (settings.CriticalCount > 0 && total > settings.CriticalCount)
+                if (settings.CriticalCount.HasValue && total > settings.CriticalCount)
                     return MonitorStatus.Critical;
-                if (settings.CriticalRecentCount > 0 && recent > settings.CriticalRecentCount)
+                if (settings.CriticalRecentCount.HasValue && recent > settings.CriticalRecentCount)
                     return MonitorStatus.Critical;
 
-                if (settings.WarningCount > 0 && total > settings.WarningCount)
+                if (settings.WarningCount.HasValue && total > settings.WarningCount)
                     return MonitorStatus.Warning;
-                if (settings.WarningRecentCount > 0 && recent > settings.WarningRecentCount)
+                if (settings.WarningRecentCount.HasValue && recent > settings.WarningRecentCount)
                     return MonitorStatus.Warning;
 
                 return MonitorStatus.Good;
