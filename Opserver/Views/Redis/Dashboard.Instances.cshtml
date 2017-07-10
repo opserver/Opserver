@@ -224,6 +224,23 @@ foreach (var s in server.SlaveConnections) {
                     prevMaster = m.Name;
                 }
             </tbody>
+            <tfoot>
+                @{ var all = heads.Union(heads.SelectMany(h => h.GetAllSlavesInChain())).ToList(); }
+                <tr class="total-row">
+                    <td><strong>Total</strong> <span class="text-muted">(@all.Count.Pluralize("instance"))</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Stats?.TotalCommandsProcessed ?? 0).ToComma() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Stats?.InstantaneousOpsPerSec ?? 0).ToComma())</span></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Memory?.UsedMemoryRSS ?? 0).ToHumanReadableSize() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Memory?.UsedMemory ?? 0).ToHumanReadableSize())</span></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Clients.Connected ?? 0).ToComma()</td>
+                    @if (!Model.AllVersionsMatch)
+                    {
+                        <td></td>
+                    }
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     }
     @if (standAloneMasters.Any())
@@ -256,6 +273,23 @@ foreach (var s in server.SlaveConnections) {
                     @ServerRow(m)
                 }
             </tbody>
+            <tfoot>
+                @{ var all = standAloneMasters; }
+                <tr class="total-row">
+                    <td><strong>Total</strong> <span class="text-muted">(@all.Count.Pluralize("instance"))</span></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Stats?.TotalCommandsProcessed ?? 0).ToComma() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Stats?.InstantaneousOpsPerSec ?? 0).ToComma())</span></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Memory?.UsedMemoryRSS ?? 0).ToHumanReadableSize() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Memory?.UsedMemory ?? 0).ToHumanReadableSize())</span></td>
+                    <td>@all.Sum(i => i.Info?.Data?.Clients.Connected ?? 0).ToComma()</td>
+                    @if (!Model.AllVersionsMatch)
+                    {
+                        <td></td>
+                    }
+                    <td></td>
+                </tr>
+            </tfoot>
         </table>
     }
 </div>
