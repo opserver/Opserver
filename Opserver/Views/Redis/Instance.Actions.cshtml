@@ -20,7 +20,7 @@
         {
             <strong>@i.IconSpan() @i.HostAndPort</strong>
         }
-        else if (i.HostAndPort == target.HostAndPort)
+        else if (target != null && i.HostAndPort == target.HostAndPort)
         {
             <span class="text-primary">@i.IconSpan() @i.HostAndPort</span>
         }
