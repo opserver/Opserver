@@ -3,12 +3,13 @@
 @{
     Layout = null;
     var i = Model;
-    var slaveOptions = i.RecommendedMasterTargets.GroupBy(s => s.Name).ToList();
+    var allSlaveOptions = i.RecommendedMasterTargets;
+    var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
 }
 <h4 class="modal-title">
     Actions for @i.HostAndPort <span class="text-muted">(@i.Name)</span>
 </h4>
-@helper RenderTolopogy(RedisInstance i)
+@helper RenderTolopogy(RedisInstance i, RedisInstance target = null)
 {
     if (i == null)
     {
@@ -17,21 +18,27 @@
     <li>
         @if (i.HostAndPort == Model.HostAndPort)
         {
-            <strong>
-                @i.IconSpan() @i.HostAndPort
-            </strong>
+            <strong>@i.IconSpan() @i.HostAndPort</strong>
+        }
+        else if (i.HostAndPort == target.HostAndPort)
+        {
+            <span class="text-primary">@i.IconSpan() @i.HostAndPort</span>
         }
         else
         {
             @:@i.IconSpan() @i.HostAndPort
         }
         <span class="text-muted">(@i.Name)</span>
+        @if (target != null && i.HostAndPort == target.HostAndPort)
+        {
+            <ul class="proposed">@RenderTolopogy(Model)</ul>
+        }
         @if (i.SlaveConnections?.Any() ?? false)
         {
             <ul>
                 @foreach (var sc in i.SlaveConnections)
                 {
-                    @RenderTolopogy(sc.GetServer())
+                    @RenderTolopogy(sc.GetServer(), target)
                 }
             </ul>
         }
@@ -76,8 +83,24 @@
                         }
                         @if (slaveOptions.Any())
                         {
+                            var optimalSlave = slaveOptions.Where(s => s.Key == i.Name)
+                                                           .SelectMany(s => s)
+                                                           .OrderByDescending(s => s.SlaveCount == 0)
+                                                           .ThenByDescending(s => s.IsSlave)
+                                                           .FirstOrDefault();
                             <div class="form-group form-group-sm">
-                                <div class="input-group">
+                                <label class="control-label">Set Replication Topology</label>
+                                <div class="list-group-sm">
+                                    @foreach (var so in allSlaveOptions)
+                                    {
+                                        <a href="#" class="list-group-item js-redis-new-master" data-action="slave-to" data-new-master="@so.HostAndPort">
+                                            <ul class="ul-tree">
+                                                @RenderTolopogy(so.TopMaster, so)
+                                            </ul>
+                                        </a>
+                                    }
+                                </div>
+                                @*<div class="input-group">
                                     <select name="newMaster" class="form-control js-redis-role-new-master">
                                         <option value="" disabled selected hidden>Choose a master to slave to...</option>
                                         @foreach (var g in slaveOptions)
@@ -85,15 +108,15 @@
                                             <optgroup label="@g.Key">
                                                 @foreach (var s in g)
                                                 {
-                                                    <option value="@s.HostAndPort">@s.HostAndPort</option>
+                                                    <option value="@s.HostAndPort" selected="@(s == optimalSlave ? "selected" : null )">@s.HostAndPort</option>
                                                 }
                                             </optgroup>
                                         }
                                     </select>
                                     <span class="input-group-btn">
-                                        <button class="btn btn-sm btn-primary js-redis-role-slave" data-action="slave-to" disabled="disabled">Slave</button>
+                                        <button class="btn btn-sm btn-primary js-redis-role-slave" data-action="slave-to" disabled="@(optimalSlave != null ? null : "disabled")">Slave</button>
                                     </span>
-                                </div>
+                                </div>*@
                             </div>
                         }
                     </div>

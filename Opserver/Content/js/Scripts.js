@@ -907,15 +907,13 @@ Status.Redis = (function () {
                 innerRun();
             }
         }
-        $(document).on('change', '.js-redis-role-new-master', function () {
-            $('button.js-redis-role-slave').prop('disabled', this.value.length === 0);
-        }).on('click', '.js-instance-action', function (e) {
+        $(document).on('click', '.js-instance-action', function (e) {
             e.preventDefault();
             runAction(this);
-        }).on('click', '.js-redis-role-slave', function (e) {
+        }).on('click', '.js-redis-new-master', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 node = modal.data('node'),
-                newMaster = $('[name=newMaster]', modal).val();
+                newMaster = $(this).data('new-master');
             e.preventDefault();
             runAction(this, {
                 confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
