@@ -38,6 +38,8 @@
             <ul>
                 @foreach (var sc in i.SlaveConnections)
                 {
+                    var slave = sc.GetServer();
+                    if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
                     @RenderTolopogy(sc.GetServer(), target)
                 }
             </ul>
