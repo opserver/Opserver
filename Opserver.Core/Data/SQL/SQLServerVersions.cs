@@ -77,6 +77,12 @@ namespace StackExchange.Opserver.Data.SQL
         public static class SQL2016
         {
             public static readonly Version RTM = new Version(13, 0);
+            public static readonly Version SP1 = new Version(13, 0, 4001);
+        }
+
+        public static class SQL2017
+        {
+            public static readonly Version RTM = new Version(14, 0);
         }
     }
 }
