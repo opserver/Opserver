@@ -499,30 +499,33 @@ namespace StackExchange.Opserver
                                         string searchText,
                                         string searchValue = null,
                                         string url = null,
-                                        Dictionary<string, string> addParams = null)
+                                        Dictionary<string, string> addParams = null,
+                                        string queryParam = "q")
         {
             page.ViewData[ViewDataKeys.TopBoxOptions] = new TopBoxOptions
-                {
-                    SearchOnly = true,
-                    SearchText = searchText,
-                    SearchValue = searchValue,
-                    SearchParams = addParams,
-                    Url = url
-                };
+            {
+                SearchOnly = true,
+                SearchText = searchText,
+                SearchValue = searchValue,
+                SearchParams = addParams,
+                QueryParam = queryParam,
+                Url = url
+            };
         }
 
-        public static void SetTopNodes(this WebViewPage page, IEnumerable<ISearchableNode> nodes,
+        public static void SetTopNodes(this WebViewPage page,
+                                       IEnumerable<ISearchableNode> nodes,
                                        string searchText,
                                        ISearchableNode currentNode = null,
                                        string url = null)
         {
             page.ViewData[ViewDataKeys.TopBoxOptions] = new TopBoxOptions
-                {
-                    AllNodes = nodes,
-                    CurrentNode = currentNode,
-                    SearchText = searchText,
-                    Url = url
-                };
+            {
+                AllNodes = nodes,
+                CurrentNode = currentNode,
+                SearchText = searchText,
+                Url = url
+            };
         }
     }
 

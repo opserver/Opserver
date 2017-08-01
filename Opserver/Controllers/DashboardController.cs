@@ -6,6 +6,8 @@ using Jil;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
+using System;
+using System.Collections.Generic;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -16,17 +18,22 @@ namespace StackExchange.Opserver.Controllers
         public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
 
         [Route("dashboard")]
-        public ActionResult Dashboard(string filter)
+        public ActionResult Dashboard(string q)
         {
             var vd = new DashboardModel
-                {
-                    Nodes = DashboardModule.AllNodes.ToList(),
-                    ErrorMessages = DashboardModule.ProviderExceptions.ToList(),
-                    Filter = filter,
-                    IsStartingUp = DashboardModule.AnyDoingFirstPoll
-                };
+            {
+                Nodes = GetNodes(q),
+                ErrorMessages = DashboardModule.ProviderExceptions.ToList(),
+                Filter = q,
+                IsStartingUp = DashboardModule.AnyDoingFirstPoll
+            };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }
+
+        private List<Node> GetNodes(string search) =>
+            search.HasValue()
+            ? DashboardModule.AllNodes.Where(n => n.SearchString?.IndexOf(search, StringComparison.InvariantCultureIgnoreCase) > -1).ToList()
+            : DashboardModule.AllNodes.ToList();
 
         [Route("dashboard/json")]
         public ActionResult DashboardJson()

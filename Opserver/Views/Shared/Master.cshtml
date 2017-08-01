@@ -50,7 +50,7 @@
                 {
                     <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">
                         <div class="form-group-sm">
-                            <input type="text" class="form-control js-filter" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@topNodes.SearchValue" name="q" />
+                            <input type="text" class="form-control js-filter" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@topNodes.SearchValue" name="@topNodes.QueryParam" />
                         </div>
                         @if (topNodes.SearchParams != null)
                         {

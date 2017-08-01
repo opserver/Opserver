@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using StackExchange.Opserver.Data.Dashboard.Providers;
+using System.Globalization;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -78,7 +79,13 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public string ManagementUrl { get; internal set; }
 
-        private string _searchString;
+        private string _searchString, _networkTextSummary, _applicationCPUTextSummary, _applicationMemoryTextSummary;
+
+        public void ClearSummaries()
+        {
+            _searchString = _networkTextSummary = _applicationCPUTextSummary = _applicationMemoryTextSummary = null;
+        }
+
         public string SearchString
         {
             get
@@ -86,39 +93,134 @@ namespace StackExchange.Opserver.Data.Dashboard
                 if (_searchString == null)
                 {
                     var result = StringBuilderCache.Get();
-                    const string delim = "-";
+
                     result.Append(MachineType)
-                          .Append(delim)
-                          .Append(PrettyName)
-                          .Append(delim)
-                          .Append(Status)
-                          .Append(delim)
-                          .Append(Manufacturer)
-                          .Append(delim)
-                          .Append(Model)
-                          .Append(delim)
-                          .Append(ServiceTag)
-                          .Append(delim);
-                    if (IPs != null)
+                          .Pipend(PrettyName)
+                          .Pipend(Status.ToString())
+                          .Pipend(Manufacturer)
+                          .Pipend(Model)
+                          .Pipend(ServiceTag);
+
+                    if (Hardware?.Processors != null)
                     {
-                        result.Append(delim).Append(string.Join(",", IPs));
+                        foreach (var p in Hardware.Processors)
+                        {
+                            result.Pipend(p.Name)
+                                  .Pipend(p.Description);
+                        }
+                    }
+                    if (Hardware?.Storage?.Controllers != null)
+                    {
+                        foreach (var c in Hardware.Storage.Controllers)
+                        {
+                            result.Pipend(c.Name)
+                                  .Pipend(c.FirmwareVersion)
+                                  .Pipend(c.DriverVersion);
+                        }
+                    }
+                    if (Hardware?.Storage?.PhysicalDisks != null)
+                    {
+                        foreach (var d in Hardware.Storage.PhysicalDisks)
+                        {
+                            result.Pipend(d.Media)
+                                  .Pipend(d.ProductId)
+                                  .Pipend(d.Serial)
+                                  .Pipend(d.Part);
+                        }
+                    }
+                    if (Interfaces != null)
+                    {
+                        foreach (var i in Interfaces)
+                        {
+                            result.Pipend(i.Name)
+                                  .Pipend(i.Caption)
+                                  .Pipend(i.PhysicalAddress)
+                                  .Pipend(i.TypeDescription);
+
+                            foreach (var ip in i.IPs)
+                            {
+                                result.Pipend(ip.ToString());
+                            }
+                        }
                     }
                     if (Apps != null)
                     {
-                        result.Append(delim).Append(string.Join(",", Apps.Select(a => a.NiceName)));
+                        foreach (var app in Apps)
+                        {
+                            result.Pipend(app.NiceName);
+                        }
                     }
                     if (IsVM && VMHost != null)
                     {
-                        result.Append(delim).Append(VMHost.PrettyName);
+                        result.Pipend(VMHost.PrettyName);
                     }
                     if (IsVMHost && VMs != null)
                     {
-                        result.Append(delim).Append(string.Join(",", VMs));
+                        foreach (var vm in VMs)
+                        {
+                            result.Pipend(vm?.Name);
+                        }
                     }
-
-                    _searchString = result.ToStringRecycle().ToLower();
+                    _searchString = result.ToStringRecycle();
                 }
                 return _searchString;
+            }
+        }
+
+        public string NetworkTextSummary
+        {
+            get
+            {
+                if (_networkTextSummary != null) return _networkTextSummary;
+
+                var sb = StringBuilderCache.Get();
+                sb.Append("Total Traffic: ").Append(TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
+                sb.AppendFormat("Interfaces ({0} total):", Interfaces.Count.ToString()).AppendLine();
+                foreach (var i in PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps))
+                {
+                    sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n", i.PrettyName,
+                        (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
+                        i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
+                }
+                return _networkTextSummary = sb.ToStringRecycle();
+            }
+        }
+
+        public string ApplicationCPUTextSummary
+        {
+            get
+            {
+                if (_applicationCPUTextSummary != null) return _applicationCPUTextSummary;
+
+                if (Apps?.Any() != true) return _applicationCPUTextSummary = "";
+
+                var sb = StringBuilderCache.Get();
+                sb.AppendFormat("Total App Pool CPU: {0:0.##} %\n", Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)).ToString(CultureInfo.CurrentCulture));
+                sb.AppendLine("App Pools:");
+                foreach (var a in Apps.OrderBy(a => a.NiceName))
+                {
+                    sb.AppendFormat("  {0}: {1:0.##} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
+                }
+                return _applicationCPUTextSummary = sb.ToStringRecycle();
+            }
+        }
+
+        public string ApplicationMemoryTextSummary
+        {
+            get
+            {
+                if (_applicationMemoryTextSummary != null) return _applicationMemoryTextSummary;
+
+                if (Apps?.Any() != true) return _applicationCPUTextSummary = "";
+
+                var sb = StringBuilderCache.Get();
+                sb.AppendFormat("Total App Pool Memory: {0}\n", Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
+                sb.AppendLine("App Pools:");
+                foreach (var a in Apps.OrderBy(a => a.NiceName))
+                {
+                    sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
+                }
+                return _applicationCPUTextSummary = sb.ToStringRecycle();
             }
         }
 

@@ -13,6 +13,7 @@ using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 using StackExchange.Redis;
+using System.Text;
 
 namespace StackExchange.Opserver
 {
@@ -604,5 +605,7 @@ namespace StackExchange.Opserver
             var value = bytes / Math.Pow(kiloSize, pow);
             return value.ToString(pow == 0 ? "F0" : "F" + precision.ToString()) + " " + Units[(int)pow] + unit;
         }
+
+        internal static StringBuilder Pipend(this StringBuilder sb, string value) => sb.Append("|").Append(value);
     }
 }

@@ -429,21 +429,11 @@ Status.UI = (function () {
 Status.Dashboard = (function () {
     
     function applyFilter(filter) {
-        Status.Dashboard.options.filter = filter = (filter || '').toLowerCase();
-        if (!filter) {
-            $('[data-search]').closest('tbody').andSelf().removeClass('hidden');
-            return;
-        }
-        $('[data-search]').each(function () {
-            var show = $(this).data('search').indexOf(filter) > -1;
-            $(this).toggleClass('hidden', !show);
-        });
-        $('[data-search]').closest('tbody').each(function () {
-            var show = $('td:visible', this).length;
-            $(this).toggleClass('hidden', !show);
-        });
-        // TODO: Look at children cases, e.g. search for a category where children don't match
-        // Thoughts: they should include the category in their search strings and be covered
+        Status.Dashboard.options.filter = filter = (filter || '');
+        window.history.replaceState({ 'q': filter }, document.title, Status.options.rootPath + 'dashboard' + (filter? '?q=' + encodeURIComponent(filter) : ''));
+        $('.js-filter').addClass('loading');
+        Status.refresh.run('Dashboard');
+        return;        
     }
 
     function init(options) {
@@ -475,21 +465,23 @@ Status.Dashboard = (function () {
                             $(this).replaceWith(match);
                         }
                     });
-                    if (Status.Dashboard.options.filter)
-                        applyFilter(Status.Dashboard.options.filter);
                     if (Status.Dashboard.options.afterRefresh)
                         Status.Dashboard.options.afterRefresh();
+                    $('.js-filter').removeClass('loading');
                 }).fail(function () {
                     console.log('Failed to refresh', this, arguments);
                 });
             }, Status.Dashboard.options.refresh * 1000);
         }
-        
+
+        var filterTimer;
         $(document).on('keyup', '.js-filter', function () {
-            applyFilter(this.value);
+            clearTimeout(filterTimer);
+            var filter = this.value;
+            filterTimer = setTimeout(function () {
+                applyFilter(filter);
+            }, 300);
         });
-        if (Status.Dashboard.options.filter)
-            $('.js-filter').keyup();
     }
 
     return {
@@ -609,35 +601,29 @@ Status.NodeSearch = (function () {
                 }
             }, 0);
         });
-            //.autocomplete(options.nodes, {
-            //    max: 500,
-            //    minChars: 0,
-            //    matchContains: true,
-            //    delay: 50,
-            //    inputClass: "autocomplete-input",
-            //    resultsClass: "autocomplete-results",
-            //    loadingClass: "autocomplete-loading",
-            //    formatItem: function (row) {
-            //        return '<span class="status-icon ' + row.sClass + ' icon" data-host="' + row.node + '">●</span> <span class="text-muted">' + row.category + ':</span> <span class="' + row.sClass + '">' + row.name + '</span>';
-            //    },
-            //    formatResult: function (row) { return row.node; },
-            //    formatMatch: function (row) { return row.category + ': ' + row.node; }
-            //}).result(function (e, data) {
-            //    $(this).addClass('left-icon ' + data.sClass).closest('form').submit();
-            //}).keydown(function (e) {
-            //    return e.keyCode !== 13;
-            //});
         var ai = ac.autocomplete({
             minLength: 0,
             delay: 25,
-            source: options.nodes,
+            source: options.searchUrl
+                ? function (request, response) {
+                    $.ajax(options.searchUrl, {
+                        dataType: "jsonp",
+                        data: { q: request.term },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                }
+                : options.nodes,
             appendTo: ac.parent(),
             messages: {
                 noResults: '',
                 results: function () { }
             },
             select: function (event, ui) {
-                $(this).val(ui.item.value).closest('form').submit();
+                if (options.nodes) {
+                    $(this).val(ui.item.value).closest('form').submit();
+                }
             }
         }).autocomplete('instance');
         ai._renderMenu = function (ul, items) {

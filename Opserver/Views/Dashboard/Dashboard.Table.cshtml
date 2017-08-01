@@ -106,7 +106,7 @@ else
                         </tr>
                         @foreach (var n in g.OrderBy(n => n.PrettyName))
                         {
-                            <tr class="@(n.RowClass().Nullify())@(n.IsVM ? " virtual-machine" : null)@(n.IsUnwatched ? " unwatched-row" : null)" data-search="@c.Name.ToLower()-@n.SearchString" data-node="@n.PrettyName">
+                            <tr class="@(n.RowClass().Nullify())@(n.IsVM ? " virtual-machine" : null)@(n.IsUnwatched ? " unwatched-row" : null)" data-node="@n.PrettyName">
                                 <td title="@(n.IsVM ? "Virtual Machine hosted on " + n.VMHost.PrettyName + " " : null)Last Updated: @(n.LastSync?.ToRelativeTime())">
                                     @n.IconSpan()
                                     <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass().Nullify()">@n.PrettyName</a>
