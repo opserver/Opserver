@@ -10,6 +10,7 @@ namespace StackExchange.Opserver.Models.Security
 {
     public class ActiveDirectoryProvider : SecurityProvider
     {
+        private HashSet<string> GroupNames { get; } = new HashSet<string>();
         private List<string> Servers { get; }
         private string AuthUser { get; }
         private string AuthPassword { get; }
@@ -38,11 +39,17 @@ namespace StackExchange.Opserver.Models.Security
 
         public override void PurgeCache()
         {
-            //Current.LocalCache.RemoveAll("AD-Members-*");
+            var toClear = GroupNames.ToList();
+            GroupNames.Clear();
+            foreach (var g in toClear)
+            {
+                Current.LocalCache.Remove("ADMembers-" + g);
+            }
         }
 
         public override List<string> GetGroupMembers(string groupName)
         {
+            GroupNames.Add(groupName);
             return Current.LocalCache.GetSet<List<string>>("ADMembers-" + groupName,
                 (old, ctx) =>
                 {

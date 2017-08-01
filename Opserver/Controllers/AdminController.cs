@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.GlobalAdmin)]
     public class AdminController : StatusController
     {
-        [Route("admin/purge-security-cache")]
+        [Route("admin/security/purge-cache")]
         public ActionResult Dashboard()
         {
             Current.Security.PurgeCache();
