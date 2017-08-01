@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.DirectoryServices.ActiveDirectory;
-using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -36,6 +35,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync() };
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     SetReferences();
+                    ClearSummaries();
 
                     // first run, do a follow-up poll for all stats on the first pass
                     if (!_nodeInfoAvailable)
@@ -63,6 +63,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
                     await Task.WhenAll(tasks).ConfigureAwait(false);
+                    ClearSummaries();
                 }
                 catch (COMException e)
                 {
@@ -316,8 +317,8 @@ SELECT Caption,
             private async Task PollCpuUtilizationAsync()
             {
                 var query = IsVMHost
-                    ? @"SELECT Name, Timestamp_Sys100NS, PercentTotalRunTime FROM Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
-                    : @"SELECT Name, Timestamp_Sys100NS, PercentProcessorTime FROM Win32_PerfRawData_PerfOS_Processor WHERE Name = '_Total'";
+                    ? "SELECT Name, Timestamp_Sys100NS, PercentTotalRunTime FROM Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor WHERE Name = '_Total'"
+                    : "SELECT Name, Timestamp_Sys100NS, PercentProcessorTime FROM Win32_PerfRawData_PerfOS_Processor WHERE Name = '_Total'";
 
                 var property = IsVMHost
                     ? "PercentTotalRunTime"
@@ -351,7 +352,7 @@ SELECT Caption,
 
             private async Task PollMemoryUtilizationAsync()
             {
-                const string query = @"SELECT AvailableKBytes FROM Win32_PerfRawData_PerfOS_Memory";
+                const string query = "SELECT AvailableKBytes FROM Win32_PerfRawData_PerfOS_Memory";
 
                 using (var q = Wmi.Query(Endpoint, query))
                 {
@@ -498,7 +499,6 @@ SELECT Caption,
 
             private Task<bool> GetIsVMHost()
                 => Wmi.ClassExists(Endpoint, "Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor");
-
 
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {

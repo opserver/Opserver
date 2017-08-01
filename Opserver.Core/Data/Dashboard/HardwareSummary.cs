@@ -105,6 +105,8 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             public double Amps { get; internal set; }
             public double Volts { get; internal set; }
+            public string RatedInputWattage { get; internal set; }
+            public string RatedOutputWattage { get; internal set; }
         }
 
         public class BoardPowerInfo

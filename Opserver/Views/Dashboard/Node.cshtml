@@ -85,21 +85,21 @@
                 }
             </div>
             <div class="panel-body">
-                <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary()">
+                <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary.Nullify()">
                     <div class="progress">
                         <div class="progress-bar" style="width: @(s.CPULoad?.ToString(CultureInfo.InvariantCulture))%;"></div>
                         <span>@s.CPUStatusSpan()</span>
                     </div>
                     <label>CPU</label>
                 </div>
-                <div class="value-block small col-xs-6" title="@s.ApplicationMemoryTextSummary()">
+                <div class="value-block small col-xs-6" title="@s.ApplicationMemoryTextSummary.Nullify()">
                     <div class="progress">
                         <div class="progress-bar @s.MemoryMonitorStatus().ProgressBarClass()" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%;"></div>
                         <span>@s.PrettyMemoryUsed() / @s.PrettyTotalMemory()</span>
                     </div>
                     <label>Memory</label>
                 </div>
-                <div class="value-block small col-xs-6" title="@s.NetworkTextSummary()">
+                <div class="value-block small col-xs-6" title="@s.NetworkTextSummary.Nullify()">
                     @s.PrettyTotalNetwork()
                     <label>
                         Network
