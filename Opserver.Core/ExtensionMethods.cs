@@ -1,17 +1,14 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
-using StackExchange.Profiling;
 using StackExchange.Redis;
 using System.Text;
 
@@ -22,7 +19,7 @@ namespace StackExchange.Opserver
     /// </summary>
     public static partial class ExtensionMethods
     {
-        public static readonly string ExceptionLogPrefix = "ErrorLog-";
+        public const string ExceptionLogPrefix = "ErrorLog-";
 
         /// <summary>
         /// Answers true if this String is either null or empty.

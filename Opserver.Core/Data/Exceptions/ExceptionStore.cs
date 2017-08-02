@@ -127,7 +127,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
 		From Exceptions
-		Where DeletionDate Is Null" + (apps != null && apps.Any() ? " And ApplicationName In @apps" : "") + @") er
+		Where DeletionDate Is Null" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + @") er
 	   Inner Join Exceptions e On er.Id = e.Id
  Where er.r <= @maxPerApp
  Order By CreationDate Desc", new {maxPerApp, apps});
@@ -157,7 +157,7 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
             return QueryListAsync<Error>($"{nameof(FindErrorsAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
-     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (apps != null && apps.Any() ? " And ApplicationName In @apps" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
+     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
      Order By CreationDate Desc", new { search = "%" + searchText + "%", apps, max });
         }
 

@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Models
     {
         public IIdentity Identity { get; }
 
-        public string AccountName { get; private set; }
+        public string AccountName { get; }
         public bool IsAnonymous { get; }
 
         public User(IIdentity identity)

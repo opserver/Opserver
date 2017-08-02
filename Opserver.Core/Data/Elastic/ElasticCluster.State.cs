@@ -8,8 +8,8 @@ namespace StackExchange.Opserver.Data.Elastic
     {
         private Cache<ClusterStateInfo> _state;
 
-        public Cache<ClusterStateInfo> State => _state ?? (_state = GetElasticCache(async () =>
-                await GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/").ConfigureAwait(false))
+        public Cache<ClusterStateInfo> State => _state ?? (_state = GetElasticCache(
+            () => GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/"))
         );
 
         public NodeInfo MasterNode => Nodes.Data?.Nodes?.FirstOrDefault(n => State?.Data?.MasterNode == n.GUID);

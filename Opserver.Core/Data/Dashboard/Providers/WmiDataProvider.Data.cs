@@ -70,34 +70,30 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             internal List<Interface.InterfaceUtilization> GetInterfaceUtilizationHistory(Interface iface)
             {
-                List<Interface.InterfaceUtilization> result;
                 if (iface != null
                     && Interfaces.Find(x => x == iface) != null
                     && NetHistory.ContainsKey(iface.Name))
                 {
-                    result = NetHistory[iface.Name];
+                    return NetHistory[iface.Name];
                 }
                 else
                 {
-                    result = new List<Interface.InterfaceUtilization>(0);
+                    return new List<Interface.InterfaceUtilization>(0);
                 }
-                return result;
             }
 
             internal List<Volume.VolumePerformanceUtilization> GetVolumePerformanceUtilizationHistory(Volume iface)
             {
-                List<Volume.VolumePerformanceUtilization> result;
                 if (iface != null
                     && Volumes.Find(x => x == iface) != null
                     && VolumePerformanceHistory.ContainsKey(iface.Name))
                 {
-                    result = VolumePerformanceHistory[iface.Name];
+                    return VolumePerformanceHistory[iface.Name];
                 }
                 else
                 {
-                    result = new List<Volume.VolumePerformanceUtilization>(0);
+                    return new List<Volume.VolumePerformanceUtilization>(0);
                 }
-                return result;
             }
 
             private void UpdateHistoryStorage<T>(List<T> data, T newItem) where T : GraphPoint

@@ -164,7 +164,7 @@ namespace StackExchange.Opserver.Data.Jira
             var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
 
             var sb = StringBuilderCache.Get();
-            sb.AppendLine("h3." + title);
+            sb.Append("h3.").AppendLine(title);
             sb.AppendLine("{noformat}");
             foreach (var k in allKeys.Where(k => !isHidden(k)))
             {

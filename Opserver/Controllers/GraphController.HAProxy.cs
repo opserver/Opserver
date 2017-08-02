@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Controllers
     {
         [OutputCache(Duration = 60 * 60, VaryByParam = "host;start;end;summary", VaryByContentEncoding = "gzip;deflate")]
         [Route("graph/haproxy/traffic/json")]
-        public async Task<ActionResult> HAProxyTrafficJson(string host, bool? summary = false)
+        public async Task<ActionResult> HAProxyTrafficJson(string host)
         {
             var traffic = await HAProxyTraffic.GetTrafficSummaryAsync(host, null, null).ConfigureAwait(false);
 

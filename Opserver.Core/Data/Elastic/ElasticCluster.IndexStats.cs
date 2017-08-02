@@ -8,7 +8,7 @@ namespace StackExchange.Opserver.Data.Elastic
         private Cache<IndexStatsInfo> _indexStats;
         public Cache<IndexStatsInfo> IndexStats =>
             _indexStats ?? (_indexStats = GetElasticCache(
-                    async () => await GetAsync<IndexStatsInfo>("_stats").ConfigureAwait(false))
+                () => GetAsync<IndexStatsInfo>("_stats"))
             );
 
         public class IndexStatsInfo

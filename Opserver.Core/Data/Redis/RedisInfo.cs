@@ -327,8 +327,8 @@ namespace StackExchange.Opserver.Data.Redis
         {
             public readonly Dictionary<int, KeyData> KeyData = new Dictionary<int, KeyData>();
 
-            private static readonly Regex _dbNameMatch = new Regex(@"db([0-9]+)", RegexOptions.Compiled);
-            private static readonly Regex _keysMatch = new Regex(@"keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _dbNameMatch = new Regex("db([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _keysMatch = new Regex("keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
             internal override void AddLine(string key, string value)
             {
                 var dbMatch = _dbNameMatch.Match(key);
