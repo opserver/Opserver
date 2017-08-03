@@ -44,6 +44,7 @@ namespace StackExchange.Opserver.Helpers
                 "System.Runtime.CompilerServices.ConfiguredTaskAwaitable.ConfiguredTaskAwaiter.GetResult()",
                 "System.Runtime.CompilerServices.ConfiguredTaskAwaitable`1.ConfiguredTaskAwaiter.GetResult()",
                 "System.Runtime.CompilerServices.TaskAwaiter.ThrowForNonSuccess(Task task)",
+                "System.Runtime.CompilerServices.TaskAwaiter.ValidateEnd(Task task)",
                 EndStack
             };
 
