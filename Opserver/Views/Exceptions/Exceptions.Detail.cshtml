@@ -225,7 +225,8 @@
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
         <div class="error-info">
-            <pre class="pre-code error-detail">@RenderDetail(error.Detail)</pre>
+            <pre class="stack dark"><code class="nohighlight">@Utils.StackTrace.HtmlPrettify(error.Detail).AsHtml()</code></pre>
+            @*<pre class="pre-code error-detail">@RenderDetail(error.Detail)</pre>*@
             <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
             @if (!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin)
             {

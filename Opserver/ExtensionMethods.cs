@@ -11,6 +11,7 @@ using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
 using UnconstrainedMelody;
+using System.Text;
 
 namespace StackExchange.Opserver
 {
@@ -30,6 +31,14 @@ namespace StackExchange.Opserver
         /// </summary>
         /// <param name="s">The string to convert to title case.</param>
         public static string ToTitleCase(this string s) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
+
+        /// <summary>
+        /// Appends a <see cref="string"/>, HTML encoding the contents first.
+        /// </summary>
+        /// <param name="sb">The <see cref="StringBuilder"/> to append to.</param>
+        /// <param name="s">The <see cref="string"/> to encode and append.</param>
+        /// <returns>The original <see cref="StringBuilder"/> for chaining.</returns>
+        public static StringBuilder AppendHtmlEncode(this StringBuilder sb, string s) => sb.Append(s.HtmlEncode());
 
         /// <summary>
         /// Encodes an object as JSON for direct use without quote crazy

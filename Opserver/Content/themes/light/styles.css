@@ -9350,6 +9350,110 @@ svg .stroke-muted.filled {
 .error-preview-popup p:last-child {
   margin-bottom: 0;
 }
+.error-info pre {
+  padding: 0.5em;
+  overflow: auto;
+  line-height: 1.1;
+}
+.error-info pre code {
+  font-size: 0.9em;
+}
+.error-info pre.stack {
+  background-color: #fefbec;
+  border: solid 1px #f5f5f5;
+}
+.error-info pre.stack.table code {
+  display: table;
+}
+.error-info pre.stack.table .stack.stack-row {
+  display: table-row;
+}
+.error-info pre.stack.table .stack.leadIn,
+.error-info pre.stack.table .stack.type,
+.error-info pre.stack.table .stack.method-section,
+.error-info pre.stack.table .stack.source-section {
+  display: table-cell;
+}
+.error-info pre.stack.table .stack.misc {
+  display: none;
+}
+.error-info pre.stack.table .stack.method-section .misc {
+  display: normal;
+}
+.error-info pre.command {
+  background-color: #eee;
+  padding: 0;
+  margin-top: 0;
+}
+.error-info .stack.async {
+  opacity: 0.6;
+  display: none;
+}
+.error-info .stack.leadin,
+.error-info .stack.file,
+.error-info .stack.line-prefix,
+.error-info .stack.path,
+.error-info .stack.dot {
+  color: #bbb;
+}
+.error-info .stack.async-tag {
+  color: #d14;
+  font-weight: bold;
+}
+.error-info .stack.async-tag:before {
+  content: "(";
+}
+.error-info .stack.async-tag:after {
+  content: ")";
+}
+.error-info .stack.type {
+  color: #006696;
+}
+.error-info .stack.misc,
+.error-info .stack.parens,
+.error-info .stack.generic-type {
+  color: #444;
+}
+.error-info .stack.method {
+  color: #1fad83;
+}
+.error-info .stack.paramType {
+  color: #147FCC;
+}
+.error-info .stack.paramName {
+  color: #885D3B;
+}
+.error-info pre.stack.dark {
+  background-color: #2f3640;
+  border: solid 1px #f5f5f5;
+}
+.error-info pre.stack.dark .stack.leadin,
+.error-info pre.stack.dark .stack.path,
+.error-info pre.stack.dark .stack.line-prefix,
+.error-info pre.stack.dark .stack.dot {
+  color: #bbb;
+}
+.error-info pre.stack.dark .stack.async-tag {
+  color: #d14;
+}
+.error-info pre.stack.dark .stack.type {
+  color: #8e9caf;
+}
+.error-info pre.stack.dark .stack.misc,
+.error-info pre.stack.dark .stack.parens,
+.error-info pre.stack.dark .stack.line,
+.error-info pre.stack.dark .stack.generic-type {
+  color: #e6e9ed;
+}
+.error-info pre.stack.dark .stack.method {
+  color: #4fc1e9;
+}
+.error-info pre.stack.dark .stack.paramType {
+  color: #e6e9ed;
+}
+.error-info pre.stack.dark .stack.paramName {
+  color: #ed5565;
+}
 /* SQL Server Query Plans */
 .qp-tt {
   top: 4em;

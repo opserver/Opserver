@@ -151,6 +151,7 @@
     <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />
     <Compile Include="Helpers\Theme.cs" />
+    <Compile Include="Helpers\Utils.cs" />
     <Compile Include="Views\Dashboard\Node.Graph.Model.cs">
       <DependentUpon>Node.Graph.cshtml</DependentUpon>
     </Compile>

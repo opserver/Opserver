@@ -102,3 +102,130 @@
         margin-bottom: 0;
     }
 }
+
+.error-info {
+    pre {
+        padding: 0.5em;
+        overflow: auto;
+        //font-family: Consolas, Monaco, monospace;
+        line-height: 1.1;
+
+        code {
+            font-size: 0.9em;
+        }
+
+        &.stack {
+            background-color: #fefbec;
+            border: solid 1px #f5f5f5;
+
+            &.table {
+                code {
+                    display: table;
+                }
+
+                .stack {
+                    &.stack-row {
+                        display: table-row;
+                    }
+
+                    &.leadIn, &.type, &.method-section, &.source-section {
+                        display: table-cell;
+                    }
+
+                    &.misc {
+                        display: none;
+                    }
+
+                    &.method-section .misc {
+                        display: normal;
+                    }
+                }
+            }
+        }
+
+        &.command {
+            background-color: #eee;
+            padding: 0;
+            margin-top: 0;
+        }
+    }
+
+    .stack {
+        &.async {
+            opacity: 0.6;
+            display: none;
+        }
+
+        &.leadin, &.file, &.line-prefix, &.path, &.dot {
+            color: #bbb;
+        }
+
+        &.async-tag {
+            color: #d14;
+            font-weight: bold;
+
+            &:before {
+                content: "(";
+            }
+
+            &:after {
+                content: ")";
+            }
+        }
+
+        &.type {
+            color: #006696
+        }
+
+        &.misc, &.parens, &.generic-type {
+            color: #444;
+        }
+
+        &.method {
+            color: #1fad83;
+        }
+
+        &.paramType {
+            color: #147FCC;
+        }
+
+        &.paramName {
+            color: #885D3B;
+        }
+    }
+
+    pre.stack.dark {
+        background-color: #2f3640;
+        border: solid 1px #f5f5f5;
+
+        .stack {
+            &.leadin, &.path, &.line-prefix, &.dot {
+                color: #bbb;
+            }
+
+            &.async-tag {
+                color: #d14;
+            }
+
+            &.type {
+                color: #8e9caf;
+            }
+
+            &.misc, &.parens, &.line, &.generic-type {
+                color: #e6e9ed;
+            }
+
+            &.method {
+                color: #4fc1e9;
+            }
+
+            &.paramType {
+                color: #e6e9ed;
+            }
+
+            &.paramName {
+                color: #ed5565;
+            }
+        }
+    }
+}
