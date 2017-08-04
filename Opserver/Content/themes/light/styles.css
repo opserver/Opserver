@@ -9354,10 +9354,10 @@ svg .stroke-muted.filled {
   padding: 0.5em;
   overflow: auto;
   line-height: 1.1;
-  white-space: pre;
 }
 .error-info pre code {
   font-size: 0.8em;
+  white-space: pre;
 }
 .error-info pre.stack-row {
   white-space: nowrap;
