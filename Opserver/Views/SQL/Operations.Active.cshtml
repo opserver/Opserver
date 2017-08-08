@@ -147,7 +147,7 @@ else
                         }
                         @if (w.PercentComplete.HasValue && w.TimeLeft.HasValue)
                         {
-                            <div class="progress progress-embed progress-limited" title="ETA: @((w.CollectionTime + w.TotalTime).Value.ToZuluTime())">
+                            <div class="progress progress-embed progress-limited" title="ETA: @((w.StartTime + w.TotalTime).Value.ToZuluTime())">
                                 <div class="progress-bar" style="width: @w.PercentComplete.Value.ToString(CultureInfo.InvariantCulture)%;"></div>
                                 <span>Progress: @w.PercentComplete.Value.ToString("##0.##")% (ETA: @(w.TimeLeft.Value.ToReadableString()))</span>
                             </div>
