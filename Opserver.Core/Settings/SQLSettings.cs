@@ -27,17 +27,17 @@ namespace StackExchange.Opserver
             public List<Instance> Nodes { get; set; } = new List<Instance>();
 
             /// <summary>
-            /// The machine name for this SQL cluster
+            /// The machine name for this SQL cluster.
             /// </summary>
             public string Name { get; set; }
 
             /// <summary>
-            /// Unused currently
+            /// Description for the cluster, shown in the UI.
             /// </summary>
             public string Description { get; set; }
 
             /// <summary>
-            /// How many seconds before polling a node for status again
+            /// How many seconds before polling a node for status again.
             /// </summary>
             public int? RefreshIntervalSeconds { get; set; }
         }
@@ -45,22 +45,27 @@ namespace StackExchange.Opserver
         public class Instance : ISettingsCollectionItem
         {
             /// <summary>
-            /// The machine name for this SQL instance
+            /// The machine name for this SQL instance.
             /// </summary>
             public string Name { get; set; }
 
             /// <summary>
-            /// Connection string for this instance
+            /// Description for the cluster, shown in the UI.
+            /// </summary>
+            public string Description { get; set; }
+
+            /// <summary>
+            /// Connection string for this instance.
             /// </summary>
             public string ConnectionString { get; set; }
 
             /// <summary>
-            /// Object Name for this instance
+            /// Object Name for this instance.
             /// </summary>
             public string ObjectName { get; set; }
 
             /// <summary>
-            /// How many seconds before polling this node for status again
+            /// How many seconds before polling this node for status again.
             /// </summary>
             public int? RefreshIntervalSeconds { get; set; }
         }

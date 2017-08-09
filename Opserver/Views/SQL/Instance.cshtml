@@ -68,6 +68,10 @@ if (counter == null)
 <div class="js-refresh" data-name="instance-summary">
     <h5 class="page-header">
         @i.IconSpan() @i.Name
+        @if (i.Description.HasValue())
+        {
+            <span class="text-muted">(@i.Description)</span>
+        }
         @Helpers.PollNow(i)
     </h5>
     @Helpers.PollInfo(i, i.Name)

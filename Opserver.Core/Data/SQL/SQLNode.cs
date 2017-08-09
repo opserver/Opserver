@@ -6,6 +6,7 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLNode : SQLInstance, IEquatable<SQLNode>
     {
+        public override string Description => base.Description ?? Cluster?.Description;
         public SQLCluster Cluster { get; internal set; }
 
         public SQLNode(SQLCluster sqlCluster, SQLSettings.Instance node) : base(node)

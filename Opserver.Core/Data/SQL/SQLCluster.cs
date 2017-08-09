@@ -7,6 +7,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {
         public string Name => Settings.Name;
+        public string Description => Settings.Description;
         public TimeSpan RefreshInterval { get; }
         private SQLSettings.Cluster Settings { get; }
 

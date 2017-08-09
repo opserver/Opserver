@@ -14,6 +14,7 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance : PollNode, ISearchableNode
     {
         public string Name => Settings.Name;
+        public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
         public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds()).Value;
         public string ObjectName { get; internal set; }
