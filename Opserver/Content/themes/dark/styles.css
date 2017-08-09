@@ -1,6 +1,6 @@
 ﻿/*!
- * Bootstrap v3.3.5 (http://getbootstrap.com)
- * Copyright 2011-2015 Twitter, Inc.
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
@@ -1766,6 +1766,10 @@ output {
 .form-control::-webkit-input-placeholder {
   color: #ccc;
 }
+.form-control::-ms-expand {
+  border: 0;
+  background-color: transparent;
+}
 .form-control[disabled],
 .form-control[readonly],
 fieldset[disabled] .form-control {
@@ -2172,7 +2176,7 @@ select[multiple].input-lg {
 }
 @media (min-width: 768px) {
   .form-horizontal .form-group-lg .control-label {
-    padding-top: 22.3333328px;
+    padding-top: 17px;
     font-size: 19px;
   }
 }
@@ -2181,6 +2185,10 @@ select[multiple].input-lg {
     padding-top: 9px;
     font-size: 12px;
   }
+}
+.form-horizontal .form-group-sm .checkbox,
+.form-horizontal .form-group-sm .radio {
+  padding-top: 9px;
 }
 .btn {
   display: inline-block;
@@ -2996,13 +3004,15 @@ tbody.collapse.in {
 }
 .btn-group-vertical > .btn:first-child:not(:last-child) {
   border-top-right-radius: 0;
+  border-top-left-radius: 0;
   border-bottom-right-radius: 0;
   border-bottom-left-radius: 0;
 }
 .btn-group-vertical > .btn:last-child:not(:first-child) {
-  border-bottom-left-radius: 0;
   border-top-right-radius: 0;
   border-top-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
 }
 .btn-group-vertical > .btn-group:not(:first-child):not(:last-child) > .btn {
   border-radius: 0;
@@ -3058,6 +3068,9 @@ tbody.collapse.in {
   float: left;
   width: 100%;
   margin-bottom: 0;
+}
+.input-group .form-control:focus {
+  z-index: 3;
 }
 .input-group-lg > .form-control,
 .input-group-lg > .input-group-addon,
@@ -3969,7 +3982,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > li > span:hover,
 .pagination > li > a:focus,
 .pagination > li > span:focus {
-  z-index: 3;
+  z-index: 2;
   color: #DF691A;
   background-color: #EBEBEB;
   border-color: transparent;
@@ -3980,7 +3993,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination > .active > span:hover,
 .pagination > .active > a:focus,
 .pagination > .active > span:focus {
-  z-index: 2;
+  z-index: 3;
   color: #fff;
   background-color: #DF691A;
   border-color: transparent;
@@ -4202,6 +4215,8 @@ a.badge:focus {
 .container .jumbotron,
 .container-fluid .jumbotron {
   border-radius: 0;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 .jumbotron .container {
   max-width: 100%;
@@ -5147,7 +5162,6 @@ button.close {
 .modal-header {
   padding: 10px;
   border-bottom: 1px solid #2B3E50;
-  min-height: 11.3px;
 }
 .modal-header .close {
   margin-top: -2px;
@@ -5534,6 +5548,7 @@ button.close {
   color: #fff;
   text-align: center;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+  background-color: rgba(0, 0, 0, 0);
 }
 .carousel-control.left {
   background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.0001) 100%);
@@ -5643,16 +5658,16 @@ button.close {
   .carousel-control .icon-next {
     width: 30px;
     height: 30px;
-    margin-top: -15px;
+    margin-top: -10px;
     font-size: 30px;
   }
   .carousel-control .glyphicon-chevron-left,
   .carousel-control .icon-prev {
-    margin-left: -15px;
+    margin-left: -10px;
   }
   .carousel-control .glyphicon-chevron-right,
   .carousel-control .icon-next {
-    margin-right: -15px;
+    margin-right: -10px;
   }
   .carousel-caption {
     left: 20%;
@@ -5691,6 +5706,8 @@ button.close {
 .pager:after,
 .panel-body:before,
 .panel-body:after,
+.modal-header:before,
+.modal-header:after,
 .modal-footer:before,
 .modal-footer:after {
   content: " ";
@@ -5710,6 +5727,7 @@ button.close {
 .navbar-collapse:after,
 .pager:after,
 .panel-body:after,
+.modal-header:after,
 .modal-footer:after {
   clear: both;
 }
@@ -5741,7 +5759,7 @@ button.close {
   border: 0;
 }
 .hidden {
-  display: none;
+  display: none !important;
 }
 .affix {
   position: fixed;
@@ -9975,6 +9993,9 @@ h6.page-header {
 }
 .text-center .sk-wave {
   margin: 0 auto;
+}
+.form-group-sm {
+  margin-bottom: 0;
 }
 .form-group-sm select.form-control {
   padding: 0;

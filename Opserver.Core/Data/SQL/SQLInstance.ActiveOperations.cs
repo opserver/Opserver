@@ -324,10 +324,15 @@ Exec sp_WhoIsActive
 
             public enum FilterFields
             {
+                [Description("Session")]
                 Session = 0,
+                [Description("Program")]
                 Program = 1,
+                [Description("Database")]
                 Database = 2,
+                [Description("Login")]
                 Login = 3,
+                [Description("Host")]
                 Host = 4
             }
         }
