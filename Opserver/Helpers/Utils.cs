@@ -28,6 +28,7 @@ namespace StackExchange.Opserver.Helpers
                 public const string Params = nameof(Params);
                 public const string ParamType = nameof(ParamType);
                 public const string ParamName = nameof(ParamName);
+                public const string SourceInfo = nameof(SourceInfo);
                 public const string Path = nameof(Path);
                 public const string LinePrefix = nameof(LinePrefix);
                 public const string Line = nameof(Line);
@@ -60,10 +61,12 @@ namespace StackExchange.Opserver.Helpers
              )
              ({Space}+
                 (\w+{Space}+
-                (?<{Groups.Path}>[a-z]\:.+?)
-                (?<{Groups.LinePrefix}>\:\w+{Space}+)
-                (?<{Groups.Line}>[0-9]+)\p{{P}}?
-                |\[0x[0-9a-f]+\]{Space}+\w+{Space}+<(?<{Groups.Path}>[^>]+)>(?<{Groups.LinePrefix}>:)(?<{Groups.Line}>[0-9]+))
+					(?<{Groups.SourceInfo}>
+		                (?<{Groups.Path}>([a-z]\:.+?|(\b(https?|ftp|file)://)?[-A-Za-z0-9+&@#/%?=~_|!:,.;]+[-A-Za-z0-9+&@#/%=~_|]))
+		                (?<{Groups.LinePrefix}>\:\w+{Space}+)
+		                (?<{Groups.Line}>[0-9]+)\p{{P}}?
+		                |\[0x[0-9a-f]+\]{Space}+\w+{Space}+<(?<{Groups.Path}>[^>]+)>(?<{Groups.LinePrefix}>:)(?<{Groups.Line}>[0-9]+))
+					)
              )?
             )\s*$",
                 RegexOptions.Compiled | RegexOptions.ExplicitCapture | RegexOptions.Multiline
@@ -77,8 +80,9 @@ namespace StackExchange.Opserver.Helpers
             /// Converts a stack trace to formatted HTML with styling and linkifiation.
             /// </summary>
             /// <param name="stackTrace">The stack trace to HTMLify.</param>
+            /// <param name="linkReplacements">An optional list of replacements to perform for source control links.</param>
             /// <returns>An HTML-pretty version of the stack trace.</returns>
-            public static string HtmlPrettify(string stackTrace)
+            public static string HtmlPrettify(string stackTrace, Dictionary<Regex, string> linkReplacements = null)
             {
                 int pos = 0;
                 var sb = StringBuilderCache.Get();
@@ -90,7 +94,8 @@ namespace StackExchange.Opserver.Helpers
                           asyncMethod = m.Groups[Groups.AsyncMethod],
                           method = m.Groups[Groups.Method],
                           allParams = m.Groups[Groups.Params],
-                          path = m.Groups[Groups.Path], // TODO: URLs
+                          sourceInfo = m.Groups[Groups.SourceInfo],
+                          path = m.Groups[Groups.Path],
                           linePrefix = m.Groups[Groups.LinePrefix],
                           line = m.Groups[Groups.Line];
                     CaptureCollection paramTypes = m.Groups[Groups.ParamType].Captures,
@@ -123,7 +128,7 @@ namespace StackExchange.Opserver.Helpers
 
                     // Check if the next line is the end of an async hand-off
                     var nextEndStack = stackTrace.IndexOf(EndStack, m.Index + m.Length);
-                    if ( nextEndStack > -1 && nextEndStack < m.Index + m.Length + 3)
+                    if (nextEndStack > -1 && nextEndStack < m.Index + m.Length + 3)
                     {
                         sb.Append("<span class=\"stack async-tag\">async</span> ");
                     }
@@ -189,25 +194,45 @@ namespace StackExchange.Opserver.Helpers
                     sb.Append("</span>"); // method-section for table layout
 
                     // TODO: regular expression replacement for SourceLink
-                    if (path.Value.HasValue())
+                    if (sourceInfo.Value.HasValue())
                     {
-                        var subPath = GetSubPath(path.Value, type.Value);
+                        sb.Append("<span class=\"stack source-section\">");
 
-                        sb.Append("<span class=\"stack source-section\">")
-                          .Append("<span class=\"stack misc\">")
-                          .AppendHtmlEncode(GetBetween(stackTrace, allParams, path))
-                          .Append("</span>")
-                          .Append("<span class=\"stack path\">")
-                          .AppendHtmlEncode(subPath)
-                          .Append("</span>")
-                          .AppendHtmlEncode(GetBetween(stackTrace, path, linePrefix))
-                          .Append("<span class=\"stack line-prefix\">")
-                          .AppendHtmlEncode(linePrefix.Value)
-                          .Append("</span>")
-                          .Append("<span class=\"stack line\">")
-                          .AppendHtmlEncode(line.Value)
-                          .Append("</span>")
-                          .Append("</span>");
+                        var curPath = sourceInfo.Value;
+                        if (linkReplacements != null)
+                        {
+                            foreach (var replacement in linkReplacements)
+                            {
+                                curPath = replacement.Key.Replace(curPath, replacement.Value);
+                            }
+                        }
+
+                        if (curPath != sourceInfo.Value)
+                        {
+                            sb.Append("<span class=\"stack misc\">")
+                              .AppendHtmlEncode(GetBetween(stackTrace, allParams, sourceInfo))
+                              .Append("</span>")
+                              .Append(curPath);
+                        }
+                        else if (path.Value.HasValue())
+                        {
+                            var subPath = GetSubPath(path.Value, type.Value);
+
+                            sb.Append("<span class=\"stack misc\">")
+                              .AppendHtmlEncode(GetBetween(stackTrace, allParams, path))
+                              .Append("</span>")
+                              .Append("<span class=\"stack path\">")
+                              .AppendHtmlEncode(subPath)
+                              .Append("</span>")
+                              .AppendHtmlEncode(GetBetween(stackTrace, path, linePrefix))
+                              .Append("<span class=\"stack line-prefix\">")
+                              .AppendHtmlEncode(linePrefix.Value)
+                              .Append("</span>")
+                              .Append("<span class=\"stack line\">")
+                              .AppendHtmlEncode(line.Value)
+                              .Append("</span>");
+                        }
+                        sb.Append("</span>");
                     }
 
                     sb.Append("</span>");
@@ -224,19 +249,19 @@ namespace StackExchange.Opserver.Helpers
 
             private static char[] Backslash { get; } = new[] { '\\' };
 
-            private static string GetSubPath(string filePath, string type)
+            private static string GetSubPath(string sourcePath, string type)
             {
                 //C:\git\NickCraver\StackExchange.Exceptional\src\StackExchange.Exceptional.Shared\Utils.Test.cs
-                int pos = 0;
-                foreach (var path in filePath.Split(Backslash))
+                int pathPos = 0;
+                foreach (var path in sourcePath.Split(Backslash))
                 {
-                    pos += (path.Length + 1);
+                    pathPos += (path.Length + 1);
                     if (type.StartsWith(path))
                     {
-                        return filePath.Substring(pos);
+                        return sourcePath.Substring(pathPos);
                     }
                 }
-                return filePath;
+                return sourcePath;
             }
         }
     }

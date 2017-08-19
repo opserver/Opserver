@@ -9442,6 +9442,10 @@ svg .stroke-muted.filled {
   background-color: #2f3640;
   border: solid 1px #f5f5f5;
 }
+.error-info pre.stack.dark a {
+  color: #bfe0ea;
+  text-decoration: underline;
+}
 .error-info pre.stack.dark .stack.leadin,
 .error-info pre.stack.dark .stack.path,
 .error-info pre.stack.dark .stack.line-prefix,
