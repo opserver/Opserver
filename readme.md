@@ -1,4 +1,6 @@
 ## Opserver
+[![Build status](https://ci.appveyor.com/api/projects/status/7m0b1e4orimk5nvr/branch/master?svg=true)](https://ci.appveyor.com/project/StackExchange/opserver/branch/master)
+
 Opserver is a monitoring system by the team at [Stack Exchange](http://stackexchange.com), home of [Stack Overflow](http://stackoverflow.com).  It is a tool for monitoring:  
 * Servers/Switches & anything supported by Bosun, Orion, or direct WMI monitoring
 * SQL Clusters & Single Instances 
