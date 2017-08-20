@@ -49,7 +49,7 @@
     <PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="1.1.3" />
     <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="1.0.7.0" />
     <PackageReference Include="MiniProfiler.MVC4" Version="3.0.11" />
-    <PackageReference Include="WebGrease" Vesion="1.6.0" />
+    <PackageReference Include="WebGrease" Version="1.6.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
