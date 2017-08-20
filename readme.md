@@ -1,7 +1,7 @@
 ## Opserver
 [![Build status](https://ci.appveyor.com/api/projects/status/7m0b1e4orimk5nvr/branch/master?svg=true)](https://ci.appveyor.com/project/StackExchange/opserver/branch/master)
 
-Opserver is a monitoring system by the team at [Stack Exchange](http://stackexchange.com), home of [Stack Overflow](http://stackoverflow.com).  It is a tool for monitoring:  
+Opserver is a monitoring system by the team at [Stack Exchange](https://stackexchange.com), home of [Stack Overflow](https://stackoverflow.com).  It is a tool for monitoring:  
 * Servers/Switches & anything supported by Bosun, Orion, or direct WMI monitoring
 * SQL Clusters & Single Instances 
 * Redis 
@@ -12,7 +12,7 @@ Opserver is a monitoring system by the team at [Stack Exchange](http://stackexch
 * CloudFlare DNS
 * ... and more as we go   
 
-Known as “status” internally, Opserver provides a fast overall view of all our major systems that also allows drilling in for more detail.  For an idea of the UI, you can see some [screenshots from our Velocity 2013 talk](http://imgur.com/a/dawwf).
+Known as “status” internally, Opserver provides a fast overall view of all our major systems that also allows drilling in for more detail.  For an idea of the UI, you can see some [screenshots from our Velocity 2013 talk](https://imgur.com/a/dawwf).
 
 ### Installation
 Installation should be a snap, just build this project as-is and deploy it as an IIS website. 
@@ -49,7 +49,7 @@ In order to use Jira
 * Add JiraSettings.json file under `/config` folder (JiraSettings.json.example file is included)
 * Enable REST api on Jira
 
-[Jira action screenshots](http://imgur.com/a/XtW0j)
+[Jira action screenshots](https://imgur.com/a/XtW0j)
 
 ### PagerDuty Configuration
 You can connect OpServer to your pagerduty installation.
@@ -65,7 +65,7 @@ There is a username map option for when your email address does not match your O
 
 For example George has an email of george@example.com, and a login of gsock. The plugin needs to be told how to map the email on the pagerduty side to the username on the opserver side. To setup a map to allow George to be discovered and associated correctly, you would do the following: 
 
-```JSON
+```json
 "UserNameMap": [
   {"OpServerName": "gsock", "EmailUser": "george"},
 ],
@@ -78,18 +78,17 @@ There is a HeaderHTML tag that lets you put arbitrary html above all content. Yo
 
 ### Open Source Projects in Use
 [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) by Marc Gravell  
-[Dapper](https://github.com/StackExchange/dapper-dot-net/) by Stack Exchange  
-[JSON.Net](http://james.newtonking.com/json) by James Newton-King     
+[Dapper](https://github.com/StackExchange/Dapper/) by Stack Exchange  
+[JSON.Net](https://www.newtonsoft.com/json) by James Newton-King     
 [MiniProfiler](http://miniprofiler.com/) by Stack Exchange    
 [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional) by Nick Craver  
-[TeamCitySharp](https://github.com/stack72/TeamCitySharp) by Paul Stack  
 
 JavaScript:  
-[d3.js](http://d3js.org/) by Michael Bostock  
+[d3.js](https://d3js.org/) by Michael Bostock  
 [ColorBrewer](http://colorbrewer2.org/) by Cynthia Brewer and Mark Harrower  
 [HTML Query Plan](https://github.com/JustinPealing/html-query-plan) by Justin Pealing  
-[isotope](http://isotope.metafizzy.co) by Metafizzy  
-[jQuery](http://jquery.com) by The jQuery Foundation  
+[isotope](https://isotope.metafizzy.co/) by Metafizzy  
+[jQuery](https://jquery.com/) by The jQuery Foundation  
 [jQuery cookie plugin](https://github.com/js-cookie/js-cookie) by Klaus Hartl  
 [jQuery autocomplete](http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/) by Jörn Zaefferer  
 [prettify](https://github.com/google/code-prettify) by Google  
@@ -97,11 +96,11 @@ JavaScript:
 [Toastr](https://github.com/CodeSeven/toastr) by John Papa and Hans Fjällemark  
 
 ### License
-Opserver is licensed under the [MIT License](http://opensource.org/licenses/MIT).
+Opserver is licensed under the [MIT License](https://opensource.org/licenses/MIT).
 
 ### Props
 We'd like to thank several people outside Stack Exchange for large contributions to Opserver's development.
 
 * [Brent Ozar](https://www.brentozar.com/) for lots of (continuing) help on the SQL monitoring, with some of the initial queries and help letting us know many use cases to cover.  We'll be integrating some of the awesome tooling Brent and his team have to further assist DBAs and developers (like [sp_Blitz](https://www.brentozar.com/blitz/), [sp_BlitzIndex](https://www.brentozar.com/blitzindex/), and some you'll hear about soon).  
 * [Adam Machanic](http://sqlblog.com/blogs/adam_machanic/) for [sp_WhoIsActive](http://sqlblog.com/blogs/adam_machanic/archive/tags/who+is+active/default.aspx), which powers the active tab for a SQL Instance.  He also assisted with use cases and performance tuning on the use of sp_WhoIsActive.  
-* The [SQL Sentry](http://www.sqlsentry.com/) guys, [Aaron Bertrand](http://sqlblog.com/blogs/aaron_bertrand/) and [Kevin Kline](http://kevinekline.com/) for even more SQL use cases, and their help with upcoming integration with SQL Sentry.
+* The [Sentry One](https://www.sentryone.com/) guys: [Aaron Bertrand](http://sqlblog.com/blogs/aaron_bertrand/) and [Kevin Kline](http://kevinekline.com/) for even more SQL use cases, and their help with upcoming integration with SQL Sentry.
