@@ -203,6 +203,7 @@
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="ExtensionMethods.Time.cs" />
     <Compile Include="ExtensionMethods.Sql.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\AppCache.cs" />
     <Compile Include="Helpers\Connection.cs" />
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />

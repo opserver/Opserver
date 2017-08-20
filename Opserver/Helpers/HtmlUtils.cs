@@ -10,9 +10,9 @@ using System.Web.Mvc;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public static class HtmlUtilities
+    public static class HtmlUtils
     {
-        public static IHtmlString CacheBreaker(this UrlHelper url, string path) => MvcHtmlString.Create(GetCacheBreakerUrl(path));
+        public static IHtmlString CacheBreaker(string path) => MvcHtmlString.Create(GetCacheBreakerUrl(path));
 
         /// <summary>
         /// Given the URL to a static file, returns the URL together with a cache breaker, i.e. ?v=123abc... appended.

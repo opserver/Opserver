@@ -11,9 +11,9 @@
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="google" value="notranslate" />
-    <link rel="stylesheet" href="@Url.CacheBreaker("~/Content/themes/" + Theme.Current + "/styles.min.css")">
-    <link href="@Url.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon"/>
-    <script src="@Url.CacheBreaker("~/Content/js/jquery-1.11.3.min.js")"></script>
+    <link rel="stylesheet" href="@HtmlUtils.CacheBreaker("~/Content/themes/" + Theme.Current + "/styles.min.css")">
+    <link href="@HtmlUtils.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon"/>
+    <script src="@HtmlUtils.CacheBreaker("~/Content/js/jquery-1.11.3.min.js")"></script>
     @Scripts.Render("~/scripts/plugins.js")    @Scripts.Render("~/scripts/scripts.js")    <script>
         $(function() {
             Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
