@@ -45,14 +45,9 @@ namespace StackExchange.Opserver.Data.SQL
 
                         foreach (var db in dbs)
                         {
-                            List<DatabaseLastBackup> b;
-                            db.Backups = backupLookup.TryGetValue(db.Id, out b) ? b : new List<DatabaseLastBackup>();
-
-                            List<DatabaseFile> f;
-                            db.Files = fileLookup.TryGetValue(db.Id, out f) ? f : new List<DatabaseFile>();
-
-                            DatabaseVLF v;
-                            db.VLFCount = vlfsLookup.TryGetValue(db.Id, out v) ? v?.VLFCount : null;
+                            db.Backups = backupLookup.TryGetValue(db.Id, out List<DatabaseLastBackup> b) ? b : new List<DatabaseLastBackup>();
+                            db.Files = fileLookup.TryGetValue(db.Id, out List<DatabaseFile> f) ? f : new List<DatabaseFile>();
+                            db.VLFCount = vlfsLookup.TryGetValue(db.Id, out DatabaseVLF v) ? v?.VLFCount : null;
                         }
                     }
                     return dbs;
@@ -1056,16 +1051,17 @@ Order By 1, 2, 3";
 
             public string RangeValueString
             {
-                // TODO: C# 7 switch goodness
                 get
                 {
-                    if (RangeValue == null) return string.Empty;
-                    if (RangeValue is DateTime)
+                    switch (RangeValue)
                     {
-                        var date = (DateTime)RangeValue;
-                        return date.ToString(date.TimeOfDay.Ticks == 0 ? "yyyy-MM-dd" : "u");
+                        case null:
+                            return string.Empty;
+                        case DateTime date:
+                            return date.ToString(date.TimeOfDay.Ticks == 0 ? "yyyy-MM-dd" : "u");
+                        default:
+                            return RangeValue.ToString();
                     }
-                    return RangeValue.ToString();
                 }
             }
 

@@ -93,17 +93,10 @@ namespace StackExchange.Opserver.Data.HAProxy
         #endregion
 
         private string _niceName;
-        public string NiceName
-        {
-            get
-            {
-                if (_niceName != null) return _niceName;
-                string result;
-                return _niceName = Current.Settings.HAProxy.Aliases.TryGetValue(Name, out result)
-                    ? result
-                    : Name;
-            }
-        }
+        public string NiceName =>
+            _niceName ?? (_niceName = Current.Settings.HAProxy.Aliases.TryGetValue(Name, out string result)
+                          ? result
+                          : Name);
 
         public override string ToString() =>
             (Instance.Group != null ? Instance.Group.Name + ": " : "") + Instance.Name + ": " + Name;

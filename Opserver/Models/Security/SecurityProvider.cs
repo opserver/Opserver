@@ -41,8 +41,7 @@ namespace StackExchange.Opserver.Models.Security
             {
                 foreach (var n in SecuritySettings.Current.InternalNetworks.All)
                 {
-                    IPNet net;
-                    if ((n.CIDR.HasValue() || (n.IP.HasValue() && n.Subnet.IsNullOrEmpty())) && IPNet.TryParse(n.CIDR.IsNullOrEmptyReturn(n.IP), out net))
+                    if ((n.CIDR.HasValue() || (n.IP.HasValue() && n.Subnet.IsNullOrEmpty())) && IPNet.TryParse(n.CIDR.IsNullOrEmptyReturn(n.IP), out IPNet net))
                     {
                         InternalNetworks.Add(net);
                     }
@@ -54,10 +53,7 @@ namespace StackExchange.Opserver.Models.Security
             }
         }
 
-        public bool IsInternalIP(string ip)
-        {
-            IPAddress addr;
-            return IPAddress.TryParse(ip, out addr) && InternalNetworks.Any(n => n.Contains(addr));
-        }
+        public bool IsInternalIP(string ip) =>
+            IPAddress.TryParse(ip, out IPAddress addr) && InternalNetworks.Any(n => n.Contains(addr));
     }
 }

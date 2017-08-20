@@ -50,8 +50,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                         if (Bank == null) return null;
                         if (Name.Length > Bank.Length)
                         {
-                            int position;
-                            if (int.TryParse(Name.Substring(Bank.Length), out position))
+                            if (int.TryParse(Name.Substring(Bank.Length), out int position))
                             {
                                 _label = position;
                             }

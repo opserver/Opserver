@@ -7,8 +7,6 @@ namespace StackExchange.Opserver.Data
         public event EventHandler<MonitorStatusArgs> MonitorStatusChanged;
         public event EventHandler<PollStartArgs> Polling;
         public event EventHandler<PollResultArgs> Polled;
-        public event EventHandler CacheItemFetching;
-        public event EventHandler CacheItemFetched;
 
         public class PollStartArgs : EventArgs
         {

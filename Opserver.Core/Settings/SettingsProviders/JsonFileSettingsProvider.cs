@@ -24,9 +24,8 @@ namespace StackExchange.Opserver.SettingsProviders
         {
             lock (_loadLock)
             {
-                object cached;
-                if (_settingsCache.TryGetValue(typeof (T), out cached))
-                    return (T) cached;
+                if (_settingsCache.TryGetValue(typeof(T), out object cached))
+                    return (T)cached;
 
                 var settings = GetFromFile<T>();
                 if (settings == null)

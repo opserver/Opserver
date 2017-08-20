@@ -29,8 +29,7 @@ namespace StackExchange.Opserver
         {
             if (!ShouldLog(key)) return;
 
-            var deserializationException = exception as DeserializationException;
-            if (deserializationException != null)
+            if (exception is DeserializationException deserializationException)
             {
                 exception.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
                   .AddLoggedData("Position", deserializationException.Position.ToString())

@@ -206,8 +206,7 @@ Select Cast(i.InterfaceID as varchar(50)) as InterfaceID, ipa.IPAddress, ipa.Sub
 
             foreach (var m in result)
             {
-                IPNet net;
-                if (IPNet.TryParse(m.IPAddress, m.SubnetMask, out net))
+                if (IPNet.TryParse(m.IPAddress, m.SubnetMask, out IPNet net))
                 {
                     m.IPNet = net;
                 }

@@ -14,9 +14,8 @@ namespace StackExchange.Opserver.Helpers
                 {
                     try
                     {
-                        IPAddress ip;
-                        return IPAddress.TryParse(hostOrIp, out ip)
-                                   ? new List<IPAddress> {ip}
+                        return IPAddress.TryParse(hostOrIp, out IPAddress ip)
+                                   ? new List<IPAddress> { ip }
                                    : Dns.GetHostAddresses(hostOrIp).ToList();
                     }
                     catch

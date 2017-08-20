@@ -131,8 +131,7 @@ namespace StackExchange.Opserver
             }
 
             // Have we seen this before???
-            string output;
-            if (_markedSql.TryGetValue(key, out output)) return output;
+            if (_markedSql.TryGetValue(key, out string output)) return output;
 
             // nope
             var commentWrap = " ";

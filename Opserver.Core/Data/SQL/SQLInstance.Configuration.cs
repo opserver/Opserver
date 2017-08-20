@@ -14,8 +14,7 @@ namespace StackExchange.Opserver.Data.SQL
                     var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>()).ConfigureAwait(false);
                     foreach (var r in result)
                     {
-                        int defaultVal;
-                        if (ConfigurationDefaults.TryGetValue(r.Name, out defaultVal))
+                        if (ConfigurationDefaults.TryGetValue(r.Name, out int defaultVal))
                             r.Default = defaultVal;
                     }
                     return result;

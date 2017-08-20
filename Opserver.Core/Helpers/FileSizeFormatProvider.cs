@@ -2,7 +2,7 @@
 
 namespace StackExchange.Opserver.Helpers
 {
-    //No need to reinvent the wheel, this is from http://stackoverflow.com/questions/128618/c-file-size-format-provider
+    //No need to reinvent the wheel, this is from https://stackoverflow.com/questions/128618/c-file-size-format-provider
     //Originally from: http://flimflan.com/blog/FileSizeFormatProvider.aspx
     public class FileSizeFormatProvider : IFormatProvider, ICustomFormatter
     {
@@ -18,14 +18,11 @@ namespace StackExchange.Opserver.Helpers
 
         public string Format(string format, object arg, IFormatProvider formatProvider)
         {
-            if (format == null || !format.StartsWith(fileSizeFormat))
-            {
-                return defaultFormat(format, arg, formatProvider);
-            }
+            string defaultFormat() => (arg is IFormattable formattableArg) ? formattableArg.ToString(format, formatProvider) : arg.ToString();
 
-            if (arg is string)
+            if (format == null || !format.StartsWith(fileSizeFormat) || arg is string)
             {
-                return defaultFormat(format, arg, formatProvider);
+                return defaultFormat();
             }
 
             decimal size;
@@ -36,7 +33,7 @@ namespace StackExchange.Opserver.Helpers
             }
             catch (InvalidCastException)
             {
-                return defaultFormat(format, arg, formatProvider);
+                return defaultFormat();
             }
 
             string suffix;
@@ -63,16 +60,6 @@ namespace StackExchange.Opserver.Helpers
             string precision = format.Substring(2);
             if (precision.IsNullOrEmpty()) precision = "2";
             return string.Format("{0:N" + precision + "}{1}", size, suffix);
-        }
-
-        private static string defaultFormat(string format, object arg, IFormatProvider formatProvider)
-        {
-            IFormattable formattableArg = arg as IFormattable;
-            if (formattableArg != null)
-            {
-                return formattableArg.ToString(format, formatProvider);
-            }
-            return arg.ToString();
         }
     }
 }

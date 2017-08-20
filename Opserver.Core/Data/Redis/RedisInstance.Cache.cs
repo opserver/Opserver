@@ -23,8 +23,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 var parts = connectionString.Split(StringSplits.Colon);
                 if (parts.Length != 2) return null;
-                int port;
-                if (int.TryParse(parts[1], out port)) return Get(parts[0], port);
+                if (int.TryParse(parts[1], out int port)) return Get(parts[0], port);
             }
             else
             {

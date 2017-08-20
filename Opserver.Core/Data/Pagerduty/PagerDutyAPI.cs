@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 using Jil;
+using System.Diagnostics;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
@@ -142,9 +143,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
                             }
                         }
                     }
-                    catch (Exception)
+                    catch (Exception rex)
                     {
                         // ignored, best effort
+                        Trace.WriteLine(rex);
                     }
 
                     Current.LogException(

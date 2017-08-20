@@ -41,8 +41,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         {
             foreach (var ip in addresses)
             {
-                string masked;
-                if (_cached.TryGetValue(ip, out masked)) yield return masked;
+                if (_cached.TryGetValue(ip, out string masked)) yield return masked;
                 else yield return _cached[ip] = GetMasked(ip);
             }
         }

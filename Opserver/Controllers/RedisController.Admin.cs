@@ -7,7 +7,6 @@ using StackExchange.Opserver.Models;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.Redis)]
     public partial class RedisController
     {
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]

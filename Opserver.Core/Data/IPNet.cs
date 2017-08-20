@@ -94,15 +94,13 @@ namespace StackExchange.Opserver.Data
             var parts = ipOrCidr.Split(StringSplits.ForwardSlash);
             if (parts.Length == 2)
             {
-                int cidr;
-                if (int.TryParse(parts[1], out cidr))
+                if (int.TryParse(parts[1], out int cidr))
                 {
                     return Parse(parts[0], cidr);
                 }
                 throw new IPNetParseException("Error parsing CIDR from IP: '{0}'", parts[1]);
             }
-            IPAddress ip;
-            if (IPAddress.TryParse(parts[0], out ip))
+            if (IPAddress.TryParse(parts[0], out IPAddress ip))
             {
                 return new IPNet(ip, null);
             }
@@ -117,8 +115,7 @@ namespace StackExchange.Opserver.Data
 
         public static IPNet Parse(string ip, int cidr)
         {
-            IPAddress ipAddr;
-            if (IPAddress.TryParse(ip, out ipAddr))
+            if (IPAddress.TryParse(ip, out IPAddress ipAddr))
             {
                 var bits = GetBitLength(ipAddr.AddressFamily);
                 var subnet = IPAddressFromCIDR(bits, cidr);
@@ -135,11 +132,9 @@ namespace StackExchange.Opserver.Data
 
         public static IPNet Parse(string ip, string subnet)
         {
-            IPAddress ipAddr;
-            if (IPAddress.TryParse(ip, out ipAddr))
+            if (IPAddress.TryParse(ip, out IPAddress ipAddr))
             {
-                IPAddress subnetAddr;
-                if (IPAddress.TryParse(subnet, out subnetAddr))
+                if (IPAddress.TryParse(subnet, out IPAddress subnetAddr))
                 {
                     if (!TinyIPAddress.FromIPAddress(subnetAddr).Value.IsValidSubnet)
                         throw new IPNetParseException("Error parsing subnet mask Address from IP: '" + subnet + "' is not a valid subnet");

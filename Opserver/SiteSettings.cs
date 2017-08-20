@@ -12,14 +12,7 @@ namespace StackExchange.Opserver
 
         public static string Profiling => ConfigurationManager.AppSettings["Profiling"].IsNullOrEmptyReturn("admin");
 
-        public static bool PollerProfiling
-        {
-            get
-            {
-                bool setting;
-                return bool.TryParse(ConfigurationManager.AppSettings["PollerProfiling"], out setting) && setting;
-            }
-        }
+        public static bool PollerProfiling => bool.TryParse(ConfigurationManager.AppSettings["PollerProfiling"], out bool setting) && setting;
 
         /// <summary>
         /// Semilcolon delimited list of groups that can administer the entire site, exceptions, HAProxy servers, etc.

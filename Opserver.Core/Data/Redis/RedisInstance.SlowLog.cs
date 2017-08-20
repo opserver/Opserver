@@ -17,18 +17,11 @@ namespace StackExchange.Opserver.Data.Redis
         /// <remarks>
         /// For setup instructions call <see cref="SetSlowLogThreshold"/> and <see cref="SetSlowLogMaxLength"/> or see: http://redis.io/commands/slowlog
         /// </remarks>
-        public bool IsSlowLogEnabled
-        {
-            get
-            {
-                string configVal;
-                int numVal;
-                return Config.Data != null
-                       && Config.Data.TryGetValue(ConfigParamSlowLogThreshold, out configVal)
-                       && int.TryParse(configVal, out numVal)
-                       && numVal > 0;
-            }
-        }
+        public bool IsSlowLogEnabled =>
+            Config.Data != null
+            && Config.Data.TryGetValue(ConfigParamSlowLogThreshold, out string configVal)
+            && int.TryParse(configVal, out int numVal)
+            && numVal > 0;
 
         private Cache<List<CommandTrace>> _slowLog;
         public Cache<List<CommandTrace>> SlowLog =>

@@ -46,14 +46,13 @@ namespace StackExchange.Opserver.Data.Redis
                 if (line.StartsWith("#"))
                 {
                     var sectionName = line.Replace("# ", "");
-                    PropertyInfo currentSectionProp;
-                    if (_sectionMappings.TryGetValue(sectionName, out currentSectionProp))
+                    if (_sectionMappings.TryGetValue(sectionName, out PropertyInfo currentSectionProp))
                     {
-                        currentSection = (RedisInfoSection) currentSectionProp.GetValue(info);
+                        currentSection = (RedisInfoSection)currentSectionProp.GetValue(info);
                     }
                     else
                     {
-                        currentSection = new RedisInfoSection {Name = sectionName, IsUnrecognized = true};
+                        currentSection = new RedisInfoSection { Name = sectionName, IsUnrecognized = true };
                         info.UnrecognizedSections = info.UnrecognizedSections ?? new List<RedisInfoSection>();
                         info.UnrecognizedSections.Add(currentSection);
                     }
@@ -77,8 +76,7 @@ namespace StackExchange.Opserver.Data.Redis
                 if (currentSection.IsUnrecognized)
                     continue;
 
-                PropertyInfo propertyInfo;
-                var prop = _propertyMappings[currentSection.GetType()].TryGetValue(key, out propertyInfo) ? propertyInfo : null;
+                var prop = _propertyMappings[currentSection.GetType()].TryGetValue(key, out PropertyInfo propertyInfo) ? propertyInfo : null;
                 if (prop == null)
                 {
                     currentSection.MapUnrecognizedLine(key, value);

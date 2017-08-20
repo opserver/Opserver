@@ -27,11 +27,7 @@ namespace StackExchange.Opserver.Models
                 AccountName = i.Name;
         }
 
-        public bool IsInRole(string role)
-        {
-            Roles r;
-            return Enum.TryParse(role, out r) && Current.IsInRole(r);
-        }
+        public bool IsInRole(string role) => Enum.TryParse(role, out Roles r) && Current.IsInRole(r);
 
         private Roles? _role;
         public Roles? RawRoles => _role;

@@ -13,6 +13,7 @@ namespace StackExchange.Opserver.Helpers
     /// <remarks>
     /// When constrainting an entire controller/class, per-route additions can be made using the <see cref="AlsoAllowAttribute"/>.
     /// </remarks>
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class OnlyAllowAttribute : AuthorizeAttribute
     {
         private const string ItemsKey = "AlsoAllow.Roles";
@@ -30,8 +31,7 @@ namespace StackExchange.Opserver.Helpers
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
             // method attribute allows additions to a policy set at the class level
-            var alsoAllow = filterContext.ActionDescriptor.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() as AlsoAllowAttribute;
-            if (alsoAllow != null)
+            if (filterContext.ActionDescriptor.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() is AlsoAllowAttribute alsoAllow)
             {
                 filterContext.HttpContext.Items[ItemsKey] = alsoAllow.Roles;
             }

@@ -24,8 +24,7 @@ namespace StackExchange.Opserver.Data.Elastic
             if (Aliases.Data?.Aliases == null)
                 return index;
 
-            List<string> aliases;
-            return Aliases.Data.Aliases.TryGetValue(index, out aliases)
+            return Aliases.Data.Aliases.TryGetValue(index, out List<string> aliases)
                        ? aliases[0].IsNullOrEmptyReturn(index)
                        : index;
         }

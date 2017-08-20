@@ -147,11 +147,10 @@ namespace StackExchange.Opserver.Data.SQL
                 conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
                 Supports<T>,
                 cacheDuration,
+                logExceptions: true,
                 memberName: memberName,
                 sourceFilePath: sourceFilePath,
-                sourceLineNumber: sourceLineNumber,
-                logExceptions: true
-            );
+                sourceLineNumber: sourceLineNumber);
         }
 
         protected Cache<T> GetSqlCache<T>(

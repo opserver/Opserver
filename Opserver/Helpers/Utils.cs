@@ -342,8 +342,7 @@ namespace StackExchange.Opserver.Helpers
             const string _dotSpan = "<span class=\"stack dot\">.</span>";
 
             // Check the common framework list above
-            string[] args;
-            _commonGenerics.TryGetValue(typeOrMethod, out args);
+            _commonGenerics.TryGetValue(typeOrMethod, out string[] args);
 
             // Break each type down by namespace and class (remember, we *could* have nested generic classes)
             var classes = typeOrMethod.Split(_dot);
@@ -358,8 +357,7 @@ namespace StackExchange.Opserver.Helpers
                 if (match.Success)
                 {
                     // If arguments aren't known, get the defaults
-                    int count;
-                    if (args == null && int.TryParse(match.Groups["ArgCount"].Value, out count))
+                    if (args == null && int.TryParse(match.Groups["ArgCount"].Value, out int count))
                     {
                         if (count == 1)
                         {

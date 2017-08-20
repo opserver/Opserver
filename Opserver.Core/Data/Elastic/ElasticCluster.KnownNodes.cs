@@ -32,8 +32,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public ElasticNode(string hostAndPort)
             {
-                Uri uri;
-                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out uri))
+                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out Uri uri))
                 {
                     Url = uri.ToString();
                     Host = uri.Host;
@@ -45,8 +44,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 if (parts.Length == 2)
                 {
                     Host = parts[0];
-                    int port;
-                    if (int.TryParse(parts[1], out port))
+                    if (int.TryParse(parts[1], out int port))
                     {
                         Port = port;
                     }

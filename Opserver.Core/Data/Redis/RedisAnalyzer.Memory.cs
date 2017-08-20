@@ -190,8 +190,7 @@ namespace StackExchange.Opserver.Data.Redis
 
             ConnectionInfo = connectionInfo;
             Database = database;
-            List<KeyMatcher> matchers;
-            if (!RedisAnalyzer.KeyMatchers.TryGetValue(connectionInfo, out matchers))
+            if (!RedisAnalyzer.KeyMatchers.TryGetValue(connectionInfo, out List<KeyMatcher> matchers))
             {
                 ErrorMessage = "Could not find regexes defined for " + connectionInfo;
                 return;
@@ -210,8 +209,7 @@ namespace StackExchange.Opserver.Data.Redis
             if (debugLine == null) return;
 
             var match = _debugObjectSize.Match(debugLine);
-            long size;
-            if (!match.Success || !long.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out size)) return;
+            if (!match.Success || !long.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out long size)) return;
 
             var matcher = GetKeyMatcher(key);
             var keySize = Encoding.UTF8.GetByteCount(key);

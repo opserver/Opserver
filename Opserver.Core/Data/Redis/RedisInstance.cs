@@ -103,8 +103,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string GetServerName(string hostOrIp)
         {
-            IPAddress addr;
-            if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out addr))
+            if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out IPAddress addr))
             {
                 var nodes = DashboardModule.GetNodesByIP(addr).ToList();
                 if (nodes.Count == 1) return nodes[0].PrettyName;
