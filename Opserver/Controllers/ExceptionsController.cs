@@ -8,7 +8,6 @@ using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Exceptions;
 using System.Threading.Tasks;
-using Microsoft.Ajax.Utilities;
 using StackExchange.Opserver.Data.Jira;
 using static StackExchange.Opserver.Data.Exceptions.ExceptionStores;
 
@@ -277,7 +276,7 @@ namespace StackExchange.Opserver.Controllers
             var jiraClient = new JiraClient(JiraSettings);
             var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName).ConfigureAwait(false);
 
-            if (result.Key.IsNullOrWhiteSpace())
+            if (string.IsNullOrWhiteSpace(result.Key))
             {
                 return Json(new
                 {
