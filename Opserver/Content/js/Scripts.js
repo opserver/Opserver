@@ -1000,7 +1000,8 @@ Status.Exceptions = (function () {
                         log: options.log,
                         sort: options.sort,
                         count: options.loadMore,
-                        prevLast: lastGuid
+                        prevLast: lastGuid,
+                        group: options.group
                     },
                     cache: false
                 }).done(function (html) {
