@@ -27,6 +27,7 @@
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
     <MvcProjectUpgradeChecked>true</MvcProjectUpgradeChecked>
+    <UseGlobalApplicationHostFile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -211,14 +212,14 @@
       <DependentUpon>Styles.less</DependentUpon>
     </Content>
     <Content Include="App_Code\Helpers.cshtml" />
-    <Content Include="Config\DashboardSettings.json.example" />
+    <None Include="Config\DashboardSettings.json" />
     <Content Include="Config\ElasticSettings.json.example" />
     <Content Include="Config\ExceptionsSettings.json.example" />
     <Content Include="Config\HAProxySettings.json.example" />
     <Content Include="Config\PollingSettings.json.example" />
     <Content Include="Config\RedisSettings.json.example" />
-    <Content Include="Config\SecuritySettings.config.example" />
-    <Content Include="Config\SQLSettings.json.example" />
+    <None Include="Config\SecuritySettings.config" />
+    <None Include="Config\SQLSettings.json" />
     <Content Include="Config\TeamCitySettings.json.example" />
     <Content Include="Content\img\logo\logo.eps" />
     <Content Include="Content\Styles.css.map">
