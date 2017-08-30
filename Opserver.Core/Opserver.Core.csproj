@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <LangVersion>7</LangVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}</ProjectGuid>
@@ -9,8 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>StackExchange.Opserver</RootNamespace>
     <AssemblyName>StackExchange.Opserver.Core</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>Opserver.Core.ruleset</CodeAnalysisRuleSet>
+    <StartupObject />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -19,8 +24,6 @@
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -28,141 +31,118 @@
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.25.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.25\lib\net45\Dapper.dll</HintPath>
-    </Reference>
-    <Reference Include="EasyHttp, Version=1.6.58.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\EasyHttp.1.6.58.0\lib\net40\EasyHttp.dll</HintPath>
-    </Reference>
-    <Reference Include="Jil, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Jil.1.7.0\lib\net45\Jil.dll</HintPath>
-    </Reference>
-    <Reference Include="JsonFx">
-      <HintPath>..\packages\JsonFx.2.0.1209.2802\lib\net40\JsonFx.dll</HintPath>
-    </Reference>
-    <Reference Include="MiniProfiler, Version=3.1.1.139, Culture=neutral, PublicKeyToken=b44f9351044011a3, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\MiniProfiler.3.1.1.139\lib\net40\MiniProfiler.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="Sigil, Version=4.2.1.0, Culture=neutral, PublicKeyToken=2d06c3494341c8ab, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Sigil.4.2.1\lib\net45\Sigil.dll</HintPath>
-    </Reference>
-    <Reference Include="SnmpSharpNet, Version=0.9.3.0, Culture=neutral, PublicKeyToken=b2181aa3b9571feb, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\SnmpSharpNet.0.9.3\lib\SnmpSharpNet.dll</HintPath>
-    </Reference>
-    <Reference Include="StackExchange.Elastic, Version=0.1.25.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\Lib\StackExchange.Elastic.dll</HintPath>
-    </Reference>
-    <Reference Include="StackExchange.Exceptional, Version=1.0.0.110, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Exceptional.1.0.110\lib\StackExchange.Exceptional.dll</HintPath>
-    </Reference>
-    <Reference Include="StackExchange.Redis, Version=1.0.316.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\StackExchange.Redis.1.0.322\lib\net45\StackExchange.Redis.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Dapper" Version="1.50.2" />
+    <PackageReference Include="Jil" Version="2.15.3" />
+    <PackageReference Include="MiniProfiler" Version="3.2.0.157" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="StackExchange.Exceptional" Version="1.0.130" />
+    <PackageReference Include="StackExchange.Redis" Version="1.2.1.0" />
+    <PackageReference Include="UnconstrainedMelody" Version="0.2.1" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="TeamCitySharp, Version=0.3.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\TeamCitySharp.0.3.5\lib\net40\TeamCitySharp.dll</HintPath>
-    </Reference>
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Current.Cache.cs">
       <DependentUpon>Current.cs</DependentUpon>
     </Compile>
     <Compile Include="Current.cs" />
-    <Compile Include="Data\CloudFlare\API.Actions.cs">
-      <DependentUpon>API.cs</DependentUpon>
+    <Compile Include="Data\Cloudflare\CloudFlareAPI.Actions.cs">
+      <DependentUpon>CloudflareAPI.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\API.cs" />
-    <Compile Include="Data\CloudFlare\DataCenters.cs" />
-    <Compile Include="Data\CloudFlare\RailgunInstance.Cache.cs">
-      <DependentUpon>RailgunInstance.cs</DependentUpon>
+    <Compile Include="Data\Cloudflare\CloudflareAPI.cs" />
+    <Compile Include="Data\Cloudflare\CloudflareResponse.cs" />
+    <Compile Include="Data\Cloudflare\DataCenters.cs" />
+    <Compile Include="Data\Dashboard\DashboardModule.cs" />
+    <Compile Include="Data\Dashboard\GraphPoint.cs" />
+    <Compile Include="Data\Dashboard\HardwareSummary.cs" />
+    <Compile Include="Data\Dashboard\HardwareType.cs" />
+    <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
+    <Compile Include="Data\Dashboard\Providers\BosunDataProvider.Metrics.cs">
+      <DependentUpon>BosunDataProvider.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\RailgunInstance.cs" />
-    <Compile Include="Data\CloudFlare\RailgunInstance.Stats.cs">
-      <DependentUpon>RailgunInstance.cs</DependentUpon>
+    <Compile Include="Data\Dashboard\Providers\BosunDataProvider.Nodes.cs">
+      <DependentUpon>BosunDataProvider.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Dashboard\DashboardData.cs" />
-    <Compile Include="Data\Dashboard\DashboardIssues.cs" />
     <Compile Include="Data\Dashboard\Providers\DashboardDataProvider.cs" />
     <Compile Include="Data\Dashboard\Node.Data.cs">
       <DependentUpon>Node.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Dashboard\Providers\EmptyDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Applications.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\Dashboard\Providers\OrionDataProvider.cs" />
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Interfaces.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.cs" />
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Data.cs">
+      <DependentUpon>WmiDataProvider.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Nodes.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Dashboard\Providers\OrionDataProvider.Volumes.cs">
-      <DependentUpon>OrionDataProvider.cs</DependentUpon>
+    <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Polling.cs">
+      <DependentUpon>WmiDataProvider.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\DataProvider.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.Cache.cs">
+    <Compile Include="Data\Elastic\ElasticCluster.HealthStatus.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.HealthStatus.cs">
+    <Compile Include="Data\Elastic\ElasticCluster.IndexStats.cs">
+      <DependentUpon>ElasticCluster.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Elastic\ElasticCluster.Issues.cs">
+      <DependentUpon>ElasticCluster.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Elastic\ElasticCluster.KnownNodes.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Elastic\ElasticCluster.Nodes.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.Stats.cs">
+    <Compile Include="Data\Elastic\ElasticCluster.State.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Elastic\ElasticCluster.Status.cs">
-      <DependentUpon>ElasticCluster.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\Elastic\ElasticDataObject.cs" />
-    <Compile Include="Data\Elastic\ElasticIssues.cs" />
+    <Compile Include="Data\Elastic\ShardStates.cs" />
+    <Compile Include="Data\Elastic\ElasticModule.cs" />
     <Compile Include="Data\Exceptions\ExceptionSorts.cs" />
-    <Compile Include="Data\HAProxy\HAProxyGroup.Cache.cs">
+    <Compile Include="Data\Exceptions\ExceptionsModule.cs" />
+    <Compile Include="Data\HAProxy\HAProxyModule.cs" />
+    <Compile Include="Data\HAProxy\HAProxyGroup.Issues.cs">
       <DependentUpon>HAProxyGroup.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\HAProxy\HAProxyIssues.cs" />
-    <Compile Include="Data\IssuesProvider.cs" />
-    <Compile Include="Data\Redis\RedisConnectionInfo.Cache.cs">
-      <DependentUpon>RedisConnectionInfo.cs</DependentUpon>
+    <Compile Include="Data\HAProxy\HAProxyInstance.Roles.cs">
+      <DependentUpon>HAProxyInstance.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\Issue.cs" />
+    <Compile Include="Data\Jira\JiraClient.cs" />
+    <Compile Include="Data\NodeRole.cs" />
+    <Compile Include="Data\PagerDuty\IncidentStatus.cs" />
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Actions.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.cs" />
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Incidents.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Logs.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.OnCall.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\PagerDuty\PagerDutyAPI.Schedules.cs">
+      <DependentUpon>PagerDutyAPI.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\Redis\RedisInstance.Actions.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
@@ -180,31 +160,59 @@
     <Compile Include="Data\Redis\RedisInstance.Info.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Redis\RedisInstance.Issues.cs">
+      <DependentUpon>RedisInstance.cs</DependentUpon>
+    </Compile>
     <Compile Include="Data\Redis\RedisInstance.SlowLog.cs">
       <DependentUpon>RedisInstance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\Redis\RedisIssues.cs" />
+    <Compile Include="Data\Redis\RedisModule.cs" />
     <Compile Include="Data\SearchResult.cs" />
-    <Compile Include="Data\SQL\SQLCluster.Cache.cs">
+    <Compile Include="Data\SinglePollNode.cs" />
+    <Compile Include="Data\SQL\SQLCluster.Issues.cs">
       <DependentUpon>SQLCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\SQL\SQLInstance.Cache.cs">
+    <Compile Include="Data\SQL\SQLInstance.Configuration.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\SQL\SQLInstance.Configuration.cs">
+    <Compile Include="Data\SQL\SQLInstance.Issues.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\SQL\SQLInstance.WaitStats.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\SQL\SQLIssues.cs" />
+    <Compile Include="Data\SQL\SQLModule.cs" />
+    <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGDatabaseReplica.cs">
+      <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGInfo.cs">
+      <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGListener.cs">
+      <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGListenerIPAddress.cs">
+      <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.AGReplica.cs">
+      <DependentUpon>SQLNode.AvailabilityGroups.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Data\SQL\SQLNode.ClusterInfo.cs">
+      <DependentUpon>SQLNode.cs</DependentUpon>
+    </Compile>
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="ExtensionMethods.Time.cs" />
+    <Compile Include="ExtensionMethods.Sql.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="Helpers\AppCache.cs" />
     <Compile Include="Helpers\Connection.cs" />
     <Compile Include="Helpers\FileSizeFormatProvider.cs" />
     <Compile Include="Data\IPNet.cs" />
     <Compile Include="Helpers\LocalCache.cs" />
-    <Compile Include="Helpers\ViewRange.cs" />
+    <Compile Include="StatusModule.cs" />
+    <Compile Include="Singleton.cs" />
+    <Compile Include="Helpers\WindowsKernelVersions.cs" />
+    <Compile Include="IMinVersioned.cs" />
     <Compile Include="ISeachableNode.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.cs" />
     <Compile Include="Data\Cache.cs" />
@@ -222,7 +230,7 @@
     <Compile Include="Data\Redis\RedisInfo.PropertyAttribute.cs">
       <DependentUpon>RedisInfo.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\SQL\ISQLVersionedObject.cs" />
+    <Compile Include="Data\SQL\ISQLVersioned.cs" />
     <Compile Include="Data\SQL\SQLInstance.Connections.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
     </Compile>
@@ -249,9 +257,6 @@
     </Compile>
     <Compile Include="Data\SQL\QueryPlans\ShowPlanXML.cs" />
     <Compile Include="Data\SQL\QueryPlans\ShowPlanXML.generated.cs" />
-    <Compile Include="Data\SQL\SQLNode.ClusterStates.cs">
-      <DependentUpon>SQLNode.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\SQL\SQLInstance.cs" />
     <Compile Include="Data\SQL\SQLInstance.Databases.cs">
       <DependentUpon>SQLInstance.cs</DependentUpon>
@@ -267,10 +272,9 @@
     </Compile>
     <Compile Include="Data\SQL\SQLServerVersions.cs" />
     <Compile Include="Monitoring\LightweightProfiler.cs" />
+    <Compile Include="Monitoring\MiniProfilerNullStorage.cs" />
     <Compile Include="Monitoring\OpserverProfileProvider.cs" />
     <Compile Include="Monitoring\PerfCounters.cs" />
-    <Compile Include="Monitoring\SNMPUtils.cs" />
-    <Compile Include="Data\BuildStatus.cs" />
     <Compile Include="Data\Dashboard\Application.cs" />
     <Compile Include="Data\Dashboard\DashboardCategory.cs" />
     <Compile Include="Data\Dashboard\Interface.cs" />
@@ -289,7 +293,6 @@
     <Compile Include="Data\Exceptions\Application.cs" />
     <Compile Include="Data\Exceptions\ExceptionStore.cs" />
     <Compile Include="Data\Exceptions\ExceptionStores.cs" />
-    <Compile Include="Data\FetchInfo.cs" />
     <Compile Include="Data\HAProxy\Backend.cs" />
     <Compile Include="Data\HAProxy\Frontend.cs" />
     <Compile Include="Data\HAProxy\HAProxyAdmin.cs" />
@@ -305,34 +308,37 @@
     <Compile Include="Data\HAProxy\StatusType.cs" />
     <Compile Include="Data\MonitorStatus.cs" />
     <Compile Include="Data\SQL\Enums.cs" />
-    <Compile Include="Data\SQL\SQLNode.AvailabilityGroupListeners.cs">
-      <DependentUpon>SQLNode.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\SQL\SQLNode.AvailabilityGroups.cs">
       <DependentUpon>SQLNode.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\SQL\SQLCluster.cs" />
-    <Compile Include="Data\SQL\SQLNode.ClusterMembers.cs">
-      <DependentUpon>SQLNode.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\SQL\SQLNode.ClusterNetworks.cs">
-      <DependentUpon>SQLNode.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Data\SQL\SQLNode.DatabaseReplicaClusterStates.cs">
-      <DependentUpon>SQLNode.cs</DependentUpon>
-    </Compile>
     <Compile Include="Data\SQL\SQLNode.cs" />
     <Compile Include="Data\SQL\SQLNode.TCPListeners.cs">
       <DependentUpon>SQLNode.cs</DependentUpon>
     </Compile>
+    <Compile Include="Monitoring\Wmi.cs" />
     <Compile Include="OpserverCore.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\DashboardSettings.Orion.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\DashboardSettings.Bosun.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\DashboardSettings.cs" />
+    <Compile Include="Settings\DashboardSettings.Providers.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Settings\DashboardSettings.WMI.cs">
+      <DependentUpon>DashboardSettings.cs</DependentUpon>
+    </Compile>
     <Compile Include="Settings\ElasticSettings.cs" />
     <Compile Include="Settings\ExceptionSettings.cs" />
     <Compile Include="Settings\HAProxySettings.cs" />
     <Compile Include="Settings\HAProxySettings.Traffic.cs" />
     <Compile Include="Settings\CloudFlareSettings.cs" />
+    <Compile Include="Settings\JiraSettings.cs" />
+    <Compile Include="Settings\PagerDutySettings.cs" />
     <Compile Include="Settings\Settings.cs" />
     <Compile Include="Settings\PollingSettings.cs" />
     <Compile Include="Settings\SettingsProviders\SettingsProvider.cs" />
@@ -341,7 +347,7 @@
     <Compile Include="Settings\RedisSettings.cs" />
     <Compile Include="Settings\SettingsSection.cs" />
     <Compile Include="Settings\SQLSettings.cs" />
-    <Compile Include="Settings\TeamCitySettings.cs" />
+    <Compile Include="StringBuilderCache.cs" />
     <Compile Include="StringSplits.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -361,19 +367,18 @@
     <Compile Include="Data\Elastic\ElasticCluster.Aliases.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\CloudFlare\API.Zones.cs">
-      <DependentUpon>API.cs</DependentUpon>
+    <Compile Include="Data\Cloudflare\CloudFlareAPI.Zones.cs">
+      <DependentUpon>CloudflareAPI.cs</DependentUpon>
     </Compile>
-    <None Include="packages.config">
+    <None Include="app.config" />
+    <None Include="Opserver.Core.ruleset">
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
   </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

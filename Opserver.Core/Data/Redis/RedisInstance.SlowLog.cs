@@ -17,38 +17,32 @@ namespace StackExchange.Opserver.Data.Redis
         /// <remarks>
         /// For setup instructions call <see cref="SetSlowLogThreshold"/> and <see cref="SetSlowLogMaxLength"/> or see: http://redis.io/commands/slowlog
         /// </remarks>
-        public bool IsSlowLogEnabled
-        {
-            get
-            {
-                string configVal;
-                int numVal;
-                return Config.HasData()
-                       && Config.Data.TryGetValue(ConfigParamSlowLogThreshold, out configVal)
-                       && int.TryParse(configVal, out numVal)
-                       && numVal > 0;
-            }
-        }
+        public bool IsSlowLogEnabled =>
+            Config.Data != null
+            && Config.Data.TryGetValue(ConfigParamSlowLogThreshold, out string configVal)
+            && int.TryParse(configVal, out int numVal)
+            && numVal > 0;
 
         private Cache<List<CommandTrace>> _slowLog;
-        public Cache<List<CommandTrace>> SlowLog
-        {
-            get
+        public Cache<List<CommandTrace>> SlowLog =>
+            _slowLog ?? (_slowLog = GetRedisCache(60.Seconds(), async () =>
             {
-                return _slowLog ?? (_slowLog = new Cache<List<CommandTrace>>
+                //TODO: Remove when StackExchange.Redis gets profiling
+                using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch.ToString()))
                 {
-                    CacheForSeconds = 60,
-                    UpdateCache = GetFromRedis("SlowLog", rc =>
-                    {
-                        //TODO: Remove when StackExchange.Redis gets profiling
-                        using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch))
-                        {
-                            return rc.GetSingleServer().SlowlogGet(SlowLogCountToFetch).ToList();
-                        }
-                    })
-                });
-            }
-        }
+                    return (await Connection.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch).ConfigureAwait(false)).ToList();
+                }
+            }));
+
+        private Cache<string> _tieBreaker;
+        public Cache<string> Tiebreaker =>
+            _tieBreaker ?? (_tieBreaker = GetRedisCache(10.Seconds(), () =>
+            {
+                using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
+                {
+                    return GetSERedisTiebreakerAsync(Connection);
+                }
+            }));
 
         /// <summary>
         /// Sets the slow log threshold in milliseconds, note: 0 logs EVERY command, null or negative disables logging.

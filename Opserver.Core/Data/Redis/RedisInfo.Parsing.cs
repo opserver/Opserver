@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -45,23 +46,20 @@ namespace StackExchange.Opserver.Data.Redis
                 if (line.StartsWith("#"))
                 {
                     var sectionName = line.Replace("# ", "");
-                    PropertyInfo currentSectionProp;
-                    if (_sectionMappings.TryGetValue(sectionName, out currentSectionProp))
+                    if (_sectionMappings.TryGetValue(sectionName, out PropertyInfo currentSectionProp))
                     {
-                        currentSection = (RedisInfoSection) currentSectionProp.GetValue(info);
+                        currentSection = (RedisInfoSection)currentSectionProp.GetValue(info);
                     }
                     else
                     {
-                        currentSection = new RedisInfoSection {Name = sectionName, IsUnrecognized = true};
-                        if (info.UnrecognizedSections == null)
-                            info.UnrecognizedSections = new List<RedisInfoSection>();
+                        currentSection = new RedisInfoSection { Name = sectionName, IsUnrecognized = true };
+                        info.UnrecognizedSections = info.UnrecognizedSections ?? new List<RedisInfoSection>();
                         info.UnrecognizedSections.Add(currentSection);
                     }
                     continue;
                 }
                 if (currentSection == null)
                 {
-                    //TODO: Take care of global pre-2.6 case here
                     continue;
                 }
 
@@ -75,11 +73,10 @@ namespace StackExchange.Opserver.Data.Redis
                 string key = splits[0], value = splits[1];
                 currentSection.AddLine(key, value);
 
-                if (currentSection.IsUnrecognized) 
+                if (currentSection.IsUnrecognized)
                     continue;
-                
-                PropertyInfo propertyInfo;
-                var prop = _propertyMappings[currentSection.GetType()].TryGetValue(key, out propertyInfo) ? propertyInfo : null;
+
+                var prop = _propertyMappings[currentSection.GetType()].TryGetValue(key, out PropertyInfo propertyInfo) ? propertyInfo : null;
                 if (prop == null)
                 {
                     currentSection.MapUnrecognizedLine(key, value);
@@ -94,12 +91,12 @@ namespace StackExchange.Opserver.Data.Redis
                     }
                     else
                     {
-                        prop.SetValue(currentSection, Convert.ChangeType(value, prop.PropertyType));
+                        prop.SetValue(currentSection, Convert.ChangeType(value, prop.PropertyType, CultureInfo.InvariantCulture));
                     }
                 }
                 catch (Exception e)
                 {
-                    throw new Exception(string.Format("Error parsing '{0}' from {1} as {2} for {3}.{4}", value, key, prop.PropertyType.Name, currentSection.GetType(), prop.Name), e);
+                    throw new Exception($"Error parsing '{value}' from {key} as {prop.PropertyType.Name} for {currentSection.GetType()}.{prop.Name}", e);
                 }
             }
 
@@ -111,13 +108,18 @@ namespace StackExchange.Opserver.Data.Redis
             public bool IsGlobal { get; internal set; }
             public bool IsUnrecognized { get; internal set; }
             protected string _name { get; set; }
-            public virtual string Name { get { return _name ?? Regex.Replace(GetType().Name, "Info$", ""); } internal set { _name = value; } }
+            public virtual string Name
+            {
+                get { return _name ?? Regex.Replace(GetType().Name, "Info$", ""); }
+                internal set { _name = value; }
+            }
 
             public virtual void MapUnrecognizedLine(string infoLine)
             {
                 var splits = infoLine.Split(StringSplits.Colon, 2);
                 if (splits.Length == 2) MapUnrecognizedLine(splits[0], splits[1]);
             }
+
             public virtual void MapUnrecognizedLine(string key, string value) { }
 
             public RedisInfoSection()
@@ -155,10 +157,10 @@ namespace StackExchange.Opserver.Data.Redis
                     "tcp_port",
                     "master_port"
                 };
-            
+
             private static string GetInfoValue(string label, string value)
             {
-                long l;              
+                long l;
 
                 switch (label)
                 {
@@ -166,32 +168,32 @@ namespace StackExchange.Opserver.Data.Redis
                         if (long.TryParse(value, out l))
                         {
                             var ts = TimeSpan.FromSeconds(l);
-                            return string.Format("{0} ({1}d {2}h {3}m {4}s)", value, (int)ts.TotalDays, ts.Hours, ts.Minutes, ts.Seconds);
+                            return $"{value} ({(int) ts.TotalDays}d {ts.Hours}h {ts.Minutes}m {ts.Seconds}s)";
                         }
                         break;
                     case "last_save_time":
                         if (long.TryParse(value, out l))
                         {
                             var time = l.ToDateTime();
-                            return string.Format("{0} ({1})", value, time.ToRelativeTime());
+                            return $"{value} ({time.ToRelativeTime()})";
                         }
                         break;
                     case "master_sync_left_bytes":
                         if (long.TryParse(value, out l))
                         {
-                            return string.Format("{0:n0} bytes", l);
+                            return l.ToString("n0") + " bytes";
                         }
                         break;
                     case "used_memory_rss":
                         if (long.TryParse(value, out l))
                         {
-                            return string.Format("{0} ({1})", l, l.ToSize(precision: 1));
+                            return $"{l} ({l.ToSize(precision: 1)})";
                         }
                         break;
                     default:
                         if (!_dontFormatList.Any(label.Contains) && long.TryParse(value, out l))
                         {
-                            return string.Format("{0:n0}", l);
+                            return l.ToString("n0");
                         }
                         break;
                 }

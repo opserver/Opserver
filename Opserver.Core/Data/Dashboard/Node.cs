@@ -1,176 +1,310 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
 using StackExchange.Opserver.Data.Dashboard.Providers;
+using System.Globalization;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
     public partial class Node : IMonitorStatus, ISearchableNode
     {
-        public DashboardDataProvider DataProvider { get; set; }
-        
-        string ISearchableNode.DisplayName { get { return PrettyName; } }
-        string ISearchableNode.Name { get { return PrettyName; } }
-        string ISearchableNode.CategoryName { get { return Category != null ? Category.Name.Replace(" Servers", "") : "Unknown"; } }
+        string ISearchableNode.DisplayName => PrettyName;
+        string ISearchableNode.Name => PrettyName;
+        string ISearchableNode.CategoryName => Category?.Name.Replace(" Servers", "") ?? "Unknown";
 
-        public int Id { get; internal set; }
+        public DashboardDataProvider DataProvider { get; set; }
+        public bool IsRealTimePollable => MachineType?.Contains("Windows") == true;
+        public List<Issue<Node>> Issues { get; set; }
+
+        public string Id { get; internal set; }
         public string Name { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
+        public string MachineOSVersion { get; internal set; }
+        private string _machineTypePretty;
+        public string MachineTypePretty => _machineTypePretty ?? (_machineTypePretty = GetPrettyMachineType());
         public string Ip { get; internal set; }
-        public Int16? PollIntervalSeconds { get; internal set; }
+        public short? PollIntervalSeconds { get; internal set; }
 
-        public DateTime LastBoot { get; internal set; }
+        public DateTime? LastBoot { get; internal set; }
         public NodeStatus Status { get; internal set; }
+        public NodeStatus? ChildStatus { get; internal set; }
+        public string StatusDescription { get; internal set; }
+        private HardwareType? _hardwareType;
+        public HardwareType HardwareType => _hardwareType ?? (_hardwareType = GetHardwareType()).Value;
 
-        public Int16? CPULoad { get; internal set; }
-        public Single? TotalMemory { get; internal set; }
-        public Single? MemoryUsed { get; internal set; }
-        public int? VMHostID { get; internal set; }
+        public short? CPULoad { get; internal set; }
+        public float? TotalMemory { get; internal set; }
+        public float? MemoryUsed { get; internal set; }
+        public string VMHostID { get; internal set; }
         public bool IsVMHost { get; internal set; }
         public bool IsUnwatched { get; internal set; }
-        public DateTime? UnwatchedFrom { get; internal set; }
-        public DateTime? UnwatchedUntil { get; internal set; }
 
         public string Manufacturer { get; internal set; }
         public string Model { get; internal set; }
         public string ServiceTag { get; internal set; }
-        
-        public string PrettyName { get { return (Name ?? "").ToUpper(); } }
-        public TimeSpan UpTime { get { return DateTime.UtcNow - LastBoot; } }
-        public MonitorStatus MonitorStatus { get { return Status.ToMonitorStatus(); } }
-        // TODO: Implement
-        public string MonitorStatusReason { get { return null; } }
+        public Version KernelVersion { get; internal set; }
 
-        public bool IsVM { get { return VMHostID.HasValue; } }
-        public bool HasValidMemoryReading { get { return MemoryUsed.HasValue && MemoryUsed >= 0; } }
-        public Node VMHost
-        {
-            get { return IsVM && VMHostID.HasValue ? DataProvider.GetNode(VMHostID.Value) : null; }
-        }
-        public List<Node> VMs
-        {
-            get { return IsVMHost ? DataProvider.AllNodes.Where(s => s.VMHostID == Id).ToList() : new List<Node>(); }
-        }
+        public string PrettyName => (Name ?? "").ToUpper();
+        public TimeSpan? UpTime => DateTime.UtcNow - LastBoot;
+        public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
+
+        // TODO: Implement
+        public string MonitorStatusReason => null;
+
+        public bool IsVM => VMHostID.HasValue();
+        public bool HasValidMemoryReading => MemoryUsed.HasValue && MemoryUsed >= 0;
+
+        public Node VMHost { get; internal set; }
+
+        public List<Node> VMs { get; internal set; }
 
         private DashboardCategory _category;
-        public DashboardCategory Category
+        public DashboardCategory Category =>
+            _category ?? (_category = DashboardCategory.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown);
+        private string GetPrettyMachineType()
         {
-            get { return _category ?? (_category = DashboardCategory.AllCategories.FirstOrDefault(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown); }
+            if (MachineType?.StartsWith("Linux") ?? false) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
+            return MachineType?.Replace("Microsoft Windows ", "");
         }
 
-        public string ManagementUrl
+        private HardwareType GetHardwareType()
         {
-            get { return DataProvider.GetManagementUrl(this); }
+            if (IsVM) return HardwareType.VirtualMachine;
+            return HardwareType.Physical;
+
+            // TODO: Detect network gear in a reliable way
+            //return HardwareType.Unknown;
         }
 
-        private string _searchString;
+        public string ManagementUrl { get; internal set; }
+
+        private string _searchString, _networkTextSummary, _applicationCPUTextSummary, _applicationMemoryTextSummary;
+
+        public void ClearSummaries()
+        {
+            _searchString = _networkTextSummary = _applicationCPUTextSummary = _applicationMemoryTextSummary = null;
+        }
+
         public string SearchString
         {
             get
             {
                 if (_searchString == null)
                 {
-                    var result = new StringBuilder();
-                    const string delim = "-";
-                    result.Append(MachineType)
-                          .Append(delim)
-                          .Append(PrettyName)
-                          .Append(delim)
-                          .Append(Status)
-                          .Append(delim)
-                          .Append(Manufacturer)
-                          .Append(delim)
-                          .Append(Model)
-                          .Append(delim)
-                          .Append(ServiceTag)
-                          .Append(delim)
-                          .Append(string.Join(",", IPs))
-                          .Append(delim)
-                          .Append(string.Join(",", Apps.Select(a => a.NiceName)));
-                    if (IsVM)
-                        result.Append(delim)
-                              .Append(VMHost.PrettyName);
-                    if (IsVMHost)
-                        result.Append(delim)
-                              .Append(string.Join(",", DataProvider.AllNodes.Where(s => s.VMHostID == Id)));
+                    var result = StringBuilderCache.Get();
 
-                    _searchString = result.ToString().ToLower();
+                    result.Append(MachineType)
+                          .Pipend(PrettyName)
+                          .Pipend(Status.ToString())
+                          .Pipend(Manufacturer)
+                          .Pipend(Model)
+                          .Pipend(ServiceTag);
+
+                    if (Hardware?.Processors != null)
+                    {
+                        foreach (var p in Hardware.Processors)
+                        {
+                            result.Pipend(p.Name)
+                                  .Pipend(p.Description);
+                        }
+                    }
+                    if (Hardware?.Storage?.Controllers != null)
+                    {
+                        foreach (var c in Hardware.Storage.Controllers)
+                        {
+                            result.Pipend(c.Name)
+                                  .Pipend(c.FirmwareVersion)
+                                  .Pipend(c.DriverVersion);
+                        }
+                    }
+                    if (Hardware?.Storage?.PhysicalDisks != null)
+                    {
+                        foreach (var d in Hardware.Storage.PhysicalDisks)
+                        {
+                            result.Pipend(d.Media)
+                                  .Pipend(d.ProductId)
+                                  .Pipend(d.Serial)
+                                  .Pipend(d.Part);
+                        }
+                    }
+                    if (Interfaces != null)
+                    {
+                        foreach (var i in Interfaces)
+                        {
+                            result.Pipend(i.Name)
+                                  .Pipend(i.Caption)
+                                  .Pipend(i.PhysicalAddress)
+                                  .Pipend(i.TypeDescription);
+
+                            foreach (var ip in i.IPs)
+                            {
+                                result.Pipend(ip.ToString());
+                            }
+                        }
+                    }
+                    if (Apps != null)
+                    {
+                        foreach (var app in Apps)
+                        {
+                            result.Pipend(app.NiceName);
+                        }
+                    }
+                    if (IsVM && VMHost != null)
+                    {
+                        result.Pipend(VMHost.PrettyName);
+                    }
+                    if (IsVMHost && VMs != null)
+                    {
+                        foreach (var vm in VMs)
+                        {
+                            result.Pipend(vm?.Name);
+                        }
+                    }
+                    _searchString = result.ToStringRecycle();
                 }
                 return _searchString;
             }
         }
 
-        public TimeSpan? PollInterval
-        {
-            get { return PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null; }
-        }
-        
-        // Interfaces, Volumes and Applications are pulled from cache
-        public IEnumerable<Interface> Interfaces
-        {
-            get { return DataProvider.AllInterfaces.Where(i => i.NodeId == Id && i.Status != NodeStatus.Unknown); }
-        }
-        public IEnumerable<Volume> Volumes
-        {
-            get { return DataProvider.AllVolumes.Where(v => v.NodeId == Id && v.IsDisk && v.Size > 0); }
-        }
-        public IEnumerable<Application> Apps
-        {
-            get { return DataProvider.AllApplications.Where(a => a.NodeId == Id); }
-        }
-        public IEnumerable<IPAddress> IPs
-        {
-            get { return DataProvider.GetIPsForNode(this); }
-        }
-
-        public Single? PercentMemoryUsed
-        {
-            get { return MemoryUsed * 100 / TotalMemory; }
-        }
-
-        public Single TotalNetworkbps
-        {
-            get { return Interfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
-        }
-
-        public Single TotalPrimaryNetworkbps
-        {
-            get { return PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)); }
-        }
-
-        private DashboardSettings.NodeSettings _settings;
-        public DashboardSettings.NodeSettings Settings { get { return _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName, Category.Settings)); } }
-
-        private List<Interface> _primaryInterfaces; 
-        public IEnumerable<Interface> PrimaryInterfaces
+        public string NetworkTextSummary
         {
             get
             {
-                if (_primaryInterfaces == null)
+                if (_networkTextSummary != null) return _networkTextSummary;
+
+                var sb = StringBuilderCache.Get();
+                sb.Append("Total Traffic: ").Append(TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
+                sb.AppendFormat("Interfaces ({0} total):", Interfaces.Count.ToString()).AppendLine();
+                foreach (var i in PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps))
                 {
-                    var s = Settings;
-                    List<Interface> dbInterfaces;
-                    if (s != null && s.PrimaryInterfacePatternRegex != null)
-                    {
-                        dbInterfaces = Interfaces.Where(i => s.PrimaryInterfacePatternRegex.IsMatch(i.FullName)).ToList();
-                    }
-                    else
-                    {
-                        dbInterfaces = Interfaces.Where(i =>
-                                                        i.Name.ToLower().EndsWith("team") ||
-                                                        i.Name.ToLower().StartsWith("bond") ||
-                                                        i.Name.Contains("Microsoft Network Adapter Multiplexor Driver"))
-                                                 .ToList();
-                    }
-                    _primaryInterfaces = (dbInterfaces.Any()
-                                              ? dbInterfaces.OrderBy(i => i.Name)
-                                              : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
+                    sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n", i.PrettyName,
+                        (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
+                        i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
+                }
+                return _networkTextSummary = sb.ToStringRecycle();
+            }
+        }
+
+        public string ApplicationCPUTextSummary
+        {
+            get
+            {
+                if (_applicationCPUTextSummary != null) return _applicationCPUTextSummary;
+
+                if (Apps?.Any() != true) return _applicationCPUTextSummary = "";
+
+                var sb = StringBuilderCache.Get();
+                sb.AppendFormat("Total App Pool CPU: {0:0.##} %\n", Apps.Sum(a => a.PercentCPU.GetValueOrDefault(0)).ToString(CultureInfo.CurrentCulture));
+                sb.AppendLine("App Pools:");
+                foreach (var a in Apps.OrderBy(a => a.NiceName))
+                {
+                    sb.AppendFormat("  {0}: {1:0.##} %\n", a.NiceName, a.PercentCPU?.ToString(CultureInfo.CurrentCulture));
+                }
+                return _applicationCPUTextSummary = sb.ToStringRecycle();
+            }
+        }
+
+        public string ApplicationMemoryTextSummary
+        {
+            get
+            {
+                if (_applicationMemoryTextSummary != null) return _applicationMemoryTextSummary;
+
+                if (Apps?.Any() != true) return _applicationCPUTextSummary = "";
+
+                var sb = StringBuilderCache.Get();
+                sb.AppendFormat("Total App Pool Memory: {0}\n", Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
+                sb.AppendLine("App Pools:");
+                foreach (var a in Apps.OrderBy(a => a.NiceName))
+                {
+                    sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
+                }
+                return _applicationCPUTextSummary = sb.ToStringRecycle();
+            }
+        }
+
+        public TimeSpan? PollInterval => PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null;
+
+        // Interfaces, Volumes and Applications are set by the provider
+        public List<Interface> Interfaces { get; internal set; }
+        public List<Volume> Volumes { get; internal set; }
+        public List<Application> Apps { get; internal set; }
+
+        public Interface GetInterface(string id)
+        {
+            foreach (var i in Interfaces)
+            {
+                if (i.Id == id) return i;
+            }
+            return null;
+        }
+
+        public Volume GetVolume(string id)
+        {
+            foreach (var v in Volumes)
+            {
+                if (v.Id == id) return v;
+            }
+            return null;
+        }
+
+        public Application GetApp(string id)
+        {
+            foreach (var a in Apps)
+            {
+                if (a.Id == id) return a;
+            }
+            return null;
+        }
+
+        private static readonly List<IPNet> EmptyIPs = new List<IPNet>();
+
+        public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
+
+        public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
+
+        public float TotalNetworkbps => Interfaces?.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)) ?? 0;
+        public float TotalPrimaryNetworkbps => PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
+        public float TotalVolumePerformancebps => Volumes?.Sum(i => i.ReadBps.GetValueOrDefault(0) + i.WriteBps.GetValueOrDefault(0)) ?? 0;
+
+        private DashboardSettings.NodeSettings _settings;
+        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName));
+
+        private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
+        public decimal? CPUWarningPercent => GetSetting(i => i.CPUWarningPercent);
+        public decimal? CPUCriticalPercent => GetSetting(i => i.CPUCriticalPercent);
+        public decimal? MemoryWarningPercent => GetSetting(i => i.MemoryCriticalPercent);
+        public decimal? MemoryCriticalPercent => GetSetting(i => i.MemoryCriticalPercent);
+        public decimal? DiskWarningPercent => GetSetting(i => i.DiskWarningPercent);
+        public decimal? DiskCriticalPercent => GetSetting(i => i.DiskCriticalPercent);
+
+        private List<Interface> _primaryInterfaces;
+        public List<Interface> PrimaryInterfaces
+        {
+            get
+            {
+                if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
+                {
+                    var pattern = Settings?.PrimaryInterfacePatternRegex;
+                    var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
+                    _primaryInterfaces = (dbInterfaces.Count > 0
+                        ? dbInterfaces.OrderBy(i => i.Name)
+                        : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
                 }
                 return _primaryInterfaces;
             }
+        }
+
+        /// <summary>
+        /// Should be called after a node is created to set parent referneces
+        /// This allows interfaces, volumes, etc. to poll through the provider
+        /// </summary>
+        public void SetReferences()
+        {
+            Interfaces?.ForEach(i => i.Node = this);
+            Volumes?.ForEach(v => v.Node = this);
+            Apps?.ForEach(a => a.Node = this);
         }
     }
 }

@@ -1,0 +1,9 @@
+﻿@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    Layout = null;
+}
+<h4 class="modal-title">
+    @Model.CurrentCluster.Name Index Details
+</h4>
+@Html.Partial("Indexes.Table", Model)

@@ -1,0 +1,69 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model OperationsActiveModel
+@helper SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label)
+{
+    var val = (int)option;
+    <div class="radio pull-left">
+        <label>
+            <input type="radio" name="@nameof(Model.ActiveSearchOptions.Sleeping)" value="@val.ToString()" checked="@(option == Model.ActiveSearchOptions.Sleeping)"/> @label
+        </label>
+    </div>
+}
+<h4 class="modal-title">
+    Active Operation Filters
+</h4>
+<form class="form-horizontal" action="@Url.Action(nameof(SQLController.Active))" method="GET">
+    <input type="hidden" name="node" value="@Model.CurrentInstance.Name" />
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">Include Details</label>
+        <div class="col-md-9">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" checked="@(Model.ActiveSearchOptions.Details)" name="@nameof(Model.ActiveSearchOptions.Details)" value="true"/>
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">System Sessions</label>
+        <div class="col-md-9">
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox" checked="@(Model.ActiveSearchOptions.System)" name="@nameof(Model.ActiveSearchOptions.System)" value="true" />
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">
+            Include Sleeping
+        </label>
+        <div class="col-md-9">
+            @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.None, "No")
+            @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.OpenTransaction, "Only Open")
+            @SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions.All, "All")
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">
+            Search
+        </label>
+        <div class="col-md-9">
+            <div class="form-group">
+                <div class="col-md-3">
+                    <select name="filterField" class="form-control">
+                        @foreach (SQLInstance.ActiveSearchOptions.FilterFields e in Enum.GetValues(typeof(SQLInstance.ActiveSearchOptions.FilterFields)))
+                        {
+                            <option value="@e.ToString()" selected="@(e == Model.ActiveSearchOptions.FilterField)">@e.GetDescription()</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-9">
+                    <input class="form-control" type="text" value="@Model.ActiveSearchOptions.FilterValue" name="@nameof(Model.ActiveSearchOptions.FilterValue)" placeholder="Search Text" />
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

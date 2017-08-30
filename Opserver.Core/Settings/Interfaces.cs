@@ -1,24 +1,14 @@
-﻿using System;
-
-namespace StackExchange.Opserver
+﻿namespace StackExchange.Opserver
 {
-    public interface ISecurableSection
+    public interface ISecurableModule
     {
+        bool Enabled { get; }
         string ViewGroups { get; }
         string AdminGroups { get; }
-    }
-
-    public interface ISettingsCollectionItem<T> : IEquatable<T>, ISettingsCollectionItem
-    {
     }
 
     public interface ISettingsCollectionItem
     {
         string Name { get; }
-    }
-
-    public interface IAfterLoadActions
-    {
-        void AfterLoad();
     }
 }

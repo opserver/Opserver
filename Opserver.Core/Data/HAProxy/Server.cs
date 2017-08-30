@@ -2,6 +2,6 @@
 {
     public class Server : Item
     {
-        public string Name { get { return ServerName; } }
+        public string Name => ServerName;
     }
 }

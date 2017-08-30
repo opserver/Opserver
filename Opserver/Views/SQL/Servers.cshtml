@@ -1,130 +1,114 @@
-﻿@using StackExchange.Opserver.Models
+﻿@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
-@model DashboardModel
+@model ServersModel
 @{
     var standalone = Model.StandaloneInstances;
 }
-@helper MemoryCell(SQLInstance i) {
-    if (i.ServerInfo != null)
-    {
-        <td>@(i.ServerInfo != null ? i.ServerInfo.MemoryPercentStatusSpan() : null)</td>
-    }
-    else
-    {
-        var props = i.ServerProperties.SafeData();
-        if (props != null && props.PhysicalMemoryBytes > 0)
-        {
-            <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, 2) + "%")</td>
-        }
-        else
-        {
-            <td class="note">?</td>
-        }
-    }
-}
 @helper ConnectionsCell(SQLInstance i) {
-    var props = i.ServerProperties.SafeData(true);
-    <td><a href="/sql/connections?node=@i.Name.UrlEncode()">@props.ConnectionCount.ToComma()</a> <span class="note">/ @props.SessionCount.ToComma()</span></td>
+var props = i.ServerProperties.SafeData(true);
+    <td>
+        <a href="@Url.Action(nameof(SQLController.Connections), new {node = i.Name})">@props.ConnectionCount.ToComma()</a> <span class="text-muted">/ @props.SessionCount.ToComma()</span>
+    </td>
 }
-@helper BatchesCell(SQLInstance i) {
-    var batches = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
-    <td>@(batches != null ? ((long) batches.CalculatedValue).ToComma() : "")</td>
-}
-@if (Model.Clusters.Any())
-{
-    <table class="cluster-dashboard striped-dashboard">
-        @foreach (var c in Model.Clusters.Where(clu => clu.Nodes.Any()))
-        {
-            <tbody class="node-header" data-name="header-@c.Name">
+<div class="js-refresh" data-name="sql">
+    @if (Model.Clusters.Any())
+    {
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            @foreach (var c in Model.Clusters.Where(clu => clu.Nodes.Any()))
+            {
+                <tbody>
+                    <tr class="category-row">
+                        <th colspan="11">
+                            <h5>
+                                <a href="~/sql/servers#/cluster/@c.Name" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="text-muted small">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span>
+                                @if (c.Description.HasValue()) { <span class="text-muted small">(@c.Description)</span> }
+                                <span class="pull-right small"> @Helpers.PollNow(c.Nodes)</span>
+                            </h5>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Node</th>
+                        <th>State</th>
+                        <th>CPU</th>
+                        <th class="text-muted">(Last Hour)</th>
+                        <th>Memory</th>
+                        <th>Availability</th>
+                        <th>Databases</th>
+                        <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
+                        <th>Batches<span class="text-muted">/sec</span></th>
+                        <th>Last Commit</th>
+                        <th>As of</th>
+                    </tr>
+                </tbody>
+                <tbody>
+                    @foreach (var n in c.Nodes)
+                    {
+                        var cAgs = n.AvailabilityGroups.SafeData(true);
+                        <tr class="@n.RowClass()@(n.IsAllAGsPrimary ? " info" : null)">
+                            <td>@n.IconSpan() <a href="~/sql/instance?node=@n.Name.UrlEncode()">@n.Name</a></td>
+                            <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.GetDescription()</td>
+                            <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
+                            <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
+                            @SQLHelpers.MemoryCell(n)
+                            <td>@SQLHelpers.HealthDescriptionAGs(cAgs)</td>
+                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Helpers.HealthDescription(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
+                            @ConnectionsCell(n)
+                            @SQLHelpers.BatchesCell(n)
+                            <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
+                            <td>@n.LastFetch.ToPollSpan()</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    }
+    @if (standalone.Any())
+    {
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <tbody>
                 <tr class="category-row">
-                    <th colspan="12"><h3><a href="~/sql/servers#/cluster/@c.Name" class="node-name-link" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="quorum-info">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span></h3></th>
+                    <th colspan="8">
+                        <h5>
+                            @standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone
+                            <span class="pull-right small"> @Helpers.PollNow(standalone)</span>
+                        </h5>
+                    </th>
                 </tr>
                 <tr>
-                    <th></th>
                     <th>Node</th>
-                    <th>State</th>
                     <th>CPU</th>
-                    <th class="note">(Last Hour)</th>
+                    <th class="text-muted">(Last Hour)</th>
                     <th>Memory</th>
-                    <th>Availability</th>
                     <th>Databases</th>
-                    <th title="Connections / Sessions">Conns <span class="note">/ Sess</span></th>
-                    <th>Batches<span class="note">/sec</span></th>
-                    <th>Last Commit</th>
+                    <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
+                    <th>Batches<span class="text-muted">/sec</span></th>
                     <th>As of</th>
                 </tr>
             </tbody>
-            <tbody class="node-group" data-name="@c.Name">
-                @foreach (var n in c.Nodes)
+            <tbody>
+                @foreach (var i in standalone)
                 {
-                    var cAgs = n.AvailabilityGroups.SafeData(true);
-                    var isPrimary = n.IsAllAGsPrimary;
-                    <tr class="@n.RowClass()@(isPrimary ? " primary-row" : "")">
-                        <td>@n.IconSpan()</td>
-                        <td><a href="~/sql/instance?node=@n.Name.UrlEncode()" class="node-name-link">@n.Name</a></td>
-                        <td title="Votes: @n.ClusterVotes">@n.ClusterMember.State.GetDescription()</td>
-                        <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.ServerInfo != null ? n.ServerInfo.CPUStatusSpan() : null)</a></td>
-                        <td class="sql-cpu-spark"><img alt="CPU in the last hour for @n.Name" src="~/graph/sql/cpu/spark?node=@n.Name" /></td>
-                        @MemoryCell(n)
-                        <td>@SQLHelpers.HealthDescriptionAGs(n, cAgs)</td>
-                        <td>@SQLHelpers.HealthDescription(n, cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</td>
-                        @ConnectionsCell(n)
-                        @BatchesCell(n)
-                        <td>@cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime)).ToRelativeTimeSpan()</td>
-                        <td>@n.LastFetch.ToPollSpan()</td>
+                    var dbs = i.Databases.SafeData(true);
+                    <tr class="@i.RowClass()">
+                        <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
+                        <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
+                        <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
+                        @SQLHelpers.MemoryCell(i)
+                        <td title="@dbs.Count.Pluralize("Database"):
+@string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
+                            @Helpers.HealthDescription(dbs)
+                        </td>
+                        @ConnectionsCell(i)
+                        @SQLHelpers.BatchesCell(i)
+                        <td>@i.LastFetch.ToPollSpan(mini: false)</td>
                     </tr>
                 }
             </tbody>
-        }
-    </table>
-}
-@if (standalone.Any())
-{
-    <table class="cluster-dashboard striped-dashboard">
-        <tbody class="node-header" data-name="header-standalone">
-            <tr class="category-row">
-                <th colspan="11"><h3>@standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone</h3></th>
-            </tr>
-            <tr>
-                <th></th>
-                <th>Node</th>
-                <th>CPU</th>
-                <th class="note">(Last Hour)</th>
-                <th title="Memory">Mem</th>
-                <th>Databases</th>
-                <th title="Connections / Sessions">Conns <span class="note">/ Sess</span></th>
-                <th>Batches<span class="note">/sec</span></th>
-                <th>As of</th>
-            </tr>
-        </tbody>
-        <tbody class="node-group" data-name="body-standalone">
-            @foreach (var i in standalone)
-            {
-                var dbs = i.Databases.SafeData(true);
-                <tr class="@i.RowClass()">
-                    <td>@i.IconSpan()</td>
-                    <td><a href="~/sql/instance?node=@i.Name.UrlEncode()" class="node-name-link">@i.Name</a></td>
-                    <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent + "%" : "")</a></td>
-                    <td class="sql-cpu-spark"><img alt="CPU in the last hour for @i.Name" src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" /></td>
-                    @MemoryCell(i)
-                    <td title="@dbs.Count Databases:
-@string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => string.Format("  {0}: {1}\n", g.Key, g.Count().Pluralize("Database"))))">
-                        @SQLHelpers.HealthDescription(i, dbs)
-                    </td>
-                    @ConnectionsCell(i)
-                    @BatchesCell(i)
-                    <td>@i.LastFetch.ToPollSpan(mini: false)</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-}
+        </table>
+    }
 
-<div class="node-dashboard-separator"></div>
-
-<div>
-    <div class="ag-container refresh-group" data-name="ag-summary">
+    <div class="ag-container refresh-group row small" data-name="ag-summary">
         @foreach (var c in Model.Clusters)
         {
             foreach (var ag in c.AvailabilityGroups)
@@ -133,11 +117,13 @@
             }
         }
     </div>
-</div>
 
-@if(Model.CurrentCluster != null)
-{
-    <div class="summary-popup">
-        @Html.Partial("Servers.ClusterDetail", Model)
-    </div>
-}
+    @if (Model.CurrentCluster != null)
+    {
+        <div class="hidden">
+            <div class="js-refresh" data-name="sql-@Model.CurrentCluster.Name">
+                @Html.Partial("Servers.ClusterDetail", Model)
+            </div>
+        </div>
+    }
+</div>

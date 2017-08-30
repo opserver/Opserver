@@ -6,43 +6,26 @@ namespace StackExchange.Opserver.Data.Dashboard
 {
     public class DashboardCategory
     {
-        private static List<DashboardCategory> _allCategories;
-        public static List<DashboardCategory> AllCategories
+        public static List<DashboardCategory> AllCategories { get; } =
+            Current.Settings.Dashboard.Categories
+                .Select(sc => new DashboardCategory(sc))
+                .ToList();
+
+        public static DashboardCategory Unknown { get; } = new DashboardCategory(new DashboardSettings.Category
         {
-            get { return _allCategories ?? (_allCategories = Current.Settings.Dashboard.Categories.Select(sc => new DashboardCategory(sc)).ToList()); }
-        }
-
-        public static DashboardCategory Unknown { get; private set; }
-
-        static DashboardCategory()
+            Name = "Other Nodes",
+            Pattern = ""
+        })
         {
-            var unknownSettings = new DashboardSettings.Category
-                {
-                    Name = "Other Nodes",
-                    Pattern = ""
-                };
-            Unknown = new DashboardCategory(unknownSettings)
-                {
-                    Index = int.MaxValue - 100
-                };
-        }
+            Index = int.MaxValue - 100
+        };
 
-        public string Name { get { return Settings.Name; } }
-        public Regex PatternRegex { get { return Settings.PatternRegex; } }
+        public string Name => Settings.Name;
+        public Regex PatternRegex => Settings.PatternRegex;
         public int Index { get; private set; }
 
-        public DashboardSettings.Category Settings { get; private set; }
+        public DashboardSettings.Category Settings { get; }
 
-        public decimal? CPUWarningPercent { get { return Settings.CPUWarningPercent; } }
-        public decimal? CPUCriticalPercent { get { return Settings.CPUCriticalPercent; } }
-        public decimal? MemoryWarningPercent { get { return Settings.MemoryWarningPercent; } }
-        public decimal? MemoryCriticalPercent { get { return Settings.MemoryCriticalPercent; } }
-        public decimal? DiskWarningPercent { get { return Settings.DiskWarningPercent; } }
-        public decimal? DiskCriticalPercent { get { return Settings.DiskCriticalPercent; } }
-
-        public Regex PrimaryInterfacePatternRegex { get { return Settings.PrimaryInterfacePatternRegex; } }
-
-        
         public DashboardCategory() { }
         public DashboardCategory(DashboardSettings.Category settingsCategory)
         {
@@ -54,7 +37,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             get
             {
-                var servers = DashboardData.AllNodes.Where(n => PatternRegex.IsMatch(n.Name)).ToList();
+                var servers = DashboardModule.AllNodes.Where(n => PatternRegex.IsMatch(n.Name)).ToList();
 
                 var excluder = Current.Settings.Dashboard.ExcludePatternRegex;
                 if (excluder != null)

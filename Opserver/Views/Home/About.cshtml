@@ -1,11 +1,11 @@
 ﻿@using System.Reflection
+@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.Exceptions
 @using StackExchange.Opserver.Data.HAProxy
 @using StackExchange.Opserver.Data.SQL
 @{
     this.SetPageTitle("About");
-    this.SetMainTab(MainTab.None);
 
     var asm = Assembly.GetAssembly(typeof(GlobalApplication));
     var rev = asm.GetName().Version.ToString(4);
@@ -13,268 +13,342 @@
     var s = Current.Settings;
     var cacheStats = ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
+    var currentTheme = Theme.Current;
 }
 @helper EnabledSpan(bool enabled) {
-    <span class="value @(enabled ? "good" : "warning")">@(enabled ? "Enabled" : "Disabled")</span>
+    <span class="@(enabled ? "text-success" : "text-danger")">@(enabled ? "Enabled" : "Disabled")</span>
 }
-<div class="about">
-<header class="properties">@SiteSettings.SiteNameLong</header>
-<section class="properties">
-    <ul>
-        <li>App Revision: <span class="value">@rev</span></li>
-        <li>Last Built/Changed (UTC): <span class="value">@buildDate.ToString("u")</span></li>
-        <li>Running since: <span class="value">@GlobalApplication.StartDate.ToUniversalTime().ToString("u")</span> (@GlobalApplication.StartDate.ToRelativeTimeSpan())</li>
-        <li>Current server: <span class="value">@Environment.MachineName</span></li>
-        <li>Get-Set Cache: <span class="value">Sync: @cacheStats.Item1.ToComma()</span>, <span class="value">Async: @cacheStats.Item2.ToComma()</span>, <span class="value">Async (error): @cacheStats.Item3.ToComma()</span></li>
-    </ul>
-</section>
-<header class="properties">Polling</header>
-<section class="properties">
-    <ul>
-        <li>Started: <span class="value">@pollingInfo.StartTime.ToRelativeTimeSpan()</span></li>
-        <li>Last Poll: <span class="value">@pollingInfo.LastPollAll.ToRelativeTimeSpan()</span></li>
-        <li>Thread: <span class="value@(pollingInfo.IsAlive ? "" : " critical")">@pollingInfo.IconSpan() @(pollingInfo.IsAlive ? "Alive" : "Dead")</span></li>
-        <li>Pollers: <span class="value">@pollingInfo.TotalPollers.ToComma()</span></li>
-        <li>Poll Intervals: <span class="value">@pollingInfo.TotalPollIntervals.ToComma()</span></li>
-        <li>Nodes: <span class="value">@pollingInfo.NodeCount.ToComma()</span> 
-            <ul class="sub-list">
-                @foreach (var ng in pollingInfo.NodeBreakdown)
-                {
-                    <li>@ng.Item1 <span class="value">@ng.Item2.ToComma()</span></li>
-                }
-            </ul>
-        </li>
-        <li>Caches <span class="value">@pollingInfo.TotalPollers.ToComma()</span> (<a href="/about/caches">click to view</a>)</li>
-    </ul>
-</section>
-@helper GetTypeDescription(Type t) {
-    if (t.IsGenericType && (t.GetGenericTypeDefinition() == typeof (List<>)))
-    {
-        var lt = t.GetGenericArguments()[0];
-        @:List&lt;<b>@lt.Name</b>&gt;
-    }
-    else
-    {
-        <b>@t.Name</b>
-    }
+@helper EnabledLabel(string text, bool enabled) {
+    <span class="label label-@(enabled ? "success" : "default")">@text</span>
 }
-<header class="properties">Components</header>
-<section class="properties">
-    <ul>
-        <li>Security: @EnabledSpan(SecuritySettings.Current.Enabled)</li>
-        <li>Roles: <span class="value">@Current.User.Role</span></li>
-        <li>Internal Networks: <span class="value">@Current.Security.InternalNetworks.Count</span></li>
-        <li>Current User: <span class="value">@Current.User.AccountName</span></li>
-        <li>Current Request IP: <span class="value">@Current.RequestIP</span></li>
-    </ul>
-</section>
-<header class="properties">Sections</header>
-<section class="properties">
-    <ul>
-        <li>Dashboard: @EnabledSpan(s.Dashboard.Enabled)</li>
-        <li>Exceptions: @EnabledSpan(s.Exceptions.Enabled)</li>
-        <li>SQL: @EnabledSpan(s.SQL.Enabled)</li>
-        <li>Redis: @EnabledSpan(s.Redis.Enabled)</li>
-        <li>Elastic: @EnabledSpan(s.Elastic.Enabled)</li>
-        <li>HAProxy: @EnabledSpan(s.HAProxy.Enabled)</li>
-        @if (s.HAProxy.Enabled) { <li>HAProxy Traffic: @EnabledSpan(s.HAProxy.Traffic.Enabled)</li> }
-        <li>TeamCity: @EnabledSpan(s.TeamCity.Enabled)</li>
-    </ul>
-</section>
-<header class="properties per-section-props">Enabled Sections</header>
-<section class="per-section-props">
-    <header class="properties">Global</header>
-    <section class="properties">
-        <ul>
-            <li>Name: <span class="value">@SiteSettings.SiteName</span></li>
-            <li>Full Name: <span class="value">@SiteSettings.SiteNameLong</span></li>
-            <li>Admins: <span class="value">@SiteSettings.AdminGroups</span></li>
-            <li>Viewers: <span class="value">@SiteSettings.ViewGroups</span></li>
-        </ul>
-    </section>
-    
-    @if(s.Dashboard.Enabled)
-    {
-        var si = DashboardData.AllNodes;
-        <header class="properties">@DashboardData.DataProviders.GetWorstStatus().IconSpan() Dashboard</header>
-        <section class="properties">
-            <ul>
-                <li>Excluded: <span class="value">"@s.Dashboard.ExcludePattern"</span></li>
-                @foreach (var p in DashboardData.DataProviders)
-                {
-                <li>Provider: @p.IconSpan() @p.Name
-                    <ul class="sub-list">
-                        <li>Type: <span class="value">@p.NodeType</span></li>
-                        <li>Query Timeout (ms): <span class="value">@p.QueryTimeoutMs.ToComma()</span></li>
-                        <li>Nodes: <span class="value">@p.AllNodes.Count.ToComma()</span></li>
-                        <li>Interfaces: <span class="value">@p.AllInterfaces.Count.ToComma()</span></li>
-                        <li>Volumes: <span class="value">@p.AllVolumes.Count.ToComma()</span></li>
-                        <li>Applications: <span class="value">@p.AllApplications.Count.ToComma()</span></li>
-                    </ul>
-                </li>
-                }
-            </ul>
-        </section>
-    }
-    @helper SQLInstanceList(SQLInstance instance)
-    {
-        var props = instance.ServerProperties.SafeData(true);
-        var features = instance.ServerFeatures.SafeData();
-        <li>@instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
-            <ul class="sub-list">
-                <li>
-                    Features:
-                    @if (features == null)
+<h5 class="page-header">
+    @SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span>
+</h5>
+<div class="row small">
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Info</div>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4">
+                    @rev
+                    <label>App Version</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @buildDate.ToRelativeTimeSpan()
+                    <label>Last Built</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @GlobalApplication.StartDate.ToRelativeTimeSpan()
+                    <label>Uptime</label>
+                </div>
+                <div class="value-block col-xs-6">
+                    @Environment.MachineName
+                    <label>Server</label>
+                </div>
+                <div class="value-block col-xs-6">
+                    Sync: @cacheStats.Item1.ToComma(), Async: @cacheStats.Item2.ToComma(), Errored: @cacheStats.Item3.ToComma()
+                    <label>Get-Set Cache</label>
+                </div>
+            </div>
+        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">Settings</div>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4">
+                    <form method="POST" action="~/set-theme" class="form-group-sm">
+                        <select class="js-theme form-control" name="theme">
+                            @foreach (var t in Theme.Options)
+                            {
+                                <option value="@t" selected="@(t == currentTheme ? "selected" : null)">@t@(t == Theme.Default ? " (Default)" : null)</option>
+                            }
+                        </select>
+                    </form>
+                    <label>Current Theme</label>
+                </div>
+            </div>
+        </div>
+        <script>
+            $('.js-theme').change(function () {
+                this.form.submit();
+            });
+        </script>
+        <div class="panel panel-default">
+            <div class="panel-heading">Sections</div>
+            <div class="panel-body">
+                @EnabledLabel("Dashboard", s.Dashboard.Enabled)
+                @EnabledLabel("Exceptions", s.Exceptions.Enabled)
+                @EnabledLabel("SQL", s.SQL.Enabled)
+                @EnabledLabel("Redis", s.Redis.Enabled)
+                @EnabledLabel("Elastic", s.Elastic.Enabled)
+                @EnabledLabel("HAProxy", s.HAProxy.Enabled)
+                @EnabledLabel("HAProxy Traffic", s.HAProxy.Traffic.Enabled)
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Polling</div>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4 @(pollingInfo.BackgroundClass())">
+                    @(pollingInfo.IsAlive ? "Alive" : "Dead")
+                    <label>Thread</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.StartTime.ToRelativeTimeSpan()
+                    <label>Started</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @(pollingInfo.LastPollAll?.ToRelativeTimeSpan())
+                    <label>Last Poll</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollers.ToComma()
+                    <label>Pollers</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollIntervals.ToComma()
+                    <label>Poll Intervals</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @pollingInfo.TotalPollers.ToComma()
+                    <label>Caches <span class="text-muted">(<a href="@Url.Action(nameof(HomeController.AboutCaches))">view</a>)</span></label>
+                </div>
+                <h6 class="page-header">@pollingInfo.NodeCount.ToComma() Nodes</h6>
+                <ul class="list-group">
+                    @foreach (var ng in pollingInfo.NodeBreakdown)
                     {
-                        <span class="warning">Error Fetching Features</span>
+                        <li class="list-group-item">
+                            <span class="badge">@ng.Item2.ToComma()</span>
+                            @ng.Item1.Name.Replace("StackExchange.Opserver.Data.", "")
+                        </li>
                     }
-                    else
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">Security</div>
+            <div class="panel-body small">
+                <div class="value-block col-xs-4 @((SecuritySettings.Current.Enabled ? MonitorStatus.Good : MonitorStatus.Warning).BackgroundClass())">
+                    @(SecuritySettings.Current.Enabled ? "Enabled" : "Disabled")
+                    <label>Security</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @Current.User.AccountName
+                    <label>Current User</label>
+                </div>
+                <div class="value-block col-xs-4">
+                    @Current.RequestIP
+                    <label>Request IP</label>
+                </div>
+                <ul class="list-group col-xs-12">
+                    <li class="list-group-item">
+                        <span class="text-muted">Current Roles:</span>
+                        @if (Current.User.IsGlobalAdmin)
+                        {
+                            <strong class="text-success">Global Admin</strong>
+                        }
+                        else
+                        {
+                            @Current.User.Role
+                        }
+                    </li>
+                    <li class="list-group-item">
+                        <span class="badge">@Current.Security.InternalNetworks.Count.ToComma()</span>
+                        <span class="text-muted">Internal Networks</span>
+                    </li>
+                    <li class="list-group-item">
+                        <span class="text-muted">Admins:</span> @(SiteSettings.AdminGroups?.Replace(";", ", "))
+                    </li>
+                    <li class="list-group-item">
+                        <span class="text-muted">Viewers:</span> @(SiteSettings.ViewGroups?.Replace(";", ", "))
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        @if (s.Dashboard.Enabled)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading">Dashboard</div>
+                <div class="panel-body">
+                    @foreach (var p in DashboardModule.Providers)
                     {
-                        <ul class="sub-list">
-                            <li>sp_WhoIsActive: <span class="value">@features.HasSPWhoIsActive</span></li>
-                            <li>sp_Blitz: <span class="value">@features.HasSPBlitz</span></li>
-                            <li>sp_BlitzIndex: <span class="value">@features.HasSPBlitzIndex</span></li>
-                            <li>sp_AskBrent: <span class="value">@features.HasSPAskBrent</span></li>
+                        <h6 class="page-header">@p.IconSpan() @p.Name</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <span class="badge">@p.AllNodes.Count.ToComma()</span>
+                                Nodes
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">@p.AllNodes.Sum(n => n.Interfaces?.Count).ToComma()</span>
+                                Interfaces
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">@p.AllNodes.Sum(n => n.Volumes?.Count).ToComma()</span>
+                                Volumes
+                            </li>
+                            <li class="list-group-item">
+                                <span class="badge">@p.AllNodes.Sum(n => n.Apps?.Count).ToComma()</span>
+                                Applications
+                            </li>
                         </ul>
                     }
-                </li>
-            </ul>
-        </li>
-    }
-    @if(s.SQL.Enabled) {
-        var clusters = SQLCluster.AllClusters;
-        var instances = SQLInstance.AllStandalone;
-        <header class="properties">@instances.GetWorstStatus().IconSpan() SQL Instances</header>
-        <section class="properties">
-            <ul>
-                <li>Clusters:
-                    <ul class="sub-list">
-                        @foreach (var cluster in clusters)
-                        {
-                            <li>@cluster.IconSpan() <span class="value">@cluster.Name</span>
-                                <ul class="sub-list">
-                                    @foreach (var node in cluster.Nodes)
-                                    {
-                                        @SQLInstanceList(node)
-                                    }
-                                </ul>
-                            </li>
-                        }
-                    </ul>
-                </li>
-                <li>Standalone nodes:
-                    <ul class="sub-list">
+                </div>
+            </div>
+        }
+    </div>
+    @helper SQLInstanceList(SQLInstance instance)
+    {
+var props = instance.ServerProperties.SafeData(true);
+var features = instance.ServerFeatures.SafeData();
+    <li class="list-group-item" title="Features:
+@if (features == null)
+{
+@:Error Fetching Features
+}
+else
+{
+<text>
+sp_WhoIsActive: @features.HasSPWhoIsActive.ToString()
+sp_Blitz: @features.HasSPBlitz.ToString()
+sp_BlitzIndex: @features.HasSPBlitzIndex.ToString()
+sp_AskBrent: @features.HasSPAskBrent.ToString()
+</text>
+}">
+        @instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
+    </li>
+}
+    @if (s.SQL.Enabled)
+    {
+        var clusters = SQLModule.Clusters;
+        var instances = SQLModule.StandaloneInstances;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@instances.GetWorstStatus().RawClass(showGood: true)">
+                <div class="panel-heading">SQL Instances</div>
+                <div class="panel-body small">
+                    <h6 class="page-header">@clusters.Count.Pluralize("Availability Group Cluster")</h6>
+                    @foreach (var cluster in clusters)
+                    {
+                        <h6>@cluster.IconSpan() @cluster.Name</h6>
+                        <ul class="list-group">
+                            @foreach (var node in cluster.Nodes)
+                            {
+                                @SQLInstanceList(node)
+                            }
+                        </ul>
+                    }
+                    <h6 class="page-header">@instances.Count.Pluralize("Standalone Node")</h6>
+                    <ul class="list-group">
                         @foreach (var instance in instances)
                         {
                             @SQLInstanceList(instance)
                         }
                     </ul>
-                </li>
-            </ul>
-        </section>
+                </div>
+            </div>
+        </div>
     }
-    @if(s.Exceptions.Enabled)
+    @if (s.Exceptions.Enabled)
     {
-        var apps = ExceptionStores.Applications;
-        <header class="properties">@ExceptionStores.MonitorStatus.IconSpan() Exceptions</header>
-        <section class="properties">
-            <ul>
-                @if(@s.Exceptions.AdminGroups.HasValue())
-                {
-                    <li>Admins: <span class="value">@s.Exceptions.AdminGroups</span></li>
-                }
-                @if(@s.Exceptions.ViewGroups.HasValue())
-                {
-                    <li>Viewers: <span class="value">@s.Exceptions.ViewGroups</span></li>
-                }
-                <li>Previews: <span class="value">@s.Exceptions.EnablePreviews</span></li>
-                <li>RecentSeconds: <span class="value">@s.Exceptions.RecentSeconds</span></li>
-                <li>WarningCount: <span class="value">@s.Exceptions.WarningCount</span></li>
-                <li>CriticalCount: <span class="value">@s.Exceptions.CriticalCount</span></li>
-                <li>WarningRecentCount: <span class="value">@s.Exceptions.WarningRecentCount</span></li>
-                <li>CriticalRecentCount: <span class="value">@s.Exceptions.CriticalRecentCount</span></li>
-                <li>Stores: <span class="value">@s.Exceptions.Stores.Count</span>
-                    <ul class="sub-list">
-                        @foreach(var store in s.Exceptions.Stores)
-                        {
-                            var es = ExceptionStores.Stores.First(ess => ess.Name == store.Name);
-                            <li>@es.LastFetch.IconSpan() <span class="value">@store.Name</span> - Timeout: @(store.QueryTimeoutMs.ToComma())ms - PollInterval: @(store.PollIntervalSeconds.ToComma())s
-                                <ul class="sub-list">
-                                    @foreach(var app in apps.Where(a => a.StoreName == store.Name))
-                                    {
-                                        <li>@app.Name: <span class="value">@app.ExceptionCount</span></li>
-                                    }
-                                </ul>
+        var exceptionStatus = ExceptionStores.MonitorStatus;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@exceptionStatus.RawClass(showGood: true)">
+                <div class="panel-heading">Exceptions</div>
+                <div class="panel-body small">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span class="text-muted">Admins:</span>
+                            @((s.Exceptions.AdminGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Viewers:</span>
+                            @((s.Exceptions.ViewGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge@(s.Exceptions.EnablePreviews ? "" : " alert-warning")">@s.Exceptions.EnablePreviews</span>
+                            Previews
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">@s.Exceptions.RecentSeconds.Pluralize("Second")</span>
+                            Recent Threshold
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge alert-warning">@s.Exceptions.WarningCount.ToComma() / @s.Exceptions.WarningRecentCount.ToComma() Recent</span>
+                            Warning Thresholds
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge alert-danger">@s.Exceptions.CriticalCount.ToComma() / @s.Exceptions.CriticalRecentCount.ToComma() Recent</span>
+                            Critical Thresholds
+                        </li>
+                    </ul>
+                    @foreach (var store in s.Exceptions.Stores)
+                    {
+                        var es = ExceptionsModule.Stores.First(ess => ess.Name == store.Name);
+                        <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <span class="badge">@(store.QueryTimeoutMs.ToComma())ms</span>
+                                Timeout
                             </li>
-                        }
-                    </ul>
-                </li>
-
-            </ul>
-        </section>
-    }
-    @if(s.HAProxy.Enabled)
-    {
-        <header class="properties">@HAProxyGroup.AllGroups.GetWorstStatus().IconSpan() HAProxy</header>
-        <section class="properties">
-            <ul>
-                @if(@s.HAProxy.AdminGroups.HasValue())
-                {
-                    <li>Admins: <span class="value">@s.HAProxy.AdminGroups</span></li>
-                }
-                @if (@s.HAProxy.ViewGroups.HasValue())
-                {
-                    <li>Viewers: <span class="value">@s.HAProxy.ViewGroups</span></li>
-                }
-                <li>User: <span class="value">@s.HAProxy.User</span></li>
-                <li>Query Timeout: <span class="value">@s.HAProxy.QueryTimeoutMs</span></li>
-
-                
-                <li>Instances: <span class="value">@s.HAProxy.Instances.Count</span>
-                    <ul class="sub-list">
-                        @foreach (var hap in HAProxyGroup.AllGroups.SelectMany(g => g.Instances))
-                        {
-                            <li>@hap.IconSpan() <span class="value">@hap.Name</span> @hap.Url - Timeout: @(hap.QueryTimeoutMs.GetValueOrDefault().ToComma())ms</li>
-                        }
-                    </ul>
-                </li>
-            </ul>
-        </section>
-    }
-    @if(s.TeamCity.Enabled)
-    {
-        var projects = BuildStatus.GetAllProjects();
-        var configs = BuildStatus.Configs;
-        <header class="properties">TeamCity</header>
-        <section class="properties">
-            <ul>
-                <li>Url: <span class="value">@s.TeamCity.Url</span></li>
-                <li>User: <span class="value">@s.TeamCity.User</span></li>
-                <li>Fetch: <span class="value">@BuildStatus.LastFetch</span></li>
-                <li>Fetch Interval: <span class="value">@s.TeamCity.BuildFetchIntervalSeconds</span></li>
-                <li>Projects: <span class="value">@projects.Count</span></li>
-                <li>Build Configs: <span class="value">@configs.Count</span></li>
-                <li>Build Mapped Servers: <span class="value">@s.TeamCity.ServerMaps.Count</span>
-                    <ul class="sub-list">
-                        @foreach(var map in s.TeamCity.ServerMaps)
-                        {
-                            <li><span class="value">@map.Key</span>
-                                <ul class="sub-list">
-                                    @foreach(var config in BuildStatus.GetBuildConfigsByServer(map.Key))
-                                    {
-                                        <li>@config.ProjectName - @config.Name (@config.Id)</li>
-                                    }
-                                </ul>
+                            <li class="list-group-item">
+                                <span class="badge">@(store.PollIntervalSeconds.ToComma())s</span>
+                                Poll Interval
                             </li>
-                        }
-                    </ul>
-                </li>
-            </ul>
-        </section>
+                            <li class="list-group-item">
+                                <span class="badge">@(es.Applications.Data?.Sum(a => a.ExceptionCount).ToComma() ?? "0")</span>
+                                Exception Count
+                            </li>
+                        </ul>
+                    }
+                </div>
+            </div>
+        </div>
     }
-</section>
-
-<div class="bottom-links">
-    <a href="~/">Home</a>
-</div>
+    @if (s.HAProxy.Enabled)
+    {
+        var groups = HAProxyModule.Groups;
+        <div class="col-md-4">
+            <div class="panel panel-default panel-@HAProxyModule.Groups.GetWorstStatus().RawClass(showGood: true)">
+                <div class="panel-heading">HAProxy</div>
+                <div class="panel-body small">
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <span class="text-muted">Admins:</span>
+                            @((s.HAProxy.AdminGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">Viewers:</span>
+                            @((s.HAProxy.ViewGroups ?? "None").ColorCode())
+                        </li>
+                        <li class="list-group-item">
+                            <span class="text-muted">User:</span>
+                            @s.HAProxy.User
+                        </li>
+                        <li class="list-group-item">
+                            <span class="badge">@(s.HAProxy.QueryTimeoutMs.ToComma())ms</span>
+                            Timeout
+                        </li>
+                    </ul>
+                    @if (groups.Count > 0)
+                    {
+                        foreach (var g in groups)
+                        {
+                            <h6 class="page-header">@g.IconSpan() @g.Name</h6>
+                            <ul class="list-group">
+                                @foreach (var i in g.Instances)
+                                {
+                                    <li class="list-group-item">
+                                        @i.IconSpan() <span class="text-muted">@i.Name:</span> @i.Url
+                                    </li>
+                                }
+                            </ul>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    }
 </div>

@@ -4,93 +4,94 @@
     Layout = null;
     var clients = Model.Clients.SafeData(true);
 }
+<h4 class="modal-title">
+    @clients.Count.ToComma() Clients
+</h4>
 @if (clients.Any())
 {
-    <div class="summary-dashboard">
-        <h3>
-            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> @clients.Count Clients
-        </h3>
-        <div>
-            <table id="clients-table" data-node="@Model.Host:@Model.Port">
-                <thead>
-                    <tr>
-                        <th>Address</th>
-                        <th>Server</th>
-                        <th>Name</th>
-                        <th>DB</th>
-                        <th>Flags</th>
-                        <th>Subs</th>
-                        <th>Connected</th>
-                        <th>Idle</th>
-                        <th>Last Command</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in clients)
+    <table class="clients-table table table-striped table-responsive table-super-condensed table-hover" data-node="@Model.HostAndPort">
+        <thead>
+            <tr>
+                <th>Address</th>
+                <th>Server</th>
+                <th>Name</th>
+                <th>DB</th>
+                <th>Flags</th>
+                <th>Subs</th>
+                <th>Connected</th>
+                <th>Idle</th>
+                <th>Last Command</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in clients)
+            {
+                var ip = c.Host;
+                var server = Model.GetServerName(ip);
+                <tr title="@c.Raw">
+                    <td>
+                        @if ((c.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)
+                        {
+                            <a class="hover-pulsate js-kill-client" href="#" data-addr="@c.Address"><i class="fa fa-times text-danger" aria-hidden="true"></i></a>
+                        }
+                        @(c.Address)
+                    </td>
+                    <td>@(server.HasValue() ? server : "unknown")</td>
+                    <td>@c.Name</td>
+                    <td>@c.Database.ToString()</td>
+                    @if (c.Flags != ClientFlags.None)
                     {
-                        var ip = c.Host;
-                        var server = Model.GetServerName(ip);
-                        <tr title="@c.Raw">
-                            <td>@(c.Address)@if ((c.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)
-                                {
-                                    <a class="kill-client" href="#" data-addr="@c.Address">&times;</a>
-                                }</td>
-                            <td>@(server.HasValue() ? server : "unknown")</td>
-                            <td>@c.Name</td>
-                            <td>@c.Database</td>
-                            @if (c.Flags != ClientFlags.None)
-                            {
-                                <td>@c.Flags.ToString()</td>
-                            }
-                            else
-                            {
-                                <td class="note">none</td>
-                            }
-                            <td data-val="@(c.SubscriptionCount + c.PatternSubscriptionCount)">@c.SubscriptionCount.ToComma() <span class="note">(@c.PatternSubscriptionCount.ToComma())</span></td>
-                            <td data-val="@c.AgeSeconds">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
-                            <td data-val="@c.IdleSeconds">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
-                            <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>
-                        </tr>
+                        <td>@c.Flags.ToString()</td>
                     }
-                </tbody>
-            </table>
-        </div>
-        <script>
-            $(function() {
-                $('#clients-table').tablesorter({
-                    headers: {
-                        3: { sorter: 'number' },
-                        5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                        6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                        7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
-                    }
-                });
-                $('.kill-client').click(function (e) {
-
-                    var anchor = $(this);
-                    var node = anchor.closest('#clients-table').data('node');
-                    var address = anchor.data('addr');
-                    if (node && address && confirm('Kill the connection ' + address + ' ?'))
+                    else
                     {
-                        $.ajax('/redis/instance/kill-client', {
-                            type: 'POST',
-                            data: {
-                                node: node,
-                                address: address
-                            },
-                            success: function (data) {
-                                if (data && data.success) {
-                                    anchor.closest('tr').find('td').css('text-decoration', 'line-through');
-                                    anchor.remove();
-                                }
-                            }   
-                        });
+                        <td class="text-muted">none</td>
                     }
-                    e.preventDefault();
-                })
+                    <td data-val="@((c.SubscriptionCount + c.PatternSubscriptionCount).ToString())">@c.SubscriptionCount.ToComma() <span class="text-muted">(@c.PatternSubscriptionCount.ToComma())</span></td>
+                    <td data-val="@c.AgeSeconds.ToString()">@DateTime.UtcNow.AddSeconds(-c.AgeSeconds).ToRelativeTimeMini(includeTimeForOldDates: false)</td>
+                    <td data-val="@c.IdleSeconds.ToString()">(@DateTime.UtcNow.AddSeconds(-c.IdleSeconds).ToRelativeTimeMini(includeTimeForOldDates: false, includeAgo: false))</td>
+                    <td title="@c.LastCommand">@c.LastCommand.TruncateWithEllipsis(200)</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <script>
+        $(function() {
+            $('.clients-table').tablesorter({
+                headers: {
+                    3: { sorter: 'number' },
+                    5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    7: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                }
             });
-        </script>
-    </div>
+            $('.js-kill-client').click(function(e) {
+                var anchor = $(this);
+                var node = anchor.closest('.clients-table').data('node');
+                var address = anchor.data('addr');
+                if (node && address && (e.ctrlKey || confirm('Kill the connection ' + address + ' ?'))) {
+                    anchor.addClass('icon-rotate-flip');
+                    $.ajax('/redis/instance/kill-client', {
+                        type: 'POST',
+                        data: {
+                            node: node,
+                            address: address
+                        },
+                        success: function(data) {
+                            if (data && data.success) {
+                                anchor.closest('tr').addClass('danger');
+                                anchor.remove();
+                            }
+                        },
+                        complete: function() {
+                            anchor.removeClass('icon-rotate-flip');
+                        }
+                    });
+                }
+                e.preventDefault();
+            });
+        });
+    </script>
 }
 else
 {

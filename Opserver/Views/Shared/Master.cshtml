@@ -1,8 +1,7 @@
 ﻿@using System.Web.Optimization
+@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Shared
 @{
-    var mt = ViewData[ViewDataKeys.MainTab];
-    var tab = mt != null ? (MainTab)mt : MainTab.None;
     var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
 }
 <!DOCTYPE html>
@@ -10,66 +9,73 @@
 <head>
     <title>@Html.Raw((string)ViewData[ViewDataKeys.PageTitle])</title>
     <meta name="viewport" content="width=device-width">
-    <link href="@Url.CacheBreaker("/Content/Styles.css")" rel="stylesheet" type="text/css" />
-    <link href="@Url.CacheBreaker("/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="google" value="notranslate" />
+    <link rel="stylesheet" href="@HtmlUtils.CacheBreaker("~/Content/themes/" + Theme.Current + "/styles.min.css")">
+    <link href="@HtmlUtils.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon"/>
+    <script src="@HtmlUtils.CacheBreaker("~/Content/js/jquery-1.11.3.min.js")"></script>
     @Scripts.Render("~/scripts/plugins.js")    @Scripts.Render("~/scripts/scripts.js")    <script>
         $(function() {
-            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@tab', HeaderRefresh: 10 });
-            @if (topNodes != null && topNodes.AllNodes != null && topNodes.AllNodes.Any())
+            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@TopTabs.CurrentTab', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
+            @if (topNodes?.AllNodes?.Any() ?? false)
             {
                 var serverJson = topNodes.AllNodes.Select(n => new
                     {
-                        name = n.DisplayName,
-                        node = n.Name,
-                        sClass = n.MonitorStatus.Class(),
+                        label = n.DisplayName,
+                        value = n.Name,
+                        icon = n.MonitorStatus.TextClass(showGood: true),
                         category = n.CategoryName
-                    }).OrderBy(n => n.category).ThenBy(n => n.node);
+                    }).OrderBy(n => n.category).ThenBy(n => n.label);
                 @:Status.NodeSearch.init({ nodes: @Json.Encode(serverJson).AsHtml() });
             }
         });
     </script>    @RenderSection("head", false)    @StackExchange.Profiling.MiniProfiler.RenderIncludes()
 </head>
-    <body class="@(Current.IsMobile ? "mobile" : "")">
-        <div class="top-bar">
-            @Html.Partial("~/Views/Shared/TopTabs.cshtml", tab)
-            <a href="/hub" class="logo"></a>
-            <div class="top-nodes">
-                @if (topNodes != null)
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#topbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="~/hub"></a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="topbar-collapse">
+                @Html.Partial("IssuesButton")
+                @if (topNodes?.SearchOnly ?? false)
                 {
-                    if (topNodes.SearchOnly)
-                    {
-                        <div class="ddl">
-                            <form action="@topNodes.Url" method="GET">
-                                <input type="text" class="node-ddl search-ddl" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@topNodes.SearchValue" name="q" />
-                                @if (topNodes.SearchParams != null)
-                                {
-                                    foreach (var p in topNodes.SearchParams)
-                                    {
-                                        <input type="hidden" name="@p.Key" value="@p.Value" />
-                                    }
-                                }
-                            </form>
+                    <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">
+                        <div class="form-group-sm">
+                            <input type="text" class="form-control js-filter" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@topNodes.SearchValue" name="@topNodes.QueryParam" />
                         </div>
-                    }
-                    else
-                    {
-                        var s = topNodes.CurrentNode;
-                        if (topNodes.AllNodes != null && topNodes.AllNodes.Any())
+                        @if (topNodes.SearchParams != null)
                         {
-                        <div class="ddl">
-                            <form action="@topNodes.Url" method="GET">
-                                <input type="text" class="node-ddl@(s != null ? " left-icon " + s.MonitorStatus.Class() : "")" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@(s != null ? s.DisplayName : "")" name="node" />
-                            </form>
-                        </div>
+                            foreach (var p in topNodes.SearchParams)
+                            {
+                                <input type="hidden" name="@p.Key" value="@p.Value" />
+                            }
                         }
-                    }
-                    @Html.Partial("IssuesList")
+                    </form>
                 }
+                else if (topNodes?.AllNodes?.Any() ?? false)
+                {
+                    var s = topNodes.CurrentNode;
+                    <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">
+                        <div class="form-group-sm">
+                            <input type="text" class="form-control js-filter@(s != null ? " left-icon " + s.MonitorStatus.TextClass() : "")" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@(s?.DisplayName)" name="node" />
+                        </div>
+                    </form>
+                }
+                @Html.Partial("~/Views/Shared/TopTabs.cshtml")
             </div>
         </div>
-        <div id="content">
-            @RenderBody()
-        </div>
-    </body>
+    </nav>
+<div class="container-fluid js-content">
+    @RenderBody()
+</div>
+</body>
 </html>

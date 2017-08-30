@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data
 {
     public class SearchResult<T> : SearchResult
     {
-        [JsonIgnore]
+        [IgnoreDataMember]
         public T Item { get; set; }
     }
 

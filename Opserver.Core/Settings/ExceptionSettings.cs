@@ -1,81 +1,72 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver
 {
-    public class ExceptionsSettings : Settings<ExceptionsSettings>, IAfterLoadActions
+    public class ExceptionsSettings : Settings<ExceptionsSettings>
     {
-        public override bool Enabled { get { return Stores.Any(); } }
+        public override bool Enabled => Stores.Count > 0;
 
-        public ObservableCollection<Store> Stores { get; set; }
-        public event EventHandler<Store> StoreAdded = delegate { };
-        public event EventHandler<List<Store>> StoresChanged = delegate { };
-        public event EventHandler<Store> StoreRemoved = delegate { };
+        public List<Store> Stores { get; set; } = new List<Store>();
 
-        public ObservableCollection<string> Applications { get; set; }
-        public event EventHandler<string> ApplicationAdded = delegate {};
-        public event EventHandler<List<string>> ApplicationsChanged = delegate {};
-        public event EventHandler<string> ApplicationRemoved = delegate { };
-        
-        public ExceptionsSettings()
-        {
-            // Defaults
-            RecentSeconds = 600;
-            EnablePreviews = true;
-            Applications = new ObservableCollection<string>();
-            Stores = new ObservableCollection<Store>();
-        }
+        public List<ExceptionsGroup> Groups { get; set; } = new List<ExceptionsGroup>();
 
-        public void AfterLoad()
-        {
-            Applications.AddHandlers(this, ApplicationAdded, ApplicationsChanged, ApplicationRemoved);
-            Stores.AddHandlers(this, StoreAdded, StoresChanged, StoreRemoved);
-        }
+        public List<string> Applications { get; set; } = new List<string>();
+
+        public List<StackTraceSourceLinkPattern> StackTraceReplacements { get; set; } = new List<StackTraceSourceLinkPattern>();
 
         /// <summary>
-        /// How many exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
+        /// How many exceptions before the exceptions are highlighted as a warning in the header, null (default) is ignored
         /// </summary>
-        public int WarningCount { get; set; }
+        public int? WarningCount { get; set; }
 
         /// <summary>
-        /// How many exceptions before the exceptions are highlighted as critical in the header, 0 (default) is ignored
+        /// How many exceptions before the exceptions are highlighted as critical in the header, null (default) is ignored
         /// </summary>
-        public int CriticalCount { get; set; }
+        public int? CriticalCount { get; set; }
 
         /// <summary>
         /// How many seconds a error is considered "recent"
         /// </summary>
-        public int RecentSeconds { get; set; }
+        public int RecentSeconds { get; set; } = 600;
 
         /// <summary>
-        /// How many recent exceptions before the exceptions are highlighted as a warning in the header, 0 (default) is ignored
+        /// How many recent exceptions before the exceptions are highlighted as a warning in the header, null (default) is ignored
         /// </summary>
-        public int WarningRecentCount { get; set; }
+        public int? WarningRecentCount { get; set; }
 
         /// <summary>
-        /// How many recent exceptions before the exceptions are highlighted as critical in the header, 0 (default) is ignored
+        /// How many recent exceptions before the exceptions are highlighted as critical in the header, null (default) is ignored
         /// </summary>
-        public int CriticalRecentCount { get; set; }
+        public int? CriticalRecentCount { get; set; }
 
         /// <summary>
         /// Default maximum timeout in milliseconds before giving up on an sources
         /// </summary>
-        public bool EnablePreviews { get; set; }
+        public bool EnablePreviews { get; set; } = true;
 
-        public class Store : ISettingsCollectionItem<Store>
+        /// <summary>
+        /// Count to cache in memory per app, defaults to 5000
+        /// </summary>
+        public int PerAppCacheCount { get; set; } = 5000;
+
+        public class ExceptionsGroup : ISettingsCollectionItem
         {
-            public Store()
-            {
-                PollIntervalSeconds = 5*60;
-            }
+            /// <summary>
+            /// The name that appears for this group, used as a key for applications
+            /// </summary>
+            public string Name { get; set; }
+            public string Description { get; set; }
+            public List<string> Applications { get; set; } = new List<string>();
+        }
 
+        public class Store : ISettingsCollectionItem
+        {
             /// <summary>
             /// The name that appears for this store, used as a key for applications
             /// </summary>
             public string Name { get; set; }
-
             public string Description { get; set; }
 
             /// <summary>
@@ -86,41 +77,58 @@ namespace StackExchange.Opserver
             /// <summary>
             /// How often to poll this store
             /// </summary>
-            public int PollIntervalSeconds { get; set; }
+            public int PollIntervalSeconds { get; set; } = 300;
 
             /// <summary>
             /// Connection string for this store's database
             /// </summary>
             public string ConnectionString { get; set; }
+        }
 
-            public bool Equals(Store other)
-            {
-                return string.Equals(Name, other.Name)
-                       && string.Equals(Description, other.Description)
-                       && QueryTimeoutMs == other.QueryTimeoutMs
-                       && PollIntervalSeconds == other.PollIntervalSeconds
-                       && string.Equals(ConnectionString, other.ConnectionString);
-            }
+        public class StackTraceSourceLinkPattern : ISettingsCollectionItem
+        {
+            /// <summary>
+            /// The name of the deep link pattern.
+            /// </summary>
+            public string Name { get; set; }
 
-            public override bool Equals(object obj)
-            {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != GetType()) return false;
-                return Equals((Store) obj);
-            }
+            /// <summary>
+            /// A regular expression for detecting links in stack traces.
+            /// Used in conjuction with <see cref="Replacement"/>.
+            /// </summary>
+            public string Pattern { get; set; }
 
-            public override int GetHashCode()
+            /// <summary>
+            /// A replacement pattern for rendering links from a <see cref="Pattern"/> match.
+            /// matches via <see cref="Regex.Replace(string, string, string)"/>.
+            /// </summary>
+            public string Replacement { get; set; }
+
+            private static readonly Regex DontMatchAnything = new Regex("(?!)");
+
+            private Regex _regex;
+            public Regex RegexPattern()
             {
-                unchecked
+                if (_regex == null)
                 {
-                    int hashCode = (Name != null ? Name.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ (Description != null ? Description.GetHashCode() : 0);
-                    hashCode = (hashCode*397) ^ QueryTimeoutMs.GetHashCode();
-                    hashCode = (hashCode*397) ^ PollIntervalSeconds;
-                    hashCode = (hashCode*397) ^ (ConnectionString != null ? ConnectionString.GetHashCode() : 0);
-                    return hashCode;
+                    if (Pattern.HasValue())
+                    {
+                        try
+                        {
+                            _regex = new Regex(Pattern, RegexOptions.Compiled | RegexOptions.Multiline | RegexOptions.CultureInvariant);
+                        }
+                        catch (Exception ex)
+                        {
+                            Current.LogException($"Unable to parse source link pattern for '{nameof(Name)}': '{Pattern}'", ex);
+                            _regex = DontMatchAnything;
+                        }
+                    }
+                    else
+                    {
+                        _regex = DontMatchAnything;
+                    }
                 }
+                return _regex;
             }
         }
     }

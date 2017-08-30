@@ -1,33 +1,31 @@
-﻿@model StackExchange.Opserver.Views.Elastic.DashboardModel.CurrentData
+﻿@using Jil
+@model StackExchange.Opserver.Views.Elastic.DashboardModel
 @{
     Layout = null;
-    var settings = Model.Node != null && Model.Node.Info != null ? Model.Node.Info.Settings : new Dictionary<string, dynamic>();
+    var settings = Model.CurrentNode?.Settings ?? new Dictionary<string, dynamic>();
 }
+<h4 class="modal-title">
+    Node Settings
+</h4>
 @if (settings.Any())
 {
-    <div class="summary-dashboard">
-        <h3>
-            <a href="/elastic/node?cluster=@Model.ClusterName&node=@Model.NodeName">@Model.ClusterName: @Model.NodeName</a><span class="note">:</span> Settings</h3>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Setting</th>
-                        <th>Value</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var s in settings.OrderBy(s => s.Key))
-                    {
-                        <tr>
-                            <td>@s.Key</td>
-                            <td>@Jil.JSON.Serialize(s.Value)</td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <table class="table table-striped table-responsive table-super-condensed">
+        <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in settings.OrderBy(s => s.Key))
+        {
+            <tr>
+                <td>@s.Key</td>
+                <td class="json-pretty">@JSON.Serialize(s.Value, Options.ISO8601PrettyPrint)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
 }
 else
 {

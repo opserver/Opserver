@@ -1,0 +1,173 @@
+﻿/* SQL Server Query Plans */
+.qp-tt {
+    top: 4em;
+    left: 2em;
+    border: 1px solid black;
+    background-color: #FFFFEE;
+    padding: 2px;
+    position: absolute;
+    display: none;
+    z-index: 1;
+    white-space: normal;
+    font-size: 11px;
+
+    &.sql-query-tooltip {
+        z-index: 1100;
+    }
+
+    div, table {
+        font-family: Sans-Serif;
+        text-align: left;
+    }
+
+    table {
+        border-width: 0;
+        border-spacing: 0;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    td, th {
+        font-size: 11px;
+        border-bottom: solid 1px Black;
+        padding: 1px;
+    }
+
+    td {
+        text-align: right;
+        padding-left: 10px;
+    }
+
+    th {
+        text-align: left;
+    }
+    .qp-bold {
+        font-weight: bold;
+    }
+    .qp-tt-header
+    {
+	    text-align: center;
+	    font-weight: bold;
+    }
+}
+
+.sql-query-plan {
+    div.qp-node {
+	    background-color: #FFFFF4;
+	    margin: 2px;
+	    padding: 2px;
+	    border: 1px solid #CCC;
+	    font-size: 11px;
+	    line-height: normal;
+    }
+    .qp-node > div {
+	    font-family: Consolas, Monospace;
+	    text-align: center;
+    }
+    div[class|='qp-icon'] {
+	    height: 16px;
+	    width: 16px;
+	    margin-left: auto;
+	    margin-right: auto;
+	    background-repeat: no-repeat;
+      background-size: 16px 16px;
+    }    
+    .qp-bold {
+	    font-weight: bold;
+    }
+
+    /* Icons */
+    .qp-icon-Catchall{background-image:url('../../img/query-plan/bitmap.gif')}
+    .qp-icon-ArithmeticExpression{background-image:url('../../img/query-plan/arithmetic_expression.gif')}
+    .qp-icon-Assert{background-image:url('../../img/query-plan/assert.gif')}
+    .qp-icon-Assign{background-image:url('../../img/query-plan/assign.gif')}
+    .qp-icon-Bitmap{background-image:url('../../img/query-plan/bitmap.gif')}
+    .qp-icon-BookmarkLookup{background-image:url('../../img/query-plan/bookmark_lookup.gif')}
+    .qp-icon-ClusteredIndexDelete{background-image:url('../../img/query-plan/clustered_index_delete.gif')}
+    .qp-icon-ClusteredIndexInsert{background-image:url('../../img/query-plan/clustered_index_insert.gif')}
+    .qp-icon-ClusteredIndexScan{background-image:url('../../img/query-plan/clustered_index_scan.gif')}
+    .qp-icon-ClusteredIndexSeek{background-image:url('../../img/query-plan/clustered_index_seek.gif')}
+    .qp-icon-ClusteredIndexUpdate{background-image:url('../../img/query-plan/clustered_index_update.gif')}
+    .qp-icon-Collapse{background-image:url('../../img/query-plan/collapse.gif')}
+    .qp-icon-ComputeScalar{background-image:url('../../img/query-plan/compute_scalar.gif')}
+    .qp-icon-Concatenation{background-image:url('../../img/query-plan/concatenation.gif')}
+    .qp-icon-ConstantScan{background-image:url('../../img/query-plan/constant_scan.gif')}
+    .qp-icon-Convert{background-image:url('../../img/query-plan/convert.gif')}
+    .qp-icon-CursorCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
+    .qp-icon-Declare{background-image:url('../../img/query-plan/declare.gif')}
+    .qp-icon-Delete{background-image:url('../../img/query-plan/table_delete.gif')}
+    .qp-icon-DistributeStreams{background-image:url('../../img/query-plan/distribute_streams.gif')}
+    .qp-icon-Dynamic{background-image:url('../../img/query-plan/dynamic.gif')}
+    .qp-icon-EagerSpool{background-image:url('../../img/query-plan/spool.gif')}
+    .qp-icon-FetchQuery{background-image:url('../../img/query-plan/fetch_query.gif')}
+    .qp-icon-Filter{background-image:url('../../img/query-plan/filter.gif')}
+    .qp-icon-GatherStreams{background-image:url('../../img/query-plan/gather_streams.gif')}
+    .qp-icon-HashMatch{background-image:url('../../img/query-plan/hash_match.gif')}
+    .qp-icon-HashMatchRoot{background-image:url('../../img/query-plan/hash_match.gif')}
+    .qp-icon-HashMatchTeam{background-image:url('../../img/query-plan/hash_match.gif')}
+    .qp-icon-If{background-image:url('../../img/query-plan/if.gif')}
+    .qp-icon-Insert{background-image:url('../../img/query-plan/table_insert.gif')}
+    .qp-icon-InsertedScan{background-image:url('../../img/query-plan/inserted_scan.gif')}
+    .qp-icon-Intrinsic{background-image:url('../../img/query-plan/intrinsic.gif')}
+    .qp-icon-IteratorCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
+    .qp-icon-Keyset{background-image:url('../../img/query-plan/keyset.gif')}
+    .qp-icon-LanguageElementCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
+    .qp-icon-LazySpool{background-image:url('../../img/query-plan/spool.gif')}
+    .qp-icon-LogRowScan{background-image:url('../../img/query-plan/log_row_scan.gif')}
+    .qp-icon-MergeInterval{background-image:url('../../img/query-plan/merge_interval.gif')}
+    .qp-icon-MergeJoin{background-image:url('../../img/query-plan/merge_join.gif')}
+    .qp-icon-NestedLoops{background-image:url('../../img/query-plan/nested_loops.gif')}
+    .qp-icon-NonclusteredIndexDelete{background-image:url('../../img/query-plan/nonclustered_index_delete.gif')}
+    .qp-icon-NonclusteredIndexInsert{background-image:url('../../img/query-plan/nonclustered_index_insert.gif')}
+    .qp-icon-NonclusteredIndexScan{background-image:url('../../img/query-plan/nonclustered_index_scan.gif')}
+    .qp-icon-IndexSeek{background-image:url('../../img/query-plan/nonclustered_index_seek.gif')}
+    .qp-icon-NonclusteredIndexSpool{background-image:url('../../img/query-plan/nonclustered_index_spool.gif')}
+    .qp-icon-NonclusteredIndexUpdate{background-image:url('../../img/query-plan/nonclustered_index_update.gif')}
+    .qp-icon-OnlineIndexInsert{background-image:url('../../img/query-plan/online_index_insert.gif')}
+    .qp-icon-ParameterTableScan{background-image:url('../../img/query-plan/parameter_table_scan.gif')}
+    .qp-icon-PopulationQuery{background-image:url('../../img/query-plan/population_query.gif')}
+    .qp-icon-RdiLookup{background-image:url('../../img/query-plan/rdi_lookup.gif')}
+    .qp-icon-RefreshQuery{background-image:url('../../img/query-plan/refresh_query.gif')}
+    .qp-icon-RemoteDelete{background-image:url('../../img/query-plan/remote_delete.gif')}
+    .qp-icon-RemoteInsert{background-image:url('../../img/query-plan/remote_insert.gif')}
+    .qp-icon-RemoteQuery{background-image:url('../../img/query-plan/remote_query.gif')}
+    .qp-icon-RemoteScan{background-image:url('../../img/query-plan/remote_scan.gif')}
+    .qp-icon-RemoteUpdate{background-image:url('../../img/query-plan/remote_update.gif')}
+    .qp-icon-RepartitionStreams{background-image:url('../../img/query-plan/repartition_streams.gif')}
+    .qp-icon-Result{background-image:url('../../img/query-plan/result.gif')}
+    .qp-icon-RowCountSpool{background-image:url('../../img/query-plan/row_count_spool.gif')}
+    .qp-icon-Segment{background-image:url('../../img/query-plan/segment.gif')}
+    .qp-icon-Sequence{background-image:url('../../img/query-plan/sequence.gif')}
+    .qp-icon-Sequenceproject{background-image:url('../../img/query-plan/sequenceproject.gif')}
+    .qp-icon-Snapshot{background-image:url('../../img/query-plan/snapshot.gif')}
+    .qp-icon-Sort{background-image:url('../../img/query-plan/sort.gif')}
+    .qp-icon-Split{background-image:url('../../img/query-plan/split.gif')}
+    .qp-icon-Spool{background-image:url('../../img/query-plan/spool.gif')}
+    .qp-icon-Statement{background-image:url('../../img/query-plan/result.gif')}
+    .qp-icon-StreamAggregate{background-image:url('../../img/query-plan/stream_aggregate.gif')}
+    .qp-icon-Switch{background-image:url('../../img/query-plan/switch.gif')}
+    .qp-icon-TableDelete{background-image:url('../../img/query-plan/table_delete.gif')}
+    .qp-icon-TableInsert{background-image:url('../../img/query-plan/table_insert.gif')}
+    .qp-icon-TableScan{background-image:url('../../img/query-plan/table_scan.gif')}
+    .qp-icon-TableSpool{background-image:url('../../img/query-plan/table_spool.gif')}
+    .qp-icon-TableUpdate{background-image:url('../../img/query-plan/table_update.gif')}
+    .qp-icon-TableValuedFunction{background-image:url('../../img/query-plan/table_valued_function.gif')}
+    .qp-icon-Top{background-image:url('../../img/query-plan/top.gif')}
+    .qp-icon-Udx{background-image:url('../../img/query-plan/udx.gif')}
+    .qp-icon-Update{background-image:url('../../img/query-plan/table_update.gif.gif')}
+    .qp-icon-While{background-image:url('../../img/query-plan/while.gif')}
+
+    .qp-node {
+	    position: relative;
+	    white-space: nowrap;
+    }
+    .qp-tr {
+	    display: table;
+    }
+    .qp-tr > div {
+	    display: table-cell;
+	    padding-left: 15px;
+    }
+}

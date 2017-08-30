@@ -7,7 +7,7 @@ namespace StackExchange.Opserver.Monitoring
 {
     public class OpserverProfileProvider : BaseProfilerProvider
     {
-        public WebRequestProfilerProvider WebProfilerProvider = new WebRequestProfilerProvider();
+        public readonly WebRequestProfilerProvider WebProfilerProvider = new WebRequestProfilerProvider();
 
         public const string LocalContextKey = "ContextProfiler";
         public static bool EnablePollerProfiling { get; set; }
@@ -26,12 +26,10 @@ namespace StackExchange.Opserver.Monitoring
             return contextProfiler;
         }
 
-        public override MiniProfiler Start(string sessionName = null)
-        {
 #pragma warning disable 618
-            return Start(ProfileLevel.Info, sessionName);
+        public override MiniProfiler Start(string sessionName = null) =>
+            Start(ProfileLevel.Info, sessionName);
 #pragma warning restore 618
-        }
 
         public override void Stop(bool discardResults)
         {
@@ -47,30 +45,28 @@ namespace StackExchange.Opserver.Monitoring
             }
         }
 
-        public override MiniProfiler GetCurrentProfiler()
-        {
-            return GetContextProfiler() ?? WebProfilerProvider.GetCurrentProfiler();
-        }
+        public override MiniProfiler GetCurrentProfiler() =>
+            GetContextProfiler() ?? WebProfilerProvider.GetCurrentProfiler();
 
         /// <summary>
         /// Gets the profiler from the current context - this could be for a task/poll or for an entire web request
         /// </summary>
-        public static MiniProfiler GetContextProfiler()
-        {
-            return CallContext.LogicalGetData(LocalContextKey) as MiniProfiler;
-        }
+        public static MiniProfiler GetContextProfiler() =>
+            CallContext.LogicalGetData(LocalContextKey) as MiniProfiler;
 
         /// <summary>
         /// Creates a new profiler for the current context, used for background tasks
         /// </summary>
         /// <param name="name">The name of the profiler to create</param>
         /// <param name="id">The Id of the profiler</param>
-        public static MiniProfiler CreateContextProfiler(string name, Guid? id = null)
+        /// <param name="store">Whether to store this profiler normally (default), or prevent storage</param>
+        public static MiniProfiler CreateContextProfiler(string name, Guid? id = null, bool store = true)
         {
             var profiler = new MiniProfiler(name);
             SetProfilerActive(profiler);
             if (id.HasValue) profiler.Id = id.Value;
             CallContext.LogicalSetData(LocalContextKey, profiler);
+            if (!store) profiler.Storage = MiniProfilerNullStorage.Instance;
             return profiler;
         }
 
@@ -81,7 +77,7 @@ namespace StackExchange.Opserver.Monitoring
         {
             var profiler = GetContextProfiler();
             if (profiler == null) return;
-            
+
             StopProfiler(profiler);
             SaveProfiler(profiler);
             CallContext.LogicalSetData(LocalContextKey, null);

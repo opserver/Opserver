@@ -22,7 +22,7 @@ namespace StackExchange.Opserver
         /// The time this application was spun up.
         /// </summary>
         public static readonly DateTime StartDate = DateTime.UtcNow;
-        
+
         public static void RegisterRoutes(RouteCollection routes)
         {
             routes.IgnoreRoute("{*allaspx}", new { allaspx = @".*\.aspx(/.*)?" });
@@ -31,13 +31,18 @@ namespace StackExchange.Opserver
             routes.MapMvcAttributeRoutes();
 
             // MUST be the last route as a catch-all!
-            routes.MapRoute("", "{*url}", new { controller = "Error", action = "PageNotFound" });
+            routes.MapRoute("", "{*url}", new { controller = "Home", action = "PageNotFound" });
         }
 
         private static void RegisterBundles(BundleCollection bundles)
         {
-            bundles.Add(new ScriptBundle("~/scripts/plugins.js").IncludeDirectory("~/Content/js/plugins", "*.js"));
-            bundles.Add(new ScriptBundle("~/scripts/scripts.js").Include("~/Content/js/Scripts*"));
+            bundles.Add(
+                new ScriptBundle("~/scripts/plugins.js")
+                    .Include("~/Content/bootstrap/js/bootstrap.min.js")
+                    .IncludeDirectory("~/Content/js/plugins", "*.js"));
+            bundles.Add(
+                new ScriptBundle("~/scripts/scripts.js")
+                    .Include("~/Content/js/Scripts*"));
         }
 
         public override void Init()
@@ -65,6 +70,9 @@ namespace StackExchange.Opserver
 
             // enable custom model binder
             ModelBinders.Binders.DefaultBinder = new ProfiledModelBinder();
+
+            // When settings change, reload the app pool
+            Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
         }
 
         protected void Application_End()
@@ -77,11 +85,11 @@ namespace StackExchange.Opserver
             MiniProfiler.Settings.RouteBasePath = "~/profiler/";
             MiniProfiler.Settings.PopupRenderPosition = RenderPosition.Left;
             var paths = MiniProfiler.Settings.IgnoredPaths.ToList();
-            paths.Add("/graph/");
             paths.Add("/login");
             MiniProfiler.Settings.IgnoredPaths = paths.ToArray();
             MiniProfiler.Settings.PopupMaxTracesToShow = 5;
             MiniProfiler.Settings.ProfilerProvider = new OpserverProfileProvider();
+            MiniProfiler.Settings.Storage = new MiniProfilerCacheStorage(TimeSpan.FromMinutes(10));
             OpserverProfileProvider.EnablePollerProfiling = SiteSettings.PollerProfiling;
 
             var copy = ViewEngines.Engines.ToList();
@@ -94,7 +102,6 @@ namespace StackExchange.Opserver
 
         protected void Application_BeginRequest()
         {
-            Current.LogRequest();
             if (ShouldProfile())
                 MiniProfiler.Start();
         }
@@ -103,15 +110,6 @@ namespace StackExchange.Opserver
         {
             if (ShouldProfile())
                 MiniProfiler.Stop();
-        }
-
-        public override string GetVaryByCustomString(HttpContext context, string arg)
-        {
-            if (arg.ToLower() == "highDPI")
-            {
-                return Current.IsHighDPI.ToString();
-            }
-            return base.GetVaryByCustomString(context, arg);
         }
 
         private static void GetCustomErrorData(Exception ex, HttpContext context, Dictionary<string, string> data)
@@ -123,14 +121,17 @@ namespace StackExchange.Opserver
                 data.Add("Roles", Current.User.RawRoles.ToString());
             }
 
-            if (ex == null) return;
-            foreach (DictionaryEntry de in ex.Data)
+            while (ex != null)
             {
-                var key = de.Key as string;
-                if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
+                foreach (DictionaryEntry de in ex.Data)
                 {
-                    data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value != null ? de.Value.ToString() : "");
+                    var key = de.Key as string;
+                    if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
+                    {
+                        data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value?.ToString() ?? "");
+                    }
                 }
+                ex = ex.InnerException;
             }
         }
 
@@ -143,7 +144,7 @@ namespace StackExchange.Opserver
                 case SiteSettings.ProfilingModes.LocalOnly:
                     return HttpContext.Current.Request.IsLocal;
                 case SiteSettings.ProfilingModes.AdminOnly:
-                    return Current.User != null && Current.User.IsGlobalAdmin;
+                    return Current.User?.IsGlobalAdmin == true;
                 default:
                     return false;
             }

@@ -13,16 +13,17 @@ namespace StackExchange.Opserver.Helpers
     /// <remarks>
     /// When constrainting an entire controller/class, per-route additions can be made using the <see cref="AlsoAllowAttribute"/>.
     /// </remarks>
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public class OnlyAllowAttribute : AuthorizeAttribute
     {
-        private const string ITEMS_KEY = "AlsoAllow.Roles";
+        private const string ItemsKey = "AlsoAllow.Roles";
 
         public new Roles Roles { get; set; }
 
         public OnlyAllowAttribute(Roles roles)
         {
             if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException("roles");
+                throw new ArgumentOutOfRangeException(nameof(roles));
 
             Roles = roles;
         }
@@ -30,10 +31,9 @@ namespace StackExchange.Opserver.Helpers
         public override void OnAuthorization(AuthorizationContext filterContext)
         {
             // method attribute allows additions to a policy set at the class level
-            var alsoAllow = filterContext.ActionDescriptor.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() as AlsoAllowAttribute;
-            if (alsoAllow != null)
+            if (filterContext.ActionDescriptor.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() is AlsoAllowAttribute alsoAllow)
             {
-                filterContext.HttpContext.Items[ITEMS_KEY] = alsoAllow.Roles;
+                filterContext.HttpContext.Items[ItemsKey] = alsoAllow.Roles;
             }
 
             // this will then call AuthorizeCore - one should view MS' source for OnAuthorization
@@ -42,11 +42,10 @@ namespace StackExchange.Opserver.Helpers
 
         protected override bool AuthorizeCore(HttpContextBase httpContext)
         {
-            var alsoAllow = httpContext.Items.Contains(ITEMS_KEY) ? (Roles)httpContext.Items[ITEMS_KEY] : Roles.None;
+            var alsoAllow = httpContext.Items.Contains(ItemsKey) ? (Roles)httpContext.Items[ItemsKey] : Roles.None;
             var allAllow = Roles | alsoAllow;
-            
-            var u = Current.User;
-            return u != null && u.IsInRole(allAllow); // when false, HandleUnauthorizedRequest executes
+
+            return Current.IsInRole(allAllow); // when false, HandleUnauthorizedRequest executes
         }
 
         protected override void HandleUnauthorizedRequest(AuthorizationContext filterContext)
@@ -58,7 +57,7 @@ namespace StackExchange.Opserver.Helpers
     /// <summary>
     /// Specifies that an action method constrained by a class-level <see cref="OnlyAllowAttribute"/> can authorize additional <see cref="Roles"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method)]
     public class AlsoAllowAttribute : Attribute
     {
         public Roles Roles { get; set; }
@@ -66,17 +65,9 @@ namespace StackExchange.Opserver.Helpers
         public AlsoAllowAttribute(Roles roles)
         {
             if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException("roles");
+                throw new ArgumentOutOfRangeException(nameof(roles));
 
             Roles = roles;
         }
-    }
-
-    /// <summary>
-    /// Shortcut for [Allow(Roles.Developer)]
-    /// </summary>
-    public class AdminOnlyAttribute : OnlyAllowAttribute
-    {
-        public AdminOnlyAttribute() : base(Roles.GlobalAdmin) { }
     }
 }

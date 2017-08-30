@@ -7,35 +7,33 @@ namespace StackExchange.Opserver.Models.Security
 {
     public abstract class SecurityProvider
     {
-        public virtual bool IsAdmin { get { return InGroups(SiteSettings.AdminGroups); } }
-        public virtual bool IsViewer { get { return InGroups(SiteSettings.ViewGroups); } }
+        public virtual bool IsAdmin => InGroups(SiteSettings.AdminGroups);
+        public virtual bool IsViewer => InGroups(SiteSettings.ViewGroups);
 
-        internal virtual bool InReadGroups(ISecurableSection settings)
+        internal virtual bool InReadGroups(ISecurableModule settings)
         {
             return IsViewer || (settings != null && (InGroups(settings.ViewGroups) || InAdminGroups(settings)));
         }
 
-        internal virtual bool InAdminGroups(ISecurableSection settings)
+        internal virtual bool InAdminGroups(ISecurableModule settings)
         {
             return IsAdmin || (settings != null && InGroups(settings.AdminGroups));
         }
-        
+
         private bool InGroups(string groupNames)
         {
             if (groupNames.IsNullOrEmpty() || Current.User.AccountName.IsNullOrEmpty()) return false;
             return groupNames == "*" || InGroups(groupNames, Current.User.AccountName);
         }
-        
+
         public abstract bool InGroups(string groupNames, string accountName);
         public abstract bool ValidateUser(string userName, string password);
 
-        public virtual List<string> GetGroupMembers(string groupName)
-        {
-            return new List<string>();
-        }
+        public virtual List<string> GetGroupMembers(string groupName) => new List<string>();
+
         public virtual void PurgeCache() { }
 
-        public List<IPNet> InternalNetworks;
+        public readonly List<IPNet> InternalNetworks;
         protected SecurityProvider()
         {
             InternalNetworks = new List<IPNet>();
@@ -43,8 +41,7 @@ namespace StackExchange.Opserver.Models.Security
             {
                 foreach (var n in SecuritySettings.Current.InternalNetworks.All)
                 {
-                    IPNet net;
-                    if ((n.CIDR.HasValue() || (n.IP.HasValue() && n.Subnet.IsNullOrEmpty())) && IPNet.TryParse(n.CIDR.IsNullOrEmptyReturn(n.IP), out net))
+                    if ((n.CIDR.HasValue() || (n.IP.HasValue() && n.Subnet.IsNullOrEmpty())) && IPNet.TryParse(n.CIDR.IsNullOrEmptyReturn(n.IP), out IPNet net))
                     {
                         InternalNetworks.Add(net);
                     }
@@ -56,10 +53,7 @@ namespace StackExchange.Opserver.Models.Security
             }
         }
 
-        public bool IsInternalIP(string ip)
-        {
-            IPAddress addr;
-            return IPAddress.TryParse(ip, out addr) && InternalNetworks.Any(n => n.Contains(addr));
-        }
+        public bool IsInternalIP(string ip) =>
+            IPAddress.TryParse(ip, out IPAddress addr) && InternalNetworks.Any(n => n.Contains(addr));
     }
 }

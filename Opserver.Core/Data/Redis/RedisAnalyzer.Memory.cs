@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -14,13 +13,13 @@ using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public class RedisAnalyzer
+    public static class RedisAnalyzer
     {
         internal static readonly Dictionary<RedisConnectionInfo, List<KeyMatcher>> KeyMatchers;
         static RedisAnalyzer()
         {
             KeyMatchers = new Dictionary<RedisConnectionInfo, List<KeyMatcher>>();
-            foreach (var i in RedisInstance.AllInstances.Select(rci => rci.ConnectionInfo))
+            foreach (var i in RedisModule.Instances.Select(rci => rci.ConnectionInfo))
             {
                 KeyMatchers[i] = i.Settings.AnalysisRegexes
                                   .Where(r => r.Value.HasValue())
@@ -30,21 +29,16 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
-        public static void AnalyzerInstanceMemory(RedisConnectionInfo connectionInfo)
-        {
-            //TODO: Get databases, suck in cache for each
-        }
-
         private static string GetMemoryAnalysisKey(RedisConnectionInfo connectionInfo, int database)
         {
-            return string.Format("redis-memory-analysis-{0}:{1}:{2}", connectionInfo.Host, connectionInfo.Port, database);
+            return $"redis-memory-analysis-{connectionInfo.Host}:{connectionInfo.Port}:{database}";
         }
 
         public static RedisMemoryAnalysis AnalyzeDatabaseMemory(RedisConnectionInfo connectionInfo, int database)
         {
-            using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database))
+            using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database.ToString()))
             {
-                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (old, ctx) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24 * 60 * 60, 24 * 60 * 60);
+                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (old, ctx) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
             }
         }
 
@@ -61,6 +55,7 @@ namespace StackExchange.Opserver.Data.Redis
                 AllowAdmin = true,
                 ClientName = "Status-MemoryAnalyzer",
                 Password = connectionInfo.Password,
+                Ssl = connectionInfo.Settings.UseSSL,
                 EndPoints =
                 {
                     { connectionInfo.Host, connectionInfo.Port }
@@ -89,13 +84,13 @@ namespace StackExchange.Opserver.Data.Redis
     public class RedisMemoryAnalysis : IMonitorStatus
     {
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
-        public bool IsGlobal { get { return Database == -1; } }
+        public bool IsGlobal => Database == -1;
         public int Database { get; internal set; }
         public DateTime CreationDate { get; internal set; }
 
         public TimeSpan KeyTime { get; internal set; }
         public TimeSpan AnalysisTime { get; internal set; }
-        public TimeSpan TotalTime { get { return KeyTime + AnalysisTime; } }
+        public TimeSpan TotalTime => KeyTime + AnalysisTime;
 
         public List<KeyMatcher> KeyMatchers { get; internal set; }
         public ConcurrentDictionary<KeyMatcher,KeyStats> KeyStats { get; internal set; }
@@ -108,7 +103,7 @@ namespace StackExchange.Opserver.Data.Redis
                                .OrderByDescending(tk => tk.TotalBytes)
                                .Take(50);
             }
-        }  
+        }
 
         public MonitorStatus MonitorStatus
         {
@@ -123,6 +118,7 @@ namespace StackExchange.Opserver.Data.Redis
                 return MonitorStatus.Good;
             }
         }
+
         public string MonitorStatusReason
         {
             get
@@ -142,11 +138,11 @@ namespace StackExchange.Opserver.Data.Redis
         private long _valueByteSize;
         private long _errorCount;
 
-        public long Count { get { return _count; } }
-        public long KeyByteSize { get { return _keyByteSize; } }
-        public long ValueByteSize { get { return _valueByteSize; } }
-        public long TotalByteSize { get { return _keyByteSize + _valueByteSize; } }
-        public long ErrorCount { get { return _errorCount; } }
+        public long Count => _count;
+        public long KeyByteSize => _keyByteSize;
+        public long ValueByteSize => _valueByteSize;
+        public long TotalByteSize => _keyByteSize + _valueByteSize;
+        public long ErrorCount => _errorCount;
 
         public string ErrorMessage { get; internal set; }
 
@@ -175,9 +171,9 @@ namespace StackExchange.Opserver.Data.Redis
                             {
                                 TallyDebugLine(key, x.Result);
                             }
-                            catch (Exception e)
+                            catch (Exception)
                             {
-                                TallyError(e);
+                                TallyError();
                             }
                         });
                 }
@@ -186,7 +182,7 @@ namespace StackExchange.Opserver.Data.Redis
             AnalysisTime = sw.Elapsed;
             sw.Stop();
         }
-        
+
         public RedisMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
             CreationDate = DateTime.UtcNow;
@@ -194,8 +190,7 @@ namespace StackExchange.Opserver.Data.Redis
 
             ConnectionInfo = connectionInfo;
             Database = database;
-            List<KeyMatcher> matchers;
-            if (!RedisAnalyzer.KeyMatchers.TryGetValue(connectionInfo, out matchers))
+            if (!RedisAnalyzer.KeyMatchers.TryGetValue(connectionInfo, out List<KeyMatcher> matchers))
             {
                 ErrorMessage = "Could not find regexes defined for " + connectionInfo;
                 return;
@@ -214,8 +209,7 @@ namespace StackExchange.Opserver.Data.Redis
             if (debugLine == null) return;
 
             var match = _debugObjectSize.Match(debugLine);
-            long size;
-            if (!match.Success || !long.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out size)) return;
+            if (!match.Success || !long.TryParse(match.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out long size)) return;
 
             var matcher = GetKeyMatcher(key);
             var keySize = Encoding.UTF8.GetByteCount(key);
@@ -232,12 +226,12 @@ namespace StackExchange.Opserver.Data.Redis
 
         private KeyMatcher GetKeyMatcher(string key)
         {
-            for (int i = 0; i < KeyMatchers.Count; i++)
-                if (KeyMatchers[i].Regex.IsMatch(key)) return KeyMatchers[i];
+            foreach (var t in KeyMatchers)
+                if (t.Regex.IsMatch(key)) return t;
             return null;
         }
 
-        internal void TallyError(Exception e)
+        internal void TallyError()
         {
             Interlocked.Increment(ref _errorCount);
         }
@@ -247,9 +241,9 @@ namespace StackExchange.Opserver.Data.Redis
     {
         public string Name { get; internal set; }
         public KeyMatcher Matcher { get; internal set; }
-        public int KeyBytes { get { return Encoding.UTF8.GetByteCount(Name); } }
+        public int KeyBytes => Encoding.UTF8.GetByteCount(Name);
         public long ValueBytes { get; internal set; }
-        public long TotalBytes { get { return KeyBytes + ValueBytes; } }
+        public long TotalBytes => KeyBytes + ValueBytes;
     }
 
     public class KeyMatcher
@@ -266,12 +260,12 @@ namespace StackExchange.Opserver.Data.Redis
         internal long _keyByteSize;
         internal long _valueByteSize;
 
-        public long Count { get { return _count; } }
-        public long KeyByteSize { get { return _keyByteSize; } }
-        public long ValueByteSize { get { return _valueByteSize; } }
-        public long TotalByteSize { get { return _keyByteSize + _valueByteSize; } }
+        public long Count => _count;
+        public long KeyByteSize => _keyByteSize;
+        public long ValueByteSize => _valueByteSize;
+        public long TotalByteSize => _keyByteSize + _valueByteSize;
 
-        public SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
+        public readonly SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
 
         public void Tally(string key, long keySize, long valueSize)
         {
@@ -280,9 +274,15 @@ namespace StackExchange.Opserver.Data.Redis
             Interlocked.Add(ref _valueByteSize, valueSize);
 
             lock (_lock) TopKeys.Add(valueSize, key);
+
+            // Capacity cap to prevent a memory leak, but only every so often because Array.Copy isn't cheap.
+            if (TopKeys.Count > 10000)
+            {
+                lock (_lock) TopKeys.Capacity = 50;
+            }
         }
 
-        class DescLongCompare : IComparer<long>
+        private class DescLongCompare : IComparer<long>
         {
             public int Compare(long x, long y)
             {

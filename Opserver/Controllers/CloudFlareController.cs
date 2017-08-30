@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.Threading.Tasks;
+using System.Web.Mvc;
 using StackExchange.Opserver.Data.CloudFlare;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -7,36 +8,31 @@ using StackExchange.Opserver.Views.CloudFlare;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.CloudFlare)]
-    public partial class CloudFlareController : StatusController
+    public class CloudFlareController : StatusController
     {
-        protected override ISecurableSection SettingsSection
+        public override ISecurableModule SettingsModule => Current.Settings.CloudFlare;
+
+        public override TopTab TopTab => new TopTab("CloudFlare", nameof(Dashboard), this, 40)
         {
-            get { return Current.Settings.CloudFlare; }
-        }
+            GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
+        };
 
         [Route("cloudflare")]
         public ActionResult Dashboard()
         {
-            return Redirect("/cloudflare/dns");
-        }
-
-        [Route("cloudflare/railgun")]
-        public ActionResult Railguns() 
-        {
-            var vd = new DashboardModel
-                {
-                    Railguns = RailgunInstance.AllInstances,
-                    View = DashboardModel.Views.Railgun
-                };
-            return View(vd);
+            return RedirectToAction(nameof(DNS));
         }
 
         [Route("cloudflare/dns")]
-        public ActionResult DNS()
+        public async Task<ActionResult> DNS()
         {
-            var vd = new DashboardModel
+            await CloudFlareAPI.Instance.PollAsync().ConfigureAwait(false);
+            var vd = new DNSModel
             {
-                View = DashboardModel.Views.DNS
+                View = DashboardModel.Views.DNS,
+                Zones = CloudFlareAPI.Instance.Zones.SafeData(true),
+                DNSRecords = CloudFlareAPI.Instance.DNSRecords.Data,
+                DataCenters = DataCenters.All
             };
             return View(vd);
         }

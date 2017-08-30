@@ -5,36 +5,28 @@ namespace StackExchange.Opserver.Views.Elastic
 {
     public class DashboardModel
     {
-        public List<ElasticCluster> Clusters { get; set; }
-        public CurrentData Current { get; set; }
+        public List<ElasticCluster> Clusters => ElasticModule.Clusters;
+
+        public string CurrentNodeName { get; set; }
+        public string CurrentClusterName { get; set; }
+        public string CurrentIndexName { get; set; }
+
+        public ElasticCluster CurrentCluster { get; set; }
+        public ElasticCluster.NodeInfo CurrentNode { get; set; }
+
+        //TODO: Global settings pre-websockets
+        public int Refresh { get; set; } = 10;
         public bool WarningsOnly { get; set; }
-        public Popups Popup { get; set; }
-        
-        public bool Refresh { get; set; }
-        public enum Views
-        {
-            Cluster,
-            Node,
-            Indices,
-            Shards
-        }
+
         public Views View { get; set; }
 
-        public enum Popups
+        public enum Views
         {
-            None,
-            Indices
-        }
-
-        public class CurrentData
-        {
-            public string NodeName { get; set; }
-            public string ClusterName { get; set; }
-            public string IndexName { get; set; }
-            public ElasticCluster Cluster { get; set; }
-            public ElasticCluster.NodeInfoWrap Node { get; set; }
-
-            public bool WarningsOnly { get; set; }
+            AllClusters = 0,
+            Cluster = 1,
+            Node = 2,
+            Indexes = 3,
+            Shards = 4
         }
     }
 }

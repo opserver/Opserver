@@ -9,120 +9,110 @@ using StackExchange.Opserver.Views.Elastic;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Elastic)]
-    public partial class ElasticController : StatusController
+    public class ElasticController : StatusController
     {
-        protected override ISecurableSection SettingsSection
+        public override ISecurableModule SettingsModule => Current.Settings.Elastic;
+
+        public override TopTab TopTab => new TopTab("Elastic", nameof(Dashboard), this, 30)
         {
-            get { return Current.Settings.Elastic; }
-        }
+            GetMonitorStatus = () => ElasticModule.Clusters.GetWorstStatus()
+        };
 
         [Route("elastic")]
-        public ActionResult Dashboard(string cluster, string node)
+        public ActionResult Dashboard()
         {
             var vd = new DashboardModel
             {
-                Clusters = ElasticCluster.AllClusters,
-                Refresh = true,
-                View = DashboardModel.Views.Cluster,
+                View = DashboardModel.Views.AllClusters,
                 WarningsOnly = true
             };
+            return View("AllClusters", vd);
+        }
+
+        [Route("elastic/cluster")]
+        public ActionResult Cluster(string cluster, string node)
+        {
+            var vd = GetViewData(cluster, node);
+            vd.View = DashboardModel.Views.Cluster;
             return View("Cluster", vd);
         }
 
         [Route("elastic/node")]
-        public ActionResult Node(string cluster, string node, DashboardModel.Popups popup = DashboardModel.Popups.None)
+        public ActionResult Node(string cluster, string node)
         {
-            var cn = GetNode(cluster, node);
-            var vd = new DashboardModel
-                {
-                    Clusters = ElasticCluster.AllClusters,
-                    Refresh = true,
-                    View = DashboardModel.Views.Node,
-                    Current = cn,
-                    Popup = popup
-                };
+            var vd = GetViewData(cluster, node);
+            vd.View = DashboardModel.Views.Node;
             return View("Node", vd);
         }
 
-
-        [Route("elastic/node/summary/{type}")]
-        public ActionResult NodeSummary(string cluster, string node, string type)
+        [Route("elastic/node/modal/{type}")]
+        public ActionResult NodeModal(string cluster, string node, string type)
         {
-            var vd = GetNode(cluster, node);
-
+            var vd = GetViewData(cluster, node);
             switch (type)
             {
                 case "settings":
                     return View("Node.Settings", vd);
-                case "indices":
-                    return View("Indices", vd);
                 default:
-                    return ContentNotFound("Unknown summary view requested");
+                    return ContentNotFound("Unknown modal view requested");
             }
         }
 
-        [Route("elastic/index/summary/{type}")]
-        public ActionResult IndexSummary(string cluster, string node, string index, string type, string subtype)
+        [Route("elastic/cluster/modal/{type}")]
+        public ActionResult ClusterModal(string cluster, string node, string type)
         {
-            var vd = GetNode(cluster, node, index);
+            var vd = GetViewData(cluster, node);
+            switch (type)
+            {
+                case "indexes":
+                    return View("Cluster.Indexes", vd);
+                default:
+                    return ContentNotFound("Unknown modal view requested");
+            }
+        }
 
+        [Route("elastic/index/modal/{type}")]
+        public ActionResult IndexModal(string cluster, string node, string index, string type)
+        {
+            var vd = GetViewData(cluster, node, index);
             switch (type)
             {
                 case "shards":
-                    return View("Indices.Shards", vd);
+                    return View("Cluster.Shards", vd);
                 default:
-                    return ContentNotFound("Unknown summary view requested");
+                    return ContentNotFound("Unknown modal view requested");
             }
         }
 
-        private static DashboardModel.CurrentData GetNode(string cluster, string node = null, string index = null)
+        private static DashboardModel GetViewData(string cluster, string node = null, string index = null)
         {
-            // TODO: node string split to cluster
-
             // Cluster names are not unique, names + node names should be though
             // If we see too many people with crazy combos, then node GUIDs it is.
-            var cc = ElasticCluster.AllClusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
-                                             && (node == null || (c.Nodes.Data != null && c.Nodes.Data.Get(node) != null)));
-            var cn = cc != null ? cc.Nodes.Data.Get(node) : null;
-            
-            return new DashboardModel.CurrentData
-                {
-                    NodeName = node,
-                    ClusterName = cc != null ? cc.Name : null,
-                    IndexName = index,
-                    Cluster = cc,
-                    Node = cn
-                };
-        }
+            var cc = ElasticModule.Clusters.Find(
+                c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
+                  && (node.IsNullOrEmpty() || (c.Nodes.Data?.Get(node) != null)));
+            var cn = cc?.Nodes.Data.Get(node);
 
-        [Route("elastic/indices")]
-        public ActionResult Indices(string cluster, string node, string guid)
-        {
-            var current = GetNode(cluster, node ?? guid);
-            var vd = new DashboardModel
-                {
-                    Clusters = ElasticCluster.AllClusters,
-                    Refresh = true,
-                    View = DashboardModel.Views.Indices,
-                    Current = current
-                };
-            return View("Indices", vd);
-        }
-
-        [Route("elastic/shards")]
-        public ActionResult Shards(string cluster, string server)
-        {
-            var vd = new DashboardModel
+            return new DashboardModel
             {
-                Clusters = ElasticCluster.AllClusters,
-                Refresh = true,
-                View = DashboardModel.Views.Shards
+                CurrentNodeName = node,
+                CurrentClusterName = cc?.Name,
+                CurrentIndexName = index,
+                CurrentCluster = cc,
+                CurrentNode = cn
             };
-            return View("Cluster.Shards", vd);
+        }
+
+        [Route("elastic/indexes")]
+        public ActionResult Indexes(string cluster, string node, string guid)
+        {
+            var vd = GetViewData(cluster, node ?? guid);
+            vd.View = DashboardModel.Views.Indexes;
+            return View("Indexes", vd);
         }
 
         [Route("elastic/reroute/{type}")]
-        public ActionResult Reroute(string type, string index, int shard, string node)
+        public ActionResult Reroute(string type) //, string index, int shard, string node)
         {
             bool result = false;
             switch (type)

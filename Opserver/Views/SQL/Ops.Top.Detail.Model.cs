@@ -2,7 +2,7 @@
 
 namespace StackExchange.Opserver.Views.SQL
 {
-    public class OpsTopDetailModel
+    public class OperationsTopDetailModel
     {
         public SQLInstance Instance { get; set; }
         public SQLInstance.TopOperation Op { get; set; }

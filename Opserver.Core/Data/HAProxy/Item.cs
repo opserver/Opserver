@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -18,6 +19,12 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// </summary>
         [Stat("svname", 1)]
         public string ServerName { get; internal set; }
+
+        // TODO: Settings
+        private static readonly Regex _compactReplacer = new Regex(@"-\d+$", RegexOptions.Compiled);
+        private string _compactServerName;
+        public string CompactServerName =>
+            _compactServerName ?? (_compactServerName = _compactReplacer.Replace(ServerName, ""));
 
         /// <summary>
         /// qcur: current queued requests
@@ -160,12 +167,12 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// <summary>
         /// lastchg: last status change (in seconds) - as DateTime
         /// </summary>
-        public DateTime LastStatusChange { get { return DateTime.UtcNow.AddSeconds(-LastStatusChangeSecondsAgo); } }
+        public DateTime LastStatusChange => DateTime.UtcNow.AddSeconds(-LastStatusChangeSecondsAgo);
 
         /// <summary>
         /// lastchg: last status change (in seconds) - as TimeSpan
         /// </summary>
-        public TimeSpan LastStatusDuration { get { return TimeSpan.FromSeconds(LastStatusChangeSecondsAgo); } }
+        public TimeSpan LastStatusDuration => TimeSpan.FromSeconds(LastStatusChangeSecondsAgo);
 
         /// <summary>
         /// downtime: total downtime (in seconds)
@@ -218,7 +225,7 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// <summary>
         /// type: Frontend, Backend, Server, Socket
         /// </summary>
-        public StatusType Type { get { return (StatusType)TypeId; } }
+        public StatusType Type => (StatusType)TypeId;
 
         /// <summary>
         /// rate: number of sessions per second over last elapsed second
@@ -371,11 +378,11 @@ namespace StackExchange.Opserver.Data.HAProxy
                 //Get the stat from the split array
                 var statText = stats[i];
                 //If it's empty, skip it
-                if(string.IsNullOrEmpty(statText)) continue;
+                if (statText.IsNullOrEmpty()) continue;
 
                 //Get the property info for this position
                 var propInfo = StatProperty.AllOrdered[i].PropertyInfo;
-                
+
                 //Get the property type
                 var type = propInfo.PropertyType;
                 //Cast to the underlying type for nullables
@@ -390,7 +397,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         private static Item GetStatOfType(string typeNum)
         {
-            var type = (StatusType)Int32.Parse(typeNum);
+            var type = (StatusType)int.Parse(typeNum);
             switch (type)
             {
                 case StatusType.Frontend:
@@ -402,7 +409,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 case StatusType.Socket:
                     return new Socket();
                 default:
-                    throw new NotImplementedException("Unrecognized StatusType " + typeNum);
+                    throw new ArgumentOutOfRangeException("Unrecognized StatusType " + typeNum);
             }
         }
 
@@ -410,10 +417,10 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         #region IsChecks
 
-        public bool IsFrontend { get { return Type == StatusType.Frontend; } }
-        public bool IsServer { get { return Type == StatusType.Server; } }
-        public bool IsSocket { get { return Type == StatusType.Socket; } }
-        public bool IsBackend { get { return Type == StatusType.Backend; } }
+        public bool IsFrontend => Type == StatusType.Frontend;
+        public bool IsServer => Type == StatusType.Server;
+        public bool IsSocket => Type == StatusType.Socket;
+        public bool IsBackend => Type == StatusType.Backend;
 
         #endregion
 
@@ -425,10 +432,11 @@ namespace StackExchange.Opserver.Data.HAProxy
         private static readonly Regex _upGoingDown = new Regex(@"UP \d+/\d+", RegexOptions.Compiled);
         private static readonly Regex _downGoingUp = new Regex(@"DOWN \d+/\d+", RegexOptions.Compiled);
 
-        public virtual string Description
-        {
-            get { return Type == StatusType.Server ? ServerName : Type.ToString(); }
-        }
+        public virtual string Description => Type == StatusType.Server ? ServerName : Type.ToString();
+
+        public bool InMaintenance => ProxyServerStatus == ProxyServerStatus.Maintenance;
+        public bool InDrain => ProxyServerStatus == ProxyServerStatus.Drain;
+        public bool OutOfRotation => InMaintenance || InDrain;
 
         public virtual MonitorStatus MonitorStatus
         {
@@ -444,10 +452,9 @@ namespace StackExchange.Opserver.Data.HAProxy
 
                     case ProxyServerStatus.ActiveUpGoingDown:
                     case ProxyServerStatus.BackupUpGoingDown:
-                        return MonitorStatus.Warning;
-
                     case ProxyServerStatus.Maintenance:
-                        return MonitorStatus.Maintenance;
+                    case ProxyServerStatus.Drain:
+                        return MonitorStatus.Warning;
 
                     case ProxyServerStatus.Down:
                     case ProxyServerStatus.ActiveDownGoingUp:
@@ -459,20 +466,15 @@ namespace StackExchange.Opserver.Data.HAProxy
                 }
             }
         }
-        public string MonitorStatusReason
-        {
-            get { return MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.GetDescription(); }
-        }
 
-        public bool IsChecked { get { return Status != "no check"; } }
-        public bool IsActive { get { return Active == 1; } }
-        public bool IsBackup { get { return Backup == 1; } }
+        public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.GetDescription();
+
+        public bool IsChecked => Status != "no check";
+        public bool IsActive => Active == 1;
+        public bool IsBackup => Backup == 1;
 
         private ProxyServerStatus? _proxyServerStatus;
-        public ProxyServerStatus ProxyServerStatus
-        {
-            get { return _proxyServerStatus ?? (_proxyServerStatus = GetProxyServerStatus()).Value; }
-        }
+        public ProxyServerStatus ProxyServerStatus => _proxyServerStatus ?? (_proxyServerStatus = GetProxyServerStatus()).Value;
 
         private ProxyServerStatus GetProxyServerStatus()
         {
@@ -495,6 +497,8 @@ namespace StackExchange.Opserver.Data.HAProxy
                     return ProxyServerStatus.Down;
                 case "MAINT":
                     return ProxyServerStatus.Maintenance;
+                case "DRAIN":
+                    return ProxyServerStatus.Drain;
                 // Server is not checked
                 case "no check":
                     return ProxyServerStatus.NotChecked;

@@ -1,0 +1,55 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model IEnumerable<SQLInstance.TableIndex>
+@{
+    var indexes = Model.ToList();
+}
+@if (indexes.Count > 0)
+{
+    <div class="panel panel-default text-wrap">
+        <div class="panel-heading">
+            <h6>@indexes.Count.Pluralize("Index")</h6>
+        </div>
+        <div class="panel-body">
+            <div class="list-group list-group-sm">
+                @foreach (var index in indexes.OrderByDescending(i => i.IsPrimaryKey).ThenBy(i => i.IndexName))
+                {
+                    <div class="list-group-item">
+                        <div>
+                            @if (index.IsPrimaryKey)
+                            {
+                                <i class="fa fa-key fa-fw text-warning" aria-hidden="true" title="Primary Key"></i>
+                            }
+                            else
+                            {
+                                <i class="fa fa-list-alt fa-fw" aria-hidden="true"></i>
+                            }
+                            @index.IndexName
+                            <span class="text-muted">(@index.Type@(index.IsUnique ? ", Unique" : null)@(index.HasFilter ? ", Filtered" : null))</span>
+                        </div>
+                        <div>
+                            <span class="text-muted">Columns:</span> @index.ColumnNames
+                        </div>
+                        @if (index.IncludedColumnNames.HasValue())
+                        {
+                            <div>
+                                <span class="text-muted">Included:</span> @index.IncludedColumnNames
+                            </div>
+                        }
+                        @if (index.HasFilter)
+                        {
+                            <div>
+                                <span class="text-muted">Filter:</span> @index.FilterDefinition
+                            </div>
+                        }
+                        @if (index.LastUpdated != null)
+                        {
+                            <div>
+                                <span class="text-muted">Last Stats Rebuild:</span> @index.LastUpdated.Value.ToRelativeTimeSpan()
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+}

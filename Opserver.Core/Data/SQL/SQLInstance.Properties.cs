@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
@@ -7,70 +6,75 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<SQLServerProperties> _serverProperties;
-        public Cache<SQLServerProperties> ServerProperties
-        {
-            get
-            {
-                return _serverProperties ?? (_serverProperties = new Cache<SQLServerProperties>
+        public Cache<SQLServerProperties> ServerProperties =>
+            _serverProperties ?? (_serverProperties = GetSqlCache(
+                nameof(ServerProperties), async conn =>
+                {
+                    var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL).ConfigureAwait(false);
+                    if (result != null)
                     {
-                        CacheForSeconds = 60,
-                        UpdateCache = UpdateFromSql("Properties", conn =>
-                            {
-                                var result = conn.Query<SQLServerProperties>(SQLServerProperties.FetchSQL).FirstOrDefault();
-                                if (result != null)
-                                {
-                                    Version = result.ParsedVersion;
-                                    if (result.PhysicalMemoryBytes > 0)
-                                    {
-                                        CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
-                                    }
-                                }
-                                return result;
-                            })
-                    });
-            }
-        }
+                        Version = result.ParsedVersion;
+                        if (result.PhysicalMemoryBytes > 0)
+                        {
+                            CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
+                        }
+                    }
+                    return result;
+                }));
 
-        public decimal? CurrentMemoryPercent { get; set; }
+        public decimal? CurrentMemoryPercent { get; private set; }
+
+        public const string DefaultInstanceName = "MSSQLSERVER";
 
         public class SQLServerProperties
         {
-            public string Version { get; private set; }
-            public string FullVersion { get; private set; }
-            public string Level { get; private set; }
-            public string Edition { get; private set; }
-            public string Collation { get; private set; }
-            public string BuildClrVersion { get; private set; }
-            public string InstanceName { get; private set; }
-            public FullTextInstallStatus? IsFullTextInstalled { get; private set; }
-            public HADREnabledStatus? IsHadrEnabled { get; private set; }
-            public HADRManagerStatus? HadrManagerStatus { get; private set; }
-            public string MachineName { get; private set; }
-            public string ServerName { get; private set; }
-            public int ProcessID { get; private set; }
-            public int SessionCount { get; private set; }
-            public int ConnectionCount { get; private set; }
-            public int JobCount { get; private set; }
-            public int CPUCount { get; private set; }
-            public int HyperthreadRatio { get; private set; }
-            public long PhysicalMemoryBytes { get; private set; }
-            public long VirtualMemoryBytes { get; private set; }
-            public long CommittedBytes { get; private set; }
-            public long CommittedTargetBytes { get; private set; }
-            public long StackSizeBytes { get; private set; }
-            public int CurrentWorkerCount { get; private set; }
-            public int MaxWorkersCount { get; private set; }
-            public int SchedulerCount { get; private set; }
-            public int SchedulerTotalCount { get; private set; }
-            public DateTime SQLServerStartTime { get; private set; }
-            public VirtualMachineTypes VirtualMachineType { get; private set; }
+            public string Version { get; internal set; }
+            public string FullVersion { get; internal set; }
+            public string Level { get; internal set; }
+            public string Edition { get; internal set; }
+            public string Collation { get; internal set; }
+            public string BuildClrVersion { get; internal set; }
+            public string InstanceName { get; internal set; }
+            public FullTextInstallStatus? IsFullTextInstalled { get; internal set; }
+            public HADREnabledStatus? IsHadrEnabled { get; internal set; }
+            public HADRManagerStatus? HadrManagerStatus { get; internal set; }
+            public string MachineName { get; internal set; }
+            public string ServerName { get; internal set; }
+            public int ProcessID { get; internal set; }
+            public int SessionCount { get; internal set; }
+            public int ConnectionCount { get; internal set; }
+            public int JobCount { get; internal set; }
+            public int CPUCount { get; internal set; }
+            public int HyperthreadRatio { get; internal set; }
+            public long PhysicalMemoryBytes { get; internal set; }
+            public long VirtualMemoryBytes { get; internal set; }
+            public long CommittedBytes { get; internal set; }
+            public long CommittedTargetBytes { get; internal set; }
+            public long StackSizeBytes { get; internal set; }
+            public int CurrentWorkerCount { get; internal set; }
+            public int MaxWorkersCount { get; internal set; }
+            public int SchedulerCount { get; internal set; }
+            public int SchedulerTotalCount { get; internal set; }
+            public DateTime SQLServerStartTime { get; internal set; }
+            public VirtualMachineTypes VirtualMachineType { get; internal set; }
 
-            public int CPUSocketCount { get { return CPUCount/HyperthreadRatio; } }
+            public bool IsVM => VirtualMachineType == VirtualMachineTypes.Hypervisor;
+
+            public int CPUSocketCount => CPUCount/HyperthreadRatio;
 
             private Version _version;
-            public Version ParsedVersion
+            public Version ParsedVersion => _version ?? (_version = Version != null ? System.Version.Parse(Version) : new Version(0, 0));
+
+            public string ShortEdition
             {
-                get { return _version ?? (_version = Version != null ? System.Version.Parse(Version) : new Version(0, 0)); }
+                get
+                {
+                    if (Edition.Contains("Enterprise")) return "Enterprise";
+                    if (Edition.Contains("Standard")) return "Standard";
+                    if (Edition.Contains("Developer")) return "Developer";
+                    if (Edition.Contains("Compact")) return "Compact";
+                    return Edition;
+                }
             }
 
             public string MajorVersion
@@ -79,6 +83,8 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     if (Version.HasValue())
                     {
+                        if (Version.StartsWith("14.")) return "SQL 2017";
+                        if (Version.StartsWith("13.")) return "SQL 2016";
                         if (Version.StartsWith("12.")) return "SQL 2014";
                         if (Version.StartsWith("11.")) return "SQL 2012";
                         if (Version.StartsWith("10.5")) return "SQL 2008 R2";
@@ -137,6 +143,21 @@ Else
        Cast(bpool_commit_target as bigint) * 8 * 1024 CommittedTargetBytes';
 Exec (@sql + ' 
   From sys.dm_os_sys_info');";
+        }
+
+        public class SQLServerPermissions
+        {
+            // IsNull(Cast(IS_SRVROLEMEMBER ('sysadmin') as Bit), 0) IsSysadmin
+            public bool HasSyadmin { get; internal set; }
+
+            // TODO: HasViewServerState permission, but SQL 2000 needs love
+            // IsNull(Cast((Select 1 From fn_my_permissions(NULL, 'SERVER') Where permission_name = 'VIEW SERVER STATE') as Bit), 0) HasViewServerState
+            public bool HasViewServerState { get; internal set; }
+
+            internal const string FetchSQL = @"
+Select IsNull(Cast(IS_SRVROLEMEMBER ('sysadmin') as Bit), 0) IsSysadmin,
+       IsNull(Cast((Select 1 From fn_my_permissions(NULL, 'SERVER') Where permission_name = 'VIEW SERVER STATE') as Bit), 0) HasViewServerState
+";
         }
     }
 }

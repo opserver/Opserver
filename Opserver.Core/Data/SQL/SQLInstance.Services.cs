@@ -1,20 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
         private Cache<List<SQLServiceInfo>> _services;
-        public Cache<List<SQLServiceInfo>> Services
-        {
-            get { return _services ?? (_services = SqlCacheList<SQLServiceInfo>(5 * 60)); }
-        }
+        public Cache<List<SQLServiceInfo>> Services => _services ?? (_services = SqlCacheList<SQLServiceInfo>(5.Minutes()));
 
-        public class SQLServiceInfo : ISQLVersionedObject, IMonitorStatus
+        public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2008R2.SP1; } }
-            
+            public Version MinVersion => SQLServerVersions.SQL2008R2.SP1;
+
             public MonitorStatus MonitorStatus
             {
                 get
@@ -37,6 +35,7 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
+
             public string MonitorStatusReason
             {
                 get
@@ -49,7 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
                         case ServiceStatuses.PausePending:
                             return null;
                         default:
-                            return ServiceName + " - " + Status.GetDescription();
+                            return ServiceName + " - " + (Status.HasValue ? Status.Value.GetDescription() : "");
                     }
                 }
             }
@@ -60,9 +59,9 @@ namespace StackExchange.Opserver.Data.SQL
             public ServiceStatuses? Status { get; internal set; }
             public DateTimeOffset? LastStartupTime { get; internal set; }
             public string IsClustered { get; internal set; }
-            public bool IsClusteredBool { get { return IsClustered == "Y"; } }
-            
-            internal const string FetchSQL = @"
+            public bool IsClusteredBool => IsClustered == "Y";
+
+            public string GetFetchSQL(Version v) => @"
 Select servicename ServiceName,
        service_account ServiceAccount, 
        process_id ProcessId, 
@@ -70,12 +69,8 @@ Select servicename ServiceName,
        status Status,
        last_startup_time LastStartupTime,
        is_clustered IsClustered
-  From sys.dm_server_services";
-
-            public string GetFetchSQL(Version version)
-            {
-                return FetchSQL;
-            }
+  From sys.dm_server_services;
+";
         }
     }
 }

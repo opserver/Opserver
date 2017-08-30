@@ -1,39 +1,56 @@
 ﻿@using StackExchange.Opserver
 @using StackExchange.Opserver.Data
 @using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
 
-@helper HealthDescription(SQLInstance n, IEnumerable<IMonitorStatus> ims, bool linkify = true, bool unknownIsHealthy = false)
-{
-    if (ims == null) { return; }
-    var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
-    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
-    var bad = ims.Except(warning).Except(good).ToList();
-    if (linkify)
-    {
-        if(bad.Any()){<text> @MonitorStatus.Critical.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@bad.Count() Unhealthy</a></text>}
-        if(warning.Any()){<text> @MonitorStatus.Warning.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@warning.Count() Warning</a></text>}                                                                                                                                                                               
-        if(good.Any()){<text> @MonitorStatus.Good.IconSpan() <a href="~/sql/databases?node=@n.Name.UrlEncode()" class="node-name-link">@good.Count() Healthy</a></text>}    
-    } 
-    else {
-        if(bad.Any()){<text>@MonitorStatus.Critical.IconSpan() @bad.Count().ToComma() Unhealthy</text>}
-        if(warning.Any()){<text> @MonitorStatus.Warning.IconSpan() @warning.Count().ToComma() Warning</text>}                                                                                                                                                                               
-        if(good.Any()){<text> @MonitorStatus.Good.IconSpan() @good.Count().ToComma() Healthy</text>}
-    }
-}
-
-@helper HealthDescriptionAGs(SQLNode n, IEnumerable<IMonitorStatus> ims, bool minimal = false, bool icons = true)
+@helper HealthDescriptionAGs(IEnumerable<IMonitorStatus> ims, bool minimal = false, bool icons = true)
 {
     if (ims == null) { return; }
     var bad = ims.Where(ag => ag.MonitorStatus != MonitorStatus.Good).ToList();
     var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good).ToList();
     if (minimal)
     {
-        if(good.Any()){@MonitorStatus.Good.Span(good.Count().ToComma(), good.Count().Pluralize("Healthy Database"))}
-        if(bad.Any()){@MonitorStatus.Critical.Span(" (" + bad.Count().ToComma() + ")", bad.Count().Pluralize("Unhealthy Database"))}
+        if (good.Any())
+        {
+            @MonitorStatus.Good.Span(@good.Count.ToComma(), @good.Count.Pluralize("Healthy Database"))
+        }
+        if (bad.Any())
+        {
+            @MonitorStatus.Critical.Span(@bad.Count.ToComma(), @bad.Count.Pluralize("Unhealthy Database"))
+        }
     }
     else
     {
-        if(bad.Any()){<text>@MonitorStatus.Critical.IconSpan() @bad.Count() Unhealthy</text>}
-        if(good.Any()){<text>@MonitorStatus.Good.IconSpan() @good.Count() Healthy</text>} 
+        if (bad.Any())
+        {
+            @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma() Unhealthy
+        }
+        if (good.Any())
+        {
+            @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma() Healthy
+        }
     }
+}
+@helper MemoryCell(SQLInstance i, int decimalPlaces = 2)
+{
+    if (i.ServerInfo != null)
+    {
+        <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
+    }
+    else
+    {
+        var props = i.ServerProperties.SafeData();
+        if (props != null && props.PhysicalMemoryBytes > 0)
+        {
+            <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, decimalPlaces) + "%")</td>
+        }
+        else
+        {
+            <td class="text-muted">?</td>
+        }
+    }
+}
+@helper BatchesCell(SQLInstance i)
+{
+    <td>@(i.BatchesPerSec?.ToComma())</td>
 }
