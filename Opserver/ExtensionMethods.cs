@@ -1,12 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Collections.Specialized;
+using System.Globalization;
 using System.Web;
 using System.Web.Mvc;
+using Jil;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
+using UnconstrainedMelody;
+using System.Text;
 
 namespace StackExchange.Opserver
 {
@@ -16,41 +21,30 @@ namespace StackExchange.Opserver
     public static class WebExtensionMethods
     {
         /// <summary>
-        /// returns Url Encoded string
+        /// This string is already correctly encoded HTML and can be sent to the client "as is" without additional encoding.
         /// </summary>
-        public static string UrlEncode(this string s)
-        {
-            return s.HasValue() ? HttpUtility.UrlEncode(s) : s;
-        }
+        /// <param name="html">The already-encoded HTML string.</param>
+        public static IHtmlString AsHtml(this string html) => MvcHtmlString.Create(html);
 
         /// <summary>
-        /// Returns a url encoded string with any + converted to %20 for better query string transport.
+        /// Title cases a string given the current culture.
         /// </summary>
-        public static string QueryStringEncode(this string s)
-        {
-            return s.HasValue() ? HtmlUtilities.QueryStringEncode(s) : s;
-        }
+        /// <param name="s">The string to convert to title case.</param>
+        public static string ToTitleCase(this string s) => CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s);
 
         /// <summary>
-        /// returns Html Encoded string
+        /// Appends a <see cref="string"/>, HTML encoding the contents first.
         /// </summary>
-        public static string HtmlEncode(this string s)
-        {
-            return s.HasValue() ? HttpUtility.HtmlEncode(s) : s;
-        }
+        /// <param name="sb">The <see cref="StringBuilder"/> to append to.</param>
+        /// <param name="s">The <see cref="string"/> to encode and append.</param>
+        /// <returns>The original <see cref="StringBuilder"/> for chaining.</returns>
+        public static StringBuilder AppendHtmlEncode(this StringBuilder sb, string s) => sb.Append(s.HtmlEncode());
 
         /// <summary>
-        /// Gets the count of lines in a string
+        /// Encodes an object as JSON for direct use without quote crazy
         /// </summary>
-        public static int LineCount(this string s)
-        {
-            var n = 0;
-            foreach (var c in s)
-            {
-                if (c == '\n') n++;
-            }
-            return n + 1;
-        }
+        /// <param name="o">The object to serialize.</param>
+        public static IHtmlString ToJson(this object o) => JSON.Serialize(o).AsHtml();
 
         public static IHtmlString ToStatusSpan(this Data.HAProxy.Item item)
         {
@@ -59,47 +53,97 @@ namespace StackExchange.Opserver
             switch (item.MonitorStatus)
             {
                 case MonitorStatus.Good:
-                    return string.Format("({0})", item.Status).AsHtml();
+                    return ("(" + item.Status + ")").AsHtml();
                 default:
-                    return string.Format("(<b>{0}</b>)", item.Status).AsHtml();
+                    return ("(<b>" + item.Status + "</b>)").AsHtml();
+            }
+        }
+
+        public static IHtmlString ColorCode(this string s)
+        {
+            switch (s)
+            {
+                case "None":
+                    return @"<span class=""text-muted"">None</span>".AsHtml();
+                case "Unknown":
+                    return @"<span class=""text-warning"">Unknown</span>".AsHtml();
+                case "n/a":
+                    return @"<span class=""text-warning"">n/a</span>".AsHtml();
+                default:
+                    return s.HtmlEncode().AsHtml();
             }
         }
 
         /// <summary>
-        /// Returns an icon span representation of this MonitorStatus
+        /// Returns an icon span representation of this MonitorStatus.
         /// </summary>
+        /// <param name="status">The status to get an icon for.</param>
         public static IHtmlString IconSpan(this MonitorStatus status)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.IconSpan(StatusIndicator.UpClass);
+                    return StatusIndicator.IconSpanGood;
                 case MonitorStatus.Warning:
                 case MonitorStatus.Maintenance:
-                    return StatusIndicator.IconSpan(StatusIndicator.WarningClass);
+                    return StatusIndicator.IconSpanWarning;
                 case MonitorStatus.Critical:
-                    return StatusIndicator.IconSpan(StatusIndicator.DownClass);
+                    return StatusIndicator.IconSpanCritical;
                 default:
-                    return StatusIndicator.IconSpan(StatusIndicator.UnknownClass);
+                    return StatusIndicator.IconSpanUnknown;
+            }
+        }
+
+        /// <summary>
+        /// Gets an icon representing the current status of a <see cref="Node"/>.
+        /// </summary>
+        /// <param name="node">The node to represent.</param>
+        /// <returns>An icon representing the node and its current status.</returns>
+        public static IHtmlString IconSpan(this Node node)
+        {
+            if (node == null)
+                return @"<span class=""text-muted"">●</span>".AsHtml();
+
+            var monitorStatusClass = node.MonitorStatus.TextClass(true);
+            switch (node.HardwareType)
+            {
+                case HardwareType.Physical:
+                    return $@"<i class=""{monitorStatusClass} fa fa-server"" aria-hidden=""true"" title=""Physical""></i>".AsHtml();
+                case HardwareType.VirtualMachine:
+                    return $@"<i class=""{monitorStatusClass} fa fa-cloud"" aria-hidden=""true"" title=""Virtual Machine""></i>".AsHtml();
+                case HardwareType.Network:
+                    return $@"<i class=""{monitorStatusClass} fa fa-exchange"" aria-hidden=""true"" title=""Network""></i>".AsHtml();
+                //case HardwareType.Unknown:
+                default:
+                    return $@"<i class=""{monitorStatusClass} fa fa-question-circle-o"" aria-hidden=""true"" title=""Unknown hardware type""></i>".AsHtml();
             }
         }
 
         public static IHtmlString IconSpan(this IMonitorStatus status)
         {
             if (status == null)
-                return StatusIndicator.IconSpan(StatusIndicator.UnknownClass);
+                return @"<span class=""text-muted"">●</span>".AsHtml();
 
             switch (status.MonitorStatus)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.IconSpan(StatusIndicator.UpClass);
+                    return StatusIndicator.IconSpanGood;
                 case MonitorStatus.Warning:
                 case MonitorStatus.Maintenance:
-                    return StatusIndicator.IconSpan(StatusIndicator.WarningClass, status.MonitorStatusReason);
+                    var reason = status.MonitorStatusReason;
+                    return reason.HasValue()
+                        ? $@"<span class=""text-warning"" title=""{reason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanWarning;
                 case MonitorStatus.Critical:
-                    return StatusIndicator.IconSpan(StatusIndicator.DownClass, status.MonitorStatusReason);
+                    var cReason = status.MonitorStatusReason;
+                    return cReason.HasValue()
+                        ? $@"<span class=""text-danger"" title=""{cReason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanCritical;
                 default:
-                    return StatusIndicator.IconSpan(StatusIndicator.UnknownClass, status.MonitorStatusReason);
+                    var uReason = status.MonitorStatusReason;
+                    return uReason.HasValue()
+                        ? $@"<span class=""text-muted"" title=""{uReason.HtmlEncode()}"">●</span>".AsHtml()
+                        : StatusIndicator.IconSpanUnknown;
             }
         }
 
@@ -108,78 +152,107 @@ namespace StackExchange.Opserver
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.UpCustomSpam(text, tooltip);
+                    return StatusIndicator.UpCustomSpan(text, tooltip);
                 case MonitorStatus.Warning:
-                    return StatusIndicator.WarningCustomSpam(text, tooltip);
+                    return StatusIndicator.WarningCustomSpan(text, tooltip);
                 case MonitorStatus.Critical:
-                    return StatusIndicator.DownCustomSpam(text, tooltip);
+                    return StatusIndicator.DownCustomSpan(text, tooltip);
                 default:
-                    return StatusIndicator.UnknownCustomSpam(text, tooltip);
+                    return StatusIndicator.UnknownCustomSpan(text, tooltip);
             }
         }
-        
-        public static string Class(this MonitorStatus status)
+
+        public static string RawClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
+        public static string RawClass(this MonitorStatus status, bool showGood = false, bool maint = false)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return StatusIndicator.UpClass;
+                    return showGood ? "success" : "";
                 case MonitorStatus.Warning:
-                    return StatusIndicator.WarningClass;
+                    return "warning";
                 case MonitorStatus.Critical:
-                    return StatusIndicator.DownClass;
+                    return "danger";
+                case MonitorStatus.Maintenance:
+                    return maint ? "info" : "muted";
                 default:
-                    return StatusIndicator.UnknownClass;
+                    return "muted";
             }
         }
 
-        public static string RowClass(this IMonitorStatus status)
-        {
-            return RowClass(status.MonitorStatus);
-        }
+        public static string RowClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
+        public static string RowClass(this MonitorStatus status) => RawClass(status);
 
-        public static string RowClass(this MonitorStatus status)
+        public static string TextClass(this IMonitorStatus status) => TextClass(status.MonitorStatus);
+        public static string TextClass(this MonitorStatus status, bool showGood = false)
         {
             switch (status)
             {
                 case MonitorStatus.Good:
-                    return "good-row";
+                    return showGood ? "text-success" : "";
                 case MonitorStatus.Warning:
-                    return "warning-row";
+                    return "text-warning";
                 case MonitorStatus.Critical:
-                    return "critical-row";
+                    return "text-danger";
+                //case MonitorStatus.Maintenance:
                 default:
-                    return "unknown-row";
+                    return "text-muted";
             }
         }
-        
+
+        public static string BackgroundClass(this IMonitorStatus status) => BackgroundClass(status.MonitorStatus);
+        public static string BackgroundClass(this MonitorStatus status, bool showGood = true)
+        {
+            switch (status)
+            {
+                case MonitorStatus.Good:
+                    return showGood ? "bg-success" : "";
+                case MonitorStatus.Warning:
+                    return "bg-warning";
+                case MonitorStatus.Critical:
+                    return "bg-danger";
+                default:
+                    return "bg-muted";
+            }
+        }
+
+        public static string ProgressBarClass(this MonitorStatus status)
+        {
+            switch (status)
+            {
+                case MonitorStatus.Good:
+                    return "progress-bar-success";
+                case MonitorStatus.Unknown:
+                case MonitorStatus.Maintenance:
+                case MonitorStatus.Warning:
+                    return "progress-bar-warning";
+                case MonitorStatus.Critical:
+                    return "progress-bar-danger";
+                default:
+                    return "";
+            }
+        }
+
         public static IHtmlString ToPollSpan(this Cache cache, bool mini = true, bool lastSuccess = false)
         {
-            if (cache == null)
+            if (cache?.LastPoll == null)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
             if (lastSuccess)
-                return mini ? cache.LastSuccess.ToRelativeTimeSpanMini() : cache.LastSuccess.ToRelativeTimeSpan();
-            
+                return mini ? cache.LastSuccess?.ToRelativeTimeSpanMini() : cache.LastSuccess?.ToRelativeTimeSpan();
+
             var lf = cache.LastPoll;
-            if (lf == DateTime.MinValue)
+            if (lf == null)
                 return MonitorStatus.Warning.Span("Unknown", "No Data Available Yet");
 
-            if (cache.LastPollStatus == FetchStatus.Fail)
-                return MonitorStatus.Warning.Span(mini ? lf.ToRelativeTime() : lf.ToRelativeTimeMini(),
-                                                  string.Format("Last Poll: {0}\nError: {1}", lf.ToUniversalTime(), cache.ErrorMessage));
+            var dateToUse = cache.LastSuccess ?? cache.LastPoll;
+            if (!cache.LastPollSuccessful)
+            {
+                return MonitorStatus.Warning.Span(mini ? dateToUse?.ToRelativeTime() : dateToUse?.ToRelativeTimeMini(),
+                   $"Last Poll: {lf.Value.ToZuluTime()} ({lf.Value.ToRelativeTime()})\nError: {cache.ErrorMessage}");
+            }
 
-            return mini ? lf.ToRelativeTimeSpanMini() : lf.ToRelativeTimeSpan();
-        }
-        
-        public static string ToDateOnlyString(this DateTime dt)
-        {
-            return dt.ToString("yyyy-MM-dd");
-        }
-
-        public static MvcHtmlString ToDateOnlySpanPretty(this DateTime dt, string cssClass)
-        {
-            return MvcHtmlString.Create(String.Format(@"<span title=""{0:u}"" class=""{1}"">{2}</span>", dt, cssClass, ToDateOnlyStringPretty(dt, DateTime.UtcNow)));
+            return mini ? lf.Value.ToRelativeTimeSpanMini() : lf.Value.ToRelativeTimeSpan();
         }
 
         public static string ToDateOnlyStringPretty(this DateTime dt, DateTime? utcNow = null)
@@ -189,64 +262,50 @@ namespace StackExchange.Opserver
         }
 
         /// <summary>
-        /// Convert a nullable datetime to a zulu string
+        /// Convert a datetime to a zulu string.
         /// </summary>
-        public static string ToUniversalTime(this DateTime? dt)
-        {
-            return !dt.HasValue ? string.Empty : ToUniversalTime(dt.Value);
-        }
+        /// <param name="dt">The time to represent as zulu.</param>
+        public static string ToZuluTime(this DateTime dt) => dt.ToString("u");
 
         /// <summary>
-        /// Convert a datetime to a zulu string
+        /// Converts a timespan to a readable string adapted from https://stackoverflow.com/a/4423615
         /// </summary>
-        public static string ToUniversalTime(this DateTime dt)
-        {
-            return dt.ToString("u");
-        }
-
-        /// <summary>
-        /// Converts a timespan to a readable string adapted from http://stackoverflow.com/a/4423615
-        /// </summary>
+        /// <param name="span">The span of time to represent.</param>
         public static string ToReadableString(this TimeSpan span)
         {
             var dur = span.Duration();
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             if (dur.Days > 0) sb.AppendFormat("{0:0} day{1}, ", span.Days, span.Days == 1 ? "" : "s");
             if (dur.Hours > 0) sb.AppendFormat("{0:0} hour{1}, ", span.Hours, span.Hours == 1 ? "" : "s");
             if (dur.Minutes > 0) sb.AppendFormat("{0:0} minute{1}, ", span.Minutes, span.Minutes == 1 ? "" : "s");
             if (dur.Seconds > 0) sb.AppendFormat("{0:0} second{1}, ", span.Seconds, span.Seconds == 1 ? "" : "s");
 
             if (sb.Length >= 2) sb.Length -= 2;
-            return sb.ToString().IsNullOrEmptyReturn("0 seconds");
+            return sb.ToStringRecycle().IsNullOrEmptyReturn("0 seconds");
         }
 
         /// <summary>
-        /// returns a html span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
+        /// Gets a HTML span element with relative time elapsed since this event occurred, eg, "3 months ago" or "yesterday"; 
         /// assumes time is *already* stored in UTC format!
         /// </summary>
-        public static IHtmlString ToRelativeTimeSpan(this DateTime dt)
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="cssClass">(Optional) CSS class sting to add.</param>
+        /// <param name="asPlusMinus">(Optional) Whether to render a +/- in front of the text.</param>
+        /// <param name="compareTo">(Optional) The date to be relative to (defaults to <see cref="DateTime.UtcNow"/>).</param>
+        public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssClass = null, bool asPlusMinus = false, DateTime? compareTo = null)
         {
-            return ToRelativeTimeSpan(dt, "relativetime");
-        }
-        public static IHtmlString ToRelativeTimeSpan(this DateTime dt, string cssclass, bool asPlusMinus = false, DateTime? compareTo = null)
-        {
+            // TODO: Make this a setting?
+            // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo = compareTo ?? DateTime.UtcNow;
-            if (string.IsNullOrEmpty(cssclass))
-                return string.Format(@"<span title=""{0:u}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)).AsHtml();
-            else
-                return string.Format(@"<span title=""{0:u}"" class=""{2}"">{1}</span>", dt, dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo), cssclass).AsHtml();
+            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
         }
-        public static IHtmlString ToRelativeTimeSpan(this DateTime? dt, string cssclass = "")
-        {
-            return dt == null
-                       ? MvcHtmlString.Empty
-                       : ToRelativeTimeSpan(dt.Value, "relativetime" + (cssclass.HasValue() ? " " + cssclass : ""));
-        }
-
 
         /// <summary>
-        /// returns a very *small* humanized string indicating how long ago something happened, eg "3d ago"
+        /// Gets a very *small* humanized string indicating how long ago something happened, eg "3d ago".
         /// </summary>
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="includeTimeForOldDates">(Optional) Whether to include the time portion for dates 12+ months ago.</param>
+        /// <param name="includeAgo">(Optional) Whether to include the "ago" suffix on the end.</param>
         public static string ToRelativeTimeMini(this DateTime dt, bool includeTimeForOldDates = true, bool includeAgo = true)
         {
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
@@ -254,20 +313,20 @@ namespace StackExchange.Opserver
 
             if (delta < 60)
             {
-                return ts.Seconds + "s" + (includeAgo ? " ago" : "");
+                return ts.Seconds.ToString() + "s" + (includeAgo ? " ago" : "");
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes + "m" + (includeAgo ? " ago" : "");
+                return ts.Minutes.ToString() + "m" + (includeAgo ? " ago" : "");
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours + "h" + (includeAgo ? " ago" : "");
+                return ts.Hours.ToString() + "h" + (includeAgo ? " ago" : "");
             }
             var days = ts.Days;
             if (days <= 2)
             {
-                return days + "d" + (includeAgo ? " ago" : "");
+                return days.ToString() + "d" + (includeAgo ? " ago" : "");
             }
             else if (days <= 330)
             {
@@ -276,10 +335,10 @@ namespace StackExchange.Opserver
             return dt.ToString(includeTimeForOldDates ? @"MMM %d \'yy 'at' %H:mmm" : @"MMM %d \'yy").ToLowerInvariant();
         }
 
-
         /// <summary>
         /// returns a very *small* humanized string indicating how long ago something happened, e.g. "3d 10m" or "2m 10s"
         /// </summary>
+        /// <param name="dt">The time to represent, compared to <see cref="DateTime.UtcNow"/></param>
         public static string ToRelativeTimeMiniAll(this DateTime dt)
         {
             var ts = new TimeSpan(DateTime.UtcNow.Ticks - dt.Ticks);
@@ -287,200 +346,148 @@ namespace StackExchange.Opserver
 
             if (delta < 60)
             {
-                return ts.Seconds + "s";
+                return ts.Seconds.ToString() + "s";
             }
             if (delta < 3600) // 60 mins * 60 sec
             {
-                return ts.Minutes + "m" + ((ts.Seconds > 0) ? " " + ts.Seconds + "s" : "");
+                return ts.Minutes.ToString() + "m" + (ts.Seconds > 0 ? " " + ts.Seconds.ToString() + "s" : "");
             }
             if (delta < 86400)  // 24 hrs * 60 mins * 60 sec
             {
-                return ts.Hours + "h" + ((ts.Minutes > 0) ? " " + ts.Minutes + "m" : "");
+                return ts.Hours.ToString() + "h" + (ts.Minutes > 0 ? " " + ts.Minutes.ToString() + "m" : "");
             }
-            return ts.Days + "d" + ((ts.Hours > 0) ? " " + ts.Hours + "h" : "");
+            return ts.Days.ToString() + "d" + (ts.Hours > 0 ? " " + ts.Hours.ToString() + "h" : "");
         }
 
         /// <summary>
-        /// returns AN HTML SPAN ELEMENT with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
+        /// Gets an HTML span element with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
         /// assumes time is *already* stored in UTC format!
         /// </summary>
+        /// <param name="dt">The time to represent.</param>
+        /// <param name="includeTimeForOldDates">(Optional) Whether to include the time portion for dates 12+ months ago.</param>
         public static IHtmlString ToRelativeTimeSpanMini(this DateTime dt, bool includeTimeForOldDates = true)
         {
-            return string.Format(@"<span title=""{0:u}"" class=""relativetime"">{1}</span>", dt, ToRelativeTimeMini(dt, includeTimeForOldDates)).AsHtml();
-        }
-        /// <summary>
-        /// returns AN HTML SPAN ELEMENT with minified relative time elapsed since this event occurred, eg, "3mo ago" or "yday"; 
-        /// assumes time is *already* stored in UTC format!
-        /// If this DateTime? is null, will return empty string.
-        /// </summary>
-        public static IHtmlString ToRelativeTimeSpanMini(this DateTime? dt, bool includeTimeForOldDates = true)
-        {
-            return dt == null
-                       ? MvcHtmlString.Empty
-                       : ToRelativeTimeSpanMini(dt.Value, includeTimeForOldDates);
+            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
         }
 
         /// <summary>
-        /// Mini rep - 1.1k allowed
+        /// Mini number, e.g. 1.1k
         /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
+        /// <param name="number">The number to represent.</param>
         public static string Mini(this int number)
         {
-
             if (number >= 1000000)
-            {
-                return String.Format("{0:0.0m}", (double)number / 1000000);
-            }
+                return ((double)number / 1000000).ToString("0.0m");
 
             if (number >= 1000)
-            {
-                return String.Format("{0:0.#k}", (double)number / 1000);
-            }
+                return ((double)number / 1000).ToString("0.#k");
 
-            return String.Format("{0:#,##0}", number);
-        }
-        /// <summary>
-        /// Full representation of a number
-        /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
-        public static string Full(this int number)
-        {
-            return String.Format("{0:#,##0}", number);
+            return number.ToString("#,##0");
         }
 
         /// <summary>
-        /// Micro representation of a number
+        /// Full representation of a number.
         /// </summary>
-        /// <param name="number"></param>
-        /// <returns></returns>
+        /// <param name="number">The number to represent.</param>
+        /// <returns>A formatted number, with commas.</returns>
+        public static string Full(this int number) => number.ToString("#,##0");
+
+        /// <summary>
+        /// Micro representation of a number.
+        /// </summary>
+        /// <param name="number">The number to represent.</param>
         public static string Micro(this int number)
         {
-
             if (number >= 1000000)
-            {
-                return String.Format("{0:0.0m}", (double)number / 1000000);
-            }
-
-            if (number >= 100000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-            }
-
-            if (number >= 10000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-
-            }
+                return ((double)number / 1000000).ToString("0.0m");
 
             if (number >= 1000)
-            {
-                return String.Format("{0:0k}", (double)number / 1000);
-            }
+                return ((double)number / 1000).ToString("0k");
 
-            return String.Format("{0:#,##0}", number);
+            return number.ToString("#,##0");
         }
 
         /// <summary>
-        /// Adds the parameter items to this list.
+        /// Converts seconds to a human readable timespan.
         /// </summary>
-        public static void AddAll<T>(this List<T> list, params T[] items)
-        {
-            list.AddRange(items);
-        }
-
-        /// <summary>
-        /// Converts seconds to a human readable timespan
-        /// </summary>
+        /// <param name="seconds">The number of seconds to represent.</param>
         public static IHtmlString ToTimeString(this int seconds)
         {
             if (seconds == 0) return MvcHtmlString.Empty;
             var ts = new TimeSpan(0, 0, seconds);
-            var sb = new StringBuilder();
+            var sb = StringBuilderCache.Get();
             if (ts.Days > 0)
-                sb.AppendFormat("<b>{0}</b>d ", ts.Days);
+                sb.Append("<b>").Append(ts.Days.ToString()).Append("</b>d ");
             if (ts.Hours > 0)
-                sb.AppendFormat("<b>{0}</b>hr ", ts.Hours);
+                sb.Append("<b>").Append(ts.Hours.ToString()).Append("</b>hr ");
             if (ts.Minutes > 0)
-                sb.AppendFormat("<b>{0}</b>min ", ts.Minutes);
+                sb.Append("<b>").Append(ts.Minutes.ToString()).Append("</b>min ");
             if (ts.Seconds > 0 && ts.Days == 0)
-                sb.AppendFormat("<b>{0}</b>sec ", ts.Seconds);
-            return sb.ToString().AsHtml();
+                sb.Append("<b>").Append(ts.Seconds.ToString()).Append("</b>sec ");
+            return sb.ToStringRecycle().AsHtml();
         }
 
-        public static IHtmlString ToYesNo(this int number)
+        private static readonly MvcHtmlString YesHtml = MvcHtmlString.Create("Yes");
+        private static readonly MvcHtmlString NoHtml = MvcHtmlString.Create("No");
+
+        public static IHtmlString ToYesNo(this bool value)
         {
-            return MvcHtmlString.Create(number == 1 ? "Yes" : "No");
+            return value ? YesHtml : NoHtml;
         }
 
         /// <summary>
-        /// Micro representation of a time in millisecs 
+        /// Micro representation of a number in bytes. 
         /// </summary>
-        public static IHtmlString MicroTime(this long time)
-        {
-            const string format = "<span title='{0}'>{1}</span>";
-            string title;
-            string body;
-
-            if (time < 1000)
-            {
-                title = time + " milliseconds";
-                body = time + "ms";
-            }
-            else if (time < 1000 * 500)
-            {
-                title = String.Format("{0:0.###}", (double)time / 1000) + " seconds";
-                body = String.Format("{0:0.#} secs", (double)time / 1000);
-            }
-            else if (time < 1000 * 60 * 300)
-            {
-                title = String.Format("{0:0.###}", (double)time / (1000 * 60)) + " minutes";
-                body = String.Format("{0:0.#} mins", (double)time / (1000 * 60));
-            }
-            else
-            {
-                title = String.Format("{0:0.###}", (double)time / (1000 * 60 * 60)) + " hours";
-                body = String.Format("{0:0.#} hours", (double)time / (1000 * 60 * 60));
-            }
-
-            return String.Format(format, title, body).AsHtml();
-        }
-
-        /// <summary>
-        /// Micro representation of a time in millisecs 
-        /// </summary>
+        /// <param name="unit">The number of bytes to represent.</param>
         public static IHtmlString MicroUnit(this long unit)
         {
             const string format = "<span title='{0}'>{1}</span>";
-            var title = unit + "";
+            var title = unit.ToString();
             string body;
 
             if (unit < 1000)
             {
-                body = unit + "";
+                body = unit.ToString();
             }
             else if (unit < 1000 * 1000)
             {
-                body = String.Format("{0:0.##}K", (double)unit / 1000);
+                body = ((double)unit / 1000).ToString("0.##K");
             }
             else if (unit < 1000 * 1000 * 1000)
             {
-                body = String.Format("{0:0.###}M", (double)unit / (1000 * 1000));
+                body = ((double)unit / (1000 * 1000)).ToString("0.###M");
             }
             else
             {
-                body = String.Format("{0:0.###}B", (double)unit / (1000 * 1000 * 1000));
+                body = ((double)unit / (1000 * 1000 * 1000)).ToString("0.###B");
             }
 
-            return String.Format(format, title, body).AsHtml();
+            return string.Format(format, title, body).AsHtml();
         }
 
-        public static IHtmlString ToNoteIfNA(this string data)
+        public static IHtmlString ToMutedIfNA(this string data)
         {
             return MvcHtmlString.Create(data == "n/a"
-                                            ? string.Concat(@"<span class=""note"">", data.HtmlEncode(), "</span>")
-                                            : data.HtmlEncode());
+                ? @"<span class=""text-muted"">n/a</span>"
+                : data.HtmlEncode());
+        }
+
+        public static string ToQueryString(this NameValueCollection nvc)
+        {
+            var sb = StringBuilderCache.Get();
+            sb.Append("?");
+            foreach (string key in nvc)
+            {
+                foreach (var value in nvc.GetValues(key))
+                {
+                    if (sb.Length > 1) sb.Append("&");
+                    sb.Append(key.UrlEncode())
+                        .Append("=")
+                        .Append(value.UrlEncode());
+                }
+            }
+            var result = sb.ToStringRecycle();
+            return result.Length > 1 ? result : "";
         }
     }
 
@@ -488,7 +495,7 @@ namespace StackExchange.Opserver
     {
         public static void SetPageTitle(this WebViewPage page, string title)
         {
-            title = HtmlUtilities.Encode(title);
+            title = title.HtmlEncode();
             page.ViewData[ViewDataKeys.PageTitle] = GetPageTitle(page, title);
         }
 
@@ -497,42 +504,40 @@ namespace StackExchange.Opserver
             return title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
         }
 
-        public static void SetMainTab(this WebViewPage page, MainTab tab)
-        {
-            page.ViewData[ViewDataKeys.MainTab] = tab;
-        }
-
         public static void SetTopSearch(this WebViewPage page,
                                         string searchText,
                                         string searchValue = null,
                                         string url = null,
-                                        Dictionary<string, string> addParams = null)
+                                        Dictionary<string, string> addParams = null,
+                                        string queryParam = "q")
         {
             page.ViewData[ViewDataKeys.TopBoxOptions] = new TopBoxOptions
-                {
-                    SearchOnly = true,
-                    SearchText = searchText,
-                    SearchValue = searchValue,
-                    SearchParams = addParams,
-                    Url = url
-                };
+            {
+                SearchOnly = true,
+                SearchText = searchText,
+                SearchValue = searchValue,
+                SearchParams = addParams,
+                QueryParam = queryParam,
+                Url = url
+            };
         }
 
-        public static void SetTopNodes(this WebViewPage page, IEnumerable<ISearchableNode> nodes,
+        public static void SetTopNodes(this WebViewPage page,
+                                       IEnumerable<ISearchableNode> nodes,
                                        string searchText,
                                        ISearchableNode currentNode = null,
                                        string url = null)
         {
             page.ViewData[ViewDataKeys.TopBoxOptions] = new TopBoxOptions
-                {
-                    AllNodes = nodes,
-                    CurrentNode = currentNode,
-                    SearchText = searchText,
-                    Url = url
-                };
+            {
+                AllNodes = nodes,
+                CurrentNode = currentNode,
+                SearchText = searchText,
+                Url = url
+            };
         }
     }
-    
+
     public static class EnumExtensions
     {
         public static IHtmlString ToSpan(this SynchronizationStates? state, string tooltip = null)
@@ -541,28 +546,29 @@ namespace StackExchange.Opserver
             {
                 case SynchronizationStates.Synchronizing:
                 case SynchronizationStates.Synchronized:
-                    return StatusIndicator.UpCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.UpCustomSpan(state.Value.GetDescription(), tooltip);
                 case SynchronizationStates.NotSynchronizing:
                 case SynchronizationStates.Reverting:
                 case SynchronizationStates.Initializing:
-                    return StatusIndicator.DownCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.DownCustomSpan(state.Value.GetDescription(), tooltip);
                 default:
-                    return StatusIndicator.UnknownCustomSpam(state.GetDescription(), tooltip);
+                    return StatusIndicator.UnknownCustomSpan(state.Value.GetDescription(), tooltip);
             }
         }
+
         public static IHtmlString ToSpan(this ReplicaRoles? state, string tooltip = null, bool abbreviate = false)
         {
-            var desc = state.GetDescription();
+            var desc = state.HasValue ? state.Value.GetDescription() : "";
             if (abbreviate) desc = desc.Substring(0, 1);
             switch (state)
             {
                 case ReplicaRoles.Primary:
-                    return StatusIndicator.UpCustomSpam(desc, tooltip);
+                    return StatusIndicator.UpCustomSpan(desc, tooltip);
                 case ReplicaRoles.Secondary:
                     return desc.AsHtml();
                 //case ReplicaRoles.Resolving:
                 default:
-                    return StatusIndicator.DownCustomSpam(desc, tooltip);
+                    return StatusIndicator.DownCustomSpan(desc, tooltip);
             }
         }
     }

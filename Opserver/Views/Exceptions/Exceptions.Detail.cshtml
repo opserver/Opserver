@@ -2,60 +2,60 @@
 @using System.Text.RegularExpressions
 @using StackExchange.Exceptional
 @using StackExchange.Opserver
+@using StackExchange.Opserver.Controllers
 @model Error
 @{
     var error = Model;
     const string customDataErrorKey = "CustomDataFetchError";
     this.SetPageTitle("Error Info - " + error);
-    this.SetMainTab(MainTab.Exceptions);
 }
 @section head {
-    @if(error != null) 
+    @if (error != null)
     {
-    <script>
-        var Exception = @error.ToDetailedJson().AsHtml();
-        $(function () {
-            Status.Exceptions.init({ log: '@error.ApplicationName', id: '@error.GUID' });
-        });
-    </script>
+        <script>
+            var Exception = @error.ToDetailedJson().AsHtml();
+            $(function () {
+                Status.Exceptions.init({ log: '@error.ApplicationName', id: '@error.GUID.ToString()' });
+            });
+        </script>
     }
 }
 @functions
 {
-    private static HashSet<string> hiddenHttpKeys = new HashSet<string>
-                                                        {
-                                                            "ALL_HTTP",
-                                                            "ALL_RAW",
-                                                            "HTTP_CONTENT_LENGTH",
-                                                            "HTTP_CONTENT_TYPE",
-                                                            "HTTP_COOKIE",
-                                                            "QUERY_STRING"
-                                                        };
+    private static readonly HashSet<string> HiddenHttpKeys = new HashSet<string>
+    {
+        "ALL_HTTP",
+        "ALL_RAW",
+        "HTTP_CONTENT_LENGTH",
+        "HTTP_CONTENT_TYPE",
+        "HTTP_COOKIE",
+        "QUERY_STRING"
+    };
 
-    private static HashSet<string> defaultHttpKeys = new HashSet<string>
-                                                     {
-                                                         "APPL_MD_PATH",
-                                                         "APPL_PHYSICAL_PATH",
-                                                         "GATEWAY_INTERFACE",
-                                                         "HTTP_ACCEPT",
-                                                         "HTTP_ACCEPT_CHARSET",
-                                                         "HTTP_ACCEPT_ENCODING",
-                                                         "HTTP_ACCEPT_LANGUAGE",
-                                                         "HTTP_CONNECTION",
-                                                         "HTTP_KEEP_ALIVE",
-                                                         "HTTPS",
-                                                         "INSTANCE_ID",
-                                                         "INSTANCE_META_PATH",
-                                                         "PATH_INFO",
-                                                         "PATH_TRANSLATED",
-                                                         "REMOTE_PORT",
-                                                         "SCRIPT_NAME",
-                                                         "SERVER_NAME",
-                                                         "SERVER_PORT",
-                                                         "SERVER_PORT_SECURE",
-                                                         "SERVER_PROTOCOL",
-                                                         "SERVER_SOFTWARE"
-                                                     };
+    private static readonly HashSet<string> DefaultHttpKeys = new HashSet<string>
+    {
+        "APPL_MD_PATH",
+        "APPL_PHYSICAL_PATH",
+        "GATEWAY_INTERFACE",
+        "HTTP_ACCEPT",
+        "HTTP_ACCEPT_CHARSET",
+        "HTTP_ACCEPT_ENCODING",
+        "HTTP_ACCEPT_LANGUAGE",
+        "HTTP_CONNECTION",
+        "HTTP_KEEP_ALIVE",
+        "HTTPS",
+        "INSTANCE_ID",
+        "INSTANCE_META_PATH",
+        "PATH_INFO",
+        "PATH_TRANSLATED",
+        "REMOTE_PORT",
+        "SCRIPT_NAME",
+        "SERVER_NAME",
+        "SERVER_PORT",
+        "SERVER_PORT_SECURE",
+        "SERVER_PROTOCOL",
+        "SERVER_SOFTWARE"
+    };
 
     private static readonly Regex _sanitizeUrl = new Regex(@"[^-a-z0-9+&@#/%?=~_|!:,.;\*\(\)\{\}]", RegexOptions.IgnoreCase | RegexOptions.Compiled);
     public static string SanitizeUrl(string url)
@@ -63,139 +63,220 @@
         return url.IsNullOrEmpty() ? url : _sanitizeUrl.Replace(url, "");
     }
 }
-@helper Linkify(string possibleLink) {
-    if (string.IsNullOrEmpty(possibleLink)) {
-        @possibleLink;
-    }
 
-    if (Regex.IsMatch(possibleLink, @"%[A-Z0-9][A-Z0-9]"))
+@helper Linkify(string possibleLink)
+{
+    if (possibleLink.IsNullOrEmpty())
     {
-        possibleLink = Server.UrlDecode(possibleLink);
+        @possibleLink
     }
-
-    if (Regex.IsMatch(possibleLink, "^(https?|ftp|file)://"))
+    if (possibleLink != null)
     {
-        //@* || (Regex.IsMatch(s, "/[^ /,]+/") && !s.Contains("/LM"))*@ // block special case of "/LM/W3SVC/1"
-        var sane = SanitizeUrl(possibleLink);
-        if (sane == possibleLink) // only link if it's not suspicious
+        if (Regex.IsMatch(possibleLink, @"%[A-Z0-9][A-Z0-9]"))
         {
-            <a href="@sane">@possibleLink</a>
-            return;
+            possibleLink = Server.UrlDecode(possibleLink);
+        }
+        if (Regex.IsMatch(possibleLink, "^(https?|ftp|file)://"))
+        {
+            var sane = SanitizeUrl(possibleLink);
+            if (sane == possibleLink) // only link if it's not suspicious
+            {
+                <a href="@sane">@possibleLink</a>
+                return;
+            }
         }
     }
-
     @possibleLink
 }
-@helper RenderVariableTable(string title, string className, NameValueCollection vars) {
-    if (vars == null || vars.Count == 0) {
+@helper RenderVariableTable(string title, string className, NameValueCollection vars)
+{
+    if (vars == null || vars.Count == 0)
+    {
         return;
     }
     // If this is a hidden row, buffer it up, since CSS has no clean mechanism for :visible:nth-row(odd) type styling behavior
-    Func<string, bool> isHidden = k => defaultHttpKeys.Contains(k);
-    var allKeys = vars.AllKeys.Where(key => !hiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
-    
+    Func<string, bool> isHidden = k => DefaultHttpKeys.Contains(k);
+    var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
+
     <div class="@className">
-        <h3 class="kv-title">@title</h3>
+        <h5><strong>@title</strong></h5>
         <div class="side-scroll">
-            <table class="kv-table">
+            <table class="table table-striped table-hover table-super-condensed table-responsive">
+                <tbody>
                 @foreach (var k in allKeys.Where(k => !isHidden(k)))
                 {
-                <tr>
-                    <td class="key">@k</td>
-                    <td class="value">@Linkify(vars[k])</td>
-                </tr>
+                    <tr>
+                        <td class="text-nowrap">@k</td>
+                        <td>@Linkify(vars[k])</td>
+                    </tr>
                 }
                 @if (vars["HTTP_HOST"].HasValue() && vars["URL"].HasValue())
                 {
-                var ssl = vars["HTTP_X_FORWARDED_PROTO"] == "https" || vars["HTTP_X_SSL"].HasValue() || vars["HTTPS"] == "on";
-                var url = string.Format("http{3}://{0}{1}{2}", vars["HTTP_HOST"], vars["URL"], vars["QUERY_STRING"].HasValue() ? "?" + vars["QUERY_STRING"] : "", ssl ? "s" : "");
-                <tr>
-                    <td class="key">URL and Query</td>
-                    <td class="value">
-                        @if (vars["REQUEST_METHOD"] == "GET")
-                        {
-                            @Linkify(url)
-                        }
-                        else
-                        {
-                            @url.HtmlEncode()
-                        }
-                    </td>
-                </tr>
+                    var ssl = vars["HTTP_X_FORWARDED_PROTO"] == "https" || vars["HTTP_X_SSL"].HasValue() || vars["HTTPS"] == "on";
+                    var url = $"http{(ssl ? "s" : "")}://{vars["HTTP_HOST"]}{vars["URL"]}{(vars["QUERY_STRING"].HasValue() ? "?" + vars["QUERY_STRING"] : "")}";
+                    <tr>
+                        <td class="text-nowrap">URL and Query</td>
+                        <td>
+                            @if (vars["REQUEST_METHOD"] == "GET")
+                            {
+                                @Linkify(url)
+                            }
+                            else
+                            {
+                                @url.HtmlEncode()
+                            }
+                        </td>
+                    </tr>
                 }
                 @foreach (var k in allKeys.Where(k => isHidden(k)))
                 {
-                <tr class="hidden">
-                    <td class="key">@k</td>
-                    <td class="value">@Linkify(vars[k])</td>
-                </tr>
+                    <tr class="hidden">
+                        <td>@k</td>
+                        <td>@Linkify(vars[k])</td>
+                    </tr>
                 }
+                </tbody>
             </table>
         </div>
     </div>
 }
+@helper RenderDetail(string detail)
+{
+    var pos = 0;
+    while (pos < detail.Length)
+    {
+        var offset = pos;
+        var matches = Current.Settings.Exceptions.StackTraceReplacements
+            .Select(x => new
+            {
+                pattern = x.RegexPattern(),
+                match = x.RegexPattern().Match(detail, offset),
+                replacement = x.Replacement,
+                name = x.Name,
+            })
+            .Where(x => x.match.Success)
+            .OrderBy(x => x.match.Index)
+            .ThenByDescending(x => x.match.Length)
+            .ToArray();
+
+        if (matches.Length == 0)
+        {
+            break;
+        }
+
+        var next = matches[0];
+
+        var prefixLength =  next.match.Index - pos;
+        if (prefixLength > 0)
+        {
+            Write(detail.Substring(pos, prefixLength));
+        }
+
+        var nextPos = next.match.Index + next.match.Length;
+
+        // log ambigous matches, take first one
+        var overlapping = matches.Skip(1).FirstOrDefault(x => x.match.Index < nextPos);
+        if (overlapping != null)
+        {
+            Current.LogException($"Ambigous source link pattern match between '{next.name}' and '{overlapping.name}'", new Exception("Ambigous SourceLink configuration"));
+        }
+        try
+        {
+            var replacement = next.match.Result(next.replacement);
+            WriteLiteral(replacement); // allow HTML in the replacement
+        }
+        catch (Exception ex)
+        {
+            Current.LogException($"Error while applying source link pattern replacement for '{next.name}'", ex);
+            Write(next.match.Value);
+        }
+
+        pos = nextPos;
+    }
+
+    var tailLength = detail.Length - pos;
+    if (tailLength > 0)
+    {
+        Write(detail.Substring(pos, tailLength));
+    }
+}
 <div id="ErrorInfo">
-@if (error == null)
-{
-    <div class="top-section error-bread-top">
-        <div class="error-header"><a href="/exceptions">Exceptions</a> > <span class="error-title">Error not found</span></div>
-    </div>
-    <div class="error-not-found">Error was not found.  If this link worked previously, the error was hard deleted.</div>
-}
-else
-{
-    <div class="top-section error-bread-top">
-        <div class="error-header"><a href="/exceptions">Exceptions</a> > <a href="/exceptions?log=@error.ApplicationName.UrlEncode()">@error.ApplicationName</a> > <span class="error-title">@error.Message</span> <span class="similar-link">(<a href="/exceptions/similar?id=@error.GUID&app=@error.ApplicationName.UrlEncode()">view similar</a>)</span></div>
-    </div>
-    <div class="error-info">
-        <div class="error-type">@error.Type</div>
-        <pre class="error-detail">@error.Detail
-        </pre>
-        <p class="error-time">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> on @error.MachineName@if(!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin){<text> <span class="info-delete-link">(<a class="info-link" href="#" title="delete this error from the log">delete</a>)</span></text>}</p>
-        @if (!string.IsNullOrEmpty(error.SQL))
-        {
-            <h3 class="kv-title">SQL</h3>
-            <pre class="sql-detail">@error.SQL</pre>
-            <br/>
-        }
-        @RenderVariableTable("Server Variables", "server-variables", error.ServerVariables)
-        @if (error.CustomData != null && error.CustomData.Count > 0)
-        {
-            var errored = error.CustomData.ContainsKey(customDataErrorKey);
-            var cdKeys = error.CustomData.Keys.Where(k => k != customDataErrorKey);
-            <div class="custom-data">
-                @if (errored)
-                {
-                    <h3 class="kv-title title-error">Custom - Error while gathering custom data</h3>
-                } else
-                {
-                    <h3 class="kv-title">Custom</h3>
-                }
-                @if (cdKeys.Any(k => k != customDataErrorKey))
-                {
-                    <div class="side-scroll">
-                        <table class="kv-table">
-                            @foreach (var cd in cdKeys)
-                            {
-                                <tr>
-                                    <td class="key">@cd</td>
-                                    <td class="value">@Linkify(error.CustomData[cd])</td>
-                                </tr>
-                            }
-                        </table>
-                    </div>
-                }
-                @if(errored)
-                {
-                    <span class="custom-error-label">GetCustomData threw an exception:</span>
-                    <pre class="error-detail">@error.CustomData[customDataErrorKey]</pre>
-                }
-            </div>
-        }
-        @RenderVariableTable("QueryString", "querystring", error.QueryString)
-        @RenderVariableTable("Form", "form", error.Form)
-        @RenderVariableTable("Cookies", "cookies", error.Cookies)
-        @RenderVariableTable("RequestHeaders", "headers", error.RequestHeaders)
-    </div>
-}
+    @if (error == null)
+    {
+        <h5 class="page-header">
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
+            <span class="text-muted">/</span> 
+            Unknown
+        </h5>
+        <div class="alert alert-warning">
+            <h4>Error was not found.</h4>
+            If this link worked previously, the error was hard deleted.
+        </div>
+    }
+    else
+    {
+        <h5 class="page-header">
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
+            <span class="text-muted">/</span>
+            <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new {log = error.ApplicationName})">@error.ApplicationName</a>
+            <span class="text-muted">/</span>
+            @error.Type
+            <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName })">View Similar</a></span>
+        </h5>
+        <p class="small text-danger js-error-message">@error.Message</p>
+        <div class="error-info">
+            <pre class="stack dark"><code class="nohighlight">@Utils.StackTrace.HtmlPrettify(error.Detail, Current.Settings.Exceptions.StackTraceReplacements.ToDictionary(l => l.RegexPattern(), l => l.Replacement)).AsHtml()</code></pre>
+            @*<pre class="pre-code error-detail">@RenderDetail(error.Detail)</pre>*@
+            <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
+            @if (!error.DeletionDate.HasValue && Current.User.IsExceptionAdmin)
+            {
+                <span class="text-muted">(<a href="#" title="delete this error from the log">delete</a>)</span>
+            }
+            </p>
+            @if ((Current.Settings.Jira?.Enabled ?? false) && Current.User.IsExceptionAdmin)
+            {
+                @Html.Action("JiraActions", new { appName = Model.ApplicationName })
+            }
+            @if (error.SQL.HasValue())
+            {
+                <h5><strong>SQL</strong></h5>
+                <pre class="pre-code prettyprint lang-sql">@error.SQL</pre>
+            }
+            @RenderVariableTable("Server Variables", "server-variables", error.ServerVariables)
+            @if (error.CustomData?.Count > 0)
+            {
+                var errored = error.CustomData.ContainsKey(customDataErrorKey);
+                var cdKeys = error.CustomData.Keys.Where(k => k != customDataErrorKey).ToList();
+                <div class="custom-data">
+                    @if (errored)
+                    {
+                        <h5 class="text-danger"><strong>Custom - Error while gathering custom data</strong></h5>
+                        <span>GetCustomData threw an exception:</span>
+                        <pre class="error-detail">@error.CustomData[customDataErrorKey]</pre>
+                    }
+                    else if (cdKeys.Any())
+                    {
+                        <h5><strong>Custom</strong></h5>
+                        <div class="side-scroll">
+                            <table class="table table-striped table-hover table-super-condensed table-responsive">
+                                <tbody>
+                                @foreach (var cd in cdKeys)
+                                {
+                                    <tr>
+                                        <td class="text-nowrap">@cd</td>
+                                        <td>@Linkify(error.CustomData[cd])</td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            }
+            @RenderVariableTable("Query Parameters", "querystring", error.QueryString)
+            @RenderVariableTable("Form", "form", error.Form)
+            @RenderVariableTable("Cookies", "cookies", error.Cookies)
+            @RenderVariableTable("Request Headers", "headers", error.RequestHeaders)
+        </div>
+    }
 </div>

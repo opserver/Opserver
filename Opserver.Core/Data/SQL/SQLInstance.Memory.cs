@@ -6,14 +6,11 @@ namespace StackExchange.Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLMemoryClerkSummaryInfo>> _memoryClerkSummary;
-        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary
-        {
-            get { return _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(30)); }
-        }
+        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary => _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(RefreshInterval));
 
-        public class SQLMemoryClerkSummaryInfo : ISQLVersionedObject
+        public class SQLMemoryClerkSummaryInfo : ISQLVersioned
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string ClerkType { get; internal set; }
             public long UsedBytes { get; internal set; }
@@ -107,8 +104,9 @@ namespace StackExchange.Opserver.Data.SQL
                     }
                 }
             }
-            public bool IsBufferPool { get { return ClerkType == "MEMORYCLERK_SQLBUFFERPOOL"; } }
-            public bool IsPlanCache { get { return ClerkType == "CACHESTORE_SQLCP"; } }
+
+            public bool IsBufferPool => ClerkType == "MEMORYCLERK_SQLBUFFERPOOL";
+            public bool IsPlanCache => ClerkType == "CACHESTORE_SQLCP";
 
             internal const string FetchSQL = @"
    Select [type] ClerkType, 
@@ -119,14 +117,13 @@ namespace StackExchange.Opserver.Data.SQL
  Group By [type]
  Order By Sum(pages_kb) Desc";
 
-            public string GetFetchSQL(Version version)
+            public string GetFetchSQL(Version v)
             {
-                if (version < SQLServerVersions.SQL2012.RTM)
-                    return FetchSQL.Replace("pages_kb", "single_pages_kb + multi_pages_kb");
+                if (v < SQLServerVersions.SQL2012.RTM)
+                    return FetchSQL.Replace("pages_kb", "(single_pages_kb + multi_pages_kb)");
 
                 return FetchSQL;
             }
         }
-
     }
 }

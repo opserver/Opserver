@@ -3,23 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    public abstract class DashboardDataProvider : PollNode
+    public abstract class DashboardDataProvider<TSettings> : DashboardDataProvider where TSettings : class, IProviderSettings
+    {
+        public TSettings Settings { get; protected set; }
+
+        protected DashboardDataProvider(TSettings settings) : base(settings)
+        {
+            Settings = settings;
+        }
+    }
+
+    public abstract class DashboardDataProvider : PollNode, IIssuesProvider
     {
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
-        public string ConnectionString { get; protected set; }
-        public int QueryTimeoutMs { get; protected set; }
-        
+
+        public virtual IEnumerable<Issue> GetIssues()
+        {
+            foreach (var n in AllNodes)
+            {
+                if (n.Issues?.Count > 0)
+                {
+                    foreach (var i in n.Issues)
+                    {
+                        yield return i;
+                    }
+                }
+            }
+        }
+
+        public override string ToString() => GetType().Name;
+
         protected DashboardDataProvider(string uniqueKey) : base(uniqueKey) { }
 
-        protected DashboardDataProvider(DashboardSettings.Provider provider) : base(provider.Name)
+        protected DashboardDataProvider(IProviderSettings settings) : base(settings.Name + "Dashboard")
         {
-            Name = provider.Name;
-            ConnectionString = provider.ConnectionString;
-            QueryTimeoutMs = provider.QueryTimeoutMs;
+            Name = settings.Name;
         }
 
         /// <summary>
@@ -38,92 +61,54 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public abstract List<Node> AllNodes { get; }
 
-        public Node GetNode(int id)
-        {
-            return AllNodes.FirstOrDefault(s => s.Id == id);
-        }
+        public Node GetNodeById(string id) => AllNodes.Find(s => s.Id == id);
 
-        public Node GetNode(string hostName)
+        public Node GetNodeByHostname(string hostName)
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
-            return AllNodes.FirstOrDefault(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
+            return AllNodes.Find(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
         }
 
-        public abstract IEnumerable<Node> GetNodesByIP(IPAddress ip);
-        public abstract IEnumerable<IPAddress> GetIPsForNode(Node node);
+        public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip) =>
+            AllNodes.Where(n => n.IPs?.Any(i => i.Contains(ip)) == true);
 
         public virtual string GetManagementUrl(Node node) { return null; }
-        public abstract IEnumerable<Node.CPUUtilization> GetCPUUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
-        public abstract IEnumerable<Node.MemoryUtilization> GetMemoryUtilization(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null);
+
+        public abstract Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null);
+
+        public abstract Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
+        public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
+
+        public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 
         #endregion
-
-        #region Interfaces
-
-        public abstract List<Interface> AllInterfaces { get; }
-
-        public Interface GetInterface(int id)
-        {
-            return AllInterfaces.FirstOrDefault(i => i.Id == id);
-        }
-
-        public abstract IEnumerable<Interface.InterfaceUtilization> GetUtilization(Interface volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Volumes
-
-        public abstract List<Volume> AllVolumes { get; }
-
-        public Volume GetVolume(int id)
-        {
-            return AllVolumes.FirstOrDefault(v => v.Id == id);
-        }
-
-        public abstract IEnumerable<Volume.VolumeUtilization> GetUtilization(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
-
-        #endregion
-
-        #region Applications
-
-        public abstract List<Application> AllApplications { get; }
-
-        public Application GetApplication(int id)
-        {
-            return AllApplications.FirstOrDefault(a => a.Id == id);
-        }
-
-        #endregion
-
-        #region Cache
 
         protected Cache<T> ProviderCache<T>(
-            Func<T> fetch,
-            int cacheSeconds,
-            int? cacheFailureSeconds = null,
+            Func<Task<T>> fetch,
+            TimeSpan cacheDuration,
+            TimeSpan? cacheFailureDuration = null,
             bool affectsStatus = true,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
             where T : class
         {
-            return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
-                {
-                    AffectsNodeStatus = affectsStatus,
-                    CacheForSeconds = cacheSeconds,
-                    CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromProvider(typeof (T).Name + "-List", fetch)
-                };
+            return new Cache<T>(this,
+                "Data Provieder Fetch: " + NodeType + ":" + typeof(T).Name,
+                cacheDuration,
+                fetch,
+                addExceptionData: e => e.AddLoggedData("NodeType", NodeType),
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber)
+            {
+                AffectsNodeStatus = affectsStatus,
+                CacheFailureDuration = cacheFailureDuration
+            };
         }
-
-        public Action<Cache<T>> UpdateFromProvider<T>(string opName, Func<T> fetch) where T : class
-        {
-            return UpdateCacheItem(description: "Data Provieder Fetch: " + NodeType + ":" + opName,
-                                   getData: fetch,
-                                   addExceptionData: e => e.AddLoggedData("NodeType", NodeType));
-        }
-
-        #endregion
-
     }
 }

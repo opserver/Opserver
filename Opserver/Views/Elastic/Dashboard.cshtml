@@ -1,51 +1,48 @@
-﻿@using StackExchange.Opserver.Data.Elastic
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
 @using StackExchange.Opserver.Views.Elastic
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.Elastic);
-    this.SetPageTitle("elasticsearch Dashboard");
-    this.SetTopNodes(ElasticCluster.AllClusters,
+    this.SetPageTitle("Elasticsearch Dashboard");
+    this.SetTopNodes(ElasticModule.Clusters,
         "elastic clusters",
-        Model.Current != null ? Model.Current.Cluster : null);
+        Model.CurrentCluster);
 }
 @section head {
     <script>
         $(function() {
-            Status.Dashboard.init({ refresh: @(Model.Refresh ? (Model.View == DashboardModel.Views.Shards ? 60 : 5) : 0) });
-            @if (Model.Current != null)
-            {
-            @:Status.Elastic.init({ cluster: '@Model.Current.ClusterName', node: '@Model.Current.NodeName' });
-            }
+            Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
+            Status.Elastic.init({ cluster: '@Model.CurrentClusterName', node: '@Model.CurrentNodeName' });
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string href, string name, bool includeParams = true)
+@helper TabLink(DashboardModel.Views view, string action, string name, bool includeCluster = true, bool includeNode = false)
 {
-    var cc = Model.Current != null ? Model.Current.ClusterName : null;
-    var cs = Model.Current != null ? Model.Current.NodeName : null;
-    if (includeParams && cc != null && cs != null)
+    var rvd = new RouteValueDictionary();
+    if (includeCluster && Model.CurrentClusterName.HasValue())
     {
-        <a class="@(Model.View == view ? "selected" : "")" href="@href?cluster=@cc.UrlEncode()&node=@cs.UrlEncode()">@name</a>
+        rvd.Add("cluster", Model.CurrentClusterName);
     }
-    else
+    if (includeNode && Model.CurrentNodeName.HasValue())
     {
-        <a class="@(Model.View == view ? "selected" : "")" href="@href">@name</a>
+        rvd.Add("node", Model.CurrentNodeName);
     }
+
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action, rvd)">@name</a></li>
 }
-    <div class="tabs sub-tabs">
-        <div class="tabs-links">
-            @TabLink(DashboardModel.Views.Cluster, "/elastic", "clusters", false)
-            @TabLink(DashboardModel.Views.Node, "/elastic/node", "node")
-            @TabLink(DashboardModel.Views.Indices, "/elastic/indices", "indices")
-        </div>
-    </div>
-<div class="dashboard-list">
-    @if (Model.View == DashboardModel.Views.Node && (Model.Current == null || Model.Current.Node == null))
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false)
+    @TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster")
+    @TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true)
+    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes")
+</ul>
+<div>
+    @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))
     {
         @Html.Partial("Node.Selector")
     }
-    else if (Model.View == DashboardModel.Views.Indices && (Model.Current == null || Model.Current.Cluster == null))
+    else if ((Model.View == DashboardModel.Views.Cluster || Model.View == DashboardModel.Views.Indexes) && (Model.CurrentCluster == null))
     {
         @Html.Partial("Cluster.Selector")
     }

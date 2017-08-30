@@ -1,6 +1,6 @@
-﻿@using StackExchange.Opserver.Data.Dashboard
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Views.Dashboard
 @model Node
 @{
     var s = Model;
@@ -10,22 +10,22 @@
     public string GetItemClass(Node s)
     {
         var prefix = s.IsVM ? "virtual-machine " : "";
-        return prefix + s.MonitorStatus.RowClass();
+        return prefix + s.RowClass();
     }
 }
 @helper Graph(Node s, string type)
 {
-    if (!DashboardData.HasData)
+    if (!DashboardModule.HasData)
     {
-        <div class="spark-no-data">No Data Available</div>
+        <div class="text-muted">No Data Available</div>
         return;
     }
-    <img class="dashboard-spark" src="/graph/@type.ToLower()/spark?id=@s.Id"  width="@Current.ViewSettings.SparklineChartWidth" height="@Current.ViewSettings.SparklineChartHeight" alt="" data-id="@s.Id" data-title="@type" data-node="@s.PrettyName" />
+    <img class="js-dashboard-spark" src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
 }
-<div class="item @s.MonitorStatus.Class() @GetItemClass(s)">
+<div class="item dashboard @s.TextClass() @GetItemClass(s)">
     <div class="server-name">
         @s.IconSpan()
-        <a href="/dashboard/node?node=@s.PrettyName" class="node-name-link">@s.PrettyName</a>
+        <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = s.PrettyName })">@s.PrettyName</a>
         @if (s.IsUnwatched)
         {
             <span class="unmanaged">(unmanaged)</span>
@@ -39,12 +39,12 @@
     <div class="status-block mem-status">
         <span class="label">Mem </span>@s.MemoryPercentStatusSpan()
         <div class="status-graph">@s.MemoryStatusSpan()@if (s.HasValidMemoryReading) {
-            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width:@(s.PercentMemoryUsed)%"></div></div>
+            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div></div>
         }
         </div>
     </div>
     <div class="status-block net-status">
         <span class="label">Net </span>@s.PrettyTotalNetwork() 
-        <div class="status-graph"><a href="/dashboard/node?node=@s.PrettyName&view=@CurrentStatusTypes.Interfaces">@Graph(s, "Network")</a></div>
+        <div class="status-graph">@Graph(s, "Network")</div>
     </div>
 </div>

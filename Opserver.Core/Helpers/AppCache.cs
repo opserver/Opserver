@@ -4,7 +4,7 @@ using System.Net;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public static partial class AppCache
+    public static class AppCache
     {
         #region IP Cache
 
@@ -14,16 +14,15 @@ namespace StackExchange.Opserver.Helpers
                 {
                     try
                     {
-                        IPAddress ip;
-                        return IPAddress.TryParse(hostOrIp, out ip)
-                                   ? new List<IPAddress> {ip}
+                        return IPAddress.TryParse(hostOrIp, out IPAddress ip)
+                                   ? new List<IPAddress> { ip }
                                    : Dns.GetHostAddresses(hostOrIp).ToList();
                     }
                     catch
                     {
                         return new List<IPAddress>();
                     }
-                }, 10*60, 24*60*60);
+                }, 10.Hours(), 24.Hours());
         }
 
         public static string GetHostName(string ip)
@@ -33,13 +32,13 @@ namespace StackExchange.Opserver.Helpers
                 try
                 {
                     var entry = Dns.GetHostEntry(ip);
-                    return entry != null ? entry.HostName.Split(StringSplits.Period).First() : "Unknown";
+                    return entry != null ? entry.HostName.Split(StringSplits.Period)[0] : "Unknown";
                 }
                 catch
                 {
                     return "Unknown";
                 }
-            }, 10 * 60, 24 * 60 * 60);
+            }, 10.Minutes(), 24.Hours());
         }
 
         #endregion

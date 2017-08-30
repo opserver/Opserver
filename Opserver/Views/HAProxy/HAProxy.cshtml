@@ -1,62 +1,65 @@
-﻿@using System.Text
+﻿@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.HAProxy
 @using StackExchange.Opserver.Views.HAProxy
+@using Action = StackExchange.Opserver.Data.HAProxy.Action
 @model HAProxyModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("HAProxy");
-    this.SetMainTab(MainTab.HAProxy);
-    var allGroups = HAProxyGroup.AllGroups;
-    this.SetTopNodes(HAProxyGroup.AllGroups, "HAProxy Groups", Model.SelectedGroup);
+    var allGroups = HAProxyModule.Groups;
+    this.SetTopNodes(HAProxyModule.Groups, "HAProxy Groups", Model.SelectedGroup);
 }
 @section head {
 @if (Model.IsInstanceFilterable)
 {
-    <script>$(function() { Status.HAProxy.init({ refresh: @(Model.Refresh ? 5 : 0), group: '@(Model.SelectedGroup != null ? Model.SelectedGroup.Name : "")', proxy: '@(Model.WatchProxy)' }); });</script>
+    <script>
+        $(function() {
+            Status.HAProxy.init({
+                refresh: @(Model.Refresh ? 5 : 0), 
+                group: '@(Model.SelectedGroup != null ? Model.SelectedGroup.Name : "")', 
+                proxy: '@(Model.WatchProxy)'
+            });
+        });
+    </script>
 }
 }
-<div class="tabs sub-tabs">
-    <div class="tabs-links">
-        @if (Current.User.IsHAProxyAdmin)
-        {
-        <a class="@(Model.View == HAProxyModel.Views.Admin ? "selected" : "") admin-link" href="/haproxy/admin">admin</a>
-        }
-        <a class="@(Model.View == HAProxyModel.Views.Dashboard ? "selected" : "")" href="/haproxy">dashboard</a>
-        <a class="@(Model.View == HAProxyModel.Views.Detailed ? "selected" : "")" href="/haproxy/detailed">detailed</a>
-        @if (Current.Settings.HAProxy.Traffic.Enabled)
-        {
-        <a class="@(Model.View == HAProxyModel.Views.Traffic ? "selected" : "")" href="/haproxy/traffic">traffic history</a>
-        }
-    </div>
-</div>
-@if (Model.IsInstanceFilterable)
+@helper TabLink(HAProxyModel.Views view, string action, string name)
 {
-    var allProxies = HAProxyGroup.GetAllProxies();
-    <div class="node-category-list top-section" style="padding-top: 8px;">
-        <ul class="top-server-list">
-            <li>Instances: </li>
-            @{ var ac = Model.SelectedGroup == null ? @" class=""selected""" : ""; }
-            <li@(ac.AsHtml())><a href="/haproxy@(Model.View == HAProxyModel.Views.Admin ? "/admin" : "")"><span>All</span></a></li>
-            @foreach (var ha in allGroups)
-            {
-                var cha = ha == Model.SelectedGroup ? "selected" : null;
-                var count = allProxies.Count(e => e.Instance.Group.Name == ha.Name && e.Servers.Any());
-                var title = new StringBuilder();
-                var lastPoll = ha.Instances.Max(i => i.Proxies.LastPoll);
-                var lastSuccess = ha.Instances.Max(i => i.Proxies.LastSuccess);
-                var erroring = ha.Instances.FirstOrDefault(i => i.Proxies.ErrorMessage.HasValue());
-                title.Append(ha.Name)
-                     .AppendLine(": ")
-                     .Append("Last Poll: ").AppendLine(lastPoll == DateTime.MinValue ? "Not yet polled" : lastPoll.ToRelativeTime())
-                     .Append("Last Success: ").AppendLine(lastSuccess.HasValue ? lastSuccess.ToRelativeTime() : "never");
-                if (erroring != null)
-                {
-                    title.Append("Error: ").Append(erroring.Proxies.ErrorMessage);
-                }
-                <li class="@cha"><a href="?group=@ha.Name.UrlEncode()"><span class="@ha.MonitorStatus.GetDescription()" title="@title">@ha.Name</span></a><span class="count">@(count > 0 ? " (" + count + ")" : "")</span></li>
-            }
-            <li><a class="refresh-link" href="#">@(Model.Refresh ? "Disable Refresh" : "Enable Refresh")</a></li>
-        </ul>
-    </div>
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
 }
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard")
+    @if (Current.Settings.HAProxy.Traffic.Enabled)
+    {
+        @TabLink(HAProxyModel.Views.Traffic, nameof(HAProxyController.Traffic), "traffic")
+    }
+</ul>
+<div class="js-refresh" data-name="haproxy-header">
+    @if (Model.IsInstanceFilterable)
+    {
+        var allProxies = HAProxyGroup.GetAllProxies();
+        <ul class="badge-link-list small">
+            <li class="@(Model.SelectedGroup == null ? "active" : null)">
+                <a href="?">All</a>
+                <span class="badge">@allProxies.Count.ToComma()</span>
+            </li>
+            @foreach (var g in allGroups)
+            {
+                var count = allProxies.Count(e => e.Instance.Group.Name == g.Name && e.Servers.Any());
+                var lastPoll = g.Instances.Max(i => i.Proxies.LastPoll);
+                var lastSuccess = g.Instances.Max(i => i.Proxies.LastSuccess);
+                var erroring = g.Instances.FirstOrDefault(i => i.Proxies.ErrorMessage.HasValue());
+                <li class="@(g == Model.SelectedGroup ? "active" : null)" data-name="@g.Name" title="@g.Name:
+Last Poll: @(lastPoll?.ToRelativeTime() ?? "Not yet polled")
+Last Success: @(lastSuccess?.ToRelativeTime() ?? "never")@if (erroring != null) {<text>
+Error: @(erroring.Proxies.ErrorMessage)</text>
+}">
+                    <a href="?group=@g.Name.UrlEncode()" class="@g.TextClass()">@g.Name</a>
+                    <span class="badge alert-@g.RawClass()">@count.ToComma()</span>
+                </li>
+            }
+        </ul>
+    }
+    @Helpers.PollInfo(allGroups.SelectMany(g => g.Instances), "HAProxy")
+</div>
 @RenderBody()

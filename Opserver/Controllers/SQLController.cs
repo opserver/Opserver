@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.SQL;
@@ -14,29 +15,31 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        protected override ISecurableSection SettingsSection
+        public override ISecurableModule SettingsModule => Current.Settings.SQL;
+
+        public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
         {
-            get { return Current.Settings.SQL; }
-        }
+            GetMonitorStatus = () => SQLModule.AllInstances.GetWorstStatus()
+        };
 
         [Route("sql")]
         public ActionResult Dashboard()
         {
-            return Redirect("/sql/servers");
+            return RedirectToAction(nameof(Servers));
         }
 
         [Route("sql/servers")]
         public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
         {
-            var vd = new DashboardModel
+            var vd = new ServersModel
                 {
-                    StandaloneInstances = SQLInstance.AllStandalone,
-                    Clusters = SQLCluster.AllClusters,
+                    StandaloneInstances = SQLModule.StandaloneInstances,
+                    Clusters = SQLModule.Clusters,
                     Refresh = node.HasValue() ? 10 : 5
                 };
 
             if (cluster.HasValue())
-                vd.CurrentCluster = vd.Clusters.FirstOrDefault(c => string.Equals(c.Name, cluster, StringComparison.OrdinalIgnoreCase));
+                vd.CurrentCluster = vd.Clusters.Find(c => string.Equals(c.Name, cluster, StringComparison.OrdinalIgnoreCase));
             if (vd.CurrentCluster != null)
                 vd.AvailabilityGroups = vd.CurrentCluster.GetAvailabilityGroups(node, ag).ToList();
 
@@ -51,10 +54,9 @@ namespace StackExchange.Opserver.Controllers
         {
             var i = SQLInstance.Get(node);
 
-            var vd = new DashboardModel
+            var vd = new InstanceModel
             {
                 View = SQLViews.Instance,
-                StandaloneInstances = SQLInstance.AllStandalone,
                 Refresh = node.HasValue() ? 10 : 5,
                 CurrentInstance = i
             };
@@ -88,19 +90,39 @@ namespace StackExchange.Opserver.Controllers
 
         [OutputCache(Duration = 5 * 1, VaryByParam = "node;sort;options", VaryByContentEncoding = "gzip;deflate")]
         [Route("sql/top")]
-        public ActionResult Top(string node, SQLInstance.TopSearchOptions options, bool? detailed = false)
+        public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
+        {
+            var vd = GetOperationsModel(node, options);
+            var i = vd.CurrentInstance;
+
+            if (i != null)
+            {
+                var cache = i.GetTopOperations(options);
+                vd.TopOperations = cache.Data;
+                vd.ErrorMessage = cache.ErrorMessage;
+            }
+
+            return View("Operations.Top", vd);
+        }
+
+        [Route("sql/top/filters")]
+        public ActionResult TopFilters(string node, SQLInstance.TopSearchOptions options)
+        {
+            var vd = GetOperationsModel(node, options);
+            return View("Operations.Top.Filters", vd);
+        }
+
+        private OperationsTopModel GetOperationsModel(string node, SQLInstance.TopSearchOptions options)
         {
             var i = SQLInstance.Get(node);
             options.SetDefaults();
 
-            var vd = new DashboardModel
+            return new OperationsTopModel
             {
                 View = SQLViews.Top,
-                Detailed = detailed.GetValueOrDefault(),
                 CurrentInstance = i,
                 TopSearchOptions = options
             };
-            return View("Operations.Top", vd);
         }
 
         [Route("sql/top/detail")]
@@ -110,11 +132,11 @@ namespace StackExchange.Opserver.Controllers
 
             var i = SQLInstance.Get(node);
 
-            var vd = new OpsTopDetailModel
-                {
-                    Instance = i,
-                    Op = i.GetTopOperation(planHandle, offset).Data
-                };
+            var vd = new OperationsTopDetailModel
+            {
+                Instance = i,
+                Op = i.GetTopOperation(planHandle, offset).Data
+            };
             return View("Operations.Top.Detail", vd);
         }
 
@@ -123,44 +145,50 @@ namespace StackExchange.Opserver.Controllers
         {
             var planHandle = HttpServerUtility.UrlTokenDecode(handle);
             var i = SQLInstance.Get(node);
-            var op = i.GetTopOperation(planHandle);
-            if (op.Data == null) return ContentNotFound("Plan was not found.");
+            var op = i.GetTopOperation(planHandle).Data;
+            if (op == null) return ContentNotFound("Plan was not found.");
 
-            var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.Data.QueryPlan));
+            var ms = new MemoryStream(Encoding.UTF8.GetBytes(op.QueryPlan));
 
-            return File(ms, "text/xml", string.Format("QueryPlan-{0}.sqlplan", Math.Abs(handle.GetHashCode())));
+            return File(ms, "text/xml", $"QueryPlan-{Math.Abs(handle.GetHashCode())}.sqlplan");
         }
 
         [Route("sql/active")]
-        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options,
-                                   SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions? sleeping = null,
-                                   bool? system = false,
-                                   bool? details = false)
+        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options)
         {
-            if (sleeping.HasValue) options.IncludeSleepingSessions = sleeping.Value;
-            if (system.HasValue) options.IncludeSystemSessions = system.Value;
-            if (details.HasValue) options.GetAdditionalInfo = details.Value;
+            var vd = GetOperationsActiveModel(node, options);
+            return View("Operations.Active", vd);
+        }
 
+        [Route("sql/active/filters")]
+        public ActionResult ActiveFilters(string node, SQLInstance.ActiveSearchOptions options)
+        {
+            var vd = GetOperationsActiveModel(node, options);
+            return View("Operations.Active.Filters", vd);
+        }
+
+        private OperationsActiveModel GetOperationsActiveModel(string node, SQLInstance.ActiveSearchOptions options)
+        {
             var i = SQLInstance.Get(node);
-
-            var vd = new DashboardModel
+            return new OperationsActiveModel
             {
                 View = SQLViews.Active,
                 CurrentInstance = i,
                 ActiveSearchOptions = options
             };
-            return View("Operations.Active", vd);
         }
 
         [Route("sql/connections")]
-        public ActionResult Connections(string node)
+        public async Task<ActionResult> Connections(string node)
         {
             var i = SQLInstance.Get(node);
 
             var vd = new DashboardModel
             {
                 View = SQLViews.Connections,
-                CurrentInstance = i
+                CurrentInstance = i,
+                Cache = i?.Connections,
+                Connections = i == null ? null : await i.Connections.GetData().ConfigureAwait(false)
             };
             return View(vd);
         }
@@ -174,7 +202,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 View = SQLViews.Databases,
                 CurrentInstance = i,
-                Refresh = 10*60
+                Refresh = 2*60
             };
             return View(vd);
         }
@@ -193,12 +221,27 @@ namespace StackExchange.Opserver.Controllers
             };
             switch (view)
             {
+                case "backups":
+                    vd.View = DatabasesModel.Views.Backups;
+                    return View("Databases.Modal.Backups", vd);
+                case "restores":
+                    vd.View = DatabasesModel.Views.Restores;
+                    return View("Databases.Modal.Restores", vd);
+                case "storage":
+                    vd.View = DatabasesModel.Views.Storage;
+                    return View("Databases.Modal.Storage", vd);
                 case "tables":
                     vd.View = DatabasesModel.Views.Tables;
                     return View("Databases.Modal.Tables", vd);
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);
+                case "missingindexes":
+                    vd.View = DatabasesModel.Views.MissingIndexes;
+                    return View("Databases.Modal.MissingIndexes", vd);
+                case "storedprocedures":
+                    vd.View = DatabasesModel.Views.StoredProcedures;
+                    return View("Databases.Modal.StoredProcedures", vd);
             }
             return View("Databases.Modal.Tables", vd);
         }
@@ -215,7 +258,7 @@ namespace StackExchange.Opserver.Controllers
             };
             return View("Databases.Modal.Tables", vd);
         }
-        
+
         private ActionResult NoInstanceRedirect(string node)
         {
             if (Current.IsAjaxRequest)

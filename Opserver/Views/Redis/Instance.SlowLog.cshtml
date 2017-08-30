@@ -3,36 +3,32 @@
     Layout = null;
     var log = Model.SlowLog.SafeData(true);
 }
+<h4 class="modal-title">
+    Slow Command Log
+</h4>
 @if (log.Any())
 {
-    <div class="summary-dashboard">
-        <h3>
-            <a href="/redis/instance?node=@Model.Host:@Model.Port">@Model.Host:@Model.Port (@Model.Name)</a><span class="note">:</span> Slow Command Log
-        </h3>
-        <div>
-            <table id="slow-log-table">
-                <thead>
-                    <tr>
-                        <th>Command</th>
-                        <th>Duration</th>
-                        <th>When</th>
-                        <th>Ref</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var entry in log)
-                    {
-                        <tr data-id="@entry.UniqueId">
-                            <td>@string.Join(" ", entry.Arguments)</td>
-                            <td>@entry.Duration.ToTimeStringMini(3)</td>
-                            <td>@entry.Time.ToRelativeTimeSpan()</td>
-                            <td><a href="@entry.GetHelpUrl()" target="_blank">docs</a></td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <table class="table table-striped table-hover table-super-condensed table-responsive js-slow-log-table">
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Duration</th>
+                <th>When</th>
+                <th>Ref</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in log)
+            {
+                <tr data-id="@entry.UniqueId.ToString()">
+                    <td>@string.Join(" ", entry.Arguments)</td>
+                    <td class="text-nowrap">@entry.Duration.ToTimeStringMini(3)</td>
+                    <td class="text-nowrap">@entry.Time.ToRelativeTimeSpanMini()</td>
+                    <td class="text-nowrap"><a href="@entry.GetHelpUrl()" target="_blank">docs</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
 }
 else
 {

@@ -1,101 +1,65 @@
 ﻿using System;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.SettingsProviders;
+using Jil;
 
 namespace StackExchange.Opserver
 {
     internal static partial class Current
     {
-        public static SettingsProvider Settings
-        {
-            get { return SettingsProvider.Current; }
-        }
-        
+        public static SettingsProvider Settings => SettingsProvider.Current;
+
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
-        public static void LogException(string message, Exception innerException, string key = null, int? reLogDelaySeconds = null)
+        /// <param name="message">The exception message to log.</param>
+        /// <param name="innerException">The exception to wrap in an outer exception with <paramref name="message"/>.</param>
+        public static void LogException(string message, Exception innerException)
         {
             var ex = new Exception(message, innerException);
             LogException(ex);
         }
 
         /// <summary>
-        /// manually write an exception to our standard exception log
+        /// Manually write an exception to our standard exception log.
         /// </summary>
-        public static void LogException(Exception ex, string key = null, int? reLogDelaySeconds = null)
+        /// <param name="exception">The <see cref="Exception"/> to log.</param>
+        /// <param name="key">(Optional) The throttle cache key.</param>
+        public static void LogException(Exception exception, string key = null)
         {
             if (!ShouldLog(key)) return;
-            ErrorStore.LogExceptionWithoutContext(ex, appendFullStackTrace: true);
+
+            if (exception is DeserializationException deserializationException)
+            {
+                exception.AddLoggedData("Snippet-After", deserializationException.SnippetAfterError)
+                  .AddLoggedData("Position", deserializationException.Position.ToString())
+                  .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
+            }
+
+            ErrorStore.LogExceptionWithoutContext(exception, appendFullStackTrace: true);
             RecordLogged(key);
         }
 
         /// <summary>
-        /// record that an exception was logged in local cache for the specified length of time (default of 30 minutes)
+        /// Record that an exception was logged in local cache for the specified length of time.
         /// </summary>
-        private static void RecordLogged(string key, int? reLogDelaySeconds = 30 * 60 * 60)
+        /// <param name="key">The throttle cache key.</param>
+        /// <param name="relogDelay">The duration of time to wait before logging again (default: 30 minutes).</param>
+        private static void RecordLogged(string key, TimeSpan? relogDelay = null)
         {
-            if (key.IsNullOrEmpty() || !reLogDelaySeconds.HasValue) return;
-            LocalCache.Set("ExceptionLogRetry-" + key, true, reLogDelaySeconds.Value);
+            relogDelay = relogDelay ?? 30.Minutes();
+            if (key.IsNullOrEmpty() || !relogDelay.HasValue) return;
+            LocalCache.Set("ExceptionLogRetry-" + key, true, relogDelay.Value);
         }
 
         /// <summary>
-        /// see if an exception with the given key should be logged, based on if it was logged recently
+        /// See if an exception with the given key should be logged, based on if it was logged recently.
         /// </summary>
+        /// <param name="key">The throttle cache key.</param>
         private static bool ShouldLog(string key)
         {
             if (key.IsNullOrEmpty()) return true;
             return !LocalCache.Get<bool?>("ExceptionLogRetry-"+key).GetValueOrDefault();
-        }
-        
-        /// <summary>
-        /// Caches a backoff for the given command
-        /// </summary>
-        public static void SetBackOff(string key, int durationSeconds)
-        {
-            LocalCache.Set("BackOff-" + key, true, durationSeconds);
-        }
-
-        /// <summary>
-        /// Whether this given key should backoff and not proceed in its action
-        /// </summary>
-        public static bool ShouldBackOff(string key)
-        {
-            return LocalCache.Get<bool?>("BackOff-" + key).GetValueOrDefault();
-        }
-
-        public static int DefaultExceptionBackOffSeconds = 5;
-
-        /// <summary>
-        /// Executes a command with a backoff.  If a previous command errored or set a backoff on execution, a default(T) will be returned.
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="key">The backoff cache key to use</param>
-        /// <param name="toRun">The degate to execute</param>
-        /// <param name="exceptionBackOffSeconds">How long to backoff if an exception arises</param>
-        /// <param name="defaultResult">The return to provide if told to BACK THE HELL OFF</param>
-        public static T ExecWithBackoff<T>(string key, Func<BackOffArgs, T> toRun, int? exceptionBackOffSeconds = null, T defaultResult = default(T))
-        {
-            if (ShouldBackOff(key))
-                return defaultResult;
-            var b = new BackOffArgs();
-            try
-            {
-                var result = toRun(b);
-                if (b.BackOffSeconds.HasValue)
-                    SetBackOff(key, b.BackOffSeconds.GetValueOrDefault());
-                return result;
-            }
-            catch (Exception)
-            {
-                SetBackOff(key, exceptionBackOffSeconds.GetValueOrDefault(DefaultExceptionBackOffSeconds));
-                return defaultResult;
-            }
-        }
-
-        public class BackOffArgs
-        {
-            public int? BackOffSeconds { get; set; }
         }
     }
 }

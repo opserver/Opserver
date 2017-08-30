@@ -1,0 +1,23 @@
+﻿/* Configuration for the Cloudflare dashboard */
+{
+  "email": "<Email>", // The login email for the Cloudflare API
+  "apiKey": "<API key>", // The API key for the Cloudflare API
+  // The origin data centers
+  "datacenters": [
+    // name: The name of the data center to use in the UI
+    // ranges: The outside ranges of *your* network, these are matches against CloudFlare's A records,
+    //         to indicate where traffic is pointed to in the dashboard.
+    // maskedRanges: The same function as ranges, but with the first 3 octets masked in the dashboard.
+    //               This allows people to use the dashboard without exposing sensitive IPs for instance.
+    {
+      "name": "New York",
+      "ranges": [ "10.2.1.0/24" ],
+      "maskedRanges": [ "12.34.56.0/24" ]
+    },
+    {
+      "name": "Denver",
+      "ranges": [ "10.6.1.0/24" ],
+      "maskedRanges": [ "12.34.57.0/24" ]
+    }
+  ]
+}

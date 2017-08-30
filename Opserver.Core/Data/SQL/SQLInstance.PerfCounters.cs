@@ -1,41 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
         private Cache<List<PerfCounterRecord>> _perfCounters;
-        public Cache<List<PerfCounterRecord>> PerfCounters
-        {
-            get
+        public Cache<List<PerfCounterRecord>> PerfCounters =>
+            _perfCounters ?? (_perfCounters = GetSqlCache(nameof(PerfCounters), conn =>
             {
-                return _perfCounters ?? (_perfCounters = new Cache<List<PerfCounterRecord>>
-                    {
-                        CacheForSeconds = 20,
-                        UpdateCache = UpdateFromSql("PerfCounters", conn =>
-                            {
-                                var sql = GetFetchSQL<PerfCounterRecord>();
-                                return conn.Query<PerfCounterRecord>(sql, new {maxEvents = 60}).ToList();
-                            })
-                    });
-            }
-        }
+                var sql = GetFetchSQL<PerfCounterRecord>();
+                return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});
+            }));
+
+        public long? BatchesPerSec => (long?)GetPerfCounter("SQL Statistics", "Batch Requests/sec", "")?.CalculatedValue;
 
         public PerfCounterRecord GetPerfCounter(string category, string name, string instance)
         {
-            var counters = PerfCounters.SafeData();
-            var objectName = this.ObjectName + ":" + category;
-            return counters != null
-                       ? counters.FirstOrDefault(c => c.ObjectName == objectName && c.CounterName == name && c.InstanceName == instance)
-                       : null;
+            // TODO Split fields on fetch and compare each rather than a concat per lookup
+            var objectName = ObjectName + ":" + category;
+            return PerfCounters.Data?.FirstOrDefault(c => c.ObjectName == objectName && c.CounterName == name && c.InstanceName == instance);
         }
 
-        public class PerfCounterRecord : ISQLVersionedObject
+        public class PerfCounterRecord : ISQLVersioned
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2000.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2000.RTM;
 
             public string ObjectName { get; internal set; }
             public string CounterName { get; internal set; }
@@ -44,7 +34,7 @@ namespace StackExchange.Opserver.Data.SQL
             public decimal CalculatedValue { get; internal set; }
             public int Type { get; internal set; }
 
-            internal string FetchSQL = @"
+            internal const string FetchSQL = @"
 Declare @PCounters Table (object_name nvarchar(128),
                           counter_name nvarchar(128),
                           instance_name nvarchar(128),
@@ -57,6 +47,7 @@ Select RTrim(spi.object_name) object_name, RTrim(spi.counter_name) counter_name,
   From sys.dm_os_performance_counters spi
  Where spi.instance_name Not In (Select name From sys.databases)
    And spi.object_name Not Like 'SQLServer:Backup Device%'
+   And spi.object_name Not Like 'SQL Server 2016 XTP%'
 
 WAITFOR DELAY '00:00:01'
 
@@ -72,6 +63,7 @@ Select RTrim(spi.object_name) object_name, RTrim(spi.counter_name) counter_name,
   From sys.dm_os_performance_counters spi
  Where spi.instance_name Not In (Select name From sys.databases)
    And spi.object_name Not Like 'SQLServer:Backup Device%'
+   And spi.object_name Not Like 'SQL Server 2016 XTP%'
 
 Select cc.object_name ObjectName,
        cc.counter_name CounterName,

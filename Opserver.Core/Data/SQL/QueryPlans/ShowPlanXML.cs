@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
@@ -15,7 +14,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             {
                 if (BatchSequence == null) return new List<BaseStmtInfoType>();
                 return BatchSequence.SelectMany(bs =>
-                        bs.SelectMany(b => b.Items != null ? b.Items.SelectMany(bst => bst.Statements) : null)
+                        bs.SelectMany(b => b.Items?.SelectMany(bst => bst.Statements))
                     ).ToList();
             }
         }
@@ -23,9 +22,6 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
     public partial class BaseStmtInfoType
     {
-        //public string Params { get; }
-        //public string ToString() { }
-
         public virtual IEnumerable<BaseStmtInfoType> Statements
         {
             get { yield return this; }
@@ -33,7 +29,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
 
         public bool IsMinor
         {
-            get { 
+            get {
                 switch (StatementType)
                 {
                     case "COND":
@@ -65,7 +61,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             {
                 //TODO: Pair these down, seeing what looks good for now
                 var ss = this as StmtSimpleType;
-                return ss != null ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText, ""), "").Trim() : "";
+                return ss != null ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim() : "";
             }
         }
 
@@ -74,30 +70,30 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 var orig = StatementTextWithoutInitialParams;
-                return orig == "" ? "" : initParamsTrimRegex.Replace(orig, "").Trim();
+                return orig?.Length == 0 ? string.Empty : initParamsTrimRegex.Replace(orig, string.Empty).Trim();
             }
         }
 
         private string GetDeclareStatement(QueryPlanType queryPlan)
         {
-            if (queryPlan == null || queryPlan.ParameterList == null || !queryPlan.ParameterList.Any()) return "";
+            if (queryPlan?.ParameterList == null || queryPlan.ParameterList.Length == 0) return "";
 
-            var result = new StringBuilder();
+            var result = StringBuilderCache.Get();
             var paramTypeList = paramRegex.Match(StatementText);
             if (!paramTypeList.Success) return "";
 
             var paramTypes = paramTypeList.Groups[1].Value.Split(StringSplits.Comma).Select(p => p.Split(StringSplits.Space));
 
-            queryPlan.ParameterList.ForEach(p =>
+            foreach (var p in queryPlan.ParameterList)
+            {
+                var paramType = paramTypes.FirstOrDefault(pt => pt[0] == p.Column);
+                if (paramType != null)
                 {
-                    var paramType = paramTypes.FirstOrDefault(pt => pt[0] == p.Column);
-                    if (paramType != null)
-                    {
-                        result.AppendFormat(declareFormat, p.Column, paramType[1], p.ParameterCompiledValue)
-                              .AppendLine();
-                    }
-                });
-            return result.Length > 0 ? result.Insert(0, "-- Compiled Params\n").ToString() : "";
+                    result.AppendFormat(declareFormat, p.Column, paramType[1], p.ParameterCompiledValue)
+                          .AppendLine();
+                }
+            }
+            return result.Length > 0 ? result.Insert(0, "-- Compiled Params\n").ToStringRecycle() : result.ToStringRecycle();
         }
     }
 
@@ -108,11 +104,11 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 yield return this;
-                if (Then != null && Then.Statements != null)
+                if (Then?.Statements != null)
                 {
                     foreach (var s in Then.Statements.Items) yield return s;
                 }
-                if (Else != null && Else.Statements != null)
+                if (Else?.Statements != null)
                 {
                     foreach (var s in Else.Statements.Items) yield return s;
                 }

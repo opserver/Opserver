@@ -42,12 +42,17 @@
     "MakeMinified": false,
     "OutputDirectory": null,
     "RunOnBuild": false,
-    "SyncBase64ImageValues": true
+    "SyncBase64ImageValues": true,
+    "Autoprefix": false,
+    "AutoprefixerBrowsers": null,
+    "GenerateRtlSourceMaps": true,
+    "RtlCss": false
   },
   "General": {
-    "AllMessagesToOutputWindow": false,
+    "AllMessagesToOutputWindow": true,
     "KeepImportantComments": true,
-    "SvgPreviewPane": true
+    "SvgPreviewPane": true,
+    "ShowWEIgnoreLogs": true
   },
   "Html": {
     "AutoMinify": false,
@@ -76,7 +81,12 @@
     "EnableFoundationValidation": true,
     "MakeMinified": false,
     "OutputDirectory": null,
-    "RunOnBuild": false
+    "RunOnBuild": false,
+    "AttributeQuotesRemovalMode": "KeepQuotes",
+    "CustomAngularDirectiveList": null,
+    "MinifyAngularBindingExpressions": false,
+    "MinifyKnockoutBindingExpressions": false,
+    "ProcessableScriptTypeList": null
   },
   "JavaScript": {
     "AutoMinify": false,
@@ -88,7 +98,10 @@
     "LintResultLocation": "Message",
     "MakeMinified": false,
     "OutputDirectory": null,
-    "RunOnBuild": false
+    "RunOnBuild": false,
+    "EvalTreatment": "MakeImmediateSafe",
+    "RootDirectory": "/Scripts/",
+    "TermSemicolons": true
   },
   "Less": {
     "CompileOnBuild": false,
@@ -149,7 +162,10 @@
     "OutputDirectory": null,
     "ProcessSourceMapsForEditorEnhancements": true,
     "ShowPreviewPane": true,
-    "StrictMath": false
+    "StrictMath": false,
+    "NumberPrecision": 5,
+    "OutputStyle": "Expanded",
+    "UseRubyRuntime": false
   },
   "Sprite": {
     "CssOutputDirectory": null,
@@ -159,7 +175,9 @@
     "RunOnBuild": false,
     "ScssOutputDirectory": null,
     "UseAbsoluteUrl": false,
-    "UseFullPathForIdentifierName": true
+    "UseFullPathForIdentifierName": true,
+    "Margin": 1,
+    "OutputDirectory": null
   },
   "SweetJs": {
     "CompileOnBuild": false,
@@ -170,5 +188,11 @@
     "ProcessSourceMapsForEditorEnhancements": true,
     "ShowPreviewPane": true,
     "StrictMath": false
+  },
+  "Handlebars": {
+    "CompileOnBuild": false,
+    "CompileOnSave": true,
+    "MinifyInPlace": false,
+    "OutputDirectory": null
   }
 }

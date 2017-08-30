@@ -1,0 +1,12 @@
+[
+  {
+    "outputFile": "Content/themes/dark/styles.css",
+    "inputFile": "Content/themes/dark/styles.less",
+    "sourceMap": false
+  },
+  {
+    "outputFile": "Content/themes/light/styles.css",
+    "inputFile": "Content/themes/light/styles.less",
+    "sourceMap": false
+  }
+]

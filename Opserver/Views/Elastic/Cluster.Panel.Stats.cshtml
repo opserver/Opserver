@@ -1,0 +1,41 @@
+﻿@model StackExchange.Opserver.Data.Elastic.ElasticCluster
+@{
+    Layout = null;
+    var gs = Model.IndexStats.Data?.All;
+}
+<div class="panel panel-default">
+    <div class="panel-heading">@Icon.Cluster Cluster Stats</div>
+    <div class="panel-body small">
+        @if (gs?.Total?.Documents != null)
+        {
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Documents.Count.ToComma())">
+                @(gs.Total.Documents.Count.ToComma() ?? "Unknown")
+                <label>Docs</label>
+            </div>
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries.Documents.Deleted.ToComma())">
+                @(gs.Total.Documents.Deleted.ToComma() ?? "Unknown")
+                <label>Deleted Docs</label>
+            </div>
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Search?.QueryTotal.ToComma())">
+                @(gs.Total?.Search?.QueryTotal.ToComma() ?? "Unknown")
+                <label>Searches</label>
+            </div>
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Store?.SizeInBytes.ToSize())">
+                @(gs.Total?.Store?.SizeInBytes.ToSize() ?? "Unknown")
+                <label>Size</label>
+            </div>
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Indexing?.Total.ToComma())">
+                @(gs.Total?.Indexing?.Total.ToComma() ?? "Unknown")
+                <label>Indexed</label>
+            </div>
+            <div class="value-block col-md-4 col-sm-6" title="Primaries: @(gs.Primaries?.Get?.Total.ToComma())">
+                @(gs.Total?.Get?.Total.ToComma() ?? "Unknown")
+                <label>Gets</label>
+            </div>
+        }
+        else
+        {
+            <div class="no-content">No indexes found.</div>
+        }
+    </div>
+</div>

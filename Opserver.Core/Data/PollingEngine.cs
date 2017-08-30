@@ -3,28 +3,28 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Hosting;
 
 namespace StackExchange.Opserver.Data
 {
-    public class PollingEngine
+    public static class PollingEngine
     {
         private static readonly object _addLock = new object();
+        private static readonly object _pollAllLock = new object();
+        public static readonly HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
 
-        public static HashSet<PollNode> AllPollNodes;
         private static Thread _globalPollingThread;
         private static volatile bool _shuttingDown;
-        private static readonly object _pollAllLock;
-        private static int _totalPollIntervals;
+        private static long _totalPollIntervals;
+        internal static long _activePolls;
         private static DateTime? _lastPollAll;
         private static DateTime _startTime;
 
         static PollingEngine()
         {
-            _pollAllLock = new object();
-            AllPollNodes = new HashSet<PollNode>();
             StartPolling();
         }
-        
+
         /// <summary>
         /// Adds a node to the global polling list ONLY IF IT IS NEW
         /// If a node with the same unique key was already added, it will not be added again
@@ -54,15 +54,12 @@ namespace StackExchange.Opserver.Data
         public static void StartPolling()
         {
             _startTime = DateTime.UtcNow;
-            if (_globalPollingThread == null)
-            {
-                _globalPollingThread = new Thread(MonitorPollingLoop)
+            _globalPollingThread = _globalPollingThread ?? new Thread(MonitorPollingLoop)
                 {
                     Name = "GlobalPolling",
                     Priority = ThreadPriority.Lowest,
                     IsBackground = true
                 };
-            }
             if (!_globalPollingThread.IsAlive)
                 _globalPollingThread.Start();
         }
@@ -82,7 +79,8 @@ namespace StackExchange.Opserver.Data
             public DateTime StartTime { get; internal set; }
             public DateTime? LastPollAll { get; internal set; }
             public bool IsAlive { get; internal set; }
-            public int TotalPollIntervals { get; internal set; }
+            public long TotalPollIntervals { get; internal set; }
+            public long ActivePolls { get; internal set; }
             public int NodeCount { get; internal set; }
             public int TotalPollers { get; internal set; }
             public List<Tuple<Type, int>> NodeBreakdown { get; internal set; }
@@ -99,6 +97,7 @@ namespace StackExchange.Opserver.Data
                     LastPollAll = _lastPollAll,
                     IsAlive = _globalPollingThread.IsAlive,
                     TotalPollIntervals = _totalPollIntervals,
+                    ActivePolls = _activePolls,
                     NodeCount = AllPollNodes.Count,
                     TotalPollers = AllPollNodes.Sum(n => n.DataPollers.Count()),
                     NodeBreakdown = AllPollNodes.GroupBy(n => n.GetType()).Select(g => Tuple.Create(g.Key, g.Count())).ToList(),
@@ -112,7 +111,7 @@ namespace StackExchange.Opserver.Data
             {
                 try
                 {
-                    StartIndexLoop();
+                    StartPollLoop();
                 }
                 catch (ThreadAbortException e)
                 {
@@ -134,23 +133,30 @@ namespace StackExchange.Opserver.Data
             }
         }
 
-        private static void StartIndexLoop()
+        private static void StartPollLoop()
         {
             while (!_shuttingDown)
             {
-                PollAll();
+                PollAllAndForget();
                 Thread.Sleep(1000);
             }
         }
-        
-        public static void PollAll()
+
+        public static void PollAllAndForget()
         {
             if (!Monitor.TryEnter(_pollAllLock, 500)) return;
 
             Interlocked.Increment(ref _totalPollIntervals);
             try
             {
-                Parallel.ForEach(AllPollNodes, i => i.Poll());
+                foreach (var n in AllPollNodes)
+                {
+                    if (n.IsPolling || !n.NeedsPoll)
+                    {
+                        continue;
+                    }
+                    HostingEnvironment.QueueBackgroundWorkItem(ct => n.PollAsync());
+                }
             }
             catch (Exception e)
             {
@@ -169,23 +175,32 @@ namespace StackExchange.Opserver.Data
         /// <param name="nodeType">Type of node to poll</param>
         /// <param name="key">Unique key of the node to poll</param>
         /// <param name="cacheGuid">If included, the specific cache to poll</param>
-        /// <param name="sync">Whether to perform a synchronous poll operation (async by default)</param>
         /// <returns>Whether the poll was successful</returns>
-        public static bool Poll(string nodeType, string key, Guid? cacheGuid = null, bool sync = false)
+        public static async Task<bool> PollAsync(string nodeType, string key, Guid? cacheGuid = null)
         {
+            if (nodeType == Cache.TimedCacheKey)
+            {
+                Cache.Purge(key);
+                return true;
+            }
+
             var node = AllPollNodes.FirstOrDefault(p => p.NodeType == nodeType && p.UniqueKey == key);
             if (node == null) return false;
 
             if (cacheGuid.HasValue)
             {
                 var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
-                return cache != null && cache.Poll(true) > 0;
+                if (cache != null)
+                {
+                    await cache.PollGenericAsync(true).ConfigureAwait(false);
+                }
+                return cache?.LastPollSuccessful ?? false;
             }
             // Polling an entire server
-            node.Poll(true, sync: sync);
+            await node.PollAsync(true).ConfigureAwait(false);
             return true;
         }
-        
+
         public static List<PollNode> GetNodes(string type)
         {
             return AllPollNodes.Where(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase)).ToList();
@@ -194,6 +209,51 @@ namespace StackExchange.Opserver.Data
         public static PollNode GetNode(string type, string key)
         {
             return AllPollNodes.FirstOrDefault(pn => string.Equals(pn.NodeType, type, StringComparison.InvariantCultureIgnoreCase) && pn.UniqueKey == key);
+        }
+
+        public static Cache GetCache(Guid id)
+        {
+            foreach (var pn in AllPollNodes)
+            {
+                foreach (var c in pn.DataPollers)
+                {
+                    if (c.UniqueId == id) return c;
+                }
+            }
+            return null;
+        }
+
+        public static ThreadStats GetThreadStats() => new ThreadStats();
+
+        public class ThreadStats
+        {
+            private readonly int _minWorkerThreads;
+            public int MinWorkerThreads => _minWorkerThreads;
+
+            private readonly int _minIOThreads;
+            public int MinIOThreads => _minIOThreads;
+
+            private readonly int _availableWorkerThreads;
+            public int AvailableWorkerThreads => _availableWorkerThreads;
+
+            private readonly int _availableIOThreads;
+            public int AvailableIOThreads => _availableIOThreads;
+
+            private readonly int _maxIOThreads;
+            public int MaxIOThreads => _maxIOThreads;
+
+            private readonly int _maxWorkerThreads;
+            public int MaxWorkerThreads => _maxWorkerThreads;
+
+            public int BusyIOThreads => _maxIOThreads - _availableIOThreads;
+            public int BusyWorkerThreads => _maxWorkerThreads - _availableWorkerThreads;
+
+            public ThreadStats()
+            {
+                ThreadPool.GetMinThreads(out _minWorkerThreads, out _minIOThreads);
+                ThreadPool.GetAvailableThreads(out _availableWorkerThreads, out _availableIOThreads);
+                ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxIOThreads);
+            }
         }
     }
 }

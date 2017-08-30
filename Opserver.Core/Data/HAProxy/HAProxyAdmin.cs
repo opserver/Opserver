@@ -1,97 +1,108 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.ComponentModel;
 using System.Linq;
-using System.Net.Sockets;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public class HAProxyAdmin
+    public static class HAProxyAdmin
     {
         public const string AllServersKey = "*";
-        private static readonly ParallelOptions _parallelOptions = new ParallelOptions { MaxDegreeOfParallelism = 3 };
 
-        public static bool PerformProxyAction(IEnumerable<Proxy> proxies, string serverName, Action action)
+        private class ActionPair
         {
-            var result = true;
-            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == serverName || serverName.IsNullOrEmpty()).Select(s => new { Proxy = p, Server = s }));
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
-            {
-                result = result && PostAction(pair.Proxy, pair.Server, action);
-            });
-            return result;
+            public Proxy Proxy { get; set; }
+            public Server Server { get; set; }
         }
 
-        public static bool PerformProxyAction(Proxy proxy, Server server, Action action)
+        public static Task<bool> PerformProxyActionAsync(IEnumerable<Proxy> proxies, string serverName, Action action)
         {
-            if (server != null)
-            {
-                var result = true;
-                Parallel.ForEach(proxy.Servers, _parallelOptions, s =>
-                    {
-                        result = result && PostAction(proxy, s, action);
-                    });
-                return result;
-            }
-            else
-            {
-                return PostAction(proxy, server, action);
-            }
+            var pairs = proxies
+                .SelectMany(p => p.Servers
+                    .Where(s => s.Name == serverName || serverName.IsNullOrEmpty())
+                    .Select(s => new ActionPair {Proxy = p, Server = s})
+                ).ToList();
+
+            return PostActionsAsync(pairs, action);
         }
 
-        public static bool PerformServerAction(string server, Action action)
+        public static Task<bool> PerformServerActionAsync(string server, Action action)
         {
             var proxies = HAProxyGroup.GetAllProxies();
-            var matchingServers = proxies.SelectMany(p => p.Servers.Where(s => s.Name == server).Select(s => new { Proxy = p, Server = s }));
+            var pairs = proxies
+                .SelectMany(p => p.Servers
+                    .Where(s => s.Name == server)
+                    .Select(s => new ActionPair { Proxy = p, Server = s})
+                ).ToList();
 
-            var result = true;
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
-                {
-                    result = result && PostAction(pair.Proxy, pair.Server, action);
-                });
-            return result;
+            return PostActionsAsync(pairs, action);
         }
 
-        public static bool PerformGroupAction(string group, Action action)
+        public static Task<bool> PerformGroupActionAsync(string group, Action action)
         {
             var haGroup = HAProxyGroup.GetGroup(group);
-            if (haGroup == null) return false;
-            var proxies = haGroup.GetProxies();
-            var matchingServers = proxies.SelectMany(p => p.Servers.Select(s => new { Proxy = p, Server = s }));
+            if (haGroup == null) return Task.FromResult(false);
 
-            var result = true;
-            Parallel.ForEach(matchingServers, _parallelOptions, pair =>
+            var pairs = haGroup.GetProxies()
+                .SelectMany(p => p.Servers
+                    .Select(s => new ActionPair {Proxy = p, Server = s})
+                ).ToList();
+
+            return PostActionsAsync(pairs, action);
+        }
+
+        private static async Task<bool> PostActionsAsync(List<ActionPair> pairs, Action action)
+        {
+            var instances = new HashSet<HAProxyInstance>();
+            var tasks = new List<Task<bool>>(pairs.Count);
+            foreach (var p in pairs)
             {
-                result = result && PostAction(pair.Proxy, pair.Server, action);
-            });
+                tasks.Add(PostAction(p.Proxy, p.Server, action));
+                instances.Add(p.Proxy.Instance);
+            }
+            var result = (await Task.WhenAll(tasks).ConfigureAwait(false)).All(r => r);
+            // Actions complete, now re-check status
+            var instanceTasks = instances.Select(i => i.Proxies.PollAsync(true));
+            await Task.WhenAll(instanceTasks).ConfigureAwait(false);
             return result;
         }
 
-        private static bool PostAction(Proxy p, Server server, Action action)
+        private static async Task<bool> PostAction(Proxy p, Server server, Action action)
         {
             var instance = p.Instance;
             // if we can't issue any commands, bomb out
-            if (instance.AdminUser.IsNullOrEmpty() || instance.AdminPassword.IsNullOrEmpty()) return false;
+            if (instance.AdminUser.IsNullOrEmpty() || instance.AdminPassword.IsNullOrEmpty())
+            {
+                return false;
+            }
 
-            var loginInfo = instance.AdminUser + ":" + instance.AdminPassword;
-            var haproxyUri = new Uri(instance.Url);
-            var requestBody = string.Format("s={0}&action={1}&b={2}", server.Name, action.ToString().ToLower(), p.Name);
-            var requestHeader = string.Format("POST {0} HTTP/1.1\r\nHost: {1}\r\nContent-Length: {2}\r\nAuthorization: Basic {3}\r\n\r\n",
-                haproxyUri.AbsolutePath, haproxyUri.Host, Encoding.GetEncoding("ISO-8859-1").GetBytes(requestBody).Length, Convert.ToBase64String(Encoding.Default.GetBytes(loginInfo)));
+            // HAProxy will not drain a downed server, do the next best thing: MAINT
+            if (action == Action.Drain && server.ProxyServerStatus == ProxyServerStatus.Down)
+            {
+                action = Action.Maintenance;
+            }
 
             try
             {
-                var socket = new System.Net.Sockets.Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(haproxyUri.Host, haproxyUri.Port);
-                socket.Send(Encoding.UTF8.GetBytes(requestHeader + requestBody));
+                using (var wc = new WebClient())
+                {
+                    var creds = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{instance.AdminUser}:{instance.AdminPassword}"));
+                    wc.Headers[HttpRequestHeader.Authorization] = "Basic " + creds;
 
-                var responseBytes = new byte[socket.ReceiveBufferSize];
-                socket.Receive(responseBytes);
-
-                var response = Encoding.UTF8.GetString(responseBytes);
-                instance.PurgeCache();
-                return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
+                    var responseBytes = await wc.UploadValuesTaskAsync(instance.Url, new NameValueCollection
+                    {
+                        ["s"] = server.Name,
+                        ["action"] = action.GetDescription(),
+                        ["b"] = p.Name
+                    }).ConfigureAwait(false);
+                    var response = Encoding.UTF8.GetString(responseBytes);
+                    return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
+                }
             }
             catch (Exception e)
             {
@@ -99,11 +110,39 @@ namespace StackExchange.Opserver.Data.HAProxy
                 return false;
             }
         }
+    }
 
-        public enum Action
-        {
-            Enable,
-            Disable
-        }
+    [Flags]
+    public enum Action
+    {
+        // ReSharper disable InconsistentNaming
+        None = 0,
+        [Description("ready")] // Set State to READY
+        Ready = 1 << 1,
+        [Description("drain")] // Set State to DRAIN
+        Drain = 1 << 2,
+        [Description("maint")] // Set State to MAINT
+        Maintenance = 1 << 3,
+        [Description("dhlth")] // Health: disable checks
+        HealthCheckDisable = 1 << 4,
+        [Description("ehlth")] // Health: enable checks
+        HealthCheckEnable = 1 << 5,
+        [Description("hrunn")] // Health: force UP
+        HealthForceUp = 1 << 6,
+        [Description("hnolb")] // Health: force NOLB
+        HealthForceNoLB = 1 << 7,
+        [Description("hdown")] // Health: force DOWN
+        HealthForceDown = 1 << 8,
+        [Description("dagent")] // Agent: disable checks
+        AgentCheckDisable = 1 << 9,
+        [Description("eagent")] // Agent: enable checks
+        AgentCheckEnable = 1 << 10,
+        [Description("arunn")] // Agent: force UP
+        AgentForceUp = 1 << 11,
+        [Description("adown")] // Agent: force DOWN
+        AgentForceDown = 1 << 12,
+        [Description("shutdown")] // Kill Sessions
+        KillSessions = 1 << 13,
+        // ReSharper restore InconsistentNaming
     }
 }

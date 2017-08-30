@@ -1,0 +1,79 @@
+﻿/* Configuration for the Redis dashboard */
+{
+  /* If a server doesn't specify any instances, then these will be used as a fallback.
+     For most simple setups, this is a single :6379 instance */
+  "defaults": {
+    "instances": [
+      {
+        "name": "Default", // Name to use in the UI
+        "port": 6379 // Port the instance runs on
+      }
+    ]
+  },
+  /* (DEPRECATED) - will remove this in favor of defaults in 2.0
+     Instances that appear on *all* servers (even if they *also* specify their own)
+     Useful for environments where most servers have the same setup, like a master + replica configuration.
+     Or, in a simple setup you'd just declare the 6379 (redis default port) instance here. */
+  "allServers": {
+    "instances": [
+      {
+        "name": "Core (Q&A)",
+        "port": 6379,
+        /* Regexes to use in memory analysis
+           Each key is evaluated against these and they're use for bucketing.
+           This helps find out what the heavy key patterns are. */
+        "analysisRegexes": {
+          "**local**": "^local-",
+          "**dev**": "^dev-",
+          "**local:**": "^local:",
+          "**dev:**": "^dev:"
+        }
+      },
+      {
+        "name": "Careers",
+        "port": 6380
+      },
+      {
+        "name": "Gossip (Q&A)",
+        "port": 6381
+      },
+      {
+        "name": "Analytics (Careers)",
+        "port": 6382
+      },
+      {
+        "name": "CoreML (Q&A)",
+        "port": 6383,
+        "analysisRegexes": {
+          "ltah-home-pred": "^ltah-home-pred-",
+          "ltal-home-pred": "^ltal-home-pred-",
+          "ml-ltap-cache": "^ml-ltap-cache-",
+          "is-ml-elligible": "^is-ml-elligible-",
+          "is-lowml-elligible": "^is-lowml-elligible-"
+        }
+      }
+    ]
+  },
+  /* Individually specified servers (DNS entries or IPs)
+     Each of these may specify their own instances. 
+     If they don't, each will inherit the instances configured in allServers above. */
+  "Servers": [
+    // Simple server, inheriting the instances from allServers
+    { "name": "ny-redis01" },
+    { "name": "ny-redis02" },
+    { "name": "co-redis01" },
+    { "name": "co-redis02" },
+    // Server specifying it's own instance list, NOT inheriting from allServers above
+    {
+      "name": "ny-mlredis01",
+      "instances": [
+        {
+          "name": "Machine Learning",
+          "port": 6379,
+          "password": "superSecret", // Instance has a password
+          "useSSL": "true" // Connect via SSL (not built into redis itself - default is false)
+        }
+      ]
+    }
+  ]
+}

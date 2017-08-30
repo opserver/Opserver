@@ -30,8 +30,13 @@ namespace StackExchange.Opserver.Models
         CloudFlare = 1 << 15,
         CloudFlareAdmin = 1 << 16,
 
-        InternalRequest = 1 << 19,
+        PagerDuty = 1 << 17,
+        PagerDutyAdmin = 1 << 18,
 
-        GlobalAdmin = 1 << 20
+        LocalRequest = 1 << 19,
+        InternalRequest = 1 << 20,
+        ApiRequest = 1 << 21,
+
+        GlobalAdmin = 1 << 22
     }
 }

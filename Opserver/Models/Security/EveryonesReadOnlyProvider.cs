@@ -5,9 +5,9 @@
     /// </summary>
     public class EveryonesReadOnlyProvider : SecurityProvider
     {
-        public override bool IsAdmin { get { return false; } }
+        public override bool IsAdmin => false;
 
-        internal override bool InReadGroups(ISecurableSection settings) { return true; }
+        internal override bool InReadGroups(ISecurableModule settings) { return true; }
         public override bool InGroups(string groupNames, string accountName) { return true; }
         public override bool ValidateUser(string userName, string password) { return true; }
     }

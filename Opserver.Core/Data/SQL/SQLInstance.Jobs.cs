@@ -1,26 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
+using System.Threading.Tasks;
 using Dapper;
+using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
         private Cache<List<SQLJobInfo>> _jobSummary;
-        public Cache<List<SQLJobInfo>> JobSummary
+        public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2.Minutes()));
+
+        /// <summary>
+        /// Enables or disables a SQL agent job
+        /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
+        /// <param name="enabled">Whether to enable or disable the job (<c>true</c>: enable, <c>false</c>: disable)</param>
+        public Task<bool> ToggleJobAsync(Guid jobId, bool enabled)
         {
-            get { return _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2*60)); }
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_update_job", new { job_id = jobId, enabled = enabled ? 1 : 0 }, commandType: CommandType.StoredProcedure));
         }
 
-        public bool ToggleJob(Guid jobId, bool enabled)
+        /// <summary>
+        /// Starts a SQL agent job
+        /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
+        public Task<bool> StartJobAsync(Guid jobId)
+        {
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_start_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
+        }
+
+        /// <summary>
+        /// Stops a SQL agent job
+        /// </summary>
+        /// <param name="jobId">The ID of the job to toggle</param>
+        public Task<bool> StopJobAsync(Guid jobId)
+        {
+            return ExecJobActionAsync(conn => conn.ExecuteAsync("msdb.dbo.sp_stop_job", new { job_id = jobId }, commandType: CommandType.StoredProcedure));
+        }
+
+        private async Task<bool> ExecJobActionAsync(Func<DbConnection, Task<int>> action)
         {
             try
             {
-                using (var conn = GetConnection())
+                using (var conn = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    conn.Execute("msdb.dbo.sp_update_job", new {job_id = jobId, enabled = enabled ? 1 : 0}, commandType: CommandType.StoredProcedure);
-                    JobSummary.Purge();
+                    await action(conn).ConfigureAwait(false);
+                    await JobSummary.PollAsync(true).ConfigureAwait(false);
                     return true;
                 }
             }
@@ -31,21 +59,16 @@ namespace StackExchange.Opserver.Data.SQL
             }
         }
 
-        public class SQLJobInfo : ISQLVersionedObject, IMonitorStatus
+        public class SQLJobInfo : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
-            public MonitorStatus MonitorStatus
-            {
-                get
-                {
-                    return !IsEnabled
-                               ? MonitorStatus.Unknown
-                               : IsRunning
-                                     ? MonitorStatus.Good
-                                     : LastRunMonitorStatus;
-                }
-            }
+            public MonitorStatus MonitorStatus => !IsEnabled
+                ? MonitorStatus.Unknown
+                : IsRunning
+                    ? MonitorStatus.Good
+                    : LastRunMonitorStatus;
+
             public string MonitorStatusReason
             {
                 get
@@ -88,7 +111,7 @@ namespace StackExchange.Opserver.Data.SQL
             public string Category { get; internal set; }
             public JobStatuses? LastRunStatus { get; internal set; }
             public string LastRunMessage { get; internal set; }
-            public JobRunSources LastRunRequestedSource { get; internal set; }
+            public JobRunSources? LastRunRequestedSource { get; internal set; }
             public DateTime? LastRunRequestedDate { get; internal set; }
             public DateTime? LastStartDate { get; internal set; }
             public int? LastRunDurationSeconds { get; internal set; }
@@ -98,12 +121,9 @@ namespace StackExchange.Opserver.Data.SQL
             public string LastStepName { get; internal set; }
             public DateTime? NextRunDate { get; internal set; }
 
-            public TimeSpan? LastRunDuration
-            {
-                get { return LastRunDurationSeconds.HasValue ? TimeSpan.FromSeconds(LastRunDurationSeconds.Value) : (TimeSpan?)null; }
-            }
+            public TimeSpan? LastRunDuration => LastRunDurationSeconds.HasValue ? TimeSpan.FromSeconds(LastRunDurationSeconds.Value) : (TimeSpan?)null;
 
-            internal const string FetchSQL = @"
+            public string GetFetchSQL(Version v) => @"
 Select j.job_id JobId,
        j.name Name,
        j.description Description,
@@ -121,7 +141,7 @@ Select j.job_id JobId,
        ja.run_requested_date LastRunRequestedDate,
        Coalesce(ja.start_execution_date, msdb.dbo.agent_datetime(jh.run_date, jh.run_time)) LastStartDate,
        (Case When ja.run_requested_date Is Not Null and ja.stop_execution_date Is Null 
-             Then DateDiff(Second, ja.run_requested_date, GETUTCDATE())
+             Then DateDiff(Second, ja.run_requested_date, GETDATE())
              Else jh.run_duration % 100 + ROUND((jh.run_duration % 10000)/100,0,0)*60 + ROUND((jh.run_duration%1000000)/10000,0,0)*3600
         End) LastRunDurationSeconds,
        ja.stop_execution_date LastStopDate,
@@ -141,12 +161,8 @@ Select j.job_id JobId,
        Left Join msdb.dbo.sysjobsteps s
          On ja.job_id = s.job_id
          And ja.last_executed_step_id = s.step_id
-Order By j.name, LastStartDate";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
+Order By j.name, LastStartDate
+";
         }
     }
 }

@@ -1,0 +1,61 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model OperationsTopModel
+@helper RunInLast(DashboardModel.LastRunInterval interval, string label)
+{
+var secs = (int)interval;
+var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
+    <div class="radio pull-left">
+        <label>
+            <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
+        </label>
+    </div>
+}
+<h4 class="modal-title">
+    Top Operation Filters
+</h4>
+<form class="form-horizontal" action="/sql/top" method="GET">
+    <input type="hidden" name="node" value="@Model.CurrentInstance.Name" />
+    <input type="hidden" name="@nameof(SQLInstance.TopSearchOptions.Sort)" value="@Model.TopSearchOptions.Sort.ToString()" />
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">Min Executions</label>
+        <div class="col-md-9">
+            <input class="form-control" type="number" value="@Model.TopSearchOptions.MinExecs.ToString()" name="@nameof(SQLInstance.TopSearchOptions.MinExecs)" title="show only queries with a minimum of this many executions"/>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">Min Executions/Minute</label>
+        <div class="col-md-9">
+            <input class="form-control" type="number" value="@Model.TopSearchOptions.MinExecsPerMin.ToString()" name="@nameof(SQLInstance.TopSearchOptions.MinExecsPerMin)" title="show only queries with a minimum of this many executions per minute"/>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">
+            Run in the last
+        </label>
+        <div class="col-md-9">
+            @RunInLast(DashboardModel.LastRunInterval.FiveMinutes, "5 Minutes")
+            @RunInLast(DashboardModel.LastRunInterval.Hour, "Hour")
+            @RunInLast(DashboardModel.LastRunInterval.Day, "Day")
+            @RunInLast(DashboardModel.LastRunInterval.Week, "Week")
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">Text Search</label>
+        <div class="col-md-9">
+            <input class="form-control" type="text" value="@Model.TopSearchOptions.Search" name="@nameof(SQLInstance.TopSearchOptions.Search)" title="string to search for in the query text" placeholder="Search Text (warning: may be slow)"/>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label">Database</label>
+        <div class="col-md-9">
+            <select class="form-control" name="@nameof(SQLInstance.TopSearchOptions.Database)">
+                <option value="" selected="@(!Model.TopSearchOptions.Database.HasValue)">All Databases</option>
+                @foreach (var db in Model.CurrentInstance.Databases.SafeData(true).OrderBy(db => !db.IsSystemDatabase).ThenBy(db => db.Name))
+                {
+                    <option value="@db.Id.ToString()" selected="@(Model.TopSearchOptions.Database == db.Id)">@db.Name</option>
+                }
+            </select>
+        </div>
+    </div>
+</form>

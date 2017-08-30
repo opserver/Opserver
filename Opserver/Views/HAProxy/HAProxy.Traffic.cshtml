@@ -1,6 +1,6 @@
-﻿@model StackExchange.Opserver.Views.HAProxy.HAProxyModel
+﻿@using StackExchange.Opserver.Controllers
+@model StackExchange.Opserver.Views.HAProxy.HAProxyModel
 @{
-    this.SetMainTab(MainTab.HAProxy);
     Layout = "HAProxy.cshtml";
     
     const int maxTopRoutesToShow = 10;
@@ -12,11 +12,6 @@
         function htmlEncode(s) {
             return document.createElement('div').appendChild(document.createTextNode(s)).parentNode.innerHTML;
         }
-            
-        function getHost(s) {
-            s = s || '';
-            return s.indexOf('api.') == 0 ? s.substr(4) : s;
-        }
 
         $("#host").click(function () {
             $(this).select();  
@@ -25,12 +20,12 @@
             matchContains: true,
             delay: 100,
             formatItem: function (row) {
-                    return '<img src="//' + getHost(row.host) + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
+                    return '<img src="//' + row.host + '/favicon.ico" width="16" height="16"/> ' + htmlEncode(row.host);
             },
             formatResult: function (row) { return htmlEncode(row.host); },
             formatMatch: function (row) { return row.host; }
         }).result(function (e, data) {
-            $(this).css("background", 'url("//' + getHost(data.host) + '/favicon.ico") no-repeat')
+            $(this).css("background", 'url("//' + data.host + '/favicon.ico") no-repeat')
                     .closest("form").submit();
         }).keydown(function(e) {
             return e.keyCode != 13;
@@ -46,7 +41,7 @@
 <div style="padding: 4px; width: 1200px; margin: 0 auto;">
     <h2>
         Stack Exchange Network Traffic
-        <form method="GET" action="/haproxy/traffic" style="float: right;">
+        <form method="GET" action="@Url.Action(nameof(HAProxyController.Traffic))" style="float: right;">
             <div>
                 <input type="text" placeholder="All Sites" value="@Model.Host" id="host" name="host" />
             </div>
@@ -59,16 +54,15 @@
     }
     <div class="history-graph-wrap"><div id="hits-container" class="history-graph" style="height: 420px;"></div></div>
     <script>
-        Status.Graphs.init({ start: @start, end: @end });
         $(function() {
-            $('#hits-container').haproxyGraph({ title: 'HAProxy Traffic', subtitle: '@subtitle', params: { host: '@Model.Host' } });
-            $('#content').on('click', '.route-row', function () {
+            $('#hits-container').haproxyGraph({ title: 'HAProxy Traffic', subtitle: '@subtitle', params: { host: '@Model.Host', start: @start.ToString(), end: @end.ToString() } });
+            $(document).on('click', '.route-row', function () {
                 if ($('#route-graph').length) return;
                 var route = $(this).data('route'),
                     days = $(this).data('days'),
                     host = $(this).data('host'),
                     container = '<div id="route-graph"><div class="cpu-total"><div id="route-time-graph" class="chart route-chart" data-title="Route Time Breakdown"></div></div></div>',
-                    wrap = $(container).appendTo('#content');
+                    wrap = $(container).appendTo('.js-content');
 
                 $('#route-time-graph').haproxyRouteGraph(route, days, host);
 
@@ -97,7 +91,7 @@
 </style>
 
 <div class="route-times">
-    <h2 style="padding-bottom: 4px; overflow: auto;">Top Hit Routes <span class="note">(Last 30 Days)</span>
+    <h2 style="padding-bottom: 4px; overflow: auto;">Top Hit Routes <span class="text-muted">(Last 30 Days)</span>
         @if (topRoutes.Count > 0)
         {
             <div class="legend chart route-chart">
@@ -125,7 +119,7 @@
     @helper RouteTimePart(string label, decimal? ms)
     {
         if (ms.GetValueOrDefault() == 0) {return;}
-        <span class="time">@label <span class="value">@string.Format("{0:n1}", ms)</span> ms</span>}
+        <span class="time">@label <span class="value">@(ms?.ToString("n1"))</span> ms</span>}
     <table>
         <thead>
             <tr>
@@ -152,16 +146,16 @@
                         <div>
                             <table class="nvp">
                                 <tr>
-                                    <td class="name">Hits:</td>
-                                    <td class="value">@string.Format("{0:n0}", @r.Hits)</td>
+                                    <td class="text-muted">Hits:</td>
+                                    <td>@(r.Hits?.ToString("n0"))</td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg Total (Last 24):</td>
-                                    <td class="value">@string.Format("{0:n0} ms", @r.AvgTr24Hrs)</td>
+                                    <td class="text-muted">Avg Total (Last 24):</td>
+                                    <td>@(r.AvgTr24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg Breakdown (Last 24):</td>
-                                    <td class="node">
+                                    <td class="text-muted">Avg Breakdown (Last 24):</td>
+                                    <td>
                                         @r.AvgAspNetDurationMs24Hrs
                                         @r.AvgSqlDurationMs24Hrs
                                         @r.AvgRedisDurationMs24Hrs
@@ -171,14 +165,14 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="name">Avg SQL (Last 24):</td>
-                                    <td class="value">@string.Format("{0:n0} ms", @r.AvgSqlDurationMs24Hrs)</td>
+                                    <td class="text-muted">Avg SQL (Last 24):</td>
+                                    <td>@(r.AvgSqlDurationMs24Hrs?.ToString("n0")) ms</td>
                                 </tr>
                             </table>
                         </div>                
                     </td>
-                    <td><img src="/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
-                    <td><img src="/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>
+                    @*<td><img src="~/graph/haproxy/route-performance?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Performance last 30 days"/></td>
+                    <td><img src="~/graph/haproxy/route-hits?days=30&host=@Model.Host&route=@r.RouteName.UrlEncode()&alt=@(i % 2 == 0)" width="300" height="70" alt="Hits last 30 days"/></td>*@
                 </tr>
                 if (i++ >= maxTopRoutesToShow) { break; }
             }

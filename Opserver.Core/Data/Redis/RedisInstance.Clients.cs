@@ -8,23 +8,14 @@ namespace StackExchange.Opserver.Data.Redis
     public partial class RedisInstance
     {
         private Cache<List<ClientInfo>> _clients;
-        public Cache<List<ClientInfo>> Clients
-        {
-            get
+        public Cache<List<ClientInfo>> Clients =>
+            _clients ?? (_clients = GetRedisCache(60.Seconds(), async () =>
             {
-                return _clients ?? (_clients = new Cache<List<ClientInfo>>
+                using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))
                 {
-                    CacheForSeconds = 60,
-                    UpdateCache = GetFromRedis("Clients", rc =>
-                    {
-                        //TODO: Remove when StackExchange.Redis gets profiling
-                        using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))
-                        {
-                            return rc.GetSingleServer().ClientList().ToList();
-                        }
-                    })
-                });
-            }
-        }
+                    var result = await Connection.GetSingleServer().ClientListAsync().ConfigureAwait(false);
+                    return result.ToList();
+                }
+            }));
     }
 }

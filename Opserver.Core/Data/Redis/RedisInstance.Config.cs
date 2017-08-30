@@ -8,24 +8,15 @@ namespace StackExchange.Opserver.Data.Redis
     public partial class RedisInstance
     {
         private Cache<Dictionary<string, string>> _config;
-        public Cache<Dictionary<string, string>> Config
-        {
-            get
+
+        public Cache<Dictionary<string, string>> Config =>
+            _config ?? (_config = GetRedisCache(2.Minutes(), async () =>
             {
-                return _config ?? (_config = new Cache<Dictionary<string, string>>
+                using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
                 {
-                    CacheForSeconds = 120,
-                    UpdateCache = GetFromRedis("Config", rc =>
-                    {
-                        //TODO: Remove when StackExchange.Redis gets profiling
-                        using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
-                        {
-                            return rc.GetSingleServer().ConfigGet("*").ToDictionary(x => x.Key, x => x.Value);
-                        }
-                    })
-                });
-            }
-        }
+                    return (await Connection.GetSingleServer().ConfigGetAsync("*").ConfigureAwait(false)).ToDictionary(x => x.Key, x => x.Value);
+                }
+            }));
 
         /// <summary>
         /// Sets a config value without needing a restart

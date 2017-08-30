@@ -1,48 +1,43 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using StackExchange.Elastic;
+using System.Runtime.Serialization;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {
         private Cache<IndexAliasInfo> _aliases;
-        public Cache<IndexAliasInfo> Aliases
-        {
-            get { return _aliases ?? (_aliases = GetCache<IndexAliasInfo>(5*60)); }
-        }
+        public Cache<IndexAliasInfo> Aliases =>
+            _aliases ?? (_aliases = GetElasticCache(async () =>
+            {
+                var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases").ConfigureAwait(false);
+                return new IndexAliasInfo
+                {
+                    Aliases = aliases?.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0)
+                        .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
+                              ?? new Dictionary<string, List<string>>()
+                };
+            }));
 
         public string GetIndexAliasedName(string index)
         {
-            if (Aliases.Data == null || Aliases.Data.Aliases == null)
+            if (Aliases.Data?.Aliases == null)
                 return index;
 
-            List<string> aliases;
-            return Aliases.Data.Aliases.TryGetValue(index, out aliases)
-                       ? aliases.First().IsNullOrEmptyReturn(index)
+            return Aliases.Data.Aliases.TryGetValue(index, out List<string> aliases)
+                       ? aliases[0].IsNullOrEmptyReturn(index)
                        : index;
         }
 
-        public class IndexAliasInfo : ElasticDataObject
+        public class IndexAliasInfo
         {
-            public Dictionary<string, List<string>> Aliases { get; private set; }
+            public Dictionary<string, List<string>> Aliases { get; internal set; }
+        }
 
-            public override ElasticResponse RefreshFromConnection(SearchClient cli)
-            {
-                var rawAliases = cli.GetAliases();
-                if (rawAliases.HasData)
-                {
-                    var result = new Dictionary<string, List<string>>();
-                    foreach (var a in rawAliases.Data)
-                    {
-                        if (a.Value != null && a.Value.Aliases != null && a.Value.Aliases.Count > 0)
-                            result.Add(a.Key, a.Value.Aliases.Keys.ToList());
-                    }
-                    Aliases = result;
-                }
-
-                return rawAliases;
-            }
+        public class IndexAliasList
+        {
+            [DataMember(Name = "aliases")]
+            public Dictionary<string, object> Aliases { get; internal set; }
         }
     }
 }

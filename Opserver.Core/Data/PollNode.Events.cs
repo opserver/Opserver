@@ -7,8 +7,6 @@ namespace StackExchange.Opserver.Data
         public event EventHandler<MonitorStatusArgs> MonitorStatusChanged;
         public event EventHandler<PollStartArgs> Polling;
         public event EventHandler<PollResultArgs> Polled;
-        public event EventHandler CacheItemFetching;
-        public event EventHandler CacheItemFetched;
 
         public class PollStartArgs : EventArgs
         {
@@ -18,10 +16,7 @@ namespace StackExchange.Opserver.Data
             public bool AbortPoll { get; set; }
         }
 
-        public class PollResultArgs : EventArgs
-        {
-            public int Polled { get; internal set; }
-        }
+        public class PollResultArgs : EventArgs { }
 
         public class MonitorStatusArgs : EventArgs
         {

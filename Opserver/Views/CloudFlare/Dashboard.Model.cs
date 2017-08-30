@@ -1,19 +1,14 @@
-﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data.CloudFlare;
-
-namespace StackExchange.Opserver.Views.CloudFlare
+﻿namespace StackExchange.Opserver.Views.CloudFlare
 {
     public class DashboardModel
     {
-        public List<RailgunInstance> Railguns { get; set; } 
+        public virtual Views View { get; set; }
 
         public enum Views
         {
-            Overview,
-            Railgun,
-            DNS,
-            Analytics
+            Overview = 0,
+            DNS = 1,
+            Analytics = 2
         }
-        public Views View { get; set; }
     }
 }

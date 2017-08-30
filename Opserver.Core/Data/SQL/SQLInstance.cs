@@ -1,10 +1,11 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Data.SqlClient;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using Dapper;
+using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
 
@@ -12,149 +13,185 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode, ISearchableNode
     {
-        public string Name { get; internal set; }
+        public string Name => Settings.Name;
+        public virtual string Description => Settings.Description;
+        private TimeSpan? _refreshInterval;
+        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds()).Value;
         public string ObjectName { get; internal set; }
-        public string CategoryName { get { return "SQL"; } }
-        string ISearchableNode.DisplayName { get { return Name; } }
+        public string CategoryName => "SQL";
+        string ISearchableNode.DisplayName => Name;
         protected string ConnectionString { get; set; }
-        public Version Version { get; internal set; }
-        public static Dictionary<Type, ISQLVersionedObject> VersionSingletons;
+        public Version Version { get; internal set; } = new Version(); // default to 0.0
+        protected SQLSettings.Instance Settings { get; }
 
-        static SQLInstance()
+        protected static readonly ConcurrentDictionary<Tuple<string, Version>, string> QueryLookup =
+            new ConcurrentDictionary<Tuple<string, Version>, string>();
+
+        public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
+        public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
+
+        public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
         {
-            VersionSingletons = new Dictionary<Type, ISQLVersionedObject>();
-            foreach (var type in Assembly.GetExecutingAssembly().GetTypes().Where(typeof(ISQLVersionedObject).IsAssignableFrom))
+            Settings = settings;
+            ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", settings.Name));
+            // Grab the instance name for performance counters and such
+            var csb = new SqlConnectionStringBuilder(ConnectionString);
+            var parts = csb.DataSource?.Split(StringSplits.BackSlash);
+            if (Settings.ObjectName.HasValue())
             {
-                if (!type.IsClass) continue;
-                try
-                {
-                    VersionSingletons.Add(type, (ISQLVersionedObject)Activator.CreateInstance(type));
-                }
-                catch (Exception e)
-                {
-                    Current.LogException("Error creating ISQLVersionedObject lookup for " + type, e);
-                }
+                ObjectName = Settings.ObjectName;
             }
-        }
-
-        public SQLInstance(string name, string connectionString, string objectName) : base(name)
-        {
-            Version = new Version(); // default to 0.0
-            Name = name;
-            // TODO: Object Name regex for not SQLServer but InstanceName, e.g. "MSSQL$MyInstance" from "MyServer\\MyInstance"
-            ObjectName = objectName.IsNullOrEmptyReturn(objectName, "SQLServer");
-            ConnectionString = connectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", name));
+            else
+            {
+                ObjectName = parts?.Length == 2 ? "MSSQL$" + parts[1].ToUpper() : "SQLServer";
+            }
         }
 
         public static SQLInstance Get(string name)
         {
-            return name.IsNullOrEmpty()
-                       ? null
-                       : AllInstances.FirstOrDefault(i => i.Name.ToLower() == name.ToLower());
+            return SQLModule.AllInstances.Find(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        public override string NodeType { get { return "SQL"; } }
-        public override int MinSecondsBetweenPolls { get { return 2; } }
+        public override string NodeType => "SQL";
+        public override int MinSecondsBetweenPolls => 2;
 
         public override IEnumerable<Cache> DataPollers
         {
             get
             {
                 yield return ServerProperties;
-                yield return Configuration;
-                yield return Databases;
-                yield return DatabaseBackups;
-                yield return DatabaseFiles;
-                yield return DatabaseVLFs;
-                yield return CPUHistoryLastHour;
-                yield return JobSummary;
-                yield return PerfCounters;
-                yield return MemoryClerkSummary;
-                yield return ServerFeatures;
-                yield return TraceFlags;
-                yield return Volumes;
+                if (Supports<SQLServerFeatures>())
+                    yield return ServerFeatures;
+                if (Supports<SQLConfigurationOption>())
+                    yield return Configuration;
+                if (Supports<Database>())
+                    yield return Databases;
+                if (Supports<ResourceEvent>())
+                    yield return ResourceHistory;
+                if (Supports<SQLJobInfo>())
+                    yield return JobSummary;
+                if (Supports<PerfCounterRecord>())
+                    yield return PerfCounters;
+                if (Supports<SQLMemoryClerkSummaryInfo>())
+                    yield return MemoryClerkSummary;
+                if (Supports<TraceFlagInfo>())
+                    yield return TraceFlags;
+                if (Supports<VolumeInfo>())
+                    yield return Volumes;
+                if (Supports<SQLConnectionInfo>())
+                    yield return Connections;
+                if (Supports<SQLConnectionSummaryInfo>())
+                    yield return ConnectionsSummary;
             }
         }
 
+        public bool Supports<T>() where T : ISQLVersioned, new() => Version >= Singleton<T>.Instance.MinVersion;
+
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {
-            if (Databases.HasData())
+            if (!HasPolled)
+                yield return MonitorStatus.Unknown;
+            if (HasPolled && !HasPolledCacheSuccessfully)
+                yield return MonitorStatus.Critical;
+            if (Databases.Data != null)
                 yield return Databases.Data.GetWorstStatus();
         }
+
         protected override string GetMonitorStatusReason()
         {
-            return Databases.HasData() ? Databases.Data.GetReasonSummary() : null;
+            return Databases.Data?.GetReasonSummary();
         }
 
-        public Node ServerInfo
-        {
-            get { return DashboardData.GetNodeByName(Name); }
-        }
+        public Node ServerInfo => DashboardModule.GetNodeByName(Name);
 
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
         /// </summary>
-        protected DbConnection GetConnection(int timeout = 5000)
+        /// <param name="timeoutMs">Maximum milliseconds to wait when opening the connection.</param>
+        protected Task<DbConnection> GetConnectionAsync(int timeoutMs = 5000) => Connection.GetOpenAsync(ConnectionString, connectionTimeoutMs: timeoutMs);
+
+        /// <summary>
+        /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT
+        /// TODO: Remove with async views in MVC Core
+        /// </summary>
+        /// <param name="timeoutMs">Maximum milliseconds to wait when opening the connection.</param>
+        protected DbConnection GetConnection(int timeoutMs = 5000) => Connection.GetOpen(ConnectionString, connectionTimeoutMs: timeoutMs);
+
+        private string GetCacheKey(string itemName) { return $"SQL-Instance-{Name}-{itemName}"; }
+
+        public Cache<List<T>> SqlCacheList<T>(
+            TimeSpan cacheDuration,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+            where T : class, ISQLVersioned, new()
         {
-            return Connection.GetOpen(ConnectionString, connectionTimeout: timeout);
+            return GetSqlCache(memberName,
+                conn => conn.QueryAsync<T>(GetFetchSQL<T>()),
+                Supports<T>,
+                cacheDuration,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
 
-        public string GetFetchSQL<T>() where T : ISQLVersionedObject
+        public Cache<T> SqlCacheSingle<T>(
+            TimeSpan cacheDuration,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0)
+            where T : class, ISQLVersioned, new()
         {
-            ISQLVersionedObject lookup;
-            return VersionSingletons.TryGetValue(typeof (T), out lookup) ? lookup.GetFetchSQL(Version) : null;
+            return GetSqlCache(memberName,
+                conn => conn.QueryFirstOrDefaultAsync<T>(GetFetchSQL<T>()),
+                Supports<T>,
+                cacheDuration,
+                logExceptions: true,
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber);
         }
 
-        private string GetCacheKey(string itemName) { return string.Format("SQL-Instance-{0}-{1}", Name, itemName); }
-
-        public Cache<List<T>> SqlCacheList<T>(int cacheSeconds,
-                                              int? cacheFailureSeconds = null,
-                                              bool affectsStatus = true,
-                                              [CallerMemberName] string memberName = "",
-                                              [CallerFilePath] string sourceFilePath = "",
-                                              [CallerLineNumber] int sourceLineNumber = 0) 
-            where T : class, ISQLVersionedObject
+        protected Cache<T> GetSqlCache<T>(
+            string opName,
+            Func<DbConnection, Task<T>> get,
+            Func<bool> shouldRun = null,
+            TimeSpan? cacheDuration = null,
+            bool logExceptions = false,
+            [CallerMemberName] string memberName = "",
+            [CallerFilePath] string sourceFilePath = "",
+            [CallerLineNumber] int sourceLineNumber = 0
+            ) where T : class, new()
         {
-            return new Cache<List<T>>(memberName, sourceFilePath, sourceLineNumber)
+            return new Cache<T>(this, "SQL Fetch: " + Name + ":" + opName,
+                cacheDuration ?? RefreshInterval,
+                getData: async () =>
                 {
-                    AffectsNodeStatus = affectsStatus,
-                    CacheForSeconds = cacheSeconds,
-                    CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromSql(typeof (T).Name + "-List", conn => conn.Query<T>(GetFetchSQL<T>()).ToList())
-                };
+                    if (shouldRun != null && !shouldRun()) return new T();
+                    using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+                    {
+                        return await get(conn).ConfigureAwait(false);
+                    }
+                },
+                logExceptions: logExceptions,
+                addExceptionData: e => e.AddLoggedData("Server", Name),
+                memberName: memberName,
+                sourceFilePath: sourceFilePath,
+                sourceLineNumber: sourceLineNumber
+            );
         }
 
-        public Cache<T> SqlCacheSingle<T>(int cacheSeconds,
-                                              int? cacheFailureSeconds = null,
-                                          [CallerMemberName] string memberName = "",
-                                          [CallerFilePath] string sourceFilePath = "",
-                                          [CallerLineNumber] int sourceLineNumber = 0)
-            where T : class, ISQLVersionedObject
-        {
-            return new Cache<T>(memberName, sourceFilePath, sourceLineNumber)
+        public LightweightCache<T> TimedCache<T>(string key, Func<DbConnection, T> get, TimeSpan duration, TimeSpan staleDuration) where T : class
+        => Cache.GetTimedCache(GetCacheKey(key),
+            () =>
+            {
+                using (var conn = GetConnection())
                 {
-                    CacheForSeconds = cacheSeconds,
-                    CacheFailureForSeconds = cacheFailureSeconds,
-                    UpdateCache = UpdateFromSql(typeof (T).Name + "-Single", conn => conn.Query<T>(GetFetchSQL<T>()).FirstOrDefault())
-                };
-        }
+                    return get(conn);
+                }
+            }, duration, staleDuration);
 
-        public Action<Cache<T>> UpdateFromSql<T>(string opName, Func<DbConnection, T> getFromConnection) where T : class
-        {
-            return UpdateCacheItem(description: "SQL Fetch: " + Name + ":" + opName,
-                                   getData: () =>
-                                       {
-                                           using (var conn = GetConnection())
-                                           {
-                                               return getFromConnection(conn);
-                                           }
-                                       },
-                                   addExceptionData: e => e.AddLoggedData("Server", Name));
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
+        public override string ToString() => Name;
     }
 }

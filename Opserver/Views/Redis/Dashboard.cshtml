@@ -1,31 +1,31 @@
-﻿@using StackExchange.Opserver.Data.Redis
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Redis
 @using StackExchange.Opserver.Views.Redis
 @model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetMainTab(MainTab.Redis);
     this.SetPageTitle("Redis Dashboard");
-    this.SetTopNodes(RedisInstance.AllInstances, "Redis Servers", Model.CurrentInstance);
+    this.SetTopNodes(RedisModule.Instances, "Redis Servers", Model.CurrentInstance);
 }
-@helper TabLink(RedisViews view, string href, string name, bool includeParams = true)
+@helper TabLink(RedisViews view, string action, string name, bool includeParams = true)
 {
-    <a class="@(Model.View == view ? "selected" : "")" href="@href@(includeParams && Model.CurrentInstance != null ? string.Format("?node={0}:{1}", Model.CurrentInstance.Host, Model.CurrentInstance.Port) : "")">@name</a>
+    <li class="@(Model.View == view ? "active" : null)">
+        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.HostAndPort } : null)">@name</a>
+    </li>
 }
 @section head {
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh ? 5 : 0) });
-            Status.Redis.init({ node: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Host : "")', port: '@(Model.CurrentInstance != null ? Model.CurrentInstance.Port.ToString() : "")' });
+            Status.Redis.init({ node: '@(Model.CurrentInstance?.Host ?? "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
         });
     </script>
 }
-    <div class="tabs sub-tabs">
-        <div class="tabs-links">
-            @TabLink(RedisViews.All, "/redis", "all servers", false)
-            @TabLink(RedisViews.Instance, "/redis/instance", "instance")
-        </div>
-    </div>
-<div class="dashboard-list">
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(RedisViews.All, nameof(RedisController.Dashboard), "all servers", false)
+    @TabLink(RedisViews.Instance, nameof(RedisController.Instance), "instance")
+</ul>
+<div>
     @if (Model.View == RedisViews.Instance && Model.CurrentInstance == null)
     {
         @Html.Partial("Instance.Selector")

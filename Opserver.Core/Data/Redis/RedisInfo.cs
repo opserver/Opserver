@@ -22,32 +22,24 @@ namespace StackExchange.Opserver.Data.Redis
                 yield return CPU;
                 yield return Keyspace;
                 if (UnrecognizedSections != null)
+                {
                     foreach (var s in UnrecognizedSections)
+                    {
                         yield return s;
+                    }
+                }
                 // key space
             }
         }
 
-        public RedisInfo()
-        {
-            Replication = new ReplicationInfo();
-            Clients = new ClientInfo();
-            Server = new ServerInfo();
-            Memory = new MemoryInfo();
-            Persistence = new PersistenceInfo();
-            Stats = new StatsInfo();
-            CPU = new CPUInfo();
-            Keyspace = new KeyspaceInfo();
-        }
-
         public enum RedisInstanceRole
         {
-            Master,
-            Slave,
-            Unknown
+            Unknown = 0,
+            Master = 1,
+            Slave = 2
         }
 
-        public ReplicationInfo Replication { get; internal set; }
+        public ReplicationInfo Replication { get; internal set; } = new ReplicationInfo();
         public class ReplicationInfo : RedisInfoSection
         {
             public RedisInstanceRole RedisInstanceRole
@@ -59,7 +51,7 @@ namespace StackExchange.Opserver.Data.Redis
                        case "master": return RedisInstanceRole.Master;
                        case "slave": return RedisInstanceRole.Slave;
                        default: return RedisInstanceRole.Unknown;
-                   } 
+                   }
                 }
             }
 
@@ -89,7 +81,7 @@ namespace StackExchange.Opserver.Data.Redis
             [RedisInfoProperty("master_repl_offset")]
             public long MasterReplicationOffset { get; internal set; }
             [RedisInfoProperty("slave_repl_offset")]
-            public long SlaveReplicationOffset { get; internal set; }      
+            public long SlaveReplicationOffset { get; internal set; }
 
             [RedisInfoProperty("repl_backlog_active")]
             public bool BacklogActive { get; internal set; }
@@ -99,9 +91,8 @@ namespace StackExchange.Opserver.Data.Redis
             public long BacklogFirstByteOffset { get; internal set; }
             [RedisInfoProperty("repl_backlog_histlen")]
             public long BacklogHistoryLength { get; internal set; }
-            
 
-            public List<RedisSlaveInfo> SlaveConnections = new List<RedisSlaveInfo>();
+            public readonly List<RedisSlaveInfo> SlaveConnections = new List<RedisSlaveInfo>();
             private static readonly Regex _slaveRegex = new Regex(@"slave\d+", RegexOptions.Compiled);
 
             public override void MapUnrecognizedLine(string key, string value)
@@ -129,7 +120,7 @@ namespace StackExchange.Opserver.Data.Redis
                                 var pair = p.Split(StringSplits.Equal);
                                 if (pair.Length != 2) continue;
                                 var val = pair[1];
-                                
+
                                 switch(pair[0]) {
                                     case "ip":
                                         si.IP = val;
@@ -163,16 +154,15 @@ namespace StackExchange.Opserver.Data.Redis
             public long Offset { get; internal set; }
 
             private IPAddress _ipAddress;
-            public IPAddress IPAddress { get { return _ipAddress ?? (_ipAddress = IPAddress.Parse(IP)); } }
+            public IPAddress IPAddress => _ipAddress ?? (_ipAddress = IPAddress.Parse(IP));
 
             public RedisInstance GetServer()
             {
-                return RedisInstance.GetInstance(Port, IPAddress);
+                return RedisInstance.Get(Port, IPAddress);
             }
         }
 
-
-        public ClientInfo Clients { get; internal set; }
+        public ClientInfo Clients { get; internal set; } = new ClientInfo();
         public class ClientInfo : RedisInfoSection
         {
             [RedisInfoProperty("connected_clients")]
@@ -185,12 +175,11 @@ namespace StackExchange.Opserver.Data.Redis
             public long BiggestInputBuffer { get; internal set; }
         }
 
-
-        public ServerInfo Server { get; internal set; }
+        public ServerInfo Server { get; internal set; } = new ServerInfo();
         public class ServerInfo : RedisInfoSection
         {
             private Version _version;
-            public Version Version { get { return _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version()); } }
+            public Version Version => _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version());
 
             [RedisInfoProperty("redis_version")]
             public string VersionNumber { get; internal set; }
@@ -224,8 +213,7 @@ namespace StackExchange.Opserver.Data.Redis
             public int LRUClock { get; internal set; }
         }
 
-
-        public MemoryInfo Memory { get; internal set; }
+        public MemoryInfo Memory { get; internal set; } = new MemoryInfo();
         public class MemoryInfo : RedisInfoSection
         {
             [RedisInfoProperty("used_memory")]
@@ -246,8 +234,7 @@ namespace StackExchange.Opserver.Data.Redis
             public string MemoryAllocator { get; internal set; }
         }
 
-
-        public PersistenceInfo Persistence { get; internal set; }
+        public PersistenceInfo Persistence { get; internal set; } = new PersistenceInfo();
         public class PersistenceInfo : RedisInfoSection
         {
             [RedisInfoProperty("loading")]
@@ -277,6 +264,7 @@ namespace StackExchange.Opserver.Data.Redis
             public long AOFCurrentRewriteTimeSeconds { get; internal set; }
             [RedisInfoProperty("aof_last_bgrewrite_status")]
             public string AOFLastBGRewriteStatus { get; internal set; }
+            public bool AOFLastBGRewriteStatusIsGood => AOFLastBGRewriteStatus == "ok";
             [RedisInfoProperty("aof_current_size")]
             public long AOFCurrentSize { get; internal set; }
             [RedisInfoProperty("aof_base_size")]
@@ -293,8 +281,7 @@ namespace StackExchange.Opserver.Data.Redis
             public long AOFDelayedFSync { get; internal set; }
         }
 
-
-        public StatsInfo Stats { get; internal set; }
+        public StatsInfo Stats { get; internal set; } = new StatsInfo();
         public class StatsInfo : RedisInfoSection
         {
             [RedisInfoProperty("total_connections_received")]
@@ -322,8 +309,7 @@ namespace StackExchange.Opserver.Data.Redis
             public long LatestForkMicroSeconds { get; internal set; }
         }
 
-
-        public CPUInfo CPU { get; internal set; }
+        public CPUInfo CPU { get; internal set; } = new CPUInfo();
         public class CPUInfo : RedisInfoSection
         {
             [RedisInfoProperty("used_cpu_sys")]
@@ -336,14 +322,13 @@ namespace StackExchange.Opserver.Data.Redis
             public double UsedCPUUserChildren { get; internal set; }
         }
 
-
-        public KeyspaceInfo Keyspace { get; internal set; }
+        public KeyspaceInfo Keyspace { get; internal set; } = new KeyspaceInfo();
         public class KeyspaceInfo : RedisInfoSection
-        {   
-            public Dictionary<int, KeyData> KeyData = new Dictionary<int, KeyData>();
+        {
+            public readonly Dictionary<int, KeyData> KeyData = new Dictionary<int, KeyData>();
 
-            private static readonly Regex _dbNameMatch = new Regex(@"db([0-9]+)", RegexOptions.Compiled);
-            private static readonly Regex _keysMatch = new Regex(@"keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _dbNameMatch = new Regex("db([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _keysMatch = new Regex("keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
             internal override void AddLine(string key, string value)
             {
                 var dbMatch = _dbNameMatch.Match(key);
@@ -360,13 +345,13 @@ namespace StackExchange.Opserver.Data.Redis
                                     Expires = long.Parse(keysMatch.Groups[2].Value)
                                 };
                             KeyData[int.Parse(dbMatch.Groups[1].Value)] = kd;
-                            value = string.Format("{0} keys, {1} expires", kd.Keys.ToComma(), kd.Expires.ToComma());
+                            value = $"{kd.Keys.ToComma()} keys, {kd.Expires.ToComma()} expires";
                         }
                         catch (Exception e)
                         {
                             var ex = new Exception("Error Pasing " + key + ":" + value + " from redis INFO - Parsed Keys=" + keysMatch.Groups[1].Value + ", Expires=" + keysMatch.Groups[2].Value + ".", e);
                             Current.LogException(ex);
-                        }  
+                        }
                     }
                 }
                 base.AddLine(key, value);

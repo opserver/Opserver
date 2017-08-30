@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
@@ -13,13 +14,15 @@ namespace StackExchange.Opserver.Data.Exceptions
     {
         public const int PerAppSummaryCount = 1000;
 
-        private int? QueryTimeout { get { return Settings.QueryTimeoutMs; } }
-        public string Name { get { return Settings.Name; } }
-        public string Description { get { return Settings.Description; } }
+        public override string ToString() => "Store: " + Settings.Name;
+
+        private int? QueryTimeout => Settings.QueryTimeoutMs;
+        public string Name => Settings.Name;
+        public string Description => Settings.Description;
         public ExceptionsSettings.Store Settings { get; internal set; }
 
-        public override int MinSecondsBetweenPolls { get { return 1; } }
-        public override string NodeType { get { return "Exceptions"; } }
+        public override int MinSecondsBetweenPolls => 1;
+        public override string NodeType => "Exceptions";
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -30,74 +33,75 @@ namespace StackExchange.Opserver.Data.Exceptions
             }
         }
 
-        protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
+        protected override IEnumerable<MonitorStatus> GetMonitorStatus()
+        {
+            yield return DataPollers.GetWorstStatus();
+        }
+
         protected override string GetMonitorStatusReason() { return null; }
-        
+
         public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)
         {
             Settings = settings;
         }
 
-        public Action<Cache<T>> UpdateFromSql<T>(string opName, Func<DbConnection, T> getFromConnection) where T : class
-        {
-            return UpdateCacheItem("Exceptions Fetch: " + Name + ":" + opName,
-                                   () => { using (var conn = GetConnection()) return getFromConnection(conn); },
-                                   addExceptionData: e => e.AddLoggedData("Server", Name));
-        }
-
         private Cache<List<Application>> _applications;
-        public Cache<List<Application>> Applications
-        {
-            get
-            {
-                return _applications ?? (_applications = new Cache<List<Application>>
-                    {
-                        CacheForSeconds = Settings.PollIntervalSeconds,
-                        UpdateCache = UpdateFromSql("Applications-List",
-                            conn => conn.Query<Application>(@"
+        public Cache<List<Application>> Applications =>
+            _applications ?? (_applications = new Cache<List<Application>>(
+                this,
+                "Exceptions Fetch: " + Name + ":" + nameof(Applications),
+                Settings.PollIntervalSeconds.Seconds(),
+                async () =>
+                {
+                    var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
 Select ApplicationName as Name, 
        Sum(DuplicateCount) as ExceptionCount,
 	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentExceptionCount,
 	   MAX(CreationDate) as MostRecent
   From Exceptions
  Where DeletionDate Is Null
- Group By ApplicationName",
-                          new { Current.Settings.Exceptions.RecentSeconds }, commandTimeout: QueryTimeout)
-                         .ForEach(a => { a.StoreName = Name; a.Store = this; }).ToList())
+ Group By ApplicationName", new {Current.Settings.Exceptions.RecentSeconds}).ConfigureAwait(false);
+                    result.ForEach(a =>
+                    {
+                        a.StoreName = Name;
+                        a.Store = this;
                     });
-            }
-        }
+                    return result;
+                },
+                afterPoll: cache => ExceptionStores.UpdateApplicationGroups()));
 
         private Cache<List<Error>> _errorSummary;
-        public Cache<List<Error>> ErrorSummary
-        {
-            get
-            {
-                return _errorSummary ?? (_errorSummary = new Cache<List<Error>>
-                {
-                    CacheForSeconds = Settings.PollIntervalSeconds,
-                    UpdateCache = UpdateFromSql("Error-Summary-List",
-                        conn => conn.Query<Error>(@"
+        public Cache<List<Error>> ErrorSummary =>
+            _errorSummary ?? (_errorSummary = new Cache<List<Error>>(
+                this,
+                "Exceptions Fetch: " + Name + ":" + nameof(ErrorSummary),
+                Settings.PollIntervalSeconds.Seconds(),
+                () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
 		From Exceptions
 		Where DeletionDate Is Null) er
 	   Inner Join Exceptions e On er.Id = e.Id
  Where er.r <= @PerAppSummaryCount
- Order By CreationDate Desc",
-                      new { PerAppSummaryCount }, commandTimeout: QueryTimeout).ToList())
-                });
-            }
-        }
+ Order By CreationDate Desc", new {PerAppSummaryCount})));
 
-        public List<Error> GetErrorSummary(int maxPerApp, string appName = null)
+        public async Task<List<Error>> GetErrorSummary(int maxPerApp, string group = null, string app = null)
         {
-            var errors = ErrorSummary.SafeData(true);
-            // specific application
-            if (appName.HasValue())
+            var errors = await ErrorSummary.GetData().ConfigureAwait(false);
+            if (errors == null) return new List<Error>();
+            // specific application - this is most specific
+            if (app.HasValue())
             {
-                return errors.Where(e => e.ApplicationName == appName)
+                return errors.Where(e => e.ApplicationName == app)
                              .Take(maxPerApp)
+                             .ToList();
+            }
+            if (group.HasValue())
+            {
+                var apps = ExceptionStores.GetAppNames(group, app).ToHashSet();
+                return errors.GroupBy(e => e.ApplicationName)
+                             .Where(g => apps.Contains(g.Key))
+                             .SelectMany(e => e.Take(maxPerApp))
                              .ToList();
             }
             // all apps, 1000
@@ -112,157 +116,94 @@ Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e
         }
 
         /// <summary>
-        /// Get all current errors, possibly per application
+        /// Get all current errors, possibly per application.
         /// </summary>
+        /// <param name="maxPerApp">Count of exceptions to fetch per application.</param>
+        /// <param name="apps">(Optional) The list of applications to fetch exceptions for.</param>
         /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
-        public List<Error> GetAllErrors(int maxPerApp, string appName = null)
+        public Task<List<Error>> GetAllErrorsAsync(int maxPerApp, IEnumerable<string> apps = null)
         {
-            try
-            {
-                using (MiniProfiler.Current.Step("GetAllErrors() for " + Name + " App: " + (appName ?? "All")))
-                using (var c = GetConnection())
-                {
-                    var sql = @"
+            return QueryListAsync<Error>($"{nameof(GetAllErrorsAsync)}() for {Name}", @"
 Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
   From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
 		From Exceptions
-		Where DeletionDate Is Null" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + @") er
+		Where DeletionDate Is Null" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + @") er
 	   Inner Join Exceptions e On er.Id = e.Id
  Where er.r <= @maxPerApp
- Order By CreationDate Desc";
-                    return c.Query<Error>(sql, new {maxPerApp, appName}, commandTimeout: QueryTimeout).ToList();
-                }
-            }
-            catch (Exception e)
-            {
-                Current.LogException(e);
-                return new List<Error>();
-            }
+ Order By CreationDate Desc", new {maxPerApp, apps});
         }
 
-        public List<Error> GetSimilarErrors(Error error, int max)
+        public Task<List<Error>> GetSimilarErrorsAsync(Error error, int max)
         {
-            try
-            {
-                using (MiniProfiler.Current.Step("GetSimilarErrors() for " + Name))
-                using (var c = GetConnection())
-                {
-                    var result = c.Query<Error>(@"
+            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where ApplicationName = @ApplicationName
        And Message = @Message
-     Order By CreationDate Desc", new { max, error.ApplicationName, error.Message }, commandTimeout: QueryTimeout).ToList();
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                Current.LogException(e);
-                return new List<Error>();
-            }
+     Order By CreationDate Desc", new {max, error.ApplicationName, error.Message});
         }
 
-        public List<Error> GetSimilarErrorsInTime(Error error, int max)
+        public Task<List<Error>> GetSimilarErrorsInTimeAsync(Error error, int max)
         {
-            try
-            {
-                using (MiniProfiler.Current.Step("GetSimilarErrorsInTime() for " + Name))
-                using (var c = GetConnection())
-                {
-                    var result = c.Query<Error>(@"
+            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsInTimeAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
      Where CreationDate Between @start and @end
-     Order By CreationDate Desc", new { max, start = error.CreationDate.AddMinutes(-5), end = error.CreationDate.AddMinutes(5) }, commandTimeout: QueryTimeout).ToList();
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                Current.LogException(e);
-                return new List<Error>();
-            }
+     Order By CreationDate Desc", new { max, start = error.CreationDate.AddMinutes(-5), end = error.CreationDate.AddMinutes(5) });
         }
 
-        public List<Error> FindErrors(string searchText, string appName, int max, bool includeDeleted)
+        public Task<List<Error>> FindErrorsAsync(string searchText, int max, bool includeDeleted, IEnumerable<string> apps = null)
         {
-            try
-            {
-                using (MiniProfiler.Current.Step("FindErrors() for " + Name))
-                using (var c = GetConnection())
-                {
-                    var result = c.Query<Error>(@"
+            return QueryListAsync<Error>($"{nameof(FindErrorsAsync)}() for {Name}", @"
     Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
       From Exceptions e
-     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (appName.HasValue() ? " And ApplicationName = @appName" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
-     Order By CreationDate Desc", new { search = '%' + searchText + '%', appName, max }, commandTimeout: QueryTimeout).ToList();
-                    return result;
-                }
-            }
-            catch (Exception e)
-            {
-                Current.LogException(e);
-                return new List<Error>();
-            }
+     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
+     Order By CreationDate Desc", new { search = "%" + searchText + "%", apps, max });
         }
 
-        public int DeleteAllErrors(string appName)
+        public Task<int> DeleteAllErrorsAsync(List<string> apps)
         {
-            using (MiniProfiler.Current.Step("DeleteAllErrors() (app: " + appName + ") for " + Name))
-            using (var c = GetConnection())
-            {
-                return c.Execute(@"
+            return ExecTaskAsync($"{nameof(DeleteAllErrorsAsync)}() for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
    And IsProtected = 0 
-   And ApplicationName = @appName", new { appName }, commandTimeout: QueryTimeout);
-            }
+   And ApplicationName In @apps", new { apps });
         }
 
-        public int DeleteSimilarErrors(Error error)
+        public Task<int> DeleteSimilarErrorsAsync(Error error)
         {
-            using (MiniProfiler.Current.Step("DeleteSimilarErrors('" + error.GUID + "') (app: " + error.ApplicationName + ") for " + Name))
-            using (var c = GetConnection())
-            {
-                return c.Execute(@"
+            return ExecTaskAsync($"{nameof(DeleteSimilarErrorsAsync)}('{error.GUID}') (app: {error.ApplicationName}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where ApplicationName = @ApplicationName
    And Message = @Message
    And DeletionDate Is Null
-   And IsProtected = 0", new { error.ApplicationName, error.Message }, commandTimeout: QueryTimeout);
-            }
+   And IsProtected = 0", new {error.ApplicationName, error.Message});
         }
 
-        public int DeleteErrors(string appName, List<Guid> ids)
+        public Task<int> DeleteErrorsAsync(List<Guid> ids)
         {
-            using (MiniProfiler.Current.Step("DeleteErrors(" + ids.Count + " Guids) (app: " + appName + ") for " + Name))
-            using (var c = GetConnection())
-            {
-                return c.Execute(@"
+            return ExecTaskAsync($"{nameof(DeleteErrorsAsync)}({ids.Count} Guids) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where DeletionDate Is Null 
    And IsProtected = 0 
-   And ApplicationName = @appName
-   And GUID In @ids", new { appName, ids }, commandTimeout: QueryTimeout);
-            }
+   And GUID In @ids", new { ids });
         }
-        
-        public Error GetError(Guid guid)
+
+        public async Task<Error> GetErrorAsync(Guid guid)
         {
             try
             {
                 Error sqlError;
-                using (MiniProfiler.Current.Step("GetError() (guid: " + guid + ") for " + Name))
-                using (var c = GetConnection())
+                using (MiniProfiler.Current.Step(nameof(GetErrorAsync) + "() (guid: " + guid.ToString() + ") for " + Name))
+                using (var c = await GetConnectionAsync().ConfigureAwait(false))
                 {
-                    sqlError = c.Query<Error>(@"
-    Select * 
+                    sqlError = await c.QueryFirstOrDefaultAsync<Error>(@"
+    Select Top 1 * 
       From Exceptions 
-     Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout).FirstOrDefault();
+     Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout).ConfigureAwait(false);
                 }
                 if (sqlError == null) return null;
 
@@ -281,34 +222,50 @@ Update Exceptions
             }
         }
 
-        public bool ProtectError(Guid guid)
+        public async Task<bool> ProtectErrorAsync(Guid guid)
         {
-            using (MiniProfiler.Current.Step("ProtectError() (guid: " + guid + ") for " + Name))
-            using (var c = GetConnection())
-            {
-                return c.Execute(@"
+              return await ExecTaskAsync($"{nameof(ProtectErrorAsync)}() (guid: {guid}) for {Name}", @"
 Update Exceptions 
    Set IsProtected = 1, DeletionDate = Null
- Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout) > 0;
-            }
+ Where GUID = @guid", new {guid}).ConfigureAwait(false) > 0;
         }
 
-        public bool DeleteError(Guid guid)
+        public async Task<bool> DeleteErrorAsync(Guid guid)
         {
-            using (MiniProfiler.Current.Step("DeleteError() (guid: " + guid + ") for " + Name))
-            using (var c = GetConnection())
-            {
-                return c.Execute(@"
+            return await ExecTaskAsync($"{nameof(DeleteErrorAsync)}() (guid: {guid}) for {Name}", @"
 Update Exceptions 
    Set DeletionDate = GETUTCDATE() 
  Where GUID = @guid 
-   And DeletionDate Is Null", new { guid }, commandTimeout: QueryTimeout) > 0;
+   And DeletionDate Is Null", new { guid }).ConfigureAwait(false) > 0;
+        }
+
+        public async Task<List<T>> QueryListAsync<T>(string step, string sql, dynamic paramsObj)
+        {
+            try
+            {
+                using (MiniProfiler.Current.Step(step))
+                using (var c = await GetConnectionAsync().ConfigureAwait(false))
+                {
+                    return await c.QueryAsync<T>(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
+                }
+            }
+            catch (Exception e)
+            {
+                Current.LogException(e);
+                return new List<T>();
             }
         }
 
-        private DbConnection GetConnection()
+        public async Task<int> ExecTaskAsync(string step, string sql, dynamic paramsObj)
         {
-            return Connection.GetOpen(Settings.ConnectionString, QueryTimeout);
+            using (MiniProfiler.Current.Step(step))
+            using (var c = await GetConnectionAsync().ConfigureAwait(false))
+            {
+                return await c.ExecuteAsync(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
+            }
         }
+
+        private Task<DbConnection> GetConnectionAsync() =>
+            Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeout);
     }
 }

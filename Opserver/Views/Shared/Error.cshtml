@@ -1,12 +1,30 @@
-﻿<div class="center-container">
-    <h1>Error!</h1>
-    <div class="desc">Sorry, an error occurred while processing your request.</div>
-</div>
-<!-- Actual error:
+﻿@using StackExchange.Opserver.Controllers
 @{
-    var o = HttpContext.Current.ApplicationInstance.Application["LastError"] as Exception;
-    if (o != null) { 
-        @o.GetBaseException().Message
-    }
+    this.SetPageTitle("Error");
 }
--->
+<div class="row">
+    <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 100px">
+        <h1>
+            <i class="fa fa-exclamation-triangle text-danger" aria-hidden="true"></i> Oh no, an error!
+        </h1>
+        <p>
+            I'm so sorry, an error occured doing the thing in the place.
+        </p>
+        @if (Current.User.IsGlobalAdmin)
+        {
+            <p>You can check <a href="~/admin/errors">the error log</a> for details.</p>
+        }
+    </div>
+</div>
+@if (Current.User.IsGlobalAdmin)
+{
+    <!-- Actual error:
+    @{
+        var o = HttpContext.Current.ApplicationInstance.Application["LastError"] as Exception;
+        if (o != null)
+        {
+            @o.GetBaseException().Message
+        }
+    }
+    -->
+}

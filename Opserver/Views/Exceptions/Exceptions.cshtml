@@ -1,51 +1,51 @@
-﻿@using StackExchange.Opserver.Data.Exceptions
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
+    var group = Model.SelectedGroup;
     var log = Model.SelectedLog;
     var exceptions = Model.Errors;
-    
-    this.SetPageTitle(Model.Title);
-    this.SetMainTab(MainTab.Exceptions);
-    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
-                      Model.Search,
-                      "/exceptions/search",
-                      log.HasValue() ? new Dictionary<string, string> {{"log", log}} : null);
 
-    var distinctApps = Model.Applications.GroupBy(a => a.Name).Select(g => new { Name = g.Key, ExceptionCount = g.Sum(a => a.ExceptionCount), MostRecent = g.Max(a => a.MostRecent) });
-    
-    if (Current.IsMobile) {
-        distinctApps = distinctApps.Where(a => a.ExceptionCount > 0); // filter out 0s for mobile
-    }
+    this.SetPageTitle(Model.Title);
+    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
+              Model.Search,
+              Url.Action(nameof(ExceptionsController.Search)),
+              Model.SearchDictionary);
+    var anyLoaded = ExceptionsModule.Stores?.Any(s => s.HasPolledCacheSuccessfully && s.MonitorStatus == MonitorStatus.Good) ?? false;
 }
 @section head {
     <script>
-        $(function () { Status.Exceptions.init({ refresh: 120, log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function() { Status.Exceptions.init({ refresh: 120, group: '@group.AsHtml()', log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
-<div class="node-category-list top-section">
-    <ul class="top-server-list">
-        <li>Exception Logs: </li>
-        @{ var ac = Model.ShowAll ? @" class=""selected""" : ""; }
-        <li@(ac.AsHtml())><a href="/exceptions"><span>All</span></a></li>
-        @foreach (var a in distinctApps)
-        {
-            var cl = a.Name == log ? "selected" : null;
-            <li class="@cl.AsHtml()"><a href="/exceptions?log=@a.Name.UrlEncode()" title="@a.ExceptionCount.Pluralize("Exception")@(a.MostRecent.HasValue ? ", Last: " + a.MostRecent.ToRelativeTime() : "")"><span>@a.Name</span></a><span class="count">@(a.ExceptionCount > 0 ? " (" + a.ExceptionCount.ToComma() + ")" : "")</span></li>
-        }
-    </ul>
-</div>
-@if (ExceptionStores.Stores.Any(s => s.MonitorStatus == MonitorStatus.Good))
-{
-    <div class="bottom-section">
-        @Html.Partial("Exceptions.Table", Model)
-        <div class="no-content good@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
-        <div class="loading-more-spacer loading hidden"></div>
-        <div class="no-content no-more hidden">End of active exception log</div>
+<div class="js-refresh" data-name="exceptions-header">
+    <h5 class="page-header">
+        Exception Logs
+        <span>
+            @if (!Model.ShowAll)
+            {
+                @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
+            }
+            @if (ExceptionsModule.Stores?.Any() == true)
+            {
+                @Helpers.PollNow(ExceptionsModule.Stores)
+            }
+        </span>
+    </h5>
+    @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
+    @if (anyLoaded)
+    {
+    <div class="js-exception-counts">
+        @{ Html.RenderPartial("Exceptions.Navigation", Model); }
     </div>
-}
-else
+    }
+</div>
+@if (anyLoaded)
 {
-    <div class="bottom-section">
-        <div class="no-content critical">Nothing to display, there was an error fetching from all exception stores</div>
+    <div class="js-refresh" data-name="exceptions-list">
+        @Html.Partial("Exceptions.Table", Model)
+        <div class="js-bottom-loader horizontal-load"><div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="js-bottom-no-exceptions no-content text-success@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
+        <div class="js-bottom-no-more no-content small@(Model.HasMore ? null : " hidden")">End of active exception log</div>
     </div>
 }

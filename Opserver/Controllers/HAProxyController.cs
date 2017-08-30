@@ -12,23 +12,25 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController
     {
-        protected override ISecurableSection SettingsSection
+        public override ISecurableModule SettingsModule => Current.Settings.HAProxy;
+
+        public override TopTab TopTab => new TopTab("HAProxy", nameof(Dashboard), this, 60)
         {
-            get { return Current.Settings.HAProxy; }
-        }
-        
+            GetMonitorStatus = () => HAProxyModule.Groups.GetWorstStatus()
+        };
+
         [Route("haproxy")]
         [Route("haproxy/dashboard")]
-        public ActionResult HAProxyDashboard(string group, string node, string watch = null, bool norefresh = false)
+        public ActionResult Dashboard(string group, string node, string watch = null, bool norefresh = false)
         {
             var haGroup = HAProxyGroup.GetGroup(group ?? node);
-            var proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies());
+            var proxies = haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies();
             proxies.RemoveAll(p => !p.HasServers);
 
             var vd = new HAProxyModel
             {
                 SelectedGroup = haGroup,
-                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyGroup.AllGroups,
+                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyModule.Groups,
                 Proxies = proxies,
                 View = HAProxyModel.Views.Dashboard,
                 Refresh = !norefresh,
@@ -37,32 +39,16 @@ namespace StackExchange.Opserver.Controllers
             return View("HAProxy.Dashboard", vd);
         }
 
-        [Route("haproxy/detailed")]
-        public ActionResult HAProxyDetailed(string group, string node, string watch = null, bool norefresh = false)
-        {
-            var haGroup = HAProxyGroup.GetGroup(group ?? node);
-            var vd = new HAProxyModel
-            {
-                SelectedGroup = haGroup,
-                Groups = haGroup != null ? new List<HAProxyGroup> { haGroup } : HAProxyGroup.AllGroups,
-                Proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies()),
-                View = HAProxyModel.Views.Detailed,
-                Refresh = !norefresh,
-                WatchProxy = watch
-            };
-            return View("HAProxy.Detailed", vd);
-        }
-
         [Route("haproxy/traffic")]
-        public ActionResult HAProxyTraffic(string host)
+        public async Task<ActionResult> Traffic(string host)
         {
             if (!Current.Settings.HAProxy.Traffic.Enabled)
                 return DefaultAction();
-            
-            var hosts = Task.Run(() => Data.HAProxy.HAProxyTraffic.GetHosts());
-            var topRoutes = Task.Run(() => Data.HAProxy.HAProxyTraffic.GetTopPageRotues(30, host));
 
-            Task.WaitAll(hosts, topRoutes);
+            var hosts = HAProxyTraffic.GetHostsAsync();
+            var topRoutes = HAProxyTraffic.GetTopPageRotuesAsync(30, host);
+
+            await Task.WhenAll(hosts, topRoutes).ConfigureAwait(false);
 
             var vd = new HAProxyModel
             {

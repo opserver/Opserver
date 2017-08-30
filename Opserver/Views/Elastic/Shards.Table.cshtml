@@ -1,0 +1,78 @@
+﻿@using StackExchange.Opserver.Data.Elastic
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    Layout = null;
+    var c = Model.CurrentCluster;
+    var i = Model.CurrentIndexName;
+    var shards = (Model.WarningsOnly ? c.TroubledShards : c.AllShards).Where(s => i == null || s.Index == i).ToList();
+}
+@helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfo> nodes)
+{
+    ElasticCluster.NodeInfo result;
+    if (node.IsNullOrEmpty())
+    {
+            <span class="text-muted">n/a</span>
+    }
+    else if (nodes.TryGetValue(node, out result))
+    {
+        if (result.Name == Model.CurrentNodeName)
+        {
+                <strong>@result.IconSpan() @result.ShortName</strong>
+        }
+        else
+        {
+                <span>@result.IconSpan() @result.ShortName</span>
+        }
+    }
+    else
+    {
+            <span class="text-muted">@node</span>
+    }
+}
+@if (shards.Any() && c.Nodes.Data != null)
+{
+    var nodes = c.Nodes.Data.Nodes.ToDictionary(n => n.GUID);
+    <table class="table table-striped table-hover table-responsive table-super-condensed">
+        <thead>
+            <tr>
+                <th>Index</th>
+                <th>State</th>
+                <th>Shard #</th>
+                <th>Primary</th>
+                <th>Node</th>
+                <th>Relocating To</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in shards.OrderByWorst().ThenBy(s =>
+        {
+            int j;
+            return int.TryParse(s.Index, out j) ? j : 0;
+        }).ThenBy(s => s.Shard).ThenByDescending(s => s.Primary))
+        {
+            <tr class="@s.RowClass()">
+                <td>@s.IconSpan() @c.GetIndexAliasedName(s.Index)</td>
+                <td class="@s.MonitorStatus.TextClass(showGood: true)">@s.PrettyState</td>
+                <td>@s.Shard.ToString()</td>
+                <td>
+                    @if (s.Primary)
+                    {
+                        <strong>Yes</strong>
+                    }
+                    else
+                    {
+                        @:No
+                    }
+                </td>
+                <td>@GetNodeName(s.Node, nodes)</td>
+                <td>@GetNodeName(s.RelocatingNode, nodes)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No shard data available</div>
+}

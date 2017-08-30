@@ -3,7 +3,7 @@
 @{
     Layout = null;
     var configs = Model.Configuration;
-    var data = configs.SafeData(true);
+    var data = configs.Data;
 }
 @helper DisplayValue(int val)
 {
@@ -18,15 +18,17 @@
 {
     if (options.Any()) {
             <tbody>
-                <tr class="section-label-row">
-                    <td colspan="5">@title</td>
+                <tr>
+                    <th colspan="5" class="category-row">
+                        <h5>@title</h5>
+                    </th>
                 </tr>
                 <tr>
                     <th>Name</th>
                     <th>Description</th>
                     <th>Value</th>
                     <th>Active</th>
-                    <th class="note">Default (Min - Max)</th>
+                    <th class="text-muted">Default (Min - Max)</th>
                 </tr>
             </tbody>
             <tbody>
@@ -42,29 +44,23 @@
                 <tr>
                     <td>@c.Name @if(c.IsDyanmic){<span class="good"> (Dynamic)</span>}</td>
                     <td>@c.Description</td>
-                    <td class="@(c.Value != c.ValueInUse ? "warning" : null)">@DisplayValue(c.Value)</td>
-                    <td class="@(!c.IsDefault ? "warning" : null)">@DisplayValue(c.ValueInUse)</td>
-                    <td class="note">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
+                    <td class="text-nowrap@(c.Value != c.ValueInUse ? " text-warning" : null)">@DisplayValue(c.Value)</td>
+                    <td class="text-nowrap@(!c.IsDefault ? " text-warning" : null)">@DisplayValue(c.ValueInUse)</td>
+                    <td class="text-nowrap text-muted">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
                 </tr>
 }
-<div class="summary-dashboard">
-    <h3>
-        <a href="/sql/instance?node=@Model.Name">@Model.Name</a><span class="note">:</span> Configuration
-
-        <span class="top-right-info">Updated @configs.ToPollSpan()</span>
-    </h3>
-    @if (data.Any())
-    {
-    <div>
-        <table>
-            @ConfigSection("Non-Default", data.Where(c => !c.IsDefault))
-            @ConfigSection("Defaults", data.Where(c => c.IsDefault && !c.IsAdvanced))
-            @ConfigSection("Defaults (Advanced)", data.Where(c => c.IsDefault && c.IsAdvanced))
-        </table>
-    </div>
-    }
-    else
-    {
+<h4 class="modal-title" title="Updated @(configs.LastPoll?.ToRelativeTime())">
+    @Model.Name<span class="text-muted">:</span> Configuration
+</h4>
+@if (data?.Any() ?? false)
+{
+    <table class="table table-striped table-responsive table-super-condensed table-hover">
+        @ConfigSection("Non-Default", data.Where(c => !c.IsDefault))
+        @ConfigSection("Defaults", data.Where(c => c.IsDefault && !c.IsAdvanced))
+        @ConfigSection("Defaults (Advanced)", data.Where(c => c.IsDefault && c.IsAdvanced))
+    </table>
+}
+else
+{
     <div class="no-content">No configuration information available</div>
-    }
-</div>
+}

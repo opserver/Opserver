@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
@@ -10,16 +12,17 @@ namespace StackExchange.Opserver.Controllers
     public class PollController : StatusController
     {
         [Route("poll")]
-        public ActionResult JsonNodes(string type, string uniqueKey, Guid? guid = null)
+        public async Task<ActionResult> PollNodes(string type, string[] key, Guid? guid = null)
         {
             if (type.IsNullOrEmpty())
                 return JsonError("type is missing");
-            if (uniqueKey.IsNullOrEmpty())
-                return JsonError("uniqueKey is missing");
+            if (!(key?.Any() ?? false))
+                return JsonError("key is missing");
             try
             {
-                var pollResult = PollingEngine.Poll(type, uniqueKey, guid, sync: true);
-                return Json(pollResult);
+                var polls = key.Select(k => PollingEngine.PollAsync(type, k, guid));
+                var results = await Task.WhenAll(polls).ConfigureAwait(false);
+                return Json(results.Aggregate(true, (current, r) => current & r));
             }
             catch (Exception e)
             {

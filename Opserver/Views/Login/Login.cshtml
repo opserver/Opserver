@@ -6,47 +6,44 @@
 <html lang="en">
     <head>
         <title>@SiteSettings.SiteNameLong</title>
-        <link href="@Url.CacheBreaker("/Content/Login.css")" rel="stylesheet" type="text/css" />
-        <link href="@Url.CacheBreaker("/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
-        <script src="@Url.CacheBreaker("/Content/Plugins.js")"></script>
-        <script src="@Url.CacheBreaker("/Content/Login.js")"></script>
+        <link href="@HtmlUtils.CacheBreaker("~/Content/themes/light/styles.min.css")" rel="stylesheet" type="text/css" />
+        <link href="@HtmlUtils.CacheBreaker("~/Content/img/apple-touch-icon.png")" rel="apple-touch-icon" />
     </head>
     <body>
-        <div class="intro">
-            <div class="wrapper">
-                <a href="~/" class="logo">@SiteSettings.SiteNameLong</a>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="~/hub"></a>
+                </div>
             </div>
-        </div>
-        <div class="content">
-            <div class="wrapper">
-                <div class="center-container">
-                    <div id="login">
-                        <h2>@SiteSettings.SiteNameLong Login</h2>
-                        <div>
-                            <form action="/login" method="POST">
-                                <div class="inputs">
-                                    <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
-                                    <input type="text" name="user" placeholder="Username" autofocus="autofocus" /> <br />
-                                    <input type="password" name="pass" placeholder="Password" /> <br />
-                                    <input type="submit" value="Log in" class="orange-submit" />
-                                </div>
-                            </form>
-                            @if (Model.ErrorMessage.HasValue())
-                            {
-                                <div class="error">
-                                    Error: @Model.ErrorMessage
-                                </div>
-                            }
+        </nav>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-4 col-xs-8 col-xs-offset-2" style="margin-top: 50px;">
+                    <h4 class="page-header">@SiteSettings.SiteNameLong Login</h4>
+                    <form action="~/login" method="POST">
+                        <div class="form-group form-group-sm">
+                            <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
+                            <input type="text" class="form-control" name="user" placeholder="Username" autofocus="autofocus" /> <br />
+                            <input type="password" class="form-control" name="pass" placeholder="Password" /> <br />
+                            <input type="submit" value="Log in" class="btn btn-primary btn-sm pull-right" />
                         </div>
-                    </div>
+                    </form>
+                    @if (Model.ErrorMessage.HasValue())
+                    {
+                        <div class="error">
+                            Error: @Model.ErrorMessage
+                        </div>
+                    }
                 </div>
             </div>
         </div>
-        <div class="footer">
-            <div class="wrapper">
-                <p>This site is for monitoring status of the Stack Exchange network.</p>
-                <p style="margin-bottom: 0;">site design / logo &copy; @DateTime.UtcNow.Year stack exchange, inc</p>
+        <footer class="page-footer">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <p>This site is for monitoring status of the @Icon.StackOverflow Stack Overflow network.</p>
+                </div>
             </div>
-        </div>
+        </footer>
     </body>
 </html>

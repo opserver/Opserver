@@ -1,32 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance
     {
         private Cache<List<WaitStatRecord>> _waitStats;
-        public Cache<List<WaitStatRecord>> WaitStats
-        {
-            get
-            {
-                return _waitStats ?? (_waitStats = new Cache<List<WaitStatRecord>>
+        public Cache<List<WaitStatRecord>> WaitStats =>
+            _waitStats ?? (_waitStats = GetSqlCache(
+                nameof(WaitStats), conn =>
                 {
-                    CacheForSeconds = 60,
-                    UpdateCache = UpdateFromSql("WaitStats", conn =>
-                    {
-                        var sql = GetFetchSQL<WaitStatRecord>();
-                        return conn.Query<WaitStatRecord>(sql, new { secondsBetween = 15 }).ToList();
-                    })
-                });
-            }
-        }
+                    var sql = GetFetchSQL<WaitStatRecord>();
+                    return conn.QueryAsync<WaitStatRecord>(sql, new {secondsBetween = 15});
+                }));
 
-        public class WaitStatRecord : ISQLVersionedObject
+        public class WaitStatRecord : ISQLVersioned
         {
-            public Version MinVersion { get { return SQLServerVersions.SQL2005.RTM; } }
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string WaitType { get; internal set; }
             public int SecondsBetween { get; internal set; }
@@ -36,10 +26,7 @@ namespace StackExchange.Opserver.Data.SQL
 
             private bool? _isIgnorable;
 
-            public bool IsIgnorable
-            {
-                get { return _isIgnorable ?? (_isIgnorable = IsIgnorableWait(WaitType)).Value; }
-            }
+            public bool IsIgnorable => _isIgnorable ?? (_isIgnorable = IsIgnorableWait(WaitType)).Value;
 
             public static bool IsIgnorableWait(string waitType)
             {
@@ -79,16 +66,11 @@ namespace StackExchange.Opserver.Data.SQL
                 }
             }
 
-            public double AverageWaitTime
-            {
-                get { return (double)WaitTimeMs/SecondsBetween; }
-            }
-            public double AverageTaskCount
-            {
-                get { return (double)WaitTaskCount / SecondsBetween; }
-            }
+            public double AverageWaitTime => (double)WaitTimeMs/SecondsBetween;
 
-            internal string FetchSQL = @"
+            public double AverageTaskCount => (double)WaitTaskCount / SecondsBetween;
+
+            public string GetFetchSQL(Version v) => @"
 Declare @delayInterval char(8) = Convert(Char(8), DateAdd(Second, @secondsBetween, '00:00:00'), 108);
 
 If Object_Id('tempdb..#PWaitStats') Is Not Null
@@ -124,12 +106,8 @@ Select cw.WaitType,
  Where cw.WaitTaskCount - pw.WaitTaskCount > 0
 
 Drop Table #PWaitStats;
-Drop Table #CWaitStats;";
-
-            public string GetFetchSQL(Version v)
-            {
-                return FetchSQL;
-            }
+Drop Table #CWaitStats;
+";
         }
     }
 }

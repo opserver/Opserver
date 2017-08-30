@@ -7,10 +7,10 @@ namespace StackExchange.Opserver.Models
 {
     public class User : IPrincipal
     {
-        public IIdentity Identity { get; private set; }
+        public IIdentity Identity { get; }
 
-        public string AccountName { get; private set; }
-        public bool IsAnonymous { get; private set; }
+        public string AccountName { get; }
+        public bool IsAnonymous { get; }
 
         public User(IIdentity identity)
         {
@@ -27,20 +27,11 @@ namespace StackExchange.Opserver.Models
                 AccountName = i.Name;
         }
 
-        public bool IsInRole(string role)
-        {
-            Roles r;
-            return Enum.TryParse(role, out r) && IsInRole(r);
-        }
-
-        public bool IsInRole(Roles roles)
-        {
-            return (Role & roles) != Roles.None || Role.HasFlag(Roles.GlobalAdmin);
-        }
+        public bool IsInRole(string role) => Enum.TryParse(role, out Roles r) && Current.IsInRole(r);
 
         private Roles? _role;
-        public Roles? RawRoles { get { return _role; } }
-        
+        public Roles? RawRoles => _role;
+
         /// <summary>
         /// Returns this user's role on the current site.
         /// </summary>
@@ -67,27 +58,27 @@ namespace StackExchange.Opserver.Models
                         result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
                         result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
                         result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
+                        result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
 
                         _role = result;
                     }
                 }
-                return Current.Security.IsInternalIP(Current.RequestIP)
-                           ? _role.Value | Roles.InternalRequest
-                           : _role.Value;
+
+                return _role.Value;
             }
         }
 
-        public Roles GetRoles(ISecurableSection section, Roles user, Roles admin)
+        public Roles GetRoles(ISecurableModule module, Roles user, Roles admin)
         {
-            if (section.IsAdmin()) return admin | user;
-            if (section.HasAccess()) return user;
+            if (module.IsAdmin()) return admin | user;
+            if (module.HasAccess()) return user;
             return Roles.None;
         }
 
-        public bool IsGlobalAdmin { get { return IsInRole(Roles.GlobalAdmin); } }
-        public bool IsExceptionAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
-        public bool IsHAProxyAdmin { get { return IsInRole(Roles.ExceptionsAdmin); } }
-        public bool IsRedisAdmin { get { return IsInRole(Roles.RedisAdmin); } }
-        public bool IsSQLAdmin { get { return IsInRole(Roles.SQLAdmin); } }
+        public bool IsGlobalAdmin => Current.IsInRole(Roles.GlobalAdmin);
+        public bool IsExceptionAdmin => Current.IsInRole(Roles.ExceptionsAdmin);
+        public bool IsHAProxyAdmin => Current.IsInRole(Roles.ExceptionsAdmin);
+        public bool IsRedisAdmin => Current.IsInRole(Roles.RedisAdmin);
+        public bool IsSQLAdmin => Current.IsInRole(Roles.SQLAdmin);
     }
 }

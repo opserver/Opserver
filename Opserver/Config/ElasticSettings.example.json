@@ -1,0 +1,36 @@
+﻿/* Configuration for the Elastic dashboard */
+{
+  // Which security groups can view the dashboard ("*" for everyone)
+  // "viewGroups": "*",
+  // Which security groups have permissions to perform actions (removing a server from rotation, etc.)
+  // "adminGroups": "SysAdmins",
+  /* The clusters to monitor */
+  "clusters": [
+    {
+      "name": "NY Production", // Name of the cluster (used in the UI before fetching of info is complete)
+      "refreshIntervalSeconds": 10, // (Optional) How often to poll the cluster - defaults to 120 seconds
+      // Nodes in this cluster, use "node:port" if not using :9200 for elastic
+      "nodes": [
+        "ny-search01",
+        "ny-search02",
+        "ny-search03"
+      ]
+    },
+    {
+      "name": "NY Development",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        "ny-devsearch01",
+        "ny-devsearch02"
+      ]
+    },
+    {
+      "name": "NY Dev Logstash",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        "ny-devlogstash01",
+        "ny-devlogstash02"
+      ]
+    }
+  ]
+}

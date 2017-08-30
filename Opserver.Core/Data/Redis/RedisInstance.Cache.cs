@@ -7,64 +7,61 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisInstance
     {
-        public static List<RedisInstance> AllInstances
+        public static RedisInstance Get(RedisConnectionInfo info)
         {
-            get { return _redisInstances ?? (_redisInstances = LoadRedisServerInfos()); }
-        }
-
-        private static readonly object _loadLock = new object();
-        private static List<RedisInstance> _redisInstances;
-        private static List<RedisInstance> LoadRedisServerInfos()
-        {
-            lock (_loadLock)
+            foreach (var i in RedisModule.Instances)
             {
-                if (_redisInstances != null) return _redisInstances;
-
-                return RedisConnectionInfo.AllConnections.Select(rci => new RedisInstance(rci))
-                                          .Where(rsi => rsi.TryAddToGlobalPollers()).ToList();
+                if (i.ConnectionInfo == info) return i;
             }
+            return null;
         }
 
-        public static RedisInstance GetInstance(RedisConnectionInfo info)
-        {
-            return AllInstances.FirstOrDefault(ri => ri.ConnectionInfo == info);
-        }
-        public static RedisInstance GetInstance(string connectionString)
+        public static RedisInstance Get(string connectionString)
         {
             if (connectionString.IsNullOrEmpty()) return null;
             if (connectionString.Contains(":"))
             {
                 var parts = connectionString.Split(StringSplits.Colon);
                 if (parts.Length != 2) return null;
-                int port;
-                if (int.TryParse(parts[1], out port)) return GetInstance(parts[0], port);
+                if (int.TryParse(parts[1], out int port)) return Get(parts[0], port);
             }
             else
             {
-                return GetInstances(connectionString).FirstOrDefault();
+                return GetAll(connectionString).FirstOrDefault();
             }
             return null;
         }
-        public static RedisInstance GetInstance(string host, int port)
+
+        public static RedisInstance Get(string host, int port)
         {
-            return AllInstances.FirstOrDefault(ri => ri.Host == host && ri.Port == port)
-                ?? AllInstances.FirstOrDefault(ri => ri.Host.Split(StringSplits.Period).First() == host.Split(StringSplits.Period).First() && ri.Port == port);
-        }
-        public static RedisInstance GetInstance(int port, IPAddress ipAddress)
-        {
-            return AllInstances.FirstOrDefault(s => s.ConnectionInfo.Port == port
-                                                  && s.ConnectionInfo.IPAddresses.Any(ip => ip.Equals(ipAddress)));
+            foreach (var ri in RedisModule.Instances)
+            {
+                if (ri.Host == host && ri.Port == port) return ri;
+            }
+            var shortHost = host.Split(StringSplits.Period)[0];
+            foreach (var ri in RedisModule.Instances)
+            {
+                if (ri.Port == port && ri.ShortHost == shortHost) return ri;
+            }
+            return null;
         }
 
-        public static List<RedisInstance> GetInstances(string node)
+        public static RedisInstance Get(int port, IPAddress ipAddress)
         {
-            var infos = AllInstances.Where(ri => string.Equals(ri.Host, node, StringComparison.InvariantCultureIgnoreCase));
-            return infos.ToList();
+            foreach (var i in RedisModule.Instances)
+            {
+                if (i.ConnectionInfo.Port != port) continue;
+                foreach (var ip in i.ConnectionInfo.IPAddresses)
+                {
+                    if (ip.Equals(ipAddress)) return i;
+                }
+            }
+            return null;
         }
 
-        public static bool IsRedisServer(string node)
+        public static List<RedisInstance> GetAll(string node)
         {
-            return AllInstances.Any(i => string.Equals(i.Host, node, StringComparison.InvariantCultureIgnoreCase));
+            return RedisModule.Instances.Where(ri => string.Equals(ri.Host, node, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
     }
 }

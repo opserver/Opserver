@@ -1,0 +1,119 @@
+﻿@using StackExchange.Opserver.Views.Dashboard
+@model NodeGraphModel
+@{
+    Layout = null;
+    int mainWidth = Model.IsLive ? 429 : 858;
+}
+@functions{
+    public bool ShowType(string type) => Model.Type == type || Model.IsLive;
+}
+@if (Model.Node != null)
+{
+    if (Model.IsLive)
+    {
+        <h4 class="modal-title">
+            Live Stats for @Model.Node.PrettyName
+        </h4>
+        <div class="row small">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        CPU Utilization
+                    </div>
+                    <div class="panel-body">
+                        <div class="history-graph js-graph-cpu"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Memory Utilization <span cass="text-muted">(@(Model.Node.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
+                    <div class="panel-body">
+                        <div class="history-graph js-graph-memory"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <h4 class="modal-title">
+            @Model.Node.PrettyName: @Model.Title
+        </h4>
+        if (ShowType(NodeGraphModel.KnownTypes.CPU))
+        {
+            <div class="dashboard-chart js-graph-cpu"></div>
+        }
+        if (ShowType(NodeGraphModel.KnownTypes.Memory))
+        {
+            <div class="dashboard-chart js-graph-memory"></div>
+        }
+        if (Model.Type == NodeGraphModel.KnownTypes.Network)
+        {
+            <div class="dashboard-chart js-graph-network"></div>
+        }
+        if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance)
+        {
+            <div class="dashboard-chart js-graph-volumePerformance"></div>
+        }
+    }
+    if (ShowType(NodeGraphModel.KnownTypes.CPU))
+    {
+        <script>
+            $('.js-graph-cpu')
+                .cpuGraph({
+                    id: '@Model.Node.Id',
+                    width: @mainWidth,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.CpuData.ToJson()
+                });
+        </script>
+    }
+    if (ShowType(NodeGraphModel.KnownTypes.Memory))
+    {
+        <script>
+            $('.js-graph-memory')
+                .memoryGraph({
+                    id: '@Model.Node.Id',
+                    width: @mainWidth,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    max: @((Model.Node.TotalMemory/1024/1024)?.ToString(CultureInfo.InvariantCulture)),
+                    data: @Model.MemoryData.ToJson()
+                });
+        </script>
+    }
+    if (Model.Type == NodeGraphModel.KnownTypes.Network) // Intentionally not included yet in live view
+    {
+        <script>
+            $('.js-graph-network')
+                .networkGraph({
+                    id: '@Model.Node.Id',
+                    iid: '@(Model.Interface?.Id)',
+                    width: 858,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.NetworkData.ToJson()
+                });
+        </script>
+    }
+    if (Model.Type == NodeGraphModel.KnownTypes.VolumePerformance) // Intentionally not included yet in live view
+    { 
+            <script>
+                $('.js-graph-volumePerformance').volumePerformanceGraph({
+                    id: '@Model.Node.Id',
+                    iid: '@(Model.Volume?.Id)',
+                    width: 858,
+                    live: @(Model.IsLive ? "true" : "false"),
+                    data: @Model.VolumePerformanceData.ToJson()
+                    });
+            </script>
+    }
+}
+else
+{
+    <h4 class="modal-title">
+        Unknown node
+    </h4>
+    <div class="alert alert-warning">
+        <h5>Node not found</h5>
+    </div>
+}

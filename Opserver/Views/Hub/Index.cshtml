@@ -1,60 +1,32 @@
-﻿@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Data.HAProxy
-@using StackExchange.Opserver.Data.SQL
-@model StackExchange.Opserver.Views.Hub.HubModel
+﻿@using StackExchange.Opserver.Views.Hub
+@model HubModel
 @{
-    // TODO: Cache check for poll fail -> toastr
     this.SetPageTitle("Hub");
-    var displayItems = Model.Items.OrderByWorst(i => i.MonitorStatus).ThenByDescending(i => i is IMonitedService);
-    var start = DateTime.UtcNow.AddDays(-1).ToEpochTime(true);
-    var end = DateTime.UtcNow.ToEpochTime(true);
+    var views = HubView.Views;
 }
 @section head {
-    <meta http-equiv="refresh" content="@(15*60)">
     <script>
         $(function() {
-            function layout() {
-                $('.node-group').isotope({
-                    masonry: {
-                        columnWidth: 175,
-                        gutterWidth: 10
-                    }
-                });
-            }
-            Status.Dashboard.init({ refresh: 60, afterRefresh: layout });
-            Status.Graphs.init({ start: @start, end: @end });
-            layout();
+            Status.Dashboard.init({ refresh: 60 });
         });
-    </script>}
-<div class="dashboard-list">
-    <div class="node-dashboard main-dashboard striped-dashboard heads-up">
-        <div class="node-group" data-name="all-servers">
-            @foreach (var i in displayItems)
+    </script>
+}
+<div>
+    <div class="small js-isotope js-refresh" data-name="all-servers">
+        <div class="col-md-4">
+            @for (var i = 0; i < views.Count; i += 2)
             {
-                var s = i as StackExchange.Opserver.Data.Dashboard.Node;
-                if (s != null)
-                {
-                    @Html.Partial("Dashboard.Node", s)
-                }
-                var ag = i as SQLNode.AvailabilityGroupInfo;
-                if (ag != null)
-                {
-                    @Html.Partial("SQL.AvailabilityGroup", ag)
-                }
-                var ec = i as ElasticCluster;
-                if (ec != null)
-                {
-                    @Html.Partial("Elastic.Cluster", ec)
-                }
-                var hag = i as HAProxyGroup;
-                if (hag != null)
-                {
-                    @Html.Partial("HAProxy.Group", hag)
-                }
+                @Html.Partial(views[i].ViewName)
             }
         </div>
-    </div>
-    <div id="spark-detail">
-        <div id="dashboard-chart" style="width: 960px; height: 330px;"></div>
+        <div class="col-md-4">
+            @for (var i = 1; i < views.Count; i += 2)
+            {
+                @Html.Partial(views[i].ViewName)
+            }
+        </div>
+        <div class="col-md-4">
+            @Html.Partial("Index.Issues")
+        </div>
     </div>
 </div>

@@ -1,30 +1,46 @@
-﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+﻿@using StackExchange.Opserver.Controllers
+@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
     var log = Model.SelectedLog;
     var exceptions = Model.Errors;
 
     this.SetPageTitle(Model.Title);
-    this.SetMainTab(MainTab.Exceptions);
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
                       Model.Search,
-                      "/exceptions/search",
-                      log.HasValue() ? new Dictionary<string, string> { { "log", log } } : null);
+                      Url.Action(nameof(ExceptionsController.Search)),
+                      Model.SearchDictionary);
 }
 @section head {
     <script>
         $(function () { Status.Exceptions.init({ log: '@log', search: '@Model.Search', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: @(Model.ShowDeleted ? "true" : "false") }); });
     </script>
 }
-<div class="top-section error-bread-top">
-    <div class="error-header">
-        <a href="/exceptions">Exceptions</a> > @if(Model.SelectedLog.HasValue()){<text><a href="/exceptions?log=@Model.SelectedLog.UrlEncode()">@Model.SelectedLog</a> > </text>}Search results for '@Model.Search'
-        @if (!Model.ShowDeleted)
-        {
-        <span class="top-link">(<a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">Include Deleted</a>)</span>
-        }
-    </div>
-</div>
-<div class="bottom-section">
+<h5 class="page-header">
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
+    <span class="text-muted">/</span>
+    @if (Model.SelectedGroup.HasValue())
+    {
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup })">@Model.SelectedGroup</a>
+        <span class="text-muted">/</span>
+    }
+    @if (Model.SelectedLog.HasValue())
+    {
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup, log = Model.SelectedLog })">@Model.SelectedLog</a>
+        <span class="text-muted">/</span>
+    }
+    Search
+</h5>
+<p class="small">
+    @if (!Model.ShowDeleted)
+    {
+        @:Showing all current exception results, to include deleted exceptions <strong><a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">click here</a></strong>.
+    }
+    else
+    {
+        @:Showing all exception results, including deleted.
+    }
+</p>
+<div>
     @Html.Partial("Exceptions.Table", Model)
     <div class="no-content@(exceptions.Any() ? " hidden" : "")">
     @if (Model.ShowDeleted)
@@ -33,7 +49,7 @@
     } 
     else 
     {                
-        @:No current exceptions found, <a href="/exceptions/search?log=@log.UrlEncode()&q=@Model.Search.UrlEncode()&showDeleted=true">would you like to search deleted errors?</a>
+        @:No current exceptions found, <a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">would you like to search deleted errors?</a>
     }
     </div>
 </div>

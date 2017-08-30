@@ -1,0 +1,44 @@
+﻿@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Models
+@model Node
+@helper Graph(Interface i, string type)
+{
+    if (i.IsUnwatched) { 
+        <div class="text-muted">No Data Available</div>
+        return;
+    }
+    <a href="#/dashboard/graph/@Model.Id.UrlEncode()/network/@i.Id">
+        <img class="js-dashboard-spark" src="~/graph/interface/@type.ToLower()/spark?id=@Model.Id&iid=@i.Id" alt="" />
+    </a>
+}
+<h5 class="page-header">@Model.Interfaces.Count.Pluralize("Network Interface")</h5>
+<table class="table table-striped table-middle table-super-condensed table-responsive table-dashboard text-nowrap js-interfaces">
+    <thead>
+        <tr>
+            <th>Interface</th>
+            <th>Speed</th>
+            <th>In</th>
+            <th></th>
+            <th>Out</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+    @{ var j = 0; }
+    @foreach (var i in Model.Interfaces.OrderBy(i => !i.IsTeam).ThenBy(i => i.Id))
+    {
+        <tr class="@i.RowClass()">
+            <td class="@(Model.PrimaryInterfaces.Contains(i) ? "primary-interface" : "")" title="@i.FullName
+                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@(j++.ToString())">
+                @i.IconSpan()
+                @i.PrettyName
+            </td>
+            <td class="@(i.Speed > 10L*1000*1000*1000 ? " very-fast" : i.Speed >= 10L*1000*1000*1000 ? " fast" : "")" data-val="@($"{i.Speed:F0}")">@i.PrettySpeed</td>
+            <td data-val="@(i.InBps?.ToString("F0"))">@i.PrettyIn()</td>
+            <td data-val="@(i.InBps?.ToString("F0"))">@Graph(i, "in")</td>
+            <td data-val="@(i.OutBps?.ToString("F0"))">@i.PrettyOut()</td>
+            <td data-val="@(i.OutBps?.ToString("F0"))">@Graph(i, "out")</td>
+        </tr>
+    }
+    </tbody>
+</table>
