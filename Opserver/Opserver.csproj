@@ -121,13 +121,13 @@
       <DependentUpon>styles.css</DependentUpon>
     </Content>
     <Content Include="App_Code\Helpers.cshtml" />
-    <None Include="Config\DashboardSettings.example.json" />
+    <None Include="Config\DashboardSettings.json" />
     <None Include="Config\ElasticSettings.example.json" />
     <None Include="Config\ExceptionsSettings.example.json" />
     <None Include="Config\HAProxySettings.example.json" />
     <None Include="Config\RedisSettings.example.json" />
-    <Content Include="Config\SecuritySettings.config.example" />
-    <None Include="Config\SQLSettings.example.json" />
+    <Content Include="Config\SecuritySettings.config" />
+    <None Include="Config\SQLSettings.json" />
     <Content Include="Content\img\logo\logo.eps" />
     <None Include="Config\JiraSettings.example.json" />
     <Content Include="App_Code\Gauges.cshtml" />

@@ -1,0 +1,125 @@
+﻿/* Configuration for the SQL Server dashboard */
+{
+  // The default connection string used unless specifically provided on a node
+  // $ServerName$ gets replaces with the name property of the instance
+  "defaultConnectionString": "Data Source=$ServerName$;Initial Catalog=master;Integrated Security=SSPI;",
+  // How often to poll all servers (defaults to 60 seconds if not configured)
+  "refreshIntervalSeconds": 30,
+  // Always On Availability Group Clusters
+  "clusters": [
+    {
+      "name": "EZDISPENSEAG",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "EZDSQLHAG01" },
+        { "name": "EZDSQLHAG02" }
+      ]
+    },
+    {
+      "name": "EZVERIFYAG01",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "EZVSQLHAG01" },
+        { "name": "EZVSQLHAG02" }
+      ]
+    },
+    {
+      "name": "MCPSQLAG01",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "MCPSQLHAG01" },
+        { "name": "MCPSQLHAG02" }
+      ]
+    },
+    {
+      "name": "EZDUATAG",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "UATSQLHAG01\\EZDUAT" },
+        { "name": "UATSQLHAG02\\EZDUAT" }
+      ]
+    },
+    {
+      "name": "EZVUATAG",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "UATSQLHAG01\\EZVUAT" },
+        { "name": "UATSQLHAG02\\EZVUAT" }
+      ]
+    },
+    {
+      "name": "CPUATAG",
+      "refreshIntervalSeconds": 20,
+      "nodes": [
+        { "name": "UATSQLHAG01\\CPUAT" },
+        { "name": "UATSQLHAG02\\CPUAT" }
+      ]
+    },
+    {
+      // Used purely for display
+      "name": "DBADMINAG",
+      // How often to poll the server
+      "refreshIntervalSeconds": 20,
+      // The list of nodes (servers) in this AG setup
+      "nodes": [
+        { "name": "DBASQLHAG01\\SQL2012" },
+        { "name": "DBASQLHAG02\\SQL2012" }
+      ]
+    }
+  ],
+  // Standalone instances
+  "instances": [
+    // An example with all the options configured
+    //{
+    //  "name": "",
+    //  "connectionString": "Data Source=NY-DB05;Initial Catalog=bob;Integrated Security=SSPI;",
+    //  "refreshIntervalSeconds": 200
+    //},
+    // Some standalone servers (default instance) using default refresh and connection strings:
+
+    //Production Servers
+    { "name": "AHCS-SENDSUITE" },
+    { "name": "AHCS-SQLTFS" },
+    { "name": "BTSSQLCLUS01" },
+    { "name": "BISQL01" },
+    { "name": "GEMINI01" },
+    { "name": "INFRASQL01" },
+    { "name": "SPSQL01" },
+    { "name": "THEGUILD\\VCENTER5" },
+    { "name": "TRACSQL01" },
+
+    //VAL
+    { "name": "AHCS-VAL01\\CPVAL" },
+    { "name": "AHCS-VAL01\\EZDVAL" },
+    { "name": "AHCS-VAL01\\MSAXVAL" },
+    { "name": "AHCS-VAL02\\EZVVAL" },
+
+    //UAT
+    { "name": "BizTalk-UAT01\\BTSSQLUAT01" },
+    { "name": "BizTalk-UAT02" },
+
+    //QA/STG
+    { "name": "AHCS-QA01\\EZVQA" },
+    { "name": "AHCS-STAGE\\CPSTAGE" },
+    { "name": "AHCS-STAGE\\EZDSTAGE " },
+    { "name": "BTSBPMQA01\\BTSSQLQA01" },
+
+    //DEV
+    { "name": "AHCS-DEV01\\EZVDEV" },
+    { "name": "AHCS-DEV02\\CPDEV" },
+    { "name": "AHCS-DEV02\\EZDDEV" },
+    { "name": "BIDEVSQL01" },
+    { "name": "MSAX-DEVSQL01" },
+    { "name": "MSAX-PRODSQL01" },
+    { "name": "MSAX-RPTSQL01" },
+    { "name": "SPS-DEV" },
+    { "name": "SPS-DEV\\EZPORTAL_SQLUAT" }
+
+
+    //{ "name": "NY-DESQL01" },
+    //{ "name": "NY-RESTORESQL01" },
+    //{ "name": "NY-UTILSQL01" },
+    // Example of a named instance
+    //{ "name": "NY-SQL05\\MYINSTANCENAME" }
+  ]
+}

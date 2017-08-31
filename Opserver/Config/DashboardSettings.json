@@ -4,18 +4,27 @@
      Multiple providers can be used...but things may get crazy when a node is monitored by more than 1 */
   "providers": {
     /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
-    "bosun": {
-      "host": "https://bosun.ds.stackexchange.com",
-      "apiKey": "IAmALittleApiKeyShortAndStout"
-
-    }
-    /* If using WMI, a list of nodes to monitor needs to be provided */
-    //"wmi": {
-    //  "nodes": [ "ny-web01" ], // List of nodes to monitor
-    //  "staticDataTimeoutSeconds": 300, // (Optional) How long to cache static data (node name, hardware, etc.) - defaults to 5 minutes
-    //  "dynamicDataTimeoutSeconds": 5, // (Optional) How long to cache dynamic data (utilizations, etc.) - defaults to 30 seconds
-    //  "historyHours": 2 // (Optional) How long to retain data (in memory) - defaults to 24 hours
+    //"bosun": {
+    //  "host": "https://bosun.ds.stackexchange.com",
+    //  "apiKey": "IAmALittleApiKeyShortAndStout"
+    //
     //}
+    /* If using WMI, a list of nodes to monitor needs to be provided */
+    "wmi": {
+      "nodes": [
+        "EZDSQLHAG01",
+        "EZDSQLHAG02",
+        "EZVSQLHAG01",
+        "EZVSQLHAG02",
+        "MCPSQLHAG01",
+        "MCPSQLHAG02",
+        "DBASQLHAG01",
+        "DBASQLHAG02" 
+      ], // List of nodes to monitor
+      "staticDataTimeoutSeconds": 300, // (Optional) How long to cache static data (node name, hardware, etc.) - defaults to 5 minutes
+      "dynamicDataTimeoutSeconds": 5, // (Optional) How long to cache dynamic data (utilizations, etc.) - defaults to 30 seconds
+      "historyHours": 2 // (Optional) How long to retain data (in memory) - defaults to 24 hours
+    }
     /* If using Orion, a host (for links, not API) and a connection string needs to be provided */
     //"orion": {
     //  "host": "orion.ds.stackexchange.com",
@@ -34,8 +43,8 @@
   /* (Optional) Specific category settings,for grouping servers and setting specific thresholds on them */
   "categories": [
     {
-      "name": "Database Servers", // Name for this group of servers
-      "pattern": "-sql", // Regex pattern of server names to put in this group
+      "name": "DBA Servers", // Name for this group of servers
+      "pattern": "-DBA", // Regex pattern of server names to put in this group
       "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
       "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
       "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
