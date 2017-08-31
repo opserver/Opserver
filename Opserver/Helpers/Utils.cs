@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -239,12 +240,74 @@ namespace StackExchange.Opserver.Helpers
 
                     pos = frame.Index + frame.Length;
                 }
+
                 // append anything left
-                sb.Append("<span class=\"stack misc\">")
-                  .AppendHtmlEncode(stackTrace.Substring(pos))
-                  .Append("</span>");
+                sb.Append("<span class=\"stack misc\">");
+                LinkifyRest(sb, stackTrace, pos, linkReplacements);
+                sb.Append("</span>");
 
                 return sb.ToStringRecycle();
+            }
+
+            private static void LinkifyRest(StringBuilder sb, string stackTrace, int pos, Dictionary<Regex, string> linkReplacements)
+            {
+                while (pos < stackTrace.Length)
+                {
+                    var offset = pos;
+                    var matches = linkReplacements
+                        .Select(x => new
+                        {
+                            pattern = x.Key,
+                            match = x.Key.Match(stackTrace, offset),
+                            replacement = x.Value,
+                        })
+                        .Where(x => x.match.Success)
+                        .OrderBy(x => x.match.Index)
+                        .ThenByDescending(x => x.match.Length)
+                        .ToArray();
+
+                    if (matches.Length == 0)
+                    {
+                        break;
+                    }
+
+                    var next = matches[0];
+
+                    var prefixLength =  next.match.Index - pos;
+                    if (prefixLength > 0)
+                    {
+                        sb.AppendHtmlEncode(stackTrace.Substring(pos, prefixLength));
+                    }
+
+                    var nextPos = next.match.Index + next.match.Length;
+
+                    // log ambigous matches, take first one
+                    var overlapping = matches.Skip(1).FirstOrDefault(x => x.match.Index < nextPos);
+                    if (overlapping != null)
+                    {
+                        Current.LogException($"Ambigous source link pattern match between '{next.pattern}' and '{overlapping.pattern}'", new Exception("Ambigous SourceLink configuration"));
+                    }
+                    try
+                    {
+                        var replacement = next.match.Result(next.replacement);
+                        sb.Append("<span class=\"stack source-section\">");
+                        sb.Append(replacement); // allow HTML in the replacement
+                        sb.Append("</span>");
+                    }
+                    catch (Exception ex)
+                    {
+                        Current.LogException($"Error while applying source link pattern replacement for '{next.pattern}'", ex);
+                        sb.AppendHtmlEncode(next.match.Value);
+                    }
+
+                    pos = nextPos;
+                }
+
+                var tailLength = stackTrace.Length - pos;
+                if (tailLength > 0)
+                {
+                    sb.AppendHtmlEncode(stackTrace.Substring(pos, tailLength));
+                }
             }
 
             private static char[] Backslash { get; } = new[] { '\\' };
