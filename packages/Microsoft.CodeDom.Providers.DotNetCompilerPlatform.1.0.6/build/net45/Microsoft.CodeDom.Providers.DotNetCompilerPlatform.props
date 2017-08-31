@@ -1,0 +1,72 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <RoslyCompilerFiles Include="$(CscToolPath)\*">
+      <Link>roslyn\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </RoslyCompilerFiles>
+  </ItemGroup>
+ <Target Name="RoslynCompilerFilesToPublish">
+    <ItemGroup>
+      <_RoslynFiles Include="@(RoslyCompilerFiles)" />
+      <FilesForPackagingFromProject Include="%(_RoslynFiles.Identity)">
+        <DestinationRelativePath>bin\roslyn\%(RecursiveDir)%(Filename)%(Extension)</DestinationRelativePath>
+      </FilesForPackagingFromProject>
+    </ItemGroup>
+  </Target>
+  <PropertyGroup>
+    <CopyAllFilesToSingleFolderForPackageDependsOn>
+      RoslynCompilerFilesToPublish;
+      $(CopyAllFilesToSingleFolderForPackageDependsOn);
+    </CopyAllFilesToSingleFolderForPackageDependsOn>
+  </PropertyGroup>
+  <Target Name="CopyRoslynCompilerFilesToOutputDirectory" AfterTargets="CopyFilesToOutputDirectory">
+    <Copy SourceFiles="@(RoslyCompilerFiles)" DestinationFolder="$(WebProjectOutputDir)\bin\roslyn" ContinueOnError="true" SkipUnchangedFiles="true" Retries="0" />
+  </Target>
+  <Target Name = "KillVBCSCompilerAndRetryCopy" AfterTargets="CopyRoslynCompilerFilesToOutputDirectory" Condition="'$(MSBuildLastTaskResult)' == 'False'" >
+    <KillProcess ProcessName="VBCSCompiler" ImagePath="$(WebProjectOutputDir)" />
+    <Copy SourceFiles="@(RoslyCompilerFiles)" DestinationFolder="$(WebProjectOutputDir)\bin\roslyn" ContinueOnError="true" SkipUnchangedFiles="true" />
+  </Target>
+  <UsingTask TaskName="KillProcess" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <ParameterGroup>
+      <ProcessName ParameterType="System.String" Required="true" />
+      <ImagePath ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Reference Include="System" />
+      <Reference Include="System.Management" />
+      <Using Namespace="System" />
+      <Using Namespace="System.Linq" />
+      <Using Namespace="System.Diagnostics" />
+      <Using Namespace="System.Management" />
+      <Code Type="Fragment" Language="cs">
+        <![CDATA[
+                try
+                {
+                  foreach(var p in Process.GetProcessesByName(ProcessName))
+                  {
+                      var wmiQuery = "SELECT ProcessId, ExecutablePath FROM Win32_Process WHERE ProcessId = " + p.Id;
+                      using(var searcher = new ManagementObjectSearcher(wmiQuery))
+                      {
+                        using(var results = searcher.Get())
+                          {
+                            var mo = results.Cast<ManagementObject>().FirstOrDefault();
+                            Log.LogMessage("ExecutablePath is {0}", (string)mo["ExecutablePath"]);
+                            if(mo != null && string.Compare((string)mo["ExecutablePath"], ImagePath, StringComparison.OrdinalIgnoreCase) > 0)
+                            {
+                              p.Kill();
+                              Log.LogMessage("{0} is killed", (string)mo["ExecutablePath"]);
+                              break;
+                            }
+                          }
+                      }
+                  }
+                }
+                catch (Exception ex)
+                {
+                  Log.LogErrorFromException(ex);
+                }
+                return true;
+                ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>

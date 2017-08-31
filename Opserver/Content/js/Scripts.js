@@ -1000,7 +1000,12 @@ Status.Exceptions = (function () {
                         log: options.log,
                         sort: options.sort,
                         count: options.loadMore,
+<<<<<<< HEAD
                         prevLast: lastGuid
+=======
+                        prevLast: lastGuid,
+                        group: options.group
+>>>>>>> release/v20170831
                     },
                     cache: false
                 }).done(function (html) {
