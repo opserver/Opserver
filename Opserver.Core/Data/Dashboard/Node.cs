@@ -286,7 +286,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
                 {
-                    var pattern = Settings?.PrimaryInterfacePatternRegex;
+                    var pattern = Settings?.PrimaryInterfacePatternRegex ?? Category?.Settings?.PrimaryInterfacePatternRegex;
                     var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
                     _primaryInterfaces = (dbInterfaces.Count > 0
                         ? dbInterfaces.OrderBy(i => i.Name)
