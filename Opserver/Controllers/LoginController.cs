@@ -3,6 +3,7 @@ using System.Web.Security;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Login;
 using Roles = StackExchange.Opserver.Models.Roles;
+using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -13,6 +14,10 @@ namespace StackExchange.Opserver.Controllers
         {
             if (returnUrl == "/")
                 return RedirectToAction(nameof(Login));
+
+            if (Current.Security is EveryonesAnAdminProvider
+                || Current.Security is EveryonesReadOnlyProvider)
+                return View("AutoLogin");
 
             var vd = new LoginModel();
             return View(vd);
