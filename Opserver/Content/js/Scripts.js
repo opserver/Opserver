@@ -811,16 +811,21 @@ Status.SQL = (function () {
         function agentAction(link, route, errMessage) {
             var origText = link.text();
             var $link = link.text('').prependWaveLoader();
+            var perNode = link.closest('[data-node]').data('node');
             $.ajax(Status.options.rootPath + 'sql/' + route, {
                 type: 'POST',
                 data: {
-                    node: Status.SQL.options.node,
+                    node: perNode || Status.SQL.options.node,
                     guid: link.closest('[data-guid]').data('guid'),
                     enable: link.data('enable')
                 },
                 success: function (data, status, xhr) {
                     if (data === true) {
-                        Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        if (perNode) {
+                            Status.refresh.run();
+                        } else {
+                            Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        }
                     } else {
                         $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                     }

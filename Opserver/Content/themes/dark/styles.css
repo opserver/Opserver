@@ -10023,6 +10023,9 @@ h6.page-header {
 .table > tbody > tr.category-row h5 span.pull-right .text-muted.small {
   margin-top: 6px;
 }
+.tablesorter-header {
+  cursor: pointer;
+}
 .table-dashboard img {
   min-width: 50px;
   width: 100%;

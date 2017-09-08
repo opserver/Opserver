@@ -636,6 +636,7 @@
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Login\AutoLogin.cshtml" />
+    <Content Include="Views\SQL\AllJobs.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />
