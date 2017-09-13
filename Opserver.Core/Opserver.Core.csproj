@@ -16,6 +16,7 @@
     <WarningLevel>4</WarningLevel>
     <CodeAnalysisRuleSet>Opserver.Core.ruleset</CodeAnalysisRuleSet>
     <StartupObject />
+    <RuntimeIdentifier>win</RuntimeIdentifier>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
