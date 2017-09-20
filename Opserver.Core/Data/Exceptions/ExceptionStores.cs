@@ -160,9 +160,9 @@ namespace StackExchange.Opserver.Data.Exceptions
                 case ExceptionSorts.MessageDesc:
                     return source.OrderByDescending(e => e.Message);
                 case ExceptionSorts.UrlAsc:
-                    return source.OrderBy(e => e.Url);
+                    return source.OrderBy(e => e.UrlPath);
                 case ExceptionSorts.UrlDesc:
-                    return source.OrderByDescending(e => e.Url);
+                    return source.OrderByDescending(e => e.UrlPath);
                 case ExceptionSorts.IPAddressAsc:
                     return source.OrderBy(e => e.IPAddress);
                 case ExceptionSorts.IPAddressDesc:

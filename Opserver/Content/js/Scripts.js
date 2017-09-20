@@ -393,6 +393,7 @@
         });
         prepTableSorter();
         prettyPrint();
+        hljs.initHighlighting();
     }
 
     return {

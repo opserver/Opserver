@@ -195,7 +195,7 @@ namespace StackExchange.Opserver.Data.Jira
             sb.AppendFormat("Machine Name: {0}\r\n", error.MachineName);
             sb.AppendFormat("Host: {0}\r\n", error.Host);
             sb.AppendFormat("Created On (UTC): {0}\r\n", error.CreationDate.ToString(CultureInfo.CurrentCulture));
-            sb.AppendFormat("Url: {0}\r\n", error.Url);
+            sb.AppendFormat("Url: {0}\r\n", error.FullUrl);
             sb.AppendFormat("HTTP Method: {0}\r\n", error.HTTPMethod);
             sb.AppendFormat("IP Address: {0}\r\n", error.IPAddress);
             sb.AppendFormat("Count: {0}\r\n", error.DuplicateCount.ToString());

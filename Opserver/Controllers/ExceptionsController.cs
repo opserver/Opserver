@@ -186,13 +186,13 @@ namespace StackExchange.Opserver.Controllers
                            e.Message,
                            e.Detail,
                            e.MachineName,
-                           e.SQL,
                            e.Host,
-                           e.Url,
+                           e.FullUrl,
                            e.HTTPMethod,
                            e.IPAddress,
                            e.DuplicateCount,
                            CreationDate = e.CreationDate.ToEpochTime(),
+                           e.Commands,
                        })
                        : JsonNotFound();
         }

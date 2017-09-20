@@ -64,7 +64,7 @@ namespace StackExchange.Opserver
 
             SetupMiniProfiler();
 
-            ErrorStore.GetCustomData = GetCustomErrorData;
+            Exceptional.Exceptional.Settings.GetCustomData = GetCustomErrorData;
 
             TaskScheduler.UnobservedTaskException += (sender, args) => Current.LogException(args.Exception);
 
@@ -112,7 +112,7 @@ namespace StackExchange.Opserver
                 MiniProfiler.Stop();
         }
 
-        private static void GetCustomErrorData(Exception ex, HttpContext context, Dictionary<string, string> data)
+        private static void GetCustomErrorData(Exception ex, Dictionary<string, string> data)
         {
             // everything below needs a context
             if (Current.Context != null)

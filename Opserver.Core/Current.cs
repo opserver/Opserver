@@ -36,7 +36,7 @@ namespace StackExchange.Opserver
                   .AddLoggedData("Ended-Unexpectedly", deserializationException.EndedUnexpectedly.ToString());
             }
 
-            ErrorStore.LogExceptionWithoutContext(exception, appendFullStackTrace: true);
+            exception.LogNoContext();
             RecordLogged(key);
         }
 
