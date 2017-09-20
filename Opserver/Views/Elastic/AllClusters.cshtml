@@ -135,14 +135,20 @@
                             {
                                 <td class="text-muted">n/a</td>
                             }
-                            @if (stats?.Process?.Memory != null)
+                            @if (stats?.JVM?.Memory!= null)
                             {
-                                <td>@stats.Process.Memory.ResidentInBytes.ToSize()</td>
-                                <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize()</td>
+                                <td>@stats.JVM.Memory.HeapCommittedInBytes.ToSize()</td>
                             }
                             else
                             {
                                 <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.Process?.Memory != null)
+                            {
+                                <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize()</td>
+                            }
+                            else
+                            {
                                 <td class="text-muted">n/a</td>
                             }
                             @if (stats?.Process != null)
