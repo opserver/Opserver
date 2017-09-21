@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
-        public bool IsVM => VMHostID.HasValue();
+        public bool IsVM => VMHostID.HasValue() || (Manufacturer?.Contains("VMware") ?? false);
         public bool HasValidMemoryReading => MemoryUsed.HasValue && MemoryUsed >= 0;
 
         public Node VMHost { get; internal set; }
