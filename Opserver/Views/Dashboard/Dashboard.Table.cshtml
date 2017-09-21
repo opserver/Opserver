@@ -13,22 +13,13 @@
 }
 @helper Graph(Node n, string type)
 {
-if (DashboardModule.HasData)
-{
-<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark?id=@n.Id" alt="" /></a>}
-else
-{
-<div class="text-muted">No Data Available</div>}
-}
-@helper GraphAll(Node n, string type)
-{
-if (DashboardModule.HasData)
-{
-<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark/all#@n.Id" alt="" /></a>
-}
-else
-{
-<div class="text-muted">No Data Available</div>}
+    if (DashboardModule.HasData) {
+        if (Request.QueryString["allGraph"].HasValue())
+        {<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark/all#@n.Id" alt="" /></a>}
+        else
+        {<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark?id=@n.Id" alt="" /></a>}
+    }
+    else {<div class="text-muted">No Data Available</div>}
 }
 @helper DiskText(Node n)
 {
