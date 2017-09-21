@@ -107,6 +107,7 @@
     </Content>
     <Content Include="Content\js\plugins\bootbox.js" />
     <Content Include="Content\js\plugins\colorbrewer.js" />
+    <Content Include="Content\js\plugins\highlight.pack.js" />
     <Content Include="Content\js\plugins\jquery-ui.js" />
     <Content Include="Content\js\plugins\visibility.js" />
     <Content Include="Content\themes\dark\styles.css">
@@ -303,6 +304,7 @@
     <Content Include="Content\font-awesome\less\screen-reader.less" />
     <Content Include="Content\font-awesome\less\stacked.less" />
     <Content Include="Content\font-awesome\less\variables.less" />
+    <Content Include="Content\themes\_shared\highlightjs.less" />
     <None Include="Help\SQL\WaitStats.md" />
     <Content Include="Views\CloudFlare\Dashboard.cshtml" />
     <Content Include="Views\Dashboard\Node.Graph.cshtml">
