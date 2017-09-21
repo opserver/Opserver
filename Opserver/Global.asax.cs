@@ -7,7 +7,6 @@ using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
-using StackExchange.Exceptional;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
@@ -86,6 +85,7 @@ namespace StackExchange.Opserver
             MiniProfiler.Settings.PopupRenderPosition = RenderPosition.Left;
             var paths = MiniProfiler.Settings.IgnoredPaths.ToList();
             paths.Add("/login");
+            paths.Add("/spark");
             MiniProfiler.Settings.IgnoredPaths = paths.ToArray();
             MiniProfiler.Settings.PopupMaxTracesToShow = 5;
             MiniProfiler.Settings.ProfilerProvider = new OpserverProfileProvider();
