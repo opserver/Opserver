@@ -34,12 +34,12 @@
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.2" />
-    <PackageReference Include="Jil" Version="2.15.3" />
+    <PackageReference Include="Dapper" Version="1.50.4-alpha1-00070" />
+    <PackageReference Include="Jil" Version="2.15.4" />
     <PackageReference Include="MiniProfiler" Version="3.2.0.157" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="StackExchange.Exceptional" Version="2.0.0-alpha3-00180" />
-    <PackageReference Include="StackExchange.Redis" Version="1.2.1.0" />
+    <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <PackageReference Include="UnconstrainedMelody" Version="0.2.1" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
