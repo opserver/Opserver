@@ -49,7 +49,7 @@
             </div>
             <div class="panel-body">
                 <div class="value-block small col-xs-6">
-                    @if (s.Manufacturer.IsNullOrEmpty() && s.IsVM)
+                    @if (s.Manufacturer.IsNullOrEmpty() && s.VMHost != null)
                     {
                         <a href="@Url.Action(nameof(DashboardController.Node), new {node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost})">@s.VMHost.PrettyName</a>
                         <label>VM Host</label>
