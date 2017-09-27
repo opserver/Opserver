@@ -879,7 +879,9 @@ Status.Redis = (function () {
 
         function runAction(link, options, event) {
             var action = $(link).data('action'),
-                node = $(link).closest('.js-redis-actions').data('node'),
+                modal = $(link).closest('.js-redis-actions'),
+                node = modal.data('node'),
+                title = modal.data('name'),
                 confirmMessage = options && options.confirmMessage || $(link).data('confirm');
 
             function innerRun() {
@@ -889,9 +891,9 @@ Status.Redis = (function () {
                      bootbox.hideAll();
                  });
             }
-            if (confirmMessage && !event.ctrlKey) {
+            if (confirmMessage && !(event && event.ctrlKey)) {
                 bootbox.confirm({
-                    title: options.title,
+                    title: title,
                     message: confirmMessage,
                     callback: function (result) {
                         if (result) {
@@ -909,11 +911,9 @@ Status.Redis = (function () {
         }).on('click', '.js-redis-new-master', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 node = modal.data('node'),
-                name = modal.data('name'),
                 newMaster = $(this).data('new-master');
             e.preventDefault();
             runAction(this, {
-                title: name,
                 confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
                 data: {
                     newMaster: newMaster
