@@ -125,7 +125,7 @@ namespace StackExchange.Opserver.Data.Redis
         /// </summary>
         public List<RedisInstance> RecommendedMasterTargets =>
             RedisModule.Instances
-            .Where(s => s.Port == Port && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s)
+            .Where(s => s.Port == Port && s.Name == Name && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s)
             .ToList();
     }
 }
