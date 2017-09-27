@@ -907,7 +907,7 @@ Status.Redis = (function () {
         }
         $(document).on('click', '.js-instance-action', function (e) {
             e.preventDefault();
-            runAction(this);
+            runAction(this, null, e);
         }).on('click', '.js-redis-new-master', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 node = modal.data('node'),
