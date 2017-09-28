@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Views.Redis
             Missing = Instances.Where(i => !Slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();
             // In the single server view, everything is top level
             Heads = View == RedisViews.Server ? Instances.ToList() : Masters.Where(m => m.SlaveCount > 0).ToList();
-            StandAloneMasters = View == RedisViews.Server ? new List<RedisInstance>() : Masters.Where(m => m.SlaveCount == 0).ToList();
+            StandAloneMasters = View == RedisViews.Server ? new List<RedisInstance>() : Masters.Where(m => m.SlaveCount == 0 && !Missing.Contains(m)).ToList();
         }
     }
 }
