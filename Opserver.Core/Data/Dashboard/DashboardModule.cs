@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.Find(s => s.Name.Equals(hostName, StringComparison.InvariantCultureIgnoreCase)) ??
-				AllNodes.Find(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
+				AllNodes.Find(s => s.Name.IndexOf(hostName, StringComparison.InvariantCultureIgnoreCase) >= 0);
         }
 
         public static IEnumerable<Node> GetNodesByIP(IPAddress ip) =>
