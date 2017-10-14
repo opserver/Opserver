@@ -82,7 +82,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 return _dayCache ?? (_dayCache = ProviderCache(async () =>
                 {
                     var result = new IntervalCache(TimeSpan.FromDays(1));
-                    Func<string, string[], Task> addMetric = async (metricName, tags) =>
+                    async Task addMetric(string metricName, string[] tags)
                     {
                         var tagDict = tags?.ToDictionary(t => t, t => "*");
                         var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict).ConfigureAwait(false);
@@ -97,7 +97,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         {
                             result.Series[metricName] = apiResult.Series.ToDictionary(s => s.Host.NormalizeForCache());
                         }
-                    };
+                    }
 
                     var c = addMetric(BosunMetric.Globals.CPU, null);
                     var m = addMetric(BosunMetric.Globals.MemoryUsed, null);

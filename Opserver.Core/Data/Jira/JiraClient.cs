@@ -160,7 +160,7 @@ namespace StackExchange.Opserver.Data.Jira
             {
                 return string.Empty;
             }
-            Func<string, bool> isHidden = k => DefaultHttpKeys.Contains(k);
+            bool isHidden(string k) => DefaultHttpKeys.Contains(k);
             var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
 
             var sb = StringBuilderCache.Get();

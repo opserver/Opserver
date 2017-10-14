@@ -10,8 +10,7 @@ namespace StackExchange.Opserver.Data.SQL
         public Cache<List<AGInfo>> AvailabilityGroups =>
             _availabilityGroups ?? (_availabilityGroups = GetSqlCache(nameof(AvailabilityGroups), async conn =>
             {
-                Func<string, string, PerfCounterRecord> getCounter =
-                    (cn, n) => GetPerfCounter("Availability Replica", cn, n);
+                PerfCounterRecord getCounter(string cn, string n) => GetPerfCounter("Availability Replica", cn, n);
                 var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AvailabilityGroups), Version), k =>
                         GetFetchSQL<AGInfo>(k.Item2) + "\n" +
                         GetFetchSQL<AGReplica>(k.Item2) + "\n" +

@@ -16,8 +16,7 @@ namespace StackExchange.Opserver
         public InstanceSettings GetInstanceSettings(Instance instance, Group group)
         {
             // Grab setting from node, then category, then global
-            Func<Func<IInstanceSettings, string>, string, string> getVal =
-                (f, d) => f(instance)
+            string getVal(Func<IInstanceSettings, string> f, string d) => f(instance)
                               .IsNullOrEmptyReturn(group != null ? f(group) : null)
                               .IsNullOrEmptyReturn(d);
 

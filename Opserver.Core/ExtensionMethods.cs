@@ -330,14 +330,14 @@ namespace StackExchange.Opserver
         {
             var sb = StringBuilderCache.Get();
             var elems = 0;
-            Action<string, int> add = (s, i) =>
+            void add(string s, int i)
+            {
+                if (elems < maxElements && i > 0)
                 {
-                    if (elems < maxElements && i > 0)
-                    {
-                        sb.AppendFormat("{0:0}{1} ", i, s);
-                        elems++;
-                    }
-                };
+                    sb.AppendFormat("{0:0}{1} ", i, s);
+                    elems++;
+                }
+            }
             add("d", span.Days);
             add("h", span.Hours);
             add("m", span.Minutes);
