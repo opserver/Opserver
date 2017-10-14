@@ -75,7 +75,10 @@ namespace StackExchange.Opserver.Data.Redis
                 yield return MonitorStatus.Unknown;
                 yield break;
             }
-            if (Role == RedisInfo.RedisInstanceRole.Unknown) yield return MonitorStatus.Critical;
+            if (Role == RedisInfo.RedisInstanceRole.Unknown)
+            {
+                yield return Info.LastPollSuccessful ? MonitorStatus.Critical : MonitorStatus.Warning;
+            }
             if (!Info.LastPollSuccessful) yield return MonitorStatus.Warning;
             if (Replication == null)
             {

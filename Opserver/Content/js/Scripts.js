@@ -877,9 +877,11 @@ Status.Redis = (function () {
             }
         });
 
-        function runAction(link, options) {
+        function runAction(link, options, event) {
             var action = $(link).data('action'),
-                node = $(link).closest('.js-redis-actions').data('node'),
+                modal = $(link).closest('.js-redis-actions'),
+                node = modal.data('node'),
+                title = modal.data('name'),
                 confirmMessage = options && options.confirmMessage || $(link).data('confirm');
 
             function innerRun() {
@@ -889,10 +891,14 @@ Status.Redis = (function () {
                      bootbox.hideAll();
                  });
             }
-            if (confirmMessage) {
-                bootbox.confirm(confirmMessage, function (result) {
-                    if (result) {
-                        innerRun();
+            if (confirmMessage && !(event && event.ctrlKey)) {
+                bootbox.confirm({
+                    title: title,
+                    message: confirmMessage,
+                    callback: function (result) {
+                        if (result) {
+                            innerRun();
+                        }
                     }
                 });
             } else {
@@ -901,7 +907,7 @@ Status.Redis = (function () {
         }
         $(document).on('click', '.js-instance-action', function (e) {
             e.preventDefault();
-            runAction(this);
+            runAction(this, null, e);
         }).on('click', '.js-redis-new-master', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 node = modal.data('node'),
@@ -912,7 +918,7 @@ Status.Redis = (function () {
                 data: {
                     newMaster: newMaster
                 }
-            });
+            }, e);
         }).on('click', '.js-redis-key-purge', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 key = $('[name=key]', modal).val();

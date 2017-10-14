@@ -3,7 +3,7 @@
 @{
     Layout = null;
     var i = Model;
-    var allSlaveOptions = i.RecommendedMasterTargets;
+    var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host);
     var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
 }
 <h4 class="modal-title">
@@ -46,7 +46,7 @@
         }
     </li>
 }
-<div class="js-redis-actions" data-node="@i.HostAndPort">
+<div class="js-redis-actions" data-node="@i.HostAndPort" data-name="@i.Name">
     <div class="row small">
         <div class="col-md-6">
             <div class="panel panel-default">
@@ -61,17 +61,19 @@
                         {
                             <div class="form-group form-group-sm">
                                 <label class="control-label label-inline">Promote to Master <span class="text-muted">(this will deslave the instance)</span></label>
-                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="'Are you sure you deslave @i.HostAndPort and make it a master?'">Promote / Deslave</button>
+                                <button class="btn btn-success btn-xs pull-right js-instance-action" data-action="make-master-promote" data-confirm="Are you sure you want to promote @i.HostAndPort and set it to the tiebreaker?">Promote</button>
+                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="Are you sure you want to deslave @i.HostAndPort and make it a standalone master?">Deslave</button>
                             </div>
                         }
                         @if (i.IsMaster)
                         {
+                            var tiebreaker = i.Tiebreaker.Data ?? "not set";
                             <div class="form-group form-group-sm">
                                 <label class="control-label">StackExchange.Redis Tiebreakers</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" value="@(i.Tiebreaker.Data ?? "not set")" disabled="disabled"/>
+                                    <input type="text" class="form-control" value="@tiebreaker" disabled="disabled"/>
                                     <span class="input-group-btn">
-                                        @if (i.Tiebreaker.Data == i.HostAndPort)
+                                        @if (tiebreaker.Contains(i.Host) && tiebreaker.Contains(i.Port.ToString()))
                                         {
                                             <button class="btn btn-sm btn-warning js-instance-action" data-action="clear-tiebreaker">Clear</button>
                                         }

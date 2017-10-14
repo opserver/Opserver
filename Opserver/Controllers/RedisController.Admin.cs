@@ -25,7 +25,12 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public async Task<ActionResult> PromoteToMaster(string node)
+        public Task<ActionResult> PromoteToMaster(string node) => Deslave(node, false);
+
+        [Route("redis/instance/actions/{node}/make-master-promote"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public Task<ActionResult> PromoteToMasterTiebreaker(string node) => Deslave(node, true);
+
+        private async Task<ActionResult> Deslave(string node, bool promote)
         {
             var i = RedisInstance.Get(node);
             if (i == null) return JsonNotFound();
@@ -34,6 +39,16 @@ namespace StackExchange.Opserver.Controllers
             try
             {
                 var message = i.PromoteToMaster();
+                if (promote)
+                {
+                    await i.SetSERedisTiebreakerAsync().ConfigureAwait(false);
+                    await oldMaster?.ClearSERedisTiebreakerAsync();
+                    await oldMaster?.SlaveToAsync(i.HostAndPort);
+                }
+                else
+                {
+                    await i.ClearSERedisTiebreakerAsync().ConfigureAwait(false);
+                }
                 // We want these to be synchronous
                 await i.PollAsync(true).ConfigureAwait(false);
                 await oldMaster?.PollAsync(true);

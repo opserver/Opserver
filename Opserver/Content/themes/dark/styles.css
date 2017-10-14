@@ -10094,11 +10094,11 @@ h6.page-header {
 .text-center .sk-wave {
   margin: 0 auto;
 }
-.form-group-sm {
-  margin-bottom: 0;
-}
 .form-group-sm select.form-control {
   padding: 0;
+}
+.form-group-sm:last-child {
+  margin-bottom: 0;
 }
 .label-inline {
   line-height: 22px;
