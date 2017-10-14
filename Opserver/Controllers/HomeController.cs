@@ -20,7 +20,6 @@ namespace StackExchange.Opserver.Controllers
         [Route("top-refresh")]
         public ActionResult TopRefresh(string tab)
         {
-            MiniProfiler.Stop(discardResults: true);
             TopTabs.CurrentTab = tab;
 
             var vd = new TopRefreshModel

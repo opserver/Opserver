@@ -1,6 +1,7 @@
 ﻿@using System.Web.Optimization
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Shared
+@using StackExchange.Profiling
 @{
     var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
 }
@@ -29,7 +30,7 @@
                 @:Status.NodeSearch.init({ nodes: @Json.Encode(serverJson).AsHtml() });
             }
         });
-    </script>    @RenderSection("head", false)    @StackExchange.Profiling.MiniProfiler.RenderIncludes()
+    </script>    @RenderSection("head", false)    @MiniProfiler.Current.RenderIncludes()
 </head>
 <body>
     <nav class="navbar navbar-default">

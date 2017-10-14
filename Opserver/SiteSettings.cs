@@ -14,13 +14,15 @@ namespace StackExchange.Opserver
 
         public static bool PollerProfiling => bool.TryParse(ConfigurationManager.AppSettings["PollerProfiling"], out bool setting) && setting;
 
+        public static bool LogPollerExceptions => bool.TryParse(ConfigurationManager.AppSettings["LogPollerExceptions"], out bool setting) && setting;
+
         /// <summary>
-        /// Semilcolon delimited list of groups that can administer the entire site, exceptions, HAProxy servers, etc.
+        /// Semicolon delimited list of groups that can administer the entire site, exceptions, HAProxy servers, etc.
         /// </summary>
         public static string AdminGroups => ConfigurationManager.AppSettings["AdminGroups"].IsNullOrEmptyReturn("");
 
         /// <summary>
-        /// Semilcolon delimited list of groups that can view the entire site, exceptions, HAProxy servers, etc.
+        /// Semicolon delimited list of groups that can view the entire site, exceptions, HAProxy servers, etc.
         /// </summary>
         public static string ViewGroups => ConfigurationManager.AppSettings["ViewGroups"].IsNullOrEmptyReturn("");
 

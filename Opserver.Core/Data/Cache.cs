@@ -4,8 +4,8 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Monitoring;
 using StackExchange.Profiling;
+using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Opserver.Data
 {
@@ -108,6 +108,12 @@ namespace StackExchange.Opserver.Data
 
         private string MiniProfilerDescription { get; }
 
+        private static readonly MiniProfilerOptions _profilerOptions = new MiniProfilerOptions
+        {
+            Storage = new NullStorage(),
+            ProfilerProvider = new DefaultProfilerProvider()
+        };
+
         /// <summary>
         /// Creates a cache poller
         /// </summary>
@@ -129,7 +135,7 @@ namespace StackExchange.Opserver.Data
             TimeSpan cacheDuration,
             Func<Task<T>> getData,
             int? timeoutMs = null,
-            bool logExceptions = false, // TODO: Settings
+            bool? logExceptions = null,
             Action<Exception> addExceptionData = null,
             Action<Cache<T>> afterPoll = null,
             [CallerMemberName] string memberName = "",
@@ -137,16 +143,17 @@ namespace StackExchange.Opserver.Data
             [CallerLineNumber] int sourceLineNumber = 0)
             : base(cacheDuration, memberName, sourceFilePath, sourceLineNumber)
         {
-            MiniProfilerDescription = "Poll: " + description; // contcat once
+            MiniProfilerDescription = "Poll: " + description; // concatenate once
+            logExceptions = logExceptions ?? LogExceptions;
 
             _updateFunc = async () =>
             {
                 var success = true;
                 PollStatus = "UpdateCacheItem";
-                if (OpserverProfileProvider.EnablePollerProfiling)
+                if (EnableProfiling)
                 {
-                    Profiler = OpserverProfileProvider.CreateContextProfiler(MiniProfilerDescription, UniqueId,
-                        store: false);
+                    Profiler = _profilerOptions.StartProfiler(MiniProfilerDescription);
+                    Profiler.Id = UniqueId;
                 }
                 using (MiniProfiler.Current.Step(description))
                 {
@@ -165,7 +172,7 @@ namespace StackExchange.Opserver.Data
                                 }
                                 else
                                 {
-                                    // This means the whenany returned the timeout first...boom.
+                                    // This means the .WhenAny returned the timeout first...boom.
                                     throw new TimeoutException($"Fetch timed out after {timeoutMs} ms.");
                                 }
                             }
@@ -181,7 +188,7 @@ namespace StackExchange.Opserver.Data
                     catch (Exception e)
                     {
                         success = false;
-                        if (logExceptions)
+                        if (logExceptions.Value)
                         {
                             addExceptionData?.Invoke(e);
                             Current.LogException(e);
@@ -200,9 +207,9 @@ namespace StackExchange.Opserver.Data
                     }
                     owner.PollComplete(this, success);
                 }
-                if (OpserverProfileProvider.EnablePollerProfiling)
+                if (EnableProfiling)
                 {
-                    OpserverProfileProvider.StopContextProfiler();
+                    Profiler.Stop();
                 }
                 PollStatus = "UpdateCacheItem Complete";
                 return Data;
@@ -281,6 +288,9 @@ namespace StackExchange.Opserver.Data
         /// If profiling for cache polls is active, this contains a MiniProfiler of the current or last poll
         /// </summary>
         public MiniProfiler Profiler { get; protected set; }
+
+        public static bool EnableProfiling { get; set; }
+        public static bool LogExceptions { get; set; }
 
         internal void SetSuccess()
         {
