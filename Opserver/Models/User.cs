@@ -15,16 +15,15 @@ namespace StackExchange.Opserver.Models
         public User(IIdentity identity)
         {
             Identity = identity;
-            var i = identity as FormsIdentity;
-            if (i == null)
+            if (Identity == null)
             {
                 IsAnonymous = true;
                 return;
             }
 
-            IsAnonymous = !i.IsAuthenticated;
-            if (i.IsAuthenticated)
-                AccountName = i.Name;
+            IsAnonymous = !Identity.IsAuthenticated;
+            if (Identity.IsAuthenticated)
+                AccountName = Identity.Name;
         }
 
         public bool IsInRole(string role) => Enum.TryParse(role, out Roles r) && Current.IsInRole(r);
