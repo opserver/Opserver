@@ -113,36 +113,37 @@
                         var shards = ss.Where(sh => sh.Node == n.GUID).ToList();
                         var stats = n.Stats;
                         var upTime = stats?.JVM?.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
+                        var percentCPU = stats?.PercentCPUOS ?? stats?.PercentCPUProcess;
                         <tr class="@n.RowClass()@(n == masterNode ? " info" : null)">
                             <td title="Up since @(upTime.HasValue ? upTime.Value.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
                                 @n.IconSpan()
                                 <a class="@n.TextClass()" href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">@c.ShortName(n)</a>
                             </td>
                             <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
-                            @if (stats?.OS?.CPU?.Used != null)
+                            @if (percentCPU != null)
                             {
-                                <td title="Process CPU: @stats.OS.CPU.Used.ToComma()% load average @(stats.OS.LoadAverageString ?? "Unknown")">
-                                    @(stats.OS.CPU.Used.ToComma())%
-                                </td>
-                            }
-                            else if (stats?.Process?.CPU != null)
-                            {
-                                <td title="Process CPU: @stats.Process.CPU.Percent.ToComma()% load average @(stats.OS.LoadAverageString ?? "Unknown")">
-                                    @(stats.Process.CPU.Percent.ToComma())%
+                                <td title="Process CPU: @percentCPU.ToComma()% load average @(stats.LoadAverageString ?? "Unknown")">
+                                    @(percentCPU.ToComma())%
                                 </td>
                             }
                             else
                             {
                                 <td class="text-muted">n/a</td>
                             }
-                            @if (stats?.Process?.Memory != null)
+                            @if (stats?.MemoryHeapInBytes != null)
                             {
-                                <td>@stats.Process.Memory.ResidentInBytes.ToSize()</td>
-                                <td>@stats.Process.Memory.TotalVirtualInBytes.ToSize()</td>
+                                <td>@stats.MemoryHeapInBytes.Value.ToSize()</td>
                             }
                             else
                             {
                                 <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.MemoryProcessVirtualInBytes != null)
+                            {
+                                <td>@stats.MemoryProcessVirtualInBytes.Value.ToSize()</td>
+                            }
+                            else
+                            {
                                 <td class="text-muted">n/a</td>
                             }
                             @if (stats?.Process != null)

@@ -52,7 +52,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
-        public bool IsVM => VMHostID.HasValue();
+        public bool IsVM => VMHostID.HasValue() || (Manufacturer?.Contains("VMware") ?? false);
         public bool HasValidMemoryReading => MemoryUsed.HasValue && MemoryUsed >= 0;
 
         public Node VMHost { get; internal set; }
@@ -286,7 +286,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_primaryInterfaces == null || (_primaryInterfaces.Count == 0 && Interfaces?.Count > 0))
                 {
-                    var pattern = Settings?.PrimaryInterfacePatternRegex;
+                    var pattern = Settings?.PrimaryInterfacePatternRegex ?? Category?.Settings?.PrimaryInterfacePatternRegex;
                     var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
                     _primaryInterfaces = (dbInterfaces.Count > 0
                         ? dbInterfaces.OrderBy(i => i.Name)

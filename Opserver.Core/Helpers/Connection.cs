@@ -22,14 +22,14 @@ namespace StackExchange.Opserver.Helpers
         public static DbConnection GetOpen(string connectionString, int? connectionTimeoutMs = null)
         {
             var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
-            Action<DbConnection> setReadUncommitted = c =>
+            void setReadUncommitted(DbConnection c)
+            {
+                using (var cmd = c.CreateCommand())
                 {
-                    using (var cmd = c.CreateCommand())
-                    {
-                        cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
-                        cmd.ExecuteNonQueryAsync();
-                    }
-                };
+                    cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
+                    cmd.ExecuteNonQueryAsync();
+                }
+            }
 
             if (connectionTimeoutMs.GetValueOrDefault(0) == 0)
             {

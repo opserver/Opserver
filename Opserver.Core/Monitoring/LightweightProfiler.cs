@@ -4,6 +4,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
+using StackExchange.Profiling.SqlFormatters;
 
 namespace StackExchange.Opserver.Monitoring
 {
@@ -57,11 +58,11 @@ namespace StackExchange.Opserver.Monitoring
             _wrapped?.ReaderFinish(reader);
         }
 
+        private static readonly SqlServerFormatter _sqlFormatter = new SqlServerFormatter();
+
         public void OnError(IDbCommand profiledDbCommand, SqlExecuteType executeType, Exception exception)
         {
-            var formatter = new Profiling.SqlFormatters.SqlServerFormatter();
-            var parameters = SqlTiming.GetCommandParameters(profiledDbCommand);
-            exception.Data["SQL"] = formatter.FormatSql(profiledDbCommand.CommandText, parameters);
+            exception.Data["SQL"] = _sqlFormatter.GetFormattedSql(profiledDbCommand);
         }
 
         public bool IsActive => true;

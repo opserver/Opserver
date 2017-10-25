@@ -98,8 +98,8 @@ namespace StackExchange.Opserver.Data.Dashboard
             ? (FullName != null && pattern.IsMatch(FullName))
               || (Name != null && pattern.IsMatch(Name))
               || (Caption != null && pattern.IsMatch(Caption))
-            : Name.ToLower().EndsWith("team")
-              || Name.ToLower().StartsWith("bond")
+            : Name.EndsWith("team", StringComparison.OrdinalIgnoreCase)
+              || Name.StartsWith("bond", StringComparison.OrdinalIgnoreCase)
               || Name.Contains("Microsoft Network Adapter Multiplexor Driver");
 
         public Interface() {}

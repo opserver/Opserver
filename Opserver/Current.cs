@@ -91,7 +91,7 @@ namespace StackExchange.Opserver
         public static void LogException(Exception exception, string key = null)
         {
             if (!ShouldLog(key)) return;
-            ErrorStore.LogException(exception, Context, appendFullStackTrace: true);
+            exception.Log(Context);
             RecordLogged(key);
         }
 

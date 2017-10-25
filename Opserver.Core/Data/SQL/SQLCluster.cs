@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.SQL
 
         public IEnumerable<SQLNode.AGInfo> GetAvailabilityGroups(string node, string agName)
         {
-            Func<SQLNode.AGInfo, bool> agMatch = ag => agName.IsNullOrEmpty() || ag.Name == agName;
+            bool agMatch(SQLNode.AGInfo ag) => agName.IsNullOrEmpty() || ag.Name == agName;
 
             return (node.HasValue()
                 ? Nodes.Where(n => string.Equals(n.Name, node))

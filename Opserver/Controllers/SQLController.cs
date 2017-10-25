@@ -49,6 +49,20 @@ namespace StackExchange.Opserver.Controllers
             return View("Servers", vd);
         }
 
+        [Route("sql/jobs")]
+        public ActionResult AllJobs()
+        {
+            var vd = new ServersModel
+            {
+                View = SQLViews.Jobs,
+                StandaloneInstances = SQLModule.StandaloneInstances,
+                Clusters = SQLModule.Clusters,
+                Refresh = 30
+            };
+
+            return View("AllJobs", vd);
+        }
+
         [Route("sql/instance")]
         public ActionResult Instance(string node)
         {

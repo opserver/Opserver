@@ -38,6 +38,7 @@ var props = i.ServerProperties.SafeData(true);
                         <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
                         <th>Batches<span class="text-muted">/sec</span></th>
                         <th>Last Commit</th>
+                        <th title="Quorum Votes in the Cluster">Votes</th>
                         <th>As of</th>
                     </tr>
                 </tbody>
@@ -56,6 +57,7 @@ var props = i.ServerProperties.SafeData(true);
                             @ConnectionsCell(n)
                             @SQLHelpers.BatchesCell(n)
                             <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
+                            <td>@n.ClusterVotes.ToComma()</td>
                             <td>@n.LastFetch.ToPollSpan()</td>
                         </tr>
                     }

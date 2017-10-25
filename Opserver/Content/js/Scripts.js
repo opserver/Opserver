@@ -393,6 +393,7 @@
         });
         prepTableSorter();
         prettyPrint();
+        hljs.initHighlighting();
     }
 
     return {
@@ -811,16 +812,21 @@ Status.SQL = (function () {
         function agentAction(link, route, errMessage) {
             var origText = link.text();
             var $link = link.text('').prependWaveLoader();
+            var perNode = link.closest('[data-node]').data('node');
             $.ajax(Status.options.rootPath + 'sql/' + route, {
                 type: 'POST',
                 data: {
-                    node: Status.SQL.options.node,
+                    node: perNode || Status.SQL.options.node,
                     guid: link.closest('[data-guid]').data('guid'),
                     enable: link.data('enable')
                 },
                 success: function (data, status, xhr) {
                     if (data === true) {
-                        Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        if (perNode) {
+                            Status.refresh.run();
+                        } else {
+                            Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        }
                     } else {
                         $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                     }
@@ -871,9 +877,11 @@ Status.Redis = (function () {
             }
         });
 
-        function runAction(link, options) {
+        function runAction(link, options, event) {
             var action = $(link).data('action'),
-                node = $(link).closest('.js-redis-actions').data('node'),
+                modal = $(link).closest('.js-redis-actions'),
+                node = modal.data('node'),
+                title = modal.data('name'),
                 confirmMessage = options && options.confirmMessage || $(link).data('confirm');
 
             function innerRun() {
@@ -883,10 +891,14 @@ Status.Redis = (function () {
                      bootbox.hideAll();
                  });
             }
-            if (confirmMessage) {
-                bootbox.confirm(confirmMessage, function (result) {
-                    if (result) {
-                        innerRun();
+            if (confirmMessage && !(event && event.ctrlKey)) {
+                bootbox.confirm({
+                    title: title,
+                    message: confirmMessage,
+                    callback: function (result) {
+                        if (result) {
+                            innerRun();
+                        }
                     }
                 });
             } else {
@@ -895,7 +907,7 @@ Status.Redis = (function () {
         }
         $(document).on('click', '.js-instance-action', function (e) {
             e.preventDefault();
-            runAction(this);
+            runAction(this, null, e);
         }).on('click', '.js-redis-new-master', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 node = modal.data('node'),
@@ -906,7 +918,7 @@ Status.Redis = (function () {
                 data: {
                     newMaster: newMaster
                 }
-            });
+            }, e);
         }).on('click', '.js-redis-key-purge', function (e) {
             var modal = $(this).closest('.js-redis-actions'),
                 key = $('[name=key]', modal).val();
@@ -1001,11 +1013,16 @@ Status.Exceptions = (function () {
                         sort: options.sort,
                         count: options.loadMore,
 <<<<<<< HEAD
+<<<<<<< HEAD
                         prevLast: lastGuid
 =======
                         prevLast: lastGuid,
                         group: options.group
 >>>>>>> release/v20170831
+=======
+                        prevLast: lastGuid,
+                        group: options.group
+>>>>>>> upstream/master
                     },
                     cache: false
                 }).done(function (html) {

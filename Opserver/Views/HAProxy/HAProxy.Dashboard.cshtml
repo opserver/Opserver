@@ -2,7 +2,6 @@
 @using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.HAProxy
 @using Action = StackExchange.Opserver.Data.HAProxy.Action
-@using ExtensionMethods = StackExchange.Exceptional.Extensions.ExtensionMethods
 @model StackExchange.Opserver.Views.HAProxy.HAProxyModel
 @{
     Layout = "HAProxy.cshtml";
@@ -196,7 +195,7 @@
             {
                 if ((action & a) != 0) strings.Add(a.ToString());
             }
-            result = ExtensionMethods.ToJson(strings);
+            result = strings.ToJson().ToString();
             ActionLists.TryAdd(action, result);
         }
         return result;

@@ -35,7 +35,7 @@
     @TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false)
     @TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster")
     @TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true)
-    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes")
+    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes", includeNode: true)
 </ul>
 <div>
     @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))

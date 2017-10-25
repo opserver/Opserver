@@ -7,11 +7,12 @@ namespace StackExchange.Opserver.Views.SQL
     public enum SQLViews
     {
         Servers = 0,
-        Instance = 1,
-        Active = 2,
-        Top = 3,
-        Connections = 4,
-        Databases = 5
+        Jobs = 1,
+        Instance = 3,
+        Active = 4,
+        Top = 5,
+        Connections = 6,
+        Databases = 7
     }
 
     public class DashboardModel

@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public Node GetNodeByHostname(string hostName)
         {
             if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
-            return AllNodes.Find(s => s.Name.ToLowerInvariant().Contains(hostName.ToLowerInvariant()));
+            return AllNodes.Find(s => s.Name.IndexOf(hostName, StringComparison.InvariantCultureIgnoreCase) >= 0);
         }
 
         public virtual IEnumerable<Node> GetNodesByIP(IPAddress ip) =>

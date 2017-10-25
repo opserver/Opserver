@@ -2,6 +2,7 @@
 @import "../../font-awesome/less/font-awesome.less";
 @import "_shared/_variables.less";
 @import "_shared/_bootswatch.less";
+@import "_shared/highlightjs.less";
 @import "_shared/animations.less";
 @import "_shared/spinkit.less";
 @import "_shared/prettify.less";
@@ -262,7 +263,9 @@ h4, h5, h6 {
   select.form-control {
     padding: 0;
   }
-  margin-bottom: 0;
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 .label-inline {
   line-height: 22px;
@@ -285,6 +288,9 @@ h4, h5, h6 {
       margin-top: 6px;
     }
   }
+}
+.tablesorter-header {
+    cursor: pointer;
 }
 
 .table-dashboard {

@@ -23,6 +23,7 @@
 }
 <ul class="nav nav-tabs nav-tabs-right">
     @TabLink(SQLViews.Servers, nameof(SQLController.Dashboard), "all servers", false)
+    @TabLink(SQLViews.Jobs, nameof(SQLController.AllJobs), "all jobs", false)
     @TabLink(SQLViews.Instance, nameof(SQLController.Instance), "instance")
     @TabLink(SQLViews.Top, nameof(SQLController.Top), "top")
     @TabLink(SQLViews.Active, nameof(SQLController.Active), "active")
@@ -30,7 +31,7 @@
     @TabLink(SQLViews.Databases, nameof(SQLController.Databases), "databases")
 </ul>
 <div>
-    @if (Model.View != SQLViews.Servers && Model.CurrentInstance == null)
+    @if (Model.View != SQLViews.Servers && Model.View != SQLViews.Jobs && Model.CurrentInstance == null)
     {
         @Html.Partial("Instance.Selector")
     }
