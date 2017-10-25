@@ -5,12 +5,12 @@
   "providers": {
     /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
     "bosun": {
-      "host": "http://10.1.9.56:8070"
+      "host": "http://bosunprd01.ppi.lan:8070"
       //"apiKey": "IAmALittleApiKeyShortAndStout"
     
-    },
+    }
     /* If using WMI, a list of nodes to monitor needs to be provided */
-    "wmi": {
+    /*"wmi": {
       "nodes": [
         "ahcs-dev",
         "ahcs-dev01",
@@ -37,7 +37,7 @@
     //"orion": {
     //  "host": "orion.ds.stackexchange.com",
     //  "connectionString": "Data Source=ny-utilsql01;Initial Catalog=SolarWindsOrion;Integrated Security=SSPI;Timeout=10"
-    //}
+    //}*/
   },
   /* General dashboard UI settings */
   "excludePattern": "redis|\\.com", // (Optioal) Regex node name pattern to exclude from the dashboard
@@ -52,7 +52,7 @@
   "categories": [
     {
       "name": "PRD", // Name for this group of servers
-      "pattern": "MCPSQL|EZDSQL|EZVSQL|BTSSQL", // Regex pattern of server names to put in this group
+      "pattern": "MCPSQL|EZDSQL|EZVSQL|BTSSQL|SPSQL|BISQL|AHCS-SQLTFS", // Regex pattern of server names to put in this group
       "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
       "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
       "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
