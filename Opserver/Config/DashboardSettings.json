@@ -4,22 +4,30 @@
      Multiple providers can be used...but things may get crazy when a node is monitored by more than 1 */
   "providers": {
     /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
-    //"bosun": {
-    //  "host": "https://bosun.ds.stackexchange.com",
-    //  "apiKey": "IAmALittleApiKeyShortAndStout"
-    //
-    //}
+    "bosun": {
+      "host": "http://10.1.9.56:8070"
+      //"apiKey": "IAmALittleApiKeyShortAndStout"
+    
+    },
     /* If using WMI, a list of nodes to monitor needs to be provided */
     "wmi": {
       "nodes": [
-        "EZDSQLHAG01",
-        "EZDSQLHAG02",
-        "EZVSQLHAG01",
-        "EZVSQLHAG02",
-        "MCPSQLHAG01",
-        "MCPSQLHAG02",
-        "DBASQLHAG01",
-        "DBASQLHAG02" 
+        "ahcs-dev",
+        "ahcs-dev01",
+        "ahcs-dev02",
+        "ahcs-qa01",
+        "ahcs-val01",
+        "ahcs-val02",
+        "dbasqlhag01",
+        "dbasqlhag02",
+        "ezdsqlhag01",
+        "ezdsqlhag02",
+        "ezvsqlhag01",
+        "ezvsqlhag02",
+        "mcpsqlhag01",
+        "mcpsqlhag02",
+        "btssql01",
+        "btssql02"
       ], // List of nodes to monitor
       "staticDataTimeoutSeconds": 300, // (Optional) How long to cache static data (node name, hardware, etc.) - defaults to 5 minutes
       "dynamicDataTimeoutSeconds": 5, // (Optional) How long to cache dynamic data (utilizations, etc.) - defaults to 30 seconds
@@ -43,8 +51,8 @@
   /* (Optional) Specific category settings,for grouping servers and setting specific thresholds on them */
   "categories": [
     {
-      "name": "DBA Servers", // Name for this group of servers
-      "pattern": "-DBA", // Regex pattern of server names to put in this group
+      "name": "PRD", // Name for this group of servers
+      "pattern": "MCPSQL|EZDSQL|EZVSQL|BTSSQL", // Regex pattern of server names to put in this group
       "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
       "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
       "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
@@ -52,8 +60,44 @@
       "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
     },
     {
-      "name": "Web Servers",
-      "pattern": "-web|-promoweb|-vmweb",
+      "name": "VAL", // Name for this group of servers
+      "pattern": "VAL", // Regex pattern of server names to put in this group
+      "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
+      "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "memoryCriticalPercent": 99.2, // How much memory usage before a node is treated as critical (defaults to the setting above if not specified)
+      "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
+    },
+    {
+      "name": "DBA", // Name for this group of servers
+      "pattern": "DBASQL", // Regex pattern of server names to put in this group
+      "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
+      "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "memoryCriticalPercent": 99.2, // How much memory usage before a node is treated as critical (defaults to the setting above if not specified)
+      "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
+    },
+    {
+      "name": "UAT", // Name for this group of servers
+      "pattern": "UAT", // Regex pattern of server names to put in this group
+      "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
+      "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "memoryCriticalPercent": 99.2, // How much memory usage before a node is treated as critical (defaults to the setting above if not specified)
+      "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
+    },
+    {
+      "name": "QA/STG", // Name for this group of servers
+      "pattern": "QA|STAGE", // Regex pattern of server names to put in this group
+      "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
+      "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "memoryCriticalPercent": 99.2, // How much memory usage before a node is treated as critical (defaults to the setting above if not specified)
+      "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
+    },
+    {
+      "name": "DEV",
+      "pattern": "DEV",
       "cpuWarningPercent": 25,
       "memoryWarningPercent": 75,
       "primaryInterfacePattern": "-TEAM$|-TEAM · Local"
