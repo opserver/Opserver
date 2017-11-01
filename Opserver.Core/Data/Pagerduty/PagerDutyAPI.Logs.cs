@@ -15,12 +15,12 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 return GetFromPagerDutyAsync($"incidents/{id}/log_entries", getFromJson:
                     response => JSON.Deserialize<LogEntries>(response, JilOptions).Logs);
             }
-            catch(DeserializationException de)
+            catch (DeserializationException de)
             {
                 Current.LogException(
                     de.AddLoggedData("Snippet After", de.SnippetAfterError)
                     );
-                return null;
+                return Task.FromResult<List<LogEntry>>(null);
             }
         }
     }
