@@ -5759,7 +5759,7 @@ button.close {
   border: 0;
 }
 .hidden {
-  display: none !important;
+  display: none;
 }
 .affix {
   position: fixed;
