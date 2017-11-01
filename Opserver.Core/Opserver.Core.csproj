@@ -36,7 +36,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4-alpha1-00070" />
     <PackageReference Include="Jil" Version="2.15.4" />
-    <PackageReference Include="MiniProfiler" Version="4.0.0-alpha8-200" />
+    <PackageReference Include="MiniProfiler" Version="4.0.0-alpha9-00207" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="StackExchange.Exceptional" Version="2.0.0-alpha3-00185" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
