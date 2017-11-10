@@ -13,17 +13,34 @@ namespace StackExchange.Opserver.Data.HAProxy
             foreach (var p in data)
             {
                 if (p.Servers == null) continue;
+                Server found = null;
+                var active = 0;
+                var inactive = 0;
                 foreach (var s in p.Servers)
                 {
                     if (s.Name == node)
                     {
-                        yield return new NodeRole
-                        {
-                            Service = "HAProxy",
-                            Description = $"{Name} - {Group?.Name ?? "(No Group)"} - {p.NiceName}",
-                            Active = s.MonitorStatus == MonitorStatus.Good
-                        };
+                        found = s;
                     }
+                    if (s.MonitorStatus == MonitorStatus.Good)
+                    {
+                        active++;
+                    }
+                    else
+                    {
+                        inactive++;
+                    }
+                }
+                if (found != null)
+                {
+                    yield return new NodeRole
+                    {
+                        Service = "HAProxy",
+                        Description = $"{Name} - {Group?.Name ?? "(No Group)"} - {p.NiceName}",
+                        Active = found.MonitorStatus == MonitorStatus.Good,
+                        TotalActive = active,
+                        TotalInactive = inactive,
+                    };
                 }
             }
         }
