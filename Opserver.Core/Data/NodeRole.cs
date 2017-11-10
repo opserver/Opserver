@@ -9,6 +9,8 @@ namespace StackExchange.Opserver.Data
         public string Service { get; set; }
         public string Description { get; set; }
         public bool Active { get; set; }
+        public int TotalActive { get; set; }
+        public int TotalInactive { get; set; }
 
         internal static ConcurrentBag<INodeRoleProvider> Providers { get; } = new ConcurrentBag<INodeRoleProvider>();
 
