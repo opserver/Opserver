@@ -15,6 +15,11 @@
         /// </summary>
         public string APIKey { get; set; }
 
+        /// <summary>
+        /// Whether to ignore the Bosun ping status. If <c>true</c>, unreachable nodes will not be marked as such.
+        /// </summary>
+        public bool IgnorePing { get; set; }
+
         public void Normalize()
         {
             Host = Host.NormalizeHostOrFQDN();
