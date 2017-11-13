@@ -95,7 +95,7 @@
     { "name": "AHCS-VAL02\\EZVVAL" },
 
     //UAT
-    { "name": "BizTalk-UAT01\\BTSSQLUAT01" },
+    //{ "name": "BizTalk-UAT01\\BTSSQLUAT01" },
     { "name": "BizTalk-UAT02" },
 
     //QA/STG
