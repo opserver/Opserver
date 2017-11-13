@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.HAProxy
@@ -15,13 +16,16 @@ namespace StackExchange.Opserver.Data.HAProxy
                 if (p.Servers == null) continue;
                 foreach (var s in p.Servers)
                 {
-                    if (s.Name == node)
+                    if (node.IsNullOrEmpty() || string.Equals(s.Name, node, System.StringComparison.OrdinalIgnoreCase))
                     {
                         yield return new NodeRole
                         {
                             Service = "HAProxy",
                             Description = $"{Name} - {Group?.Name ?? "(No Group)"} - {p.NiceName}",
-                            Active = s.MonitorStatus == MonitorStatus.Good
+                            Active = s.MonitorStatus == MonitorStatus.Good,
+                            Node = node.HasValue() ? null : s.Name,
+                            SiblingsActive = p.Servers.Count(ps => ps != s && ps.MonitorStatus == MonitorStatus.Good),
+                            SiblingsInactive = p.Servers.Count(ps => ps != s && ps.MonitorStatus != MonitorStatus.Good)
                         };
                     }
                 }

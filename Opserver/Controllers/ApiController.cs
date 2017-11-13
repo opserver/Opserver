@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Mvc;
+using Jil;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -11,10 +12,21 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.LocalRequest | Roles.InternalRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
+        private Options JilOptions = Options.ExcludeNulls;
+
+        protected override void OnActionExecuting(ActionExecutingContext filterContext)
+        {
+            if (Request.QueryString["pretty"] != null)
+            {
+                JilOptions = Options.PrettyPrintExcludeNulls;
+            }
+            base.OnActionExecuting(filterContext);
+        }
+
         [Route("api/node/roles")]
         public ActionResult NodeRoles(string node)
         {
-            return Json(new NodeResults(node));
+            return Json(new NodeResults(node), JilOptions);
         }
 
         [Route("api/node/enable"), HttpPost]

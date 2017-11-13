@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Helpers
                 using (var cmd = c.CreateCommand())
                 {
                     cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
-                    cmd.ExecuteNonQueryAsync();
+                    cmd.ExecuteNonQuery();
                 }
             }
 

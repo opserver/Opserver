@@ -11,6 +11,14 @@
 @:@tk.Value (@tk.Key.ToComma() bytes)
     }
 }
+@helper Percent(long bytes) {
+    if (bytes == 0)
+    {
+        return;
+    }
+    var percent = bytes / (decimal)Model.TotalByteSize;
+    <span class="text-muted">(@percent.ToString("0.00")%)</span>
+}
 <h5 class="page-header">
     @Model.IconSpan() @serverInfo.HostAndPort (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()
     <a class="pull-right" href="@Url.Action(nameof(RedisController.ClearAnalysis), new { node = serverInfo.HostAndPort, db = Model.Database })">Re-run analysis</a>
@@ -79,7 +87,7 @@
                     <td>@ks.Count.ToComma()</td>
                     <td>@ks.KeyByteSize.ToComma()</td>
                     <td>@ks.ValueByteSize.ToComma()</td>
-                    <td>@ks.TotalByteSize.ToComma()</td>
+                    <td>@ks.TotalByteSize.ToComma() @Percent(ks.TotalByteSize)</td>
                 </tr>
             }
         }
@@ -117,7 +125,7 @@
                     <td>@tk.Name</td>
                     <td>@tk.KeyBytes.ToComma()</td>
                     <td>@tk.ValueBytes.ToComma()</td>
-                    <td>@tk.TotalBytes.ToComma()</td>
+                    <td>@tk.TotalBytes.ToComma() @Percent(tk.TotalBytes)</td>
                 </tr>
             }
         </tbody>
