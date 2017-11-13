@@ -52,7 +52,7 @@
   "categories": [
     {
       "name": "PRD", // Name for this group of servers
-      "pattern": "MCPSQL|EZDSQL|EZVSQL|BTSSQL|SPSQL|BISQL|AHCS-SQLTFS", // Regex pattern of server names to put in this group
+      "pattern": "MCPSQL|EZDSQL|EZVSQL|BTSSQL|SPSQL|BISQL|AHCS-SQLTFS|TRACSQL|INFRASQL|AHCS-SEND", // Regex pattern of server names to put in this group
       "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
       "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
       "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
