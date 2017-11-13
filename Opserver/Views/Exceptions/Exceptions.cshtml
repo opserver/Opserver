@@ -19,6 +19,7 @@
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">
+<<<<<<< HEAD
     <h5 class="page-header">
         Exception Logs
         <span>
@@ -32,6 +33,16 @@
             }
         </span>
     </h5>
+=======
+    <ul class="nav nav-tabs nav-tabs-right">
+        @foreach (var s in ExceptionsModule.Stores)
+        {
+            <li class="@(Model.Store == s ? "active" : null)">
+                <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
+            </li>
+        }
+    </ul>
+>>>>>>> parent of 4e65aa3... Exceptions: only show tabs if we need tabs (>1 store)
     @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
     @if (anyLoaded)
     {
