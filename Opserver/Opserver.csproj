@@ -328,6 +328,9 @@
     <Content Include="Views\Dashboard\Node.Volumes.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Dashboard\Node.Win32Services.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Elastic\Cluster.Indexes.cshtml">
       <DependentUpon>Cluster.cshtml</DependentUpon>
     </Content>

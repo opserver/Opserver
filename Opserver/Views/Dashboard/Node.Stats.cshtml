@@ -30,6 +30,11 @@
     @Html.Partial("Node.Interfaces", Model)
 }
 
+@if (Model.Win32Services.Any())
+{
+    @Html.Partial("Node.Win32Services", Model)
+}
+
 @if (Current.Settings.Dashboard.ShowVolumePerformance && Model.Volumes.Any())
 {
     @Html.Partial("Node.Volumes", Model)

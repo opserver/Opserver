@@ -61,6 +61,12 @@ namespace StackExchange.Opserver
         /// </summary>
         public bool ShowVolumePerformance { get; set; }
 
+        /// <summary>
+        /// WMI Query Language (WQL) "WHERE" clause indicating which services to monitor on the server
+        /// Example:  Name = 'W3SVC' OR Name = 'MSSQLSERVER'
+        /// </summary>
+        public string Win32ServicesWhereClause { get; set; }
+
         #endregion
 
         /// <summary>
@@ -127,6 +133,11 @@ namespace StackExchange.Opserver
             /// Percent at which disk utilization on a node is marked at a critical level
             /// </summary>
             public decimal? DiskCriticalPercent { get; set; }
+
+            /// <summary>
+            /// List of windows services to monitor on the server
+            /// </summary>
+            public string Win32ServicesWhereClause { get; set; }
         }
 
         /// <summary>
@@ -191,6 +202,11 @@ namespace StackExchange.Opserver
             /// Percent at which disk utilization on a node is marked at a critical level
             /// </summary>
             public decimal? DiskCriticalPercent { get; set; }
+
+            /// <summary>
+            /// List of windows services to monitor on the server
+            /// </summary>
+            public string Win32ServicesWhereClause { get; set; }
         }
     }
 
@@ -203,5 +219,6 @@ namespace StackExchange.Opserver
         decimal? MemoryCriticalPercent { get; set; }
         decimal? DiskWarningPercent { get; set; }
         decimal? DiskCriticalPercent { get; set; }
+        string Win32ServicesWhereClause { get; set; }
     }
 }
