@@ -312,7 +312,7 @@ SELECT Caption,
 
             private async Task GetServicesAsync()
             {
-                if (!String.IsNullOrEmpty(ServicesPatternRegEx.ToString()))
+                if (!String.IsNullOrEmpty(ServicesPatternRegEx?.ToString()))
                 {
                     string query = @"
 SELECT Caption,
