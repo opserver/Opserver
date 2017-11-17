@@ -319,6 +319,9 @@
     <Content Include="Views\Dashboard\Node.Network.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Dashboard\Node.Services.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Dashboard\Node.Stats.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
@@ -326,9 +329,6 @@
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Dashboard\Node.Volumes.cshtml">
-      <DependentUpon>Node.cshtml</DependentUpon>
-    </Content>
-    <Content Include="Views\Dashboard\Node.Win32Services.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Elastic\Cluster.Indexes.cshtml">

@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 try
                 {
-                    var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync(), GetWin32ServicesAsync() };
+                    var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync(), GetServicesAsync() };
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     SetReferences();
                     ClearSummaries();
@@ -310,11 +310,11 @@ SELECT Caption,
                 }
             }
 
-            private async Task GetWin32ServicesAsync()
+            private async Task GetServicesAsync()
             {
-                if (!String.IsNullOrEmpty(this.Win32ServicesWhereClause))
+                if (!String.IsNullOrEmpty(ServicesPatternRegEx.ToString()))
                 {
-                    string query = String.Format(@"
+                    string query = @"
 SELECT Caption,
        Description,
        DisplayName,
@@ -323,44 +323,46 @@ SELECT Caption,
        StartMode,
        StartName,
        State
-  FROM Win32_Service
-WHERE {0}", this.Win32ServicesWhereClause); //windows services
+  FROM Win32_Service"; // windows services
 
                     using (var q = Wmi.Query(Endpoint, query))
                     {
                         foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
-                            var id = service.Name;
-                            var s = Win32Services.Find(x => x.Id == id) ?? new Win32Service();
-
-                            s.Id = id;
-                            s.Caption = service.Caption;
-                            s.DisplayName = service.DisplayName;
-                            s.Description = service.Description;
-                            s.Name = service.Name;
-                            s.NodeId = Id;
-                            s.State = service.State;
-                            s.LastSync = DateTime.UtcNow;
-                            switch (service.State)
+                            if (ServicesPatternRegEx.IsMatch(service.Name))
                             {
-                                case "Running":
-                                    s.Status = NodeStatus.Active;
-                                    break;
-                                case "Stopped":
-                                    s.Status = NodeStatus.Down;
-                                    break;
-                                default:
-                                    s.Status = NodeStatus.Unknown;
-                                    break;
-                            }
-                            s.Started = service.Started;
-                            s.StartMode = service.StartMode;
-                            s.StartName = service.StartName;
+                                var id = service.Name;
+                                var s = Services.Find(x => x.Id == id) ?? new NodeService();
 
-                            if (s.Node == null)
-                            {
-                                s.Node = this;
-                                Win32Services.Add(s);
+                                s.Id = id;
+                                s.Caption = service.Caption;
+                                s.DisplayName = service.DisplayName;
+                                s.Description = service.Description;
+                                s.Name = service.Name;
+                                s.NodeId = Id;
+                                s.State = service.State;
+                                s.LastSync = DateTime.UtcNow;
+                                switch (service.State)
+                                {
+                                    case "Running":
+                                        s.Status = NodeStatus.Active;
+                                        break;
+                                    case "Stopped":
+                                        s.Status = NodeStatus.Down;
+                                        break;
+                                    default:
+                                        s.Status = NodeStatus.Unknown;
+                                        break;
+                                }
+                                s.Started = service.Started;
+                                s.StartMode = service.StartMode;
+                                s.StartName = service.StartName;
+
+                                if (s.Node == null)
+                                {
+                                    s.Node = this;
+                                    Services.Add(s);
+                                }
                             }
                         }
                     }

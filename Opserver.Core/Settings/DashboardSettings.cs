@@ -62,11 +62,21 @@ namespace StackExchange.Opserver
         public bool ShowVolumePerformance { get; set; }
 
         /// <summary>
-        /// WMI Query Language (WQL) "WHERE" clause indicating which services to monitor on the server
-        /// Example:  Name = 'W3SVC' OR Name = 'MSSQLSERVER'
+        /// The Pattern to match on node services, all services matching this pattern will be shown on the dashboard. 
         /// </summary>
-        public string Win32ServicesWhereClause { get; set; }
+        public string ServicesPattern { get; set; }
 
+        private Regex _servicesPatternRegEx;
+        public Regex ServicesPatternRegEx
+        {
+            get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
+            set { _servicesPatternRegEx = value; }
+        }
+
+        protected Regex GetPatternMatcher(string pattern)
+        {
+            return pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
+        }
         #endregion
 
         /// <summary>
@@ -135,9 +145,16 @@ namespace StackExchange.Opserver
             public decimal? DiskCriticalPercent { get; set; }
 
             /// <summary>
-            /// List of windows services to monitor on the server
+            /// The Pattern to match on node services, all services matching this pattern will be shown on the dashboard. 
             /// </summary>
-            public string Win32ServicesWhereClause { get; set; }
+            public string ServicesPattern { get; set; }
+
+            private Regex _servicesPatternRegEx;
+            public Regex ServicesPatternRegEx
+            {
+                get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
+                set { _servicesPatternRegEx = value; }
+            }
         }
 
         /// <summary>
@@ -204,9 +221,16 @@ namespace StackExchange.Opserver
             public decimal? DiskCriticalPercent { get; set; }
 
             /// <summary>
-            /// List of windows services to monitor on the server
+            /// The Pattern to match on node services, all services matching this pattern will be shown on the dashboard. 
             /// </summary>
-            public string Win32ServicesWhereClause { get; set; }
+            public string ServicesPattern { get; set; }
+
+            private Regex _servicesPatternRegEx;
+            public Regex ServicesPatternRegEx
+            {
+                get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
+                set { _servicesPatternRegEx = value; }
+            }
         }
     }
 
@@ -219,6 +243,6 @@ namespace StackExchange.Opserver
         decimal? MemoryCriticalPercent { get; set; }
         decimal? DiskWarningPercent { get; set; }
         decimal? DiskCriticalPercent { get; set; }
-        string Win32ServicesWhereClause { get; set; }
+        Regex ServicesPatternRegEx { get; set; }
     }
 }

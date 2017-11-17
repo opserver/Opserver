@@ -2,7 +2,7 @@
 @using StackExchange.Opserver.Models
 @model Node
 
-<h5 class="page-header">@Model.Win32Services.Count.Pluralize("Windows Service")</h5>
+<h5 class="page-header">@Model.Services.Count.Pluralize("Service")</h5>
 <table class="table table-striped table-middle table-super-condensed table-responsive table-dashboard text-nowrap">
     <thead>
         <tr>
@@ -15,17 +15,16 @@
         </tr>
     </thead>
     <tbody>
-        @{ var j = 0; }
-        @foreach (var i in Model.Win32Services.OrderBy(i => i.Id))
+        @foreach (var i in Model.Services.OrderBy(i => i.DisplayName))
         {
             <tr class="@i.RowClass()">
                 <td title="@i.Caption
-                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@(j++.ToString())">
+                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@(i.Id)">
                     @i.IconSpan()
                     @i.DisplayName
                 </td>
-                <td>@i.Description</td>
-                <td data-val="@(i.State)">@i.State</td>
+                <td class="text-wrap">@i.Description</td>
+                <td>@i.State</td>
                 <td></td>
                 <td>@i.StartMode</td>
                 <td>@i.StartName</td>
