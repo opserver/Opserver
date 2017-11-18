@@ -11,7 +11,6 @@ namespace StackExchange.Opserver.Data.Dashboard
         public Node Node { get; set; }
 
         public string Id { get; internal set; }
-        public string NodeId { get; internal set; }
         public DateTime? LastSync { get; internal set; }
         public string Name { get; internal set; }
         public string Caption { get; internal set; }
@@ -19,7 +18,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public NodeStatus Status { get; internal set; }
 
         public string DisplayName { get; internal set; }
-        public bool Started { get; internal set; }
+        public bool Running { get; internal set; }
         public string StartMode { get; internal set; }
         public string StartName { get; internal set; }
         public string State { get; internal set; }

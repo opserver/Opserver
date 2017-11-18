@@ -312,9 +312,7 @@ SELECT Caption,
 
             private async Task GetServicesAsync()
             {
-                if (!String.IsNullOrEmpty(ServicesPatternRegEx?.ToString()))
-                {
-                    string query = @"
+                string query = @"
 SELECT Caption,
        Description,
        DisplayName,
@@ -325,44 +323,42 @@ SELECT Caption,
        State
   FROM Win32_Service"; // windows services
 
-                    using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Wmi.Query(Endpoint, query))
+                {
+                    foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
-                        foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                        if (ServicesPatternRegEx?.IsMatch(service.Name) ?? true)
                         {
-                            if (ServicesPatternRegEx.IsMatch(service.Name))
+                            var id = service.Name;
+                            var s = Services.Find(x => x.Id == id) ?? new NodeService();
+
+                            s.Id = id;
+                            s.Caption = service.Caption;
+                            s.DisplayName = service.DisplayName;
+                            s.Description = service.Description;
+                            s.Name = service.Name;
+                            s.State = service.State;
+                            s.LastSync = DateTime.UtcNow;
+                            switch (service.State)
                             {
-                                var id = service.Name;
-                                var s = Services.Find(x => x.Id == id) ?? new NodeService();
+                                case "Running":
+                                    s.Status = NodeStatus.Active;
+                                    break;
+                                case "Stopped":
+                                    s.Status = NodeStatus.Down;
+                                    break;
+                                default:
+                                    s.Status = NodeStatus.Unknown;
+                                    break;
+                            }
+                            s.Running = service.Started;
+                            s.StartMode = service.StartMode;
+                            s.StartName = service.StartName;
 
-                                s.Id = id;
-                                s.Caption = service.Caption;
-                                s.DisplayName = service.DisplayName;
-                                s.Description = service.Description;
-                                s.Name = service.Name;
-                                s.NodeId = Id;
-                                s.State = service.State;
-                                s.LastSync = DateTime.UtcNow;
-                                switch (service.State)
-                                {
-                                    case "Running":
-                                        s.Status = NodeStatus.Active;
-                                        break;
-                                    case "Stopped":
-                                        s.Status = NodeStatus.Down;
-                                        break;
-                                    default:
-                                        s.Status = NodeStatus.Unknown;
-                                        break;
-                                }
-                                s.Started = service.Started;
-                                s.StartMode = service.StartMode;
-                                s.StartName = service.StartName;
-
-                                if (s.Node == null)
-                                {
-                                    s.Node = this;
-                                    Services.Add(s);
-                                }
+                            if (s.Node == null)
+                            {
+                                s.Node = this;
+                                Services.Add(s);
                             }
                         }
                     }

@@ -9,7 +9,6 @@
             <th>Service</th>
             <th>Description</th>
             <th>State</th>
-            <th></th>
             <th>Startup Type</th>
             <th>Log On As</th>
         </tr>
@@ -19,13 +18,12 @@
         {
             <tr class="@i.RowClass()">
                 <td title="@i.Caption
-                    last updated @(i.LastSync?.ToRelativeTime())" data-val="@(i.Id)">
+Last Updated @(i.LastSync?.ToRelativeTime() ?? "Unknown")" data-val="@(i.Id)">
                     @i.IconSpan()
                     @i.DisplayName
                 </td>
                 <td class="text-wrap">@i.Description</td>
                 <td>@i.State</td>
-                <td></td>
                 <td>@i.StartMode</td>
                 <td>@i.StartName</td>
             </tr>
