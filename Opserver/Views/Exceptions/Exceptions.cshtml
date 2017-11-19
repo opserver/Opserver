@@ -20,6 +20,8 @@
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">
+    @if (ExceptionsModule.Stores.Count > 1)
+    {
     <ul class="nav nav-tabs nav-tabs-right">
         @foreach (var s in ExceptionsModule.Stores)
         {
@@ -28,6 +30,7 @@
             </li>
         }
     </ul>
+    }
     @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
     @if (anyLoaded)
     {
