@@ -60,7 +60,7 @@
         {
             var bkup = db.Backups?.FirstOrDefault();
             SQLNode.AGDatabaseReplica replica;
-                <tr class="database-row @db.RowClass()" data-dbname="@db.Name" title="VLF Count @(db.VLFCount?.ToComma() ?? "unknown")">
+                <tr class="database-row @db.RowClass()" data-dbname="@db.Name">
                     <td>
                         <i class="fa fa-database @DatabasesModel.GetDatabaseClass(db)" aria-hidden="true"></i>
                         @db.Name
@@ -84,7 +84,8 @@
                     {
                         <td data-val="@((db.TotalSizeMB*1024*1024).ToString(CultureInfo.InvariantCulture))" title="Log Size: @((db.LogSizeMB.Value*1024*1024).ToSize())
 Used: @((db.LogSizeUsedMB.Value*1024*1024).ToSize())
-(@db.LogPercentUsed.GetValueOrDefault(0).ToString("#,##0.###")% full)">
+(@db.LogPercentUsed.GetValueOrDefault(0).ToString("#,##0.###")% full)
+VLF Count: @(db.VLFCount?.ToComma() ?? "unknown")">
                             @((db.TotalSizeMB * 1024 * 1024).ToSize()) <span class="text-muted">/ @((db.LogSizeMB.Value * 1024 * 1024).ToSize())</span>
                         </td>
                     }
