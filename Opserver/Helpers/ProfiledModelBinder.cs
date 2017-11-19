@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Helpers
             string name = prof == null ? null : "BindModel:" + bindingContext.ModelName;
             using (prof.Step(name))
             {
-                Type modelType = bindingContext.ModelType;
+                var modelType = bindingContext.ModelType;
                 if (modelType == formCollectionType || bindingContext.ModelMetadata.IsComplexType)
                 {
                     return base.BindModel(controllerContext, bindingContext);
@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Helpers
 
                 try
                 {
-                    ValueProviderResult valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
+                    var valueProviderResult = bindingContext.ValueProvider.GetValue(bindingContext.ModelName);
                     object result = valueProviderResult?.RawValue;
                     if (result == null) return null;
 
@@ -53,8 +53,7 @@ namespace StackExchange.Opserver.Helpers
                         }
                         catch { /* best attempt only */ }
                     }
-                    result = Convert.ChangeType(result, underlyingType, valueProviderResult.Culture);
-                    return result;
+                    return Convert.ChangeType(result, underlyingType, valueProviderResult.Culture);
                 }
                 catch
                 {
