@@ -291,7 +291,6 @@
     </Compile>
     <Compile Include="Data\Exceptions\Application.cs" />
     <Compile Include="Data\Exceptions\ExceptionStore.cs" />
-    <Compile Include="Data\Exceptions\ExceptionStores.cs" />
     <Compile Include="Data\HAProxy\Backend.cs" />
     <Compile Include="Data\HAProxy\Frontend.cs" />
     <Compile Include="Data\HAProxy\HAProxyAdmin.cs" />

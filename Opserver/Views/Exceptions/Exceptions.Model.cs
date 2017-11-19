@@ -12,43 +12,29 @@ namespace StackExchange.Opserver.Views.Exceptions
         private NameValueCollection _requestQueryString;
         public NameValueCollection RequestQueryString => _requestQueryString ?? (_requestQueryString = HttpUtility.ParseQueryString(Current.Request.QueryString.ToString()));
 
+        public ExceptionStore Store { get; internal set; }
+        public List<ApplicationGroup> Groups { get; set; }
+        public ApplicationGroup Group { get; set; }
+        public Application Log { get; set; }
         public ExceptionSorts Sort { get; set; }
-        public string SelectedGroup { get; set; }
-        public string SelectedLog { get; set; }
-        public bool ShowingWindow { get; set; }
 
         public string Search { get; set; }
         public Error Exception { get; set; }
-        public List<ApplicationGroup> Groups { get; set; }
         public List<Error> Errors { get; set; }
-        private int? _shownCount;
-        public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
+
         public bool ClearLinkForVisibleOnly { get; set; }
 
-        public bool ShowClearLink
-        {
-            get { return SelectedLog.HasValue() && Errors.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin; }
-        }
+        public bool ShowAll => Group == null && Log == null;
+        private int? _shownCount;
+        public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
+        public bool ShowClearLink => Log != null && Errors.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin;
+        public bool ShowDeleted { get; set; }
 
         public int LoadAsyncSize { get; set; }
 
-        public bool ShowDeleted { get; set; }
-        public bool ShowAll => SelectedGroup.IsNullOrEmpty() && SelectedLog.IsNullOrEmpty();
         private int? _totalCount;
         public int TotalCount => _totalCount ?? (_totalCount = GetTotal()).Value;
-        private int GetTotal()
-        {
-            if (!SelectedGroup.HasValue())
-            {
-                return ExceptionStores.TotalExceptionCount;
-            }
-            var group = Groups.Find(g => g.Name == SelectedGroup);
-            if (group != null && SelectedLog.HasValue())
-            {
-                return group.Applications.Find(a => a.Name == SelectedLog)?.ExceptionCount ?? 0;
-            }
-            return group?.Total ?? 0;
-        }
+        private int GetTotal() => Log?.ExceptionCount ?? Group?.Total ?? Store?.TotalExceptionCount ?? ExceptionsModule.TotalExceptionCount;
 
         public bool HasMore => TotalCount > ShownCount;
         public string Title
@@ -57,17 +43,28 @@ namespace StackExchange.Opserver.Views.Exceptions
             {
                 if (Search.HasValue())
                 {
-                    return $"{Errors.Count.ToComma()} Search results ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) for '{Search}'{(SelectedLog.HasValue() ? " in " + SelectedLog : "")}";
+                    return $"{Errors.Count.ToComma()} Search results ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) for '{Search}'{(Log != null ? " in " + Log.Name : "")}";
                 }
                 if (Exception == null)
                 {
-                    if (SelectedGroup.HasValue() && SelectedLog.IsNullOrEmpty() && SelectedGroup != "All")
+                    if (Log != null)
                     {
-                        return TotalCount.Pluralize((SelectedGroup + " Exception").Trim());
+                        return Log.ExceptionCount.Pluralize(Log.Name + " Exception");
                     }
-                    return TotalCount.Pluralize((SelectedLog + " Exception").Trim());
+                    else if (Group != null)
+                    {
+                        return Group.Total.Pluralize(Group.Name + " Exception");
+                    }
+                    else if (Store != null)
+                    {
+                        return Store.TotalExceptionCount.Pluralize(Store.Name + " Exception");
+                    }
+                    else
+                    {
+                        return TotalCount.Pluralize("Exception");
+                    }
                 }
-                return $"Most recent {Errors.Count} similar entries ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) from {SelectedLog}";
+                return $"Most recent {Errors.Count} similar entries ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) from {Log?.Name}";
             }
         }
 
@@ -75,11 +72,12 @@ namespace StackExchange.Opserver.Views.Exceptions
         {
             get
             {
-                if (SelectedGroup.IsNullOrEmpty() && SelectedLog.IsNullOrEmpty()) return null;
+                if (Store == null && Group == null && Log == null) return null;
 
                 var result = new Dictionary<string, string>();
-                if (SelectedGroup.HasValue()) result["group"] = SelectedGroup;
-                if (SelectedLog.HasValue()) result["log"] = SelectedLog;
+                if (Store != null) result["store"] = Store.Name;
+                if (Group != null) result["group"] = Group.Name;
+                if (Log != null) result["log"] = Log.Name;
                 return result;
             }
         }

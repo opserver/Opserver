@@ -43,23 +43,23 @@
             @if (Current.Settings.Exceptions.EnablePreviews)
             {
                 <span class="js-preview">
-                    <a href="~/exceptions/detail?id=@e.GUID&log=@e.ApplicationName.UrlEncode()"><i class="fa fa-eye" aria-hidden="true"></i></a>
+                    <a href="~/exceptions/detail?id=@e.GUID&log=@e.ApplicationName.UrlEncode()&store=@Model.Store.Name.UrlEncode()"><i class="fa fa-eye" aria-hidden="true"></i></a>
                 </span>
             }
         </td>
         <td class="@ErrorStyle(e)" data-val="@e.CreationDate.ToEpochTime()">@e.CreationDate.ToRelativeTimeSpanMini()</td>
         <td title="@e.Type">
-            @if (Model.SelectedLog.HasValue())
+            @if (Model.Log != null)
             {
                 @GetShortName(e)
             }
             else
             {
-                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()">@e.ApplicationName</a>
+                <a href="~/exceptions?log=@e.ApplicationName.UrlEncode()&store=@Model.Store.Name.UrlEncode()">@e.ApplicationName</a>
             }
         </td>
         <td>
-            <a class="text-wordbreak js-exception-link @(e.Message.StartsWith("Failed to retrieve error log:") ? "bad-error" : null)" href="~/exceptions/detail?id=@e.GUID&log=@e.ApplicationName.UrlEncode()">
+            <a class="text-wordbreak js-exception-link @(e.Message.StartsWith("Failed to retrieve error log:") ? "bad-error" : null)" href="~/exceptions/detail?id=@e.GUID&log=@e.ApplicationName.UrlEncode()&store=@Model.Store.Name.UrlEncode()">
                 @(e.Message.TruncateWithEllipsis(110))
             </a>
         </td>

@@ -2,8 +2,9 @@
 @using StackExchange.Opserver.Data.Exceptions
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
-    var group = Model.SelectedGroup;
-    var log = Model.SelectedLog;
+    var store = Model.Store?.Name;
+    var group = Model.Group?.Name;
+    var log = Model.Log?.Name;
     var exceptions = Model.Errors;
 
     this.SetPageTitle(Model.Title);
@@ -15,23 +16,18 @@
 }
 @section head {
     <script>
-        $(function() { Status.Exceptions.init({ refresh: 120, group: '@group.AsHtml()', log: '@log', sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function() { Status.Exceptions.init({ refresh: 120, store:@store.ToJson(), group: @group.ToJson(), log: @log.ToJson(), sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">
-    <h5 class="page-header">
-        Exception Logs
-        <span>
-            @if (!Model.ShowAll)
-            {
-                @: <a class="pull-right" href="@Url.Action(nameof(ExceptionsController.Exceptions))">View All</a>
-            }
-            @if (ExceptionsModule.Stores?.Any() == true)
-            {
-                @Helpers.PollNow(ExceptionsModule.Stores)
-            }
-        </span>
-    </h5>
+    <ul class="nav nav-tabs nav-tabs-right">
+        @foreach (var s in ExceptionsModule.Stores)
+        {
+            <li class="@(Model.Store == s ? "active" : null)">
+                <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
+            </li>
+        }
+    </ul>
     @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
     @if (anyLoaded)
     {

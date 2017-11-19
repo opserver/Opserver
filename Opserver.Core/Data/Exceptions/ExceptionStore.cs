@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
@@ -19,6 +18,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         private int? QueryTimeout => Settings.QueryTimeoutMs;
         public string Name => Settings.Name;
         public string Description => Settings.Description;
+        public string TableName => Settings.TableName.IsNullOrEmptyReturn("Exceptions");
         public ExceptionsSettings.Store Settings { get; internal set; }
 
         public override int MinSecondsBetweenPolls => 1;
@@ -26,11 +26,7 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public override IEnumerable<Cache> DataPollers
         {
-            get
-            {
-                yield return Applications;
-                yield return ErrorSummary;
-            }
+            get { yield return Applications; }
         }
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
@@ -43,6 +39,46 @@ namespace StackExchange.Opserver.Data.Exceptions
         public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)
         {
             Settings = settings;
+            ApplicationGroups = GetConfiguredApplicationGroups();
+            KnownApplications = ApplicationGroups.SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
+        }
+
+        public int TotalExceptionCount => Applications.Data?.Sum(a => a.ExceptionCount) ?? 0;
+        public int TotalRecentExceptionCount => Applications.Data?.Sum(a => a.RecentExceptionCount) ?? 0;
+        private ApplicationGroup CatchAll { get; set; }
+        public List<ApplicationGroup> ApplicationGroups { get; private set; }
+        public HashSet<string> KnownApplications { get; }
+
+        private List<ApplicationGroup> GetConfiguredApplicationGroups()
+        {
+            var groups = Settings.Groups ?? Current.Settings.Exceptions.Groups;
+            var applications = Settings.Applications ?? Current.Settings.Exceptions.Applications;
+            if (groups?.Any() ?? false)
+            {
+                var configured = groups
+                    .Select(g => new ApplicationGroup
+                    {
+                        Name = g.Name,
+                        Applications = g.Applications.OrderBy(a => a).Select(a => new Application { Name = a }).ToList()
+                    }).ToList();
+                // The user could have configured an "Other", don't duplicate it
+                if (configured.All(g => g.Name != "Other"))
+                {
+                    configured.Add(new ApplicationGroup { Name = "Other" });
+                }
+                CatchAll = configured.First(g => g.Name == "Other");
+                return configured;
+            }
+            // One big bucket if nothing is configured
+            CatchAll = new ApplicationGroup { Name = "All" };
+            if (applications?.Any() ?? false)
+            {
+                CatchAll.Applications = applications.OrderBy(a => a).Select(a => new Application { Name = a }).ToList();
+            }
+            return new List<ApplicationGroup>
+            {
+                CatchAll
+            };
         }
 
         private Cache<List<Application>> _applications;
@@ -68,97 +104,235 @@ Select ApplicationName as Name,
                     });
                     return result;
                 },
-                afterPoll: cache => ExceptionStores.UpdateApplicationGroups()));
+                afterPoll: cache => UpdateApplicationGroups()));
 
-        private Cache<List<Error>> _errorSummary;
-        public Cache<List<Error>> ErrorSummary =>
-            _errorSummary ?? (_errorSummary = new Cache<List<Error>>(
-                this,
-                "Exceptions Fetch: " + Name + ":" + nameof(ErrorSummary),
-                Settings.PollIntervalSeconds.Seconds(),
-                () => QueryListAsync<Error>($"ErrorSummary Fetch: {Name}", @"
-Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
-  From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
-		From Exceptions
-		Where DeletionDate Is Null) er
-	   Inner Join Exceptions e On er.Id = e.Id
- Where er.r <= @PerAppSummaryCount
- Order By CreationDate Desc", new {PerAppSummaryCount})));
-
-        public async Task<List<Error>> GetErrorSummary(int maxPerApp, string group = null, string app = null)
+        internal List<ApplicationGroup> UpdateApplicationGroups()
         {
-            var errors = await ErrorSummary.GetData().ConfigureAwait(false);
-            if (errors == null) return new List<Error>();
-            // specific application - this is most specific
+            using (MiniProfiler.Current.Step(nameof(UpdateApplicationGroups)))
+            {
+                var result = ApplicationGroups;
+                var apps = Applications.Data;
+                // Loop through all configured groups and hook up applications returned from the queries
+                foreach (var g in result)
+                {
+                    for (var i = 0; i < g.Applications.Count; i++)
+                    {
+                        var a = g.Applications[i];
+                        foreach (var app in apps)
+                        {
+                            if (app.Name == a.Name)
+                            {
+                                g.Applications[i] = app;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Clear all dynamic apps from the CatchAll group unless we found them again (minimal delta)
+                // Doing this atomically to minimize enumeration conflicts
+                CatchAll.Applications.RemoveAll(a => !apps.Any(ap => ap.Name == a.Name) && !KnownApplications.Contains(a.Name));
+
+                // Check for the any dyanmic/unconfigured apps that we need to add to the all group
+                foreach (var app in apps)
+                {
+                    if (!KnownApplications.Contains(app.Name) && !CatchAll.Applications.Any(a => a.Name == app.Name))
+                    {
+                        // This dynamic app needs a home!
+                        CatchAll.Applications.Add(app);
+                    }
+                }
+                CatchAll.Applications.Sort((a, b) => a.Name.CompareTo(b.Name));
+
+                // Cleanout those with no errors right now
+                var foundNames = apps.Select(a => a.Name).ToHashSet();
+                foreach (var a in result.SelectMany(g => g.Applications))
+                {
+                    if (!foundNames.Contains(a.Name))
+                    {
+                        a.ClearCounts();
+                    }
+                }
+
+                ApplicationGroups = result;
+                return result;
+            }
+        }
+
+        public class SearchParams
+        {
+            public string Group { get; set; }
+            public string Log { get; set; }
+            public int Count { get; set; } = 250;
+            public bool IncludeDeleted { get; set; }
+            public string SearchQuery { get; set; }
+            public string Message { get; set; }
+            public DateTime? StartDate { get; set; }
+            public DateTime? EndDate { get; set; }
+            public Guid? StartAt { get; set; }
+            public ExceptionSorts Sort { get; set; }
+
+            public override int GetHashCode()
+            {
+                var hashCode = -1510201480;
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Group);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Log);
+                hashCode = (hashCode * -1521134295) + Count.GetHashCode();
+                hashCode = (hashCode * -1521134295) + IncludeDeleted.GetHashCode();
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(SearchQuery);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Message);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(StartDate);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(EndDate);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(StartAt);
+                return (hashCode * -1521134295) + Sort.GetHashCode();
+            }
+        }
+
+        // TODO: Move this into a SQL-specific provider maybe, something swappable
+        public Task<List<Error>> GetErrorsAsync(SearchParams search)
+        {
+            var sb = StringBuilderCache.Get();
+            bool firstWhere = true;
+            void AddClause(string clause)
+            {
+                sb.Append(firstWhere ? " Where " : "   And ").AppendLine(clause);
+                firstWhere = false;
+            }
+
+            sb.Append(@"With list As (
+Select e.Id,
+	   e.GUID,
+	   e.ApplicationName,
+	   e.MachineName,
+	   e.CreationDate,
+	   e.Type,
+	   e.IsProtected,
+	   e.Host,
+	   e.Url,
+	   e.HTTPMethod,
+	   e.IPAddress,
+	   e.Source,
+	   e.Message,
+	   e.StatusCode,
+	   e.ErrorHash,
+	   e.DuplicateCount,
+	   e.DeletionDate,
+	   ROW_NUMBER() Over(").Append(GetSortString(search.Sort)).Append(@") rowNum
+  From ").Append(TableName).AppendLine(" e");
+
+            var logs = GetAppNames(search);
+            if (search.Log.HasValue() || search.Group.HasValue())
+            {
+                AddClause("ApplicationName In @logs");
+            }
+            if (search.Message.HasValue())
+            {
+                AddClause("Message = @Message");
+            }
+            if (!search.IncludeDeleted)
+            {
+                AddClause("DeletionDate Is Null");
+            }
+            if (search.StartDate.HasValue)
+            {
+                AddClause("CreationDate >= @StartDate");
+            }
+            if (search.EndDate.HasValue)
+            {
+                AddClause("CreationDate <= @EndDate");
+            }
+            if (search.SearchQuery.HasValue())
+            {
+                AddClause("(Message Like @query Or Url Like @query)");
+            }
+            sb.Append(@"
+)
+  Select Top {=Count} *
+    From list");
+            if (search.StartAt.HasValue)
+            {
+                sb.Append(@"
+   Where rowNum > (Select Top 1 rowNum From list Where GUID = @StartAt)");
+            }
+            sb.Append(@"
+Order By rowNum");
+
+            var sql = sb.ToStringRecycle();
+
+            return QueryListAsync<Error>($"{nameof(GetErrorsAsync)}() for {Name}", sql, new
+            {
+                logs,
+                search.Message,
+                search.StartDate,
+                search.EndDate,
+                query = "%" + search.SearchQuery + "%",
+                search.StartAt,
+                search.Count
+            });
+        }
+
+        public IEnumerable<string> GetAppNames(SearchParams search) => GetAppNames(search.Group, search.Log);
+        public IEnumerable<string> GetAppNames(string group, string app)
+        {
             if (app.HasValue())
             {
-                return errors.Where(e => e.ApplicationName == app)
-                             .Take(maxPerApp)
-                             .ToList();
+                yield return app;
+                yield break;
             }
             if (group.HasValue())
             {
-                var apps = ExceptionStores.GetAppNames(group, app).ToHashSet();
-                return errors.GroupBy(e => e.ApplicationName)
-                             .Where(g => apps.Contains(g.Key))
-                             .SelectMany(e => e.Take(maxPerApp))
-                             .ToList();
+                var apps = ApplicationGroups?.FirstOrDefault(g => g.Name == group)?.Applications;
+                if (apps != null)
+                {
+                    foreach (var a in apps)
+                    {
+                        yield return a.Name;
+                    }
+                }
             }
-            // all apps, 1000
-            if (maxPerApp == PerAppSummaryCount)
+        }
+
+        private string GetSortString(ExceptionSorts sort)
+        {
+            switch (sort)
             {
-                return errors;
+                case ExceptionSorts.AppAsc:
+                    return " Order By ApplicationName, CreationDate Desc";
+                case ExceptionSorts.AppDesc:
+                    return " Order By ApplicationName Desc, CreationDate Desc";
+                case ExceptionSorts.TypeAsc:
+                    return " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1), CreationDate Desc";
+                case ExceptionSorts.TypeDesc:
+                    return " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1) Desc, CreationDate Desc";
+                case ExceptionSorts.MessageAsc:
+                    return " Order By Message, CreationDate Desc";
+                case ExceptionSorts.MessageDesc:
+                    return " Order By Message Desc, CreationDate Desc";
+                case ExceptionSorts.UrlAsc:
+                    return " Order By Url, CreationDate Desc";
+                case ExceptionSorts.UrlDesc:
+                    return " Order By Url Desc, CreationDate Desc";
+                case ExceptionSorts.IPAddressAsc:
+                    return " Order By IPAddress, CreationDate Desc";
+                case ExceptionSorts.IPAddressDesc:
+                    return " Order By IPAddress Desc, CreationDate Desc";
+                case ExceptionSorts.HostAsc:
+                    return " Order By Host, CreationDate Desc";
+                case ExceptionSorts.HostDesc:
+                    return " Order By Host Desc, CreationDate Desc";
+                case ExceptionSorts.MachineNameAsc:
+                    return " Order By MachineName, CreationDate Desc";
+                case ExceptionSorts.MachineNameDesc:
+                    return " Order By MachineName Desc, CreationDate Desc";
+                case ExceptionSorts.CountAsc:
+                    return " Order By IsNull(DuplicateCount, 1), CreationDate Desc";
+                case ExceptionSorts.CountDesc:
+                    return " Order By IsNull(DuplicateCount, 1) Desc, CreationDate Desc";
+                case ExceptionSorts.TimeAsc:
+                    return " Order By CreationDate";
+                //case ExceptionSorts.TimeDesc:
+                default:
+                    return " Order By CreationDate Desc";
             }
-            // app apps, n records
-            return errors.GroupBy(e => e.ApplicationName)
-                         .SelectMany(e => e.Take(maxPerApp))
-                         .ToList();
-        }
-
-        /// <summary>
-        /// Get all current errors, possibly per application.
-        /// </summary>
-        /// <param name="maxPerApp">Count of exceptions to fetch per application.</param>
-        /// <param name="apps">(Optional) The list of applications to fetch exceptions for.</param>
-        /// <remarks>This does not populate Detail, it's comparatively large and unused in list views</remarks>
-        public Task<List<Error>> GetAllErrorsAsync(int maxPerApp, IEnumerable<string> apps = null)
-        {
-            return QueryListAsync<Error>($"{nameof(GetAllErrorsAsync)}() for {Name}", @"
-Select e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.StatusCode, e.ErrorHash, e.DuplicateCount
-  From (Select Id, Rank() Over (Partition By ApplicationName Order By CreationDate desc) as r
-		From Exceptions
-		Where DeletionDate Is Null" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + @") er
-	   Inner Join Exceptions e On er.Id = e.Id
- Where er.r <= @maxPerApp
- Order By CreationDate Desc", new {maxPerApp, apps});
-        }
-
-        public Task<List<Error>> GetSimilarErrorsAsync(Error error, int max)
-        {
-            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsAsync)}() for {Name}", @"
-    Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
-      From Exceptions e
-     Where ApplicationName = @ApplicationName
-       And Message = @Message
-     Order By CreationDate Desc", new {max, error.ApplicationName, error.Message});
-        }
-
-        public Task<List<Error>> GetSimilarErrorsInTimeAsync(Error error, int max)
-        {
-            return QueryListAsync<Error>($"{nameof(GetSimilarErrorsInTimeAsync)}() for {Name}", @"
-    Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
-      From Exceptions e
-     Where CreationDate Between @start and @end
-     Order By CreationDate Desc", new { max, start = error.CreationDate.AddMinutes(-5), end = error.CreationDate.AddMinutes(5) });
-        }
-
-        public Task<List<Error>> FindErrorsAsync(string searchText, int max, bool includeDeleted, IEnumerable<string> apps = null)
-        {
-            return QueryListAsync<Error>($"{nameof(FindErrorsAsync)}() for {Name}", @"
-    Select Top (@max) e.Id, e.GUID, e.ApplicationName, e.MachineName, e.CreationDate, e.Type, e.IsProtected, e.Host, e.Url, e.HTTPMethod, e.IPAddress, e.Source, e.Message, e.Detail, e.StatusCode, e.ErrorHash, e.DuplicateCount, e.DeletionDate
-      From Exceptions e
-     Where (Message Like @search Or Detail Like @search Or Url Like @search)" + (apps?.Any() == true ? " And ApplicationName In @apps" : "") + (includeDeleted ? "" : " And DeletionDate Is Null") + @"
-     Order By CreationDate Desc", new { search = "%" + searchText + "%", apps, max });
         }
 
         public Task<int> DeleteAllErrorsAsync(List<string> apps)
@@ -192,7 +366,7 @@ Update Exceptions
    And GUID In @ids", new { ids });
         }
 
-        public async Task<Error> GetErrorAsync(Guid guid)
+        public async Task<Error> GetErrorAsync(string app, Guid guid)
         {
             try
             {
@@ -213,6 +387,7 @@ Update Exceptions
                 result.DuplicateCount = sqlError.DuplicateCount;
                 result.DeletionDate = sqlError.DeletionDate;
                 result.ApplicationName = sqlError.ApplicationName;
+                result.IsProtected = sqlError.IsProtected;
                 return result;
             }
             catch (Exception e)
@@ -261,7 +436,11 @@ Update Exceptions
             using (MiniProfiler.Current.Step(step))
             using (var c = await GetConnectionAsync().ConfigureAwait(false))
             {
-                return await c.ExecuteAsync(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
+                // Perform the action
+                var result = await c.ExecuteAsync(sql, paramsObj as object, commandTimeout: QueryTimeout).ConfigureAwait(false);
+                // Refresh our caches
+                await Applications.PollAsync(!Applications.IsPolling).ConfigureAwait(false);
+                return result;
             }
         }
 

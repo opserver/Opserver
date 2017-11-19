@@ -2,8 +2,8 @@
 {
     public enum ExceptionSorts
     {
-        TimeAsc = 0,
-        TimeDesc = 1,
+        TimeDesc = 0,
+        TimeAsc = 1,
         AppAsc = 2,
         AppDesc = 3,
         TypeAsc = 4,

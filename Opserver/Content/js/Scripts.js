@@ -953,6 +953,9 @@ Status.Exceptions = (function () {
             groupCount = 0;
         // For any not found...
         $('.js-exception-total').text('0');
+        data.Stores.forEach(function (s) {
+            $('.js-exception-total.js-exception-store[data-name="' + s.Name + '"]').text(s.Total.toLocaleString());
+        });
         data.Groups.forEach(function(g) {
             if (g.Name === group) {
                 groupCount = g.Total;
@@ -983,6 +986,13 @@ Status.Exceptions = (function () {
     function init(options) {
         Status.Exceptions.options = options;
 
+        var baseOptions = {
+            store: options.store,
+            group: options.group,
+            log: options.log,
+            sort: options.sort
+        };
+
         // TODO: Set refresh params
         function getLoadCount() {
             // If scrolled back to the top, load 500
@@ -1008,13 +1018,10 @@ Status.Exceptions = (function () {
                 $('.js-bottom-loader').show();
                 var lastGuid = $('.js-exceptions tr.js-error').last().data('id');
                 $.ajax(Status.options.rootPath + 'exceptions/load-more', {
-                    data: {
-                        log: options.log,
-                        sort: options.sort,
+                    data: $.extend({}, baseOptions, {
                         count: options.loadMore,
-                        prevLast: lastGuid,
-                        group: options.group
-                    },
+                        prevLast: lastGuid
+                    }),
                     cache: false
                 }).done(function (html) {
                     var newRows = $(html).filter('tr');
@@ -1048,7 +1055,10 @@ Status.Exceptions = (function () {
 
             $.ajax({
                 type: 'POST',
-                data: { log: jRow.data('log') || options.log, id: jRow.data('id') },
+                data: $.extend({}, baseOptions, {
+                    log: jRow.data('log') || options.log,
+                    id: jRow.data('id')
+                }),
                 url: url,
                 success: function (data) {
                     if (options.showingDeleted) {
@@ -1079,7 +1089,8 @@ Status.Exceptions = (function () {
             });
         }
 
-        // ajax the error deletion on the list page
+        // AJAX error deletion on the list page
+        // And the delete link on the detail page
         $(document).on('click', '.js-exceptions a.js-delete-link', function (e) {
             var jThis = $(this);
 
@@ -1109,7 +1120,10 @@ Status.Exceptions = (function () {
 
             $.ajax({
                 type: 'POST',
-                data: { log: jRow.data('log') || options.log, id: jRow.data('id') },
+                data: $.extend({}, baseOptions, {
+                    log: jRow.data('log') || options.log,
+                    id: jRow.data('id')
+                }),
                 context: this,
                 url: url,
                 success: function (data) {
@@ -1176,7 +1190,10 @@ Status.Exceptions = (function () {
                         type: 'POST',
                         context: this,
                         traditional: true,
-                        data: { ids: ids, returnCounts: true },
+                        data: $.extend({}, baseOptions, {
+                            ids: ids,
+                            returnCounts: true
+                        }),
                         url: Status.options.rootPath + 'exceptions/delete-list',
                         success: function (data) {
                             var table = selected.closest('table');
@@ -1206,14 +1223,18 @@ Status.Exceptions = (function () {
                     jThis.find('.fa').addClass('icon-rotate-flip');
                     $.ajax({
                         type: 'POST',
-                        data: {
+                        data: $.extend({}, baseOptions, {
                             group: jThis.data('group') || options.group,
                             log: jThis.data('log') || options.log,
                             id: jThis.data('id') || options.id
-                        },
+                        }),
                         url: jThis.data('url'),
-                        success: function(data) {
-                            window.location.href = data.url;
+                        success: function (data) {
+                            if (data.url) {
+                                window.location.href = data.url;
+                            } else {
+                                window.location.reload(true);
+                            }
                         },
                         error: function(xhr) {
                             jThis.find('.fa').removeClass('icon-rotate-flip');
@@ -1236,7 +1257,9 @@ Status.Exceptions = (function () {
                     $.ajax({
                         type: 'POST',
                         traditional: true,
-                        data: { group: options.group, log: options.log, ids: ids },
+                        data: $.extend({}, baseOptions, {
+                            ids: ids
+                        }),
                         url: jThis.data('url'),
                         success: function (data) {
                             window.location.href = data.url;
@@ -1315,13 +1338,16 @@ Status.Exceptions = (function () {
         }
 
         /* Error detail handlers*/
-        $('.info-delete-link a').on('click', function () {
+        $(document).on('click', '.js-exception-actions a', function () {
             $(this).addClass('loading');
             $.ajax({
                 type: 'POST',
-                data: { id: options.id, log: options.log, redirect: true },
+                data: $.extend({}, baseOptions, {
+                    id: options.id,
+                    redirect: true
+                }),
                 context: this,
-                url: Status.options.rootPath + 'exceptions/delete',
+                url: $(this).data('url'),
                 success: function (data) {
                     window.location.href = data.url;
                 },
@@ -1338,7 +1364,10 @@ Status.Exceptions = (function () {
             var actionid = $(this).data("actionid");
             $.ajax({
                 type: 'POST',
-                data: { id: options.id, log: options.log, actionid: actionid },
+                data: $.extend({}, baseOptions, {
+                    id: options.id,
+                    actionid: actionid
+                }),
                 context: this,
                 url: Status.options.rootPath + 'exceptions/jiraaction',
                 success: function (data) {
