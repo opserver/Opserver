@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using StackExchange.Opserver.Data.Dashboard.Providers;
 using System.Globalization;
+using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -226,10 +227,11 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public TimeSpan? PollInterval => PollIntervalSeconds.HasValue ? TimeSpan.FromSeconds(PollIntervalSeconds.Value) : (TimeSpan?) null;
 
-        // Interfaces, Volumes and Applications are set by the provider
+        // Interfaces, Volumes, Applications, and Services are set by the provider
         public List<Interface> Interfaces { get; internal set; }
         public List<Volume> Volumes { get; internal set; }
         public List<Application> Apps { get; internal set; }
+        public List<NodeService> Services { get; internal set; }
 
         public Interface GetInterface(string id)
         {
@@ -258,6 +260,15 @@ namespace StackExchange.Opserver.Data.Dashboard
             return null;
         }
 
+        public NodeService GetService(string id)
+        {
+            foreach (var s in Services)
+            {
+                if (s.Id == id) return s;
+            }
+            return null;
+        }
+
         private static readonly List<IPNet> EmptyIPs = new List<IPNet>();
 
         public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
@@ -272,12 +283,14 @@ namespace StackExchange.Opserver.Data.Dashboard
         public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName));
 
         private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
+        private Regex GetSetting(Func<INodeSettings, Regex> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
         public decimal? CPUWarningPercent => GetSetting(i => i.CPUWarningPercent);
         public decimal? CPUCriticalPercent => GetSetting(i => i.CPUCriticalPercent);
         public decimal? MemoryWarningPercent => GetSetting(i => i.MemoryCriticalPercent);
         public decimal? MemoryCriticalPercent => GetSetting(i => i.MemoryCriticalPercent);
         public decimal? DiskWarningPercent => GetSetting(i => i.DiskWarningPercent);
         public decimal? DiskCriticalPercent => GetSetting(i => i.DiskCriticalPercent);
+        public Regex ServicesPatternRegEx => GetSetting(i => i.ServicesPatternRegEx);
 
         private List<Interface> _primaryInterfaces;
         public List<Interface> PrimaryInterfaces
@@ -305,6 +318,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             Interfaces?.ForEach(i => i.Node = this);
             Volumes?.ForEach(v => v.Node = this);
             Apps?.ForEach(a => a.Node = this);
+            Services?.ForEach(s => s.Node = this);
         }
     }
 }

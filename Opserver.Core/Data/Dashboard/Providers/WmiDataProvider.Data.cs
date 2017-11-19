@@ -55,6 +55,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Caches = new List<Cache>(2);
                 Interfaces = new List<Interface>(2);
                 Volumes = new List<Volume>(3);
+                Services = new List<NodeService>();
                 VMs = new List<Node>();
                 Apps = new List<Application>();
 

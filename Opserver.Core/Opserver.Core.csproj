@@ -92,6 +92,7 @@
     <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Polling.cs">
       <DependentUpon>WmiDataProvider.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Dashboard\NodeService.cs" />
     <Compile Include="Data\DataProvider.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>

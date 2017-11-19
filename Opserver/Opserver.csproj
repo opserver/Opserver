@@ -319,6 +319,9 @@
     <Content Include="Views\Dashboard\Node.Network.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Dashboard\Node.Services.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
     <Content Include="Views\Dashboard\Node.Stats.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
