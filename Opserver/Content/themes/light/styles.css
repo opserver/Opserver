@@ -5766,7 +5766,7 @@ button.close {
   border: 0;
 }
 .hidden {
-  display: none !important;
+  display: none;
 }
 .affix {
   position: fixed;
@@ -9451,6 +9451,9 @@ svg .stroke-muted.filled {
   font-size: 15px;
   box-shadow: 3px 3px 10px #555555;
 }
+.error-preview-popup .text-danger {
+  overflow: hidden;
+}
 .error-preview-popup .title-prefix {
   color: #6f6f6f;
 }
@@ -9934,6 +9937,12 @@ svg .stroke-muted.filled {
   font-size: 12px;
   margin-bottom: 9.5px;
 }
+.nav-tabs li a .badge {
+  line-height: 1;
+  padding: 1px 7px;
+  margin-left: 2px;
+  vertical-align: unset;
+}
 .navbar-toggle {
   padding: 6px 10px;
 }
@@ -10024,6 +10033,9 @@ h6.page-header {
   display: flex;
   align-items: center;
 }
+span.pull-right a.pull-right {
+  float: none !important;
+}
 .page-header {
   margin: 10px 0 5px;
 }
@@ -10058,6 +10070,9 @@ h6.page-header {
 }
 .page-footer > .row {
   width: 100%;
+}
+.pipe-delim a + a:before {
+  content: "| ";
 }
 .actions a + a:not(.btn):before,
 .page-header .pull-right a + a:not(.btn):before {

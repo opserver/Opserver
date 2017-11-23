@@ -8,6 +8,8 @@ namespace StackExchange.Opserver
     {
         public override bool Enabled => Stores.Count > 0;
 
+        public int PageSize { get; set; } = 500;
+
         public List<Store> Stores { get; set; } = new List<Store>();
 
         public List<ExceptionsGroup> Groups { get; set; } = new List<ExceptionsGroup>();
@@ -71,6 +73,26 @@ namespace StackExchange.Opserver
             /// </summary>
             public string Name { get; set; }
             public string Description { get; set; }
+
+            /// <summary>
+            /// The name of the table exceptions are stored in. "Exceptions" is the default.
+            /// </summary>
+            public string TableName { get; set; }
+
+            /// <summary>
+            /// Whether to include this store in the header total
+            /// </summary>
+            public bool IncludeInTotal { get; set; } = true;
+
+            /// <summary>
+            /// Store specific groups, if not specified then the top level groups will be used.
+            /// </summary>
+            public List<ExceptionsGroup> Groups { get; set; }
+
+            /// <summary>
+            /// Store specific applications, if not specified then the top level applications will be used.
+            /// </summary>
+            public List<string> Applications { get; set; }
 
             /// <summary>
             /// Maximum timeout in milliseconds before giving up on this store

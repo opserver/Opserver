@@ -253,7 +253,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
     }
     @if (s.Exceptions.Enabled)
     {
-        var exceptionStatus = ExceptionStores.MonitorStatus;
+        var exceptionStatus = ExceptionsModule.MonitorStatus;
         <div class="col-md-4">
             <div class="panel panel-default panel-@exceptionStatus.RawClass(showGood: true)">
                 <div class="panel-heading">Exceptions</div>

@@ -36,9 +36,9 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4-alpha1-00070" />
     <PackageReference Include="Jil" Version="2.15.4" />
-    <PackageReference Include="MiniProfiler" Version="4.0.0-alpha8-200" />
+    <PackageReference Include="MiniProfiler" Version="4.0.0-alpha9-00207" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="StackExchange.Exceptional" Version="2.0.0-alpha3-00182" />
+    <PackageReference Include="StackExchange.Exceptional" Version="2.0.0-alpha3-00185" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <PackageReference Include="UnconstrainedMelody" Version="0.2.1" />
     <Reference Include="Microsoft.CSharp" />
@@ -92,6 +92,7 @@
     <Compile Include="Data\Dashboard\Providers\WmiDataProvider.Polling.cs">
       <DependentUpon>WmiDataProvider.cs</DependentUpon>
     </Compile>
+    <Compile Include="Data\Dashboard\NodeService.cs" />
     <Compile Include="Data\DataProvider.cs" />
     <Compile Include="Data\Elastic\ElasticCluster.Actions.cs">
       <DependentUpon>ElasticCluster.cs</DependentUpon>
@@ -291,7 +292,6 @@
     </Compile>
     <Compile Include="Data\Exceptions\Application.cs" />
     <Compile Include="Data\Exceptions\ExceptionStore.cs" />
-    <Compile Include="Data\Exceptions\ExceptionStores.cs" />
     <Compile Include="Data\HAProxy\Backend.cs" />
     <Compile Include="Data\HAProxy\Frontend.cs" />
     <Compile Include="Data\HAProxy\HAProxyAdmin.cs" />

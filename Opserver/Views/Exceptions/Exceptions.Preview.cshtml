@@ -2,8 +2,10 @@
 @using StackExchange.Opserver.Controllers
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
-    Layout = null;
     var error = Model.Exception;
+    var store = Model.Store?.Name;
+    var group = Model.Group?.Name;
+    var log = Model.Log?.Name;
 }
 <div class="error-preview">
 @if (error == null)
@@ -23,11 +25,11 @@ else
             <span class="text-danger">(x@(error.DuplicateCount.ToComma()))</span>
         }
         <span class="pull-right">
-            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@Model.SelectedLog" data-group="@Model.SelectedGroup" data-id="@error.GUID">@Icon.X Clear all similar</a>
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteSimilar))" data-log="@log" data-group="@group" data-id="@error.GUID">@Icon.X Clear all similar</a>
             <span class="text-muted">|</span>
-            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup })" title="View exceptions with the same message in the same log">View Similar</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log, group, store })" title="View exceptions with the same message in the same log">View Similar</a>
             <span class="text-muted">|</span>
-            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = Model.SelectedLog, group = Model.SelectedGroup, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
+            <a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log, group, store, byTime = true })" title="View exceptions within 5 minutes of this one">View Nearby</a>
         </span>
     </h6>
     <p class="small text-danger">@error.Message</p>

@@ -45,7 +45,7 @@
     <PackageReference Include="Microsoft.AspNet.Mvc" Version="5.2.3" />
     <PackageReference Include="Microsoft.AspNet.Web.Optimization" Version="1.1.3" />
     <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="1.0.7.0" />
-    <PackageReference Include="MiniProfiler.Mvc5" Version="4.0.0-alpha8-200" />
+    <PackageReference Include="MiniProfiler.Mvc5" Version="4.0.0-alpha9-00207" />
     <PackageReference Include="WebGrease" Version="1.6.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -317,6 +317,9 @@
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Dashboard\Node.Network.cshtml">
+      <DependentUpon>Node.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\Dashboard\Node.Services.cshtml">
       <DependentUpon>Node.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Dashboard\Node.Stats.cshtml">

@@ -1,7 +1,10 @@
 ﻿@using StackExchange.Opserver.Controllers
 @model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
 @{
-    var log = Model.SelectedLog;
+    var store = Model.Store?.Name;
+    var group = Model.Group?.Name;
+    var log = Model.Log?.Name;
+
     var exceptions = Model.Errors;
 
     this.SetPageTitle(Model.Title);
@@ -12,20 +15,20 @@
 }
 @section head {
     <script>
-        $(function () { Status.Exceptions.init({ log: '@log', search: '@Model.Search', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: @(Model.ShowDeleted ? "true" : "false") }); });
+        $(function () { Status.Exceptions.init({ store: @store.ToJson(), group: @group.ToJson(), log: @log.ToJson(), search: '@Model.Search', enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false"), showingDeleted: @(Model.ShowDeleted ? "true" : "false") }); });
     </script>
 }
 <h5 class="page-header">
-    <a href="@Url.Action(nameof(ExceptionsController.Exceptions))">Exceptions</a>
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store })">@store Exceptions</a>
     <span class="text-muted">/</span>
-    @if (Model.SelectedGroup.HasValue())
+    @if (group != null)
     {
-        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup })">@Model.SelectedGroup</a>
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store, group })">@group</a>
         <span class="text-muted">/</span>
     }
-    @if (Model.SelectedLog.HasValue())
+    @if (log != null)
     {
-        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { group = Model.SelectedGroup, log = Model.SelectedLog })">@Model.SelectedLog</a>
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store, group, log })">@log</a>
         <span class="text-muted">/</span>
     }
     Search
@@ -49,7 +52,7 @@
     } 
     else 
     {                
-        @:No current exceptions found, <a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">would you like to search deleted errors?</a>
+        @:No current exceptions found, <a href="@Url.Action(nameof(ExceptionsController.Search), new { store, group, log, q = Model.Search, showDeleted = true })">would you like to search deleted errors?</a>
     }
     </div>
 </div>

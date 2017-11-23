@@ -322,7 +322,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             if (host.OpenIncidents?.Count(i => i.Active) > 0)
                 return NodeStatus.Warning;
-            if (host.ICMPData?.Values.All(p => p.TimedOut) == true)
+            if (!Settings.IgnorePing && host.ICMPData?.Values.All(p => p.TimedOut) == true)
                 return NodeStatus.Unreachable;
             return NodeStatus.Active;
         }
