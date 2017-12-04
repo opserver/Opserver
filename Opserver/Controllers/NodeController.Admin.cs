@@ -20,8 +20,8 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ServiceStart(string node, string name)
         {
             var n = DashboardModule.GetNodeByName(node);
-            var result = Json(await n.DataProvider.UpdateServiceAsync(n, name, NodeService.Action.Start));
-            await n.DataProvider.PollAsync(true);
+            var result = Json(await n.DataProvider.UpdateServiceAsync(n, name, NodeService.Action.Start).ConfigureAwait(false));
+            await n.DataProvider.PollAsync(true).ConfigureAwait(false);
             return result;
         }
 
@@ -29,8 +29,8 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> ServiceStop(string node, string name) 
         {
             var n = DashboardModule.GetNodeByName(node);
-            var result = Json(await n.DataProvider.UpdateServiceAsync(n, name, NodeService.Action.Stop));
-            await n.DataProvider.PollAsync(true);
+            var result = Json(await n.DataProvider.UpdateServiceAsync(n, name, NodeService.Action.Stop).ConfigureAwait(false));
+            await n.DataProvider.PollAsync(true).ConfigureAwait(false);
             return result;
         }
     }
