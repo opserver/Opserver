@@ -516,6 +516,48 @@ Status.Dashboard.Server = (function () {
                 5: { sorter: 'dataVal', sortInitialOrder: 'desc' }
             }
         });
+
+        function serviceAction(link, route, errMessage) {
+            var origText = link.text();
+            var $link = link.text('').prependWaveLoader();
+            var node = link.closest('[data-node]').data('node');
+            $.ajax(Status.options.rootPath + 'service/' + route, {
+                type: 'POST',
+                data: {
+                    node: node,
+                    name: link.closest('[data-name]').data('name'),
+                    enable: link.data('enable')
+                },
+                success: function (data, status, xhr) {
+                    if (data.Result === true) {
+                        if (node) {
+                            //Status.refresh.run();
+                            Status.refresh.run('Dashboard');
+                            location.reload();
+                        } else {
+                            //Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
+                        }
+                    } else {
+                        $link.text(origText).errorPopupFromJSON(xhr, errMessage);
+                    }
+                },
+                error: function (xhr) {
+                    $link.text(origText).errorPopupFromJSON(xhr, errMessage);
+                }
+            });
+            return false;
+        }
+        $(document).on('click', '.js-service-action', function () {
+            console.log('clicked');
+            var link = $(this);
+            switch (link.data('action')) {
+                case 'start':
+                    return serviceAction($(this), 'start', 'An error occurred starting this service.');
+                case 'stop':
+                    return serviceAction($(this), 'stop', 'An error occurred stopping this service.');
+            }
+            return false;
+        });
     }
     
     function liveDashboard(startValue) {

@@ -83,6 +83,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
         public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
 
+        public abstract Task<Task<bool>> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action);
+
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
 
         #endregion

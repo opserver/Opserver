@@ -546,6 +546,24 @@ SELECT Caption,
                 UpdateHistoryStorage(CombinedVolumePerformanceHistory, combinedUtil);
             }
 
+            public async Task<bool> UpdateServiceAsync(string serviceName, NodeService.Action action)
+            {
+                string query = $@"SELECT Name FROM Win32_Service WHERE Name = '{serviceName}'";
+
+                using (var q = Wmi.Query(Endpoint, query))
+                {
+                    foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    {
+                        if (action == NodeService.Action.Stop)
+                            return service.StopService() == 0;
+
+                        if (action == NodeService.Action.Start)
+                            return service.StartService() == 0;
+                    }
+                }
+                return false;
+            }
+
             #region private helpers
 
             private Task<bool> GetIsVMHost()

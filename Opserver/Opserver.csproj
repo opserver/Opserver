@@ -241,6 +241,10 @@
     <Compile Include="Controllers\SQLController.Admin.cs">
       <DependentUpon>SQLController.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\NodeController.cs" />
+    <Compile Include="Controllers\NodeController.Admin.cs">
+      <DependentUpon>NodeController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />
     <Compile Include="Models\TopTabs.cs" />

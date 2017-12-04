@@ -453,6 +453,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
             return (await UtilizationQueryAsync<Interface.InterfaceUtilization>(iface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<DoubleGraphPoint>();
         }
 
+        public override Task<Task<bool>> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action) => Task.FromResult(Task.FromResult(false));
+
         public Task<DbConnection> GetConnectionAsync()
         {
             return Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeoutMs);

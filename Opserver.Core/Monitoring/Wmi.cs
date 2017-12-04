@@ -177,6 +177,20 @@ namespace StackExchange.Opserver.Monitoring
                 }
             }
 
+            public override bool TryInvokeMember(InvokeMemberBinder binder, object[] args, out object result)
+            {
+                try
+                {
+                    result = _obj.InvokeMethod(binder.Name, args);
+                    return true;
+                }
+                catch
+                {
+                    result = null;
+                    return false;
+                }
+            }
+
             public override IEnumerable<string> GetDynamicMemberNames()
                 => _obj.Properties.Cast<PropertyData>().Select(x => x.Name);
         }

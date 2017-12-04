@@ -9,6 +9,10 @@
             <th>Service</th>
             <th>Description</th>
             <th>State</th>
+            @if (Current.IsInRole(StackExchange.Opserver.Models.Roles.GlobalAdmin))
+            {
+            <th>Action</th>
+            }
             <th>Startup Type</th>
             <th>Log On As</th>
         </tr>
@@ -24,6 +28,19 @@ Last Updated @(i.LastSync?.ToRelativeTime() ?? "Unknown")" data-val="@(i.Id)">
                 </td>
                 <td class="text-wrap">@i.Description</td>
                 <td>@i.State</td>
+                @if (Current.IsInRole(StackExchange.Opserver.Models.Roles.GlobalAdmin))
+                {
+                    <td class="actions">
+                        @if (!i.Running)
+                    {
+                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="start" data-name="@i.Name.ToString()">Start</a>
+                        }
+                        else
+                        {
+                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="stop" data-name="@i.Name.ToString()">Stop</a>
+                        }
+                    </td>
+                }
                 <td>@i.StartMode</td>
                 <td>@i.StartName</td>
             </tr>

@@ -27,5 +27,10 @@ namespace StackExchange.Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
+        public enum Action
+        {
+            Stop,
+            Start
+        }
     }
 }
