@@ -531,12 +531,9 @@ Status.Dashboard.Server = (function () {
                 success: function (data, status, xhr) {
                     if (data === true) {
                         if (node) {
-                            //Status.refresh.run();
                             Status.refresh.run('Dashboard');
-                            location.reload();
-                        } else {
-                            //Status.popup('sql/instance/summary/jobs', { node: Status.SQL.options.node });
-                        }
+                            window.location.reload(true);
+                        } 
                     } else {
                         $link.text(origText).errorPopupFromJSON(xhr, errMessage);
                     }
