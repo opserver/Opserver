@@ -180,8 +180,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
-        public override Task<Task<bool>> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action) => Task.FromResult(Task.FromResult(false));
-
         /// <summary>
         /// Determines if the passed in dates are approximately the last 24 hours, 
         /// so that we can share the day cache more efficiently
