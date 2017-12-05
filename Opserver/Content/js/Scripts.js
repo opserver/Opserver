@@ -529,7 +529,7 @@ Status.Dashboard.Server = (function () {
                     enable: link.data('enable')
                 },
                 success: function (data, status, xhr) {
-                    if (data.Result === true) {
+                    if (data === true) {
                         if (node) {
                             //Status.refresh.run();
                             Status.refresh.run('Dashboard');
@@ -548,7 +548,6 @@ Status.Dashboard.Server = (function () {
             return false;
         }
         $(document).on('click', '.js-service-action', function () {
-            console.log('clicked');
             var link = $(this);
             switch (link.data('action')) {
                 case 'start':

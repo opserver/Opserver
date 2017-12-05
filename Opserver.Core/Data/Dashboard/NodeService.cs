@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard
 {
@@ -26,6 +27,11 @@ namespace StackExchange.Opserver.Data.Dashboard
         public MonitorStatus MonitorStatus => Status.ToMonitorStatus();
         // TODO: Implement
         public string MonitorStatusReason => null;
+
+        public Task<bool> Update(Action action)
+        {
+            return Node.DataProvider.UpdateServiceAsync(Node, Id, action);
+        }
 
         public enum Action
         {
