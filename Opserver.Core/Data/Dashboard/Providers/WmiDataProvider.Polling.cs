@@ -550,18 +550,26 @@ SELECT Caption,
             {
                 string query = $@"SELECT Name FROM Win32_Service WHERE Name = '{serviceName}'";
 
+                bool actionResult = false;
+
                 using (var q = Wmi.Query(Endpoint, query))
                 {
                     foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
-                        if (action == NodeService.Action.Stop)
-                            return service.StopService() == 0;
-
-                        if (action == NodeService.Action.Start)
-                            return service.StartService() == 0;
+                        switch (action)
+                        {
+                            case NodeService.Action.Stop:
+                                actionResult = service.StopService() == 0;
+                                break;
+                            case NodeService.Action.Start:
+                                actionResult = service.StartService() == 0;
+                                break;
+                            default:
+                                break;
+                        }
                     }
                 }
-                return false;
+                return actionResult;
             }
 
             #region private helpers
