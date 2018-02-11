@@ -16,7 +16,7 @@
     }
     else
     {
-    <a href="#/db/@Model.Database/@view.ToString().ToLower()" class="@(view == Model.View ? "active" : "")"><i class="fa fa-@icon fa-fw" aria-hidden="true"></i> @text</a>   
+    <a href="#/db/@Model.Database.UrlPathEncode()/@view.ToString().ToLower()" class="@(view == Model.View ? "active" : "")"><i class="fa fa-@icon fa-fw" aria-hidden="true"></i> @text</a>   
     }
 }
 <div class="row">
