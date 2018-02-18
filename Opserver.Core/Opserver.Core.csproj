@@ -9,12 +9,13 @@
     <PackageReference Include="Dapper" Version="1.50.5-alpha1-00081" />
     <PackageReference Include="Enums.NET" Version="2.3.1" />
     <PackageReference Include="Jil" Version="2.15.4" />
-    <PackageReference Include="MiniProfiler" Version="4.0.0-beta.8" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.0.0-beta.8" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
-    <PackageReference Include="StackExchange.Exceptional" Version="2.0.0-rc2.12" />
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.0-rc2.12" />
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Data\CloudFlare\CloudFlareAPI.*.cs" DependentUpon="CloudFlareAPI.cs" />

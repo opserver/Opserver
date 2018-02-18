@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
+using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
 
 namespace StackExchange.Opserver.Data
@@ -108,7 +109,7 @@ namespace StackExchange.Opserver.Data
 
         private string MiniProfilerDescription { get; }
 
-        private static readonly MiniProfilerOptions _profilerOptions = new MiniProfilerOptions
+        private static readonly MiniProfilerBaseOptions _profilerOptions = new MiniProfilerBaseOptions
         {
             Storage = new NullStorage(),
             ProfilerProvider = new DefaultProfilerProvider()
