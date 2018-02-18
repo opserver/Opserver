@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace StackExchange.Opserver
 {
-    public partial class HAProxySettings : Settings<HAProxySettings>
+    public partial class HAProxySettings : ModuleSettings
     {
         public override bool Enabled => Instances.Count > 0 || Groups.Count > 0;
 

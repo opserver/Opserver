@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace StackExchange.Opserver
 {
-    public class DashboardSettings : Settings<DashboardSettings>, INodeSettings
+    public class DashboardSettings : ModuleSettings, INodeSettings
     {
         public override bool Enabled => Providers.Any();
 

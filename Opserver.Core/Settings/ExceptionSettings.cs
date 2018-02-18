@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace StackExchange.Opserver
 {
-    public class ExceptionsSettings : Settings<ExceptionsSettings>
+    public class ExceptionsSettings : ModuleSettings
     {
         public override bool Enabled => Stores.Count > 0;
 

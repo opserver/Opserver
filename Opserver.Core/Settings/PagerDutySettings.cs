@@ -2,7 +2,7 @@
 
 namespace StackExchange.Opserver
 {
-    public class PagerDutySettings : Settings<PagerDutySettings>
+    public class PagerDutySettings : ModuleSettings
     {
         public override bool Enabled => APIKey.HasValue();
 

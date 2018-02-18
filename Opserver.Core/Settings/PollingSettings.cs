@@ -1,6 +1,6 @@
 ﻿namespace StackExchange.Opserver
 {
-    public class PollingSettings : Settings<PollingSettings>
+    public class PollingSettings : ModuleSettings
     {
         public override bool Enabled => Windows != null;
 

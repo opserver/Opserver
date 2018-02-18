@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Controllers
                 TopTabs.SetCurrent(filterContext.Controller.GetType());
             }
 
-            var iSettings = SettingsModule as Settings;
+            var iSettings = SettingsModule as ModuleSettings;
             if (iSettings?.Enabled == false)
                 filterContext.Result = DefaultAction();
             else

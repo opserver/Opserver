@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class CloudFlareSettings : Settings<CloudFlareSettings>
+    public class CloudFlareSettings : ModuleSettings
     {
         public override bool Enabled => Email.HasValue() && APIKey.HasValue();
         public List<DataCenter> DataCenters { get; set; } = new List<DataCenter>();

@@ -2,7 +2,7 @@
 
 namespace StackExchange.Opserver
 {
-    public class RedisSettings : Settings<RedisSettings>
+    public class RedisSettings : ModuleSettings
     {
         public override bool Enabled => Servers.Count > 0;
 

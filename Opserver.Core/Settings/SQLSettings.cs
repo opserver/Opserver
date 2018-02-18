@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class SQLSettings : Settings<SQLSettings>
+    public class SQLSettings : ModuleSettings
     {
         public override bool Enabled => Clusters.Count > 0 || Instances.Count > 0;
 

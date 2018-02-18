@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class JiraSettings : Settings<JiraSettings>
+    public class JiraSettings : ModuleSettings
     {
         public override bool Enabled => Actions.Count > 0;
 

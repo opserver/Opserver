@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class ElasticSettings : Settings<ElasticSettings>
+    public class ElasticSettings : ModuleSettings
     {
         public override bool Enabled => Clusters?.Any() ?? false;
 
