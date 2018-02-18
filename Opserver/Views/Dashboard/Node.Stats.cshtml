@@ -30,7 +30,7 @@
     @Html.Partial("Node.Interfaces", Model)
 }
 
-@if (Model.Services.Any())
+@if (Model.Services?.Any() == true)
 {
     @Html.Partial("Node.Services", Model)
 }

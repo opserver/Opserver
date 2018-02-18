@@ -65,6 +65,12 @@ namespace StackExchange.Opserver
         public static string UrlEncode(this string s) => s.HasValue() ? WebUtility.UrlEncode(s) : s;
 
         /// <summary>
+        /// returns Url Encoded string
+        /// </summary>
+        /// <param name="s">The string to encode, to put in URLs</param>
+        public static string UrlPathEncode(this string s) => s.HasValue() ? Uri.EscapeUriString(s) : s;
+
+        /// <summary>
         /// returns Html Encoded string
         /// </summary>
         /// <param name="s">The string to encode, to put in HTML</param>
