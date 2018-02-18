@@ -517,41 +517,31 @@ Status.Dashboard.Server = (function () {
             }
         });
 
-        function serviceAction(link, route, errMessage) {
-            var origText = link.text();
+        $(document).on('click', '.js-service-action', function () {
+            var link = $(this);
             var $link = link.text('').prependWaveLoader();
             var node = link.closest('[data-node]').data('node');
-            $.ajax(Status.options.rootPath + 'service/' + route, {
+            $.ajax(Status.options.rootPath + 'dashboard/node/service/action', {
                 type: 'POST',
                 data: {
                     node: node,
                     name: link.closest('[data-name]').data('name'),
-                    enable: link.data('enable')
+                    serviceAction: link.data('action')
                 },
                 success: function (data, status, xhr) {
-                    if (data === true) {
+                    if (data.Success === true) {
                         if (node) {
                             Status.refresh.run('Dashboard');
                             window.location.reload(true);
-                        } 
+                        }
                     } else {
-                        $link.text(origText).errorPopupFromJSON(xhr, errMessage);
+                        $link.text(link.data('action')).errorPopupFromJSON(xhr, data.Message);
                     }
                 },
                 error: function (xhr) {
-                    $link.text(origText).errorPopupFromJSON(xhr, errMessage);
+                    $link.text(link.data('action')).errorPopupFromJSON(xhr, data.Message);
                 }
             });
-            return false;
-        }
-        $(document).on('click', '.js-service-action', function () {
-            var link = $(this);
-            switch (link.data('action')) {
-                case 'start':
-                    return serviceAction($(this), 'start', 'An error occurred starting this service.');
-                case 'stop':
-                    return serviceAction($(this), 'stop', 'An error occurred stopping this service.');
-            }
             return false;
         });
     }

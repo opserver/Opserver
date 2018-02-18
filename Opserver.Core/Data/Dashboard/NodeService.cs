@@ -28,15 +28,25 @@ namespace StackExchange.Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
-        public Task<bool> Update(Action action)
-        {
-            return Node.DataProvider.UpdateServiceAsync(Node, Id, action);
-        }
+        public Task<ServiceActionResult> Update(Action action) =>
+            (Node.DataProvider as IServiceControlProvider)?.UpdateServiceAsync(Node, Id, action) ?? Task.FromResult(new ServiceActionResult(false, "An unexpected error has occurred"));
 
         public enum Action
         {
             Stop,
             Start
         }
+    }
+
+    public class ServiceActionResult
+    {
+        public ServiceActionResult(bool success, string message)
+        {
+            this.Success = success;
+            this.Message = message;
+        }
+
+        public bool Success { get; set; }
+        public string Message { get; set; }
     }
 }

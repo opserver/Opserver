@@ -64,6 +64,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ApiController.cs" />
+    <Compile Include="Controllers\DashboardController.Admin.cs">
+      <DependentUpon>DashboardController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\Icon.cs" />
     <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />
@@ -240,10 +243,6 @@
     <Compile Include="Controllers\ElasticController.cs" />
     <Compile Include="Controllers\SQLController.Admin.cs">
       <DependentUpon>SQLController.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Controllers\NodeController.cs" />
-    <Compile Include="Controllers\NodeController.Admin.cs">
-      <DependentUpon>NodeController.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\ProfiledModelBinder.cs" />
     <Compile Include="Models\ExtensionMethods.cs" />

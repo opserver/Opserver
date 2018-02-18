@@ -72,6 +72,7 @@
     <Compile Include="Data\Dashboard\GraphPoint.cs" />
     <Compile Include="Data\Dashboard\HardwareSummary.cs" />
     <Compile Include="Data\Dashboard\HardwareType.cs" />
+    <Compile Include="Data\Dashboard\IServiceControlProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.cs" />
     <Compile Include="Data\Dashboard\Providers\BosunDataProvider.Metrics.cs">
       <DependentUpon>BosunDataProvider.cs</DependentUpon>

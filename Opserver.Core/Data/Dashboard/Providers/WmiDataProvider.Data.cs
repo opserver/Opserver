@@ -136,7 +136,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             return Task.FromResult(new List<GraphPoint>());
         }
 
-        public override async Task<bool> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action) =>
+        public async Task<ServiceActionResult> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action) =>
             await GetWmiNodeById(node.Id).UpdateServiceAsync(serviceName, action).ConfigureAwait(false);
 
         public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null) =>

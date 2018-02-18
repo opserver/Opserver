@@ -1,6 +1,9 @@
 ﻿@using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @model Node
+@{
+    bool showServiceActions = (Current.IsInRole(StackExchange.Opserver.Models.Roles.DashboardAdmin) && Model.HasServiceControl());
+}
 
 <h5 class="page-header">@Model.Services.Count.Pluralize("Service")</h5>
 <table class="table table-striped table-middle table-super-condensed table-responsive table-dashboard text-nowrap">
@@ -9,7 +12,7 @@
             <th>Service</th>
             <th>Description</th>
             <th>State</th>
-            @if (Current.IsInRole(StackExchange.Opserver.Models.Roles.GlobalAdmin))
+            @if (showServiceActions)
             {
             <th>Action</th>
             }
@@ -28,17 +31,17 @@ Last Updated @(i.LastSync?.ToRelativeTime() ?? "Unknown")" data-val="@(i.Id)">
                 </td>
                 <td class="text-wrap">@i.Description</td>
                 <td>@i.State</td>
-                @if (Current.IsInRole(StackExchange.Opserver.Models.Roles.GlobalAdmin))
+                @if (showServiceActions)
                 {
                     <td class="actions">
                         @if (!i.Running)
-                    {
-                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="start" data-name="@i.Name.ToString()">Start</a>
-                        }
+                        {
+                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="@NodeService.Action.Start" data-name="@i.Name.ToString()">@NodeService.Action.Start</a>
+                    }
                         else
                         {
-                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="stop" data-name="@i.Name.ToString()">Stop</a>
-                        }
+                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="@NodeService.Action.Stop" data-name="@i.Name.ToString()">@NodeService.Action.Stop</a>
+                }
                     </td>
                 }
                 <td>@i.StartMode</td>
