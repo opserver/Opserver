@@ -54,7 +54,7 @@
                     <td>@c.NumReads.ToComma()</td>
                     <td>@c.NumWrites.ToComma()</td>
                     <td>@c.SessionStatus</td>
-                    <td>@c.TransactionIsolationLevel.GetDescription()</td>
+                    <td>@c.TransactionIsolationLevel.AsString(EnumFormat.Description)</td>
                     <td class="query-col">@c.QueryText.TruncateWithEllipsis(80)</td>
                 </tr>
             }

@@ -22,7 +22,7 @@
                     {
                         <strong>Team</strong>
                     }
-                    @i.PrettyName <span class="text-muted">(@i.Status.GetDescription())</span>
+                    @i.PrettyName <span class="text-muted">(@i.Status.AsString(EnumFormat.Description))</span>
                 </div>
                 <div class="panel-body">
                     <div class="row">

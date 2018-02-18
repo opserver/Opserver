@@ -26,7 +26,7 @@
             {
                 <tr>
                     <td>@c.Key.LoginName</td>
-                    <td>@c.Key.TransactionIsolationLevel.GetDescription()</td>
+                    <td>@c.Key.TransactionIsolationLevel.AsString(EnumFormat.Description)</td>
                     <td>@c.Sum(s => s.ConnectionCount).ToComma()</td>
                     <td>@c.Sum(s => s.TotalReads).ToComma()</td>
                     <td>@c.Sum(s => s.TotalWrites).ToComma()</td>

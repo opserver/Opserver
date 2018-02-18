@@ -138,7 +138,7 @@
                 <td>@(i.CreationDate?.ToRelativeTimeSpan())</td>
                 <td>@i.AffectedService.Name</td>
                 <td class="actions">
-                    <span class="@i.TextClass()">@i.Status.GetDescription()</span>
+                    <span class="@i.TextClass()">@i.Status.AsString(EnumFormat.Description)</span>
                     @if (i.LastChangedBy != null)
                     {
                         <span class="text-muted">(@i.LastChangedBy.Summary)</span>

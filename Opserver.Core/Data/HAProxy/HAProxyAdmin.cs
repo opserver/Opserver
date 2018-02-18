@@ -6,7 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using UnconstrainedMelody;
+using EnumsNET;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -97,7 +97,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                     var responseBytes = await wc.UploadValuesTaskAsync(instance.Url, new NameValueCollection
                     {
                         ["s"] = server.Name,
-                        ["action"] = action.GetDescription(),
+                        ["action"] = action.AsString(EnumFormat.Description),
                         ["b"] = p.Name
                     }).ConfigureAwait(false);
                     var response = Encoding.UTF8.GetString(responseBytes);

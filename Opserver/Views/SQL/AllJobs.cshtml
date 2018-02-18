@@ -34,7 +34,7 @@
             @foreach (var jw in allJobs)
             {
                 var j = jw.Job;
-                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.GetDescription() : "Unknown";
+                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.AsString(EnumFormat.Description) : "Unknown";
                 <tr data-node="@jw.ServerName" class="@j.RowClass()@(j.IsRunning ? " info" : null)@(j.IsEnabled ? "" : " text-muted")" data-guid="@j.JobId.ToString()" title="@if(!j.IsEnabled){<text>(DISABLED)
 </text>}Job: @j.Name
 @j.Description
@@ -64,7 +64,7 @@ Last Run Message: @j.LastRunMessage">
                     }
                     else if (j.LastRunStatus.HasValue)
                     {
-                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.GetDescription().IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.AsString(EnumFormat.Description).IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
                         <td data-val="@(j.LastStartDate?.ToEpochTime())">@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td data-val="@(j.LastStopDate?.ToEpochTime())">@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td data-val="@(j.LastRunDurationSeconds ?? -1)">@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnconstrainedMelody;
+using EnumsNET;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Data.SQL
                         case ServiceStatuses.PausePending:
                             return null;
                         default:
-                            return ServiceName + " - " + (Status.HasValue ? Status.Value.GetDescription() : "");
+                            return ServiceName + " - " + (Status.HasValue ? Status.Value.AsString(EnumFormat.Description) : "");
                     }
                 }
             }

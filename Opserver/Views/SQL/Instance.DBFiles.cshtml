@@ -41,7 +41,7 @@
                 {
                 <tr>
                     <td>@f.DatabaseName</td>
-                    <td>@f.FileType.GetDescription()</td>
+                    <td>@f.FileType.AsString(EnumFormat.Description)</td>
                     <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
                     <td data-val="@f.TotalSizeBytes.ToString()">@f.TotalSizeBytes.ToHumanReadableSize()</td>
                     <td title="Reads: @f.NumReads.ToComma()

@@ -29,7 +29,7 @@
         <tbody>
             @foreach (var j in data.OrderByDescending(j => j.LastRunRequestedDate))
             {
-                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.GetDescription() : "Unknown";
+                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.AsString(EnumFormat.Description) : "Unknown";
                 <tr class="@j.RowClass()@(j.IsRunning ? " info" : null)@(j.IsEnabled ? "" : " text-muted")" data-guid="@j.JobId.ToString()" title="@if(!j.IsEnabled){<text>(DISABLED) 
 </text>}Job: @j.Name
 @j.Description
@@ -57,7 +57,7 @@ Last Run Message: @j.LastRunMessage">
                     }
                     else if (j.LastRunStatus.HasValue)
                     {
-                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.GetDescription().IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.AsString(EnumFormat.Description).IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
                         <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>

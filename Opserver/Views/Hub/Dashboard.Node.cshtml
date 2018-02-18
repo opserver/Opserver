@@ -39,7 +39,7 @@
     <div class="status-block mem-status">
         <span class="label">Mem </span>@s.MemoryPercentStatusSpan()
         <div class="status-graph">@s.MemoryStatusSpan()@if (s.HasValidMemoryReading) {
-            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().GetDescription()" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div></div>
+            <div class="space-used" style="width: 215px;"><div class="used @s.MemoryMonitorStatus().AsString(EnumFormat.Description)" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%"></div></div>
         }
         </div>
     </div>

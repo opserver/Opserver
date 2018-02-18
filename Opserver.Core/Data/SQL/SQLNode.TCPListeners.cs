@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnconstrainedMelody;
+using EnumsNET;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.SQL
                 }
             }
 
-            public string MonitorStatusReason => State == TCPListenerStates.Online ? null : State.GetDescription();
+            public string MonitorStatusReason => State == TCPListenerStates.Online ? null : State.AsString(EnumFormat.Description);
 
             public int ListenerId { get; internal set; }
             public string IPAddress { get; internal set; }

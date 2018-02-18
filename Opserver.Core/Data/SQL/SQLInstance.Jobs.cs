@@ -4,7 +4,7 @@ using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
-using UnconstrainedMelody;
+using EnumsNET;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Data.SQL
                     if (!IsEnabled) return "Not enabled";
                     if (IsRunning || LastRunMonitorStatus == MonitorStatus.Good) return null;
                     return Name + " - Last run: " +
-                           (LastRunStatus.HasValue ? LastRunStatus.Value.GetDescription() : "unknown");
+                           (LastRunStatus.HasValue ? LastRunStatus.Value.AsString(EnumFormat.Description) : "unknown");
                 }
             }
 

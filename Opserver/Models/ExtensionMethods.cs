@@ -6,12 +6,12 @@ using System.Web;
 using System.Web.Mvc;
 using System.Xml;
 using System.Xml.Xsl;
+using EnumsNET;
 using StackExchange.Opserver;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
-using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Models
 {
@@ -92,7 +92,7 @@ namespace StackExchange.Opserver.Models
         public static IHtmlString CPUStatusSpan(this Node info)
         {
             if (info == null || info.CPULoad < 0) return MvcHtmlString.Empty;
-            return $@"<span class=""{info.CPUMonitorStatus().GetDescription()}"">{info.CPULoad?.ToString("n0")} %</span>".AsHtml();
+            return $@"<span class=""{info.CPUMonitorStatus().AsString(EnumFormat.Description)}"">{info.CPULoad?.ToString("n0")} %</span>".AsHtml();
         }
 
         public static string PrettyTotalNetwork(this Node info) =>

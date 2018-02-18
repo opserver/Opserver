@@ -57,7 +57,7 @@ else
                     {
                         var percentFull = f.UsedSizeBytes * 1.0 / f.TotalSizeBytes * 100;
                         <tr>
-                            <td>@f.FileType.GetDescription()</td>
+                            <td>@f.FileType.AsString(EnumFormat.Description)</td>
                             <td title="Virtual Name: @f.FileName"><span title="@f.PhysicalName">@f.ShortPhysicalName</span></td>
                             <td>
                                 @f.UsedSizeBytes.ToHumanReadableSize() / @f.TotalSizeBytes.ToHumanReadableSize() <span class="text-muted">(@percentFull.ToString("n2")%)</span>

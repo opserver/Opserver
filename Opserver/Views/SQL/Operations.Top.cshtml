@@ -16,11 +16,11 @@
     <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
         @if (sort == Model.TopSearchOptions.Sort)
         {
-            <span class="current-sort" title="@sort.GetDescription()">@title</span>
+            <span class="current-sort" title="@sort.AsString(EnumFormat.Description)">@title</span>
         }
         else
         {
-            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.GetDescription()">@title</a>
+            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
         }
     </th>
 }
@@ -47,7 +47,7 @@
 else
 {
     <h5 class="page-header">
-        Top queries on @i.Name @(Model.TopSearchOptions.Sort.HasValue ? " by " + Model.TopSearchOptions.Sort.Value.GetDescription() : "")
+        Top queries on @i.Name @(Model.TopSearchOptions.Sort.HasValue ? " by " + Model.TopSearchOptions.Sort.Value.AsString(EnumFormat.Description) : "")
         <span class="pull-right">
             <a href="#/sql/top/filters" class="hover-pulsate@(Model.TopSearchOptions.IsNonDefault ? " text-warning" : "")" title="Filter"><i class="fa fa-filter" aria-hidden="true"></i></a>
             @*<a href="#" class="js-reload-link">Reload</a>*@

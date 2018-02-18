@@ -63,7 +63,7 @@
                         }
                     </td>
                     <td>
-                        @p.DataCompression.GetDescription()
+                        @p.DataCompression.AsString(EnumFormat.Description)
                     </td>
                     <td>@p.RowCount.ToComma()</td>
                     <td>@((p.ReservedSpaceKB * 1024).ToSize().ToMutedIfNA())</td>

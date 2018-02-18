@@ -56,7 +56,7 @@
                     <select name="filterField" class="form-control">
                         @foreach (SQLInstance.ActiveSearchOptions.FilterFields e in Enum.GetValues(typeof(SQLInstance.ActiveSearchOptions.FilterFields)))
                         {
-                            <option value="@e.ToString()" selected="@(e == Model.ActiveSearchOptions.FilterField)">@e.GetDescription()</option>
+                            <option value="@e.ToString()" selected="@(e == Model.ActiveSearchOptions.FilterField)">@e.AsString(EnumFormat.Description)</option>
                         }
                     </select>
                 </div>

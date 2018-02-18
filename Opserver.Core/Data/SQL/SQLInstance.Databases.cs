@@ -1,9 +1,9 @@
 ﻿using Dapper;
+using EnumsNET;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using UnconstrainedMelody;
 
 namespace StackExchange.Opserver.Data.SQL
 {
@@ -119,7 +119,7 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     if (IsReadOnly) return "Read-only";
                     // TODO: Other statuses, e.g. Not Synchronizing
-                    return State.GetDescription();
+                    return State.AsString(EnumFormat.Description);
                 }
             }
 
@@ -161,7 +161,7 @@ namespace StackExchange.Opserver.Data.SQL
                         case DatabaseStates.Online:
                             return null;
                         default:
-                            return Name + " database is " + State.GetDescription();
+                            return Name + " database is " + State.AsString(EnumFormat.Description);
                     }
                 }
             }

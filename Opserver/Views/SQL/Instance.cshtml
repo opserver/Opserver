@@ -234,10 +234,10 @@ Top Users:
                                 @foreach (var s in services)
                                 {
                                 <div class="value-block col-md-@cols @s.MonitorStatus.BackgroundClass()" title="Name: @s.ServiceName
-            Status: @s.Status.Value.GetDescription()
+            Status: @s.Status.Value.AsString(EnumFormat.Description)
             Account: @s.ServiceAccount
             Clustered: @(s.IsClusteredBool ? "Yes" : "No")">
-                                    @s.Status.Value.GetDescription() <span class="small">(@s.StartupType.Value.GetDescription())</span>
+                                    @s.Status.Value.AsString(EnumFormat.Description) <span class="small">(@s.StartupType.Value.AsString(EnumFormat.Description))</span>
                                     <label>@s.ServiceName.Replace(" (MSSQLSERVER)", "").Replace(" Filter Daemon Launcher", "")</label>
                                 </div>
                                 }

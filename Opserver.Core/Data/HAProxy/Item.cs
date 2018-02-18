@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using UnconstrainedMelody;
+using EnumsNET;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
@@ -467,7 +467,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.GetDescription();
+        public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.AsString(EnumFormat.Description);
 
         public bool IsChecked => Status != "no check";
         public bool IsActive => Active == 1;
