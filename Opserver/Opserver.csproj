@@ -67,6 +67,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Controllers\ApiController.cs" />
+    <Compile Include="Controllers\DashboardController.Admin.cs">
+      <DependentUpon>DashboardController.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\Icon.cs" />
     <Compile Include="Helpers\MiniProfilerCacheStorage.cs" />
     <Compile Include="Helpers\TestItem.cs" />

@@ -5,7 +5,7 @@ using System.Net;
 
 namespace StackExchange.Opserver.Data.Dashboard.Providers
 {
-    internal partial class WmiDataProvider : DashboardDataProvider<WMISettings>
+    internal partial class WmiDataProvider : DashboardDataProvider<WMISettings>, IServiceControlProvider
     {
         private readonly WMISettings _config;
         private readonly List<WmiNode> _wmiNodes = new List<WmiNode>();

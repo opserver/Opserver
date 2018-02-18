@@ -516,6 +516,34 @@ Status.Dashboard.Server = (function () {
                 5: { sorter: 'dataVal', sortInitialOrder: 'desc' }
             }
         });
+
+        $(document).on('click', '.js-service-action', function () {
+            var link = $(this);
+            var $link = link.text('').prependWaveLoader();
+            var node = link.closest('[data-node]').data('node');
+            $.ajax(Status.options.rootPath + 'dashboard/node/service/action', {
+                type: 'POST',
+                data: {
+                    node: node,
+                    name: link.closest('[data-name]').data('name'),
+                    serviceAction: link.data('action')
+                },
+                success: function (data, status, xhr) {
+                    if (data.Success === true) {
+                        if (node) {
+                            Status.refresh.run('Dashboard');
+                            window.location.reload(true);
+                        }
+                    } else {
+                        $link.text(link.data('action')).errorPopupFromJSON(xhr, data.Message);
+                    }
+                },
+                error: function (xhr) {
+                    $link.text(link.data('action')).errorPopupFromJSON(xhr, data.Message);
+                }
+            });
+            return false;
+        });
     }
     
     function liveDashboard(startValue) {
