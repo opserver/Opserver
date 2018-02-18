@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.IO;
+using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.SettingsProviders
 {
@@ -44,7 +45,7 @@ namespace StackExchange.Opserver.SettingsProviders
             var section = ConfigurationManager.GetSection("Settings") as SettingsSection;
             if (section == null)
             {
-                throw new ConfigurationErrorsException("No settings section found in the config");
+                throw new OpserverConfigException("No settings section found in the config");
             }
             var provider = section.Provider;
             if (!provider.EndsWith("SettingsProvider")) provider += "SettingsProvider";
@@ -53,7 +54,7 @@ namespace StackExchange.Opserver.SettingsProviders
             var t = Type.GetType(provider, false);
             if (t == null)
             {
-                throw new ConfigurationErrorsException($"Could not resolve type '{section.Provider}' ('{provider}')");
+                throw new OpserverConfigException($"Could not resolve type '{section.Provider}' ('{provider}')");
             }
             var p = (SettingsProvider) Activator.CreateInstance(t, section);
             return p;

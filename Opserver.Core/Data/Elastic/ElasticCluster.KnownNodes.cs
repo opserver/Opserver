@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
+using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
@@ -50,8 +50,10 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                     else
                     {
-                        Current.LogException(new ConfigurationErrorsException(
-                            $"Invalid port specified for {parts[0]}: '{parts[1]}'"));
+                        Current.LogException(
+                            new OpserverConfigException($"Invalid port specified for {parts[0]}: '{parts[1]}'")
+                            .AddLoggedData("Config Value", hostAndPort)
+                        );
                         Port = DefaultElasticPort;
                     }
                 }
