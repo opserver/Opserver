@@ -15,7 +15,6 @@
     <PackageReference Include="StackExchange.Redis" Version="1.2.6" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Management" />
-    <Reference Include="System.Web" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Data\CloudFlare\CloudFlareAPI.*.cs" DependentUpon="CloudFlareAPI.cs" />

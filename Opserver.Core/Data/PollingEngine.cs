@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Hosting;
 
 namespace StackExchange.Opserver.Data
 {
@@ -19,6 +18,12 @@ namespace StackExchange.Opserver.Data
         internal static long _activePolls;
         private static DateTime? _lastPollAll;
         private static DateTime _startTime;
+        private static Action<Func<Task>> _taskRunner;
+
+        public static void Configure(Action<Func<Task>> taskRunner)
+        {
+            _taskRunner = taskRunner;
+        }
 
         static PollingEngine()
         {
@@ -155,7 +160,7 @@ namespace StackExchange.Opserver.Data
                     {
                         continue;
                     }
-                    HostingEnvironment.QueueBackgroundWorkItem(ct => n.PollAsync());
+                    _taskRunner?.Invoke(() => n.PollAsync());
                 }
             }
             catch (Exception e)
