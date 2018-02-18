@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         {
             using (var wc = GetWebClient())
             {
-                var url = new Uri($"{APIBaseUrl}{path}{(values != null ? "?" + values : "")}");
+                var url = new Uri(APIBaseUrl + path + (values != null ? "?" + values : ""));
                 var rawResult = await wc.DownloadStringTaskAsync(url).ConfigureAwait(false);
                 return JSON.Deserialize<CloudFlareResult<T>>(rawResult, JilOptions).Result;
             }
@@ -96,7 +96,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         {
             using (var wc = GetWebClient())
             {
-                var url = new Uri($"{APIBaseUrl}{path}");
+                var url = new Uri(APIBaseUrl + path);
                 var rawResult = wc.UploadValues(url, method, values);
                 var resultString = Encoding.ASCII.GetString(rawResult);
                 return JSON.Deserialize<T>(resultString, JilOptions);

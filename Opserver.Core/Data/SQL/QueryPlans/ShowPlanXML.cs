@@ -50,8 +50,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 //TODO: Cross-statement vars declared in an assign, used later
-                var ss = this as StmtSimpleType;
-                return ss != null ? GetDeclareStatement(ss.QueryPlan) : "";
+                return this is StmtSimpleType ss ? GetDeclareStatement(ss.QueryPlan) : "";
             }
         }
 
@@ -60,8 +59,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 //TODO: Pair these down, seeing what looks good for now
-                var ss = this as StmtSimpleType;
-                return ss != null ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim() : "";
+                return this is StmtSimpleType ss ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim() : "";
             }
         }
 

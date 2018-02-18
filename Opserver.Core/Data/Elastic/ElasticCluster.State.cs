@@ -20,19 +20,10 @@ namespace StackExchange.Opserver.Data.Elastic
         public class ClusterStateInfo : IMonitorStatus
         {
             private MonitorStatus? _monitorStatus;
-            public MonitorStatus MonitorStatus
-            {
-                get
-                {
-                    if (!_monitorStatus.HasValue)
-                    {
-                        _monitorStatus = RoutingNodes?.Nodes.Values.SelectMany(n => n)
-                            .Union(RoutingNodes.Unassigned)
-                            .GetWorstStatus() ?? MonitorStatus.Unknown;
-                    }
-                    return _monitorStatus.Value;
-                }
-            }
+            public MonitorStatus MonitorStatus =>
+                _monitorStatus ?? (_monitorStatus = RoutingNodes?.Nodes.Values.SelectMany(n => n)
+                    .Union(RoutingNodes.Unassigned)
+                    .GetWorstStatus() ?? MonitorStatus.Unknown).Value;
             // TODO: Implement
             public string MonitorStatusReason => null;
 

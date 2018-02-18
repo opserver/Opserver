@@ -60,7 +60,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         ServiceTag = h.SerialNumber,
                         MachineType = h.OS?.Caption,
                         MachineOSVersion = h.OS?.Version,
-                        KernelVersion = Version.TryParse(h.OS?.Version, out Version kernelVersion) ? kernelVersion : null,
+                        KernelVersion = Version.TryParse(h.OS?.Version, out var kernelVersion) ? kernelVersion : null,
 
                         Interfaces = h.Interfaces?.Select(hi => new Interface
                         {
@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             TypeDescription = hi.Value.Type,
                             Caption = hi.Value.Description,
                             PhysicalAddress = hi.Value.MAC,
-                            IPs = hi.Value?.IPAddresses?.Select(ip => IPNet.TryParse(ip, out IPNet result) ? result : null).Where(ip => ip != null).ToList() ?? new List<IPNet>(),
+                            IPs = hi.Value?.IPAddresses?.Select(ip => IPNet.TryParse(ip, out var result) ? result : null).Where(ip => ip != null).ToList() ?? new List<IPNet>(),
                             LastSync = hi.Value.StatsLastUpdated,
                             InBps = hi.Value.Inbps,
                             OutBps = hi.Value.Outbps,
@@ -86,7 +86,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                             Name = hd.Key,
                             NodeId = h.Name,
                             Caption = hd.Key,
-                            Description = $"{hd.Key}",
+                            Description = hd.Key ?? string.Empty,
                             LastSync = hd.Value.StatsLastUpdated,
                             Used = hd.Value.UsedBytes,
                             Size = hd.Value.TotalBytes,

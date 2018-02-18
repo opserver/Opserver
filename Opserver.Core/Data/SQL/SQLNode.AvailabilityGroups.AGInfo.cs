@@ -35,18 +35,8 @@ namespace StackExchange.Opserver.Data.SQL
             public SynchronizationHealths? GroupSynchronizationHealth { get; internal set; }
 
             private bool? _hasDatabases;
-            public bool HasDatabases
-            {
-                get
-                {
-                    if (!_hasDatabases.HasValue)
-                    {
-                        _hasDatabases = LocalReplica?.Databases.Count > 0
-                                        || RemoteReplicas?.Sum(r => r.Databases?.Count ?? 0) > 0;
-                    }
-                    return _hasDatabases.Value;
-                }
-            }
+            public bool HasDatabases =>
+                _hasDatabases ?? (_hasDatabases = LocalReplica?.Databases.Count > 0|| RemoteReplicas?.Sum(r => r.Databases?.Count ?? 0) > 0).Value;
 
             public List<AGReplica> Replicas { get; internal set; }
             public List<AGListener> Listeners { get; internal set; }
