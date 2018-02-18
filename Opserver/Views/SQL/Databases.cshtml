@@ -19,7 +19,7 @@
         $(document).on('click', '.database-row', function () {
             var dbName = $(this).data('dbname');
             if (dbName) {
-                window.location.hash = '#/db/' + dbName + '/tables';
+                window.location.hash = '#/db/' + encodeURIComponent(dbName) + '/tables';
             }
         });
         var header = $('.js-databases-table .category-row').detach();

@@ -9,7 +9,7 @@ using StackExchange.Opserver.Models;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.LocalRequest | Roles.InternalRequest)] // API Requests are internal only
+    [OnlyAllow(Roles.InternalRequest | Roles.ApiRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
         private Options JilOptions = Options.ExcludeNulls;

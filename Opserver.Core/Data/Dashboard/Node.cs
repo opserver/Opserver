@@ -212,7 +212,7 @@ namespace StackExchange.Opserver.Data.Dashboard
             {
                 if (_applicationMemoryTextSummary != null) return _applicationMemoryTextSummary;
 
-                if (Apps?.Any() != true) return _applicationCPUTextSummary = "";
+                if (Apps?.Any() != true) return _applicationMemoryTextSummary = "";
 
                 var sb = StringBuilderCache.Get();
                 sb.AppendFormat("Total App Pool Memory: {0}\n", Apps.Sum(a => a.MemoryUsed.GetValueOrDefault(0)).ToSize());
@@ -221,7 +221,7 @@ namespace StackExchange.Opserver.Data.Dashboard
                 {
                     sb.AppendFormat("  {0}: {1}\n", a.NiceName, a.MemoryUsed.GetValueOrDefault(0).ToSize());
                 }
-                return _applicationCPUTextSummary = sb.ToStringRecycle();
+                return _applicationMemoryTextSummary = sb.ToStringRecycle();
             }
         }
 

@@ -19,7 +19,7 @@ var props = i.ServerProperties.SafeData(true);
             {
                 <tbody>
                     <tr class="category-row">
-                        <th colspan="11">
+                        <th colspan="12">
                             <h5>
                                 <a href="~/sql/servers#/cluster/@c.Name" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="text-muted small">(@c.QuorumType.GetDescription() - @c.QuorumState.GetDescription())</span>
                                 @if (c.Description.HasValue()) { <span class="text-muted small">(@c.Description)</span> }
