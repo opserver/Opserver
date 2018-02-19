@@ -27,15 +27,13 @@ namespace StackExchange.Opserver.Monitoring
             {
                 using (var q = Query(machineName, query, wmiNamespace))
                 {
-                    await q.GetFirstResultAsync().ConfigureAwait(false);
+                    return (await q.GetFirstResultAsync().ConfigureAwait(false)) != null;
                 }
             }
             catch
             {
                 return false;
             }
-
-            return true;
         }
 
         private static readonly ConnectionOptions _localOptions, _remoteOptions;
