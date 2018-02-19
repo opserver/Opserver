@@ -760,8 +760,9 @@ Open dbs;
 Fetch Next From dbs Into @dbId, @dbName;
 While @@FETCH_STATUS = 0
 Begin
-    Insert Into #vlfTemp
-    Exec('DBCC LOGINFO(''' + @dbName + ''') WITH NO_INFOMSGS');
+    IF IS_SRVROLEMEMBER ('sysadmin') = 1
+       Insert Into #vlfTemp
+       Exec('DBCC LOGINFO(''' + @dbName + ''') WITH NO_INFOMSGS');
     Insert Into #VLFCounts (DatabaseId, DatabaseName, VLFCount)
     Values (@dbId, @dbName, @@ROWCOUNT);
     Truncate Table #vlfTemp;
