@@ -110,6 +110,14 @@ else
                                     }
                                 </div>
                                 <div class="list-group-item">
+                                    @if (i.LastUserRead.HasValue)
+                                    {
+                                        <div><span class="text-muted">Last Read:</span> @(i.LastUserRead?.ToRelativeTimeSpan())</div>
+                                    }
+                                    @if (i.LastUserUpdate.HasValue)
+                                    {
+                                        <div><span class="text-muted">Last Update:</span> @(i.LastUserUpdate?.ToRelativeTimeSpan())</div>
+                                    }
                                     @if (i.ReservedInRowBytes > 0)
                                     {
                                         <div><span class="text-muted">In-row Bytes:</span> @i.ReservedInRowBytes.ToSize()</div>

@@ -1131,6 +1131,8 @@ Group By t.name,
             public string IndexName { get; internal set; }
             public int IndexId { get; internal set; }
             public IndexType IndexType { get; internal set; }
+            public DateTime? LastUserRead { get; internal set; }
+            public DateTime? LastUserUpdate { get; internal set; }
             public string Definition { get; internal set; }
             public string KeyDefinition { get; internal set; }
             public string IncludeDefinition { get; internal set; }
@@ -1166,8 +1168,8 @@ Select sc.name SchemaName,
        si.name IndexName,
        si.index_id IndexId,
        si.Type IndexType,
-       (Select Max(user_reads) 
-          From (VALUES (last_user_seek), (last_user_scan), (last_user_lookup)) AS value(user_reads)) AS LastUserRead,
+       Cast((Select Max(user_reads) 
+          From (VALUES (last_user_seek), (last_user_scan), (last_user_lookup)) value(user_reads)) as DateTime) LastUserRead,
        last_user_update LastUserUpdate,
        Case si.index_id When 0 Then N'/* No create statement (Heap) */'
        Else 
