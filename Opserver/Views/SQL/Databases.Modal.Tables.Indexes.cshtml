@@ -1,5 +1,5 @@
 ﻿@using StackExchange.Opserver.Data.SQL
-@model IEnumerable<SQLInstance.TableIndex>
+@model IEnumerable<SQLInstance.DatabaseIndex>
 @{
     var indexes = Model.ToList();
 }
@@ -24,27 +24,27 @@
                                 <i class="fa fa-list-alt fa-fw" aria-hidden="true"></i>
                             }
                             @index.IndexName
-                            <span class="text-muted">(@index.Type@(index.IsUnique ? ", Unique" : null)@(index.HasFilter ? ", Filtered" : null))</span>
+                            <span class="text-muted">(@index.IndexType@(index.IsUnique ? ", Unique" : null)@(index.IsFiltered ? ", Filtered" : null))</span>
                         </div>
                         <div>
-                            <span class="text-muted">Columns:</span> @index.ColumnNames
+                            <span class="text-muted">Columns:</span> @(index.KeyDefinition?.Replace("[","").Replace("]",""))
                         </div>
-                        @if (index.IncludedColumnNames.HasValue())
+                        @if (index.IncludeDefinition.HasValue())
                         {
                             <div>
-                                <span class="text-muted">Included:</span> @index.IncludedColumnNames
+                                <span class="text-muted">Included:</span> @(index.IncludeDefinition?.Replace("[", "").Replace("]", ""))
                             </div>
                         }
-                        @if (index.HasFilter)
+                        @if (index.IsFiltered)
                         {
                             <div>
-                                <span class="text-muted">Filter:</span> @index.FilterDefinition
+                                <span class="text-muted">Filter:</span> @(index.FilterDefinition?.Replace("[", "").Replace("]", ""))
                             </div>
                         }
-                        @if (index.LastUpdated != null)
+                        @if (index.StatsLastUpdated.HasValue)
                         {
                             <div>
-                                <span class="text-muted">Last Stats Rebuild:</span> @index.LastUpdated.Value.ToRelativeTimeSpan()
+                                <span class="text-muted">Last Stats Rebuild:</span> @index.StatsLastUpdated.Value.ToRelativeTimeSpan()
                             </div>
                         }
                     </div>

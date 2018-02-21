@@ -10,7 +10,7 @@
     var columnLookup = columns.Data
         .GroupBy(c => Tuple.Create(c.SchemaName, c.TableName))
         .ToDictionary(g => g.Key, g => g.ToList());
-    var indexes = s.GetIndexInfo(Model.Database);
+    var indexes = s.GetIndexInfoDetiled(Model.Database);
     var partitions = s.GetPartitionInfo(Model.Database);
 }
 @section top {
@@ -62,7 +62,7 @@
                 <tr class="tablesorter-childRow hidden text-wrap">
                     <td colspan="6">
                         @Html.Partial("Databases.Modal.Columns", columnLookup[Tuple.Create(t.SchemaName, t.TableName)])
-                        @Html.Partial("Databases.Modal.Indexes", indexes.Data.Where(c => c.SchemaName == t.SchemaName && c.TableName == t.TableName))
+                        @Html.Partial("Databases.Modal.Tables.Indexes", indexes.Data.Where(c => c.SchemaName == t.SchemaName && c.TableName == t.TableName))
                         @Html.Partial("Databases.Modal.Partitions", partitions.Data.Where(c => c.SchemaName == t.SchemaName && c.TableName == t.TableName))
                     </td>
                 </tr>

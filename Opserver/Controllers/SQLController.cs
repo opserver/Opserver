@@ -250,6 +250,9 @@ namespace StackExchange.Opserver.Controllers
                 case "views":
                     vd.View = DatabasesModel.Views.Views;
                     return View("Databases.Modal.Views", vd);
+                case "unusedindexes":
+                    vd.View = DatabasesModel.Views.UnusedIndexes;
+                    return View("Databases.Modal.UnusedIndexes", vd);
                 case "missingindexes":
                     vd.View = DatabasesModel.Views.MissingIndexes;
                     return View("Databases.Modal.MissingIndexes", vd);

@@ -27,8 +27,8 @@
         @RenderLink(DatabasesModel.Views.Backups, "Backups", "archive")
         @RenderLink(DatabasesModel.Views.Restores, "Restores", "history")
         @RenderLink(DatabasesModel.Views.Storage, "Storage", "hdd-o")
+        @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", "thumbs-o-down", !Model.Instance.Supports<SQLInstance.DatabaseIndex>())
         @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", "question-circle-o", !Model.Instance.Supports<SQLInstance.MissingIndex>())
-        @*@RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", "square-o", true)*@
         @*@RenderLink(DatabasesModel.Views.BlitzIndex, "Blitz Index", "bolt", true)*@
     </div>
     <div class="col-md-10 js-database-modal-right">

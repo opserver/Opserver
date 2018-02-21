@@ -87,6 +87,9 @@ namespace StackExchange.Opserver.Data.SQL
         public LightweightCache<List<DatabasePartition>> GetPartitionInfo(string databaseName) =>
             DatabaseFetch<DatabasePartition>(databaseName);
 
+        public LightweightCache<List<DatabaseIndex>> GetIndexInfoDetiled(string databaseName) =>
+            DatabaseFetch<DatabaseIndex>(databaseName);
+
         public Database GetDatabase(string databaseName) => Databases.Data?.FirstOrDefault(db => db.Name == databaseName);
 
         private LightweightCache<List<T>> DatabaseFetch<T>(string databaseName, TimeSpan? duration = null) where T : ISQLVersioned, new()
@@ -1117,6 +1120,179 @@ Group By t.name,
          pf.boundary_value_on_right,
          prv.value,
          p.data_compression";
+        }
+
+        public class DatabaseIndex : ISQLVersioned
+        {
+            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+
+            public string SchemaName { get; internal set; }
+            public string TableName { get; internal set; }
+            public string IndexName { get; internal set; }
+            public int IndexId { get; internal set; }
+            public IndexType IndexType { get; internal set; }
+            public string Definition { get; internal set; }
+            public string KeyDefinition { get; internal set; }
+            public string IncludeDefinition { get; internal set; }
+            public string FilterDefinition { get; internal set; }
+            public long ReservedInRowBytes { get; internal set; }
+            public long ReservedLobBytes { get; internal set; }
+            public long RowCount { get; internal set; }
+            public long UserSeeks { get; internal set; }
+            public long UserScans { get; internal set; }
+            public long UserLookups { get; internal set; }
+            public long UserUpdates { get; internal set; }
+            public int PartitionCount { get; internal set; }
+            public bool AllowPageLocks { get; internal set; }
+            public bool AllowRowLocks { get; internal set; }
+            public bool IsHypothetical { get; internal set; }
+            public bool IsPrimaryKey { get; internal set; }
+            public bool IsFiltered { get; internal set; }
+            public bool IsUnique { get; internal set; }
+            public byte FillFactor { get; internal set; }
+            public string PartitionFunction { get; internal set; }
+            public string PartitionScheme { get; internal set; }
+            public string Filegroup { get; internal set; }
+            public DateTime? StatsLastUpdated { get; internal set; }
+
+            public long TotalBytes => ReservedInRowBytes + ReservedLobBytes;
+
+            // A slightly tweaked version of the awesome index creation query by Kendra Little
+            // Blog link: https://littlekendra.com/2016/05/05/how-to-script-out-indexes-from-sql-server/
+            // Licensed under MIT: https://gist.github.com/LitKnd/2668396699c82220384d2ca2c19bbc32
+            public string GetFetchSQL(Version v) => @"
+Select sc.name SchemaName,
+       t.name AS TableName,
+       si.name IndexName,
+       si.index_id IndexId,
+       si.Type IndexType,
+       (Select Max(user_reads) 
+          From (VALUES (last_user_seek), (last_user_scan), (last_user_lookup)) AS value(user_reads)) AS LastUserRead,
+       last_user_update LastUserUpdate,
+       Case si.index_id When 0 Then N'/* No create statement (Heap) */'
+       Else 
+           Case is_primary_key When 1 Then
+               N'ALTER TABLE ' + QuoteName(sc.name) + N'.' + QuoteName(t.name) + + char(10) + N'  ADD CONSTRAINT ' + QuoteName(si.name) + N' PRIMARY KEY ' +
+                   Case When si.index_id > 1 Then N'NON' Else N'' End + N'CLUSTERED '
+               Else N'CREATE ' + 
+                   Case When si.is_unique = 1 Then N'UNIQUE ' Else N'' End +
+                   Case When si.index_id > 1 Then N'NON' Else N'' End + N'CLUSTERED ' +
+                   N'INDEX ' + QuoteName(si.name) + N' ON ' + QuoteName(sc.name) + N'.' + QuoteName(t.name) + char(10) + N' '
+           End +
+           /* key def */ N'(' + key_definition + N')' +
+           /* includes */ Case When include_definition Is Not Null Then 
+               char(10) + N' INCLUDE (' + include_definition + N')'
+               Else N''
+           End +
+           /* filters */ Case When filter_definition Is Not Null Then 
+               char(10) + N' WHERE ' + filter_definition Else N''
+           End +
+           /* with clause - compression goes here */
+           Case When row_compression_partition_list Is Not Null OR page_compression_partition_list Is Not Null 
+               Then char(10) + N' WITH (' +
+                   Case When row_compression_partition_list Is Not Null Then
+                       N'DATA_COMPRESSION = ROW ' + Case When psc.name IS NULL Then N'' Else + N' ON PARTITIONS (' + row_compression_partition_list + N')' End
+                   Else N'' End +
+                   Case When row_compression_partition_list Is Not Null AND page_compression_partition_list Is Not Null Then N', ' Else N'' End +
+                   Case When page_compression_partition_list Is Not Null Then
+                       N'DATA_COMPRESSION = PAGE ' + Case When psc.name IS NULL Then N'' Else + N' ON PARTITIONS (' + page_compression_partition_list + N')' End
+                   Else N'' End
+               + N')'
+               Else N''
+           End +
+           /* ON where? filegroup? partition scheme? */
+           ' ON ' + Case When psc.name is null 
+               Then ISNULL(QuoteName(fg.name),N'')
+               Else psc.name + N' (' + partitioning_column.column_name + N')' 
+               End
+           + N';'
+       End Definition,
+       key_definition KeyDefinition,
+	   include_definition IncludeDefinition,
+       filter_definition FilterDefinition,
+       partition_sums.reserved_in_row_bytes ReservedInRowBytes,
+       partition_sums.reserved_LOB_bytes ReservedLobBytes,
+       partition_sums.row_count [RowCount],
+       stat.user_seeks UserSeeks,
+       stat.user_scans UserScans,
+       stat.user_lookups UserLookups,
+       user_updates UserUpdates,
+       partition_sums.partition_count PartitionCount,
+       si.allow_page_locks AllowPageLocks,
+       si.allow_row_locks AllowRowLocks,
+       si.is_hypothetical IsHypothetical,
+       si.is_primary_key IsPrimaryKey,
+       si.has_filter IsFiltered,
+       si.is_unique IsUnique,
+       si.fill_factor [FillFactor],
+       pf.name PartitionFunction,
+       psc.name PartitionScheme,
+       fg.name Filegroup,
+       Stats_Date(si.object_id, si.index_id) StatsLastUpdated
+  From sys.indexes si
+       Join sys.tables t On si.object_id = t.object_id
+       Join sys.schemas sc On t.schema_id = sc.schema_id
+       Left Join sys.dm_db_index_usage_stats stat
+                 On stat.database_id = DB_ID()
+                 And si.object_id = stat.object_id
+                 And si.index_id=stat.index_id
+       Left Join sys.partition_schemes psc On si.data_space_id = psc.data_space_id
+       Left Join sys.partition_functions pf On psc.function_id = pf.function_id
+       Left Join sys.filegroups fg On si.data_space_id = fg.data_space_id
+       Outer Apply (Select Stuff( /* Key list */
+                        (Select N', ' + QuoteName(c.name) + (Case ic.is_descending_key When 1 then N' DESC' Else N'' End)
+                      From sys.index_columns ic 
+                           Join sys.columns c
+                                On ic.column_id = c.column_id
+                                And ic.object_id = c.object_id
+                     Where ic.object_id = si.object_id
+                       And ic.index_id = si.index_id
+                       And ic.key_ordinal > 0
+                  Order By ic.key_ordinal For XML Path(''), Type).value('.', 'NVARCHAR(MAX)'),1,2,'')) keys (key_definition)
+       Outer Apply (Select Max(QuoteName(c.name)) column_name /* Partitioning Ordinal */
+                      From sys.index_columns ic 
+                           Join sys.columns c
+                                On ic.column_id = c.column_id
+                                And ic.object_id = c.object_id
+                     Where ic.object_id = si.object_id
+                       And ic.index_id = si.index_id
+                       And ic.partition_ordinal = 1) partitioning_column
+       Outer Apply (Select Stuff( /* Include list */
+                        (Select N', ' + QuoteName(c.name)
+                           From sys.index_columns ic
+                                Join sys.columns c
+                                     On ic.column_id = c.column_id
+                                     And ic.object_id = c.object_id
+                          Where ic.object_id = si.object_id
+                            And ic.index_id = si.index_id
+                            And ic.is_included_column = 1
+                       Order By c.name For XML Path(''), Type).value('.', 'NVARCHAR(MAX)'),1,2,'')) includes (include_definition)
+      Outer Apply (Select Count(*) partition_count, /* Partitions */
+                          Sum(ps.in_row_reserved_page_count)*8*2014 reserved_in_row_bytes,
+                          Sum(ps.lob_reserved_page_count)*8*1024 reserved_LOB_bytes,
+                          Sum(ps.row_count) row_count
+                     From sys.partitions p
+                          Join sys.dm_db_partition_stats ps 
+                               On p.partition_id = ps.partition_id
+                    Where p.object_id = si.object_id
+                      And p.index_id = si.index_id) partition_sums
+      Outer Apply (Select Stuff( /* row compression list by partition */
+                        (Select N', ' + Cast(p.partition_number AS VARCHAR(32))
+                           From sys.partitions p
+                          Where p.object_id = si.object_id
+                            And p.index_id = si.index_id
+                            And p.data_compression = 1
+                       Order By p.partition_number For XML Path(''), Type).value('.', 'NVARCHAR(MAX)'),1,2,'')) row_compression_clause (row_compression_partition_list)
+      Outer Apply (Select Stuff( /* data compression list by partition */
+                        (Select N', ' + Cast(p.partition_number AS VARCHAR(32))
+                           From sys.partitions p
+                          Where p.object_id = si.object_id
+                            And p.index_id = si.index_id
+                            And p.data_compression = 2
+                       Order By p.partition_number For XML Path(''), Type).value('.', 'NVARCHAR(MAX)'),1,2,'')) page_compression_clause (page_compression_partition_list)
+ Where si.type In (0,1,2) /* heap, clustered, nonclustered */
+Order By sc.name, t.name, si.index_id
+Option (Recompile);";
         }
     }
 }

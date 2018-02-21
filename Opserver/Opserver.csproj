@@ -396,9 +396,6 @@
     <Content Include="Views\SQL\Databases.Modal.Columns.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
-    <Content Include="Views\SQL\Databases.Modal.Indexes.cshtml">
-      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
-    </Content>
     <Content Include="Views\SQL\Databases.Modal.MissingIndexes.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
@@ -412,6 +409,9 @@
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.StoredProcedures.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Databases.Modal.Tables.Indexes.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\Databases.Modal.Views.cshtml">
@@ -649,6 +649,9 @@
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\SQL\AllJobs.cshtml" />
+    <Content Include="Views\SQL\Databases.Modal.UnusedIndexes.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

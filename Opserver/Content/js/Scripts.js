@@ -793,7 +793,7 @@ Status.SQL = (function () {
                 Status.popup('sql/active/filters' + window.location.search, null, filterOptions);
             },
             '#/db/': function (val, firstLoad, prev) {
-                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') || val.indexOf('storedprocedures/') > 0
+                var obj = val.indexOf('tables/') > 0 || val.indexOf('views/') || val.indexOf('storedprocedures/') || val.indexOf('unusedindexes/') > 0
                           ? val.split('/').pop() : null;
                 function showColumns() {
                     $('.js-next-collapsible').removeClass('info').next().hide();
@@ -804,7 +804,7 @@ Status.SQL = (function () {
                 }
                 if (!firstLoad) {
                     // TODO: Generalize this to not need the replace? Possibly a root load in the modal
-                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev)) || (/\/storedprocedures/.test(val) && /\/storedprocedures/.test(prev))) {
+                    if ((/\/tables/.test(val) && /\/tables/.test(prev)) || (/\/views/.test(val) && /\/views/.test(prev)) || (/\/storedprocedures/.test(val) && /\/storedprocedures/.test(prev)) || (/\/unusedindexes/.test(val) && /\/unusedindexes/.test(prev))) {
                         showColumns();
                         return;
                     }
