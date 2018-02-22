@@ -60,7 +60,7 @@
         {
             var bkup = db.Backups?.FirstOrDefault();
             SQLNode.AGDatabaseReplica replica;
-                <tr class="database-row @db.RowClass()" data-dbname="@db.Name">
+                <tr class="database-row @db.RowClass()" data-dbname="@db.Name" role="button">
                     <td>
                         <i class="fa fa-database @DatabasesModel.GetDatabaseClass(db)" aria-hidden="true"></i>
                         @db.Name
