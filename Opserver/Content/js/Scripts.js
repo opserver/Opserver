@@ -962,7 +962,35 @@ Status.Redis = (function () {
                         : 'Error removing keys');
                 }
             });
-        });
+        }).on('click', '.js-redis-host-list', function (e) {
+            $(this).siblings().find('.fa-chevron-down').toggleClass('fa-chevron-down fa-chevron-right text-primary').end().next('.hidden').removeClass('selected').slideUp(150);
+            $(this).find('.fa-chevron-right').toggleClass('fa-chevron-down fa-chevron-right text-primary').end().next('.hidden').addClass('selected').slideDown(150);
+        }).on('click', '.js-server-actions-selection', function () {
+            var url = $(this).data('preview-url');
+            var operations = $('.js-redis-host-list + div.selected :input:enabled').serialize();
+            $('.js-server-action-preview').html('Loading Preview...');
+            $('.js-server-action-execute').prop('disabled', true).text('Loading Preview...');
+            $.post(url, operations, function (result) {
+                $('.js-server-action-preview').html(result);
+                $('.js-server-action-execute').prop('disabled', false).text('Execute');
+            });
+        }).on('click', '.js-server-action-execute', function (e) {
+            var url = $(this).data('perform-url');
+            var operations = $('.js-redis-server-actions-preview :input').serialize();
+            $.post(url, operations, function (response) {
+                if (response.success) {
+                    bootbox.hideAll();
+                    bootbox.alert(response.result);
+                }
+            });
+        }).on({
+            mouseenter: function () {
+                Status.refresh.pause();
+            },
+            mouseleave: function () {
+                Status.refresh.resume();
+            }
+        }, '.js-refresh .dropdown');
     }
 
     return {

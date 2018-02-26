@@ -7,47 +7,65 @@ namespace StackExchange.Opserver.Data.Redis
     public class RedisModule : StatusModule
     {
         public static bool Enabled => Instances.Count > 0;
+        public static List<RedisReplicationGroup> ReplicationGroups { get; }
+        public static List<RedisHost> Hosts { get; }
         public static List<RedisInstance> Instances { get; }
         public static List<RedisConnectionInfo> Connections { get; }
+
+        private static readonly HashSet<string> HostNames;
 
         static RedisModule()
         {
             Connections = LoadRedisConnections();
-            Instances = Connections
-                .Select(rci => new RedisInstance(rci))
-                .Where(rsi => rsi.TryAddToGlobalPollers())
-                .ToList();
+            Instances = Connections.Select(rci => new RedisInstance(rci))
+                                   .Where(rsi => rsi.TryAddToGlobalPollers())
+                                   .ToList();
+
+            Hosts = Instances.GroupBy(i => i.ConnectionInfo.Server)
+                             .Select(g => { g.Key.Instances = g.ToList(); return g.Key; })
+                             .ToList();
+
+            ReplicationGroups = Hosts.Where(h => h.ReplicationGroupName.HasValue())
+                                     .GroupBy(h => h.ReplicationGroupName)
+                                     .Select(g => new RedisReplicationGroup(g.Key, g.ToList()))
+                                     .ToList();
+
+            HostNames = new HashSet<string>(Hosts.Select(h => h.HostName), StringComparer.OrdinalIgnoreCase);
         }
 
-        public override bool IsMember(string node)
-        {
-            foreach (var i in Instances)
-            {
-                // TODO: Dictionary
-                if (string.Equals(i.Host, node, StringComparison.InvariantCultureIgnoreCase)) return true;
-            }
-            return false;
-        }
+        public override bool IsMember(string node) => HostNames.Contains(node);
 
         private static List<RedisConnectionInfo> LoadRedisConnections()
         {
             var result = new List<RedisConnectionInfo>();
             var defaultServerInstances = Current.Settings.Redis.Defaults.Instances;
-            var allServerInstances = Current.Settings.Redis.AllServers.Instances;
+            var allServerInstances = Current.Settings.Redis.AllServers.Instances ?? Enumerable.Empty<RedisSettings.Instance>();
 
             foreach (var s in Current.Settings.Redis.Servers)
             {
+                var server = new RedisHost(s);
+
                 var count = result.Count;
                 // Add instances that belong to any servers
-                allServerInstances?.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
+                foreach (var asi in allServerInstances)
+                {
+                    result.Add(new RedisConnectionInfo(server, asi));
+                }
 
                 // Add instances defined on this server
-                if (s.Instances.Count > 0)
-                    s.Instances.ForEach(i => result.Add(new RedisConnectionInfo(s.Name, i)));
+                foreach (var si in s.Instances)
+                {
+                    result.Add(new RedisConnectionInfo(server, si));
+                }
 
                 // If we have no instances added at this point, defaults it is!
                 if (defaultServerInstances != null && count == result.Count)
-                    defaultServerInstances.ForEach(gi => result.Add(new RedisConnectionInfo(s.Name, gi)));
+                {
+                    foreach (var dsi in defaultServerInstances)
+                    {
+                        result.Add(new RedisConnectionInfo(server, dsi));
+                    }
+                }
             }
             return result;
         }

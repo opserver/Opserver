@@ -10068,7 +10068,9 @@ span.pull-right a.pull-right {
   content: "| ";
 }
 .actions a + a:not(.btn):before,
-.page-header .pull-right a + a:not(.btn):before {
+.page-header .pull-right a + a:not(.btn):before,
+.actions .btn-group + a:not(.btn):before,
+.page-header .pull-right .btn-group + a:not(.btn):before {
   content: "| ";
   color: #555555;
   opacity: 0.4;
@@ -10790,11 +10792,21 @@ table .text-muted,
 .comma-list.muted li:after {
   color: #999999;
 }
+.list-group .well-condensed {
+  margin-bottom: 0;
+}
+.list-group.list-group-condensed {
+  margin-bottom: 0;
+}
 .well-condensed {
   margin-bottom: 5px;
 }
 .well-condensed:last-child {
   margin-bottom: 0;
+}
+.small .checkbox {
+  margin-top: 0px;
+  margin-bottom: 0px;
 }
 .ul-tree,
 .ul-tree ul {
@@ -10832,6 +10844,10 @@ table .text-muted,
 }
 .list-group-sm .list-group-item.bg-danger {
   border-left: solid 2px #d9534f;
+}
+a.list-group-item,
+a.list-group-item span {
+  cursor: pointer;
 }
 /* Cache Dashboard */
 tr.cache-sub-item td:first-child {

@@ -1,9 +1,8 @@
 ﻿@using StackExchange.Opserver.Data.Redis
 @model RedisInstance
 @{
-    Layout = null;
     var i = Model;
-    var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host);
+    var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host.HostName);
     var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
 }
 <h4 class="modal-title">
@@ -73,7 +72,7 @@
                                 <div class="input-group">
                                     <input type="text" class="form-control" value="@tiebreaker" disabled="disabled"/>
                                     <span class="input-group-btn">
-                                        @if (tiebreaker.Contains(i.Host) && tiebreaker.Contains(i.Port.ToString()))
+                                        @if (tiebreaker.Contains(i.Host.HostName) && tiebreaker.Contains(i.Port.ToString()))
                                         {
                                             <button class="btn btn-sm btn-warning js-instance-action" data-action="clear-tiebreaker">Clear</button>
                                         }

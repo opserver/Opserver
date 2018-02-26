@@ -14,6 +14,7 @@ namespace StackExchange.Opserver.Views.Redis
 
     public class DashboardModel
     {
+        public List<RedisReplicationGroup> ReplicationGroups => RedisModule.ReplicationGroups;
         public List<RedisInstance> Instances { get; set; }
         public string CurrentRedisServer { get; set; }
         public RedisInstance CurrentInstance { get; set; }
@@ -36,7 +37,7 @@ namespace StackExchange.Opserver.Views.Redis
 
         public void Prep()
         {
-            Instances = Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host).ToList();
+            Instances = Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host.HostName).ToList();
             Masters = Instances.Where(i => i.IsMaster).ToList();
             Slaving = Instances.Where(i => i.IsSlaving).ToList();
             Missing = Instances.Where(i => !Slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();

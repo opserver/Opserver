@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Web.Mvc;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
+using StackExchange.Opserver.Views.Redis;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -18,10 +20,17 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/actions/{node}"), OnlyAllow(Roles.RedisAdmin)]
         public ActionResult InstanceActions(string node)
         {
+            var h = RedisHost.Get(node);
+            if (h != null)
+            {
+                return PartialView("Server.Actions", h);
+            }
             var i = RedisInstance.Get(node);
-            if (i == null) return JsonNotFound();
-
-            return View("Instance.Actions", i);
+            if (i != null)
+            {
+                return PartialView("Instance.Actions", i);
+            }
+            return JsonNotFound();
         }
 
         [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
@@ -78,9 +87,38 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("redis/instance/actions/{node}/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
-        public Task<ActionResult> SlaveServer(string node, string newMaster)
+        public Task<ActionResult> SlaveInstance(string node, string newMaster)
         {
             return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
+        }
+
+        [Route("redis/server/actions/preview"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public ActionResult ServerActionPreview(string[] operations)
+        {
+            var ops = new List<RedisInstanceOperation>();
+            if (operations != null)
+            {
+                foreach (var a in operations)
+                {
+                    ops.Add(RedisInstanceOperation.FromString(a));
+                }
+            }
+            return PartialView("Server.Actions.Preview", ops);
+        }
+
+        [Route("redis/server/actions/perform"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        public async Task<ActionResult> ServerActionPerform(string[] operations)
+        {
+            var tasks = new List<Task>();
+            if (operations != null)
+            {
+                foreach (var a in operations)
+                {
+                    tasks.Add(RedisInstanceOperation.FromString(a).PerformAsync());
+                }
+            }
+            await Task.WhenAll(tasks);
+            return Json(new { success = true, result = $"{tasks.Count.Pluralize("operation")} running..." });
         }
 
         [Route("redis/instance/actions/{node}/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]

@@ -5,19 +5,20 @@ using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public partial class RedisConnectionInfo
+    public class RedisConnectionInfo
     {
         public string Name => Settings.Name;
-        public string Host { get; internal set; }
+        public string Host => Server.HostName;
         public int Port => Settings.Port;
         public string Password => Settings.Password;
         public RedisFeatures Features { get; internal set; }
+        public RedisHost Server { get; }
         internal RedisSettings.Instance Settings { get; set; }
 
-        internal RedisConnectionInfo(string host, RedisSettings.Instance settings)
+        internal RedisConnectionInfo(RedisHost server, RedisSettings.Instance settings)
         {
+            Server = server;
             Settings = settings;
-            Host = host;
         }
 
         public List<IPAddress> IPAddresses => AppCache.GetHostAddresses(Host);

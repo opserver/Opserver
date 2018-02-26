@@ -227,7 +227,8 @@ span.pull-right a.pull-right {
 }
 
 .actions, .page-header .pull-right {
-  a + a:not(.btn):before {
+  a + a:not(.btn):before,
+  .btn-group + a:not(.btn):before {
     content: "| ";
     color: @gray;  
     opacity: 0.4;
@@ -770,11 +771,27 @@ span.pull-right a.pull-right {
   }
 }
 
+.list-group {
+    .well-condensed {
+        margin-bottom: 0;
+    }
+
+    &.list-group-condensed {
+        margin-bottom: 0;
+    }
+}
+
 .well-condensed {
-  margin-bottom: @panel-body-padding;
-  &:last-child {
-    margin-bottom: 0;
-  }
+    margin-bottom: @panel-body-padding;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.small .checkbox {
+    margin-top: 0px;
+    margin-bottom: 0px;
 }
 
 .ul-tree, .ul-tree ul {
@@ -818,6 +835,10 @@ span.pull-right a.pull-right {
         }
     }
     margin-bottom: 0;
+}
+
+a.list-group-item, a.list-group-item span {
+    cursor: pointer;
 }
 
 /* Cache Dashboard */

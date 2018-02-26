@@ -19,8 +19,10 @@ namespace StackExchange.Opserver.Data.Redis
 
         public RedisConnectionInfo ConnectionInfo { get; internal set; }
         public string Name => ConnectionInfo.Name;
-        public string Host => ConnectionInfo.Host;
+        public RedisHost Host => ConnectionInfo.Server;
+        public string ReplicationGroup => ConnectionInfo.Server.ReplicationGroupName;
         public string ShortHost { get; internal set; }
+        public bool ReplicatesCrossRegion { get; }
 
         public Version Version => Info.Data?.Server.Version;
 
@@ -101,7 +103,8 @@ namespace StackExchange.Opserver.Data.Redis
         public RedisInstance(RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
         {
             ConnectionInfo = connectionInfo;
-            ShortHost = Host.Split(StringSplits.Period)[0];
+            ShortHost = connectionInfo.Host.Split(StringSplits.Period)[0];
+            ReplicatesCrossRegion = Current.Settings.Redis.Replication?.CrossRegionNameRegex?.IsMatch(ConnectionInfo.Name) ?? true;
         }
 
         public string GetServerName(string hostOrIp)
@@ -130,7 +133,7 @@ namespace StackExchange.Opserver.Data.Redis
                 Ssl=UseSsl,
                 EndPoints =
                 {
-                    { Host, Port }
+                    { ConnectionInfo.Host, ConnectionInfo.Port }
                 },
                 ClientName = "Opserver",
                 SocketManager = SharedSocketManager
@@ -150,7 +153,7 @@ namespace StackExchange.Opserver.Data.Redis
                 cacheDuration,
                 get,
                 addExceptionData: e => e.AddLoggedData("Server", Name)
-                                        .AddLoggedData("Host", Host)
+                                        .AddLoggedData("Host", ConnectionInfo.Host)
                                         .AddLoggedData("Port", Port.ToString()),
                 timeoutMs: 10000,
                 memberName: memberName,

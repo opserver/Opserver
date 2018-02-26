@@ -652,6 +652,8 @@
     <Content Include="Views\SQL\Databases.Modal.UnusedIndexes.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Redis\Server.Actions.cshtml" />
+    <Content Include="Views\Redis\Server.Actions.Preview.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Content\js\Scripts.js" />

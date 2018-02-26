@@ -17,12 +17,12 @@
     <script>
         $(function() {
             Status.Dashboard.init({ refresh: @(Model.Refresh ? 5 : 0) });
-            Status.Redis.init({ node: '@(Model.CurrentInstance?.Host ?? "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
+            Status.Redis.init({ node: '@(Model.CurrentInstance?.Host.HostName ?? "")', port: '@(Model.CurrentInstance?.Port.ToString() ?? "")' });
         });
     </script>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(RedisViews.All, nameof(RedisController.Dashboard), "all servers", false)
+    @TabLink(RedisViews.All, nameof(RedisController.Dashboard), "dashboard", false)
     @TabLink(RedisViews.Instance, nameof(RedisController.Instance), "instance")
 </ul>
 <div>
