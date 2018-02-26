@@ -114,7 +114,7 @@ namespace StackExchange.Opserver
         private static void GetCustomErrorData(Exception ex, Dictionary<string, string> data)
         {
             // everything below needs a context
-            if (Current.Context != null)
+            if (Current.Context != null && Current.User != null)
             {
                 data.Add("User", Current.User.AccountName);
                 data.Add("Roles", Current.User.RawRoles.ToString());
