@@ -16,7 +16,7 @@
     {
         return;
     }
-    var percent = bytes / (decimal)Model.TotalByteSize;
+    var percent = (bytes / (decimal)Model.TotalByteSize) * 100;
     <span class="text-muted">(@percent.ToString("0.00")%)</span>
 }
 <h5 class="page-header">
