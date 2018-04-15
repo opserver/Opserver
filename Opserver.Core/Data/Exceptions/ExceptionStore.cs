@@ -244,8 +244,7 @@ Select e.Id,
             {
                 AddClause("(Message Like @query Or Url Like @query)");
             }
-            sb.Append(@"
-)
+            sb.Append(@")
   Select Top {=Count} *
     From list");
             if (search.StartAt.HasValue)
