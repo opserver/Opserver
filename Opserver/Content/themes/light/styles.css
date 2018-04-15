@@ -9437,6 +9437,20 @@ svg .stroke-muted.filled {
 .table-exceptions > tbody > tr td:nth-child(3) a {
   color: #6f6f6f;
 }
+.table-exceptions td:nth-child(1) {
+  width: 50px;
+}
+.table-exceptions td:nth-child(2) {
+  max-width: 100px;
+}
+.table-exceptions td:nth-child(6) {
+  max-width: 120px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.table-exceptions td:nth-child(9) {
+  width: 60px;
+}
 .error-detail {
   background-color: #ffffcc;
 }
@@ -9460,9 +9474,9 @@ svg .stroke-muted.filled {
 .error-preview-popup h6 {
   margin-top: 0;
 }
-.error-preview-popup .error-detail {
+.error-preview-popup .stack {
   font-size: 12px;
-  max-height: 100px;
+  max-height: 150px;
 }
 .error-preview-popup p:last-child {
   margin-bottom: 0;
@@ -10775,6 +10789,12 @@ table .text-muted,
 }
 .history-graph {
   height: 265px;
+}
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 .comma-list {
   display: inline;

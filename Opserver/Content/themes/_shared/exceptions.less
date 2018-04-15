@@ -68,6 +68,22 @@
       }
     }
   }
+  td {
+    &:nth-child(1) {
+        width: 50px;
+    }
+    &:nth-child(2) {
+        max-width: 100px;
+    }
+    &:nth-child(6) {
+        max-width: 120px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+    }
+    &:nth-child(9) {
+        width: 60px;
+    }
+  }
 }
 
 .error-detail {
@@ -97,9 +113,9 @@
         margin-top: 0;
     }
 
-    .error-detail {
+    .stack {
         font-size: 12px;
-        max-height: 100px;
+        max-height: 150px;
     }
 
     p:last-child {
