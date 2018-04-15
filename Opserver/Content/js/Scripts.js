@@ -1076,7 +1076,9 @@ Status.Exceptions = (function () {
                 $.ajax(Status.options.rootPath + 'exceptions/load-more', {
                     data: $.extend({}, baseOptions, {
                         count: options.loadMore,
-                        prevLast: lastGuid
+                        prevLast: lastGuid,
+                        q: options.search,
+                        showDeleted: options.showDeleted
                     }),
                     cache: false
                 }).done(function (html) {
@@ -1166,7 +1168,6 @@ Status.Exceptions = (function () {
             deleteError(this);
             return false;
         });
-
         // ajax the protection on the list page
         $('.js-content').on('click', '.js-exceptions a.js-protect-link', function () {
             var url = $(this).attr('href'),
@@ -1184,8 +1185,8 @@ Status.Exceptions = (function () {
                 url: url,
                 success: function (data) {
                     $(this).siblings('.js-delete-link').attr('title', 'Delete this error')
-                           .end()
-                           .replaceWith('<span class="js-protected fa fa-lock fa-fw text-primary" title="This error is protected"></span>');
+                        .end()
+                        .replaceWith('<span class="js-protected fa fa-lock fa-fw text-primary" title="This error is protected"></span>');
                     jRow.addClass('js-protected protected').removeClass('deleted');
                     refreshCounts(data);
                 },
@@ -1209,7 +1210,7 @@ Status.Exceptions = (function () {
                 var index = row.index(),
                     lastIndex = lastSelected.index();
                 if (!e.ctrlKey) {
-                    row.siblings().andSelf().removeClass('active warning');
+                    row.siblings('.active, .warning').andSelf().removeClass('active warning');
                 }
                 row.parent()
                     .children()
@@ -1218,16 +1219,24 @@ Status.Exceptions = (function () {
                 if (!e.ctrlKey) {
                     lastSelected = row.first();
                 }
-                // TODO: Improve, possibly with a before/after unselectable style application
-                window.getSelection().removeAllRanges();
             } else if (e.ctrlKey) {
                 lastSelected = row.first();
             } else {
                 if ($('.js-exceptions tbody td').length > 2) {
                     row.addClass('active warning');
                 }
-                row.siblings().removeClass('active warning');
+                row.siblings('.active, .warning').removeClass('active warning');
                 lastSelected = row.first();
+            }
+        });
+
+        $(document).on('keydown', function (e) {
+            if (e.keyCode == 16) { // shift
+                $('.js-table-exceptions').addClass('no-select');
+            }
+        }).on('keyup', function (e) {
+            if (e.keyCode == 16) { // shift
+                $('.js-table-exceptions').removeClass('no-select');
             }
         });
 

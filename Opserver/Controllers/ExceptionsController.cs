@@ -15,6 +15,8 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Exceptions)]
     public class ExceptionsController : StatusController
     {
+        public const int MaxSearchResults = 2000;
+
         public override ISecurableModule SettingsModule => Current.Settings.Exceptions;
 
         public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
@@ -94,24 +96,32 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions")]
-        public async Task<ActionResult> Exceptions()
+        public async Task<ActionResult> Exceptions(string q, bool showDeleted = false)
         {
             var search = GetSearch();
+            search.SearchQuery = q;
+            search.IncludeDeleted = showDeleted;
+
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
+
             var vd = GetModel(errors);
+            vd.Search = q;
             vd.LoadAsyncSize = Current.Settings.Exceptions.PageSize;
             return View(vd);
         }
 
         [Route("exceptions/load-more")]
-        public async Task<ActionResult> LoadMore(int? count = null, Guid? prevLast = null)
+        public async Task<ActionResult> LoadMore(string q, bool showDeleted = false, int? count = null, Guid? prevLast = null)
         {
             var search = GetSearch();
+            search.SearchQuery = q;
             search.Count = count ?? Current.Settings.Exceptions.PageSize;
             search.StartAt = prevLast;
+            search.IncludeDeleted = showDeleted;
 
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
             var vd = GetModel(errors);
+            vd.Search = q;
             return View("Exceptions.Table.Rows", vd);
         }
 
@@ -141,6 +151,7 @@ namespace StackExchange.Opserver.Controllers
             return View("Exceptions.Similar", vd);
         }
 
+        // TODO: Figure out a good "clear all" then redirect and remove this
         [Route("exceptions/search")]
         public async Task<ActionResult> Search(string q, bool showDeleted = false)
         {
@@ -151,15 +162,9 @@ namespace StackExchange.Opserver.Controllers
             var search = GetSearch();
             search.SearchQuery = q;
             search.IncludeDeleted = showDeleted;
-            search.Count = 10000;
+            search.Count = MaxSearchResults;
 
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
-            if (errors.Count == 0 && !showDeleted)
-            {
-                // If we didn't find any current errors, go ahead and search deleted as well
-                return RedirectToAction(nameof(Search), new { q, group = CurrentGroup, log = CurrentLog, showDeleted = true });
-            }
-
             var vd = GetModel(errors);
             vd.Search = q;
             vd.ShowDeleted = showDeleted;

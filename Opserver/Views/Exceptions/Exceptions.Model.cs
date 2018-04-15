@@ -43,7 +43,7 @@ namespace StackExchange.Opserver.Views.Exceptions
             {
                 if (Search.HasValue())
                 {
-                    return $"{Errors.Count.ToComma()} Search results ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) for '{Search}'{(Log != null ? " in " + Log.Name : "")}";
+                    return $"Showing search results for '{Search}'{(Log != null ? " in " + Log.Name : "")}";
                 }
                 if (Exception == null)
                 {

@@ -10,13 +10,25 @@
     this.SetPageTitle(Model.Title);
     this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
               Model.Search,
-              Url.Action(nameof(ExceptionsController.Search)),
+              Url.Action(nameof(ExceptionsController.Exceptions)),
               Model.SearchDictionary);
     var anyLoaded = ExceptionsModule.Stores?.Any(s => s.HasPolledCacheSuccessfully && s.MonitorStatus == MonitorStatus.Good) ?? false;
 }
 @section head {
     <script>
-        $(function() { Status.Exceptions.init({ refresh: 120, store:@store.ToJson(), group: @group.ToJson(), log: @log.ToJson(), sort: '@Model.Sort', loadMore: @(Model.LoadAsyncSize), enablePreviews: @(Current.Settings.Exceptions.EnablePreviews ? "true" : "false") }); });
+        $(function () {
+            Status.Exceptions.init({
+                refresh: 120,
+                store:@store.ToJson(),
+                group: @group.ToJson(),
+                log: @log.ToJson(),
+                sort: '@Model.Sort',
+                loadMore: @(Model.LoadAsyncSize),
+                enablePreviews: @Current.Settings.Exceptions.EnablePreviews.ToJson(),
+                showDeleted: @Model.ShowDeleted.ToJson(),
+                search: @Model.Search.ToJson()
+            });
+        });
     </script>
 }
 <div class="js-refresh" data-name="exceptions-header">

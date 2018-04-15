@@ -35,7 +35,7 @@
             @Helpers.PollNow(ExceptionsModule.Stores)
         </span>
     </h5>
-    <table class="table table-striped table-responsive table-middle table-super-condensed table-hover table-actions table-exceptions" data-total-count="@Model.TotalCount" data-title="@Model.Title" data-displayed="@displayed">
+    <table class="table table-striped table-responsive table-middle table-super-condensed table-hover table-actions table-exceptions js-table-exceptions" data-total-count="@Model.TotalCount" data-title="@Model.Title" data-displayed="@displayed">
         <thead>
             <tr class="sort-row">
                 <th class="@(showActions ? "" : "hidden")"></th>

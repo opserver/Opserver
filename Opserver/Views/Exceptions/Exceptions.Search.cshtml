@@ -36,7 +36,14 @@
 <p class="small">
     @if (!Model.ShowDeleted)
     {
-        @:Showing all current exception results, to include deleted exceptions <strong><a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">click here</a></strong>.
+        if (Model.Errors.Count == ExceptionsController.MaxSearchResults)
+        {
+            @:Showing first @ExceptionsController.MaxSearchResults.ToComma() results, to include deleted exceptions <strong><a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">click here</a></strong>.
+        }
+        else
+        {
+            @:Showing all current exception results, to include deleted exceptions <strong><a href="@Url.Action(nameof(ExceptionsController.Search), new { log, q = Model.Search, showDeleted = true })">click here</a></strong>.
+        }
     }
     else
     {
