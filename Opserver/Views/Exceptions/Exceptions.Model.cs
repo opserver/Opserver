@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Views.Exceptions
         public bool ShowAll => Group == null && Log == null;
         private int? _shownCount;
         public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
-        public bool ShowClearLink => Log != null && Errors.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin;
+        public bool ShowClearLink => Log != null && Search.IsNullOrEmpty() && Errors.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin;
         public bool ShowDeleted { get; set; }
 
         public int LoadAsyncSize { get; set; }
