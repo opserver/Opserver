@@ -122,12 +122,12 @@ namespace StackExchange.Opserver.Data.Redis
         // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
         public static readonly SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
 
-        private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 10000)
+        private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 60000)
         {
             var config = new ConfigurationOptions
             {
                 SyncTimeout = syncTimeout,
-                ConnectTimeout = 20000,
+                ConnectTimeout = 60000,
                 AllowAdmin = allowAdmin,
                 Password = Password,
                 Ssl=UseSsl,
