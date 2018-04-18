@@ -91,7 +91,7 @@
         }
         @possibleLink
 }
-@helper RenderVariableTable(string title, string className, NameValueCollection vars)
+@helper RenderVariableTable(string title, string className, NameValueCollection vars, bool renderUrls = false)
     {
         if (vars == null || vars.Count == 0)
         {
@@ -130,6 +130,37 @@
                                     }
                                 </td>
                             </tr>
+                        }
+                        else
+                        {
+                            if (renderUrls && vars["Request Method"].IsNullOrEmpty()) // told to render and we don't have them elsewhere
+                            {
+                                var method = Model.Exception.HTTPMethod;
+                                if (method.HasValue())
+                                {
+                                <tr>
+                                    <td class="text-nowrap">Method</td>
+                                    <td>@method</td>
+                                </tr>
+                                    var fullUrl = Model.Exception.GetFullUrl();
+                                    if (fullUrl.HasValue())
+                                    {
+                                    <tr>
+                                        <td class="text-nowrap">URL and Query</td>
+                                        <td>
+                                            @if (method == "GET")
+                                            {
+                                                @Linkify(fullUrl)
+                                            }
+                                            else
+                                            {
+                                                @fullUrl.HtmlEncode()
+                                            }
+                                        </td>
+                                    </tr>
+                                    }
+                                }
+                            }
                         }
                         @foreach (var k in allKeys.Where(k => isHidden(k)))
                         {
@@ -214,7 +245,7 @@
                     RenderKeyValueTable(cmd.Data);
                 }
             }
-            @RenderVariableTable("Server Variables", "server-variables", error.ServerVariables)
+            @RenderVariableTable("Server Variables", "server-variables", error.ServerVariables, renderUrls: true)
             @if (error.CustomData?.Count > 0)
             {
                 var errored = error.CustomData.ContainsKey(customDataErrorKey);
