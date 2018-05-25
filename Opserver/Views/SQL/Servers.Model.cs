@@ -10,5 +10,19 @@ namespace StackExchange.Opserver.Views.SQL
         public List<SQLNode.AGInfo> AvailabilityGroups { get; set; }
 
         public SQLCluster CurrentCluster { get; set; }
+
+        public JobSort? JobSort { get; set; }
+        public SortDir? SortDirection { get; set; }
+    }
+
+    public enum JobSort
+    {
+        Server,
+        Name,
+        LastRun,
+        Start,
+        End,
+        Duration,
+        Enabled
     }
 }

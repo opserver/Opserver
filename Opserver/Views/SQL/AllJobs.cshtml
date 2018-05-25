@@ -2,10 +2,46 @@
 @using Roles = StackExchange.Opserver.Models.Roles
 @model ServersModel
 @{
-    var allJobs = Model.Clusters
+    var source = Model.Clusters
                   .SelectMany(c => c.Nodes.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })))
-                  .Union(Model.StandaloneInstances.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })))
-                  .ToList();
+                  .Union(Model.StandaloneInstances.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })));
+    
+    switch (Model.JobSort)
+    {
+        case JobSort.Duration:
+            source = Sort(source, j => j.Job.LastRunDuration);
+            break;
+        case JobSort.Enabled:
+            source = Sort(source, j => j.Job.IsEnabled);
+            break;
+        case JobSort.End:
+            source = Sort(source, j => j.Job.LastStopDate);
+            break;
+        case JobSort.LastRun:
+            source = Sort(source, j => j.Job.LastRunMonitorStatus);
+            break;
+        case JobSort.Name:
+            source = Sort(source, j => j.Job.Name);
+            break;
+        case JobSort.Server:
+            source = Sort(source, j => j.ServerName);
+            break;
+        case JobSort.Start:
+            source = Sort(source, j => j.Job.LastStartDate);
+            break;
+    }
+    var allJobs = source.ToList();
+}
+@functions {
+    public IOrderedEnumerable<T> Sort<T, TKey>(IEnumerable<T> source, Func<T, TKey> order) =>
+        Model.SortDirection == SortDir.Desc ? source.OrderByDescending(order) : source.OrderBy(order);
+}
+@helper SortLink(JobSort sort, string title)
+{
+    var curSort = sort == Model.JobSort;
+    <th class="sortable@(curSort ? " current-sort" : "")">
+        <a href="?sort=@sort.ToString()&dir=@(curSort && Model.SortDirection == SortDir.Asc ? SortDir.Desc : SortDir.Asc)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
+    </th>
 }
 <h5 class="page-header">
     @(allJobs.Count.Pluralize("Job")) <span class="small">(@(allJobs.Count(j => j.Job.IsRunning).Pluralize("Running")))</span>
@@ -17,13 +53,13 @@
         <thead>
             <tr>
                 <th></th>
-                <th>Server</th>
-                <th>Name</th>
-                <th>Last Run</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Duration</th>
-                <th>Enabled</th>
+                @SortLink(JobSort.Server, "Server")
+                @SortLink(JobSort.Name, "Name")
+                @SortLink(JobSort.LastRun, "Last Run")
+                @SortLink(JobSort.Start, "Start")
+                @SortLink(JobSort.End, "End")
+                @SortLink(JobSort.Duration, "Duration")
+                @SortLink(JobSort.Enabled, "Enabled")
                 @if (Current.IsInRole(Roles.SQLAdmin))
                 {
                     <th>Actions</th>
@@ -51,7 +87,7 @@ Last Run Message: @j.LastRunMessage">
                     <td>
                         @j.Name
                         @if (j.IsRunning)
-                    {
+                        {
                             <span class="good">(Running)</span>
                         }
                     </td>
@@ -81,7 +117,7 @@ Last Run Message: @j.LastRunMessage">
                     {
                         <td class="actions">
                             @if (j.IsEnabled)
-                        {
+                            {
                                 <a href="#" class="js-sql-job-action btn btn-xs btn-warning" data-action="toggle" data-enable="false">Disable</a>
                             }
                             else
@@ -89,7 +125,7 @@ Last Run Message: @j.LastRunMessage">
                                 <a href="#" class="js-sql-job-action btn btn-xs btn-success" data-action="toggle" data-enable="true">Enable</a>
                             }
                             @if (!j.IsRunning)
-                        {
+                            {
                                 <a href="#" class="js-sql-job-action btn btn-xs btn-primary" data-action="start" data-guid="@j.JobId.ToString()">Start</a>
                             }
                             else
@@ -102,22 +138,6 @@ Last Run Message: @j.LastRunMessage">
             }
         </tbody>
     </table>
-    <script>
-    $(function () {
-        $('.js-sql-jobs').tablesorter({
-            sortAppend: [[1, 0]],
-            headers: {
-                1: { sorter: 'cellText' }, 
-                2: { sorter: 'cellText' },
-                3: { sorter: 'cellText' },
-                4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                6: { sorter: 'dataVal', sortInitialOrder: 'desc' },
-                7: { sorter: 'cellText' },
-            }
-        });
-    });
-    </script>
 }
 else
 {
