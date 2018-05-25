@@ -10201,7 +10201,7 @@ span.pull-right a.pull-right {
   transition: opacity 0.2s ease;
   opacity: 0.2;
 }
-.profiler-results.profiler-left {
+.mp-results.mp-left {
   position: absolute;
   top: 34px;
   border-bottom-right-radius: 10px;
