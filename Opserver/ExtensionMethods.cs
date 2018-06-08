@@ -12,6 +12,7 @@ using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Shared;
 using System.Text;
 using EnumsNET;
+using System.Web.Routing;
 
 namespace StackExchange.Opserver
 {
@@ -488,6 +489,19 @@ namespace StackExchange.Opserver
             }
             var result = sb.ToStringRecycle();
             return result.Length > 1 ? result : "";
+        }
+
+        public static RouteValueDictionary ToRouteValues(this NameValueCollection queryString)
+        {
+            var routeValues = new RouteValueDictionary();
+            if (queryString?.HasKeys() == true)
+            {
+                foreach (string key in queryString.AllKeys)
+                {
+                    routeValues.Add(key, queryString[key]);
+                }
+            }
+            return routeValues;
         }
     }
 

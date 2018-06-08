@@ -18,16 +18,15 @@ namespace StackExchange.Opserver.Views.Exceptions
         public Application Log { get; set; }
         public ExceptionSorts Sort { get; set; }
 
-        public string Search { get; set; }
+        public string Search => SearchParams?.SearchQuery;
+        public ExceptionStore.SearchParams SearchParams { get; set; }
         public Error Exception { get; set; }
         public List<Error> Errors { get; set; }
-
-        public bool ClearLinkForVisibleOnly { get; set; }
 
         public bool ShowAll => Group == null && Log == null;
         private int? _shownCount;
         public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
-        public bool ShowClearLink => Log != null && Search.IsNullOrEmpty() && Errors.Any(e => !e.IsProtected) && Current.User.IsExceptionAdmin;
+        public bool ShowClearLink => Current.User.IsExceptionAdmin && Errors.Any(e => !e.IsProtected) && (Log != null || SearchParams.SearchQuery.HasValue() || SearchParams.SearchQuery.HasValue());
         public bool ShowDeleted { get; set; }
 
         public int LoadAsyncSize { get; set; }
@@ -45,26 +44,27 @@ namespace StackExchange.Opserver.Views.Exceptions
                 {
                     return $"Showing search results for '{Search}'{(Log != null ? " in " + Log.Name : "")}";
                 }
-                if (Exception == null)
+                if (SearchParams.Message.HasValue())
                 {
-                    if (Log != null)
-                    {
-                        return Log.ExceptionCount.Pluralize(Log.Name + " Exception");
-                    }
-                    else if (Group != null)
-                    {
-                        return Group.Total.Pluralize(Group.Name + " Exception");
-                    }
-                    else if (Store != null)
-                    {
-                        return Store.TotalExceptionCount.Pluralize(Store.Name + " Exception");
-                    }
-                    else
-                    {
-                        return TotalCount.Pluralize("Exception");
-                    }
+                    return $"Most recent similar entries ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) from {Log?.Name}";
                 }
-                return $"Most recent {Errors.Count} similar entries ({Errors.Sum(e => e.DuplicateCount).ToComma()} exceptions) from {Log?.Name}";
+
+                if (Log != null)
+                {
+                    return Log.ExceptionCount.Pluralize(Log.Name + " Exception");
+                }
+                else if (Group != null)
+                {
+                    return Group.Total.Pluralize(Group.Name + " Exception");
+                }
+                else if (Store != null)
+                {
+                    return Store.TotalExceptionCount.Pluralize(Store.Name + " Exception");
+                }
+                else
+                {
+                    return TotalCount.Pluralize("Exception");
+                }
             }
         }
 

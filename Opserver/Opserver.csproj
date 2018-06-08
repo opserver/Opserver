@@ -574,8 +574,6 @@
       <DependentUpon>HAProxy.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Shared\AccessDenied.cshtml" />
-    <Content Include="Views\Exceptions\Exceptions.Search.cshtml" />
-    <Content Include="Views\Exceptions\Exceptions.Similar.cshtml" />
     <Content Include="Views\Home\About.cshtml" />
     <Content Include="Views\SQL\Dashboard.cshtml" />
     <Content Include="Views\SQL\Instance.DBFiles.cshtml">

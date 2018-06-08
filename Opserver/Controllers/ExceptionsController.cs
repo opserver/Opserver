@@ -30,6 +30,8 @@ namespace StackExchange.Opserver.Controllers
         private ExceptionStore CurrentStore;
         private string CurrentGroup;
         private string CurrentLog;
+        private Guid? CurrentId;
+        private Guid? CurrentSimilarId;
         private ExceptionSorts CurrentSort;
 
         protected override void OnActionExecuting(ActionExecutingContext filterContext)
@@ -37,6 +39,8 @@ namespace StackExchange.Opserver.Controllers
             CurrentStore = ExceptionsModule.GetStore(Request.Params["store"]);
             CurrentGroup = Request.Params["group"];
             CurrentLog = Request.Params["log"] ?? Request.Params["app"]; // old link compat
+            CurrentId = Request.Params["id"].HasValue() && Guid.TryParse(Request.Params["id"], out var guid) ? guid : (Guid?)null;
+            CurrentSimilarId = Request.Params["similar"].HasValue() && Guid.TryParse(Request.Params["similar"], out var similarGuid) ? similarGuid : (Guid?)null;
             Enum.TryParse(Request.Params["sort"], out CurrentSort);
 
             if (CurrentLog.HasValue())
@@ -65,14 +69,36 @@ namespace StackExchange.Opserver.Controllers
             base.OnActionExecuting(filterContext);
         }
 
-        private ExceptionStore.SearchParams GetSearch()
+        // TODO: Move entirely to model binder
+        private async Task<ExceptionStore.SearchParams> GetSearchAsync()
         {
-            return new ExceptionStore.SearchParams
+            var result = new ExceptionStore.SearchParams
             {
                 Group = CurrentGroup,
                 Log = CurrentLog,
-                Sort = CurrentSort
+                Sort = CurrentSort,
+                Id = CurrentId
             };
+
+            if (Request.Params["q"].HasValue())
+            {
+                result.SearchQuery = Request.Params["q"];
+            }
+            if (bool.TryParse(Request.Params["includeDeleted"], out var includeDeleted))
+            {
+                result.IncludeDeleted = includeDeleted;
+            }
+
+            if (CurrentSimilarId.HasValue)
+            {
+                var error = await CurrentStore.GetErrorAsync(CurrentLog, CurrentSimilarId.Value).ConfigureAwait(false);
+                if (error != null)
+                {
+                    result.Message = error.Message;
+                }
+            }
+
+            return result;
         }
 
         private ExceptionsModel GetModel(List<Exceptional.Error> errors)
@@ -96,80 +122,28 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions")]
-        public async Task<ActionResult> Exceptions(string q, bool showDeleted = false)
+        public async Task<ActionResult> Exceptions()
         {
-            var search = GetSearch();
-            search.SearchQuery = q;
-            search.IncludeDeleted = showDeleted;
-
+            var search = await GetSearchAsync().ConfigureAwait(false);
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
 
             var vd = GetModel(errors);
-            vd.Search = q;
+            vd.SearchParams = search;
             vd.LoadAsyncSize = Current.Settings.Exceptions.PageSize;
             return View(vd);
         }
 
         [Route("exceptions/load-more")]
-        public async Task<ActionResult> LoadMore(string q, bool showDeleted = false, int? count = null, Guid? prevLast = null)
+        public async Task<ActionResult> LoadMore(int? count = null, Guid? prevLast = null)
         {
-            var search = GetSearch();
-            search.SearchQuery = q;
+            var search = await GetSearchAsync().ConfigureAwait(false);
             search.Count = count ?? Current.Settings.Exceptions.PageSize;
             search.StartAt = prevLast;
-            search.IncludeDeleted = showDeleted;
 
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
             var vd = GetModel(errors);
-            vd.Search = q;
+            vd.SearchParams = search;
             return View("Exceptions.Table.Rows", vd);
-        }
-
-        [Route("exceptions/similar")]
-        public async Task<ActionResult> Similar(Guid id, bool byTime = false, int rangeInSeconds = 5 * 60)
-        {
-            var e = await CurrentStore.GetErrorAsync(CurrentLog, id).ConfigureAwait(false);
-            if (e == null)
-                return View("Exceptions.Detail", null);
-
-            var search = GetSearch();
-            if (byTime)
-            {
-                search.StartDate = e.CreationDate.AddMinutes(-rangeInSeconds);
-                search.EndDate = e.CreationDate.AddMinutes(rangeInSeconds);
-            }
-            else
-            {
-                search.Message = e.Message;
-            }
-
-            var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
-
-            var vd = GetModel(errors);
-            vd.Exception = e;
-            vd.ClearLinkForVisibleOnly = true;
-            return View("Exceptions.Similar", vd);
-        }
-
-        // TODO: Figure out a good "clear all" then redirect and remove this
-        [Route("exceptions/search")]
-        public async Task<ActionResult> Search(string q, bool showDeleted = false)
-        {
-            // empty searches go back to the main log
-            if (q.IsNullOrEmpty())
-                return RedirectToAction(nameof(Exceptions), new { group = CurrentGroup, log = CurrentLog });
-
-            var search = GetSearch();
-            search.SearchQuery = q;
-            search.IncludeDeleted = showDeleted;
-            search.Count = MaxSearchResults;
-
-            var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
-            var vd = GetModel(errors);
-            vd.Search = q;
-            vd.ShowDeleted = showDeleted;
-            vd.ClearLinkForVisibleOnly = true;
-            return View("Exceptions.Search", vd);
         }
 
         [Route("exceptions/detail")]
@@ -231,30 +205,24 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("exceptions/delete"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> Delete(Guid id, bool redirect = false)
+        public async Task<ActionResult> Delete()
         {
+            var toDelete = await GetSearchAsync().ConfigureAwait(false);
             // we don't care about success...if it's *already* deleted, that's fine
             // if we throw an exception trying to delete, that's another matter
-            await CurrentStore.DeleteErrorAsync(id).ConfigureAwait(false);
+            if (toDelete.Id.HasValue)
+            {
+                // optimized single route
+                await CurrentStore.DeleteErrorAsync(toDelete.Id.Value).ConfigureAwait(false);
+            }
+            else
+            {
+                await CurrentStore.DeleteErrorsAsync(toDelete).ConfigureAwait(false);
+            }
 
-            return redirect ? Json(new { url = Url.Action(nameof(Exceptions), new { store = CurrentStore.Name, group = CurrentGroup, log = CurrentLog }) }) : Counts();
-        }
-
-        [Route("exceptions/delete-all"), HttpPost, AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> DeleteAll()
-        {
-            await CurrentStore.DeleteAllErrorsAsync(new List<string> { CurrentLog }).ConfigureAwait(false);
-
-            return Json(new { url = Url.Action("Exceptions", new { store = CurrentStore.Name, group = CurrentGroup }) });
-        }
-
-        [Route("exceptions/delete-similar"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]
-        public async Task<ActionResult> DeleteSimilar(Guid id)
-        {
-            var e = await CurrentStore.GetErrorAsync(CurrentLog, id).ConfigureAwait(false);
-            await CurrentStore.DeleteSimilarErrorsAsync(e).ConfigureAwait(false);
-
-            return Json(true);
+            return toDelete.Id.HasValue
+                ? Counts()
+                : Json(new { url = Url.Action(nameof(Exceptions), new { store = CurrentStore.Name, group = CurrentGroup, log = CurrentLog }) });
         }
 
         [Route("exceptions/delete-list"), AcceptVerbs(HttpVerbs.Post), OnlyAllow(Roles.ExceptionsAdmin)]

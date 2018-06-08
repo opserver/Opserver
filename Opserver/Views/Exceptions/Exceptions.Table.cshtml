@@ -23,14 +23,7 @@
         <span class="pull-right">
             @if (Model.ShowClearLink)
             {
-                if (Model.ClearLinkForVisibleOnly)
-                {
-                    <a class="text-danger hover-pulsate js-clear-visible" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteList))">@Icon.X Clear visible errors</a>
-                }
-                else
-                {
-                    <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.DeleteAll))">@Icon.X Clear all non-protected errors</a>
-                }
+                <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.Delete), Request.QueryString.ToRouteValues())">@Icon.X Clear all non-protected errors</a>
             }
             @Helpers.PollNow(ExceptionsModule.Stores)
         </span>

@@ -170,6 +170,7 @@ Select ApplicationName as Name,
             public DateTime? EndDate { get; set; }
             public Guid? StartAt { get; set; }
             public ExceptionSorts Sort { get; set; }
+            public Guid? Id { get; set; }
 
             public override int GetHashCode()
             {
@@ -183,12 +184,21 @@ Select ApplicationName as Name,
                 hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(StartDate);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(EndDate);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(StartAt);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(Id);
                 return (hashCode * -1521134295) + Sort.GetHashCode();
             }
         }
 
-        // TODO: Move this into a SQL-specific provider maybe, something swappable
         public Task<List<Error>> GetErrorsAsync(SearchParams search)
+        {
+            var query = GetSearchQuery(search, QueryMode.Search);
+            return QueryListAsync<Error>($"{nameof(GetErrorsAsync)}() for {Name}", query.SQL, query.Params);
+        }
+
+        private enum QueryMode { Search, Delete }
+
+        // TODO: Move this into a SQL-specific provider maybe, something swappable
+        private (string SQL, object Params) GetSearchQuery(SearchParams search, QueryMode mode)
         {
             var sb = StringBuilderCache.Get();
             bool firstWhere = true;
@@ -244,20 +254,36 @@ Select e.Id,
             {
                 AddClause("(Message Like @query Or Url Like @query)");
             }
-            sb.Append(@")
-  Select Top {=Count} *
-    From list");
+            if (search.Id.HasValue)
+            {
+                AddClause("Id = @Id");
+            }
+            if (mode == QueryMode.Delete)
+            {
+                AddClause("IsProtected = 0");
+            }
+
+            sb.AppendLine(")");
+            switch (mode)
+            {
+                case QueryMode.Search:
+                    sb.AppendLine("  Select Top {=Count} *");
+                    break;
+                case QueryMode.Delete:
+                    sb.AppendLine("  Delete");
+                    break;
+            }
+            sb.AppendLine("    From list");
             if (search.StartAt.HasValue)
             {
-                sb.Append(@"
-   Where rowNum > (Select Top 1 rowNum From list Where GUID = @StartAt)");
+                sb.AppendLine("   Where rowNum > (Select Top 1 rowNum From list Where GUID = @StartAt)");
             }
-            sb.Append(@"
-Order By rowNum");
+            if (mode == QueryMode.Search)
+            {
+                sb.AppendLine("Order By rowNum");
+            }
 
-            var sql = sb.ToStringRecycle();
-
-            return QueryListAsync<Error>($"{nameof(GetErrorsAsync)}() for {Name}", sql, new
+            return (sb.ToStringRecycle(), new
             {
                 logs,
                 search.Message,
@@ -265,7 +291,8 @@ Order By rowNum");
                 search.EndDate,
                 query = "%" + search.SearchQuery + "%",
                 search.StartAt,
-                search.Count
+                search.Count,
+                search.Id
             });
         }
 
@@ -334,25 +361,10 @@ Order By rowNum");
             }
         }
 
-        public Task<int> DeleteAllErrorsAsync(List<string> apps)
+        public Task<int> DeleteErrorsAsync(SearchParams search)
         {
-            return ExecTaskAsync($"{nameof(DeleteAllErrorsAsync)}() for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where DeletionDate Is Null 
-   And IsProtected = 0 
-   And ApplicationName In @apps", new { apps });
-        }
-
-        public Task<int> DeleteSimilarErrorsAsync(Error error)
-        {
-            return ExecTaskAsync($"{nameof(DeleteSimilarErrorsAsync)}('{error.GUID}') (app: {error.ApplicationName}) for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where ApplicationName = @ApplicationName
-   And Message = @Message
-   And DeletionDate Is Null
-   And IsProtected = 0", new {error.ApplicationName, error.Message});
+            var query = GetSearchQuery(search, QueryMode.Delete);
+            return ExecTaskAsync($"{nameof(DeleteErrorsAsync)}() for {Name}", query.SQL, query.Params);
         }
 
         public Task<int> DeleteErrorsAsync(List<Guid> ids)

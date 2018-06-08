@@ -1288,11 +1288,6 @@ Status.Exceptions = (function () {
                     jThis.find('.fa').addClass('icon-rotate-flip');
                     $.ajax({
                         type: 'POST',
-                        data: $.extend({}, baseOptions, {
-                            group: jThis.data('group') || options.group,
-                            log: jThis.data('log') || options.log,
-                            id: jThis.data('id') || options.id
-                        }),
                         url: jThis.data('url'),
                         success: function (data) {
                             if (data.url) {
@@ -1304,34 +1299,6 @@ Status.Exceptions = (function () {
                         error: function(xhr) {
                             jThis.find('.fa').removeClass('icon-rotate-flip');
                             jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing this log');
-                        }
-                    });
-                }
-            });
-            return false;
-        });
-
-        $(document).on('click', 'a.js-clear-visible', function () {
-            var jThis = $(this);
-            bootbox.confirm('Really delete all visible, non-protected errors?', function (result) {
-                if (result)
-                {
-                    var ids = $('.js-error:not(.protected,.deleted)').map(function () { return $(this).data('id'); }).get();
-                    jThis.find('.fa').addClass('icon-rotate-flip');
-
-                    $.ajax({
-                        type: 'POST',
-                        traditional: true,
-                        data: $.extend({}, baseOptions, {
-                            ids: ids
-                        }),
-                        url: jThis.data('url'),
-                        success: function (data) {
-                            window.location.href = data.url;
-                        },
-                        error: function (xhr) {
-                            jThis.find('.fa').removeClass('icon-rotate-flip');
-                            jThis.parent().errorPopupFromJSON(xhr, 'An error occurred clearing visible exceptions');
                         }
                     });
                 }

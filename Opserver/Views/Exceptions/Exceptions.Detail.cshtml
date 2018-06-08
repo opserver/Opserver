@@ -213,7 +213,7 @@
             <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store = Model.Store.Name, log = error.ApplicationName })">@error.ApplicationName</a>
             <span class="text-muted">/</span>
             @error.Type
-            <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Similar), new { id = error.GUID, log = error.ApplicationName, store = Model.Store?.Name })">View Similar</a></span>
+            <span class="pull-right"><a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { similar = error.GUID, log = error.ApplicationName, store = Model.Store?.Name })">View Similar</a></span>
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
         <div class="error-info">
