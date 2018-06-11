@@ -60,7 +60,7 @@ Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</tex
                     foreach (var v in volumes)
                     {
                         <div class="ag-log-volume">
-                            <span class="label">Space Free:</span> @v.VolumeMountPoint
+                            <span class="text-muted">Space Free:</span> @v.VolumeMountPoint
                             <span class="volume-space">@((v.AvailableBytes / 1024).ToComma()) <span class="text-muted">KB</span></span>
                         </div>
                     }

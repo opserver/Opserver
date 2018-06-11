@@ -16,6 +16,10 @@
         }
         if (bad.Any())
         {
+            if (good.Any())
+            {
+                <span class="text-muted">/</span>
+            }
             @MonitorStatus.Critical.Span(@bad.Count.ToComma(), @bad.Count.Pluralize("Unhealthy Database"))
         }
     }
