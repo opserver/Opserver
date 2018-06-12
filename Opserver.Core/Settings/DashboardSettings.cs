@@ -166,6 +166,11 @@ namespace StackExchange.Opserver
             string ISettingsCollectionItem.Name => Pattern;
 
             /// <summary>
+            /// The description that appears upon hovering over this node
+            /// </summary>
+            public string Description { get; set; }
+
+            /// <summary>
             /// The name that appears for this category
             /// </summary>
             public string Pattern { get; set; }

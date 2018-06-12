@@ -19,6 +19,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         public string Id { get; internal set; }
         public string Name { get; internal set; }
+        public string Description => GetNodeSetting(i => i.Description);
         public DateTime? LastSync { get; internal set; }
         public string MachineType { get; internal set; }
         public string MachineOSVersion { get; internal set; }
@@ -282,6 +283,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         private DashboardSettings.NodeSettings _settings;
         public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName));
 
+        private string GetNodeSetting(Func<DashboardSettings.NodeSettings, string> func) => func(Settings);
         private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
         private Regex GetSetting(Func<INodeSettings, Regex> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
         public decimal? CPUWarningPercent => GetSetting(i => i.CPUWarningPercent);
