@@ -145,7 +145,7 @@ FROM (SELECT TOP (@MaxResultCount)
              CROSS JOIN(SELECT SUM(execution_count) TotalExecs,
                                SUM(total_elapsed_time) TotalElapsed,
                                SUM(total_worker_time) TotalWorker,
-                               SUM(total_logical_reads) TotalReads
+                               SUM(Cast(total_logical_reads as DECIMAL(38,0))) TotalReads
                           FROM sys.dm_exec_query_stats) AS t
              CROSS APPLY sys.dm_exec_plan_attributes(qs.plan_handle) AS pa
      WHERE pa.attribute = 'dbid'
