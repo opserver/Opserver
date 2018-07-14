@@ -11,16 +11,26 @@
 @helper RenderDBIssues(SQLNode.AGReplica r) {
     if (r.SynchronizationHealth != SynchronizationHealths.Healthy)
     {
-        var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy).ToList();
+        var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy).ToList();       
+        var replica = Model.Node?.Cluster?.GetNode(r.ReplicaServerName);
+        var remoteAgData = replica?.AvailabilityGroups.SafeData(true).First(g => g.Name == Model.Name);
+        var remoteDBs = remoteAgData?.LocalReplica?.Databases?.ToDictionary(db => db.DatabaseName) ?? new Dictionary<string, SQLNode.AGDatabaseReplica>();
         if (r.Databases.Count > unhealthy.Count)
         {
-            foreach (var db in unhealthy.OrderBy(u => u.DatabaseName))
+            foreach (var db in unhealthy.OrderByDescending(u => remoteDBs.TryGetValue(u.DatabaseName, out var rdb) ? rdb.SynchronizationState : u.SynchronizationState).ThenBy(u => u.DatabaseName))
             {
+                var remoteDB = remoteDBs.TryGetValue(db.DatabaseName, out var rdb) ? rdb : db;
                 <div class="text-warning" title="@db.DatabaseName
-Sync: @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
-Health: @(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
+Sync (@Model.Node.Name): @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
+Health (@Model.Node.Name): @(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
+@if (replica != null && remoteDB != db) {<text>
+Sync (@replica.Name): @(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
+Health (@replica.Name): @(remoteDB.SynchronizationHealth.HasValue ? remoteDB.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
+</text>}
 @if (db.SuspendReason.HasValue) {<text>
-Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</text>}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)</div>
+Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</text>}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)
+                (@(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown"))
+                </div>
             }
         }
         else
