@@ -26,7 +26,7 @@ else
             <span class="text-danger">(x@(error.DuplicateCount.ToComma()))</span>
         }
         <span class="pull-right">
-            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.Delete), new { log = log, group = group, similar = error.GUID })">@Icon.X Clear all similar</a>
+            <a class="text-danger js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.Delete), new { log = log, group = group, similar = error.GUID, store })">@Icon.X Clear all similar</a>
             <span class="text-muted">|</span>
             <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { similar = error.GUID, log, group, store })" title="View exceptions with the same message in the same log">View Similar</a>
         </span>
