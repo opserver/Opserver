@@ -13,7 +13,7 @@
     {
         var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy).ToList();       
         var replica = Model.Node?.Cluster?.GetNode(r.ReplicaServerName);
-        var remoteAgData = replica?.AvailabilityGroups.SafeData(true).First(g => g.Name == Model.Name);
+        var remoteAgData = replica?.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == Model.Name);
         var remoteDBs = remoteAgData?.LocalReplica?.Databases?.ToDictionary(db => db.DatabaseName) ?? new Dictionary<string, SQLNode.AGDatabaseReplica>();
         if (r.Databases.Count > unhealthy.Count)
         {
