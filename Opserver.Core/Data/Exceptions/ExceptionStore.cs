@@ -270,7 +270,8 @@ Select e.Id,
                     sb.AppendLine("  Select Top {=Count} *");
                     break;
                 case QueryMode.Delete:
-                    sb.AppendLine("  Delete");
+                    sb.AppendLine("  Update list");
+                    sb.AppendLine("    Set DeletionDate = GetUtcDate(), IsProtected = 0");
                     break;
             }
             sb.AppendLine("    From list");
