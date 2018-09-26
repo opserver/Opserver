@@ -271,7 +271,7 @@ Select e.Id,
                     break;
                 case QueryMode.Delete:
                     sb.AppendLine("  Update list");
-                    sb.AppendLine("    Set DeletionDate = GetUtcDate()");
+                    sb.AppendLine("    Set DeletionDate = GetUtcDate(), IsProtected = 0");
                     break;
             }
             sb.AppendLine("    From list");
