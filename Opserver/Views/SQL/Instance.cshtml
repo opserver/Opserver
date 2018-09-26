@@ -29,14 +29,14 @@ if (counter == null)
         <label>@label</label>
     </div>
 }
-@helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null)
+@helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null, int cols = 4)
 {
 var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
 if (counter == null)
 {
     return;
 }
-    <div class="value-block col-md-4 col-sm-6">
+    <div class="value-block col-md-@cols.ToString() col-sm-6">
         @counter.CalculatedValue.ToString("#,##0.###") @suffix
         <label>@label</label>
     </div>
@@ -329,6 +329,11 @@ Avgerage Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms
                                     @RenderPerSecCounter("Bytes from Replica", "Availability Replica", "Bytes Received from Replica/sec", "_Total", cols: 4)
                                     @RenderPerSecCounter("Bytes to Replica", "Availability Replica", "Bytes Sent to Replica/sec", "_Total", cols: 4)
                                     @RenderPerSecCounter("Bytes to Transport", "Availability Replica", "Bytes Sent to Transport/sec", "_Total", cols: 4)
+                                </div>
+                                <div class="row">
+                                    @RenderPerSecCounter("Flow Controls", "Availability Replica", "Flow Control/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Flow Control Time (ms)", "Availability Replica", "Flow Control Time (ms/sec)", "_Total", cols: 4)
+                                    @RenderPerSecCounter("DB Flow Controls", "Database Replica", "Database Flow Controls/sec", "_Total", cols: 4)
                                 </div>
                             </div>
                         </div>
