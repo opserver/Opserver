@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         await PollStats().ConfigureAwait(false);
                     }
                 }
-                catch (COMException e)
+                catch (Exception e) when (e.InnerException is COMException)
                 {
                     Current.LogException(e);
                     Status = NodeStatus.Unreachable;
@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     ClearSummaries();
                 }
-                catch (COMException e)
+                catch (Exception e) when (e.InnerException is COMException)
                 {
                     Current.LogException(e);
                     Status = NodeStatus.Unreachable;
