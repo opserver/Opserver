@@ -93,7 +93,7 @@ namespace StackExchange.Opserver
              .IgnorePath("/login")
              .IgnorePath("/spark")
              .IgnorePath("/top-refresh")
-             .AddViewPofiling()
+             .AddViewProfiling()
             );
 
             Cache.EnableProfiling = SiteSettings.PollerProfiling;
