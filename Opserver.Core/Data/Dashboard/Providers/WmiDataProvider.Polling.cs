@@ -44,6 +44,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         await PollStats().ConfigureAwait(false);
                     }
                 }
+                // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
+                catch (COMException e)
+                {
+                    Current.LogException(e);
+                    Status = NodeStatus.Unreachable;
+                }
                 catch (Exception e) when (e.InnerException is COMException)
                 {
                     Current.LogException(e);
@@ -64,6 +70,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     ClearSummaries();
+                }
+                // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
+                catch (COMException e)
+                {
+                    Current.LogException(e);
+                    Status = NodeStatus.Unreachable;
                 }
                 catch (Exception e) when (e.InnerException is COMException)
                 {
