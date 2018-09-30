@@ -2,7 +2,7 @@
   <PropertyGroup>
     <RootNamespace>StackExchange.Opserver</RootNamespace>
     <AssemblyName>StackExchange.Opserver.Core</AssemblyName>
-    <TargetFrameworks>net461</TargetFrameworks>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <CodeAnalysisRuleSet>Opserver.Core.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
@@ -13,8 +13,16 @@
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.0-rc2.29" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.513" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Management" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="System.DirectoryServices" Version="4.5.0" />
+    <PackageReference Include="System.Management" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Data\CloudFlare\CloudFlareAPI.*.cs" DependentUpon="CloudFlareAPI.cs" />
