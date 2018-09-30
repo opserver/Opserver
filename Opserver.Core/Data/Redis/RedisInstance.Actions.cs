@@ -68,7 +68,7 @@ namespace StackExchange.Opserver.Data.Redis
             RedisValue tieBreakerValue = EndPointCollection.ToString(myEndPoint);
 
             var result = await _connection.GetDatabase()
-                .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
+                .StringSetAsync(tieBreakerKey, tieBreakerValue, flags: CommandFlags.NoRedirect)
                 .ConfigureAwait(false);
             await Tiebreaker.PollAsync(true).ConfigureAwait(false);
             return result;
@@ -94,7 +94,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             RedisKey tieBreakerKey = SERedisTiebreakerKey;
             var result = await _connection.GetDatabase()
-                .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect | CommandFlags.HighPriority)
+                .KeyDeleteAsync(tieBreakerKey, flags: CommandFlags.NoRedirect)
                 .ConfigureAwait(false);
             await Tiebreaker.PollAsync(true).ConfigureAwait(false);
             return result;

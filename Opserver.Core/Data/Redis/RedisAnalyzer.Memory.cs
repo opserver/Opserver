@@ -156,7 +156,6 @@ namespace StackExchange.Opserver.Data.Redis
             var keys = server.Keys(Database, pageSize: 1000);
             KeyTime = sw.Elapsed;
 
-            muxer.PreserveAsyncOrder = true;
             // Analyze each key
             sw.Restart();
             using (MiniProfiler.Current.Step("Key analysis"))
