@@ -715,19 +715,21 @@ Status.SQL = (function () {
             onLoad: function() {
                 $(this).closest('.modal-lg').removeClass('modal-lg').addClass('modal-huge');
                 prettyPrint();
-                $('.qp-root').drawQueryPlanLines();
-                var currentTt;
-                $(this).find('.qp-node').hover(function() {
-                    var pos = $(this).offset();
-                    var tt = $(this).find('.qp-tt');
-                    currentTt = tt.clone();
-                    currentTt.addClass('sql-query-tooltip')
-                        .appendTo(document.body)
-                        .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
-                        .show();
-                }, function() {
-                    if (currentTt) currentTt.hide();
-                });
+                if ($('.qp-root').length) {
+                    $('.qp-root').drawQueryPlanLines();
+                    var currentTt;
+                    $(this).find('.qp-node').hover(function () {
+                        var pos = $(this).offset();
+                        var tt = $(this).find('.qp-tt');
+                        currentTt = tt.clone();
+                        currentTt.addClass('sql-query-tooltip')
+                            .appendTo(document.body)
+                            .css({ top: pos.top + $(this).outerHeight(), left: pos.left })
+                            .show();
+                    }, function () {
+                        if (currentTt) currentTt.hide();
+                    });
+                }
                 $(this).find('.js-remove-plan').on('click', function() {
                     if ($(this).hasClass('js-confirm')) {
                         $(this).text('confirm?').removeClass('js-confirm');
