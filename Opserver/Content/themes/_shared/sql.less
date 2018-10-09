@@ -1,5 +1,5 @@
-﻿/* SQL Server Query Plans */
-.qp-tt {
+/* SQL Server Query Plans */
+/*.qp-tt {
     top: 4em;
     left: 2em;
     border: 1px solid black;
@@ -43,131 +43,544 @@
     th {
         text-align: left;
     }
+
     .qp-bold {
         font-weight: bold;
     }
-    .qp-tt-header
-    {
-	    text-align: center;
-	    font-weight: bold;
+
+    .qp-tt-header {
+        text-align: center;
+        font-weight: bold;
     }
+}*/
+
+.sql-query-section {
+    font-size: 13px;
 }
 
 .sql-query-plan {
+    color: @label-color;
+    max-height: ~"calc(100vh - 100px)";
+
     div.qp-node {
-	    background-color: #FFFFF4;
-	    margin: 2px;
-	    padding: 2px;
-	    border: 1px solid #CCC;
-	    font-size: 11px;
-	    line-height: normal;
-    }
-    .qp-node > div {
-	    font-family: Consolas, Monospace;
-	    text-align: center;
-    }
-    div[class|='qp-icon'] {
-	    height: 16px;
-	    width: 16px;
-	    margin-left: auto;
-	    margin-right: auto;
-	    background-repeat: no-repeat;
-      background-size: 16px 16px;
-    }    
-    .qp-bold {
-	    font-weight: bold;
+        background-color: #FFFFCC;
+        color: #444;
+        margin: 2px;
+        padding: 2px;
+        border: 1px solid #444;
+        border-radius: 4px;
     }
 
+    div.qp-node,
+    div.qp-tt {
+        font-size: 11px;
+        line-height: normal;
+    }
+
+    .qp-statement-header {
+        display: none;
+    }
+
+    .missing-index {
+        color: green;
+    }
+
+    .qp-statement-header,
+    .qp-node > div {
+        font-family: Monospace;
+    }
+
+    .qp-node > div {
+        text-align: center;
+    }
+
+    div[class|='qp-icon'] {
+        height: 32px;
+        width: 32px;
+        margin-left: auto;
+        margin-right: auto;
+        background-repeat: no-repeat;
+        position: relative;
+    }
+
+    .qp-tt {
+        top: 4em;
+        left: 2em;
+        border: 1px solid black;
+        background-color: #FFFFEE;
+        padding: 2px;
+        width: 30em;
+    }
+
+    .qp-tt div,
+    .qp-tt table {
+        font-family: Sans-Serif;
+        text-align: left;
+    }
+
+    .qp-tt table {
+        border-width: 0px;
+        border-spacing: 0px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .qp-tt td,
+    .qp-tt th {
+        font-size: 11px;
+        border-bottom: solid 1px Black;
+        padding: 1px;
+    }
+
+    .qp-tt td {
+        text-align: right;
+        padding-left: 10px;
+    }
+
+    .qp-tt th {
+        text-align: left;
+    }
+
+    .qp-bold,
+    .qp-tt-header {
+        font-weight: bold;
+    }
+
+    .qp-tt-header {
+        text-align: center;
+    }
     /* Icons */
-    .qp-icon-Catchall{background-image:url('../../img/query-plan/bitmap.gif')}
-    .qp-icon-ArithmeticExpression{background-image:url('../../img/query-plan/arithmetic_expression.gif')}
-    .qp-icon-Assert{background-image:url('../../img/query-plan/assert.gif')}
-    .qp-icon-Assign{background-image:url('../../img/query-plan/assign.gif')}
-    .qp-icon-Bitmap{background-image:url('../../img/query-plan/bitmap.gif')}
-    .qp-icon-BookmarkLookup{background-image:url('../../img/query-plan/bookmark_lookup.gif')}
-    .qp-icon-ClusteredIndexDelete{background-image:url('../../img/query-plan/clustered_index_delete.gif')}
-    .qp-icon-ClusteredIndexInsert{background-image:url('../../img/query-plan/clustered_index_insert.gif')}
-    .qp-icon-ClusteredIndexScan{background-image:url('../../img/query-plan/clustered_index_scan.gif')}
-    .qp-icon-ClusteredIndexSeek{background-image:url('../../img/query-plan/clustered_index_seek.gif')}
-    .qp-icon-ClusteredIndexUpdate{background-image:url('../../img/query-plan/clustered_index_update.gif')}
-    .qp-icon-Collapse{background-image:url('../../img/query-plan/collapse.gif')}
-    .qp-icon-ComputeScalar{background-image:url('../../img/query-plan/compute_scalar.gif')}
-    .qp-icon-Concatenation{background-image:url('../../img/query-plan/concatenation.gif')}
-    .qp-icon-ConstantScan{background-image:url('../../img/query-plan/constant_scan.gif')}
-    .qp-icon-Convert{background-image:url('../../img/query-plan/convert.gif')}
-    .qp-icon-CursorCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
-    .qp-icon-Declare{background-image:url('../../img/query-plan/declare.gif')}
-    .qp-icon-Delete{background-image:url('../../img/query-plan/table_delete.gif')}
-    .qp-icon-DistributeStreams{background-image:url('../../img/query-plan/distribute_streams.gif')}
-    .qp-icon-Dynamic{background-image:url('../../img/query-plan/dynamic.gif')}
-    .qp-icon-EagerSpool{background-image:url('../../img/query-plan/spool.gif')}
-    .qp-icon-FetchQuery{background-image:url('../../img/query-plan/fetch_query.gif')}
-    .qp-icon-Filter{background-image:url('../../img/query-plan/filter.gif')}
-    .qp-icon-GatherStreams{background-image:url('../../img/query-plan/gather_streams.gif')}
-    .qp-icon-HashMatch{background-image:url('../../img/query-plan/hash_match.gif')}
-    .qp-icon-HashMatchRoot{background-image:url('../../img/query-plan/hash_match.gif')}
-    .qp-icon-HashMatchTeam{background-image:url('../../img/query-plan/hash_match.gif')}
-    .qp-icon-If{background-image:url('../../img/query-plan/if.gif')}
-    .qp-icon-Insert{background-image:url('../../img/query-plan/table_insert.gif')}
-    .qp-icon-InsertedScan{background-image:url('../../img/query-plan/inserted_scan.gif')}
-    .qp-icon-Intrinsic{background-image:url('../../img/query-plan/intrinsic.gif')}
-    .qp-icon-IteratorCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
-    .qp-icon-Keyset{background-image:url('../../img/query-plan/keyset.gif')}
-    .qp-icon-LanguageElementCatchall{background-image:url('../../img/query-plan/bitmap.gif')}
-    .qp-icon-LazySpool{background-image:url('../../img/query-plan/spool.gif')}
-    .qp-icon-LogRowScan{background-image:url('../../img/query-plan/log_row_scan.gif')}
-    .qp-icon-MergeInterval{background-image:url('../../img/query-plan/merge_interval.gif')}
-    .qp-icon-MergeJoin{background-image:url('../../img/query-plan/merge_join.gif')}
-    .qp-icon-NestedLoops{background-image:url('../../img/query-plan/nested_loops.gif')}
-    .qp-icon-NonclusteredIndexDelete{background-image:url('../../img/query-plan/nonclustered_index_delete.gif')}
-    .qp-icon-NonclusteredIndexInsert{background-image:url('../../img/query-plan/nonclustered_index_insert.gif')}
-    .qp-icon-NonclusteredIndexScan{background-image:url('../../img/query-plan/nonclustered_index_scan.gif')}
-    .qp-icon-IndexSeek{background-image:url('../../img/query-plan/nonclustered_index_seek.gif')}
-    .qp-icon-NonclusteredIndexSpool{background-image:url('../../img/query-plan/nonclustered_index_spool.gif')}
-    .qp-icon-NonclusteredIndexUpdate{background-image:url('../../img/query-plan/nonclustered_index_update.gif')}
-    .qp-icon-OnlineIndexInsert{background-image:url('../../img/query-plan/online_index_insert.gif')}
-    .qp-icon-ParameterTableScan{background-image:url('../../img/query-plan/parameter_table_scan.gif')}
-    .qp-icon-PopulationQuery{background-image:url('../../img/query-plan/population_query.gif')}
-    .qp-icon-RdiLookup{background-image:url('../../img/query-plan/rdi_lookup.gif')}
-    .qp-icon-RefreshQuery{background-image:url('../../img/query-plan/refresh_query.gif')}
-    .qp-icon-RemoteDelete{background-image:url('../../img/query-plan/remote_delete.gif')}
-    .qp-icon-RemoteInsert{background-image:url('../../img/query-plan/remote_insert.gif')}
-    .qp-icon-RemoteQuery{background-image:url('../../img/query-plan/remote_query.gif')}
-    .qp-icon-RemoteScan{background-image:url('../../img/query-plan/remote_scan.gif')}
-    .qp-icon-RemoteUpdate{background-image:url('../../img/query-plan/remote_update.gif')}
-    .qp-icon-RepartitionStreams{background-image:url('../../img/query-plan/repartition_streams.gif')}
-    .qp-icon-Result{background-image:url('../../img/query-plan/result.gif')}
-    .qp-icon-RowCountSpool{background-image:url('../../img/query-plan/row_count_spool.gif')}
-    .qp-icon-Segment{background-image:url('../../img/query-plan/segment.gif')}
-    .qp-icon-Sequence{background-image:url('../../img/query-plan/sequence.gif')}
-    .qp-icon-Sequenceproject{background-image:url('../../img/query-plan/sequenceproject.gif')}
-    .qp-icon-Snapshot{background-image:url('../../img/query-plan/snapshot.gif')}
-    .qp-icon-Sort{background-image:url('../../img/query-plan/sort.gif')}
-    .qp-icon-Split{background-image:url('../../img/query-plan/split.gif')}
-    .qp-icon-Spool{background-image:url('../../img/query-plan/spool.gif')}
-    .qp-icon-Statement{background-image:url('../../img/query-plan/result.gif')}
-    .qp-icon-StreamAggregate{background-image:url('../../img/query-plan/stream_aggregate.gif')}
-    .qp-icon-Switch{background-image:url('../../img/query-plan/switch.gif')}
-    .qp-icon-TableDelete{background-image:url('../../img/query-plan/table_delete.gif')}
-    .qp-icon-TableInsert{background-image:url('../../img/query-plan/table_insert.gif')}
-    .qp-icon-TableScan{background-image:url('../../img/query-plan/table_scan.gif')}
-    .qp-icon-TableSpool{background-image:url('../../img/query-plan/table_spool.gif')}
-    .qp-icon-TableUpdate{background-image:url('../../img/query-plan/table_update.gif')}
-    .qp-icon-TableValuedFunction{background-image:url('../../img/query-plan/table_valued_function.gif')}
-    .qp-icon-Top{background-image:url('../../img/query-plan/top.gif')}
-    .qp-icon-Udx{background-image:url('../../img/query-plan/udx.gif')}
-    .qp-icon-Update{background-image:url('../../img/query-plan/table_update.gif.gif')}
-    .qp-icon-While{background-image:url('../../img/query-plan/while.gif')}
+    .qp-icon-Catchall {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-ArithmeticExpression {
+        background: url('../../img/query-plan/icons.png') -0px -0px
+    }
+
+    .qp-icon-Assert {
+        background: url('../../img/query-plan/icons.png') -32px -0px
+    }
+
+    .qp-icon-Assign {
+        background: url('../../img/query-plan/icons.png') -64px -0px
+    }
+
+    .qp-icon-Bitmap {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-BookmarkLookup {
+        background: url('../../img/query-plan/icons.png') -128px -0px
+    }
+
+    .qp-icon-ClusteredIndexDelete {
+        background: url('../../img/query-plan/icons.png') -160px -0px
+    }
+
+    .qp-icon-ClusteredIndexInsert {
+        background: url('../../img/query-plan/icons.png') -192px -0px
+    }
+
+    .qp-icon-ClusteredIndexScan {
+        background: url('../../img/query-plan/icons.png') -224px -0px
+    }
+
+    .qp-icon-ClusteredIndexSeek {
+        background: url('../../img/query-plan/icons.png') -256px -0px
+    }
+
+    .qp-icon-KeyLookup {
+        background: url('../../img/query-plan/icons.png') -256px -0px
+    }
+
+    .qp-icon-ClusteredIndexUpdate {
+        background: url('../../img/query-plan/icons.png') -288px -0px
+    }
+
+    .qp-icon-Collapse {
+        background: url('../../img/query-plan/icons.png') -0px -32px
+    }
+
+    .qp-icon-ComputeScalar {
+        background: url('../../img/query-plan/icons.png') -32px -32px
+    }
+
+    .qp-icon-Concatenation {
+        background: url('../../img/query-plan/icons.png') -64px -32px
+    }
+
+    .qp-icon-ConstantScan {
+        background: url('../../img/query-plan/icons.png') -96px -32px
+    }
+
+    .qp-icon-Convert {
+        background: url('../../img/query-plan/icons.png') -128px -32px
+    }
+
+    .qp-icon-CursorCatchall {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-Declare {
+        background: url('../../img/query-plan/icons.png') -160px -32px
+    }
+
+    .qp-icon-Delete {
+        background: url('../../img/query-plan/icons.png') -288px -160px
+    }
+
+    .qp-icon-DistributeStreams {
+        background: url('../../img/query-plan/icons.png') -224px -32px
+    }
+
+    .qp-icon-Dynamic {
+        background: url('../../img/query-plan/icons.png') -256px -32px
+    }
+
+    .qp-icon-EagerSpool {
+        background: url('../../img/query-plan/icons.png') -192px -160px
+    }
+
+    .qp-icon-FetchQuery {
+        background: url('../../img/query-plan/icons.png') -288px -32px
+    }
+
+    .qp-icon-Filter {
+        background: url('../../img/query-plan/icons.png') -0px -64px
+    }
+
+    .qp-icon-GatherStreams {
+        background: url('../../img/query-plan/icons.png') -32px -64px
+    }
+
+    .qp-icon-HashMatch {
+        background: url('../../img/query-plan/icons.png') -64px -64px
+    }
+
+    .qp-icon-HashMatchRoot {
+        background: url('../../img/query-plan/icons.png') -64px -64px
+    }
+
+    .qp-icon-HashMatchTeam {
+        background: url('../../img/query-plan/icons.png') -64px -64px
+    }
+
+    .qp-icon-If {
+        background: url('../../img/query-plan/icons.png') -96px -64px
+    }
+
+    .qp-icon-Insert {
+        background: url('../../img/query-plan/icons.png') -0px -192px
+    }
+
+    .qp-icon-InsertedScan {
+        background: url('../../img/query-plan/icons.png') -128px -64px
+    }
+
+    .qp-icon-Intrinsic {
+        background: url('../../img/query-plan/icons.png') -160px -64px
+    }
+
+    .qp-icon-IteratorCatchall {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-Keyset {
+        background: url('../../img/query-plan/icons.png') -192px -64px
+    }
+
+    .qp-icon-LanguageElementCatchall {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-LazySpool {
+        background: url('../../img/query-plan/icons.png') -192px -160px
+    }
+
+    .qp-icon-LogRowScan {
+        background: url('../../img/query-plan/icons.png') -224px -64px
+    }
+
+    .qp-icon-MergeInterval {
+        background: url('../../img/query-plan/icons.png') -256px -64px
+    }
+
+    .qp-icon-MergeJoin {
+        background: url('../../img/query-plan/icons.png') -288px -64px
+    }
+
+    .qp-icon-NestedLoops {
+        background: url('../../img/query-plan/icons.png') -0px -96px
+    }
+
+    .qp-icon-NonclusteredIndexDelete {
+        background: url('../../img/query-plan/icons.png') -32px -96px
+    }
+
+    .qp-icon-NonclusteredIndexInsert {
+        background: url('../../img/query-plan/icons.png') -64px -96px
+    }
+
+    .qp-icon-IndexScan {
+        background: url('../../img/query-plan/icons.png') -96px -96px
+    }
+
+    .qp-icon-IndexSeek {
+        background: url('../../img/query-plan/icons.png') -128px -96px
+    }
+
+    .qp-icon-NonclusteredIndexSpool {
+        background: url('../../img/query-plan/icons.png') -160px -96px
+    }
+
+    .qp-icon-NonclusteredIndexUpdate {
+        background: url('../../img/query-plan/icons.png') -192px -96px
+    }
+
+    .qp-icon-OnlineIndexInsert {
+        background: url('../../img/query-plan/icons.png') -224px -96px
+    }
+
+    .qp-icon-ParameterTableScan {
+        background: url('../../img/query-plan/icons.png') -256px -96px
+    }
+
+    .qp-icon-PopulationQuery {
+        background: url('../../img/query-plan/icons.png') -288px -96px
+    }
+
+    .qp-icon-RdiLookup {
+        background: url('../../img/query-plan/icons.png') -0px -128px
+    }
+
+    .qp-icon-RefreshQuery {
+        background: url('../../img/query-plan/icons.png') -32px -128px
+    }
+
+    .qp-icon-RemoteDelete {
+        background: url('../../img/query-plan/icons.png') -64px -128px
+    }
+
+    .qp-icon-RemoteInsert {
+        background: url('../../img/query-plan/icons.png') -96px -128px
+    }
+
+    .qp-icon-RemoteQuery {
+        background: url('../../img/query-plan/icons.png') -128px -128px
+    }
+
+    .qp-icon-RemoteScan {
+        background: url('../../img/query-plan/icons.png') -160px -128px
+    }
+
+    .qp-icon-RemoteUpdate {
+        background: url('../../img/query-plan/icons.png') -192px -128px
+    }
+
+    .qp-icon-RepartitionStreams {
+        background: url('../../img/query-plan/icons.png') -224px -128px
+    }
+
+    .qp-icon-Result {
+        background: url('../../img/query-plan/icons.png') -256px -128px
+    }
+
+    .qp-icon-RowCountSpool {
+        background: url('../../img/query-plan/icons.png') -288px -128px
+    }
+
+    .qp-icon-Segment {
+        background: url('../../img/query-plan/icons.png') -0px -160px
+    }
+
+    .qp-icon-Sequence {
+        background: url('../../img/query-plan/icons.png') -32px -160px
+    }
+
+    .qp-icon-Sequenceproject {
+        background: url('../../img/query-plan/icons.png') -64px -160px
+    }
+
+    .qp-icon-Snapshot {
+        background: url('../../img/query-plan/icons.png') -96px -160px
+    }
+
+    .qp-icon-Sort {
+        background: url('../../img/query-plan/icons.png') -128px -160px
+    }
+
+    .qp-icon-Split {
+        background: url('../../img/query-plan/icons.png') -160px -160px
+    }
+
+    .qp-icon-Spool {
+        background: url('../../img/query-plan/icons.png') -192px -160px
+    }
+
+    .qp-icon-Statement {
+        background: url('../../img/query-plan/icons.png') -256px -128px
+    }
+
+    .qp-icon-StreamAggregate {
+        background: url('../../img/query-plan/icons.png') -224px -160px
+    }
+
+    .qp-icon-Switch {
+        background: url('../../img/query-plan/icons.png') -256px -160px
+    }
+
+    .qp-icon-TableDelete {
+        background: url('../../img/query-plan/icons.png') -288px -160px
+    }
+
+    .qp-icon-TableInsert {
+        background: url('../../img/query-plan/icons.png') -0px -192px
+    }
+
+    .qp-icon-TableScan {
+        background: url('../../img/query-plan/icons.png') -32px -192px
+    }
+
+    .qp-icon-TableSpool {
+        background: url('../../img/query-plan/icons.png') -64px -192px
+    }
+
+    .qp-icon-TableUpdate {
+        background: url('../../img/query-plan/icons.png') -96px -192px
+    }
+
+    .qp-icon-TableValuedFunction {
+        background: url('../../img/query-plan/icons.png') -128px -192px
+    }
+
+    .qp-icon-Top {
+        background: url('../../img/query-plan/icons.png') -160px -192px
+    }
+
+    .qp-icon-Udx {
+        background: url('../../img/query-plan/icons.png') -192px -192px
+    }
+
+    .qp-icon-Update {
+        background: url('../../img/query-plan/icons.png') -96px -192px
+    }
+
+    .qp-icon-While {
+        background: url('../../img/query-plan/icons.png') -224px -192px
+    }
+
+    .qp-icon-PopulateQuery {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-StmtCursor {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-SequenceProject {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-FastForward {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-SnapShot {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-WindowAggregate {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-AdaptiveJoin {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-IndexSpool {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-icon-IndexInsert {
+        background: url('../../img/query-plan/icons.png') -96px -0px
+    }
+
+    .qp-iconwarn {
+        background: url('../../img/query-plan/icons.png') -304px -209px;
+        height: 16px;
+        width: 16px;
+        position: absolute;
+        top: 16px;
+    }
+
+    .qp-iconpar {
+        background: url('../../img/query-plan/icons.png') -304px -193px;
+        height: 16px;
+        width: 16px;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+    }
+    /* Layout - can't touch this */
+    .qp-tt {
+        position: absolute;
+        z-index: 1;
+        white-space: normal;
+        -webkit-transition-delay: 0.5s;
+        transition-delay: 0.5s;
+    }
+
+    div.qp-node .qp-tt,
+    .qp-noCssTooltip div.qp-node:hover .qp-tt {
+        visibility: collapse;
+    }
+
+    div.qp-node:hover .qp-tt {
+        visibility: visible;
+    }
+
+    .qp-tt table {
+        white-space: nowrap;
+    }
 
     .qp-node {
-	    position: relative;
-	    white-space: nowrap;
+        position: relative;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
     }
+
+    .qp-node-outer {
+        height: 76.4px;
+        display: table-cell;
+    }
+
     .qp-tr {
-	    display: table;
+        display: table;
     }
+
     .qp-tr > div {
-	    display: table-cell;
-	    padding-left: 15px;
+        display: table-cell;
+        padding-left: 20px;
+    }
+
+    .qp-root {
+        position: relative;
+        display: inline-block;
+    }
+
+    .qp-root svg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .qp-root polyline {
+        pointer-events: auto;
     }
 }

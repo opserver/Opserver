@@ -226,7 +226,6 @@
     <Content Include="Content\themes\light\styles.less" />
     <Content Include="Content\themes\_shared\animations.less" />
     <Content Include="Content\themes\_shared\spinkit.less" />
-    <Content Include="Content\themes\_shared\prettify.less" />
     <Content Include="Content\themes\_shared\exceptions.less" />
     <Content Include="Content\themes\_shared\sql.less" />
     <Content Include="Content\js\plugins\toastr.js" />
@@ -549,7 +548,6 @@
     <Content Include="Content\img\query-plan\while.gif" />
     <Content Include="Content\js\plugins\cookie.js" />
     <Content Include="Content\js\plugins\d3.v3.js" />
-    <Content Include="Content\js\plugins\prettify.js" />
     <Content Include="Content\js\plugins\qp.js" />
     <Content Include="Content\js\plugins\tablesorter.js" />
     <Content Include="Content\img\apple-touch-icon.png" />

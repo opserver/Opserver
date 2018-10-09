@@ -47,7 +47,7 @@ else {
                 <tr class="tablesorter-childRow hidden">
                     <td colspan="4">
                         @Html.Partial("Databases.Modal.Columns", columnLookup[Tuple.Create(v.SchemaName, v.ViewName)])
-                        <pre class="pre-code prettyprint lang-sql">@v.Definition.Trim()</pre>
+                        <pre><code class="sql">@v.Definition.Trim()</code></pre>
                     </td>
                 </tr>
                 <tr class="tablesorter-childRow hidden"></tr>
@@ -72,7 +72,7 @@ else {
                     2: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                 }
             });
-            prettyPrint();
+            Status.highlight();
         });
     </script>
 }

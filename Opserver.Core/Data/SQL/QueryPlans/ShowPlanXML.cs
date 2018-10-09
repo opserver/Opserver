@@ -45,6 +45,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
         private static readonly Regex initParamsTrimRegex = new Regex(@"^\s*(begin|end)\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex paramRegex = new Regex(@"^\(( [^\(\)]* ( ( (?<Open>\() [^\(\)]* )+ ( (?<Close-Open>\)) [^\(\)]* )+ )* (?(Open)(?!)) )\)", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly Regex paramSplitRegex = new Regex(@",(?=[@])", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly char[] startTrimChars = new[] { '\n', '\r', ';' };
 
         public string ParameterDeclareStatement
         {
@@ -60,7 +61,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
             get
             {
                 //TODO: Pair these down, seeing what looks good for now
-                return this is StmtSimpleType ss ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim() : "";
+                return this is StmtSimpleType ss ? emptyLineRegex.Replace(paramRegex.Replace(ss.StatementText ?? "", ""), "").Trim().TrimStart(startTrimChars) : "";
             }
         }
 

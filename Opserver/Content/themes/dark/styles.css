@@ -494,7 +494,7 @@ small,
 mark,
 .mark {
   background-color: rgba(241, 151, 23, 0.2);
-  padding: .2em;
+  padding: 0.2em;
 }
 .text-left {
   text-align: left;
@@ -797,13 +797,71 @@ pre code {
   margin-left: -5px;
   margin-right: -5px;
 }
-.col-xs-1, .col-sm-1, .col-md-1, .col-lg-1, .col-xs-2, .col-sm-2, .col-md-2, .col-lg-2, .col-xs-3, .col-sm-3, .col-md-3, .col-lg-3, .col-xs-4, .col-sm-4, .col-md-4, .col-lg-4, .col-xs-5, .col-sm-5, .col-md-5, .col-lg-5, .col-xs-6, .col-sm-6, .col-md-6, .col-lg-6, .col-xs-7, .col-sm-7, .col-md-7, .col-lg-7, .col-xs-8, .col-sm-8, .col-md-8, .col-lg-8, .col-xs-9, .col-sm-9, .col-md-9, .col-lg-9, .col-xs-10, .col-sm-10, .col-md-10, .col-lg-10, .col-xs-11, .col-sm-11, .col-md-11, .col-lg-11, .col-xs-12, .col-sm-12, .col-md-12, .col-lg-12 {
+.col-xs-1,
+.col-sm-1,
+.col-md-1,
+.col-lg-1,
+.col-xs-2,
+.col-sm-2,
+.col-md-2,
+.col-lg-2,
+.col-xs-3,
+.col-sm-3,
+.col-md-3,
+.col-lg-3,
+.col-xs-4,
+.col-sm-4,
+.col-md-4,
+.col-lg-4,
+.col-xs-5,
+.col-sm-5,
+.col-md-5,
+.col-lg-5,
+.col-xs-6,
+.col-sm-6,
+.col-md-6,
+.col-lg-6,
+.col-xs-7,
+.col-sm-7,
+.col-md-7,
+.col-lg-7,
+.col-xs-8,
+.col-sm-8,
+.col-md-8,
+.col-lg-8,
+.col-xs-9,
+.col-sm-9,
+.col-md-9,
+.col-lg-9,
+.col-xs-10,
+.col-sm-10,
+.col-md-10,
+.col-lg-10,
+.col-xs-11,
+.col-sm-11,
+.col-md-11,
+.col-lg-11,
+.col-xs-12,
+.col-sm-12,
+.col-md-12,
+.col-lg-12 {
   position: relative;
   min-height: 1px;
   padding-left: 5px;
   padding-right: 5px;
 }
-.col-xs-1, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9, .col-xs-10, .col-xs-11, .col-xs-12 {
+.col-xs-1,
+.col-xs-2,
+.col-xs-3,
+.col-xs-4,
+.col-xs-5,
+.col-xs-6,
+.col-xs-7,
+.col-xs-8,
+.col-xs-9,
+.col-xs-10,
+.col-xs-11,
+.col-xs-12 {
   float: left;
 }
 .col-xs-12 {
@@ -960,7 +1018,18 @@ pre code {
   margin-left: 0%;
 }
 @media (min-width: 768px) {
-  .col-sm-1, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-sm-10, .col-sm-11, .col-sm-12 {
+  .col-sm-1,
+  .col-sm-2,
+  .col-sm-3,
+  .col-sm-4,
+  .col-sm-5,
+  .col-sm-6,
+  .col-sm-7,
+  .col-sm-8,
+  .col-sm-9,
+  .col-sm-10,
+  .col-sm-11,
+  .col-sm-12 {
     float: left;
   }
   .col-sm-12 {
@@ -1118,7 +1187,18 @@ pre code {
   }
 }
 @media (min-width: 992px) {
-  .col-md-1, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-md-10, .col-md-11, .col-md-12 {
+  .col-md-1,
+  .col-md-2,
+  .col-md-3,
+  .col-md-4,
+  .col-md-5,
+  .col-md-6,
+  .col-md-7,
+  .col-md-8,
+  .col-md-9,
+  .col-md-10,
+  .col-md-11,
+  .col-md-12 {
     float: left;
   }
   .col-md-12 {
@@ -1276,7 +1356,18 @@ pre code {
   }
 }
 @media (min-width: 1200px) {
-  .col-lg-1, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-lg-10, .col-lg-11, .col-lg-12 {
+  .col-lg-1,
+  .col-lg-2,
+  .col-lg-3,
+  .col-lg-4,
+  .col-lg-5,
+  .col-lg-6,
+  .col-lg-7,
+  .col-lg-8,
+  .col-lg-9,
+  .col-lg-10,
+  .col-lg-11,
+  .col-lg-12 {
     float: left;
   }
   .col-lg-12 {
@@ -4082,7 +4173,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .label {
   display: inline;
-  padding: .2em .6em .3em;
+  padding: 0.2em 0.6em 0.3em;
   font-size: 75%;
   font-weight: bold;
   line-height: 1;
@@ -4090,7 +4181,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   text-align: center;
   white-space: nowrap;
   vertical-align: baseline;
-  border-radius: .25em;
+  border-radius: 0.25em;
 }
 a.label:hover,
 a.label:focus {
@@ -6036,9 +6127,9 @@ button.close {
   left: -1.85714286em;
 }
 .fa-border {
-  padding: .2em .25em .15em;
+  padding: 0.2em 0.25em 0.15em;
   border: solid 0.08em #eee;
-  border-radius: .1em;
+  border-radius: 0.1em;
 }
 .fa-pull-left {
   float: left;
@@ -6047,10 +6138,10 @@ button.close {
   float: right;
 }
 .fa.fa-pull-left {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 .fa.fa-pull-right {
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 /* Deprecated as of 4.4.0 */
 .pull-right {
@@ -6060,10 +6151,10 @@ button.close {
   float: left;
 }
 .fa.pull-left {
-  margin-right: .3em;
+  margin-right: 0.3em;
 }
 .fa.pull-right {
-  margin-left: .3em;
+  margin-left: 0.3em;
 }
 .fa-spin {
   -webkit-animation: fa-spin 2s infinite linear;
@@ -9250,7 +9341,7 @@ li.L9 {
   stroke-opacity: 0.1;
 }
 .chart .brush .extent {
-  fill-opacity: .200;
+  fill-opacity: 0.2;
   shape-rendering: crispEdges;
 }
 .chart .chart-tooltip {
@@ -9450,7 +9541,7 @@ svg .stroke-muted.filled {
 .error-preview-popup {
   position: absolute;
   background: #2e2e2e;
-  width: calc(90%);
+  width: calc(100% - 10px);
   left: 52px;
   margin-top: -19px;
   padding: 10px;
@@ -9587,327 +9678,473 @@ svg .stroke-muted.filled {
   color: #ed5565;
 }
 /* SQL Server Query Plans */
-.qp-tt {
+/*.qp-tt {
+    top: 4em;
+    left: 2em;
+    border: 1px solid black;
+    background-color: #FFFFEE;
+    padding: 2px;
+    position: absolute;
+    display: none;
+    z-index: 1;
+    white-space: normal;
+    font-size: 11px;
+
+    &.sql-query-tooltip {
+        z-index: 1100;
+    }
+
+    div, table {
+        font-family: Sans-Serif;
+        text-align: left;
+    }
+
+    table {
+        border-width: 0;
+        border-spacing: 0;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    td, th {
+        font-size: 11px;
+        border-bottom: solid 1px Black;
+        padding: 1px;
+    }
+
+    td {
+        text-align: right;
+        padding-left: 10px;
+    }
+
+    th {
+        text-align: left;
+    }
+
+    .qp-bold {
+        font-weight: bold;
+    }
+
+    .qp-tt-header {
+        text-align: center;
+        font-weight: bold;
+    }
+}*/
+.sql-query-section {
+  font-size: 13px;
+}
+.sql-query-plan {
+  color: #ddd;
+  max-height: calc(100vh - 100px);
+  /* Icons */
+  /* Layout - can't touch this */
+}
+.sql-query-plan div.qp-node {
+  background-color: #FFFFCC;
+  color: #444;
+  margin: 2px;
+  padding: 2px;
+  border: 1px solid #444;
+  border-radius: 4px;
+}
+.sql-query-plan div.qp-node,
+.sql-query-plan div.qp-tt {
+  font-size: 11px;
+  line-height: normal;
+}
+.sql-query-plan .qp-statement-header {
+  display: none;
+}
+.sql-query-plan .missing-index {
+  color: green;
+}
+.sql-query-plan .qp-statement-header,
+.sql-query-plan .qp-node > div {
+  font-family: Monospace;
+}
+.sql-query-plan .qp-node > div {
+  text-align: center;
+}
+.sql-query-plan div[class|='qp-icon'] {
+  height: 32px;
+  width: 32px;
+  margin-left: auto;
+  margin-right: auto;
+  background-repeat: no-repeat;
+  position: relative;
+}
+.sql-query-plan .qp-tt {
   top: 4em;
   left: 2em;
   border: 1px solid black;
   background-color: #FFFFEE;
   padding: 2px;
-  position: absolute;
-  display: none;
-  z-index: 1;
-  white-space: normal;
-  font-size: 11px;
+  width: 30em;
 }
-.qp-tt.sql-query-tooltip {
-  z-index: 1100;
-}
-.qp-tt div,
-.qp-tt table {
+.sql-query-plan .qp-tt div,
+.sql-query-plan .qp-tt table {
   font-family: Sans-Serif;
   text-align: left;
 }
-.qp-tt table {
-  border-width: 0;
-  border-spacing: 0;
+.sql-query-plan .qp-tt table {
+  border-width: 0px;
+  border-spacing: 0px;
   margin-top: 10px;
   margin-bottom: 10px;
   width: 100%;
-  white-space: nowrap;
 }
-.qp-tt td,
-.qp-tt th {
+.sql-query-plan .qp-tt td,
+.sql-query-plan .qp-tt th {
   font-size: 11px;
   border-bottom: solid 1px Black;
   padding: 1px;
 }
-.qp-tt td {
+.sql-query-plan .qp-tt td {
   text-align: right;
   padding-left: 10px;
 }
-.qp-tt th {
+.sql-query-plan .qp-tt th {
   text-align: left;
 }
-.qp-tt .qp-bold {
+.sql-query-plan .qp-bold,
+.sql-query-plan .qp-tt-header {
   font-weight: bold;
 }
-.qp-tt .qp-tt-header {
+.sql-query-plan .qp-tt-header {
   text-align: center;
-  font-weight: bold;
-}
-.sql-query-plan {
-  /* Icons */
-}
-.sql-query-plan div.qp-node {
-  background-color: #FFFFF4;
-  margin: 2px;
-  padding: 2px;
-  border: 1px solid #CCC;
-  font-size: 11px;
-  line-height: normal;
-}
-.sql-query-plan .qp-node > div {
-  font-family: Consolas, Monospace;
-  text-align: center;
-}
-.sql-query-plan div[class|='qp-icon'] {
-  height: 16px;
-  width: 16px;
-  margin-left: auto;
-  margin-right: auto;
-  background-repeat: no-repeat;
-  background-size: 16px 16px;
-}
-.sql-query-plan .qp-bold {
-  font-weight: bold;
 }
 .sql-query-plan .qp-icon-Catchall {
-  background-image: url('../../img/query-plan/bitmap.gif');
+  background: url('../../img/query-plan/icons.png') -96px 0px;
 }
 .sql-query-plan .qp-icon-ArithmeticExpression {
-  background-image: url('../../img/query-plan/arithmetic_expression.gif');
+  background: url('../../img/query-plan/icons.png') 0px 0px;
 }
 .sql-query-plan .qp-icon-Assert {
-  background-image: url('../../img/query-plan/assert.gif');
+  background: url('../../img/query-plan/icons.png') -32px 0px;
 }
 .sql-query-plan .qp-icon-Assign {
-  background-image: url('../../img/query-plan/assign.gif');
+  background: url('../../img/query-plan/icons.png') -64px 0px;
 }
 .sql-query-plan .qp-icon-Bitmap {
-  background-image: url('../../img/query-plan/bitmap.gif');
+  background: url('../../img/query-plan/icons.png') -96px 0px;
 }
 .sql-query-plan .qp-icon-BookmarkLookup {
-  background-image: url('../../img/query-plan/bookmark_lookup.gif');
+  background: url('../../img/query-plan/icons.png') -128px 0px;
 }
 .sql-query-plan .qp-icon-ClusteredIndexDelete {
-  background-image: url('../../img/query-plan/clustered_index_delete.gif');
+  background: url('../../img/query-plan/icons.png') -160px 0px;
 }
 .sql-query-plan .qp-icon-ClusteredIndexInsert {
-  background-image: url('../../img/query-plan/clustered_index_insert.gif');
+  background: url('../../img/query-plan/icons.png') -192px 0px;
 }
 .sql-query-plan .qp-icon-ClusteredIndexScan {
-  background-image: url('../../img/query-plan/clustered_index_scan.gif');
+  background: url('../../img/query-plan/icons.png') -224px 0px;
 }
 .sql-query-plan .qp-icon-ClusteredIndexSeek {
-  background-image: url('../../img/query-plan/clustered_index_seek.gif');
+  background: url('../../img/query-plan/icons.png') -256px 0px;
+}
+.sql-query-plan .qp-icon-KeyLookup {
+  background: url('../../img/query-plan/icons.png') -256px 0px;
 }
 .sql-query-plan .qp-icon-ClusteredIndexUpdate {
-  background-image: url('../../img/query-plan/clustered_index_update.gif');
+  background: url('../../img/query-plan/icons.png') -288px 0px;
 }
 .sql-query-plan .qp-icon-Collapse {
-  background-image: url('../../img/query-plan/collapse.gif');
+  background: url('../../img/query-plan/icons.png') 0px -32px;
 }
 .sql-query-plan .qp-icon-ComputeScalar {
-  background-image: url('../../img/query-plan/compute_scalar.gif');
+  background: url('../../img/query-plan/icons.png') -32px -32px;
 }
 .sql-query-plan .qp-icon-Concatenation {
-  background-image: url('../../img/query-plan/concatenation.gif');
+  background: url('../../img/query-plan/icons.png') -64px -32px;
 }
 .sql-query-plan .qp-icon-ConstantScan {
-  background-image: url('../../img/query-plan/constant_scan.gif');
+  background: url('../../img/query-plan/icons.png') -96px -32px;
 }
 .sql-query-plan .qp-icon-Convert {
-  background-image: url('../../img/query-plan/convert.gif');
+  background: url('../../img/query-plan/icons.png') -128px -32px;
 }
 .sql-query-plan .qp-icon-CursorCatchall {
-  background-image: url('../../img/query-plan/bitmap.gif');
+  background: url('../../img/query-plan/icons.png') -96px 0px;
 }
 .sql-query-plan .qp-icon-Declare {
-  background-image: url('../../img/query-plan/declare.gif');
+  background: url('../../img/query-plan/icons.png') -160px -32px;
 }
 .sql-query-plan .qp-icon-Delete {
-  background-image: url('../../img/query-plan/table_delete.gif');
+  background: url('../../img/query-plan/icons.png') -288px -160px;
 }
 .sql-query-plan .qp-icon-DistributeStreams {
-  background-image: url('../../img/query-plan/distribute_streams.gif');
+  background: url('../../img/query-plan/icons.png') -224px -32px;
 }
 .sql-query-plan .qp-icon-Dynamic {
-  background-image: url('../../img/query-plan/dynamic.gif');
+  background: url('../../img/query-plan/icons.png') -256px -32px;
 }
 .sql-query-plan .qp-icon-EagerSpool {
-  background-image: url('../../img/query-plan/spool.gif');
+  background: url('../../img/query-plan/icons.png') -192px -160px;
 }
 .sql-query-plan .qp-icon-FetchQuery {
-  background-image: url('../../img/query-plan/fetch_query.gif');
+  background: url('../../img/query-plan/icons.png') -288px -32px;
 }
 .sql-query-plan .qp-icon-Filter {
-  background-image: url('../../img/query-plan/filter.gif');
+  background: url('../../img/query-plan/icons.png') 0px -64px;
 }
 .sql-query-plan .qp-icon-GatherStreams {
-  background-image: url('../../img/query-plan/gather_streams.gif');
+  background: url('../../img/query-plan/icons.png') -32px -64px;
 }
 .sql-query-plan .qp-icon-HashMatch {
-  background-image: url('../../img/query-plan/hash_match.gif');
+  background: url('../../img/query-plan/icons.png') -64px -64px;
 }
 .sql-query-plan .qp-icon-HashMatchRoot {
-  background-image: url('../../img/query-plan/hash_match.gif');
+  background: url('../../img/query-plan/icons.png') -64px -64px;
 }
 .sql-query-plan .qp-icon-HashMatchTeam {
-  background-image: url('../../img/query-plan/hash_match.gif');
+  background: url('../../img/query-plan/icons.png') -64px -64px;
 }
 .sql-query-plan .qp-icon-If {
-  background-image: url('../../img/query-plan/if.gif');
+  background: url('../../img/query-plan/icons.png') -96px -64px;
 }
 .sql-query-plan .qp-icon-Insert {
-  background-image: url('../../img/query-plan/table_insert.gif');
+  background: url('../../img/query-plan/icons.png') 0px -192px;
 }
 .sql-query-plan .qp-icon-InsertedScan {
-  background-image: url('../../img/query-plan/inserted_scan.gif');
+  background: url('../../img/query-plan/icons.png') -128px -64px;
 }
 .sql-query-plan .qp-icon-Intrinsic {
-  background-image: url('../../img/query-plan/intrinsic.gif');
+  background: url('../../img/query-plan/icons.png') -160px -64px;
 }
 .sql-query-plan .qp-icon-IteratorCatchall {
-  background-image: url('../../img/query-plan/bitmap.gif');
+  background: url('../../img/query-plan/icons.png') -96px 0px;
 }
 .sql-query-plan .qp-icon-Keyset {
-  background-image: url('../../img/query-plan/keyset.gif');
+  background: url('../../img/query-plan/icons.png') -192px -64px;
 }
 .sql-query-plan .qp-icon-LanguageElementCatchall {
-  background-image: url('../../img/query-plan/bitmap.gif');
+  background: url('../../img/query-plan/icons.png') -96px 0px;
 }
 .sql-query-plan .qp-icon-LazySpool {
-  background-image: url('../../img/query-plan/spool.gif');
+  background: url('../../img/query-plan/icons.png') -192px -160px;
 }
 .sql-query-plan .qp-icon-LogRowScan {
-  background-image: url('../../img/query-plan/log_row_scan.gif');
+  background: url('../../img/query-plan/icons.png') -224px -64px;
 }
 .sql-query-plan .qp-icon-MergeInterval {
-  background-image: url('../../img/query-plan/merge_interval.gif');
+  background: url('../../img/query-plan/icons.png') -256px -64px;
 }
 .sql-query-plan .qp-icon-MergeJoin {
-  background-image: url('../../img/query-plan/merge_join.gif');
+  background: url('../../img/query-plan/icons.png') -288px -64px;
 }
 .sql-query-plan .qp-icon-NestedLoops {
-  background-image: url('../../img/query-plan/nested_loops.gif');
+  background: url('../../img/query-plan/icons.png') 0px -96px;
 }
 .sql-query-plan .qp-icon-NonclusteredIndexDelete {
-  background-image: url('../../img/query-plan/nonclustered_index_delete.gif');
+  background: url('../../img/query-plan/icons.png') -32px -96px;
 }
 .sql-query-plan .qp-icon-NonclusteredIndexInsert {
-  background-image: url('../../img/query-plan/nonclustered_index_insert.gif');
+  background: url('../../img/query-plan/icons.png') -64px -96px;
 }
-.sql-query-plan .qp-icon-NonclusteredIndexScan {
-  background-image: url('../../img/query-plan/nonclustered_index_scan.gif');
+.sql-query-plan .qp-icon-IndexScan {
+  background: url('../../img/query-plan/icons.png') -96px -96px;
 }
 .sql-query-plan .qp-icon-IndexSeek {
-  background-image: url('../../img/query-plan/nonclustered_index_seek.gif');
+  background: url('../../img/query-plan/icons.png') -128px -96px;
 }
 .sql-query-plan .qp-icon-NonclusteredIndexSpool {
-  background-image: url('../../img/query-plan/nonclustered_index_spool.gif');
+  background: url('../../img/query-plan/icons.png') -160px -96px;
 }
 .sql-query-plan .qp-icon-NonclusteredIndexUpdate {
-  background-image: url('../../img/query-plan/nonclustered_index_update.gif');
+  background: url('../../img/query-plan/icons.png') -192px -96px;
 }
 .sql-query-plan .qp-icon-OnlineIndexInsert {
-  background-image: url('../../img/query-plan/online_index_insert.gif');
+  background: url('../../img/query-plan/icons.png') -224px -96px;
 }
 .sql-query-plan .qp-icon-ParameterTableScan {
-  background-image: url('../../img/query-plan/parameter_table_scan.gif');
+  background: url('../../img/query-plan/icons.png') -256px -96px;
 }
 .sql-query-plan .qp-icon-PopulationQuery {
-  background-image: url('../../img/query-plan/population_query.gif');
+  background: url('../../img/query-plan/icons.png') -288px -96px;
 }
 .sql-query-plan .qp-icon-RdiLookup {
-  background-image: url('../../img/query-plan/rdi_lookup.gif');
+  background: url('../../img/query-plan/icons.png') 0px -128px;
 }
 .sql-query-plan .qp-icon-RefreshQuery {
-  background-image: url('../../img/query-plan/refresh_query.gif');
+  background: url('../../img/query-plan/icons.png') -32px -128px;
 }
 .sql-query-plan .qp-icon-RemoteDelete {
-  background-image: url('../../img/query-plan/remote_delete.gif');
+  background: url('../../img/query-plan/icons.png') -64px -128px;
 }
 .sql-query-plan .qp-icon-RemoteInsert {
-  background-image: url('../../img/query-plan/remote_insert.gif');
+  background: url('../../img/query-plan/icons.png') -96px -128px;
 }
 .sql-query-plan .qp-icon-RemoteQuery {
-  background-image: url('../../img/query-plan/remote_query.gif');
+  background: url('../../img/query-plan/icons.png') -128px -128px;
 }
 .sql-query-plan .qp-icon-RemoteScan {
-  background-image: url('../../img/query-plan/remote_scan.gif');
+  background: url('../../img/query-plan/icons.png') -160px -128px;
 }
 .sql-query-plan .qp-icon-RemoteUpdate {
-  background-image: url('../../img/query-plan/remote_update.gif');
+  background: url('../../img/query-plan/icons.png') -192px -128px;
 }
 .sql-query-plan .qp-icon-RepartitionStreams {
-  background-image: url('../../img/query-plan/repartition_streams.gif');
+  background: url('../../img/query-plan/icons.png') -224px -128px;
 }
 .sql-query-plan .qp-icon-Result {
-  background-image: url('../../img/query-plan/result.gif');
+  background: url('../../img/query-plan/icons.png') -256px -128px;
 }
 .sql-query-plan .qp-icon-RowCountSpool {
-  background-image: url('../../img/query-plan/row_count_spool.gif');
+  background: url('../../img/query-plan/icons.png') -288px -128px;
 }
 .sql-query-plan .qp-icon-Segment {
-  background-image: url('../../img/query-plan/segment.gif');
+  background: url('../../img/query-plan/icons.png') 0px -160px;
 }
 .sql-query-plan .qp-icon-Sequence {
-  background-image: url('../../img/query-plan/sequence.gif');
+  background: url('../../img/query-plan/icons.png') -32px -160px;
 }
 .sql-query-plan .qp-icon-Sequenceproject {
-  background-image: url('../../img/query-plan/sequenceproject.gif');
+  background: url('../../img/query-plan/icons.png') -64px -160px;
 }
 .sql-query-plan .qp-icon-Snapshot {
-  background-image: url('../../img/query-plan/snapshot.gif');
+  background: url('../../img/query-plan/icons.png') -96px -160px;
 }
 .sql-query-plan .qp-icon-Sort {
-  background-image: url('../../img/query-plan/sort.gif');
+  background: url('../../img/query-plan/icons.png') -128px -160px;
 }
 .sql-query-plan .qp-icon-Split {
-  background-image: url('../../img/query-plan/split.gif');
+  background: url('../../img/query-plan/icons.png') -160px -160px;
 }
 .sql-query-plan .qp-icon-Spool {
-  background-image: url('../../img/query-plan/spool.gif');
+  background: url('../../img/query-plan/icons.png') -192px -160px;
 }
 .sql-query-plan .qp-icon-Statement {
-  background-image: url('../../img/query-plan/result.gif');
+  background: url('../../img/query-plan/icons.png') -256px -128px;
 }
 .sql-query-plan .qp-icon-StreamAggregate {
-  background-image: url('../../img/query-plan/stream_aggregate.gif');
+  background: url('../../img/query-plan/icons.png') -224px -160px;
 }
 .sql-query-plan .qp-icon-Switch {
-  background-image: url('../../img/query-plan/switch.gif');
+  background: url('../../img/query-plan/icons.png') -256px -160px;
 }
 .sql-query-plan .qp-icon-TableDelete {
-  background-image: url('../../img/query-plan/table_delete.gif');
+  background: url('../../img/query-plan/icons.png') -288px -160px;
 }
 .sql-query-plan .qp-icon-TableInsert {
-  background-image: url('../../img/query-plan/table_insert.gif');
+  background: url('../../img/query-plan/icons.png') 0px -192px;
 }
 .sql-query-plan .qp-icon-TableScan {
-  background-image: url('../../img/query-plan/table_scan.gif');
+  background: url('../../img/query-plan/icons.png') -32px -192px;
 }
 .sql-query-plan .qp-icon-TableSpool {
-  background-image: url('../../img/query-plan/table_spool.gif');
+  background: url('../../img/query-plan/icons.png') -64px -192px;
 }
 .sql-query-plan .qp-icon-TableUpdate {
-  background-image: url('../../img/query-plan/table_update.gif');
+  background: url('../../img/query-plan/icons.png') -96px -192px;
 }
 .sql-query-plan .qp-icon-TableValuedFunction {
-  background-image: url('../../img/query-plan/table_valued_function.gif');
+  background: url('../../img/query-plan/icons.png') -128px -192px;
 }
 .sql-query-plan .qp-icon-Top {
-  background-image: url('../../img/query-plan/top.gif');
+  background: url('../../img/query-plan/icons.png') -160px -192px;
 }
 .sql-query-plan .qp-icon-Udx {
-  background-image: url('../../img/query-plan/udx.gif');
+  background: url('../../img/query-plan/icons.png') -192px -192px;
 }
 .sql-query-plan .qp-icon-Update {
-  background-image: url('../../img/query-plan/table_update.gif.gif');
+  background: url('../../img/query-plan/icons.png') -96px -192px;
 }
 .sql-query-plan .qp-icon-While {
-  background-image: url('../../img/query-plan/while.gif');
+  background: url('../../img/query-plan/icons.png') -224px -192px;
+}
+.sql-query-plan .qp-icon-PopulateQuery {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-StmtCursor {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-SequenceProject {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-FastForward {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-SnapShot {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-WindowAggregate {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-AdaptiveJoin {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-IndexSpool {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-icon-IndexInsert {
+  background: url('../../img/query-plan/icons.png') -96px 0px;
+}
+.sql-query-plan .qp-iconwarn {
+  background: url('../../img/query-plan/icons.png') -304px -209px;
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  top: 16px;
+}
+.sql-query-plan .qp-iconpar {
+  background: url('../../img/query-plan/icons.png') -304px -193px;
+  height: 16px;
+  width: 16px;
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+.sql-query-plan .qp-tt {
+  position: absolute;
+  z-index: 1;
+  white-space: normal;
+  -webkit-transition-delay: 0.5s;
+  transition-delay: 0.5s;
+}
+.sql-query-plan div.qp-node .qp-tt,
+.sql-query-plan .qp-noCssTooltip div.qp-node:hover .qp-tt {
+  visibility: collapse;
+}
+.sql-query-plan div.qp-node:hover .qp-tt {
+  visibility: visible;
+}
+.sql-query-plan .qp-tt table {
+  white-space: nowrap;
 }
 .sql-query-plan .qp-node {
   position: relative;
   white-space: nowrap;
+  display: inline-block;
+  vertical-align: middle;
+}
+.sql-query-plan .qp-node-outer {
+  height: 76.4px;
+  display: table-cell;
 }
 .sql-query-plan .qp-tr {
   display: table;
 }
 .sql-query-plan .qp-tr > div {
   display: table-cell;
-  padding-left: 15px;
+  padding-left: 20px;
+}
+.sql-query-plan .qp-root {
+  position: relative;
+  display: inline-block;
+}
+.sql-query-plan .qp-root svg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.sql-query-plan .qp-root polyline {
+  pointer-events: auto;
 }
 /* Panel Layout Pages */
 .navbar {
@@ -10883,6 +11120,14 @@ tr.cache-sub-item td:first-child {
 }
 .total-row {
   font-weight: bold;
+}
+pre {
+  padding: 0;
+  font-size: 1em;
+}
+pre code,
+pre code.hljs {
+  border: none;
 }
 .navbar-default .badge {
   background-color: #ddd;

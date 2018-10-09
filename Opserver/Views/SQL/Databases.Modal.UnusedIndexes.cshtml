@@ -147,7 +147,7 @@ else
                                     }
                                 </div>
                                 <div class="list-group-item">
-                                    <pre class="pre-code prettyprint lang-sql">@i.Definition.Trim()</pre>
+                                    <pre><code class="sql">@i.Definition.Trim()</code></pre>
                                 </div>
                             </div>
                         </div>
@@ -187,7 +187,7 @@ else
                     8: { sorter: 'dataVal', sortInitialOrder: 'desc' }
                 }
             });
-            prettyPrint();
+            Status.highlight();
         });
     </script>
 }

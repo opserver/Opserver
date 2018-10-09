@@ -164,9 +164,9 @@
                         }
                         @foreach (var statement in plan.Statements)
                         {
-                            <pre class="pre-code prettyprint lang-sql @(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
+                            <pre><code lang="sql @(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
 @if (!truncated){@statement.StatementTextWithoutInitialParams}
-@if(truncated && statement == lastStatement){@op.FullText}</pre>
+@if(truncated && statement == lastStatement){@op.FullText}</code></pre>
                             textPos += statement.StatementText?.Length * 2 ?? 0;
                         }
                     </div>
@@ -194,7 +194,7 @@
                                         }
                                     </div>
                                     <div class="sql-query-excerpt">
-                                        <pre class="pre-code prettyprint lang-sql">@excerpt</pre>
+                                        <pre><code class="sql">@excerpt</code></pre>
                                     </div>
                                     @if (excerpt.LineCount() > 3)
                                     {
@@ -274,8 +274,11 @@
                     </div>*@
                 <div id="sql-query-plan" class="well well-sm" style="overflow-x: auto;">
                     <div class="sql-query-plan">
-                        @op.QueryPlanHtml()
+                        @*@op.QueryPlanHtml()*@
                     </div>
+                    <script>
+                        QP.showPlan($("#sql-query-plan div").get(0), @op.QueryPlan.ToJson(), { jsTooltips: false });
+                    </script>
                 </div>
             </div>
         </div>
