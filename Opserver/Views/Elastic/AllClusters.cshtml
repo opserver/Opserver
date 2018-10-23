@@ -194,11 +194,11 @@
     }
 </div>
 <div class="js-refresh" data-name="cluster-sub-detail">
-    @foreach (var c in Model.Clusters.Where(c => c.TroubledIndexes.Any()))
+    @foreach (var c in Model.Clusters.Where(c => c.InterestingIndexes.Any()))
     {
         var m = new DashboardModel
         {
-            WarningsOnly = Model.WarningsOnly,
+            DisplayMode = Model.DisplayMode,
             CurrentCluster = c
         };
         <h5 class="page-header">

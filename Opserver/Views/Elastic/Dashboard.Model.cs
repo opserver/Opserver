@@ -16,7 +16,48 @@ namespace StackExchange.Opserver.Views.Elastic
 
         //TODO: Global settings pre-websockets
         public int Refresh { get; set; } = 10;
-        public bool WarningsOnly { get; set; }
+        public DisplayModes DisplayMode { get; set; }
+
+        public enum DisplayModes
+        {
+            All,
+            InterestingOnly,
+            WarningsOnly
+        }
+
+        public IEnumerable<ElasticCluster.ClusterHealthInfo.IndexHealthInfo> DisplayIndexexs
+        {
+            get
+            {
+                switch (DisplayMode)
+                {
+                    case DisplayModes.InterestingOnly:
+                        return CurrentCluster?.TroubledIndexes; // TODO: Differentiate both
+                    case DisplayModes.WarningsOnly:
+                        return CurrentCluster?.TroubledIndexes;
+                    //case DashboardModel.DisplayModes.All:
+                    default:
+                return CurrentCluster?.HealthStatus.Data?.Indexes?.Values;
+                }
+            }
+        }
+
+        public IEnumerable<ElasticCluster.ClusterStateInfo.ShardState> DisplayShards
+        {
+            get
+            {
+                switch (DisplayMode)
+                {
+                    case DisplayModes.InterestingOnly:
+                        return CurrentCluster?.TroubledShards; // TODO: Differentiate both
+                    case DisplayModes.WarningsOnly:
+                        return CurrentCluster?.TroubledShards;
+                    //case DashboardModel.DisplayModes.All:
+                    default:
+                        return CurrentCluster?.AllShards;
+                }
+            }
+        }
 
         public Views View { get; set; }
 

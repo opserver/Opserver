@@ -1,12 +1,10 @@
 ﻿@using StackExchange.Opserver.Data.Elastic
-@model StackExchange.Opserver.Views.Elastic.DashboardModel
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
 @{
     var c = Model.CurrentCluster;
     if (c == null) { return; }
-    var indexes = Model.WarningsOnly
-        ? c.TroubledIndexes.ToList()
-        : c.HealthStatus.Data?.Indexes?.Values.ToList()
-          ?? new List<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>();
+    var indexes = Model.DisplayIndexexs ?? new List<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>();
     var stats = c.IndexStats.SafeData(true);
 }
 @if (indexes.Any())
@@ -61,7 +59,7 @@
                     <td>@i.UnassignedShards.ToComma()</td>
                 </tr>
             }
-            @if (!Model.WarningsOnly)
+            @if (Model.DisplayMode == DashboardModel.DisplayModes.All)
             {
                 var indexStats = stats.Indexes?.Values;
                 <tr class="total-row">
@@ -86,7 +84,7 @@
         </tbody>
     </table>
 }
-else if (!Model.WarningsOnly)
+else if (Model.DisplayMode == DashboardModel.DisplayModes.All)
 {
     <div class="no-content">No indexes found in the @c.Name cluster</div>
 }

@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
             {
                 View = DashboardModel.Views.AllClusters,
-                WarningsOnly = true
+                DisplayMode = DashboardModel.DisplayModes.InterestingOnly
             };
             return View("AllClusters", vd);
         }

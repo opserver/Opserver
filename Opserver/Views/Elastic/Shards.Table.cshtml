@@ -5,7 +5,7 @@
     Layout = null;
     var c = Model.CurrentCluster;
     var i = Model.CurrentIndexName;
-    var shards = (Model.WarningsOnly ? c.TroubledShards : c.AllShards).Where(s => i == null || s.Index == i).ToList();
+    var shards = Model.DisplayShards.Where(s => i == null || s.Index == i).ToList();
 }
 @helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfo> nodes)
 {

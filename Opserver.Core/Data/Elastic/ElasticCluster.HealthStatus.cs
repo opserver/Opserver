@@ -30,6 +30,16 @@ namespace StackExchange.Opserver.Data.Elastic
             }
         }
 
+        public IEnumerable<ClusterHealthInfo.IndexHealthInfo> InterestingIndexes
+        {
+            get
+            {
+                return HealthStatus.Data?.Indexes != null
+                    ? HealthStatus.Data.Indexes.Values.Where(i => i.MonitorStatus != MonitorStatus.Good || i.InitializingShards > 0 || i.UnassignedShards > 0 || i.RelocatingShards > 0).OrderByWorst()
+                    : Enumerable.Empty<ClusterHealthInfo.IndexHealthInfo>();
+            }
+        }
+
         public class ClusterHealthInfo : IMonitorStatus
         {
             public MonitorStatus MonitorStatus => ColorToStatus(Status);
