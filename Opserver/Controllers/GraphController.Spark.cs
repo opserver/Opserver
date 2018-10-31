@@ -157,7 +157,7 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
-        public static async Task<ActionResult> SparkSvgAll<T>(string cacheKey, TimeSpan cacheDuation, Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
+        public static async Task<ActionResult> SparkSvgAll<T>(string cacheKey, TimeSpan cacheDuration, Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
         {
             var cached = Current.LocalCache.Get<byte[]>(cacheKey);
             if (cached != null)
@@ -228,12 +228,12 @@ namespace StackExchange.Opserver.Controllers
                   .Append(@" z""/>\n")
                   .Append("\t</g>\n");
 
-                currentYTop += SparkHeight;
+                currentYTop += SparkHeight + 1;
             }
 
             sb.Append("</svg>");
             var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
-            Current.LocalCache.Set(cacheKey, bytes, cacheDuation);
+            Current.LocalCache.Set(cacheKey, bytes, cacheDuration);
             return new FileContentResult(bytes, "image/svg+xml");
         }
 
