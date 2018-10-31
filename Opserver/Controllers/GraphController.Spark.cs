@@ -41,6 +41,8 @@ namespace StackExchange.Opserver.Controllers
         public Task<ActionResult> CPUSparkSvgAll()
         {
             return SparkSvgAll(
+                "AllCPU",
+                TimeSpan.FromMinutes(2),
                 getPoints: n => n.GetCPUUtilization(SparkStart, null, SparkPoints),
                 getMax: (n, p) => 100,
                 getVal: p => p.Value.GetValueOrDefault());
@@ -64,6 +66,8 @@ namespace StackExchange.Opserver.Controllers
         public Task<ActionResult> MemorySparkSvgAll()
         {
             return SparkSvgAll(
+                "AllMemory",
+                TimeSpan.FromMinutes(2),
                 getPoints: n => n.GetMemoryUtilization(SparkStart, null, SparkPoints),
                 getMax: (n, p) => Convert.ToInt64(n.TotalMemory.GetValueOrDefault()),
                 getVal: p => p.Value.GetValueOrDefault());
@@ -87,6 +91,8 @@ namespace StackExchange.Opserver.Controllers
         public Task<ActionResult> NetworkSparkSvgAll()
         {
             return SparkSvgAll(
+                "AllNetwork",
+                TimeSpan.FromMinutes(2),
                 getPoints: n => n.GetNetworkUtilization(SparkStart, null, SparkPoints),
                 getMax: (n, points) => Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()),
                 getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
@@ -151,8 +157,14 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
-        public static async Task<ActionResult> SparkSvgAll<T>(Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
+        public static async Task<ActionResult> SparkSvgAll<T>(string cacheKey, TimeSpan cacheDuation, Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
         {
+            var cached = Current.LocalCache.Get<byte[]>(cacheKey);
+            if (cached != null)
+            {
+                return new FileContentResult(cached, "image/svg+xml");
+            }
+
             const int width = SparkPoints;
 
             var nodes = DashboardModule.AllNodes;
@@ -221,6 +233,7 @@ namespace StackExchange.Opserver.Controllers
 
             sb.Append("</svg>");
             var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
+            Current.LocalCache.Set(cacheKey, bytes, cacheDuation);
             return new FileContentResult(bytes, "image/svg+xml");
         }
 
