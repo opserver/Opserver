@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>StackExchange.Opserver</RootNamespace>
+    <AssemblyName>StackExchange.Opserver.Core</AssemblyName>
+    <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="1.50.5" />
+    <PackageReference Include="Enums.NET" Version="2.3.2" />
+    <PackageReference Include="Jil" Version="2.16.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.1" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.0.138" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.0-rc2.29" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.513" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'net461'">
+    <Reference Include="System.DirectoryServices" />
+    <Reference Include="System.Management" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.5.0" />
+    <PackageReference Include="System.DirectoryServices" Version="4.5.0" />
+    <PackageReference Include="System.Management" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Data\CloudFlare\CloudFlareAPI.*.cs" DependentUpon="CloudFlareAPI.cs" />
+    <Compile Update="Data\Dashboard\Interface.*.cs" DependentUpon="Interface.cs" />
+    <Compile Update="Data\Dashboard\Node.*.cs" DependentUpon="Node.cs" />
+    <Compile Update="Data\Dashboard\Volume.*.cs" DependentUpon="Volume.cs" />
+    <Compile Update="Data\Elastic\ElasticCluster.*.cs" DependentUpon="ElasticCluster.cs" />
+    <Compile Update="Data\HAProxy\HAProxyGroup.*.cs" DependentUpon="HAProxyGroup.cs" />
+    <Compile Update="Data\HAProxy\HAProxyInstance.*.cs" DependentUpon="HAProxyInstance.cs" />
+    <Compile Update="Data\PagerDuty\PagerDutyAPI.*.cs" DependentUpon="PagerDutyAPI.cs" />
+    <Compile Update="Data\Redis\RedisInfo.*.cs" DependentUpon="RedisInfo.cs" />
+    <Compile Update="Data\Redis\RedisInstance.*.cs" DependentUpon="RedisInstance.cs" />
+    <Compile Update="Data\SQL\SQLInstance.*.cs" DependentUpon="SQLInstance.cs" />
+    <Compile Update="Data\SQL\SQLNode.*.cs" DependentUpon="SQLNode.cs" />
+    <Compile Update="Settings\DashboardSettings.*.cs" DependentUpon="DashboardSettings.cs" />
+    <Compile Update="Settings\HAProxySettings.*.cs" DependentUpon="HAProxySettings.cs" />
+    <Compile Update="Current.*.cs" DependentUpon="Current.cs" />
+    <Compile Update="ExtensionMethods.*.cs" DependentUpon="ExtensionMethods.cs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,60 @@
+﻿/* Configuration for the main dashboard */
+{
+  /* Which provider to use for dashboard data 
+     Multiple providers can be used...but things may get crazy when a node is monitored by more than 1 */
+  "providers": {
+    /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
+    "bosun": {
+      "host": "https://bosun.ds.stackexchange.com",
+      "apiKey": "IAmALittleApiKeyShortAndStout"
+
+    }
+    /* If using WMI, a list of nodes to monitor needs to be provided */
+    //"wmi": {
+    //  "nodes": [ "ny-web01" ], // List of nodes to monitor
+    //  "staticDataTimeoutSeconds": 300, // (Optional) How long to cache static data (node name, hardware, etc.) - defaults to 5 minutes
+    //  "dynamicDataTimeoutSeconds": 5, // (Optional) How long to cache dynamic data (utilizations, etc.) - defaults to 30 seconds
+    //  "historyHours": 2 // (Optional) How long to retain data (in memory) - defaults to 24 hours
+    //}
+    /* If using Orion, a host (for links, not API) and a connection string needs to be provided */
+    //"orion": {
+    //  "host": "orion.ds.stackexchange.com",
+    //  "connectionString": "Data Source=ny-utilsql01;Initial Catalog=SolarWindsOrion;Integrated Security=SSPI;Timeout=10"
+    //}
+  },
+  /* General dashboard UI settings */
+  "excludePattern": "redis|\\.com", // (Optioal) Regex node name pattern to exclude from the dashboard
+  "cpuWarningPercent": 50, // How much CPU usage before a node is treated as a warning
+  "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical
+  "memoryWarningPercent": 90, // How much memory usage before a node is treated as a warning
+  "memoryCriticalPercent": 95, // How much memory usage before a node is treated as critical
+  "diskWarningPercent": 85, // How much disk usage before a node is treated as a warning
+  "diskCriticalPercent": 95, // How much disk usage before a node is treated as critical
+  // "showVolumePerformance": true, // Whether to show volume performance (columns) on the dashboard - defaults to false
+  /* (Optional) Specific category settings,for grouping servers and setting specific thresholds on them */
+  "categories": [
+    {
+      "name": "Database Servers", // Name for this group of servers
+      "pattern": "-sql", // Regex pattern of server names to put in this group
+      "cpuWarningPercent": 20, // How much CPU usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "cpuCriticalPercent": 60, // How much CPU usage before a node is treated as critical (defaults to the setting above if not specified)
+      "memoryWarningPercent": 98, // How much memory usage before a node is treated as a warning (defaults to the setting above if not specified)
+      "memoryCriticalPercent": 99.2, // How much memory usage before a node is treated as critical (defaults to the setting above if not specified)
+      "primaryInterfacePattern": "-TEAM$" // (If the provider supports it) Regex pattern of interface names to treat as "primary" (shown in the dashboard aggregates)
+    },
+    {
+      "name": "Web Servers",
+      "pattern": "-web|-promoweb|-vmweb",
+      "cpuWarningPercent": 25,
+      "memoryWarningPercent": 75,
+      "primaryInterfacePattern": "-TEAM$|-TEAM · Local"
+    }
+  ],
+  /* Like categories, per-node overrides for any of the settings above - illustrating 1 setting but all work */
+  "perNodeSettings": [
+    {
+      "pattern": "EDGE\\d+ \\(INAP\\)", // Regex pattern to match against
+      "primaryInterfacePattern": "GigabitEthernet0/0/0" // Example setting - any of the above (e.g. warning/critical thresoholds) work
+    }
+  ]
+}

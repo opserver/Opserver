@@ -1,0 +1,108 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    Layout = "Databases.Modal.cshtml";
+    var s = Model.Instance;
+    var tables = s.GetTableInfo(Model.Database);
+    var columns = s.GetColumnInfo(Model.Database);
+    // Because a large table list needs an indexed lookup
+    var columnLookup = columns.Data
+        .GroupBy(c => Tuple.Create(c.SchemaName, c.TableName))
+        .ToDictionary(g => g.Key, g => g.ToList());
+    var indexes = s.GetIndexInfoDetiled(Model.Database);
+    var partitions = s.GetPartitionInfo(Model.Database);
+}
+@section top {
+    <span class="pull-right small">@Helpers.PollNow(tables, columns, indexes, partitions)</span>
+}
+@if (tables.Data == null || !tables.Successful)
+{
+    <div class="alert alert-warning">
+        <h5>There was an error fetching table info from @s.Name for @Model.Database</h5>
+        <p class="error-stack">@tables.ErrorMessage</p>
+    </div>
+} else {
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-database-tables">
+        <thead>
+            <tr>
+                <th>Table</th>
+                <th>Rows</th>
+                <th>Indexes</th>
+                <th>Data Size</th>
+                <th>Index Size</th>
+                <th>Total Size</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in tables.Data.OrderBy(t => t.SchemaName).ThenBy(t => t.TableName))
+            {
+                <tr data-obj="@(t.SchemaName).@(t.TableName)" class="js-next-collapsible" title="@(t.SchemaName).@(t.TableName) created @t.CreationDate.ToZuluTime() modified @t.LastModifiedDate.ToZuluTime()">
+                    <td>
+                        <a href="#/db/@(Model.Database)/tables/@(t.SchemaName).@(t.TableName)">
+                            <span class="text-muted">@(t.SchemaName).</span><span>@t.TableName</span>
+                            @if (t.TableType == TableTypes.Heap)
+                            {
+                                <span class="text-muted"> (Heap)</span>
+                            }
+                        </a>
+                    </td>
+                    <td data-val="@t.RowCount.ToString()">
+                        @t.RowCount.ToComma()
+                        @if (t.PartitionCount > 1)
+                        {
+                            <span class="text-muted"> (@t.PartitionCount.Pluralize("partition"))</span>
+                        }
+                    </td>
+                    <td data-val="@t.IndexCount.ToString()">@t.IndexCount.ToComma()</td>
+                    <td data-val="@t.DataTotalSpaceKB.ToString()">@((t.DataTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
+                    <td data-val="@t.IndexTotalSpaceKB.ToString()">@((t.IndexTotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
+                    <td data-val="@t.TotalSpaceKB.ToString()">@((t.TotalSpaceKB*1024).ToSize().ToMutedIfNA())</td>
+                </tr>
+                <tr class="tablesorter-childRow hidden text-wrap">
+                    <td colspan="6">
+                        <partial name="Databases.Modal.Columns" model="columnLookup[Tuple.Create(t.SchemaName, t.TableName)]" />
+                        <partial name="Databases.Modal.Tables.Indexes" model="indexes.Data.Where(c => c.SchemaName == t.SchemaName && c.TableName == t.TableName)" />
+                        <partial name="Databases.Modal.Partitions" model="partitions.Data.Where(c => c.SchemaName == t.SchemaName && c.TableName == t.TableName)" />
+                    </td>
+                </tr>
+                <tr class="tablesorter-childRow hidden"></tr>
+            }
+        </tbody>
+        <tfoot>
+            @if (tables.Data.Any())
+            {
+                <tr class="total-row">
+                    <td><b>Total</b> <span class="text-muted">(@tables.Data.Count.Pluralize("table"))</span></td>
+                    <td>@(tables.Data.Sum(t => t.RowCount).ToComma())</td>
+                    <td>@(tables.Data.Sum(t => t.IndexCount).ToComma())</td>
+                    <td>@((tables.Data.Sum(t => t.DataTotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
+                    <td>@((tables.Data.Sum(t => t.IndexTotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
+                    <td>@((tables.Data.Sum(t => t.TotalSpaceKB) * 1024).ToSize().ToMutedIfNA())</td>
+                </tr>
+            }
+            else
+            {
+                <tr>
+                    <td colspan="6">
+                        <div class="no-content">There aren't any tables in this database.</div>
+                    </td>
+                </tr>
+            }
+        </tfoot>
+    </table>
+    <script>
+        $(function () {
+            $('.js-database-tables').tablesorter({
+                headers: {
+                    1: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    4: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    5: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    6: { sorter: 'dataVal', sortInitialOrder: 'desc' }
+                }
+            });
+        });
+    </script>
+}

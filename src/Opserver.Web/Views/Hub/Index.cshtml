@@ -1,0 +1,32 @@
+﻿@using StackExchange.Opserver.Views.Hub
+@model HubModel
+@{
+    this.SetPageTitle("Hub");
+    var views = HubView.Views;
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: 60 });
+        });
+    </script>
+}
+<div>
+    <div class="small js-isotope js-refresh" data-name="all-servers">
+        <div class="col-md-4">
+            @for (var i = 0; i < views.Count; i += 2)
+            {
+                <partial name="@views[i].ViewName" />
+            }
+        </div>
+        <div class="col-md-4">
+            @for (var i = 1; i < views.Count; i += 2)
+            {
+                <partial name="@views[i].ViewName" />
+            }
+        </div>
+        <div class="col-md-4">
+            <partial name="Index.Issues" />
+        </div>
+    </div>
+</div>

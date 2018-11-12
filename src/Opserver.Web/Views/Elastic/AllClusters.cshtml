@@ -1,0 +1,210 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    var knownClusters = Model.Clusters.Where(c => c.Nodes.Data?.Nodes != null && c.Nodes.Data.Nodes.Any()).ToList();
+    var unknownClusters = Model.Clusters.Where(c => !c.Nodes.Data?.Nodes?.Any() ?? true);
+}
+@helper CommonVersionHeader(ElasticCluster c)
+{
+    var nodes = c.Nodes.SafeData(true).Nodes;
+
+    if (nodes != null && nodes.Any())
+    {
+        var minVersion = nodes.Min(n => n.Version);
+        var maxVersion = nodes.Max(n => n.Version);
+        var versionString = minVersion == maxVersion ? minVersion.ToString() : (minVersion + "-" + maxVersion);
+        @:- Version @versionString
+    }
+}
+<div class="js-refresh" data-name="elastic-overview">
+    @if (knownClusters.Count == 0)
+    {
+        @Helpers.PollInfo(knownClusters, "any Elastic clusters")
+    }
+    else
+    {
+        foreach (var c in unknownClusters)
+        {
+            <h5 class="page-header">
+                @c.IconSpan() @(((ISearchableNode)c).DisplayName)
+                <span class="cluster-info">(unknown)</span>
+            </h5>
+            <table class="table table-striped table-hover table-responsive table-super-condensed">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Node</th>
+                        <th>Healthy</th>
+                        <th>Error</th>
+                        <th>Last Seen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in c.KnownNodes)
+                    {
+                        <tr class="@(MonitorStatus.Unknown.RowClass())">
+                            <td>@(MonitorStatus.Unknown.IconSpan())</td>
+                            <td>@n.Url</td>
+                            <td class="text-muted">Unknown</td>
+                            <td title="@(n.LastException?.Message)">@(n.LastException?.Message.TruncateWithEllipsis(100))</td>
+                            <td>@(n.LastSeen?.ToRelativeTimeSpan() ?? "Never".AsHtml())</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    }
+    @if (knownClusters.Any())
+    {
+        <table class="table table-striped table-hover table-responsive table-super-condensed">
+            @foreach (var c in knownClusters)
+            {
+                var ss = c.AllShards;
+                var hs = c.HealthStatus.SafeData(true);
+                var ns = c.Nodes.SafeData(true);
+                var masterNode = c.MasterNode;
+                var attribs = new List<string> { ns.Nodes.Count.Pluralize("node"), ss.Count.Pluralize("shard") };
+                if (hs.InitializingShards > 0)
+                {
+                    attribs.Add($"{hs.InitializingShards.ToComma()} initializing");
+                }
+                if (hs.RelocatingShards > 0)
+                {
+                    attribs.Add($"{hs.RelocatingShards.ToComma()} relocating");
+                }
+                if (hs.UnassignedShards > 0)
+                {
+                    attribs.Add($"{hs.UnassignedShards.ToComma()} unassigned");
+                }
+                <tbody>
+                    <tr class="category-row">
+                        <th colspan="11">
+                            <h5>
+                                @hs.IconSpan() <a class="@hs.TextClass()" href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name, node = ns.Nodes.FirstOrDefault()?.Name })">@c.Name</a>
+                                <span class="text-muted small">(@string.Join(", ", attribs))@CommonVersionHeader(c)</span>
+                                <span class="pull-right small"> @Helpers.PollNow(c)</span>
+                            </h5>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Node</th>
+                        <th>Shards</th>
+                        <th>CPU</th>
+                        <th>Memory</th>
+                        <th>Virtual</th>
+                        <th>Indexes</th>
+                        <th>Searches</th>
+                        <th>Conns</th>
+                        <th>Rx</th>
+                        <th>Tx</th>
+                        <th>As of</th>
+                    </tr>
+                </tbody>
+                <tbody>
+                    @foreach (var n in ns.Nodes)
+                    {
+                        // Don't show client nodes such as logstash inserters in this view
+                        if (n.IsClient)
+                        {
+                            continue;
+                        }
+                        var shards = ss.Where(sh => sh.Node == n.GUID).ToList();
+                        var stats = n.Stats;
+                        var upTime = stats?.JVM?.UptimeInMilliseconds > 0 ? DateTime.UtcNow.AddMilliseconds(-stats.JVM.UptimeInMilliseconds) : (DateTime?)null;
+                        var percentCPU = stats?.PercentCPUOS ?? stats?.PercentCPUProcess;
+                        <tr class="@n.RowClass()@(n == masterNode ? " info" : null)">
+                            <td title="Up since @(upTime.HasValue ? upTime.Value.ToZuluTime() + " (" + upTime?.ToRelativeTime() + ")" : "(unknown)")">
+                                @n.IconSpan()
+                                <a class="@n.TextClass()" href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">@c.ShortName(n)</a>
+                            </td>
+                            <td>@shards.Count.ToComma() <span class="text-muted small">(@shards.Count(s => s.Primary).ToComma() primary)</span></td>
+                            @if (percentCPU != null)
+                            {
+                                <td title="Process CPU: @percentCPU.ToComma()% load average @(stats.LoadAverageString ?? "Unknown")">
+                                    @(percentCPU.ToComma())%
+                                </td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.MemoryHeapInBytes != null)
+                            {
+                                <td>@stats.MemoryHeapInBytes.Value.ToSize()</td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.MemoryProcessVirtualInBytes != null)
+                            {
+                                <td>@stats.MemoryProcessVirtualInBytes.Value.ToSize()</td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.Process != null)
+                            {
+                                var indexCount = c.HealthStatus.Data?.Indexes?.Count.ToComma() ?? "<unknown>";
+                                <td title="@indexCount indexes with @(stats.Process.OpenFileDescriptors.ToComma()) open file descriptors">
+                                    <a href="@Url.Action(nameof(ElasticController.Indexes), new { cluster = c.Name, node = n.Name })">
+                                        @indexCount
+                                    </a> <span class="text-muted">@(stats.Indexes.Store.SizeInBytes > 0 ? "(" + stats.Indexes.Store.SizeInBytes.ToSize() + ")" : "")</span>
+                                </td>
+                                <td>@stats.Indexes.Search.QueryTotal.ToComma()</td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">n/a</td>
+                                <td class="text-muted">n/a</td>
+                            }
+                            @if (stats?.HTTP != null)
+                            {
+                                <td title="@(stats.HTTP.CurrentOpen.ToString()) open, @stats.HTTP.TotalOpened.ToComma() total">@stats.HTTP.CurrentOpen.ToComma()</td>
+                            }
+                            else
+                            {
+                                <td><span class="text-muted">n/a</span></td>
+                            }
+                            @if (stats?.Transport != null)
+                            {
+                                <td>@stats.Transport.RXSizeInBytes.ToSize()</td>
+                                <td>@stats.Transport.TXSizeInBytes.ToSize()</td>
+                            }
+                            else
+                            {
+                                <td class="text-muted">n/a</td>
+                                <td class="text-muted">n/a</td>
+                            }
+                            <td>@c.State.ToPollSpan()</td>
+                        </tr>
+                    }
+                    @if (c.KnownNodes.Count > ns.Nodes.Count)
+                    {
+                        <tr class="danger text-center">
+                            <td colspan="12">@((c.KnownNodes.Count - ns.Nodes.Count).Pluralize("node")) currently missing of (@string.Join(", ", c.KnownNodes.Select(s => s))).</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    }
+</div>
+<div class="js-refresh" data-name="cluster-sub-detail">
+    @foreach (var c in Model.Clusters.Where(c => c.InterestingIndexes.Any()))
+    {
+        var m = new DashboardModel
+        {
+            DisplayMode = Model.DisplayMode,
+            CurrentCluster = c
+        };
+        <h5 class="page-header">
+            @c.IconSpan() @c.Name indexes with problems
+        </h5>
+        <partial name="Indexes.Table" model="m" />
+        <partial name="Shards.Table" model="m" />
+    }
+</div>

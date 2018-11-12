@@ -1,0 +1,62 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Exceptions
+@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@{
+    var store = Model.Store?.Name;
+    var group = Model.Group?.Name;
+    var log = Model.Log?.Name;
+    var exceptions = Model.Errors;
+
+    this.SetPageTitle(Model.Title);
+    this.SetTopSearch((log.HasValue() ? log + " " : "") + "Exceptions",
+              Model.Search,
+              Url.Action(nameof(ExceptionsController.Exceptions)),
+              Model.SearchDictionary);
+    var anyLoaded = ExceptionsModule.Stores?.Any(s => s.HasPolledCacheSuccessfully && s.MonitorStatus == MonitorStatus.Good) ?? false;
+}
+@section head {
+    <script>
+        $(function () {
+            Status.Exceptions.init({
+                refresh: 120,
+                store:@store.ToJson(),
+                group: @group.ToJson(),
+                log: @log.ToJson(),
+                sort: '@Model.Sort',
+                loadMore: @(Model.LoadAsyncSize),
+                enablePreviews: @Current.Settings.Exceptions.EnablePreviews.ToJson(),
+                showDeleted: @Model.ShowDeleted.ToJson(),
+                search: @Model.Search.ToJson()
+            });
+        });
+    </script>
+}
+<div class="js-refresh" data-name="exceptions-header">
+    @if (ExceptionsModule.Stores.Count > 1)
+    {
+    <ul class="nav nav-tabs nav-tabs-right">
+        @foreach (var s in ExceptionsModule.Stores)
+        {
+            <li class="@(Model.Store == s ? "active" : null)">
+                <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
+            </li>
+        }
+    </ul>
+    }
+    @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
+    @if (anyLoaded)
+    {
+    <div class="js-exception-counts">
+        <partial name="Exceptions.Navigation" model="Model" />
+    </div>
+    }
+</div>
+@if (anyLoaded)
+{
+    <div class="js-refresh" data-name="exceptions-list">
+        <partial name="Exceptions.Table" model="Model" />
+        <div class="js-bottom-loader horizontal-load"><div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div></div>
+        <div class="js-bottom-no-exceptions no-content text-success@(exceptions.Any() ? " hidden" : "")">No @log exceptions</div>
+        <div class="js-bottom-no-more no-content small@(Model.HasMore ? null : " hidden")">End of active exception log</div>
+    </div>
+}

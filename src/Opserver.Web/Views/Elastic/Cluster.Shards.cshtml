@@ -1,0 +1,12 @@
+﻿@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    Layout = null;
+    var c = Model.CurrentCluster;
+    var i = Model.CurrentIndexName;
+    var shards = Model.DisplayShards.Where(s => i == null || s.Index == i).ToList();
+}
+<h4 class="modal-title">
+    @shards.Count.ToComma() Shards @(Model.DisplayMode == DashboardModel.DisplayModes.WarningsOnly ? "in trouble" : "") on @c.HealthStatus.Data.TotalNodeCount.Pluralize("node") (@c.HealthStatus.Data.Name)
+</h4>
+<partial name="Shards.Table" model="Model" />

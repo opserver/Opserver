@@ -1,0 +1,50 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.Elastic
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+    this.SetPageTitle("Elasticsearch Dashboard");
+    this.SetTopNodes(ElasticModule.Clusters,
+        "elastic clusters",
+        Model.CurrentCluster);
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
+            Status.Elastic.init({ cluster: '@Model.CurrentClusterName', node: '@Model.CurrentNodeName' });
+        });
+    </script>
+}
+@helper TabLink(DashboardModel.Views view, string action, string name, bool includeCluster = true, bool includeNode = false)
+{
+    var rvd = new RouteValueDictionary();
+    if (includeCluster && Model.CurrentClusterName.HasValue())
+    {
+        rvd.Add("cluster", Model.CurrentClusterName);
+    }
+    if (includeNode && Model.CurrentNodeName.HasValue())
+    {
+        rvd.Add("node", Model.CurrentNodeName);
+    }
+
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action, rvd)">@name</a></li>
+}
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false)
+    @TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster")
+    @TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true)
+    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes", includeNode: true)
+</ul>
+<div>
+    @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))
+    {
+        <partial name="Node.Selector" />
+    }
+    else if ((Model.View == DashboardModel.Views.Cluster || Model.View == DashboardModel.Views.Indexes) && (Model.CurrentCluster == null))
+    {
+        <partial name="Cluster.Selector" />
+    }
+    @RenderBody()
+</div>

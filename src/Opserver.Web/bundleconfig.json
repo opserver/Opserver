@@ -1,0 +1,10 @@
+[
+  {
+    "inputFiles": [
+      "Content/js/jquery-1.11.3.min.js",
+      "Content/bootstrap/js/bootstrap.min.js",
+      "Content/js/plugins/*.js"
+    ],
+    "outputFileName": "wwwroot/Content/js/plugins.js"
+  }
+]

@@ -1,0 +1,37 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DatabasesModel
+@{
+    var db = Model.Database;
+}
+<h4 class="modal-title">
+    Database details for @db
+    @RenderSection("top", false)
+</h4>
+@helper RenderLink(DatabasesModel.Views view, string text, string icon, bool disabled = false)
+{
+    if (disabled)
+    {
+    <a href="javascript:void(0)" class="text-muted disabled">@text</a>
+    }
+    else
+    {
+    <a href="#/db/@Model.Database.UrlPathEncode()/@view.ToString().ToLower()" class="@(view == Model.View ? "active" : "")"><i class="fa fa-@icon fa-fw" aria-hidden="true"></i> @text</a>   
+    }
+}
+<div class="row">
+    <div class="navbar-left col-md-2">
+        @RenderLink(DatabasesModel.Views.Tables, "Tables", "table")
+        @RenderLink(DatabasesModel.Views.Views, "Views", "binoculars")
+        @RenderLink(DatabasesModel.Views.StoredProcedures, "Stored Procs", "file-text-o")
+        @RenderLink(DatabasesModel.Views.Backups, "Backups", "archive")
+        @RenderLink(DatabasesModel.Views.Restores, "Restores", "history")
+        @RenderLink(DatabasesModel.Views.Storage, "Storage", "hdd-o")
+        @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", "thumbs-o-down", !Model.Instance.Supports<SQLInstance.DatabaseIndex>())
+        @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", "question-circle-o", !Model.Instance.Supports<SQLInstance.MissingIndex>())
+        @*@RenderLink(DatabasesModel.Views.BlitzIndex, "Blitz Index", "bolt", true)*@
+    </div>
+    <div class="col-md-10 js-database-modal-right">
+        @RenderBody()
+    </div>
+</div>

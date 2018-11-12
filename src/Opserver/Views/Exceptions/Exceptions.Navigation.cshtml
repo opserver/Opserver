@@ -1,0 +1,47 @@
+﻿@model StackExchange.Opserver.Views.Exceptions.ExceptionsModel
+@using StackExchange.Opserver.Controllers
+@{
+    Layout = null;
+}
+@if (Model.Groups.Count > 1)
+{
+    <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store = Model.Store.Name })" title="View All" class="btn btn-xs@(Model.ShowAll ? " btn-primary" : null)">View All</a>
+}
+@foreach (var g in Model.Groups)
+{
+    if (g.Applications.Count == 0)
+    {
+        continue;
+    }
+    var active = g == Model.Group;
+    var btnClass = active ? "btn-primary" : "";
+    var app = Model.Log != null && g.Applications.Contains(Model.Log) ? Model.Log : null;
+    <div class="btn-group dropdown">
+        <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store = Model.Store.Name, group = g.Name })" class="btn btn-xs @btnClass">
+            @g.Name
+            @if (app != null)
+            {
+                @:(@app.Name)
+                @:(<span class="js-exception-total" data-name="@g.Name-@app.Name">@app.ExceptionCount.ToComma()</span> of <span class="js-exception-total" data-name="@g.Name">@g.Total.ToComma()</span>)
+            }
+            else
+            {
+                @:(<span class="js-exception-total" data-name="@g.Name">@g.Total.ToComma()</span>)
+            }
+        </a>
+        <a href="#" class="btn btn-xs dropdown-toggle @btnClass" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+            @foreach (var a in g.Applications)
+                {
+                <li class="@(Model.Log?.Name == a.Name || g.Applications.Count == 1 ? " active" : null)">
+                    <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store = Model.Store.Name, group = g.Name, log = a.Name })">
+                        @a.Name
+                        <span class="badge js-exception-total" data-name="@g.Name-@a.Name">@a.ExceptionCount.ToComma()</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+}

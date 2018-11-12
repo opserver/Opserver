@@ -1,0 +1,55 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@model RedisInstance
+@{
+    Layout = null;
+    var info = Model;
+    var cache = info.Info;
+}
+<h4 class="modal-title">
+    INFO for @Model.HostAndPort
+</h4>
+@if (cache != null && cache.ErrorMessage.HasValue() || cache?.LastPoll > cache?.LastSuccess)
+{
+    <div class="alert alert-warning">
+        <h5>Error getting INFO</h5>
+        @if (cache.ErrorMessage.HasValue())
+        {
+            <p class="error-stack">
+                @cache.ErrorMessage
+            </p>
+        }
+        @if (cache.LastPoll > cache.LastSuccess)
+        {
+            <p class="error-stack">
+                Query failed, showing info from: @(cache.LastSuccess?.ToRelativeTimeSpanMini())
+            </p>
+        }
+    </div>
+}
+@if (cache?.Data?.Sections != null)
+{
+    <div class="small">
+        @foreach (var s in cache.Data.Sections)
+        {
+            <div class="panel panel-default">
+                <div class="panel-heading">@s.Name</div>
+                <div class="panel-body">
+                     @foreach (var l in s.Lines)
+                     {
+                         <div>
+                             <span class="text-muted">@l.Key: </span>:
+                             @if (l.Important)
+                             {
+                                 <strong>@l.ParsedValue</strong>
+                             }
+                             else
+                             {
+                                 @l.ParsedValue
+                             }
+                         </div>
+                     }
+                </div>
+            </div>
+        }
+    </div>
+}

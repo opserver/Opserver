@@ -1,0 +1,170 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Profiling
+@using StackExchange.Opserver.Data.Dashboard
+@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model OperationsActiveModel
+@{
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
+}
+@if (!(i.ServerFeatures.Data?.HasSPWhoIsActive ?? false))
+{
+    <div class="alert alert-warning">
+        <h5>Oh no!</h5>
+        <p>
+            <code>sp_WhoIsActive</code> was not found or was not accessible on this SQL instance.<br />
+            <a href="http://whoisactive.com/downloads/">Please visit Adam Machanic's site to grab the latest copy.</a>
+        </p>
+    </div>
+}
+else
+{
+    var activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
+    var enableDashboardLinks = Current.Settings.Dashboard.Enabled;
+    if (activeOps.ErrorMessage.HasValue())
+    {
+        <h5 class="page-header">Unknown active queries on @i.Name</h5>
+        <div class="alert alert-danger">
+            <h5>There was an error fetching server status from @i.Name:</h5>
+            <p class="error-stack">@activeOps.ErrorMessage</p>
+        </div>
+    }
+    else
+    {
+        var data = activeOps.Data ?? new List<SQLInstance.ActiveOperation>();
+        <h5 class="page-header">
+            Current active queries on @i.Name:
+            <span class="pull-right">
+                <a href="#/sql/active/filters" class="hover-pulsate@(Model.ActiveSearchOptions.IsNonDefault ? " text-warning" : "")"><i class="fa fa-filter" aria-hidden="true"></i></a>
+                <a href="#" class="js-reload-link">Reload</a>
+            </span>
+        </h5>
+        if (data.Any(o => o.BlockingSessionId.HasValue))
+        {
+            <div class="alert alert-warning">
+                <h5>Blocking Detected:</h5>
+                <p>
+                    <ul>
+                        @helper BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked)
+                        {
+                            <li>
+                                Session: <a href="#spid-@op.SessionId.ToString()">@op.SessionId.ToString()</a>
+                                @if (blocked[op].Any())
+                                {
+                                    <ul>
+                                        <li>Session: @string.Join(", ", blocked[op].Where(b => !blocked[b].Any()).Select(b => string.Format("<a href=\"#spid-{0}\">{0}</a>", b.SessionId))).AsHtml()</li>
+                                        @foreach (var b in blocked[op].Where(bo => blocked[bo].Any()))
+                                        {
+                                            @BlockingTree(b, blocked)
+                                        }
+                                    </ul>
+                                }
+                            </li>
+                        }
+                        @{
+                            var blocked = new Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>>();
+                            foreach (var op in data)
+                            {
+                                blocked[op] = data.Where(o => o.BlockingSessionId == op.SessionId).ToList();
+                            }
+                            // Iterate top level blockers
+                            // TODO: Circular blocks
+                            foreach (var op in data.Where(o => !o.BlockingSessionId.HasValue && blocked[o].Any()))
+                            {
+                                @BlockingTree(op, blocked)
+                            }
+                        }
+                    </ul>
+                </p>
+            </div>
+        }
+        <table class="table table-striped table-hover table-super-condensed table-responsive">
+            <thead>
+                <tr>
+                    <th>SID</th>
+                    <th title="Operation Duration">Time</th>
+                    <th>CPU</th>
+                    <th>Reads</th>
+                    <th>Writes</th>
+                    <th>Status</th>
+                    <th>Host</th>
+                    <th>User</th>
+                    <th>DB</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var w in data)
+            {
+                <tr id="spid-@w.SessionId.ToString()">
+                    <td>@w.SessionId.ToString()</td>
+                    <td title="@w.Duration.ToReadableString()">@w.Duration.ToTimeStringMini(maxElements: 1)</td>
+                    <td>@w.CPU.ToComma()</td>
+                    <td>@w.Reads.ToComma()</td>
+                    <td>@w.Writes.ToComma()</td>
+                    <td title="@w.WaitInfo">@w.Status</td>
+                    <td title="Program: @w.ProgramName">
+                        @if (enableDashboardLinks && DashboardModule.GetNodeByName(w.HostName) != null)
+                        {
+                            <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = w.HostName })">@w.HostName</a>
+                        }
+                        else
+                        {
+                            @w.HostName
+                        }
+                    </td>
+                    <td>@w.LoginName</td>
+                    <td>@w.DatabaseName</td>
+                    <td>
+                        @if (w.TempDBCurrent > 0)
+                        {
+                            <div>
+                                <span class="text-muted">Temp (Pages):</span> @w.TempDBCurrent.ToComma()
+                            </div>
+                        }
+                        @if (w.TempDBAllocations > 0)
+                        {
+                            <div>
+                                <span class="text-muted">Temp (Writes):</span> @w.TempDBAllocations.ToComma()
+                            </div>
+                        }
+                        @if (w.WaitInfo.HasValue())
+                        {
+                            <div>
+                                <span class="text-muted">Waits:</span> @w.WaitInfo
+                            </div>
+                        }
+                        @if (w.BlockingSessionId.HasValue)
+                        {
+                            <div>
+                                <a href="#spid-@w.BlockingSessionId.ToString()"><span class="text-muted">Blocked By:</span> @w.BlockingSessionId</a>
+                            </div>
+                        }
+                        @if (w.SqlText.HasValue())
+                        {
+                            <pre class="pre-limited"><code class="sql">@w.SqlText</code></pre>
+                        }
+                        @if (w.PercentComplete.HasValue && w.TimeLeft.HasValue)
+                        {
+                            <div class="progress progress-embed progress-limited" title="ETA: @((w.StartTime + w.TotalTime).Value.ToZuluTime())">
+                                <div class="progress-bar" style="width: @w.PercentComplete.Value.ToString(CultureInfo.InvariantCulture)%;"></div>
+                                <span>Progress: @w.PercentComplete.Value.ToString("##0.##")% (ETA: @(w.TimeLeft.Value.ToReadableString()))</span>
+                            </div>
+                        }
+                    </td>
+
+                </tr>
+            }
+            @if (!data.Any())
+            {
+                <tr>
+                    <td colspan="10">
+                        <div class="text-muted">There are no active operations at the moment.</div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}

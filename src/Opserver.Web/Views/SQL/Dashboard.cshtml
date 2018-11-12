@@ -1,0 +1,39 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model DashboardModel
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+    this.SetPageTitle("SQL Dashboard");
+    this.SetTopNodes(SQLModule.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? Url.Action(nameof(SQLController.Instance)) : null);
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: @(Model.Refresh.ToString()) });
+            Status.SQL.init({ node: @((Model.CurrentInstance?.Name ?? "").ToJson()) });
+        });
+    </script>
+}
+@helper TabLink(SQLViews view, string action, string name, bool includeParams = true)
+{
+    <li class="@(Model.View == view ? "active" : null)">
+        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new {node = Model.CurrentInstance.Name} : null)">@name</a>
+    </li>
+}
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(SQLViews.Servers, nameof(SQLController.Dashboard), "all servers", false)
+    @TabLink(SQLViews.Jobs, nameof(SQLController.AllJobs), "all jobs", false)
+    @TabLink(SQLViews.Instance, nameof(SQLController.Instance), "instance")
+    @TabLink(SQLViews.Top, nameof(SQLController.Top), "top")
+    @TabLink(SQLViews.Active, nameof(SQLController.Active), "active")
+    @TabLink(SQLViews.Connections, nameof(SQLController.Connections), "connections")
+    @TabLink(SQLViews.Databases, nameof(SQLController.Databases), "databases")
+</ul>
+<div>
+    @if (Model.View != SQLViews.Servers && Model.View != SQLViews.Jobs && Model.CurrentInstance == null)
+    {
+        <partial name="Instance.Selector" />
+    }
+    @RenderBody()
+</div>

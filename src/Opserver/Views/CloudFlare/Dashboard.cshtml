@@ -1,0 +1,22 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Views.CloudFlare
+@model DashboardModel
+@{
+    Layout = "~/Views/Shared/Master.cshtml";
+    this.SetPageTitle("CloudFlare Dashboard");
+}
+@section head {
+    <script>
+        $(function() {
+            Status.Dashboard.init({ refresh: 30 });
+        });
+    </script>
+}
+@helper TabLink(DashboardModel.Views view, string action, string name)
+{
+    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
+}
+<ul class="nav nav-tabs nav-tabs-right">
+    @TabLink(DashboardModel.Views.DNS, nameof(CloudFlareController.DNS), "DNS")
+</ul>
+@RenderBody()

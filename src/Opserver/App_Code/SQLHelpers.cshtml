@@ -1,0 +1,60 @@
+﻿@using StackExchange.Opserver
+@using StackExchange.Opserver.Data
+@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
+
+@helper HealthDescriptionAGs(IEnumerable<IMonitorStatus> ims, bool minimal = false, bool icons = true)
+{
+    if (ims == null) { return; }
+    var bad = ims.Where(ag => ag.MonitorStatus != MonitorStatus.Good).ToList();
+    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good).ToList();
+    if (minimal)
+    {
+        if (good.Any())
+        {
+            @MonitorStatus.Good.Span(@good.Count.ToComma(), @good.Count.Pluralize("Healthy Database"))
+        }
+        if (bad.Any())
+        {
+            if (good.Any())
+            {
+                <span class="text-muted">/</span>
+            }
+            @MonitorStatus.Critical.Span(@bad.Count.ToComma(), @bad.Count.Pluralize("Unhealthy Database"))
+        }
+    }
+    else
+    {
+        if (bad.Any())
+        {
+            @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma() Unhealthy
+        }
+        if (good.Any())
+        {
+            @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma() Healthy
+        }
+    }
+}
+@helper MemoryCell(SQLInstance i, int decimalPlaces = 2)
+{
+    if (i.ServerInfo != null)
+    {
+        <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
+    }
+    else
+    {
+        var props = i.ServerProperties.SafeData();
+        if (props != null && props.PhysicalMemoryBytes > 0)
+        {
+            <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, decimalPlaces) + "%")</td>
+        }
+        else
+        {
+            <td class="text-muted">?</td>
+        }
+    }
+}
+@helper BatchesCell(SQLInstance i)
+{
+    <td>@(i.BatchesPerSec?.ToComma())</td>
+}

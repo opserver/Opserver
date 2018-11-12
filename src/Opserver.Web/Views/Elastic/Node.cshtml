@@ -1,0 +1,220 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Views.Elastic
+@model DashboardModel
+@{
+    var c = Model.CurrentCluster;
+    var n = Model.CurrentNode;
+    if (c == null || n == null) { return; }
+    var os = n.Stats?.OS;
+    var proc = n.Stats?.Process;
+    var jvm = n.Stats?.JVM;
+    var fs = n.Stats?.FileSystem;
+    var transport = n.Stats?.Transport;
+    var cnd = c.Nodes.Data?.Nodes.FirstOrDefault(nd => nd.GUID == n.GUID);
+}
+<div>
+    <h5 class="page-header">
+        @c.IconSpan() @c.Name<span class="text-muted">: </span> @n.ShortName
+        @Helpers.PollNow(c)
+    </h5>
+    <p></p>
+    <div class="row small js-refresh" data-name="node-summary">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Server Summary for @n.GUID <span class="text-muted">(<a href="#/elastic/node/settings">View Settings</a>)</span></div>
+                <div class="panel-body small">
+                    <div class="value-block col-md-3 col-sm-6" title="Host: @n.Hostname
+Transport: @n.Stats?.TransportAddress">
+                        @c.Name
+                        <label>
+                            Cluster
+                            <span class="text-muted">(<a href="@Url.Action(nameof(ElasticController.Cluster), new { cluster = c.Name, node = n.Name })">view</a>)</span>
+                        </label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @n.Version.ToString()
+                        <label>Version</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @(c.State?.Data?.MasterNode == n.GUID ? "Master" : "Slave")
+                        <label>Role</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @((c.Nodes?.Data?.Nodes?.Count - 1).ToString())
+                        <label>Siblings</label>
+                    </div>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Stats System</div>
+                <div class="panel-body small">
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (jvm?.UptimeInMilliseconds > 0)
+                        {
+                            var upTime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
+                            <span title="@upTime.ToReadableString()">
+                                @upTime.ToTimeStringMini(3)
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label>Uptime</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (os?.CPU?.Used != null)
+                        {
+                            var percentCpu = os?.CPU?.Used.ToString();
+                            <div class="progress">
+                                <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                <span>@percentCpu%</span>
+                            </div>
+                        }
+                        else if (proc?.CPU != null)
+                        {
+                            var percentCpu = proc.CPU.Percent.ToString();
+                            <div class="progress">
+                                <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                <span>@percentCpu%</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label>CPU</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (os?.Memory != null)
+                        {
+                            var percentMemoryUsed = os.Memory.UsedPercent;
+                            var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString(CultureInfo.InvariantCulture);
+                            <div class="progress" title="">
+                                <div class="progress-bar" style="width: @percentUsed%;"></div>
+                                <span>@percentUsed%</span>
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label title="Memory Used">Memory</label>
+                    </div>
+                    <div class="value-block col-md-3 col-sm-6">
+                        @if (os?.Swap != null)
+                        {
+                            <span title="@os.Swap.FreeInBytes.ToSize() free">
+                                @os.Swap.UsedInBytes.ToSize(zero: "0") / @((os.Swap.UsedInBytes + os.Swap.FreeInBytes).ToSize())
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="text-warning">Unknown</span>
+                        }
+                        <label>Swap</label>
+                    </div>
+                </div>
+            </div>
+            @if (jvm != null)
+            {
+                var uptime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
+                var gcTime = TimeSpan.FromMilliseconds(jvm.GC.CollectionTimeInMilliseconds);
+                <div class="panel panel-default">
+                    <div class="panel-heading">@Icon.VM Java Virtual Machine <span class="text-muted">(PID: @(cnd?.JVM.PID.ToString()))</span></div>
+                    <div class="panel-body small">
+                        <div class="value-block col-md-4 col-sm-6" title="@uptime.ToReadableString()">
+                            @uptime.ToTimeStringMini(3)
+                            <label>Uptime</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6">
+                            @jvm.Memory.HeapUsedInBytes.ToSize() <span class="text-muted">(@jvm.Memory.HeapCommittedInBytes.ToSize() commit)</span>
+                            <label>Heap</label>
+                        </div>
+                        <div class="value-block col-md-4 col-sm-6">
+                            @jvm.Memory.NonHeapUsedInBytes.ToSize() <span class="text-muted">(@jvm.Memory.NonHeapCommittedInBytes.ToSize() commit)</span>
+                            <label>Non-Heap</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6" title="
+                             @foreach (var k in jvm.Memory.Pools.Keys) { var val = jvm.Memory.Pools[k]; <text>
+                             @k
+                             Used @val.Used (@val.PeakUsed peak)
+                             Max @val.Max (@val.PeakMax peak)</text>
+}">
+                            @jvm.Memory.Pools.Keys.Count.ToComma()
+                            <label>Pools</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @jvm.Threads.Count.ToComma() <span class="text-muted">(@jvm.Threads.PeakCount.ToComma() peak)</span>
+                            <label>Threads</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @jvm.GC.CollectionCount.ToComma() <span class="text-muted" title="@gcTime.ToReadableString()">(@gcTime.ToTimeStringMini(4))</span>
+                            <label>GC Runs</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @(cnd?.JVM.Version)
+                            <label>Version</label>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (transport != null)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">@Icon.Network Network</div>
+                    <div class="panel-body small">
+                        <div class="value-block col-md-3 col-sm-6">
+                            @(n?.HTTP?.PublishAddressPretty)
+                            <label>Address</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.ServerOpen.ToComma()
+                            <label>Open Conns</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.RXSizeInBytes.ToSize()
+                            <label>Received</label>
+                        </div>
+                        <div class="value-block col-md-3 col-sm-6">
+                            @transport.TXSizeInBytes.ToSize()
+                            <label>Sent</label>
+                        </div>
+                    </div>
+                </div>
+            }
+            @if (fs?.Data != null)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">@Icon.Disk File System Mounts</div>
+                    <div class="panel-body small">
+                        @foreach (var fsd in fs.Data)
+                        {
+                            var percentUsed = 100 * (fsd.TotalInBytes - fsd.AvailableInBytes) / (float)fsd.TotalInBytes;
+                            <div class="value-block col-md-@(fs.Data.Length == 1 ? "12" : "6") col-sm-6" title="Mount: @fsd.Mount
+Path: @fsd.Path
+Queue: @fsd.DiskQueue
+
+Total: @fsd.TotalInBytes.ToSize()
+Free: @fsd.FreeInBytes.ToSize()
+Available: @fsd.AvailableInBytes.ToSize()
+
+Reads: @fsd.DiskReads.ToComma() (@fsd.DiskReadSizeInBytes.ToSize())
+Writes: @fsd.DiskWrites.ToComma() (@fsd.DiskWriteSizeInBytes.ToSize())">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.InvariantCulture)%;"></div>
+                                    <span>@((fsd.TotalInBytes - fsd.AvailableInBytes).ToSize()) / @fsd.TotalInBytes.ToSize() <span class="smaller">(@fsd.AvailableInBytes.ToSize() free)</span></span>
+                                </div>
+                                <label>@fsd.Mount</label>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        <div class="col-md-6">
+            <partial name="Cluster.Panel.Stats" model="c" />
+            <partial name="Cluster.Panel.Indexes" model="c" />
+        </div>
+    </div>
+</div>

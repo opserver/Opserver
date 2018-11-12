@@ -1,0 +1,25 @@
+<Project>
+  <PropertyGroup>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Opserver.ruleset</CodeAnalysisRuleSet>
+    <!--<GenerateDocumentationFile>true</GenerateDocumentationFile>-->
+    <PackageId>$(AssemblyName)</PackageId>
+    <PackageProjectUrl>https://github.com/Opserver/Opserver/</PackageProjectUrl>
+    <PackageLicenseUrl>https://raw.github.com/Opserver/Opserver/master/LICENSE</PackageLicenseUrl>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/Opserver/Opserver/</RepositoryUrl>
+
+    <!--<DebugSymbols>true</DebugSymbols>-->
+    <!--<DebugType>pdbonly</DebugType>-->
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <IncludeSymbols>false</IncludeSymbols>
+    <!--<PublishRepositoryUrl>true</PublishRepositoryUrl>-->
+    <!--<EmbedUntrackedSources>true</EmbedUntrackedSources>-->
+    <!--<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>-->
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Nerdbank.GitVersioning" Version="2.2.13" PrivateAssets="all" />
+    <!--<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>-->
+  </ItemGroup>
+</Project>

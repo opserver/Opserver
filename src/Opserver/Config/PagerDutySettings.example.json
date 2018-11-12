@@ -1,0 +1,25 @@
+﻿/* Configuration for the PagerDuty dashboard */
+{
+  // (Required) PagerDuty API key
+  "APIKey": "ABC123",
+  // (Optional) The number of users to show per schedule in the dashboard (top N by escalation) - defaults to 2
+  "onCallToShow": 3,
+  // (Optional) How many days of incidents to cache in the dashboard - defaults to 60
+  "daysToCache": 60,
+  // (Optional) Title for the information section
+  "headerTitle": "Contacting SRE On Call",
+  // (Optional) Section of HTML to show in the info section, for providing on-call phone numbers, etc.
+  "headerHtml": "<p>First, <b>if this tab is <span class=\"text-danger\">RED<span></b> our alerting systems have notified us of the problem. If you are having an issue ...</p></div>",
+  // (Optional) If multiple schedule exist, this one is treated as the primary
+  "primaryScheduleId": "AEDJIL",
+  /* Map of Opserver account names (usually Active Directory) to PagerDuty emails
+   With this provided, known users can take on-call because we know how to map the action to. */
+  "userNameMap": [
+    {
+      // Opserver login (probably Active Directory user name)
+      "opServerName": "jsmith",
+      // PagerDuty email
+      "emailUser": "jsmith@mycompany.com"
+    }
+  ]
+}

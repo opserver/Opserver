@@ -1,0 +1,146 @@
+﻿@using StackExchange.Opserver.Views.SQL
+@using Roles = StackExchange.Opserver.Models.Roles
+@model ServersModel
+@{
+    var source = Model.Clusters
+                  .SelectMany(c => c.Nodes.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })))
+                  .Union(Model.StandaloneInstances.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })));
+    
+    switch (Model.JobSort)
+    {
+        case JobSort.Duration:
+            source = Sort(source, j => j.Job.LastRunDuration);
+            break;
+        case JobSort.Enabled:
+            source = Sort(source, j => j.Job.IsEnabled);
+            break;
+        case JobSort.End:
+            source = Sort(source, j => j.Job.LastStopDate);
+            break;
+        case JobSort.LastRun:
+            source = Sort(source, j => j.Job.LastRunMonitorStatus);
+            break;
+        case JobSort.Name:
+            source = Sort(source, j => j.Job.Name);
+            break;
+        case JobSort.Server:
+            source = Sort(source, j => j.ServerName);
+            break;
+        case JobSort.Start:
+            source = Sort(source, j => j.Job.LastStartDate);
+            break;
+    }
+    var allJobs = source.ToList();
+}
+@functions {
+    public IOrderedEnumerable<T> Sort<T, TKey>(IEnumerable<T> source, Func<T, TKey> order) =>
+        Model.SortDirection == SortDir.Desc ? source.OrderByDescending(order) : source.OrderBy(order);
+}
+@helper SortLink(JobSort sort, string title)
+{
+    var curSort = sort == Model.JobSort;
+    <th class="sortable@(curSort ? " current-sort" : "")">
+        <a href="?sort=@sort.ToString()&dir=@(curSort && Model.SortDirection == SortDir.Asc ? SortDir.Desc : SortDir.Asc)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
+    </th>
+}
+<h5 class="page-header">
+    @(allJobs.Count.Pluralize("Job")) <span class="small">(@(allJobs.Count(j => j.Job.IsRunning).Pluralize("Running")))</span>
+</h5>
+<div class="js-refresh" data-name="sql-jobs">
+@if (allJobs.Count > 0)
+{
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-sql-jobs">
+        <thead>
+            <tr>
+                <th></th>
+                @SortLink(JobSort.Server, "Server")
+                @SortLink(JobSort.Name, "Name")
+                @SortLink(JobSort.LastRun, "Last Run")
+                @SortLink(JobSort.Start, "Start")
+                @SortLink(JobSort.End, "End")
+                @SortLink(JobSort.Duration, "Duration")
+                @SortLink(JobSort.Enabled, "Enabled")
+                @if (Current.IsInRole(Roles.SQLAdmin))
+                {
+                    <th>Actions</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var jw in allJobs)
+            {
+                var j = jw.Job;
+                var lastInitiator = j.LastRunRequestedSource.HasValue ? j.LastRunRequestedSource.Value.AsString(EnumFormat.Description) : "Unknown";
+                <tr data-node="@jw.ServerName" class="@j.RowClass()@(j.IsRunning ? " info" : null)@(j.IsEnabled ? "" : " text-muted")" data-guid="@j.JobId.ToString()" title="@if(!j.IsEnabled){<text>(DISABLED)
+</text>}Job: @j.Name
+@j.Description
+@if(j.IsRunning) {<text>Currently Running
+</text>}
+
+Category: @j.Category
+Created: @j.DateCreated.ToZuluTime()
+
+Last Run Initiated by: @lastInitiator
+Last Run Message: @j.LastRunMessage">
+                    <td>@j.IconSpan()</td>
+                    <td>@jw.ServerName</td>
+                    <td>
+                        @j.Name
+                        @if (j.IsRunning)
+                        {
+                            <span class="good">(Running)</span>
+                        }
+                    </td>
+                    @if (j.IsRunning)
+                    {
+                        <td>Running (@lastInitiator)</td>
+                        <td data-val="@(j.LastStartDate?.ToEpochTime())">@(j.LastStartDate?.ToRelativeTimeSpan())</td>
+                        <td data-val="-1"></td>
+                        <td data-val="@(j.LastRunDurationSeconds ?? -1)">@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
+                    }
+                    else if (j.LastRunStatus.HasValue)
+                    {
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span(j.LastRunStatus.Value.AsString(EnumFormat.Description).IsNullOrEmptyReturn("Unknown")) (@lastInitiator)</td>
+                        <td data-val="@(j.LastStartDate?.ToEpochTime())">@(j.LastStartDate?.ToRelativeTimeSpan())</td>
+                        <td data-val="@(j.LastStopDate?.ToEpochTime())">@(j.LastStopDate?.ToRelativeTimeSpan())</td>
+                        <td data-val="@(j.LastRunDurationSeconds ?? -1)">@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
+                    }
+                    else
+                    {
+                        <td class="text-muted">no run history found</td>
+                        <td data-val="-1"></td>
+                        <td data-val="-1"></td>
+                        <td data-val="-1"></td>
+                    }
+                    <td class="@(j.IsEnabled ? "" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
+                    @if (Current.IsInRole(Roles.SQLAdmin))
+                    {
+                        <td class="actions">
+                            @if (j.IsEnabled)
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-warning" data-action="toggle" data-enable="false">Disable</a>
+                            }
+                            else
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-success" data-action="toggle" data-enable="true">Enable</a>
+                            }
+                            @if (!j.IsRunning)
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-primary" data-action="start" data-guid="@j.JobId.ToString()">Start</a>
+                            }
+                            else
+                            {
+                                <a href="#" class="js-sql-job-action btn btn-xs btn-danger" data-action="stop" data-guid="@j.JobId.ToString()">Stop</a>
+                            }
+                        </td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No jobs information available</div>
+}
+</div>

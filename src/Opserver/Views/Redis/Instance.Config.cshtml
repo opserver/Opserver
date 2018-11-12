@@ -1,0 +1,32 @@
+﻿@model StackExchange.Opserver.Data.Redis.RedisInstance
+@{
+    Layout = null;
+    var config = Model.Config.Data;
+}
+<h4 class="modal-title">
+    Server Config
+</h4>
+@if (config?.Any() ?? false)
+{
+    <table class="table table-striped table-responsive table-super-condensed table-hover">
+        <thead>
+            <tr>
+                <th>Config Param</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in config.OrderBy(e => e.Key))
+            {
+                <tr>
+                    <td>@entry.Key</td>
+                    <td>@entry.Value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No configuration available</div>
+}

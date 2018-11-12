@@ -1,0 +1,112 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Views.SQL
+@model OperationsTopModel
+@{
+    var i = Model.CurrentInstance;
+    var topOps = Model.TopOperations;
+    var errorMessage = Model.ErrorMessage;
+    if (i == null) { return; }
+}
+@helper ReadableTime(long microSeconds)
+{
+    @TimeSpan.FromMilliseconds(microSeconds / 1000d).ToTimeStringMini()
+}
+@helper SortLink(SQLInstance.TopSorts sort, string title)
+{
+    <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
+        @if (sort == Model.TopSearchOptions.Sort)
+        {
+            <span class="current-sort" title="@sort.AsString(EnumFormat.Description)">@title</span>
+        }
+        else
+        {
+            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
+        }
+    </th>
+}
+@helper RunInLast(DashboardModel.LastRunInterval interval, string label)
+{
+    var secs = (int) interval;
+    var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
+    <label>
+        <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
+    </label>
+}
+@if (errorMessage.HasValue())
+{
+    <h5 class="page-header">
+        Unknown Operations on @i.Name
+    </h5>
+    <div class="alert alert-danger">
+        <h5>There was an error fetching server status from @i.Name:</h5>
+        <p class="error-stack">
+            @errorMessage
+        </p>
+    </div>
+}
+else
+{
+    <h5 class="page-header">
+        Top queries on @i.Name @(Model.TopSearchOptions.Sort.HasValue ? " by " + Model.TopSearchOptions.Sort.Value.AsString(EnumFormat.Description) : "")
+        <span class="pull-right">
+            <a href="#/sql/top/filters" class="hover-pulsate@(Model.TopSearchOptions.IsNonDefault ? " text-warning" : "")" title="Filter"><i class="fa fa-filter" aria-hidden="true"></i></a>
+            @*<a href="#" class="js-reload-link">Reload</a>*@
+        </span>
+    </h5>
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive table-row-actions">
+        <thead>
+            <tr class="sort-row sort-category">
+                <th colspan="3">CPU</th>
+                <th colspan="2">Time</th>
+                <th colspan="2">Reads</th>
+                <th colspan="2">Execs</th>
+                <th>Time</th>
+                <th colspan="2">Query Info</th>
+            </tr>
+            <tr class="sort-row">
+                @SortLink(SQLInstance.TopSorts.AvgCPU, "Avg")
+                @SortLink(SQLInstance.TopSorts.AvgCPUPerMinute, "Avg/min")
+                @SortLink(SQLInstance.TopSorts.TotalCPU, "Total")
+
+                @SortLink(SQLInstance.TopSorts.AvgDuration, "Avg")
+                @SortLink(SQLInstance.TopSorts.TotalDuration, "Total")
+
+                @SortLink(SQLInstance.TopSorts.AvgReads, "Avg")
+                @SortLink(SQLInstance.TopSorts.TotalReads, "Total")
+
+                @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs")
+                @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min")
+                @SortLink(SQLInstance.TopSorts.LastExecutionTime, "Last Exec")
+                <th>Database</th>
+                <th>Query</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var o in topOps)
+        {
+            <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
+                <td>@o.AvgCPU.ToComma()µs</td>
+                <td>@o.AvgCPUPerMinute.ToComma()µs</td>
+                <td>@ReadableTime(o.TotalCPU)</td>
+                <td>@ReadableTime(o.AvgDuration)</td>
+                <td>@ReadableTime(o.TotalDuration)</td>
+                <td>@o.AvgReads.ToComma()</td>
+                <td>@o.TotalReads.ToComma()</td>
+                <td>@o.ExecutionCount.ToComma()</td>
+                <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
+                <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
+                <td>@o.CompiledOnDatabase</td>
+                <td class="query-col" title="@o.QueryText">@o.QueryText.TruncateWithEllipsis(80)</td>
+            </tr>
+        }
+        @if (!topOps.Any())
+        {
+            <tr>
+                <td colspan="12">
+                    <div class="no-content">There are no operations in the plan cache on this server.</div>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}

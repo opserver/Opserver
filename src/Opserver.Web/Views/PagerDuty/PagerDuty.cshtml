@@ -1,0 +1,156 @@
+﻿@using StackExchange.Opserver.Data.PagerDuty
+@model StackExchange.Opserver.Views.PagerDuty.PagerDutyModel
+@{
+    Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
+    this.SetPageTitle("PagerDuty");
+    var settings = Current.Settings.PagerDuty;
+}
+@helper GetOverrideAction(string incident = null, string status = null)
+{
+    if (Model.CurrentPagerDutyPerson != null && Current.User.IsGlobalAdmin)
+    {
+        @:<span class="pull-right"><a href="#" class="js-override-action">Take on Call</a> (1hr)</span>
+    }
+}
+
+@helper GetIncidentAction(IncidentStatus status)
+{
+    if (Model.CurrentPagerDutyPerson == null) { return; }
+    switch (status)
+    {
+        case IncidentStatus.acknowledged:
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
+            break;
+        default:
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.acknowledged">Ack</a>
+            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
+            break;
+    }
+}
+
+@section head {
+    <script>
+        Status.Dashboard.init({ refresh: 5 });
+        $(function() {
+            Status.loaders.register({
+                '#/pagerduty/incident/': function (val) {
+                    Status.popup('pagerduty/incident/' + val);
+                },
+                '#/pagerduty/escalation/': function (val) {
+                    Status.popup('pagerduty/escalation/' + val);
+                }
+            });
+            $(document).on('click', '.js-incident-action',function(e) {
+                e.preventDefault();
+                $.post('/pagerduty/action/incident/updatestatus',{
+                    newStatus: $(this).data('action'),
+                    incident: $(this).closest('[data-incident]').data('incident')
+                })
+                  .done(function () {
+                    Status.refresh.run();
+                });
+            });
+            $(document).on('click', '.js-override-action',function (e) {
+                e.preventDefault();
+                $.post('/pagerduty/action/oncall/override').done(function () {
+                    Status.refresh.run();
+                });
+            });
+        });
+    </script>
+}
+<div class="js-refresh" data-name="PagerDuty">
+    @if (settings.HeaderTitle.HasValue() || settings.HeaderHtml.HasValue())
+    {
+        <div class="panel panel-default">
+            @if (settings.HeaderTitle.HasValue())
+            {
+                <div class="panel-heading">
+                    @settings.HeaderTitle
+                </div>
+            }
+            @if (settings.HeaderHtml.HasValue())
+            {
+                <div class="panel-body small">
+                    @settings.HeaderHtml.AsHtml()
+                </div>
+            }
+        </div>
+    }
+    <h5 class="page-header">On Call (<a href="#/pagerduty/escalation/full">Full Schedule</a>) @GetOverrideAction()</h5>
+    <table class="table table-striped table-hover table-super-condensed table-responsive text-nowrap">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Level</th>
+                <th>Policy</th>
+                <th>Email</th>
+                <th>Phone</th>
+            </tr>
+        </thead>
+        @if (!PagerDutyAPI.Instance.AllSchedules.LastPollSuccessful)
+        {
+            <tbody>
+                <tr>
+                    <td colspan="5">
+                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.AllSchedules, "No schedules loaded from PagerDuty")
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tbody>
+        @foreach (var a in Model.Schedule)
+        {
+            <partial name="PagerDuty.OnCallRow" model="a" />
+        }
+        </tbody>
+    </table>
+
+    <h5 class="page-header">
+        Incidents: Last @Model.CachedDays.ToComma() Days
+        @Helpers.PollNow(PagerDutyAPI.Instance)
+    </h5>
+    <table class="table table-striped table-hover table-super-condensed table-responsive table-actions text-nowrap">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th></th>
+                <th>Service</th>
+                <th>Status</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        @if (!PagerDutyAPI.Instance.Incidents.LastPollSuccessful)
+        {
+            <tbody>
+                <tr>
+                    <td colspan="4">
+                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.Incidents, "No incidents loaded from PagerDuty")
+                    </td>
+                </tr>
+            </tbody>
+        }
+        <tbody>
+        @foreach (var i in Model.AllIncidents.OrderByDescending(i => i.CreationDate))
+        {
+            <tr class="@i.RowClass()" data-incident="@i.Id">
+                <td><a href="#/pagerduty/incident/detail/@i.Number.ToString()">@i.Number.ToString()</a></td>
+                <td>@(i.CreationDate?.ToRelativeTimeSpan())</td>
+                <td>@i.AffectedService.Name</td>
+                <td class="actions">
+                    <span class="@i.TextClass()">@i.Status.AsString(EnumFormat.Description)</span>
+                    @if (i.LastChangedBy != null)
+                    {
+                        <span class="text-muted">(@i.LastChangedBy.Summary)</span>
+                    }
+                    @if (i.Status == IncidentStatus.triggered || i.Status == IncidentStatus.acknowledged)
+                    {
+                        @GetIncidentAction(i.Status)
+                    }
+                </td>
+                <td>@i.Title</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

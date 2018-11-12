@@ -1,0 +1,75 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@model IEnumerable<SQLInstance.DatabasePartition>
+@{
+    var partitions = Model.OrderBy(p => p.RangeValue).ToList();
+    if (partitions.Count == 0)
+    {
+        return;
+    }
+    var sample = partitions[0];
+}
+<div class="panel panel-default">
+    <div class="panel-heading">
+        <h6>
+            @partitions.Count.Pluralize("Partition")
+            <span class="smaller">
+                <span class="text-muted"> - Scheme:</span> @sample.Scheme
+                <span class="text-muted">, Function:</span> @sample.Function
+            </span>
+        </h6>
+    </div>
+    <div class="panel-body">
+        <table class="table-striped col-xs-12">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Filegroup</th>
+                    <th>Boundary <span class="text-muted">(@(sample.IsRight ? "Right" : "Left"))</span></th>
+                    <th>Compression</th>
+                    <th>Rows</th>
+                    <th>Reserved Space</th>
+                </tr>
+            </thead>
+            <tbody>
+            @for (var i = 0; i < partitions.Count; i++)
+            {
+                var p = partitions[i];
+                var icon = "fa-columns";
+                switch (p.DataCompression)
+                {
+                    case PartitionDataCompression.Row:
+                    case PartitionDataCompression.Page:
+                    case PartitionDataCompression.ColumnstoreArchive:
+                        icon = "fa-archive";
+                        break;
+                }
+                <tr data-id="@p.PartitionNumber">
+                    <td><i class="fa @icon fa-fw text-muted" aria-hidden="true"></i> @p.PartitionNumber</td>
+                    <td>@p.Filegroup</td>
+                    <td>
+                        @if (p.RangeValue == null)
+                        {
+                            if (partitions.Count > i)
+                            {
+                                var np = partitions[i + 1];
+                                // so tempted to make this ugly just to get p = np
+                                <span class="text-muted">@(np.IsRight ? "< " : ">= ") </span> @np.RangeValueString
+                            }
+                            <span class="text-muted"> (null)</span>
+                        }
+                        else
+                        {
+                            <span class="text-muted">@(sample.IsRight ? ">=" : "<") </span> @p.RangeValueString
+                        }
+                    </td>
+                    <td>
+                        @p.DataCompression.AsString(EnumFormat.Description)
+                    </td>
+                    <td>@p.RowCount.ToComma()</td>
+                    <td>@((p.ReservedSpaceKB * 1024).ToSize().ToMutedIfNA())</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

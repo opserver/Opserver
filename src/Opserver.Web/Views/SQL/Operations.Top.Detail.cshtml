@@ -1,0 +1,285 @@
+﻿@using StackExchange.Opserver.Controllers
+@using StackExchange.Opserver.Models
+@using StackExchange.Opserver.Data.SQL.QueryPlans
+@model StackExchange.Opserver.Views.SQL.OperationsTopDetailModel
+@{
+    Layout = null;
+    var s = Model.Instance;
+    var op = Model.Op;
+}
+@helper ReadableTime(long microseconds)
+{
+    @TimeSpan.FromMilliseconds(microseconds / 1000).ToTimeStringMini()
+}
+<h4 class="modal-title">
+    Details for operation on @s.Name@(op != null ? ": " + op.CompiledOnDatabase : null)
+</h4>
+<div class="sql-plan-wrap">
+    @if (op == null)
+    {
+        <div class="alert alert-warning">
+            <h5>Error</h5>
+            <p>Could not find the requested operation.</p>
+        </div>
+    }
+    else
+    {
+        var plan = op.GetShowPlanXML();
+        <div class="row small">
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-bar-chart fa-fw"></i> CPU</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @ReadableTime(op.TotalCPU)
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @op.AvgCPU.ToComma() µs
+                            <label>Average</label>
+                        </div>
+                        <div class="value-block">
+                            @op.PercentCPU.ToString("0.00")
+                            <label>% of Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-search fa-fw"></i> Reads</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @op.TotalReads.ToComma()
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @op.AvgReads.ToComma()
+                            <label>Average</label>
+                        </div>
+                        <div class="value-block">
+                            @op.PercentReads.ToString("0.00")
+                            <label>% of Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-play fa-fw"></i> Executions</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @op.ExecutionCount.ToComma()
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @op.ExecutionsPerMinute.ToString("#,000.00")
+                            <label>Per Minute</label>
+                        </div>
+                        <div class="value-block">
+                            @op.PercentExecutions.ToString("0.00")
+                            <label>% of Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-clock-o fa-fw"></i> Time</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @ReadableTime(op.TotalDuration)
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @ReadableTime(op.AvgDuration)
+                            <label>Average</label>
+                        </div>
+                        <div class="value-block">
+                            @op.PercentDuration.ToString("0.00")
+                            <label>% of Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-list fa-fw"></i> Rows</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @op.TotalReturnedRows.ToComma()
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @op.AvgReturnedRows.ToString("n2") (@op.MinReturnedRows.ToComma() - @op.MaxReturnedRows.ToComma())
+                            <label>Average</label>
+                        </div>
+                        <div class="value-block">
+                            @op.LastReturnedRows.ToString()
+                            <label>Last</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-info-circle fa-fw"></i> Info</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @op.PlanCreationTime.ToRelativeTimeSpan()
+                            <label>Created</label>
+                        </div>
+                        <div class="value-block">
+                            @op.LastExecutionTime.ToRelativeTimeSpan()
+                            <label>Last Execution</label>
+                        </div>
+                        <div class="value-block">
+                            <a href="@Url.Action(nameof(SQLController.TopPlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">Download</a>
+                            <label>Query Plan</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row small">
+            <div class="value-block col-md-12">
+                0x@(op.ReadablePlanHandle)
+                <label>Plan Handle (<a class="text-danger js-remove-plan js-confirm" href="@Url.Action(nameof(SQLController.RemovePlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">purge plan</a>)</label>
+            </div>
+        </div>
+
+        <div class="sql-query-section">
+            @*<ul class="nav nav-tabs nav-tabs-right">
+                    <li class="active"><a href="#sql-query" data-toggle="tab">query text</a></li>
+                    <li><a href="#sql-query-details" data-toggle="tab">query details</a></li>
+                    <li><a href="#sql-query-plan" data-toggle="tab">query plan</a></li>
+                </ul>*@
+            <div>
+                <div id="sql-query" class="tab-pane fade active in" style="overflow-x: auto;">
+                    <div>
+                        @{
+                            var truncated = plan.Statements.Any(st => st.StatementText != null && st.StatementText.Length > 3998);
+                            var lastStatement = plan.Statements.LastOrDefault();
+                            var textPos = 0;
+                        }
+                        @foreach (var statement in plan.Statements)
+                        {
+                            <pre><code lang="sql @(textPos == op.StatementStartOffset && plan.Statements.Count > 1 ? " selected-statement" : "")">@statement.ParameterDeclareStatement
+@if (!truncated){@statement.StatementTextWithoutInitialParams}
+@if(truncated && statement == lastStatement){@op.FullText}</code></pre>
+                            textPos += statement.StatementText?.Length * 2 ?? 0;
+                        }
+                    </div>
+                </div>
+                @*<div id="sql-query-details" class="tab-pane fade">
+                        <div>
+                            @foreach (var statement in plan.Statements)
+                            {
+                                var ss = statement as StmtSimpleType;
+                                if (statement.IsMinor)
+                                {
+                                    continue;
+                                }
+                                var excerpt = statement.StatementTextWithoutInitialParamsTrimmed;
+                                <div class="sql-statement">
+                                    <div class="sql-query-header" title="Type: @statement.StatementType">
+                                        Statement
+                                        @if (statement.StatementSubTreeCostSpecified || statement.StatementOptmLevel.HasValue())
+                                        {
+                                            <span class="text-muted">
+                                                @(statement.StatementSubTreeCostSpecified ? "cost: " + statement.StatementSubTreeCost : "")
+                                                @(statement.StatementSubTreeCostSpecified && statement.StatementOptmLevel.HasValue() ? " - " : "")
+                                                @(statement.StatementOptmLevel.HasValue() ? "optimization: " + statement.StatementOptmLevel : "")
+                                            </span>
+                                        }
+                                    </div>
+                                    <div class="sql-query-excerpt">
+                                        <pre><code class="sql">@excerpt</code></pre>
+                                    </div>
+                                    @if (excerpt.LineCount() > 3)
+                                    {
+                                        <div class="hide-gradient">
+                                            <a href="#" class="show-toggle">(show more)</a>
+                                        </div>
+                                    }
+                                    <div class="sql-query-attributes">
+                                        @if (statement.QueryPlanHash.HasValue() || statement.QueryHash.HasValue())
+                                        {
+                                            <div>
+                                                <div class="key">Hashes</div>
+                                                <div class="value">
+                                                    @if (statement.QueryPlanHash.HasValue())
+                                                    {
+                                                        @statement.QueryPlanHash
+                                                        <span class="text-muted">(plan)</span>
+                                                    }
+                                                    @if (statement.QueryHash.HasValue())
+                                                    {
+                                                        @statement.QueryHash
+                                                        <span class="text-muted">(query)</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                        @if (ss?.QueryPlan != null)
+                                        {
+                                            if (ss.QueryPlan.NonParallelPlanReason.HasValue())
+                                            {
+                                                <div>
+                                                    <div class="key">Non-Parallel Because:</div>
+                                                    <div class="value">@ss.QueryPlan.NonParallelPlanReason</div>
+                                                </div>
+                                            }
+                                            if (ss.QueryPlan.DegreeOfParallelismSpecified)
+                                            {
+                                                <div>
+                                                    <div class="key">Parallelism:</div>
+                                                    <div class="value">@ss.QueryPlan.DegreeOfParallelism</div>
+                                                </div>
+                                            }
+                                        }
+                                        @if (statement.StatementEstRowsSpecified)
+                                        {
+                                            <div>
+                                                <div class="key">Estimated Rows</div>
+                                                <div class="value">@statement.StatementEstRows</div>
+                                            </div>
+                                        }
+                                    </div>
+                                    @if (ss?.QueryPlan?.MissingIndexes != null)
+                                    {
+                                        <div class="sql-query-header">@ss.QueryPlan.MissingIndexes.Length.Pluralize("Missing Index", "Missing Indexes") <span class="text-muted">(according to SQL Server, don't blindly apply these)</span></div>
+                                        foreach (var mi in ss.QueryPlan.MissingIndexes)
+                                        {
+                                            <div class="index-details">
+                                                <span class="text-muted">(Impact: @mi.Impact)</span>
+                                                @foreach (var index in mi.MissingIndex)
+                                                {
+                                                    var cols = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.EQUALITY || i.Usage == ColumnGroupTypeUsage.INEQUALITY);
+                                                    var include = index.ColumnGroup.Where(i => i.Usage == ColumnGroupTypeUsage.INCLUDE);
+                                                    <span>
+                                                        @($"{index.Database}.{index.Schema}.{index.Table}") (<span class="columns">@string.Join(", ", cols.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        @if (include.Any())
+                                                        {
+                                                            @: Include (<span class="columns">@string.Join(", ", include.SelectMany(c => c.Column).Select(c => c.Name))</span>)
+                                                        }
+                                                    </span>
+                                                }
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            }
+                        </div>
+                    </div>*@
+                <div id="sql-query-plan" class="well well-sm" style="overflow-x: auto;">
+                    <div class="sql-query-plan">
+                    </div>
+                    <script>
+                        QP.showPlan($("#sql-query-plan div").get(0), @op.QueryPlan.ToJson(), { jsTooltips: false });
+                    </script>
+                </div>
+            </div>
+        </div>
+                            }
+</div>

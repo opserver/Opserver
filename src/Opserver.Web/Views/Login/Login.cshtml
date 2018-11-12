@@ -1,0 +1,49 @@
+﻿@model StackExchange.Opserver.Views.Login.LoginModel
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>@SiteSettings.SiteNameLong</title>
+        <link href="~/Content/themes/light/styles.min.css" asp-append-version="true" rel="stylesheet" type="text/css" />
+        <link href="~/Content/img/apple-touch-icon.png" asp-append-version="true" rel="apple-touch-icon" />
+    </head>
+    <body>
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="~/hub"></a>
+                </div>
+            </div>
+        </nav>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-4 col-sm-offset-4 col-xs-8 col-xs-offset-2" style="margin-top: 50px;">
+                    <h4 class="page-header">@SiteSettings.SiteNameLong Login</h4>
+                    <form action="~/login" method="POST">
+                        <div class="form-group form-group-sm">
+                            <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
+                            <input type="text" class="form-control" name="user" placeholder="Username" autofocus="autofocus" /> <br />
+                            <input type="password" class="form-control" name="pass" placeholder="Password" /> <br />
+                            <input type="submit" value="Log in" class="btn btn-primary btn-sm pull-right" />
+                        </div>
+                    </form>
+                    @if (Model.ErrorMessage.HasValue())
+                    {
+                        <div class="error">
+                            Error: @Model.ErrorMessage
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <footer class="page-footer">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <p>This site is for monitoring status of the @Icon.StackOverflow Stack Overflow network.</p>
+                </div>
+            </div>
+        </footer>
+    </body>
+</html>

@@ -1,0 +1,136 @@
+﻿@using StackExchange.Opserver
+@using StackExchange.Opserver.Data
+@using StackExchange.Opserver.Helpers
+@helper PollNow(PollNode n, Cache c = null)
+{
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(c?.UniqueId.ToString())" title="Updated @(n.LastPoll?.ToZuluTime())">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+}
+@helper PollNow(PollNode n, params Cache[] c)
+{
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@n.NodeType" data-uk="@n.UniqueKey" data-guid="@(Json.Encode(c.Select(i => i.UniqueId)))" title="Updated @(n.LastPoll?.ToZuluTime())">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+}
+@helper PollNow(IEnumerable<PollNode> nodes)
+{ 
+    if (nodes != null)
+    {
+        <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@(nodes.FirstOrDefault()?.NodeType)" data-uk="@Json.Encode(nodes.Where(i => i != null).Select(i => i.UniqueKey))">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+    }
+}
+@helper PollNow(params LightweightCache[] caches)
+{
+    if (caches != null)
+    {
+        <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@Json.Encode(caches.Where(i => i != null).Select(i => i.Key))">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+    }
+}
+@helper PollNow(LightweightCache cache)
+{
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@cache.Key">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+}
+@helper PollNow(string nodeType)
+{
+    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@nodeType" data-uk="all">@Icon.Refresh <span class="js-text">Poll Now</span></a>
+}
+@helper HealthDescription(IEnumerable<IMonitorStatus> ims, bool unknownIsHealthy = false)
+{
+    if (ims == null)
+    {
+        return;
+    }
+    var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
+    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
+    var bad = ims.Except(warning).Except(good).ToList();
+
+    if (bad.Any())
+    {
+        @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma()
+    }
+    if (warning.Any())
+    {
+        @:@MonitorStatus.Warning.IconSpan() @warning.Count.ToComma()
+    }
+    if (good.Any())
+    {
+        @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
+    }
+}
+@helper CacheEmpty(Cache cache, string message)
+{
+    if (!cache.LastPollSuccessful)
+    {
+        <div class="alert alert-info">
+            <h5>@message</h5>
+            @if (cache.ErrorMessage.HasValue())
+            {
+                <p class="error-stack">@cache.ErrorMessage</p>
+            }
+        </div>
+    }
+}
+@helper PollInfo(PollNode node, string name)
+{
+    if (!node.HasPolled || node.LastFetch?.LastSuccess == null)
+    {
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">
+            @if (!node.HasPolled)
+            {
+                <h5><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No data for @name yet</h5>
+                <p class="text-muted small">First poll is underway - you'll see data appear in a few moments.</p>
+                <div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div>
+            }
+            else if (node.LastFetch?.LastSuccess == null)
+            {
+                <h5><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i> Data unavailable for @name</h5>
+                <p class="text-muted small">Last Attempt: @(node.LastPoll?.ToRelativeTimeSpan())</p>
+                <div class="alert alert-warning">
+                    @if (node.LastFetch?.ErrorMessage.HasValue() ?? false)
+                    {
+                        <p class="error-stack">@node.LastFetch.ErrorMessage</p>
+                    }
+                </div>
+            }
+            </div>
+        </div>
+    }
+}
+@helper PollInfo(IEnumerable<PollNode> nodes, string name)
+{
+    if (nodes.All(n => !n.HasPolled))
+    {
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">
+                <h5><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No data for @name yet</h5>
+                <p class="text-muted small">First poll is underway - you'll see data appear in a few moments.</p>
+                <div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div>
+            </div>
+        </div>
+    }
+}
+@helper PollInfo(Cache cache, string name)
+{
+    if (!cache.LastPoll.HasValue || !cache.LastPollSuccessful)
+    {
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">
+                @if (!cache.LastPoll.HasValue)
+                {
+                    <h5><i class="fa fa-exclamation-triangle" aria-hidden="true"></i> No data for @name yet</h5>
+                    <p class="text-muted small">First poll is underway - you'll see data appear in a few moments.</p>
+                    <div class="sk-wave"><div></div><div></div><div></div><div></div><div></div></div>
+                }
+                else if (!cache.LastPollSuccessful)
+                {
+                    <h5><i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i> Data unavailable for @name</h5>
+                    <p class="text-muted small">Last Attempt: @(cache.LastPoll?.ToRelativeTimeSpan())</p>
+                    <div class="alert alert-warning">
+                        @if (cache.ErrorMessage.HasValue())
+                        {
+                            <p class="error-stack">@cache.ErrorMessage</p>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+    }
+}

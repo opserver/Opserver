@@ -1,0 +1,42 @@
+﻿@model StackExchange.Opserver.Data.SQL.SQLInstance
+@{
+    Layout = null;
+    var types = Model.MemoryClerkSummary;
+    var data = types.SafeData(true);
+}
+<h4 class="modal-title" title="Updated @(types.LastPoll?.ToRelativeTime())">
+    Memory Usage Details
+</h4>
+@if (data.Any())
+{
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+        <thead>
+            <tr>
+                <th>Description</th>
+                <th>Clerk Type</th>
+                <th>Memory Used</th>
+                <th>% Used</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var t in data)
+            {
+                <tr>
+                    <td>@t.Name</td>
+                    <td class="text-muted">@t.ClerkType</td>
+                    <td title="@t.UsedBytes.Pluralize("byte")">@t.UsedBytes.ToSize()</td>
+                    <td>
+                        <div class="progress-embed" style="min-width: 100px;">
+                            <div class="progress-bar" style="width: @t.UsedPercent.ToString("n2", CultureInfo.InvariantCulture)%"></div>
+                            <span>@(t.UsedPercent.ToString("#0.###"))%</span>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No memory clerk information available</div>
+}

@@ -1,0 +1,20 @@
+﻿@model List<JiraAction>
+@{
+    Layout = null;
+}
+@if (Model != null && Model.Count > 0)
+{
+    <p class="error-time" style="margin:5px 0 5px 0">
+        Jira Actions
+        @foreach (var action in Model)
+        {
+            <span class="info-jira-action-link">
+                ( <a class="info-link" data-actionid="@action.Id" href="#">@action.Caption</a>  )
+            </span>
+        }
+    </p>
+
+    <p class="error-time" id="jira-links-container" style="display:none;margin:5px 0 5px 0">
+        Browse in Jira
+    </p>
+}

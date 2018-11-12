@@ -1,0 +1,161 @@
+﻿@using StackExchange.Opserver.Data.Redis
+@model RedisInstance
+@{
+    var i = Model;
+    var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host.HostName);
+    var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
+}
+<h4 class="modal-title">
+    Actions for @i.HostAndPort <span class="text-muted">(@i.Name)</span>
+</h4>
+@helper RenderTolopogy(RedisInstance i, RedisInstance target = null)
+{
+    if (i == null)
+    {
+        return;
+    }
+    <li>
+        @if (i.HostAndPort == Model.HostAndPort)
+        {
+            <strong>@i.IconSpan() @i.HostAndPort</strong>
+        }
+        else if (target != null && i.HostAndPort == target.HostAndPort)
+        {
+            <span class="text-primary">@i.IconSpan() @i.HostAndPort</span>
+        }
+        else
+        {
+            @:@i.IconSpan() @i.HostAndPort
+        }
+        <span class="text-muted">(@i.Name)</span>
+        @if (target != null && i.HostAndPort == target.HostAndPort)
+        {
+            <ul class="proposed">@RenderTolopogy(Model)</ul>
+        }
+        @if (i.SlaveConnections?.Any() ?? false)
+        {
+            <ul>
+                @foreach (var sc in i.SlaveConnections)
+                {
+                    var slave = sc.GetServer();
+                    if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
+                    @RenderTolopogy(sc.GetServer(), target)
+                }
+            </ul>
+        }
+    </li>
+}
+<div class="js-redis-actions" data-node="@i.HostAndPort" data-name="@i.Name">
+    <div class="row small">
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">Topology - @i.RoleDescription with @i.SlaveCount.Pluralize("slave")</div>
+                <div class="panel-body">
+                    <ul class="ul-tree">
+                        @RenderTolopogy(i.TopMaster)
+                    </ul>
+                    <h6 class="page-header">Actions</h6>
+                    <div>
+                        @if (i.IsSlave)
+                        {
+                            <div class="form-group form-group-sm">
+                                <label class="control-label label-inline">Promote to Master <span class="text-muted">(this will deslave the instance)</span></label>
+                                <button class="btn btn-success btn-xs pull-right js-instance-action" data-action="make-master-promote" data-confirm="Are you sure you want to promote @i.HostAndPort and set it to the tiebreaker?">Promote</button>
+                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="Are you sure you want to deslave @i.HostAndPort and make it a standalone master?">Deslave</button>
+                            </div>
+                        }
+                        @if (i.IsMaster)
+                        {
+                            var tiebreaker = i.Tiebreaker.Data ?? "not set";
+                            <div class="form-group form-group-sm">
+                                <label class="control-label">StackExchange.Redis Tiebreakers</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" value="@tiebreaker" disabled="disabled"/>
+                                    <span class="input-group-btn">
+                                        @if (tiebreaker.Contains(i.Host.HostName) && tiebreaker.Contains(i.Port.ToString()))
+                                        {
+                                            <button class="btn btn-sm btn-warning js-instance-action" data-action="clear-tiebreaker">Clear</button>
+                                        }
+                                        else if (i.IsMaster)
+                                        {
+                                            <button class="btn btn-sm btn-primary js-instance-action" data-action="set-tiebreaker">Set</button>
+                                        }
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                        @if (slaveOptions.Any())
+                        {
+                            var optimalSlave = slaveOptions.Where(s => s.Key == i.Name)
+                                                           .SelectMany(s => s)
+                                                           .OrderByDescending(s => s.SlaveCount == 0)
+                                                           .ThenByDescending(s => s.IsSlave)
+                                                           .FirstOrDefault();
+                            <div class="form-group form-group-sm">
+                                <label class="control-label">Set Replication Topology</label>
+                                <div class="list-group-sm">
+                                    @foreach (var so in allSlaveOptions)
+                                    {
+                                        <a href="#" class="list-group-item js-redis-new-master" data-action="slave-to" data-new-master="@so.HostAndPort">
+                                            <ul class="ul-tree">
+                                                @RenderTolopogy(so.TopMaster, so)
+                                            </ul>
+                                        </a>
+                                    }
+                                </div>
+                                @*<div class="input-group">
+                                    <select name="newMaster" class="form-control js-redis-role-new-master">
+                                        <option value="" disabled selected hidden>Choose a master to slave to...</option>
+                                        @foreach (var g in slaveOptions)
+                                        {
+                                            <optgroup label="@g.Key">
+                                                @foreach (var s in g)
+                                                {
+                                                    <option value="@s.HostAndPort" selected="@(s == optimalSlave ? "selected" : null )">@s.HostAndPort</option>
+                                                }
+                                            </optgroup>
+                                        }
+                                    </select>
+                                    <span class="input-group-btn">
+                                        <button class="btn btn-sm btn-primary js-redis-role-slave" data-action="slave-to" disabled="@(optimalSlave != null ? null : "disabled")">Slave</button>
+                                    </span>
+                                </div>*@
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            @if (i.IsMaster)
+            {
+                <div class="panel panel-default">
+                    <div class="panel-heading">Keys</div>
+                    <div class="panel-body">
+                        <div class="form-group form-group-sm">
+                            <label class="control-label">Database & Key</label>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <select name="database" class="form-control js-redis-database">
+                                        @foreach (var db in i.Info.Data?.Keyspace.KeyData.Keys ?? Enumerable.Empty<int>())
+                                        {
+                                            <option value="@db.ToString()">@db.ToString()</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="key" placeholder="Key to purge..." />
+                                        <span class="input-group-btn">
+                                            <button class="btn btn-sm btn-danger js-redis-key-purge" data-action="key-purge">Purge</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
