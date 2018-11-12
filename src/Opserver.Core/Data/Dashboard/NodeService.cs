@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace StackExchange.Opserver.Data.Dashboard
@@ -42,8 +41,8 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         public ServiceActionResult(bool success, string message)
         {
-            this.Success = success;
-            this.Message = message;
+            Success = success;
+            Message = message;
         }
 
         public bool Success { get; set; }

@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data
                 var property = base.CreateProperty(member, memberSerialization);
                 if (typeof(ISQLVersioned).IsAssignableFrom(property.DeclaringType) && property.PropertyName == nameof(ISQLVersioned.MinVersion))
                 {
-                    property.ShouldSerialize = i => false;
+                    property.ShouldSerialize = _ => false;
                 }
                 return property;
             }

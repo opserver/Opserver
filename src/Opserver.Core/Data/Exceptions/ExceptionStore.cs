@@ -104,7 +104,7 @@ Select ApplicationName as Name,
                     });
                     return result;
                 },
-                afterPoll: cache => UpdateApplicationGroups()));
+                afterPoll: _ => UpdateApplicationGroups()));
 
         internal List<ApplicationGroup> UpdateApplicationGroups()
         {
@@ -378,7 +378,7 @@ Update Exceptions
    And GUID In @ids", new { ids });
         }
 
-        public async Task<Error> GetErrorAsync(string app, Guid guid)
+        public async Task<Error> GetErrorAsync(string _, Guid guid)
         {
             try
             {

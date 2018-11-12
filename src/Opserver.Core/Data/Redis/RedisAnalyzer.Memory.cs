@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database.ToString()))
             {
-                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (old, ctx) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
+                return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (_, __) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
             }
         }
 

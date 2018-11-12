@@ -51,7 +51,7 @@ namespace StackExchange.Opserver.Models.Security
         {
             GroupNames.Add(groupName);
             return Current.LocalCache.GetSet<List<string>>("ADMembers-" + groupName,
-                (old, ctx) =>
+                (old, _) =>
                 {
                     using (MiniProfiler.Current.Step("Getting members for " + groupName))
                     {

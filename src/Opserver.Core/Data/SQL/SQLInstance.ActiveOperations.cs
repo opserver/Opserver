@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Data.SQL
         {
             public TimeSpan Duration => CollectionTime - StartTime;
             public TimeSpan? TotalTime => PercentComplete == null
-                ? default(TimeSpan)
+                ? default
                 : TimeSpan.FromTicks((long)(Duration.Ticks * 100 / PercentComplete));
             public TimeSpan? TimeLeft => TotalTime - Duration;
 

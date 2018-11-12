@@ -101,7 +101,7 @@ namespace StackExchange.Opserver.Monitoring
 
                 var path = $@"\\{machineName}\{wmiNamespace}";
                 var scope = _scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
-                _searcher = _searcherCache.GetOrAdd(path + q, x => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
+                _searcher = _searcherCache.GetOrAdd(path + q, _ => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
             }
 
             public Task<ManagementObjectCollection> Result

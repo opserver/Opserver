@@ -117,7 +117,7 @@ namespace StackExchange.Opserver.Controllers
                     tasks.Add(RedisInstanceOperation.FromString(a).PerformAsync());
                 }
             }
-            await Task.WhenAll(tasks);
+            await Task.WhenAll(tasks).ConfigureAwait(false);
             return Json(new { success = true, result = $"{tasks.Count.Pluralize("operation")} running..." });
         }
 

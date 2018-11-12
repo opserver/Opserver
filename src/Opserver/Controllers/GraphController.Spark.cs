@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Controllers
         {
             return SparkSvgAll(
                 getPoints: n => n.GetCPUUtilization(SparkStart, null, SparkPoints),
-                getMax: (n, p) => 100,
+                getMax: (_, __) => 100,
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
@@ -65,7 +65,7 @@ namespace StackExchange.Opserver.Controllers
         {
             return SparkSvgAll(
                 getPoints: n => n.GetMemoryUtilization(SparkStart, null, SparkPoints),
-                getMax: (n, p) => Convert.ToInt64(n.TotalMemory.GetValueOrDefault()),
+                getMax: (n, _) => Convert.ToInt64(n.TotalMemory.GetValueOrDefault()),
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Controllers
         {
             return SparkSvgAll(
                 getPoints: n => n.GetNetworkUtilization(SparkStart, null, SparkPoints),
-                getMax: (n, points) => Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()),
+                getMax: (_, points) => Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()),
                 getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 

@@ -9,7 +9,7 @@ using StackExchange.Opserver.Data.SQL;
 
 namespace StackExchange.Opserver.Views.Hub
 {
-    public class HubView : IMonitorStatus
+    public sealed class HubView : IMonitorStatus
     {
         private static List<HubView> _registered { get; } = new List<HubView>();
         public static List<HubView> Views => _registered.Where(v => v.IsEnabled).OrderByWorst().ToList();

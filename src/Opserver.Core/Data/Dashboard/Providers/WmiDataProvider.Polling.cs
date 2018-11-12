@@ -224,9 +224,9 @@ SELECT Name,
                     {
                         foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
-                            var teamName = data.Team;
+                            string teamName = data.Team;
 
-                            if (teamNamesToInterfaces.TryGetValue(teamName, out Interface teamInterface))
+                            if (teamNamesToInterfaces.TryGetValue(teamName, out var teamInterface))
                             {
                                 var adapterName = data.Name;
                                 var memberInterface = Interfaces.Find(x => x.Name == adapterName);
@@ -251,7 +251,8 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
-                        if (indexMap.TryGetValue(data.InterfaceIndex, out Interface i))
+                        uint index = data.InterfaceIndex;
+                        if (indexMap.TryGetValue(index, out var i))
                         {
                             i.DHCPEnabled = data.DHCPEnabled;
                             var ips = data.IPAddress as string[];
@@ -265,7 +266,7 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
 
                             for (var j = 0; j < (ips?.Length).GetValueOrDefault(0); j++)
                             {
-                                if (int.TryParse(subnets[j], out int cidr) && IPNet.TryParse(ips[j], cidr, out IPNet net))
+                                if (int.TryParse(subnets[j], out int cidr) && IPNet.TryParse(ips[j], cidr, out var net))
                                 {
                                     i.IPs.Add(net);
                                 }
@@ -493,7 +494,7 @@ SELECT Caption,
                             OutAvgBps = iface.OutBps
                         };
 
-                        var netData = NetHistory.GetOrAdd(iface.Name, k => new List<Interface.InterfaceUtilization>(1024));
+                        var netData = NetHistory.GetOrAdd(iface.Name, _ => new List<Interface.InterfaceUtilization>(1024));
                         UpdateHistoryStorage(netData, util);
 
                         if (PrimaryInterfaces.Contains(iface))
@@ -544,7 +545,7 @@ SELECT Caption,
                             WriteAvgBps = iface.WriteBps
                         };
 
-                        var netData = VolumePerformanceHistory.GetOrAdd(iface.Name, k => new List<Volume.VolumePerformanceUtilization>(1024));
+                        var netData = VolumePerformanceHistory.GetOrAdd(iface.Name, _ => new List<Volume.VolumePerformanceUtilization>(1024));
                         UpdateHistoryStorage(netData, util);
 
                         //if (PrimaryInterfaces.Contains(iface))

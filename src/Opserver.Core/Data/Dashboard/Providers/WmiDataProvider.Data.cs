@@ -199,7 +199,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 string cacheKey = $"{Classname}.{Identifier}";
 
                 // "previous.previousData = null" to cleanup previousData from previousData. Otherwise we get a linked list which never cleans up.
-                node.previousPerfDataCache.AddOrUpdate(cacheKey, s => _previousData = this, (s, previous) =>
+                node.previousPerfDataCache.AddOrUpdate(cacheKey, _ => _previousData = this, (_, previous) =>
                 {
                     previous._previousData = null;
                     _previousData = previous;

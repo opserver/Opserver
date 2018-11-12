@@ -266,7 +266,7 @@ namespace StackExchange.Opserver
 
         private static string ToRelativeTimeFuture(DateTime dt, DateTime utcNow, bool includeTime = true)
         {
-            TimeSpan ts = dt - utcNow;
+            var ts = dt - utcNow;
             double delta = ts.TotalSeconds;
 
             if (delta < 1) return "just now";
@@ -429,7 +429,7 @@ namespace StackExchange.Opserver
         {
             var possiblyStale = cache.Get<GetSetWrapper<T>>(key);
             var localLockName = key;
-            var nullLoadLock = _getSetNullLocks.AddOrUpdate(localLockName, k => new object(), (k, old) => old);
+            var nullLoadLock = _getSetNullLocks.AddOrUpdate(localLockName, _ => new object(), (_, old) => old);
             if (possiblyStale == null)
             {
                 // We can't prevent multiple web server's from running this (well, we can but its probably overkill) but we can

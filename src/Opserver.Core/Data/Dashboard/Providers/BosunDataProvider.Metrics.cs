@@ -84,7 +84,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var result = new IntervalCache(TimeSpan.FromDays(1));
                     async Task addMetric(string metricName, string[] tags)
                     {
-                        var tagDict = tags?.ToDictionary(t => t, t => "*");
+                        var tagDict = tags?.ToDictionary(t => t, _ => "*");
                         var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict).ConfigureAwait(false);
                         if (apiResult == null) return;
                         if (tags?.Any() ?? false)

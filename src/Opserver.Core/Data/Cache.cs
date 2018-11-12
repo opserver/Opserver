@@ -236,7 +236,7 @@ namespace StackExchange.Opserver.Data
             using (MiniProfiler.Current.Step("LightweightCache: " + key))
             {
                 // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
-                return Current.LocalCache.GetSet<LightweightCache<T>>(key, (old, ctx) =>
+                return Current.LocalCache.GetSet<LightweightCache<T>>(key, (_, __) =>
                 {
                     var tc = new LightweightCache<T>() { Key = key };
                     try

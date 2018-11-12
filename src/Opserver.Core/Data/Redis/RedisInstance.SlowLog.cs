@@ -36,11 +36,11 @@ namespace StackExchange.Opserver.Data.Redis
 
         private Cache<string> _tieBreaker;
         public Cache<string> Tiebreaker =>
-            _tieBreaker ?? (_tieBreaker = GetRedisCache(10.Seconds(), () =>
+            _tieBreaker ?? (_tieBreaker = GetRedisCache(10.Seconds(), async () =>
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
                 {
-                    return GetSERedisTiebreakerAsync(Connection);
+                    return await GetSERedisTiebreakerAsync(Connection).ConfigureAwait(false);
                 }
             }));
 

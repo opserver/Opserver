@@ -22,10 +22,10 @@ namespace StackExchange.Opserver.Helpers
         public T Get<T>(string key)
         {
             var o = Cache[key];
-            if (o == null) return default(T);
-            if (o is T)
-                return (T)o;
-            return default(T);
+            if (o == null) return default;
+            if (o is T t)
+                return t;
+            return default;
         }
 
         /// <summary>

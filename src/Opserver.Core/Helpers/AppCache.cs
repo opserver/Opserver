@@ -10,11 +10,11 @@ namespace StackExchange.Opserver.Helpers
 
         public static List<IPAddress> GetHostAddresses(string hostOrIp)
         {
-            return Current.LocalCache.GetSet<List<IPAddress>>("host-ip-cache-" + hostOrIp, (old, ctx) =>
+            return Current.LocalCache.GetSet<List<IPAddress>>("host-ip-cache-" + hostOrIp, (_, __) =>
                 {
                     try
                     {
-                        return IPAddress.TryParse(hostOrIp, out IPAddress ip)
+                        return IPAddress.TryParse(hostOrIp, out var ip)
                                    ? new List<IPAddress> { ip }
                                    : Dns.GetHostAddresses(hostOrIp).ToList();
                     }
@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Helpers
 
         public static string GetHostName(string ip)
         {
-            return Current.LocalCache.GetSet<string>("host-name-cache-" + ip, (old, ctx) =>
+            return Current.LocalCache.GetSet<string>("host-name-cache-" + ip, (_, __) =>
             {
                 try
                 {

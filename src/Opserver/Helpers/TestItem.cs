@@ -3,7 +3,7 @@ using StackExchange.Opserver.Data;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public class TestItem : IMonitorStatus
+    public sealed class TestItem : IMonitorStatus
     {
         public static readonly TestItem Good = new TestItem(MonitorStatus.Good);
         public static readonly TestItem Warning = new TestItem(MonitorStatus.Warning);

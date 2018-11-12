@@ -45,7 +45,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                if (_connection == null || !_connection.IsConnected)
+                if (_connection?.IsConnected != true)
                 {
                     _connection = _connection ?? GetConnection(allowAdmin: true);
                     if (!_connection.IsConnected)
@@ -109,7 +109,7 @@ namespace StackExchange.Opserver.Data.Redis
 
         public string GetServerName(string hostOrIp)
         {
-            if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out IPAddress addr))
+            if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out var addr))
             {
                 var nodes = DashboardModule.GetNodesByIP(addr).ToList();
                 if (nodes.Count == 1) return nodes[0].PrettyName;

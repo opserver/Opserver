@@ -35,8 +35,6 @@ namespace StackExchange.Opserver.Controllers
             var iSettings = SettingsModule as ModuleSettings;
             if (iSettings?.Enabled == false)
                 filterContext.Result = DefaultAction();
-
-            
         }
 
         public ActionResult DefaultAction()
@@ -142,7 +140,7 @@ namespace StackExchange.Opserver.Controllers
             return Json<object>(null);
         }
 
-        protected ActionResult JsonNotFound<T>(T toSerialize = default(T))
+        protected ActionResult JsonNotFound<T>(T toSerialize = default)
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
             return Json(toSerialize);

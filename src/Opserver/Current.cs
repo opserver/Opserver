@@ -36,9 +36,9 @@ namespace StackExchange.Opserver
         public static User User => Context.User as User;
 
         public static bool IsSecureConnection =>
-            Request.IsSecureConnection ||
+            Request.IsSecureConnection
             // This can be "http", "https", or the more fun "https, http, https, https" even.
-            (Request.Headers["X-Forwarded-Proto"]?.StartsWith("https") == true);
+            || (Request.Headers["X-Forwarded-Proto"]?.StartsWith("https") == true);
 
         private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
 

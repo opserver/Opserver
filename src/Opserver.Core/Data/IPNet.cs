@@ -88,7 +88,7 @@ namespace StackExchange.Opserver.Data
                 }
                 throw new IPNetParseException("Error parsing CIDR from IP: '{0}'", parts[1]);
             }
-            if (IPAddress.TryParse(parts[0], out IPAddress ip))
+            if (IPAddress.TryParse(parts[0], out var ip))
             {
                 return new IPNet(ip, null);
             }
@@ -103,7 +103,7 @@ namespace StackExchange.Opserver.Data
 
         public static IPNet Parse(string ip, int cidr)
         {
-            if (IPAddress.TryParse(ip, out IPAddress ipAddr))
+            if (IPAddress.TryParse(ip, out var ipAddr))
             {
                 var bits = GetBitLength(ipAddr.AddressFamily);
                 var subnet = IPAddressFromCIDR(bits, cidr);
@@ -120,9 +120,9 @@ namespace StackExchange.Opserver.Data
 
         public static IPNet Parse(string ip, string subnet)
         {
-            if (IPAddress.TryParse(ip, out IPAddress ipAddr))
+            if (IPAddress.TryParse(ip, out var ipAddr))
             {
-                if (IPAddress.TryParse(subnet, out IPAddress subnetAddr))
+                if (IPAddress.TryParse(subnet, out var subnetAddr))
                 {
                     if (!TinyIPAddress.FromIPAddress(subnetAddr).Value.IsValidSubnet)
                         throw new IPNetParseException("Error parsing subnet mask Address from IP: '" + subnet + "' is not a valid subnet");
@@ -416,7 +416,7 @@ namespace StackExchange.Opserver.Data
             public override bool Equals(object obj)
             {
                 if (obj is null) return false;
-                return obj is TinyIPAddress && Equals((TinyIPAddress)obj);
+                return obj is TinyIPAddress tinyIPAddress && Equals(tinyIPAddress);
             }
 
             public int CompareTo(TinyIPAddress other) => Compare(this, other);

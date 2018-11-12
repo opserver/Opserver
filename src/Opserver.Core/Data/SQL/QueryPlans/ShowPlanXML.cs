@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
         private static readonly Regex emptyLineRegex = new Regex(@"^\s+$[\r\n]*", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly Regex initParamsTrimRegex = new Regex(@"^\s*(begin|end)\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex paramRegex = new Regex(@"^\(( [^\(\)]* ( ( (?<Open>\() [^\(\)]* )+ ( (?<Close-Open>\)) [^\(\)]* )+ )* (?(Open)(?!)) )\)", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex paramSplitRegex = new Regex(@",(?=[@])", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex paramSplitRegex = new Regex(",(?=[@])", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly char[] startTrimChars = new[] { '\n', '\r', ';' };
 
         public string ParameterDeclareStatement
