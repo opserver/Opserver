@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Web;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
@@ -12,6 +10,9 @@ namespace StackExchange.Opserver
 {
     public static partial class Current
     {
+        private static IHttpContextAccessor _httpAccessor;
+        public static void Init(IHttpContextAccessor accessor) => _httpAccessor = accessor;
+
         public static SettingsProvider Settings => SettingsProvider.Current;
 
         public static LocalCache LocalCache => CoreCurrent.LocalCache;
@@ -19,7 +20,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Shortcut to HttpContext.Current.
         /// </summary>
-        public static HttpContext Context => HttpContext.Current;
+        public static HttpContext Context => _httpAccessor.HttpContext;
 
         /// <summary>
         /// Shortcut to HttpContext.Current.Request.
