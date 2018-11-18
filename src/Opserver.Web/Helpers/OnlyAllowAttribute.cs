@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using StackExchange.Opserver.Controllers;
@@ -40,7 +41,8 @@ namespace StackExchange.Opserver.Helpers
                 return; // Authorized via AlsoAllow
             }
 
-            context.Result = ((StatusController)context.Controller).AccessDenied();
+            // TODO: Sanity check
+            context.Result = new RedirectToActionResult(nameof(StatusController.AccessDenied), "Status", null);
         }
     }
 
