@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 using StackExchange.Opserver.Controllers;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Models.Security;
@@ -14,8 +13,8 @@ namespace StackExchange.Opserver.Models
 
         public static string CurrentTab
         {
-            get => HttpContext.Current.Items["TopTabs-Current"] as string;
-            set => HttpContext.Current.Items["TopTabs-Current"] = value;
+            get => Current.Context.Items["TopTabs-Current"] as string;
+            set => Current.Context.Items["TopTabs-Current"] = value;
         }
 
         public static void SetCurrent(Type type)
