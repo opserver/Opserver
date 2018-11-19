@@ -1,4 +1,5 @@
-﻿using StackExchange.Opserver.Models;
+﻿using System.Net;
+using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver
@@ -42,7 +43,7 @@ namespace StackExchange.Opserver
                 if (roles != null) return (Roles)roles;
 
                 var result = Roles.None;
-                if (Context.Connection.IsLocal) result |= Roles.LocalRequest;
+                if (IPAddress.IsLoopback(Context.Connection.RemoteIpAddress)) result |= Roles.LocalRequest;
                 if (Security.IsInternalIP(RequestIP)) result |= Roles.InternalRequest;
                 if (IsValidApiRequest()) result |= Roles.ApiRequest;
 

@@ -32,9 +32,10 @@ namespace StackExchange.Opserver.Controllers
             // TODO: Change how all this works
             TopTabs.SetCurrent(GetType());
 
-            var iSettings = SettingsModule as ModuleSettings;
-            if (iSettings?.Enabled == false)
-                filterContext.Result = DefaultAction();
+            // TODO: Figure out enabled/disabled (maybe we handle it in route registration instead, or a filter?)
+            //var iSettings = SettingsModule as ModuleSettings;
+            //if (iSettings?.Enabled == false)
+            //    filterContext.Result = DefaultAction();
         }
 
         public ActionResult DefaultAction()

@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
             Zones.Data?.FirstOrDefault(z => host.EndsWith(z.Name));
 
         public CloudFlareZone GetZoneFromUrl(string url) =>
-            !Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out Uri uri) ? null : GetZoneFromHost(uri.Host);
+            !Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri) ? null : GetZoneFromHost(uri.Host);
 
         /// <summary>
         /// Get the IP Addresses for a given fully qualified host (star records not supported), even through CNAME chains
