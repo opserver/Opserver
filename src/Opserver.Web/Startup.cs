@@ -33,6 +33,9 @@ namespace StackExchange.Opserver
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                    .AddCookie(options => options.LoginPath = "/login");
+
             services.AddMemoryCache();
             services.AddExceptional(
                 _configuration.GetSection("Exceptional"),
@@ -98,7 +101,8 @@ namespace StackExchange.Opserver
 
         public void Configure(IApplicationBuilder appBuilder, IApplicationLifetime appLifetime, IHttpContextAccessor httpAccessor)
         {
-            appBuilder.UseStaticFiles()
+            appBuilder.UseAuthentication()
+                      .UseStaticFiles()
                       .UseExceptional()
                       .UseMiniProfiler()
                       .UseAuthentication()

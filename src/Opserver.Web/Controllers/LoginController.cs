@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Mvc;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Views.Login;
 using Roles = StackExchange.Opserver.Models.Roles;
@@ -18,15 +22,18 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("login"), HttpPost, AlsoAllow(Roles.Anonymous)]
-        public ActionResult Login(string user, string pass, string url)
+        public async Task<ActionResult> Login(string user, string pass, string url)
         {
             var vd = new LoginModel();
             if (Current.Security.ValidateUser(user, pass))
             {
-                var cookie = FormsAuthentication.GetAuthCookie(user, true);
-                if (Current.IsSecureConnection) cookie.Secure = true;
-                Response.Cookies.Add(cookie);
-
+                var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, user)
+                    };
+                var userIdentity = new ClaimsIdentity(claims, "login");
+                var principal = new ClaimsPrincipal(userIdentity);
+                await HttpContext.SignInAsync(principal).ConfigureAwait(false);
                 return Redirect(url.HasValue() ? url : "~/");
             }
             vd.ErrorMessage = "Login failed";
@@ -35,9 +42,9 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("logout"), AlsoAllow(Roles.Anonymous)]
-        public ActionResult Logout()
+        public async Task<ActionResult> Logout()
         {
-            FormsAuthentication.SignOut();
+            await HttpContext.SignOutAsync().ConfigureAwait(false);
             return RedirectToAction(nameof(Login));
         }
     }
