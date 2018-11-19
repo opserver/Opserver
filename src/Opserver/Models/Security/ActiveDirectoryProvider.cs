@@ -111,7 +111,7 @@ namespace StackExchange.Opserver.Models.Security
                 }
             }
 
-            return default(T);
+            return default;
         }
     }
 }

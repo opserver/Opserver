@@ -191,7 +191,7 @@ namespace StackExchange.Opserver.Controllers
             return Json<object>(null);
         }
 
-        protected JsonResult JsonNotFound<T>(T toSerialize = default(T))
+        protected JsonResult JsonNotFound<T>(T toSerialize = default)
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
             return Json(toSerialize);
