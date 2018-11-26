@@ -34,7 +34,11 @@ namespace StackExchange.Opserver
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie(options => options.LoginPath = "/login");
+                    .AddCookie(options =>
+                    {
+                        options.LoginPath = "/login";
+                        options.LoginPath = "/logout";
+                    });
 
             services.AddMemoryCache();
             services.AddExceptional(
