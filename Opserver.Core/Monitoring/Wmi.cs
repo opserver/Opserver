@@ -116,7 +116,27 @@ namespace StackExchange.Opserver.Monitoring
                     return _data != null ? Task.FromResult(_data) : Task.Run(() =>
                     {
                         try { return _data = _searcher.Get(); }
-                        catch (Exception ex) { throw new Exception($"Failed to query {_wmiNamespace} on {_machineName}", ex); }
+                        catch (Exception ex)
+                        {
+
+                            // Without this WMI queries will continue to fail after a machine reboots.
+                            if (ex is System.Runtime.InteropServices.COMException)
+                            {
+                                foreach (var scopeCacheItem in _scopeCache)
+                                {
+                                    if (scopeCacheItem.Key.StartsWith($@"\\{_machineName}"))
+                                        _scopeCache.TryRemove(scopeCacheItem.Key, out var scopeCacheValue);
+                                }
+                                foreach (var searchCacheItem in _searcherCache)
+                                {
+                                    if (searchCacheItem.Key.StartsWith($@"\\{_machineName}"))
+                                        _searcherCache.TryRemove(searchCacheItem.Key, out var searchCacheValue);
+                                }
+                            }
+
+                            throw new Exception($"Failed to query {_wmiNamespace} on {_machineName}", ex);
+
+                        }
                     });
                 }
             }
