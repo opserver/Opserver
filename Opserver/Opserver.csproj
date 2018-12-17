@@ -501,6 +501,7 @@
     <Content Include="Content\img\query-plan\filter.gif" />
     <Content Include="Content\img\query-plan\gather_streams.gif" />
     <Content Include="Content\img\query-plan\hash_match.gif" />
+    <Content Include="Content\img\query-plan\icons.png" />
     <Content Include="Content\img\query-plan\if.gif" />
     <Content Include="Content\img\query-plan\inserted_scan.gif" />
     <Content Include="Content\img\query-plan\intrinsic.gif" />
