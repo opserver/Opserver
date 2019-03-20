@@ -195,7 +195,7 @@ namespace StackExchange.Opserver
             return result.Value;
         }
 
-        public static MonitorStatus GetWorstStatus(this IEnumerable<MonitorStatus> ims) => ims.OrderByDescending(i => i).FirstOrDefault();
+        public static MonitorStatus GetWorstStatus(this IEnumerable<MonitorStatus> ims) => ims?.OrderByDescending(i => i).FirstOrDefault() ?? MonitorStatus.Unknown;
 
         public static IOrderedEnumerable<T> OrderByWorst<T>(this IEnumerable<T> ims) where T : IMonitorStatus => OrderByWorst(ims, i => i.MonitorStatus);
 
