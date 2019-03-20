@@ -4,6 +4,8 @@
     <AssemblyName>StackExchange.Opserver.Core</AssemblyName>
     <TargetFrameworks>net461;netstandard2.0</TargetFrameworks>
     <CodeAnalysisRuleSet>Opserver.Core.ruleset</CodeAnalysisRuleSet>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
