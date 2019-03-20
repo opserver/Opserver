@@ -188,7 +188,7 @@ namespace StackExchange.Opserver
                 result = Current.LocalCache.Get<MonitorStatus?>(cacheKey);
             if (result == null)
             {
-                result = GetWorstStatus(ims.Select(i => i.MonitorStatus));
+                result = GetWorstStatus(ims.Where(i => i != null).Select(i => i.MonitorStatus));
                 if (cacheKey.HasValue())
                     Current.LocalCache.Set(cacheKey, result, duration);
             }
