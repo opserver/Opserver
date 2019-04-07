@@ -82,7 +82,7 @@ namespace StackExchange.Opserver
 
         private static void SetupMiniProfiler()
         {
-            var options = MiniProfiler.Configure(new MiniProfilerOptions()
+            MiniProfiler.Configure(new MiniProfilerOptions()
             {
                 RouteBasePath = "~/profiler/",
                 PopupRenderPosition = RenderPosition.Left,

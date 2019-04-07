@@ -1,17 +1,16 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>StackExchange.Opserver</RootNamespace>
     <AssemblyName>StackExchange.Opserver</AssemblyName>
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.1.1" />
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.138" />
-    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.0.0-rc2.29" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.2.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.169" />
+    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.0.78" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.5.0" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
@@ -23,13 +22,6 @@
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <!--<Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.DirectoryServices.AccountManagement" />
-    <Reference Include="System.Web.ApplicationServices" />
-    <Reference Include="System.Web.DynamicData" />
-    <Reference Include="System.Web.Entity" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Web.Routing" />-->
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config\*.config.example" />
