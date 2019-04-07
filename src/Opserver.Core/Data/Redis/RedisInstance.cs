@@ -39,7 +39,6 @@ namespace StackExchange.Opserver.Data.Redis
         public override string NodeType => "Redis";
         public override int MinSecondsBetweenPolls => 5;
 
-        private readonly object _connectionLock = new object();
         private ConnectionMultiplexer _connection;
         public ConnectionMultiplexer Connection
         {

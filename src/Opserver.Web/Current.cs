@@ -39,18 +39,10 @@ namespace StackExchange.Opserver
 
         public static bool IsSecureConnection => Request.IsHttps;
 
-        private static readonly Regex _lastIpAddress = new Regex(@"\b([0-9]{1,3}\.){3}[0-9]{1,3}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-
         /// <summary>
         /// Gets the IP this request came from, gets the real IP when behind a proxy
         /// </summary>
         public static string RequestIP => Request.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-
-        private static bool IsPrivateIP(string s)
-        {
-            //TODO: convert to IPNet check and include 172.16.0.0/12
-            return s.StartsWith("192.168.") || s.StartsWith("10.") || s.StartsWith("127.0.0.");
-        }
 
         /// <summary>
         /// Manually write an exception to our standard exception log.

@@ -118,7 +118,6 @@ namespace StackExchange.Opserver.Monitoring
                         try { return _data = _searcher.Get(); }
                         catch (Exception ex)
                         {
-
                             // Without this WMI queries will continue to fail after a machine reboots.
                             if (ex is System.Runtime.InteropServices.COMException)
                             {
@@ -135,7 +134,6 @@ namespace StackExchange.Opserver.Monitoring
                             }
 
                             throw new Exception($"Failed to query {_wmiNamespace} on {_machineName}", ex);
-
                         }
                     });
                 }

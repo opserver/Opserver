@@ -509,13 +509,8 @@ namespace StackExchange.Opserver
     {
         public static void SetPageTitle(this WebViewPage page, string title)
         {
-            title = title.HtmlEncode();
-            page.ViewData[ViewDataKeys.PageTitle] = GetPageTitle(page, title);
-        }
-
-        public static string GetPageTitle(this WebViewPage page, string title)
-        {
-            return title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
+            page.ViewContext.ViewData[ViewDataKeys.PageTitle] =
+                title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title.HtmlEncode(), " - ", SiteSettings.SiteName);
         }
 
         public static void SetTopSearch(this WebViewPage page,
