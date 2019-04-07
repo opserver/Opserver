@@ -151,18 +151,35 @@ namespace StackExchange.Opserver.Data.PagerDuty
         {
             get
             {
+                var sb = StringBuilderCache.Get();
+                if (CountryCode.HasValue)
+                {
+                    sb.Append("+").Append(CountryCode).Append(" ");
+                }
                 switch (Type)
                 {
                     case "sms_contact_method":
                     case "phone_contact_method":
-                        // I'm sure no one outside the US uses this...
-                        // we will have to fix this soon
-                        // NOTE: C# port of Google's Phone number formatting Library can be found here:
-                        // https://www.nuget.org/packages/libphonenumber-csharp/
-                        return Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "$1-$2-$3");
+                        switch (CountryCode)
+                        {
+                            case 1: // US
+                                sb.Append(Regex.Replace(Address, @"(\d{3})(\d{3})(\d{4})", "($1) $2-$3"));
+                                break;
+                            case 61: // AU
+                                sb.Append(Regex.Replace(Address, @"(\d{4})(\d{4})", "$1 $2"));
+                                break;
+                            // Do we want to increase our deployment payload by 50% to handle phone number formatting here?
+                            // The options are crazy bad, so just doing a little for the moment...
+                            default:
+                                sb.Append(Address);
+                                break;
+                        }
+                        break;
                     default:
-                        return Address;
+                        sb.Append(Address);
+                        break;
                 }
+                return sb.ToStringRecycle();
             }
         }
 

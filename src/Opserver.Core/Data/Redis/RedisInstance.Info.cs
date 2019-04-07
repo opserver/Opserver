@@ -108,7 +108,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                return Info.LastPollSuccessful ? (Replication?.SlaveConnections.Select(s => s.GetServer()).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
+                return Info.LastPollSuccessful ? (Replication?.SlaveConnections.Select(s => s.GetServer()).Where(s => s != null).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
                 // If we can't poll this server, ONLY trust the other nodes we can poll
                 //return AllInstances.Where(i => i.Master == this).ToList();
             }

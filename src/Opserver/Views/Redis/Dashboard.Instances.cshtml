@@ -36,7 +36,7 @@
 }
 @helper SectionHeader(List<RedisInstance> instances, string label, bool defaultHeaders = true, bool countChain = false)
     {
-        var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllSlavesInChain())).ToList() : instances;
+        var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllSlavesInChain())).Where(i => i != null).ToList() : instances;
         <tbody>
             <tr class="category-row page-header">
                 <th colspan="@(Model.AllVersionsMatch ? 8 : 9)">
