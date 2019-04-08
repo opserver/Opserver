@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data
 {
@@ -77,38 +78,20 @@ namespace StackExchange.Opserver.Data
             _shuttingDown = true;
         }
 
-        public class GlobalPollingStatus : IMonitorStatus
+        public static GlobalPollingStatus GetPollingStatus() => new GlobalPollingStatus
         {
-            public MonitorStatus MonitorStatus { get; internal set; }
-            public string MonitorStatusReason { get; internal set; }
-            public DateTime StartTime { get; internal set; }
-            public DateTime? LastPollAll { get; internal set; }
-            public bool IsAlive { get; internal set; }
-            public long TotalPollIntervals { get; internal set; }
-            public long ActivePolls { get; internal set; }
-            public int NodeCount { get; internal set; }
-            public int TotalPollers { get; internal set; }
-            public List<Tuple<Type, int>> NodeBreakdown { get; internal set; }
-            public List<PollNode> Nodes { get; internal set; }
-        }
-
-        public static GlobalPollingStatus GetPollingStatus()
-        {
-            return new GlobalPollingStatus
-                {
-                    MonitorStatus = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? MonitorStatus.Good : MonitorStatus.Unknown) : MonitorStatus.Critical,
-                    MonitorStatusReason = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? null : "No Poll Nodes") : "Global Polling Thread Dead",
-                    StartTime = _startTime,
-                    LastPollAll = _lastPollAll,
-                    IsAlive = _globalPollingThread.IsAlive,
-                    TotalPollIntervals = _totalPollIntervals,
-                    ActivePolls = _activePolls,
-                    NodeCount = AllPollNodes.Count,
-                    TotalPollers = AllPollNodes.Sum(n => n.DataPollers.Count()),
-                    NodeBreakdown = AllPollNodes.GroupBy(n => n.GetType()).Select(g => Tuple.Create(g.Key, g.Count())).ToList(),
-                    Nodes = AllPollNodes.ToList()
-                };
-        }
+            MonitorStatus = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? MonitorStatus.Good : MonitorStatus.Unknown) : MonitorStatus.Critical,
+            MonitorStatusReason = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? null : "No Poll Nodes") : "Global Polling Thread Dead",
+            StartTime = _startTime,
+            LastPollAll = _lastPollAll,
+            IsAlive = _globalPollingThread.IsAlive,
+            TotalPollIntervals = _totalPollIntervals,
+            ActivePolls = _activePolls,
+            NodeCount = AllPollNodes.Count,
+            TotalPollers = AllPollNodes.Sum(n => n.DataPollers.Count()),
+            NodeBreakdown = AllPollNodes.GroupBy(n => n.GetType()).Select(g => Tuple.Create(g.Key, g.Count())).ToList(),
+            Nodes = AllPollNodes.ToList()
+        };
 
         private static void MonitorPollingLoop()
         {
@@ -229,36 +212,5 @@ namespace StackExchange.Opserver.Data
         }
 
         public static ThreadStats GetThreadStats() => new ThreadStats();
-
-        public class ThreadStats
-        {
-            private readonly int _minWorkerThreads;
-            public int MinWorkerThreads => _minWorkerThreads;
-
-            private readonly int _minIOThreads;
-            public int MinIOThreads => _minIOThreads;
-
-            private readonly int _availableWorkerThreads;
-            public int AvailableWorkerThreads => _availableWorkerThreads;
-
-            private readonly int _availableIOThreads;
-            public int AvailableIOThreads => _availableIOThreads;
-
-            private readonly int _maxIOThreads;
-            public int MaxIOThreads => _maxIOThreads;
-
-            private readonly int _maxWorkerThreads;
-            public int MaxWorkerThreads => _maxWorkerThreads;
-
-            public int BusyIOThreads => _maxIOThreads - _availableIOThreads;
-            public int BusyWorkerThreads => _maxWorkerThreads - _availableWorkerThreads;
-
-            public ThreadStats()
-            {
-                ThreadPool.GetMinThreads(out _minWorkerThreads, out _minIOThreads);
-                ThreadPool.GetAvailableThreads(out _availableWorkerThreads, out _availableIOThreads);
-                ThreadPool.GetMaxThreads(out _maxWorkerThreads, out _maxIOThreads);
-            }
-        }
     }
 }
