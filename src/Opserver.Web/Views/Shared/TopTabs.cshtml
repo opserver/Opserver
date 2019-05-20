@@ -3,33 +3,36 @@
 @{
     Layout = null;
 }
-@helper RenderTab(TopTab tab)
+@functions
 {
-    if (tab.IsEnabled)
+    void RenderTab(TopTab tab)
     {
-        // Optimism!
-        using (MiniProfiler.Current.Step("Render Tab: " + tab.Name))
+        if (tab.IsEnabled)
         {
-            var status = tab.GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
-            var badgeCount = tab.GetBadgeCount?.Invoke();
-                    <li class="@(tab.IsCurrentTab ? "active" : null)">
-                        <a href="@Url.Action(tab.Action, tab.Controller)" title="@(tab.GetTooltip?.Invoke())">
-                            <span class="@(status.TextClass())">@tab.Name</span>
-                            @if (badgeCount > 0)
-                            {
-                                <span class="badge" data-name="@tab.Name">@badgeCount.ToComma()</span>
-                            }
-                        </a>
-                    </li>
+            // Optimism!
+            using (MiniProfiler.Current.Step("Render Tab: " + tab.Name))
+            {
+                var status = tab.GetMonitorStatus?.Invoke() ?? MonitorStatus.Good;
+                var badgeCount = tab.GetBadgeCount?.Invoke();
+                        <li class="@(tab.IsCurrentTab ? "active" : null)">
+                            <a href="@Url.Action(tab.Action, tab.Controller)" title="@(tab.GetTooltip?.Invoke())">
+                                <span class="@(status.TextClass())">@tab.Name</span>
+                                @if (badgeCount > 0)
+                                {
+                                    <span class="badge" data-name="@tab.Name">@badgeCount.ToComma()</span>
+                                }
+                            </a>
+                        </li>
+            }
         }
     }
 }
 @using (MiniProfiler.Current.Step("TopTabs"))
 {
-            <ul class="nav navbar-nav navbar-right js-top-tabs">
-                @foreach (var tab in TopTabs.Tabs)
-                {
-                    @RenderTab(tab)
-                }
-            </ul>
+    <ul class="nav navbar-nav navbar-right js-top-tabs">
+        @foreach (var tab in TopTabs.Tabs)
+        {
+            RenderTab(tab);
+        }
+    </ul>
 }

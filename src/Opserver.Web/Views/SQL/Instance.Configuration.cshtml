@@ -5,18 +5,28 @@
     var configs = Model.Configuration;
     var data = configs.Data;
 }
-@helper DisplayValue(int val)
+@functions
 {
-    switch (val)
+    string DisplayValue(int val)
     {
-        case int.MaxValue:<span title="@int.MaxValue.ToComma()">Int.Max</span>break;
-        case int.MinValue:<span title="@int.MinValue.ToComma()">Int.Min</span>break;
-        default:@val.ToComma()break;
+        switch (val)
+        {
+            case int.MaxValue:
+                <span title="@int.MaxValue.ToComma()">Int.Max</span>
+                break;
+            case int.MinValue:
+                <span title="@int.MinValue.ToComma()">Int.Min</span>
+                break;
+            default:
+                @val.ToComma()
+                break;
+        }
+        return null;
     }
-}
-@helper ConfigSection(string title, IEnumerable<SQLInstance.SQLConfigurationOption> options)
-{
-    if (options.Any()) {
+    string ConfigSection(string title, IEnumerable<SQLInstance.SQLConfigurationOption> options)
+    {
+        if (options.Any())
+        {
             <tbody>
                 <tr>
                     <th colspan="5" class="category-row">
@@ -34,20 +44,22 @@
             <tbody>
                 @foreach (var c in options)
                 {
-                    @ConfigRow(c)
+                    ConfigRow(c);
                 }
             </tbody>
+        }
+        return null;
     }
-}
-@helper ConfigRow(SQLInstance.SQLConfigurationOption c)
-{
-                <tr>
-                    <td>@c.Name @if(c.IsDyanmic){<span class="good"> (Dynamic)</span>}</td>
-                    <td>@c.Description</td>
-                    <td class="text-nowrap@(c.Value != c.ValueInUse ? " text-warning" : null)">@DisplayValue(c.Value)</td>
-                    <td class="text-nowrap@(!c.IsDefault ? " text-warning" : null)">@DisplayValue(c.ValueInUse)</td>
-                    <td class="text-nowrap text-muted">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
-                </tr>
+    void ConfigRow(SQLInstance.SQLConfigurationOption c)
+    {
+        <tr>
+            <td>@c.Name @if(c.IsDyanmic){<span class="good"> (Dynamic)</span>}</td>
+            <td>@c.Description</td>
+            <td class="text-nowrap@(c.Value != c.ValueInUse ? " text-warning" : null)">@DisplayValue(c.Value)</td>
+            <td class="text-nowrap@(!c.IsDefault ? " text-warning" : null)">@DisplayValue(c.ValueInUse)</td>
+            <td class="text-nowrap text-muted">@DisplayValue(c.Default) (@DisplayValue(c.Minimum) - @DisplayValue(c.Maximum))</td>
+        </tr>
+    }
 }
 <h4 class="modal-title" title="Updated @(configs.LastPoll?.ToRelativeTime())">
     @Model.Name<span class="text-muted">:</span> Configuration

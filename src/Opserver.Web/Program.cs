@@ -9,8 +9,10 @@ using Microsoft.Extensions.Logging;
 
 namespace StackExchange.Opserver
 {
-    internal static class Program
+    public static class Program
     {
+        public static readonly DateTime StartDate = DateTime.UtcNow;
+
         private static void Main(string[] args)
         {
             var runAsService = false;

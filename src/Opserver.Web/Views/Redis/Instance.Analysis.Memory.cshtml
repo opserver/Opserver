@@ -5,19 +5,25 @@
     Layout = "~/Views/Shared/Master.cshtml";
     var serverInfo = RedisInstance.Get(Model.ConnectionInfo);
 }
-@helper TopKeys(KeyStats ks) {
-    foreach (var tk in ks.TopKeys)
+@functions
+{
+    string TopKeys(KeyStats ks)
     {
-@:@tk.Value (@tk.Key.ToComma() bytes)
+        foreach (var tk in ks.TopKeys)
+        {
+            @:@tk.Value (@tk.Key.ToComma() bytes)
+        }
+        return null;
     }
-}
-@helper Percent(long bytes) {
-    if (bytes == 0)
+    string Percent(long bytes)
     {
-        return;
+        if (bytes != 0)
+        {
+            var percent = (bytes / (decimal)Model.TotalByteSize) * 100;
+            <span class="text-muted">(@percent.ToString("0.00")%)</span>
+        }
+        return null;
     }
-    var percent = (bytes / (decimal)Model.TotalByteSize) * 100;
-    <span class="text-muted">(@percent.ToString("0.00")%)</span>
 }
 <h5 class="page-header">
     @Model.IconSpan() @serverInfo.HostAndPort (@Model.ConnectionInfo.Name) - Database @Model.Database.ToString()

@@ -7,7 +7,8 @@
 <h4 class="modal-title">
     Actions for @s.IconSpan() @s.HostName <span class="text-muted">(@s.ReplicationGroup)</span>
 </h4>
-@functions {
+@functions
+{
     public string CountSummary(List<RedisInstance> instances)
     {
         var sb = StringBuilderCache.Get();
@@ -27,56 +28,59 @@
         }
         return sb.ToStringRecycle();
     }
-}
-@helper ServerRole (RedisInstance instance) {
-switch (instance.Role)
-{
-    case RedisInfo.RedisInstanceRole.Master:
-        <span class="text-muted">(<span class="text-primary">master</span>)</span>
-        break;
-    case RedisInfo.RedisInstanceRole.Slave:
-        if (instance.IsSlaving)
-        {
-            <span class="text-muted">(<b class="text-success">slaving</b> to <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
-        }
-        else
-        {
-            <span class="text-muted">(slave of <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
-        }
-        break;
-    default:
-        <span class="text-muted">(<span class="text-warning">unknown</span>)</span>
-        break;
-    }
-}
-@helper HostTree(RedisHost host, List<RedisInstance> filterTo = null)
-{
-    filterTo = filterTo ?? host.Instances.Where(i => i.IsMaster).ToList();
-    var downstream = host.GetDownstreamHosts(filterTo);
 
-    <li>
-        <span title="@string.Join("\n", filterTo.Select(fi => fi.Name))">
-            @host.IconSpan()
-            @if (host == Model)
-            {
-                <strong>@host.HostName</strong>
-            }
-            else
-            {
-                <a href="#/redis/actions/@host.HostName.UrlEncode()">@host.HostName</a>
-            }
-            <span class="text-muted">(@CountSummary(filterTo ?? host.Instances.Where(i => i.IsMaster).ToList()))</span>
-        </span>
-        @if (downstream.Count > 0)
+    string ServerRole (RedisInstance instance)
+    {
+        switch (instance.Role)
         {
-            <ul class="ul-tree">
-                @foreach (var dsHost in downstream)
+            case RedisInfo.RedisInstanceRole.Master:
+                <span class="text-muted">(<span class="text-primary">master</span>)</span>
+                return null;
+            case RedisInfo.RedisInstanceRole.Slave:
+                if (instance.IsSlaving)
                 {
-                    @HostTree(dsHost.TargetHost, dsHost.ReplicatedInstances)
+                    <span class="text-muted">(<b class="text-success">slaving</b> to <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
                 }
-            </ul>
+                else
+                {
+                    <span class="text-muted">(slave of <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
+                }
+                return null;
+            default:
+                <span class="text-muted">(<span class="text-warning">unknown</span>)</span>
+                return null;
         }
-    </li>
+    }
+
+    void  HostTree(RedisHost host, List<RedisInstance> filterTo = null)
+    {
+        filterTo = filterTo ?? host.Instances.Where(i => i.IsMaster).ToList();
+        var downstream = host.GetDownstreamHosts(filterTo);
+
+        <li>
+            <span title="@string.Join("\n", filterTo.Select(fi => fi.Name))">
+                @host.IconSpan()
+                @if (host == Model)
+                {
+                    <strong>@host.HostName</strong>
+                }
+                else
+                {
+                    <a href="#/redis/actions/@host.HostName.UrlEncode()">@host.HostName</a>
+                }
+                <span class="text-muted">(@CountSummary(filterTo ?? host.Instances.Where(i => i.IsMaster).ToList()))</span>
+            </span>
+            @if (downstream.Count > 0)
+            {
+                <ul class="ul-tree">
+                    @foreach (var dsHost in downstream)
+                    {
+                        HostTree(dsHost.TargetHost, dsHost.ReplicatedInstances);
+                    }
+                </ul>
+            }
+        </li>
+    }
 }
 <div class="js-redis-actions" data-node="@s.HostName">
     <div class="row small">
@@ -89,7 +93,7 @@ switch (instance.Role)
                         {
                             if (h.IsTopLevel)
                             {
-                                @HostTree(h)
+                                HostTree(h);
                             }
                         }
                     </ul>

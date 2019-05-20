@@ -43,7 +43,7 @@
         }
     </ul>
     }
-    @Helpers.PollInfo(ExceptionsModule.Stores, "exceptions")
+    <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Nodes = ExceptionsModule.Stores, Name = "exceptions" })" />
     @if (anyLoaded)
     {
     <div class="js-exception-counts">

@@ -3,46 +3,49 @@
 @{ 
     var operations = Model;
 }
-@helper RenderTolopogy(RedisInstance top, RedisInstance newMaster, InstanceCommandType command, RedisInstance controlling = null)
+@functions
 {
-    if (top == null)
+    string RenderTolopogy(RedisInstance top, RedisInstance newMaster, InstanceCommandType command, RedisInstance controlling = null)
     {
-        return;
+        if (top != null)
+        {
+        <li>
+            @if (top == newMaster && command == InstanceCommandType.MakeMaster)
+            {
+                <strong class="text-primary">@top.IconSpan() @top.HostAndPort</strong>
+            }
+            else if (controlling != null && top.HostAndPort == controlling.HostAndPort)
+            {
+                <span class="text-primary">@top.IconSpan() @top.HostAndPort</span>
+            }
+            else if (top.IsMaster)
+            {
+                <strong>@top.IconSpan() @top.HostAndPort</strong>
+            }
+            else
+            {
+                @:@top.IconSpan() @top.HostAndPort
+            }
+            <span class="text-muted">(@top.Name)</span>
+            @if (controlling != null && top == newMaster)
+            {
+                <ul class="proposed">@RenderTolopogy(controlling, newMaster, command, controlling)</ul>
+            }
+            @if (top.SlaveConnections?.Any() ?? false)
+            {
+                <ul>
+                    @foreach (var sc in top.SlaveConnections)
+                    {
+                        var slave = sc.GetServer();
+                        if (controlling != null && slave.HostAndPort == controlling.HostAndPort) { continue; }
+                        @RenderTolopogy(slave, newMaster, command, controlling)
+                    }
+                </ul>
+            }
+        </li>
+        }
+        return null;
     }
-    <li>
-        @if (top == newMaster && command == InstanceCommandType.MakeMaster)
-        {
-            <strong class="text-primary">@top.IconSpan() @top.HostAndPort</strong>
-        }
-        else if (controlling != null && top.HostAndPort == controlling.HostAndPort)
-        {
-            <span class="text-primary">@top.IconSpan() @top.HostAndPort</span>
-        }
-        else if (top.IsMaster)
-        {
-            <strong>@top.IconSpan() @top.HostAndPort</strong>
-        }
-        else
-        {
-            @:@top.IconSpan() @top.HostAndPort
-        }
-        <span class="text-muted">(@top.Name)</span>
-        @if (controlling != null && top == newMaster)
-        {
-            <ul class="proposed">@RenderTolopogy(controlling, newMaster, command, controlling)</ul>
-        }
-        @if (top.SlaveConnections?.Any() ?? false)
-        {
-            <ul>
-                @foreach (var sc in top.SlaveConnections)
-                {
-                    var slave = sc.GetServer();
-                    if (controlling != null && slave.HostAndPort == controlling.HostAndPort) { continue; }
-                    @RenderTolopogy(slave, newMaster, command, controlling)
-                }
-            </ul>
-        }
-    </li>
 }
 <div class="list-group list-group-condensed js-redis-server-actions-preview">
     <div class="row">

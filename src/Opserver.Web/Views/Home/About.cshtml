@@ -1,4 +1,5 @@
-﻿@using System.Reflection
+﻿@using System.IO
+@using System.Reflection
 @using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.Exceptions
@@ -7,7 +8,7 @@
 @{
     this.SetPageTitle("About");
 
-    var asm = Assembly.GetAssembly(typeof(GlobalApplication));
+    var asm = Assembly.GetExecutingAssembly();
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
     var s = Current.Settings;
@@ -15,11 +16,42 @@
     var pollingInfo = PollingEngine.GetPollingStatus();
     var currentTheme = Theme.Current;
 }
-@helper EnabledSpan(bool enabled) {
-    <span class="@(enabled ? "text-success" : "text-danger")">@(enabled ? "Enabled" : "Disabled")</span>
-}
-@helper EnabledLabel(string text, bool enabled) {
-    <span class="label label-@(enabled ? "success" : "default")">@text</span>
+@functions
+{
+    string EnabledSpan(bool enabled)
+    {
+        <span class="@(enabled ? "text-success" : "text-danger")">@(enabled ? "Enabled" : "Disabled")</span>
+        return null;
+    }
+    string EnabledLabel(string text, bool enabled)
+    {
+        <span class="label label-@(enabled ? "success" : "default")">@text</span>
+        return null;
+    }
+    string SQLInstanceList(SQLInstance instance)
+    {
+        var props = instance.ServerProperties.SafeData(true);
+        var features = instance.ServerFeatures.SafeData();
+        var sb = StringBuilderCache.Get();
+        sb.AppendLine("Features:");
+        if (features == null)
+        {
+            sb.AppendLine("Error Fetching Features");
+        }
+        else
+        {
+            sb.Append("sp_WhoIsActive: ").AppendLine(features.HasSPWhoIsActive.ToString());
+            sb.Append("sp_Blitz: ").AppendLine(features.HasSPBlitz.ToString());
+            sb.Append("sp_BlitzIndex: ").AppendLine(features.HasSPBlitzIndex.ToString());
+            sb.Append("sp_AskBrent: ").AppendLine(features.HasSPAskBrent.ToString());
+        }
+        string tooltip = sb.ToStringRecycle();
+
+        <li class="list-group-item" title="@tooltip">
+            @instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
+        </li>
+        return null;
+    }
 }
 <h5 class="page-header">
     @SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span>
@@ -38,7 +70,7 @@
                     <label>Last Built</label>
                 </div>
                 <div class="value-block col-xs-4">
-                    @GlobalApplication.StartDate.ToRelativeTimeSpan()
+                    @Program.StartDate.ToRelativeTimeSpan()
                     <label>Uptime</label>
                 </div>
                 <div class="value-block col-xs-6">
@@ -200,27 +232,6 @@
             </div>
         }
     </div>
-    @helper SQLInstanceList(SQLInstance instance)
-    {
-var props = instance.ServerProperties.SafeData(true);
-var features = instance.ServerFeatures.SafeData();
-    <li class="list-group-item" title="Features:
-@if (features == null)
-{
-@:Error Fetching Features
-}
-else
-{
-<text>
-sp_WhoIsActive: @features.HasSPWhoIsActive.ToString()
-sp_Blitz: @features.HasSPBlitz.ToString()
-sp_BlitzIndex: @features.HasSPBlitzIndex.ToString()
-sp_AskBrent: @features.HasSPAskBrent.ToString()
-</text>
-}">
-        @instance.IconSpan() <span class="value">@instance.Name</span> - @props.Version (@props.MachineName)
-    </li>
-}
     @if (s.SQL.Enabled)
     {
         var clusters = SQLModule.Clusters;
@@ -236,7 +247,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
                         <ul class="list-group">
                             @foreach (var node in cluster.Nodes)
                             {
-                                @SQLInstanceList(node)
+                                SQLInstanceList(node);
                             }
                         </ul>
                     }
@@ -244,7 +255,7 @@ sp_AskBrent: @features.HasSPAskBrent.ToString()
                     <ul class="list-group">
                         @foreach (var instance in instances)
                         {
-                            @SQLInstanceList(instance)
+                            SQLInstanceList(instance);
                         }
                     </ul>
                 </div>

@@ -11,13 +11,13 @@
     <div class="panel-heading">@HAProxyModule.Groups.GetWorstStatus().IconSpan() HAProxy</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            @Gauges.Circle("Group", HAProxyModule.Groups)
+            <partial Name="Guages.Circle" Model="@(("Group", HAProxyModule.Groups))" />
         </div>
         <div class="col-xs-4">
-            @Gauges.Circle("Proxy", allProxies)
+            <partial Name="Guages.Circle" Model="@(("Proxy", allProxies))" />
         </div>
         <div class="col-xs-4">
-            @Gauges.Circle("Server", allServers)
+            <partial Name="Guages.Circle" Model="@(("Server", allServers))" />
         </div>
         <table class="table table-super-condensed table-striped col-md-12">
             <thead>

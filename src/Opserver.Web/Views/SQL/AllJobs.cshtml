@@ -32,16 +32,17 @@
     }
     var allJobs = source.ToList();
 }
-@functions {
+@functions
+{
     public IOrderedEnumerable<T> Sort<T, TKey>(IEnumerable<T> source, Func<T, TKey> order) =>
         Model.SortDirection == SortDir.Desc ? source.OrderByDescending(order) : source.OrderBy(order);
-}
-@helper SortLink(JobSort sort, string title)
-{
-    var curSort = sort == Model.JobSort;
-    <th class="sortable@(curSort ? " current-sort" : "")">
-        <a href="?sort=@sort.ToString()&dir=@(curSort && Model.SortDirection == SortDir.Asc ? SortDir.Desc : SortDir.Asc)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
-    </th>
+    void SortLink(JobSort sort, string title)
+    {
+        var curSort = sort == Model.JobSort;
+        <th class="sortable@(curSort ? " current-sort" : "")">
+            <a href="?sort=@sort.ToString()&dir=@(curSort && Model.SortDirection == SortDir.Asc ? SortDir.Desc : SortDir.Asc)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
+        </th>
+    }
 }
 <h5 class="page-header">
     @(allJobs.Count.Pluralize("Job")) <span class="small">(@(allJobs.Count(j => j.Job.IsRunning).Pluralize("Running")))</span>
@@ -53,16 +54,18 @@
         <thead>
             <tr>
                 <th></th>
-                @SortLink(JobSort.Server, "Server")
-                @SortLink(JobSort.Name, "Name")
-                @SortLink(JobSort.LastRun, "Last Run")
-                @SortLink(JobSort.Start, "Start")
-                @SortLink(JobSort.End, "End")
-                @SortLink(JobSort.Duration, "Duration")
-                @SortLink(JobSort.Enabled, "Enabled")
-                @if (Current.IsInRole(Roles.SQLAdmin))
-                {
-                    <th>Actions</th>
+                @{
+                    SortLink(JobSort.Server, "Server");
+                    SortLink(JobSort.Name, "Name");
+                    SortLink(JobSort.LastRun, "Last Run");
+                    SortLink(JobSort.Start, "Start");
+                    SortLink(JobSort.End, "End");
+                    SortLink(JobSort.Duration, "Duration");
+                    SortLink(JobSort.Enabled, "Enabled");
+                    if (Current.IsInRole(Roles.SQLAdmin))
+                    {
+                        <th>Actions</th>
+                    }
                 }
             </tr>
         </thead>

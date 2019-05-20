@@ -2,14 +2,18 @@
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsActiveModel
-@helper SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label)
+@functions
 {
-    var val = (int)option;
-    <div class="radio pull-left">
-        <label>
-            <input type="radio" name="@nameof(Model.ActiveSearchOptions.Sleeping)" value="@val.ToString()" checked="@(option == Model.ActiveSearchOptions.Sleeping)"/> @label
-        </label>
-    </div>
+    string SleepingSessions(SQLInstance.ActiveSearchOptions.ShowSleepingSessionOptions option, string label)
+    {
+        var val = (int)option;
+        <div class="radio pull-left">
+            <label>
+                <input type="radio" name="@nameof(Model.ActiveSearchOptions.Sleeping)" value="@val.ToString()" checked="@(option == Model.ActiveSearchOptions.Sleeping)"/> @label
+            </label>
+        </div>
+        return null;
+    }
 }
 <h4 class="modal-title">
     Active Operation Filters

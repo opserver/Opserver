@@ -7,6 +7,14 @@
     IEnumerable<dynamic> sites = Model.Hosts.Select(s => new { host = s });
     var topRoutes = Model.TopRoutes;
 }
+@functions
+{
+    void RouteTimePart(string label, decimal? ms)
+    {
+        if (ms.GetValueOrDefault() == 0) {return;}
+        <span class="time">@label <span class="value">@(ms?.ToString("n1"))</span> ms</span>
+    }
+}
 <script>
     $(function () {
         function htmlEncode(s) {
@@ -15,7 +23,7 @@
 
         $("#host").click(function () {
             $(this).select();  
-        }).autocomplete(@Json.Encode(sites).AsHtml(), { 
+        }).autocomplete(@Jil.JSON.Serialize(sites).AsHtml(), { 
             max: 100, 
             matchContains: true,
             delay: 100,
@@ -116,10 +124,6 @@
             </div>
         }
     </h2>
-    @helper RouteTimePart(string label, decimal? ms)
-    {
-        if (ms.GetValueOrDefault() == 0) {return;}
-        <span class="time">@label <span class="value">@(ms?.ToString("n1"))</span> ms</span>}
     <table>
         <thead>
             <tr>
@@ -137,7 +141,7 @@
                 <tr>
                     <td colspan="4" style="text-align: center; padding: 20px 0;">No route info available for this host</td>
                 </tr>   
-            }        
+            }
             foreach (var r in topRoutes)
             {
                 <tr class="route-row" data-route="@r.RouteName" data-days="30" data-host="@Model.Host">
@@ -161,7 +165,14 @@
                                         @r.AvgRedisDurationMs24Hrs
                                         @r.AvgHttpDurationMs24Hrs
                                         @r.AvgTagEngineDurationMs24Hrs
-                                        (@RouteTimePart("ASP.Net", r.AvgCalculatedAspNetDurationMs)@RouteTimePart("SQL", r.AvgSqlDurationMs24Hrs)@RouteTimePart("Redis", r.AvgRedisDurationMs24Hrs)@RouteTimePart("HTTP", r.AvgHttpCount24Hrs)@RouteTimePart("Tag Engine", r.AvgTagEngineDurationMs24Hrs)@RouteTimePart("Other", r.AvgCalculatedOtherDurationMs))
+                                        (@{
+                                            RouteTimePart("ASP.Net", r.AvgCalculatedAspNetDurationMs);
+                                            RouteTimePart("SQL", r.AvgSqlDurationMs24Hrs);
+                                            RouteTimePart("Redis", r.AvgRedisDurationMs24Hrs);
+                                            RouteTimePart("HTTP", r.AvgHttpCount24Hrs);
+                                            RouteTimePart("Tag Engine", r.AvgTagEngineDurationMs24Hrs);
+                                            RouteTimePart("Other", r.AvgCalculatedOtherDurationMs);
+                                        })
                                     </td>
                                 </tr>
                                 <tr>

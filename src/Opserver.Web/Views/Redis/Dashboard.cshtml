@@ -7,11 +7,15 @@
     this.SetPageTitle("Redis Dashboard");
     this.SetTopNodes(RedisModule.Instances, "Redis Servers", Model.CurrentInstance);
 }
-@helper TabLink(RedisViews view, string action, string name, bool includeParams = true)
+@functions
 {
-    <li class="@(Model.View == view ? "active" : null)">
-        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.HostAndPort } : null)">@name</a>
-    </li>
+    string TabLink(RedisViews view, string action, string name, bool includeParams = true)
+    {
+        <li class="@(Model.View == view ? "active" : null)">
+            <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new { node = Model.CurrentInstance.HostAndPort } : null)">@name</a>
+        </li>
+        return null;
+    }
 }
 @section head {
     <script>

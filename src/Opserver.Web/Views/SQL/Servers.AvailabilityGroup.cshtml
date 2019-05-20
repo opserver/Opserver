@@ -8,38 +8,67 @@
         return;
     }
 }
-@helper RenderDBIssues(SQLNode.AGReplica r) {
-    if (r.SynchronizationHealth != SynchronizationHealths.Healthy)
+@functions
+{
+    string RenderDBIssues(SQLNode.AGReplica r)
     {
-        var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy).ToList();       
-        var replica = Model.Node?.Cluster?.GetNode(r.ReplicaServerName);
-        var remoteAgData = replica?.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == Model.Name);
-        var remoteDBs = remoteAgData?.LocalReplica?.Databases?.ToDictionary(db => db.DatabaseName) ?? new Dictionary<string, SQLNode.AGDatabaseReplica>();
-        if (r.Databases.Count > unhealthy.Count)
+        if (r.SynchronizationHealth != SynchronizationHealths.Healthy)
         {
-            foreach (var db in unhealthy.OrderByDescending(u => remoteDBs.TryGetValue(u.DatabaseName, out var rdb) ? rdb.SynchronizationState : u.SynchronizationState).ThenBy(u => u.DatabaseName))
+            var unhealthy = r.Databases.Where(db => db.SynchronizationHealth.HasValue && db.SynchronizationHealth != SynchronizationHealths.Healthy).ToList();
+            var replica = Model.Node?.Cluster?.GetNode(r.ReplicaServerName);
+            var remoteAgData = replica?.AvailabilityGroups.SafeData(true).FirstOrDefault(g => g.Name == Model.Name);
+            var remoteDBs = remoteAgData?.LocalReplica?.Databases?.ToDictionary(db => db.DatabaseName) ?? new Dictionary<string, SQLNode.AGDatabaseReplica>();
+
+
+            if (r.Databases.Count > unhealthy.Count)
             {
-                var remoteDB = remoteDBs.TryGetValue(db.DatabaseName, out var rdb) ? rdb : db;
-                <div class="text-warning" title="@db.DatabaseName
+                foreach (var db in unhealthy.OrderByDescending(u => remoteDBs.TryGetValue(u.DatabaseName, out var rdb) ? rdb.SynchronizationState : u.SynchronizationState).ThenBy(u => u.DatabaseName))
+                {
+                    var remoteDB = remoteDBs.TryGetValue(db.DatabaseName, out var rdb) ? rdb : db;
+                    // Yes this sucks...working around async issues in Razor with <text> and @: for now
+                    var sb = StringBuilderCache.Get();
+                    sb.AppendLine(db.DatabaseName);
+                    sb.AppendLine($"Sync ({Model.Node.Name}): {(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")}");
+                    sb.AppendLine($"Health ({Model.Node.Name}): {(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")}");
+                    sb.AppendLine($"{(replica != null && remoteDB != db ? $"Sync ({replica.Name}): {(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")}" : "")}");
+                    sb.AppendLine($"{(replica != null && remoteDB != db ? $"Health ({replica.Name}): {(remoteDB.SynchronizationHealth.HasValue ? remoteDB.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")}" : "")}");
+                    sb.AppendLine($"{(db.SuspendReason.HasValue ? "Suspension Reason: " + db.SuspendReason.Value.AsString(EnumFormat.Description) : null)}");
+                    var tooltip = sb.ToStringRecycle();
+
+                    //                    var tooltip = $@"{db.DatabaseName}
+                    //Sync ({Model.Node.Name}): {(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")}
+                    //Health ({Model.Node.Name}): {(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")}
+                    //{(replica != null && remoteDB != db ? $"Sync ({replica.Name}): {(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")}" : "")}
+                    //{(replica != null && remoteDB != db ? $"Health ({replica.Name}): {(remoteDB.SynchronizationHealth.HasValue ? remoteDB.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")}" : "")}
+                    //{(db.SuspendReason.HasValue ? "Suspension Reason: " + db.SuspendReason.Value.AsString(EnumFormat.Description) : null)}";
+
+                    <div class="text-warning" title="@tooltip">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)
+                    (@(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown"))
+                    </div>
+                    @*<div class="text-warning" title="@db.DatabaseName
 Sync (@Model.Node.Name): @(db.SynchronizationState.HasValue ? db.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
 Health (@Model.Node.Name): @(db.SynchronizationHealth.HasValue ? db.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
-@if (replica != null && remoteDB != db) {<text>
-Sync (@replica.Name): @(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
-Health (@replica.Name): @(remoteDB.SynchronizationHealth.HasValue ? remoteDB.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
-</text>}
-@if (db.SuspendReason.HasValue) {<text>
-Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</text>}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)
-                (@(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown"))
-                </div>
+@if (replica != null && remoteDB != db) {
+@:Sync (@replica.Name): @(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown")
+@:Health (@replica.Name): @(remoteDB.SynchronizationHealth.HasValue ? remoteDB.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknown")
+}
+@if (db.SuspendReason.HasValue) {
+@:Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)
+}">@db.IconSpan() @db.MonitorStatus.Span(db.DatabaseName)
+                    (@(remoteDB.SynchronizationState.HasValue ? remoteDB.SynchronizationState.Value.AsString(EnumFormat.Description) : "Unknown"))
+                    </div>*@
+
+                    
+                }
+            }
+            else
+            {
+                <div class="text-danger">Sync: @(r.SynchronizationHealth.HasValue ? r.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknwon")</div>
             }
         }
-        else
-        {
-            <div class="text-danger">Sync: @(r.SynchronizationHealth.HasValue ? r.SynchronizationHealth.Value.AsString(EnumFormat.Description) : "Unknwon")</div>
-        }
+        return null;
     }
 }
-
 <div class="col-md-3">
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -48,7 +77,7 @@ Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</tex
         <div class="panel-body small list-group">
             <div class="well well-sm well-condensed">
                 <div class="pull-right">
-                    <i class="fa fa-database @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i>  @SQLHelpers.HealthDescriptionAGs(ag.LocalReplica.Databases, minimal: true)
+                    <i class="fa fa-database @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i> @Health.OfAGs(ag.LocalReplica.Databases, minimal: true)
                 </div>
                 <div>
                     @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.Node.Name</a> <span class="text-success">(Master)</span>
@@ -86,7 +115,7 @@ Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</tex
     Connection State: @r.ConnectedState
     Mode: @r.AvailabilityMode">
                         <div class="pull-right">
-                            <i class="fa fa-database @(r.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i> @SQLHelpers.HealthDescriptionAGs(r.Databases, minimal: true)
+                            <i class="fa fa-database @(r.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i> @Health.OfAGs(r.Databases, minimal: true)
                         </div>
                         <div>
                             <span>

@@ -8,6 +8,25 @@
     var i = Model.CurrentInstance;
     if (i == null) { return; }
 }
+@functions
+{
+    void BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked)
+    {
+        <li>
+            Session: <a href="#spid-@op.SessionId.ToString()">@op.SessionId.ToString()</a>
+            @if (blocked[op].Any())
+            {
+                <ul>
+                    <li>Session: @string.Join(", ", blocked[op].Where(b => !blocked[b].Any()).Select(b => string.Format("<a href=\"#spid-{0}\">{0}</a>", b.SessionId))).AsHtml()</li>
+                    @foreach (var b in blocked[op].Where(bo => blocked[bo].Any()))
+                    {
+                        BlockingTree(b, blocked);
+                    }
+                </ul>
+            }
+        </li>
+    }
+}
 @if (!(i.ServerFeatures.Data?.HasSPWhoIsActive ?? false))
 {
     <div class="alert alert-warning">
@@ -46,22 +65,6 @@ else
                 <h5>Blocking Detected:</h5>
                 <p>
                     <ul>
-                        @helper BlockingTree(SQLInstance.ActiveOperation op, Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>> blocked)
-                        {
-                            <li>
-                                Session: <a href="#spid-@op.SessionId.ToString()">@op.SessionId.ToString()</a>
-                                @if (blocked[op].Any())
-                                {
-                                    <ul>
-                                        <li>Session: @string.Join(", ", blocked[op].Where(b => !blocked[b].Any()).Select(b => string.Format("<a href=\"#spid-{0}\">{0}</a>", b.SessionId))).AsHtml()</li>
-                                        @foreach (var b in blocked[op].Where(bo => blocked[bo].Any()))
-                                        {
-                                            @BlockingTree(b, blocked)
-                                        }
-                                    </ul>
-                                }
-                            </li>
-                        }
                         @{
                             var blocked = new Dictionary<SQLInstance.ActiveOperation, List<SQLInstance.ActiveOperation>>();
                             foreach (var op in data)
@@ -72,7 +75,7 @@ else
                             // TODO: Circular blocks
                             foreach (var op in data.Where(o => !o.BlockingSessionId.HasValue && blocked[o].Any()))
                             {
-                                @BlockingTree(op, blocked)
+                                BlockingTree(op, blocked);
                             }
                         }
                     </ul>

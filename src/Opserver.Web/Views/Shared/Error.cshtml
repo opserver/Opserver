@@ -16,15 +16,3 @@
         }
     </div>
 </div>
-@if (Current.User.IsGlobalAdmin)
-{
-    <!-- Actual error:
-    @{
-        var o = HttpContext.Current.ApplicationInstance.Application["LastError"] as Exception;
-        if (o != null)
-        {
-            @o.GetBaseException().Message
-        }
-    }
-    -->
-}

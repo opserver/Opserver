@@ -43,13 +43,6 @@ namespace StackExchange.Opserver
                     .Include("~/Content/js/Scripts*"));
         }
 
-        public override void Init()
-        {
-            base.Init();
-
-            OpserverCore.Init();
-        }
-
         protected void Application_Start()
         {
             // disable the X-AspNetMvc-Version: header
@@ -72,7 +65,9 @@ namespace StackExchange.Opserver
             // When settings change, reload the app pool
             Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
 
+            OpserverCore.Init();
             PollingEngine.Configure(t => HostingEnvironment.QueueBackgroundWorkItem(_ => t()));
+            PollingEngine.StartPolling();
         }
 
         protected void Application_End()

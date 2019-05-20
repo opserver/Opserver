@@ -1,32 +1,20 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>StackExchange.Opserver</RootNamespace>
     <AssemblyName>StackExchange.Opserver</AssemblyName>
-    <TargetFrameworks>netcoreapp2.2</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.0.0-preview4-19216-03" />
     <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.0.169" />
     <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.0.78" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.5.0" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.IO.Compression" />
     <Reference Include="System.Management" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Xml" />
-    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config\*.config.example" />
-    <Content Include="Content\**\*" />
-    <Content Include="wwwroot\Content\**\*" />
     <None Include="Help\**\*" />
     <None Include="Config\Readme.txt" />
     <None Include="Config\*.example.json" />

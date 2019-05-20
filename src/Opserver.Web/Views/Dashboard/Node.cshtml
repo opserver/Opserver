@@ -17,6 +17,13 @@
         });
     </script>
 }
+@functions
+{
+    void SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
+    {
+        <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)</a></li>
+    }
+}
 @if (s == null)
 {
     <div class="no-content">Node not found.</div>
@@ -145,10 +152,6 @@
         </div>
     </div>
 </div>
-@helper SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
-{
-    <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)</a></li>
-}
 @if (Model.StatusTypes.Count() > 1)
 { // only show nav if there's actual nav - save the vertical space on stats-only nodes
     <ul class="nav nav-tabs nav-tabs-right">
@@ -158,25 +161,25 @@
             switch (st)
             {
                 case CurrentStatusTypes.SQLInstance:
-                    @SubnavItem(st, Url.Action(nameof(SQLController.Instance), "SQL", new { node = s.PrettyName }))
+                    SubnavItem(st, Url.Action(nameof(SQLController.Instance), "SQL", new { node = s.PrettyName }));
                     break;
                 case CurrentStatusTypes.SQLActive:
-                    @SubnavItem(st, Url.Action(nameof(SQLController.Active), "SQL", new { node = s.PrettyName }))
+                    SubnavItem(st, Url.Action(nameof(SQLController.Active), "SQL", new { node = s.PrettyName }));
                     break;
                 case CurrentStatusTypes.SQLTop:
-                    @SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }))
+                    SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }));
                     break;
                 case CurrentStatusTypes.Redis:
-                    @SubnavItem(st, Url.Action(nameof(RedisController.Dashboard), "Redis", new { node = s.PrettyName }))
+                    SubnavItem(st, Url.Action(nameof(RedisController.Dashboard), "Redis", new { node = s.PrettyName }));
                     break;
                 case CurrentStatusTypes.HAProxy:
-                    @SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }))
+                    SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }));
                     break;
                 //case CurrentStatusTypes.Elastic:
-                //@SubnavItem(st, "/elastic" + s.PrettyName)
+                //SubnavItem(st, "/elastic" + s.PrettyName);
                 //break;
                 default:
-                    @SubnavItem(st, Url.Action(nameof(DashboardController.Node), new { node = s.PrettyName, view = st }))
+                    SubnavItem(st, Url.Action(nameof(DashboardController.Node), new { node = s.PrettyName, view = st }));
                     break;
             }
         }

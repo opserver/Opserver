@@ -17,25 +17,25 @@
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string action, string name, bool includeCluster = true, bool includeNode = false)
+@functions
 {
-    var rvd = new RouteValueDictionary();
-    if (includeCluster && Model.CurrentClusterName.HasValue())
+    void TabLink(DashboardModel.Views view, string action, string name, bool includeCluster = true, bool includeNode = false)
     {
-        rvd.Add("cluster", Model.CurrentClusterName);
+        var routeArgs = new
+        {
+            cluster = includeCluster && Model.CurrentClusterName.HasValue() ? Model.CurrentClusterName : null,
+            node = includeNode && Model.CurrentNodeName.HasValue() ? Model.CurrentNodeName : null
+        };
+        <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action, routeArgs)">@name</a></li>
     }
-    if (includeNode && Model.CurrentNodeName.HasValue())
-    {
-        rvd.Add("node", Model.CurrentNodeName);
-    }
-
-    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action, rvd)">@name</a></li>
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false)
-    @TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster")
-    @TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true)
-    @TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes", includeNode: true)
+    @{ 
+        TabLink(DashboardModel.Views.AllClusters, nameof(ElasticController.Dashboard), "all clusters", false);
+        TabLink(DashboardModel.Views.Cluster, nameof(ElasticController.Cluster), "cluster");
+        TabLink(DashboardModel.Views.Node, nameof(ElasticController.Node), "node", includeNode: true);
+        TabLink(DashboardModel.Views.Indexes, nameof(ElasticController.Indexes), "indexes", includeNode: true);
+    }
 </ul>
 <div>
     @if (Model.View == DashboardModel.Views.Node && (Model.CurrentNode == null))

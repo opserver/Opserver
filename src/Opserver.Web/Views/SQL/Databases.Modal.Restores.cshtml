@@ -6,7 +6,7 @@
     var restoreList = s.GetRestoreInfo(Model.Database);
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(restoreList)</span>
+    <span class="pull-right small">@Poll.Now(restoreList)</span>
 }
 @if (restoreList.Data == null || !restoreList.Successful)
 {

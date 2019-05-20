@@ -12,7 +12,7 @@
                                .ThenByDescending(i => i.TotalBytes);
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(indexes)</span>
+    <span class="pull-right small">@Poll.Now(indexes)</span>
 }
 @if (indexes.Data == null || !indexes.Successful)
 {

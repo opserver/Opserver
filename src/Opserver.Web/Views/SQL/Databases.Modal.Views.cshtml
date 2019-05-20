@@ -12,7 +12,7 @@
         .ToDictionary(g => g.Key, g => g.ToList());
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(views, columns)</span>
+    <span class="pull-right small">@Poll.Now(views, columns)</span>
 }
 @if (views.Data == null || !views.Successful)
 {

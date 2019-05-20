@@ -7,7 +7,7 @@
     var storedProcs = s.GetStoredProcedureInfo(Model.Database);
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(storedProcs)</span>
+    <span class="pull-right small">@Poll.Now(storedProcs)</span>
 }
 @if (storedProcs.Data == null || !storedProcs.Successful)
 {

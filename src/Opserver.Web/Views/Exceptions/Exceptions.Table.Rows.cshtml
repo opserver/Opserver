@@ -7,8 +7,14 @@
     public string ErrorStyle(StackExchange.Exceptional.Error e)
     {
         var ageHours = (DateTime.UtcNow - e.CreationDate).TotalHours;
-        if (ageHours < 1) return MonitorStatus.Critical.TextClass();
-        if (ageHours < 2) return MonitorStatus.Warning.TextClass();
+        if (ageHours < 1)
+        {
+            return MonitorStatus.Critical.TextClass();
+        }
+        if (ageHours < 2)
+        {
+            return MonitorStatus.Warning.TextClass();
+        }
         return null;
     }
 

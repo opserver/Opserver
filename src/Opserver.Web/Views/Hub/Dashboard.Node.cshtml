@@ -12,15 +12,18 @@
         var prefix = s.IsVM ? "virtual-machine " : "";
         return prefix + s.RowClass();
     }
-}
-@helper Graph(Node s, string type)
-{
-    if (!DashboardModule.HasData)
+    string Graph(Node s, string type)
     {
-        <div class="text-muted">No Data Available</div>
-        return;
+        if (!DashboardModule.HasData)
+        {
+            <div class="text-muted">No Data Available</div>
+        }
+        else
+        {
+            <img class="js-dashboard-spark" src="@Url.Content("~/graph/")@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
+        }
+        return null;
     }
-    <img class="js-dashboard-spark" src="~/graph/@type.ToLower()/spark?id=@s.Id" alt="" data-id="@s.Id" data-type="@type" data-node="@s.PrettyName" />
 }
 <div class="item dashboard @s.TextClass() @GetItemClass(s)">
     <div class="server-name">

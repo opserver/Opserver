@@ -15,11 +15,15 @@
         });
     </script>
 }
-@helper TabLink(SQLViews view, string action, string name, bool includeParams = true)
+@functions
 {
-    <li class="@(Model.View == view ? "active" : null)">
-        <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new {node = Model.CurrentInstance.Name} : null)">@name</a>
-    </li>
+    string TabLink(SQLViews view, string action, string name, bool includeParams = true)
+    {
+        <li class="@(Model.View == view ? "active" : null)">
+            <a href="@Url.Action(action, includeParams && Model.CurrentInstance != null ? new {node = Model.CurrentInstance.Name} : null)">@name</a>
+        </li>
+        return null;
+    }
 }
 <ul class="nav nav-tabs nav-tabs-right">
     @TabLink(SQLViews.Servers, nameof(SQLController.Dashboard), "all servers", false)

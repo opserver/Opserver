@@ -1,0 +1,22 @@
+﻿@using StackExchange.Opserver.Data.SQL
+@using StackExchange.Opserver.Models
+@model (SQLInstance Instance, int DecimalPlaces)
+@{ 
+    var i = Model.Instance;
+}
+@if (i.ServerInfo != null)
+{
+    <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
+}
+else
+{
+    var props = i.ServerProperties.SafeData();
+    if (props != null && props.PhysicalMemoryBytes > 0)
+    {
+        <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, Model.DecimalPlaces) + "%")</td>
+    }
+    else
+    {
+        <td class="text-muted">?</td>
+    }
+}

@@ -6,7 +6,7 @@
     var backups = s.GetBackupInfo(Model.Database);
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(backups)</span>
+    <span class="pull-right small">@Poll.Now(backups)</span>
 }
 @if (backups.Data == null || !backups.Successful)
 {

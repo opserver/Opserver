@@ -5,46 +5,49 @@
     var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host.HostName);
     var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
 }
+@functions
+{
+    string RenderTolopogy(RedisInstance i, RedisInstance target = null)
+    {
+        if (i != null)
+        {
+            <li>
+                @if (i.HostAndPort == Model.HostAndPort)
+                {
+                    <strong>@i.IconSpan() @i.HostAndPort</strong>
+                }
+                else if (target != null && i.HostAndPort == target.HostAndPort)
+                {
+                    <span class="text-primary">@i.IconSpan() @i.HostAndPort</span>
+                }
+                else
+                {
+                    @:@i.IconSpan() @i.HostAndPort
+                }
+                <span class="text-muted">(@i.Name)</span>
+                @if (target != null && i.HostAndPort == target.HostAndPort)
+                {
+                    <ul class="proposed">@{RenderTolopogy(Model);}</ul>
+                }
+                @if (i.SlaveConnections?.Any() ?? false)
+                {
+                    <ul>
+                        @foreach (var sc in i.SlaveConnections)
+                        {
+                            var slave = sc.GetServer();
+                            if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
+                            RenderTolopogy(sc.GetServer(), target);
+                        }
+                    </ul>
+                }
+            </li>
+        }
+        return null;
+    }
+}
 <h4 class="modal-title">
     Actions for @i.HostAndPort <span class="text-muted">(@i.Name)</span>
 </h4>
-@helper RenderTolopogy(RedisInstance i, RedisInstance target = null)
-{
-    if (i == null)
-    {
-        return;
-    }
-    <li>
-        @if (i.HostAndPort == Model.HostAndPort)
-        {
-            <strong>@i.IconSpan() @i.HostAndPort</strong>
-        }
-        else if (target != null && i.HostAndPort == target.HostAndPort)
-        {
-            <span class="text-primary">@i.IconSpan() @i.HostAndPort</span>
-        }
-        else
-        {
-            @:@i.IconSpan() @i.HostAndPort
-        }
-        <span class="text-muted">(@i.Name)</span>
-        @if (target != null && i.HostAndPort == target.HostAndPort)
-        {
-            <ul class="proposed">@RenderTolopogy(Model)</ul>
-        }
-        @if (i.SlaveConnections?.Any() ?? false)
-        {
-            <ul>
-                @foreach (var sc in i.SlaveConnections)
-                {
-                    var slave = sc.GetServer();
-                    if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
-                    @RenderTolopogy(sc.GetServer(), target)
-                }
-            </ul>
-        }
-    </li>
-}
 <div class="js-redis-actions" data-node="@i.HostAndPort" data-name="@i.Name">
     <div class="row small">
         <div class="col-md-6">

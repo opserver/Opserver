@@ -8,62 +8,68 @@
     var enabledTraceFlags = i.TraceFlags.Data?.Where(tf => tf.Enabled).ToList();
     var counters = Model.PerfCounters = i.PerfCounters.SafeData(true);
 }
-@helper RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+@functions
 {
-var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-if (counter == null)
-{
-    return;
-}
-    <div class="value-block col-md-3 col-sm-6">
-        @if (url.HasValue())
+    string RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
         {
-            <a href="@url">
-                @(((long)counter.CalculatedValue * 1024).ToSize())
-            </a>
+            return null;
         }
-        else
-        {
-            @(((long)counter.CalculatedValue * 1024).ToSize())
-        }
-        <label>@label</label>
-    </div>
-}
-@helper RenderCacheCounter(string label, string category, string name, string instance, string suffix = null, int cols = 4)
-{
-var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-if (counter == null)
-{
-    return;
-}
-    <div class="value-block col-md-@cols.ToString() col-sm-6">
-        @counter.CalculatedValue.ToString("#,##0.###") @suffix
-        <label>@label</label>
-    </div>
-}
-@helper RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3, bool showTotal = true)
-{
-var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
-if (counter == null)
-{
-    return;
-}
-    <div class="value-block col-md-@cols.ToString() col-sm-6">
-        @counter.CalculatedValue.ToString("#,##0.###")
-        <span class="text-muted">/sec</span>
-        @suffix
-        @if (showTotal)
-        {
-            <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
-        }
-        <label>
-            @label
+        <div class="value-block col-md-3 col-sm-6">
             @if (url.HasValue())
             {
-                <span class="text-muted">(<a href="@url">view</a>)</span>
+                <a href="@url">
+                    @(((long)counter.CalculatedValue * 1024).ToSize())
+                </a>
             }
-        </label>
-    </div>
+            else
+            {
+                @(((long)counter.CalculatedValue * 1024).ToSize())
+            }
+            <label>@label</label>
+        </div>
+        return null;
+    }
+    string RenderCacheCounter(string label, string category, string name, string instance, string suffix = null, int cols = 4)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
+        {
+            return null;
+        }
+        <div class="value-block col-md-@cols.ToString() col-sm-6">
+            @counter.CalculatedValue.ToString("#,##0.###") @suffix
+            <label>@label</label>
+        </div>
+        return null;
+    }
+    string RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3, bool showTotal = true)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
+        {
+            return null;
+       }
+        <div class="value-block col-md-@cols.ToString() col-sm-6">
+            @counter.CalculatedValue.ToString("#,##0.###")
+            <span class="text-muted">/sec</span>
+            @suffix
+            @if (showTotal)
+            {
+                <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
+            }
+            <label>
+                @label
+                @if (url.HasValue())
+                {
+                    <span class="text-muted">(<a href="@url">view</a>)</span>
+                }
+            </label>
+        </div>
+        return null;
+    }
 }
 <div class="js-refresh" data-name="instance-summary">
     <h5 class="page-header">
@@ -72,9 +78,9 @@ if (counter == null)
         {
             <span class="text-muted">(@i.Description)</span>
         }
-        @Helpers.PollNow(i)
+        @Poll.Now(i)
     </h5>
-    @Helpers.PollInfo(i, i.Name)
+    <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Node = i, Name = i.Name })" />
     <div class="row small">
         <div class="col-md-6">
             @{
@@ -116,7 +122,7 @@ if (counter == null)
                                 var dbs = i.Databases.Data;
                                 var dbStatus = dbs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @dbStatus.BackgroundClass()">
-                                    @Helpers.HealthDescription(dbs)
+                                    @Health.Description(dbs)
                                     <label>
                                         @dbs.Count.Pluralize("Database", includeNumber: false)
                                     </label>
@@ -128,7 +134,7 @@ if (counter == null)
                                 var running = jobs.Count(j => j.IsRunning);
                                 var jobStatus = jobs.GetWorstStatus();
                                 <div class="value-block col-md-3 col-sm-6 @jobStatus.BackgroundClass()">
-                                    @Helpers.HealthDescription(jobs, unknownIsHealthy: true)
+                                    @Health.Description(jobs, unknownIsHealthy: true)
                                     <label>
                                         @jobs.Count.Pluralize("Job", includeNumber: false)
                                         @if (running > 0)
@@ -348,9 +354,9 @@ Average Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms"
                 <div class="panel-heading">@Icon.Performance Performance</div>
                 <div class="panel-body small">
                     @{
-                            var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
-                            var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
-                            var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? (compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
+                        var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
+                        var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
+                        var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? (compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
                     }
                     @RenderPerSecCounter("Batches", "SQL Statistics", "Batch Requests/sec", "", url: Url.Action(nameof(SQLController.Top), new { node = i.Name, sort = "ExecutionsPerMinute", LastRunSeconds = 300 }))
                     @RenderPerSecCounter("Compilations", "SQL Statistics", "SQL Compilations/sec", "", suffix: compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
@@ -382,14 +388,14 @@ Average Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms"
                 <div class="panel-heading">@Icon.Cache Cache</div>
                 <div class="panel-body small">
                     @{
-                            Func<string, string, string, string> getCacheSize = (o, c, j) =>
-                            {
-                                var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue*8*1024;
-                                return bytes.HasValue ? $"({bytes.Value.ToSize()})" : null;
-                            };
-                            var dbCacheBytes = getCacheSize("Buffer Manager", "Database pages", "");
-                            var planCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
-                            var objectCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "_Total");
+                        Func<string, string, string, string> getCacheSize = (o, c, j) =>
+                        {
+                            var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue * 8 * 1024;
+                            return bytes.HasValue ? $"({bytes.Value.ToSize()})" : null;
+                        };
+                        var dbCacheBytes = getCacheSize("Buffer Manager", "Database pages", "");
+                        var planCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
+                        var objectCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "_Total");
                     }
                     @RenderCacheCounter("Page Life (Seconds)", "Buffer Manager", "Page life expectancy", "")
                     @RenderCacheCounter("Page Lookups", "Buffer Manager", "Page lookups/sec", "")

@@ -2,6 +2,7 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Dashboard
+@inject IJsonHelper Json
 @model DashboardModel
 @{
     // Note: not using MVC Url.Action and such here because it's too slow
@@ -11,34 +12,50 @@
                           .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
                           .OrderBy(g => g.Key.Index);
 }
-@helper Graph(Node n, string type)
+@functions
 {
-    if (DashboardModule.HasData) {
-        if (Request.QueryString["allGraph"].HasValue())
-        {<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark/all#@n.Id" alt="" /></a>}
-        else
-        {<a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="~/graph/@type/spark?id=@n.Id" alt="" /></a>}
-    }
-    else {<div class="text-muted">No Data Available</div>}
-}
-@helper DiskText(Node n)
-{
-    var worst = n.Volumes?.Where(v => v?.PercentUsed.HasValue ?? false).DefaultIfEmpty().Max(v => v?.PercentUsed);
-    if (worst > 0)
+    string Graph(Node n, string type)
     {
-        @worst.Value.ToString("n0")@:%
-    }
-}
-@helper DiskGraphs(Node n)
-{
-    if (n.Volumes != null)
-    {
-        foreach (var vol in n.Volumes)
+        if (DashboardModule.HasData)
         {
-            <div class="progress vertical" title="@vol.PrettyName: @(vol.PercentUsed?.ToString("n2"))% used (@vol.PrettyUsed/@vol.PrettySize)">
-                <div class="progress-bar @vol.SpaceStatus.ProgressBarClass()" style="height: @(vol.PercentUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
-            </div>
+            if (Current.Request.Query.TryGetValue("allGraph", out _))
+            {
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/gaph/")@type/spark/all#@n.Id" alt="" /></a>
+            }
+            else
+            {
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/gaph/")@type/spark?id=@n.Id" alt="" /></a>
+            }
         }
+        else
+        {
+            <div class="text-muted">No Data Available</div>
+        }
+        return null;
+    }
+
+    string DiskText(Node n)
+    {
+        var worst = n.Volumes?.Where(v => v?.PercentUsed.HasValue ?? false).DefaultIfEmpty().Max(v => v?.PercentUsed);
+        if (worst > 0)
+        {
+            @worst.Value.ToString("n0")@:%
+        }
+        return null;
+    }
+
+    string DiskGraphs(Node n)
+    {
+        if (n.Volumes != null)
+        {
+            foreach (var vol in n.Volumes)
+            {
+                <div class="progress vertical" title="@vol.PrettyName: @(vol.PercentUsed?.ToString("n2"))% used (@vol.PrettyUsed/@vol.PrettySize)">
+                    <div class="progress-bar @vol.SpaceStatus.ProgressBarClass()" style="height: @(vol.PercentUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
+                </div>
+            }
+        }
+        return null;
     }
 }
 <div class="js-refresh" data-name="dashboard-overview">
@@ -65,7 +82,7 @@
             <script>
                 @foreach (var e in errors)
                 {
-                    @:toastr.warning('@HttpUtility.JavaScriptStringEncode(e)', null, { positionClass: "toast-bottom-full-width", timeOut: 60 * 1000 });
+                    @:toastr.warning('@Json.Serialize(e)', null, { positionClass: "toast-bottom-full-width", timeOut: 60 * 1000 });
                 }
             </script>
         }

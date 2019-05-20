@@ -13,6 +13,7 @@ using EnumsNET;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
+using Microsoft.AspNetCore.Http;
 
 namespace StackExchange.Opserver
 {
@@ -488,15 +489,12 @@ namespace StackExchange.Opserver
             return result.Length > 1 ? result : "";
         }
 
-        public static RouteValueDictionary ToRouteValues(this NameValueCollection queryString)
+        public static RouteValueDictionary ToRouteValues(this IQueryCollection queryString)
         {
             var routeValues = new RouteValueDictionary();
-            if (queryString?.HasKeys() == true)
+            foreach (string key in queryString.Keys)
             {
-                foreach (string key in queryString.AllKeys)
-                {
-                    routeValues.Add(key, queryString[key]);
-                }
+                routeValues.Add(key, queryString[key]);
             }
             return routeValues;
         }

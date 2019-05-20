@@ -11,7 +11,7 @@
 }
 <h5 class="page-header">
     @(connections?.Count.Pluralize("Active connection") ?? "Unknown connections") on @i.Name:
-    @Helpers.PollNow(i)
+    @Poll.Now(i)
 </h5>
 @if (!Model.Cache.LastPollSuccessful)
 {
@@ -37,7 +37,7 @@
         <tbody>
             @foreach (var c in connections)
             {
-                <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(c.PlanHandle)">
+                <tr class="plan-row" data-plan-handle="@WebEncoders.Base64UrlEncode(c.PlanHandle)">
                     <td>@c.LoginName</td>
                     <td title="Program: @c.ProgramName (@c.HostProcessId)">
                         @if (enableDashboardLinks && monitoredList.Contains(c.HostName.IsNullOrEmptyReturn("").ToLower()))

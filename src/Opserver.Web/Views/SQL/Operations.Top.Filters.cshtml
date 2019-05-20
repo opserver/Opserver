@@ -2,15 +2,19 @@
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
 @model OperationsTopModel
-@helper RunInLast(DashboardModel.LastRunInterval interval, string label)
+@functions
 {
-var secs = (int)interval;
-var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
-    <div class="radio pull-left">
-        <label>
-            <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
-        </label>
-    </div>
+    string RunInLast(DashboardModel.LastRunInterval interval, string label)
+    {
+        var secs = (int)interval;
+        var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
+        <div class="radio pull-left">
+            <label>
+                <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
+            </label>
+        </div>
+        return null;
+    }
 }
 <h4 class="modal-title">
     Top Operation Filters

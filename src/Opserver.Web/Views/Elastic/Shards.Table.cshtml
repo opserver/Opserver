@@ -7,27 +7,31 @@
     var i = Model.CurrentIndexName;
     var shards = Model.DisplayShards.Where(s => i == null || s.Index == i).ToList();
 }
-@helper GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfo> nodes)
+@functions
 {
-    ElasticCluster.NodeInfo result;
-    if (node.IsNullOrEmpty())
+    string GetNodeName(string node, Dictionary<string, ElasticCluster.NodeInfo> nodes)
     {
-            <span class="text-muted">n/a</span>
-    }
-    else if (nodes.TryGetValue(node, out result))
-    {
-        if (result.Name == Model.CurrentNodeName)
+        ElasticCluster.NodeInfo result;
+        if (node.IsNullOrEmpty())
         {
+            <span class="text-muted">n/a</span>
+        }
+        else if (nodes.TryGetValue(node, out result))
+        {
+            if (result.Name == Model.CurrentNodeName)
+            {
                 <strong>@result.IconSpan() @result.ShortName</strong>
+            }
+            else
+            {
+                <span>@result.IconSpan() @result.ShortName</span>
+            }
         }
         else
         {
-                <span>@result.IconSpan() @result.ShortName</span>
-        }
-    }
-    else
-    {
             <span class="text-muted">@node</span>
+        }
+        return null;
     }
 }
 @if (shards.Any() && c.Nodes.Data != null)

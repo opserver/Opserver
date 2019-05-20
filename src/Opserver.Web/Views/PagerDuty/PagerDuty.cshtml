@@ -4,27 +4,36 @@
     Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
     var settings = Current.Settings.PagerDuty;
+    var scheduleCache = PagerDutyAPI.Instance.AllSchedules;
+    var incidentCache = PagerDutyAPI.Instance.Incidents;
 }
-@helper GetOverrideAction(string incident = null, string status = null)
+@functions
 {
-    if (Model.CurrentPagerDutyPerson != null && Current.User.IsGlobalAdmin)
+    string GetOverrideAction(string incident = null, string status = null)
     {
-        @:<span class="pull-right"><a href="#" class="js-override-action">Take on Call</a> (1hr)</span>
+        if (Model.CurrentPagerDutyPerson != null && Current.User.IsGlobalAdmin)
+        {
+            <span class="pull-right"><a href="#" class="js-override-action">Take on Call</a> (1hr)</span>
+        }
+        return null;
     }
-}
 
-@helper GetIncidentAction(IncidentStatus status)
-{
-    if (Model.CurrentPagerDutyPerson == null) { return; }
-    switch (status)
+    string GetIncidentAction(IncidentStatus status)
     {
-        case IncidentStatus.acknowledged:
-            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
-            break;
-        default:
-            <a href="#" class="js-incident-action" data-action="@IncidentStatus.acknowledged">Ack</a>
-            <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
-            break;
+        if (Model.CurrentPagerDutyPerson != null)
+        {
+            switch (status)
+            {
+                case IncidentStatus.acknowledged:
+                    <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
+                    break;
+                default:
+                    <a href="#" class="js-incident-action" data-action="@IncidentStatus.acknowledged">Ack</a>
+                    <a href="#" class="js-incident-action" data-action="@IncidentStatus.resolved">Resolve</a>
+                    break;
+            }
+        }
+        return null;
     }
 }
 
@@ -88,12 +97,18 @@
                 <th>Phone</th>
             </tr>
         </thead>
-        @if (!PagerDutyAPI.Instance.AllSchedules.LastPollSuccessful)
+        @if (!scheduleCache.LastPollSuccessful)
         {
             <tbody>
                 <tr>
                     <td colspan="5">
-                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.AllSchedules, "No schedules loaded from PagerDuty")
+                        <div class="alert alert-info">
+                            <h5>No schedules loaded from PagerDuty</h5>
+                            @if (scheduleCache.ErrorMessage.HasValue())
+                            {
+                                <p class="error-stack">@scheduleCache.ErrorMessage</p>
+                            }
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -108,7 +123,7 @@
 
     <h5 class="page-header">
         Incidents: Last @Model.CachedDays.ToComma() Days
-        @Helpers.PollNow(PagerDutyAPI.Instance)
+        @Poll.Now(PagerDutyAPI.Instance)
     </h5>
     <table class="table table-striped table-hover table-super-condensed table-responsive table-actions text-nowrap">
         <thead>
@@ -120,12 +135,18 @@
                 <th>Summary</th>
             </tr>
         </thead>
-        @if (!PagerDutyAPI.Instance.Incidents.LastPollSuccessful)
+        @if (!incidentCache.LastPollSuccessful)
         {
             <tbody>
                 <tr>
                     <td colspan="4">
-                        @Helpers.CacheEmpty(PagerDutyAPI.Instance.Incidents, "No incidents loaded from PagerDuty")
+                        <div class="alert alert-info">
+                            <h5>No incidents loaded from PagerDuty</h5>
+                            @if (incidentCache.ErrorMessage.HasValue())
+                            {
+                                <p class="error-stack">@incidentCache.ErrorMessage</p>
+                            }
+                        </div>
                     </td>
                 </tr>
             </tbody>
@@ -145,7 +166,7 @@
                     }
                     @if (i.Status == IncidentStatus.triggered || i.Status == IncidentStatus.acknowledged)
                     {
-                        @GetIncidentAction(i.Status)
+                        GetIncidentAction(i.Status);
                     }
                 </td>
                 <td>@i.Title</td>

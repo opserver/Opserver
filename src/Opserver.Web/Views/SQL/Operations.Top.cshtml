@@ -7,30 +7,32 @@
     var errorMessage = Model.ErrorMessage;
     if (i == null) { return; }
 }
-@helper ReadableTime(long microSeconds)
+@functions
 {
-    @TimeSpan.FromMilliseconds(microSeconds / 1000d).ToTimeStringMini()
-}
-@helper SortLink(SQLInstance.TopSorts sort, string title)
-{
-    <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
-        @if (sort == Model.TopSearchOptions.Sort)
-        {
-            <span class="current-sort" title="@sort.AsString(EnumFormat.Description)">@title</span>
-        }
-        else
-        {
-            <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
-        }
-    </th>
-}
-@helper RunInLast(DashboardModel.LastRunInterval interval, string label)
-{
-    var secs = (int) interval;
-    var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
-    <label>
-        <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
-    </label>
+    string ReadableTime(long microSeconds) => TimeSpan.FromMilliseconds(microSeconds / 1000d).ToTimeStringMini();
+    string SortLink(SQLInstance.TopSorts sort, string title)
+    {
+        <th class="sortable@(sort == Model.TopSearchOptions.Sort ? " current-sort" : "")">
+            @if (sort == Model.TopSearchOptions.Sort)
+            {
+                <span class="current-sort" title="@sort.AsString(EnumFormat.Description)">@title</span>
+            }
+            else
+            {
+                <a href="?node=@(Model.CurrentInstance.Name)&sort=@(sort.ToString())@(Model.TopSearchOptionsQueryString)" title="Sort by @sort.AsString(EnumFormat.Description)">@title</a>
+            }
+        </th>
+        return null;
+    }
+    string RunInLast(DashboardModel.LastRunInterval interval, string label)
+    {
+        var secs = (int) interval;
+        var isChecked = secs == Model.TopSearchOptions.LastRunSeconds;
+        <label>
+            <input type="radio" name="LastRunSeconds" value="@secs.ToString()" checked="@isChecked" /> @label
+        </label>
+        return null;
+    }
 }
 @if (errorMessage.HasValue())
 {
@@ -84,7 +86,7 @@ else
         <tbody>
         @foreach (var o in topOps)
         {
-            <tr class="plan-row" data-plan-handle="@HttpServerUtility.UrlTokenEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
+            <tr class="plan-row" data-plan-handle="@WebEncoders.Base64UrlEncode(o.PlanHandle)" data-offset="@o.StatementStartOffset.ToString()">
                 <td>@o.AvgCPU.ToComma()µs</td>
                 <td>@o.AvgCPUPerMinute.ToComma()µs</td>
                 <td>@ReadableTime(o.TotalCPU)</td>

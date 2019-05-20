@@ -6,23 +6,27 @@
     var s = Model.Instance;
     var missingIndexList = s.GetMissingIndexes(Model.Database);
 }
-@helper ColumnSummary(SQLInstance.MissingIndex i)
+@functions
 {
-    if (i.EqualityColumns.HasValue())
+    string ColumnSummary(SQLInstance.MissingIndex i)
     {
-        <div><span class="text-muted">Equals:</span> @i.EqualityColumns</div>
-    }
-    if (i.InEqualityColumns.HasValue())
-    {
-        <div><span class="text-muted">Not Equals:</span> @i.InEqualityColumns</div>
-    }
-    if (i.IncludedColumns.HasValue())
-    {
-        <div><span class="text-muted">Include:</span> @i.IncludedColumns</div>
+        if (i.EqualityColumns.HasValue())
+        {
+            <div><span class="text-muted">Equals:</span> @i.EqualityColumns</div>
+        }
+        if (i.InEqualityColumns.HasValue())
+        {
+            <div><span class="text-muted">Not Equals:</span> @i.InEqualityColumns</div>
+        }
+        if (i.IncludedColumns.HasValue())
+        {
+            <div><span class="text-muted">Include:</span> @i.IncludedColumns</div>
+        }
+        return null;
     }
 }
 @section top {
-    <span class="pull-right small">@Helpers.PollNow(missingIndexList)</span>
+    <span class="pull-right small">@Poll.Now(missingIndexList)</span>
 }
 @if (missingIndexList.Data == null || !missingIndexList.Successful)
 {

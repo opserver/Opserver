@@ -5,11 +5,16 @@
 @{
     var standalone = Model.StandaloneInstances;
 }
-@helper ConnectionsCell(SQLInstance i) {
-var props = i.ServerProperties.SafeData(true);
-    <td>
-        <a href="@Url.Action(nameof(SQLController.Connections), new {node = i.Name})">@props.ConnectionCount.ToComma()</a> <span class="text-muted">/ @props.SessionCount.ToComma()</span>
-    </td>
+@functions
+{
+    string ConnectionsCell(SQLInstance i) 
+    {
+        var props = i.ServerProperties.SafeData(true);
+        <td>
+            <a href="@Url.Action(nameof(SQLController.Connections), new {node = i.Name})">@props.ConnectionCount.ToComma()</a> <span class="text-muted">/ @props.SessionCount.ToComma()</span>
+        </td>
+        return null;
+    }
 }
 <div class="js-refresh" data-name="sql">
     @if (Model.Clusters.Any())
@@ -23,7 +28,7 @@ var props = i.ServerProperties.SafeData(true);
                             <h5>
                                 <a href="~/sql/servers#/cluster/@c.Name" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="text-muted small">(@c.QuorumType.AsString(EnumFormat.Description) - @c.QuorumState.AsString(EnumFormat.Description))</span>
                                 @if (c.Description.HasValue()) { <span class="text-muted small">(@c.Description)</span> }
-                                <span class="pull-right small"> @Helpers.PollNow(c.Nodes)</span>
+                                <span class="pull-right small"> @Poll.Now(c.Nodes)</span>
                             </h5>
                         </th>
                     </tr>
@@ -51,11 +56,11 @@ var props = i.ServerProperties.SafeData(true);
                             <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.AsString(EnumFormat.Description)</td>
                             <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
-                            @SQLHelpers.MemoryCell(n)
-                            <td>@SQLHelpers.HealthDescriptionAGs(cAgs)</td>
-                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Helpers.HealthDescription(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
+                            <partial Name="Partials.MemoryCell.cshtml" Model="@((n, 2))" />
+                            <td>@Health.OfAGs(cAgs)</td>
+                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Health.Description(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
                             @ConnectionsCell(n)
-                            @SQLHelpers.BatchesCell(n)
+                            <td>@(n.BatchesPerSec?.ToComma())</td>
                             <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
                             <td>@n.ClusterVotes.ToComma()</td>
                             <td>@n.LastFetch.ToPollSpan()</td>
@@ -73,7 +78,7 @@ var props = i.ServerProperties.SafeData(true);
                     <th colspan="8">
                         <h5>
                             @standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone
-                            <span class="pull-right small"> @Helpers.PollNow(standalone)</span>
+                            <span class="pull-right small"> @Poll.Now(standalone)</span>
                         </h5>
                     </th>
                 </tr>
@@ -96,13 +101,13 @@ var props = i.ServerProperties.SafeData(true);
                         <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
-                        @SQLHelpers.MemoryCell(i)
+                        <partial Name="Partials.MemoryCell.cshtml" Model="@((i, 2))" />
                         <td title="@dbs.Count.Pluralize("Database"):
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
-                            @Helpers.HealthDescription(dbs)
+                            @Health.Description(dbs)
                         </td>
                         @ConnectionsCell(i)
-                        @SQLHelpers.BatchesCell(i)
+                        <td>@(i.BatchesPerSec?.ToComma())</td>
                         <td>@i.LastFetch.ToPollSpan(mini: false)</td>
                     </tr>
                 }

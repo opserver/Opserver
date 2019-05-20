@@ -12,9 +12,13 @@
         });
     </script>
 }
-@helper TabLink(DashboardModel.Views view, string action, string name)
+@functions
 {
-    <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
+    string TabLink(DashboardModel.Views view, string action, string name)
+    {
+        <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
+        return null;
+    }
 }
 <ul class="nav nav-tabs nav-tabs-right">
     @TabLink(DashboardModel.Views.DNS, nameof(CloudFlareController.DNS), "DNS")

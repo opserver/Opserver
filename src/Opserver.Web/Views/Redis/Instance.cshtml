@@ -9,9 +9,9 @@
     <h5 class="page-header">
         @i.IconSpan() @i.Host<span class="text-muted">: </span> @i.Port.ToString()
         <small class="text-muted">(<a href="#/redis/summary/info">View INFO</a>)</small>
-        @Helpers.PollNow(i)
+        @Poll.Now(i)
     </h5>
-    @Helpers.PollInfo(i, i.Name)
+    <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Node = i, Name = i.Name })" />
     @if (i.HasPolledCacheSuccessfully)
     {
     <div class="row small">

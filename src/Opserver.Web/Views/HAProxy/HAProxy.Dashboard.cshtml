@@ -49,7 +49,7 @@
 @functions
 {
     readonly Dictionary<Item, Proxy> statMapping = new Dictionary<Item, Proxy>();
-    public string CombinedStat(string title, IEnumerable<Item> stats, Func<Item, string> getter)
+    string CombinedStat(string title, IEnumerable<Item> stats, Func<Item, string> getter)
     {
         var sb = StringBuilderCache.Get()
                 .Append(title)
@@ -66,7 +66,7 @@
         return sb.ToStringRecycle();
     }
 
-    public string GetRowClass(StatusType type)
+    string GetRowClass(StatusType type)
     {
         switch (type)
         {
@@ -106,16 +106,31 @@
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
             return Equals((ProxyGroupKey)obj);
         }
 
         public bool Equals(ProxyGroupKey other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
             return string.Equals(Name, other.Name) && string.Equals(GroupLinkName, other.GroupLinkName) && string.Equals(GroupName, other.GroupName) && string.Equals(ProxyName, other.ProxyName) && string.Equals(NiceName, other.NiceName) && HasAdminLogin == other.HasAdminLogin && GroupStatus == other.GroupStatus && Equals(AllServers, other.AllServers) && Equals(AllStats, other.AllStats) && PollDate.Equals(other.PollDate);
         }
 
@@ -157,15 +172,30 @@
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+            if (obj.GetType() != this.GetType())
+            {
+                return false;
+            }
             return Equals((ServerGroupKey)obj);
         }
         public bool Equals(ServerGroupKey other)
         {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
             return string.Equals(Description, other.Description) && Type == other.Type && IsFrontend == other.IsFrontend && IsChecked == other.IsChecked && IsServer == other.IsServer;
         }
 
@@ -193,10 +223,13 @@
             var strings = new List<string>();
             foreach (Action a in Enum.GetValues(typeof(Action)))
             {
-                if ((action & a) != 0) strings.Add(a.ToString());
+                if ((action & a) != 0)
+                {
+                    strings.Add(a.ToString());
+                }
+                result = strings.ToJson().ToString();
+                ActionLists.TryAdd(action, result);
             }
-            result = strings.ToJson().ToString();
-            ActionLists.TryAdd(action, result);
         }
         return result;
     }
@@ -204,9 +237,18 @@
     public string GetActions(ProxyGroupKey group)
     {
         var enabled = Action.None;
-        if (group.AllStats.Any(s => s.OutOfRotation)) enabled |= Action.Ready;
-        if (group.AllStats.Any(s => !s.InDrain)) enabled |= Action.Drain;
-        if (group.AllStats.Any(s => !s.InMaintenance)) enabled |= Action.Maintenance;
+        if (group.AllStats.Any(s => s.OutOfRotation))
+        {
+            enabled |= Action.Ready;
+        }
+        if (group.AllStats.Any(s => !s.InDrain))
+        {
+            enabled |= Action.Drain;
+        }
+        if (group.AllStats.Any(s => !s.InMaintenance))
+        {
+            enabled |= Action.Maintenance;
+        }
 
         if (group.AllServers.Any(s => s.IsChecked))
         {
@@ -224,9 +266,18 @@
     public string GetActions(IGrouping<ServerGroupKey, Item> group)
     {
         var enabled = Action.None;
-        if (group.Any(s => s.OutOfRotation)) enabled |= Action.Ready;
-        if (group.Any(s => !s.InDrain)) enabled |= Action.Drain;
-        if (group.Any(s => !s.InMaintenance)) enabled |= Action.Maintenance;
+        if (group.Any(s => s.OutOfRotation))
+        {
+            enabled |= Action.Ready;
+        }
+        if (group.Any(s => !s.InDrain))
+        {
+            enabled |= Action.Drain;
+        }
+        if (group.Any(s => !s.InMaintenance))
+        {
+            enabled |= Action.Maintenance;
+        }
 
         if (group.Key.IsChecked)
         {
@@ -331,27 +382,27 @@
                                         <span title="@ip.CheckStatusString" class="@(isPrimary ? "primary" : null)@(ip.IsServer && ip.Backup > 0 ? " text-muted" : null)">@ip.IconSpan() @p.Instance.Name</span>
                                     }
                                 </td>
-                                <td title="@CombinedStat("Current sessions", s, si => si.CurrentSessions.ToComma()) ">
+                                <td title="@CombinedStat("Current sessions", s, si => si.CurrentSessions.ToComma())">
                                     <span class="text-muted">Cur:</span>
                                     @s.Sum(si => si.CurrentSessions).ToComma()
                                 </td>
-                                <td title="@CombinedStat("New Sessions per second (current)", s, si => si.CurrentNewSessionsPerSecond.ToComma()) ">
+                                <td title="@CombinedStat("New Sessions per second (current)", s, si => si.CurrentNewSessionsPerSecond.ToComma())">
                                     <span class="text-muted">Cur:</span>
                                     @s.Sum(si => si.CurrentNewSessionsPerSecond).ToComma()
                                 </td>
-                                <td title="@CombinedStat("Max Sessions per second", s, si => si.MaxNewSessionPerSecond.ToComma()) ">
+                                <td title="@CombinedStat("Max Sessions per second", s, si => si.MaxNewSessionPerSecond.ToComma())">
                                     <span class="text-muted">Max:</span>
                                     @s.Sum(si => si.MaxNewSessionPerSecond).ToComma()
                                 </td>
-                                <td title="@CombinedStat("Bytes transferred in", s, si => $"{si.BytesIn.ToComma()} bytes ({si.BytesIn.ToHumanReadableSize()})") ">
+                                <td title="@CombinedStat("Bytes transferred in", s, si => $"{si.BytesIn.ToComma()} bytes ({si.BytesIn.ToHumanReadableSize()})")">
                                     <span class="text-muted">In:</span>
                                     @s.Sum(si => si.BytesIn).ToHumanReadableSize()
                                 </td>
-                                <td title="@CombinedStat("Bytes transferred out", s, si => $"{si.BytesOut.ToComma()} bytes ({si.BytesOut.ToHumanReadableSize()})") ">
+                                <td title="@CombinedStat("Bytes transferred out", s, si => $"{si.BytesOut.ToComma()} bytes ({si.BytesOut.ToHumanReadableSize()})")">
                                     <span class="text-muted">Out:</span>
                                     @s.Sum(si => si.BytesOut).ToHumanReadableSize()
                                 </td>
-                                <td title="@CombinedStat("Status", s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")") " class="@(stat.IsChecked ? null : "text-muted")">
+                                <td title="@CombinedStat("Status", s, si => (!si.IsFrontend && si.IsChecked ? si.LastStatusChange.ToRelativeTimeMiniAll() : "") + " (" + si.Status + ")")" class="@(stat.IsChecked ? null : "text-muted")">
                                     @(!stat.IsFrontend && stat.IsChecked ? s.Max(si => si.LastStatusChange).ToRelativeTimeMiniAll() : "") @latestStat.ToStatusSpan()
                                 </td>
                                 <td title="@CombinedStat("Poll Status", s, si => $"{si.CheckStatusString} - {si.CheckCode.ToString()} ({si.CheckDurationMiliseconds.ToString()}ms)") ">
@@ -391,7 +442,7 @@
                             <th colspan="5">
                                 <h5>
                                     Instances
-                                    <span class="pull-right small"> @Helpers.PollNow(instances)</span>
+                                    <span class="pull-right small"> @Poll.Now(instances)</span>
                                 </h5>
                             </th>
                         </tr>

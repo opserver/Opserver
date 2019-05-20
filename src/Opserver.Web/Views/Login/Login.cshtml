@@ -23,7 +23,7 @@
                     <h4 class="page-header">@SiteSettings.SiteNameLong Login</h4>
                     <form action="~/login" method="POST">
                         <div class="form-group form-group-sm">
-                            <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
+                            <input type="hidden" name="url" value="@Context.Request.Query["ReturnUrl"]" />
                             <input type="text" class="form-control" name="user" placeholder="Username" autofocus="autofocus" /> <br />
                             <input type="password" class="form-control" name="pass" placeholder="Password" /> <br />
                             <input type="submit" value="Log in" class="btn btn-primary btn-sm pull-right" />

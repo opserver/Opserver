@@ -1,54 +1,5 @@
 ﻿@using StackExchange.Opserver
-@using StackExchange.Opserver.Data
-@using StackExchange.Opserver.Helpers
-@helper PollNow(params LightweightCache[] caches)
-{
-    if (caches != null)
-    {
-        <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@Json.Encode(caches.Where(i => i != null).Select(i => i.Key))">@Icon.Refresh <span class="js-text">Poll Now</span></a>
-    }
-}
-@helper PollNow(LightweightCache cache)
-{
-    <a href="#" class="pull-right hover-pulsate js-reload-link" data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@cache.Key">@Icon.Refresh <span class="js-text">Poll Now</span></a>
-}
-@helper HealthDescription(IEnumerable<IMonitorStatus> ims, bool unknownIsHealthy = false)
-{
-    if (ims == null)
-    {
-        return;
-    }
-    var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
-    var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
-    var bad = ims.Except(warning).Except(good).ToList();
-
-    if (bad.Any())
-    {
-        @:@MonitorStatus.Critical.IconSpan() @bad.Count.ToComma()
-    }
-    if (warning.Any())
-    {
-        @:@MonitorStatus.Warning.IconSpan() @warning.Count.ToComma()
-    }
-    if (good.Any())
-    {
-        @:@MonitorStatus.Good.IconSpan() @good.Count.ToComma()
-    }
-}
-@helper CacheEmpty(Cache cache, string message)
-{
-    if (!cache.LastPollSuccessful)
-    {
-        <div class="alert alert-info">
-            <h5>@message</h5>
-            @if (cache.ErrorMessage.HasValue())
-            {
-                <p class="error-stack">@cache.ErrorMessage</p>
-            }
-        </div>
-    }
-}
-@helper PollInfo(PollNode node, string name)
+@*@helper PollInfo(PollNode node, string name)
 {
     if (!node.HasPolled || node.LastFetch?.LastSuccess == null)
     {
@@ -114,4 +65,4 @@
             </div>
         </div>
     }
-}
+}*@

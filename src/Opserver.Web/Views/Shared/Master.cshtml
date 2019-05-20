@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver.Models
 @using StackExchange.Opserver.Views.Shared
 @using StackExchange.Profiling
+@inject IJsonHelper Json
 @{
     var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
 }
@@ -11,7 +12,7 @@
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="google" value="notranslate" />
-    <link rel="stylesheet" href="@HtmlUtils.CacheBreaker("~/Content/themes/" + Theme.Current + "/styles.min.css")">
+    <link href="~/Content/themes/@Theme.Current/styles.min.css" asp-append-version="true" rel="stylesheet" />
     <link href="~/Content/img/apple-touch-icon.png" asp-append-version="true" rel="apple-touch-icon" />
     <script src="~/Content/js/jquery-1.11.3.min.js" asp-append-version="true"></script>
     <script src="~/Content/js/plugins.js" asp-append-version="true"></script>
@@ -28,7 +29,7 @@
                         icon = n.MonitorStatus.TextClass(showGood: true),
                         category = n.CategoryName
                     }).OrderBy(n => n.category).ThenBy(n => n.label);
-                @:Status.NodeSearch.init({ nodes: @Json.Encode(serverJson).AsHtml() });
+                @:Status.NodeSearch.init({ nodes: @Json.Serialize(serverJson) });
             }
         });
     </script>    @RenderSection("head", false)    @MiniProfiler.Current.RenderIncludes(Context)

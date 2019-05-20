@@ -1,15 +1,17 @@
 ﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Data.SQL.QueryPlans
 @model StackExchange.Opserver.Views.SQL.OperationsTopDetailModel
 @{
     Layout = null;
     var s = Model.Instance;
     var op = Model.Op;
 }
-@helper ReadableTime(long microseconds)
+@functions
 {
-    @TimeSpan.FromMilliseconds(microseconds / 1000).ToTimeStringMini()
+    string ReadableTime(long microseconds)
+    {
+        @TimeSpan.FromMilliseconds(microseconds / 1000).ToTimeStringMini()
+        return null;
+    }
 }
 <h4 class="modal-title">
     Details for operation on @s.Name@(op != null ? ": " + op.CompiledOnDatabase : null)
@@ -134,7 +136,7 @@
                             <label>Last Execution</label>
                         </div>
                         <div class="value-block">
-                            <a href="@Url.Action(nameof(SQLController.TopPlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">Download</a>
+                            <a href="@Url.Action(nameof(SQLController.TopPlan), new { node = s.Name, handle = WebEncoders.Base64UrlEncode(op.PlanHandle) })">Download</a>
                             <label>Query Plan</label>
                         </div>
                     </div>
@@ -144,7 +146,7 @@
         <div class="row small">
             <div class="value-block col-md-12">
                 0x@(op.ReadablePlanHandle)
-                <label>Plan Handle (<a class="text-danger js-remove-plan js-confirm" href="@Url.Action(nameof(SQLController.RemovePlan), new { node = s.Name, handle = HttpServerUtility.UrlTokenEncode(op.PlanHandle) })">purge plan</a>)</label>
+                <label>Plan Handle (<a class="text-danger js-remove-plan js-confirm" href="@Url.Action(nameof(SQLController.RemovePlan), new { node = s.Name, handle = WebEncoders.Base64UrlEncode(op.PlanHandle) })">purge plan</a>)</label>
             </div>
         </div>
 
