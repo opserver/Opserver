@@ -7,14 +7,11 @@ using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Data.HAProxy;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Views.Shared;
-using StackExchange.Profiling;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Models.Security;
 using Microsoft.AspNetCore.Mvc;
 using System.IO;
-using Microsoft.AspNetCore.Http.Extensions;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -23,9 +20,6 @@ namespace StackExchange.Opserver.Controllers
     {
         public virtual ISecurableModule SettingsModule => null;
         public virtual TopTab TopTab => null;
-
-        private readonly Func<string, IDisposable> _startStep = name => MiniProfiler.Current.Step(name);
-        private readonly Action<IDisposable> _stopStep = s => s?.Dispose();
 
         public StatusController()
         {
@@ -60,44 +54,6 @@ namespace StackExchange.Opserver.Controllers
             return View("NoConfiguration");
         }
 
-        [Route("no-config")]
-        public ViewResult NoConfig()
-        {
-            return View("NoConfiguration");
-        }
-
-        [Route("404")]
-        public ViewResult PageNotFound(string title = null, string message = null)
-        {
-            Response.StatusCode = (int)HttpStatusCode.NotFound;
-
-            var vd = new PageNotFoundModel
-                {
-                    Title = title,
-                    Message = message
-                };
-            return View("PageNotFound", vd);
-        }
-
-        [Route("denied")]
-        public ActionResult AccessDenied()
-        {
-            if (Current.User.IsAnonymous)
-            {
-                return RedirectToAction(nameof(LoginController.Login), "Login", new { returnUrl = Request.GetEncodedPathAndQuery() });
-            }
-
-            Response.StatusCode = (int)HttpStatusCode.Forbidden;
-            return View("~/Views/Shared/AccessDenied.cshtml");
-        }
-
-        [Route("error")]
-        public ActionResult ErrorPage()
-        {
-            Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-            return View("Error");
-        }
-
         public void SetTitle(string title)
         {
             title = title.HtmlEncode();
@@ -108,10 +64,8 @@ namespace StackExchange.Opserver.Controllers
         /// returns ContentResult with the parameter 'content' as its payload and "text/plain" as media type.
         /// </summary>
         /// <param name="content">The text content to render</param>
-        protected ContentResult TextPlain(string content)
-        {
-            return new ContentResult { Content = content, ContentType = "text/plain" };
-        }
+        protected ContentResult TextPlain(string content) =>
+            new ContentResult { Content = content, ContentType = "text/plain" };
 
         protected ContentResult ContentNotFound(string message = null)
         {
@@ -125,15 +79,11 @@ namespace StackExchange.Opserver.Controllers
             return Content(message);
         }
 
-        protected ContentResult JsonRaw(object content)
-        {
-            return new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
-        }
+        protected ContentResult JsonRaw(object content) =>
+            new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
 
-        protected ActionResult Json<T>(T data, Options options = null)
-        {
-            return new JsonJilResult<T> { Data = data, Options = options };
-        }
+        protected ActionResult Json<T>(T data, Options options = null) =>
+            new JsonJilResult<T> { Data = data, Options = options };
 
         protected ActionResult JsonNotFound()
         {

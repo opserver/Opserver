@@ -30,7 +30,7 @@ namespace StackExchange.Opserver
         {
             if (User == null)
             {
-                return (RequestRoles & roles) != 0;
+                return ((RequestRoles | Roles.Anonymous) & roles) != 0;
             }
             return ((User.Role | RequestRoles) & roles) != Roles.None || (User.Role & Roles.GlobalAdmin) != 0;
         }

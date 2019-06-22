@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Helpers
             }
 
             // TODO: Sanity check
-            context.Result = new RedirectToActionResult(nameof(StatusController.AccessDenied), "Status", null);
+            context.Result = new RedirectToActionResult(nameof(MiscController.AccessDenied), "Misc", null);
         }
     }
 

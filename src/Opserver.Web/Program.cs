@@ -39,8 +39,8 @@ namespace StackExchange.Opserver
                     (hostingContext, config) =>
                     {
                         config
-                            .AddJsonFile("appSettings.json", optional: false, reloadOnChange: true)
-                            .AddJsonFile("opserverSettings.json", optional: false, reloadOnChange: true);
+                            .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
+                            .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true);
                     }
                 )
                 .ConfigureLogging(

@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Models.Security
         protected SecurityProvider()
         {
             InternalNetworks = new List<IPNet>();
-            if (SecuritySettings.Current.InternalNetworks != null)
+            if (SecuritySettings.Current?.InternalNetworks != null)
             {
                 foreach (var n in SecuritySettings.Current.InternalNetworks.All)
                 {

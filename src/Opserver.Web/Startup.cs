@@ -40,9 +40,9 @@ namespace StackExchange.Opserver
                         options.LoginPath = "/login";
                         options.LoginPath = "/logout";
                     });
-
-            services.AddMemoryCache();
-            services.AddExceptional(
+            services.AddHttpContextAccessor()
+                    .AddMemoryCache()
+                    .AddExceptional(
                 _configuration.GetSection("Exceptional"),
                 settings =>
                 {
@@ -74,7 +74,7 @@ namespace StackExchange.Opserver
             services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerCacheStorageDefaults>();
             services.AddMiniProfiler(options =>
             {
-                options.RouteBasePath = "~/profiler/";
+                options.RouteBasePath = "/profiler/";
                 options.PopupRenderPosition = RenderPosition.Left;
                 options.PopupMaxTracesToShow = 5;
                 options.ShouldProfile = req =>
@@ -97,8 +97,7 @@ namespace StackExchange.Opserver
                        .IgnorePath("/spark")
                        .IgnorePath("/top-refresh");
             });
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie();
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
 
             //services.Configure<SqlSettings>(_configuration.GetSection("Sql"));
@@ -106,11 +105,12 @@ namespace StackExchange.Opserver
 
         public void Configure(IApplicationBuilder appBuilder, IHostApplicationLifetime appLifetime, IHttpContextAccessor httpAccessor)
         {
-            appBuilder.UseAuthentication()
-                      .UseStaticFiles()
+            appBuilder.UseStaticFiles()
                       .UseExceptional()
                       .UseMiniProfiler()
                       .UseAuthentication()
+                      .UseAuthorization()
+                      .UseRouting()
                       .UseEndpoints(endpoints =>
                       {
                           endpoints.MapDefaultControllerRoute();
