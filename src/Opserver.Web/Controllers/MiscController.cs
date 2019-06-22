@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (Current.User.IsAnonymous)
             {
-                return RedirectToAction(nameof(LoginController.Login), "Login", new { returnUrl = Request.GetEncodedPathAndQuery() });
+                return RedirectToAction(nameof(LoginController.Login), "Login"); //, new { returnUrl = Request.GetEncodedPathAndQuery() });
             }
 
             Response.StatusCode = (int)HttpStatusCode.Forbidden;
