@@ -12,16 +12,10 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.InternalRequest | Roles.ApiRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
-        private readonly Options JilOptions = Options.ExcludeNulls;
-
-        public ApiController()
-        {
-            string pretty = Request.Query["pretty"];
-            if (pretty != null)
-            {
-                JilOptions = Options.PrettyPrintExcludeNulls;
-            }
-        }
+        private Options JilOptions =>
+            Request.Query.ContainsKey("pretty")
+            ? Options.PrettyPrintExcludeNulls
+            : Options.ExcludeNulls;
 
         [Route("api/node/roles")]
         public ActionResult NodeRoles(string node)
