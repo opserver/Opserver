@@ -9,6 +9,11 @@ namespace StackExchange.Opserver.Models
 {
     public static class TopTabs
     {
+        static TopTabs()
+        {
+            ReloadTabs();
+        }
+
         public static List<TopTab> Tabs { get; private set; }
 
         public static string CurrentTab
@@ -19,13 +24,8 @@ namespace StackExchange.Opserver.Models
 
         public static void SetCurrent(Type type)
         {
-            var tab = Tabs.Find(t => t.ControllerType == type);
+            var tab = Tabs?.Find(t => t.ControllerType == type);
             if (tab != null) CurrentTab = tab.Name;
-        }
-
-        static TopTabs()
-        {
-            ReloadTabs();
         }
 
         public static void ReloadTabs()
@@ -39,8 +39,8 @@ namespace StackExchange.Opserver.Models
             {
                 try
                 {
-                    var tt = (Activator.CreateInstance(tc) as StatusController)?.TopTab;
-                    if (tt != null) newTabs.Add(tt);
+                    //var tt = (Activator.CreateInstance(tc) as StatusController)?.TopTab;
+                    //if (tt != null) newTabs.Add(tt);
                 }
                 catch (Exception e)
                 {
