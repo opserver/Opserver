@@ -34,7 +34,7 @@ namespace StackExchange.Opserver
         /// <summary>
         /// Gets the current user from the request
         /// </summary>
-        public static User User => Context.User as User;
+        public static User User => new User(Context.User); // TODO: Move this to efficiency
 
         public static bool IsSecureConnection => Request.IsHttps;
 
