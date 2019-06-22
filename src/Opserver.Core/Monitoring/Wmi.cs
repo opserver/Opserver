@@ -157,6 +157,7 @@ namespace StackExchange.Opserver.Monitoring
             {
                 _data?.Dispose();
                 _data = null;
+                _searcher?.Dispose();
             }
         }
 
