@@ -7,11 +7,14 @@ using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Home;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
     public class HomeController : StatusController
     {
+        public HomeController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
         [Route("")]
         public ActionResult Home()
         {

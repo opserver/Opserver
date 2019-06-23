@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Jil;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -12,10 +13,12 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.InternalRequest | Roles.ApiRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
-        private Options JilOptions =>
+        public ApiController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
+        private Jil.Options JilOptions =>
             Request.Query.ContainsKey("pretty")
-            ? Options.PrettyPrintExcludeNulls
-            : Options.ExcludeNulls;
+            ? Jil.Options.PrettyPrintExcludeNulls
+            : Jil.Options.ExcludeNulls;
 
         [Route("api/node/roles")]
         public ActionResult NodeRoles(string node)

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -8,6 +9,8 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.GlobalAdmin | Roles.InternalRequest)]
     public class DataController : StatusController
     {
+        public DataController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
         [Route("json/{type}")]
         public ActionResult JsonNodes(string type, bool cacheData = false)
         {

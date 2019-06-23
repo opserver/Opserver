@@ -38,7 +38,6 @@ namespace StackExchange.Opserver.Views.Hub
         // TODO: Move this to plugin registration
         static HubView()
         {
-            var s = Current.Settings;
             Register(() => DashboardModule.Enabled, () => DashboardModule.AllNodes.GetWorstStatus(), "Index.Dashboard");
             Register(() => SQLModule.Enabled, () => SQLModule.AllInstances.GetWorstStatus(), "Index.SQL");
             Register(() => ElasticModule.Enabled, () => ElasticModule.Clusters.GetWorstStatus(), "Index.Elastic");

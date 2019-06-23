@@ -11,7 +11,7 @@
     var asm = Assembly.GetExecutingAssembly();
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
-    var s = Current.Settings;
+    var s = Settings;
     var cacheStats = ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
     var currentTheme = Theme.Current;

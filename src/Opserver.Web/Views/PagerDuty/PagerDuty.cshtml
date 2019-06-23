@@ -3,7 +3,7 @@
 @{
     Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
-    var settings = Current.Settings.PagerDuty;
+    var settings = Settings.PagerDuty;
     var scheduleCache = PagerDutyAPI.Instance.AllSchedules;
     var incidentCache = PagerDutyAPI.Instance.Incidents;
 }

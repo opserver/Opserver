@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Http;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
-using StackExchange.Opserver.SettingsProviders;
 
 namespace StackExchange.Opserver
 {
@@ -11,8 +10,6 @@ namespace StackExchange.Opserver
     {
         private static IHttpContextAccessor _httpAccessor;
         public static void Init(IHttpContextAccessor accessor) => _httpAccessor = accessor;
-
-        public static SettingsProvider Settings => SettingsProvider.Current;
 
         public static LocalCache LocalCache => CoreCurrent.LocalCache;
 

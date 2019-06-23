@@ -1,13 +1,15 @@
 ﻿using StackExchange.Opserver.Views.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using Microsoft.AspNetCore.Http.Extensions;
 using StackExchange.Opserver.Helpers;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
     public class MiscController : StatusController
     {
+        public MiscController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
         [Route("no-config")]
         public ViewResult NoConfig()
         {

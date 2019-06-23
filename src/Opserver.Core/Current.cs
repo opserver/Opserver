@@ -1,13 +1,12 @@
 ﻿using System;
 using StackExchange.Exceptional;
-using StackExchange.Opserver.SettingsProviders;
 using Jil;
 
 namespace StackExchange.Opserver
 {
     internal static partial class Current
     {
-        public static SettingsProvider Settings => SettingsProvider.Current;
+        public static OpserverSettings Settings { get; } = new OpserverSettings();
 
         /// <summary>
         /// Manually write an exception to our standard exception log.

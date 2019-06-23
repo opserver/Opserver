@@ -9,7 +9,7 @@
     Layout = null;
     var categories = Model.Nodes
                           .GroupBy(n => n.Category)
-                          .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
+                          .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Settings.Dashboard.ShowOther))
                           .OrderBy(g => g.Key.Index);
 }
 @functions
@@ -106,7 +106,7 @@
                             <th colspan="2">CPU</th>
                             <th colspan="2">Memory</th>
                             <th colspan="2">Network</th>
-                            @if (Current.Settings.Dashboard.ShowVolumePerformance)
+                            @if (Settings.Dashboard.ShowVolumePerformance)
                             {
                             <th colspan="2">Disk (Perf)</th>
                             }
@@ -133,7 +133,7 @@
                                 <td>@Graph(n, "memory")</td>
                                 <td>@n.PrettyTotalNetwork()</td>
                                 <td>@Graph(n, "network")</td>
-                                @if (Current.Settings.Dashboard.ShowVolumePerformance)
+                                @if (Settings.Dashboard.ShowVolumePerformance)
                                 {
                                 <td>@n.PrettyTotalVolumePerformance()</td>
                                 <td>@Graph(n, "volumePerformance")</td>

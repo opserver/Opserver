@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -11,6 +12,8 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Authenticated)]
     public class PollController : StatusController
     {
+        public PollController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
         [Route("poll")]
         public async Task<ActionResult> PollNodes(string type, string[] key, Guid? guid = null)
         {

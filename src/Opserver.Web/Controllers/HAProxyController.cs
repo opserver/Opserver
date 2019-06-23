@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.HAProxy;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -12,7 +13,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.HAProxy;
+        public HAProxyController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
+        public override ISecurableModule SettingsModule => Settings.HAProxy;
 
         public override TopTab TopTab => new TopTab("HAProxy", nameof(Dashboard), this, 60)
         {
@@ -42,7 +45,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("haproxy/traffic")]
         public async Task<ActionResult> Traffic(string host)
         {
-            if (!Current.Settings.HAProxy.Traffic.Enabled)
+            if (!Settings.HAProxy.Traffic.Enabled)
                 return DefaultAction();
 
             var hosts = HAProxyTraffic.GetHostsAsync();

@@ -34,6 +34,8 @@ namespace StackExchange.Opserver
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<OpserverSettings>(_configuration);
+            services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
@@ -103,7 +105,12 @@ namespace StackExchange.Opserver
             //services.Configure<SqlSettings>(_configuration.GetSection("Sql"));
         }
 
-        public void Configure(IApplicationBuilder appBuilder, IHostApplicationLifetime appLifetime, IHttpContextAccessor httpAccessor)
+        public void Configure(
+            IApplicationBuilder appBuilder,
+            IHostApplicationLifetime appLifetime,
+            IHttpContextAccessor httpAccessor,
+            IOptions<OpserverSettings> settings
+        )
         {
             appBuilder.UseStaticFiles()
                       .UseExceptional()

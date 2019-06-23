@@ -24,7 +24,7 @@
                 log: @log.ToJson(),
                 sort: '@Model.Sort',
                 loadMore: @(Model.LoadAsyncSize),
-                enablePreviews: @Current.Settings.Exceptions.EnablePreviews.ToJson(),
+                enablePreviews: @Settings.Exceptions.EnablePreviews.ToJson(),
                 showDeleted: @Model.ShowDeleted.ToJson(),
                 search: @Model.Search.ToJson()
             });

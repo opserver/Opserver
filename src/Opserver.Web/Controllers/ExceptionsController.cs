@@ -8,6 +8,7 @@ using StackExchange.Opserver.Views.Exceptions;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Data.Jira;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -17,7 +18,7 @@ namespace StackExchange.Opserver.Controllers
     {
         public const int MaxSearchResults = 2000;
 
-        public override ISecurableModule SettingsModule => Current.Settings.Exceptions;
+        public override ISecurableModule SettingsModule => Settings.Exceptions;
 
         public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
         {
@@ -34,7 +35,7 @@ namespace StackExchange.Opserver.Controllers
         private Guid? CurrentSimilarId;
         private readonly ExceptionSorts CurrentSort;
 
-        public ExceptionsController()
+        public ExceptionsController(IOptions<OpserverSettings> _settings) : base(_settings) 
         {
             CurrentStore = ExceptionsModule.GetStore(GetParam("store"));
             CurrentGroup = GetParam("group");
@@ -127,7 +128,7 @@ namespace StackExchange.Opserver.Controllers
 
             var vd = GetModel(errors);
             vd.SearchParams = search;
-            vd.LoadAsyncSize = Current.Settings.Exceptions.PageSize;
+            vd.LoadAsyncSize = Settings.Exceptions.PageSize;
             return View(vd);
         }
 
@@ -135,7 +136,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> LoadMore(int? count = null, Guid? prevLast = null)
         {
             var search = await GetSearchAsync().ConfigureAwait(false);
-            search.Count = count ?? Current.Settings.Exceptions.PageSize;
+            search.Count = count ?? Settings.Exceptions.PageSize;
             search.StartAt = prevLast;
 
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
@@ -261,7 +262,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/jiraactions"), HttpGet, OnlyAllow(Roles.ExceptionsAdmin)]
         public ActionResult JiraActions(string appName)
         {
-            var issues = Current.Settings.Jira.GetActionsForApplication(appName);
+            var issues = Settings.Jira.GetActionsForApplication(appName);
             return View("Exceptions.Jira", issues);
         }
 
@@ -270,8 +271,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var e = await CurrentStore.GetErrorAsync(CurrentLog, id).ConfigureAwait(false);
             var user = Current.User;
-            var action = Current.Settings.Jira.Actions.Find(i => i.Id == actionid);
-            var jiraClient = new JiraClient(Current.Settings.Jira);
+            var action = Settings.Jira.Actions.Find(i => i.Id == actionid);
+            var jiraClient = new JiraClient(Settings.Jira);
             var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(result.Key))

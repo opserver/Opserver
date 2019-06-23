@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -10,7 +11,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Elastic)]
     public class ElasticController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.Elastic;
+        public ElasticController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
+        public override ISecurableModule SettingsModule => Settings.Elastic;
 
         public override TopTab TopTab => new TopTab("Elastic", nameof(Dashboard), this, 30)
         {

@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Redis;
 
 namespace StackExchange.Opserver.Controllers
 {
     public partial class RedisController
     {
+        public RedisController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public Task<ActionResult> KillClient(string node, string address)
         {

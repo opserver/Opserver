@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.Dashboard;
+        public override ISecurableModule SettingsModule => Settings.Dashboard;
 
         public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
 
@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var categories = DashboardModule.AllNodes
                 .GroupBy(n => n.Category)
-                .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Current.Settings.Dashboard.ShowOther))
+                .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Settings.Dashboard.ShowOther))
                 .OrderBy(g => g.Key.Index);
 
             var resultCategories = categories.Select(g =>

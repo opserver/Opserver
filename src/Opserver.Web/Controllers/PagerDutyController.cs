@@ -6,13 +6,16 @@ using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.PagerDuty;
 using System;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.PagerDuty;
+        public PagerDutyController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
+        public override ISecurableModule SettingsModule => Settings.PagerDuty;
 
         public override TopTab TopTab => new TopTab("PagerDuty", nameof(Dashboard), this, 45)
         {

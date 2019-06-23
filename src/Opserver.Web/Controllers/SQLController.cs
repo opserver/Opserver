@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -15,7 +16,9 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.SQL;
+        public SQLController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+
+        public override ISecurableModule SettingsModule => Settings.SQL;
 
         public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
         {

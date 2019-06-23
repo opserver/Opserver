@@ -35,7 +35,7 @@
     <partial name="Node.Services" model="Model" />
 }
 
-@if (Current.Settings.Dashboard.ShowVolumePerformance && Model.Volumes.Any())
+@if (Settings.Dashboard.ShowVolumePerformance && Model.Volumes.Any())
 {
     <partial name="Node.Volumes" model="Model" />
 }

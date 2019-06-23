@@ -33,7 +33,7 @@
 <ul class="nav nav-tabs nav-tabs-right">
     @{
         TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard");
-        if (Current.Settings.HAProxy.Traffic.Enabled)
+        if (Settings.HAProxy.Traffic.Enabled)
         {
             TabLink(HAProxyModel.Views.Traffic, nameof(HAProxyController.Traffic), "traffic");
         }

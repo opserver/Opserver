@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController
     {
-        public override ISecurableModule SettingsModule => Current.Settings.Redis;
+        public override ISecurableModule SettingsModule => Settings.Redis;
 
         public override TopTab TopTab => new TopTab("Redis", nameof(Dashboard), this, 20)
         {

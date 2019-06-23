@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Net;
 using Jil;
 using StackExchange.Opserver.Data.Dashboard;
@@ -11,7 +12,7 @@ using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Models.Security;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -20,9 +21,11 @@ namespace StackExchange.Opserver.Controllers
     {
         public virtual ISecurableModule SettingsModule => null;
         public virtual TopTab TopTab => null;
+        protected OpserverSettings Settings { get; }
 
-        public StatusController()
+        public StatusController(IOptions<OpserverSettings> _settings)
         {
+            Settings = _settings.Value;
             // TODO: Change how all this works
             TopTabs.SetCurrent(GetType());
 
@@ -34,7 +37,7 @@ namespace StackExchange.Opserver.Controllers
 
         public ActionResult DefaultAction()
         {
-            var s = Current.Settings;
+            var s = Settings;
 
             // TODO: Plugin registrations - middleware?
             // Order could be interesting here, needs to be tied to top tabs
@@ -82,7 +85,7 @@ namespace StackExchange.Opserver.Controllers
         protected ContentResult JsonRaw(object content) =>
             new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
 
-        protected ActionResult Json<T>(T data, Options options = null) =>
+        protected ActionResult Json<T>(T data, Jil.Options options = null) =>
             new JsonJilResult<T> { Data = data, Options = options };
 
         protected ActionResult JsonNotFound()
@@ -113,7 +116,7 @@ namespace StackExchange.Opserver.Controllers
         {
             public T Data { get; set; }
             public string ContentType { get; set; }
-            public Options Options { get; set; }
+            public Jil.Options Options { get; set; }
 
             public override void ExecuteResult(ActionContext context)
             {

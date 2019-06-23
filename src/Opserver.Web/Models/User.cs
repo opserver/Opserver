@@ -44,17 +44,19 @@ namespace StackExchange.Opserver.Models
                     else
                     {
                         var result = Roles.Authenticated;
+                        // TODO: Spin up user in middleware
+                        //var settings = OpserverSettings.Current;
 
-                        if (Current.Security.IsAdmin) result |= Roles.GlobalAdmin;
+                        //if (Current.Security.IsAdmin) result |= Roles.GlobalAdmin;
 
-                        result |= GetRoles(Current.Settings.CloudFlare, Roles.CloudFlare, Roles.CloudFlareAdmin);
-                        result |= GetRoles(Current.Settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);
-                        result |= GetRoles(Current.Settings.Elastic, Roles.Elastic, Roles.ElasticAdmin);
-                        result |= GetRoles(Current.Settings.Exceptions, Roles.Exceptions, Roles.ExceptionsAdmin);
-                        result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
-                        result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
-                        result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
-                        result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
+                        //result |= GetRoles(settings.CloudFlare, Roles.CloudFlare, Roles.CloudFlareAdmin);
+                        //result |= GetRoles(settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);
+                        //result |= GetRoles(settings.Elastic, Roles.Elastic, Roles.ElasticAdmin);
+                        //result |= GetRoles(settings.Exceptions, Roles.Exceptions, Roles.ExceptionsAdmin);
+                        //result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
+                        //result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
+                        //result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
+                        //result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
 
                         _role = result;
                     }
