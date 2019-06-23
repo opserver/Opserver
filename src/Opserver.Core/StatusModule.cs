@@ -38,9 +38,10 @@ namespace StackExchange.Opserver
             services.AddSingleton<Data.SQL.SQLModule>();
             services.AddSingleton<Data.Redis.RedisModule>();
             services.AddSingleton<Data.Elastic.ElasticModule>();
-            //services.AddSingleton<Data.PagerDuty.PagerDutyModule>();
+            services.AddSingleton<Data.PagerDuty.PagerDutyModule>();
             services.AddSingleton<Data.Exceptions.ExceptionsModule>();
             services.AddSingleton<Data.HAProxy.HAProxyModule>();
+            //services.AddSingleton<Data.CloudFlare.CloudFlareModule>();
             return services;
         }
     }
