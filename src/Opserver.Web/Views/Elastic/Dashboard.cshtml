@@ -1,11 +1,8 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Views.Elastic
-@model DashboardModel
+﻿@model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("Elasticsearch Dashboard");
-    this.SetTopNodes(ElasticModule.Clusters,
+    this.SetTopNodes(Module.Clusters,
         "elastic clusters",
         Model.CurrentCluster);
 }

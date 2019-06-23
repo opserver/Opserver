@@ -1,6 +1,5 @@
-﻿@using StackExchange.Opserver.Data.Redis
-@{
-    var instances = RedisModule.Instances;
+﻿@{
+    var instances = Module.Instances;
     var groups = instances.GroupBy(i => new {i.Name, i.Port})
                           .OrderBy(g => g.Key.Port)
                           .ThenBy(g => g.Key.Name);

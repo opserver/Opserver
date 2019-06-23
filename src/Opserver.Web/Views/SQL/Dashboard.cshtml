@@ -1,11 +1,8 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.SQL
-@using StackExchange.Opserver.Views.SQL
-@model DashboardModel
+﻿@model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("SQL Dashboard");
-    this.SetTopNodes(SQLModule.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? Url.Action(nameof(SQLController.Instance)) : null);
+    this.SetTopNodes(Module.AllInstances, "SQL", Model.CurrentInstance, Model.View == SQLViews.Servers ? Url.Action(nameof(SQLController.Instance)) : null);
 }
 @section head {
     <script>

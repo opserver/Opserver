@@ -1,8 +1,32 @@
 ﻿@using StackExchange.Opserver.Views.Hub
+@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
+@inject StackExchange.Opserver.Data.SQL.SQLModule Sql
+@inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
+@inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
 @model HubModel
 @{
     this.SetPageTitle("Hub");
-    var views = HubView.Views;
+
+    // Just making this compile and run for now
+    // TODO: Move to registration elsewhere, or maybe we look for Hub.cshtml (or something) in those view folders
+    // Ideally, the data layer doesn't know about view names
+    var views = new List<string>();
+    if (Dashboard.Enabled)
+    {
+        views.Add("Index.Dashboard");
+    }
+    if (Sql.Enabled)
+    {
+        views.Add("Index.SQL");
+    }
+    if (Elastic.Enabled)
+    {
+        views.Add("Index.Elastic");
+    }
+    if (HAProxy.Enabled)
+    {
+        views.Add("Index.HAProxy");
+    }
 }
 @section head {
     <script>
@@ -16,13 +40,13 @@
         <div class="col-md-4">
             @for (var i = 0; i < views.Count; i += 2)
             {
-                <partial name="@views[i].ViewName" />
+                <partial name="@views[i]" />
             }
         </div>
         <div class="col-md-4">
             @for (var i = 1; i < views.Count; i += 2)
             {
-                <partial name="@views[i].ViewName" />
+                <partial name="@views[i]" />
             }
         </div>
         <div class="col-md-4">

@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Dashboard
 
         private DashboardCategory _category;
         public DashboardCategory Category =>
-            _category ?? (_category = DashboardCategory.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown);
+            _category ?? (_category = DataProvider.Module.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown);
         private string GetPrettyMachineType()
         {
             if (MachineType?.StartsWith("Linux") ?? false) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
@@ -280,10 +280,10 @@ namespace StackExchange.Opserver.Data.Dashboard
         public float TotalVolumePerformancebps => Volumes?.Sum(i => i.ReadBps.GetValueOrDefault(0) + i.WriteBps.GetValueOrDefault(0)) ?? 0;
 
         private DashboardSettings.NodeSettings _settings;
-        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = Current.Settings.Dashboard.GetNodeSettings(PrettyName));
+        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = DataProvider.Module.Settings.GetNodeSettings(PrettyName));
 
-        private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
-        private Regex GetSetting(Func<INodeSettings, Regex> func) => func(Settings) ?? func(Category?.Settings) ?? func(Current.Settings.Dashboard);
+        private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(DataProvider.Module.Settings);
+        private Regex GetSetting(Func<INodeSettings, Regex> func) => func(Settings) ?? func(Category?.Settings) ?? func(DataProvider.Module.Settings);
         public decimal? CPUWarningPercent => GetSetting(i => i.CPUWarningPercent);
         public decimal? CPUCriticalPercent => GetSetting(i => i.CPUCriticalPercent);
         public decimal? MemoryWarningPercent => GetSetting(i => i.MemoryCriticalPercent);

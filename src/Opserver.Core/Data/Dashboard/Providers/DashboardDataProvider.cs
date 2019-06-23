@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     {
         public TSettings Settings { get; protected set; }
 
-        protected DashboardDataProvider(TSettings settings) : base(settings)
+        protected DashboardDataProvider(DashboardModule module, TSettings settings) : base(module, settings)
         {
             Settings = settings;
         }
@@ -19,6 +19,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
     public abstract class DashboardDataProvider : PollNode, IIssuesProvider
     {
+        public DashboardModule Module { get; }
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
 
@@ -38,10 +39,14 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override string ToString() => GetType().Name;
 
-        protected DashboardDataProvider(string uniqueKey) : base(uniqueKey) { }
-
-        protected DashboardDataProvider(IProviderSettings settings) : base(settings.Name + "Dashboard")
+        protected DashboardDataProvider(DashboardModule module, string uniqueKey) : base(uniqueKey)
         {
+            Module = module;
+        }
+
+        protected DashboardDataProvider(DashboardModule module, IProviderSettings settings) : base(settings.Name + "Dashboard")
+        {
+            Module = module;
             Name = settings.Name;
         }
 
@@ -65,7 +70,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public Node GetNodeByHostname(string hostName)
         {
-            if (!Current.Settings.Dashboard.Enabled || hostName.IsNullOrEmpty()) return null;
+            if (!Module.Settings.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.Find(s => s.Name.IndexOf(hostName, StringComparison.InvariantCultureIgnoreCase) >= 0);
         }
 

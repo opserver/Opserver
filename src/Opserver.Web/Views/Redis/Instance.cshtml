@@ -1,6 +1,6 @@
-﻿@using StackExchange.Opserver.Data.Redis
-@using Roles = StackExchange.Opserver.Models.Roles
-@model StackExchange.Opserver.Views.Redis.DashboardModel
+﻿@using Roles = StackExchange.Opserver.Models.Roles
+@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
+@model DashboardModel
 @{
     var i = Model.CurrentInstance;
     if (i == null) { return; }
@@ -311,7 +311,7 @@
                                         </tr>
                                         foreach (var ip in ips.OrderBy(ipg => ipg.Key))
                                         {
-                                            var name = i.GetServerName(ip.Key);
+                                            var name = Dashboard.GetServerName(ip.Key);
                                             <tr>
                                                 <td>@ip.Key
                                                     <span class="@(name == "Unknown" ? "text-muted" : "")">(@name)</span>

@@ -155,11 +155,6 @@ namespace StackExchange.Opserver.Data.Redis
 
             private IPAddress _ipAddress;
             public IPAddress IPAddress => _ipAddress ?? (_ipAddress = IPAddress.Parse(IP));
-
-            public RedisInstance GetServer()
-            {
-                return RedisInstance.Get(Port, IPAddress);
-            }
         }
 
         public ClientInfo Clients { get; internal set; } = new ClientInfo();

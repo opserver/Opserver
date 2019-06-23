@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Data.Redis
-@model RedisInstance
+﻿@model RedisInstance
 @{
     var i = Model;
     var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host.HostName);
@@ -34,9 +33,9 @@
                     <ul>
                         @foreach (var sc in i.SlaveConnections)
                         {
-                            var slave = sc.GetServer();
+                            var slave = Module.GetInstance(sc);
                             if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
-                            RenderTolopogy(sc.GetServer(), target);
+                            RenderTolopogy(slave, target);
                         }
                     </ul>
                 }

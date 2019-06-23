@@ -11,13 +11,17 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.CloudFlare)]
     public class CloudFlareController : StatusController
     {
-        public CloudFlareController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private CloudFlareModule Module { get; }
+        public CloudFlareController(IOptions<OpserverSettings> _settings, CloudFlareModule module) : base(_settings)
+        {
+            Module = module;
+        }
 
         public override ISecurableModule SettingsModule => Settings.CloudFlare;
 
         public override TopTab TopTab => new TopTab("CloudFlare", nameof(Dashboard), this, 40)
         {
-            GetMonitorStatus = () => CloudFlareAPI.Instance.MonitorStatus
+            GetMonitorStatus = () => Module.MonitorStatus
         };
 
         [Route("cloudflare")]
@@ -29,13 +33,13 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare/dns")]
         public async Task<ActionResult> DNS()
         {
-            await CloudFlareAPI.Instance.PollAsync().ConfigureAwait(false);
+            await Module.API.PollAsync().ConfigureAwait(false);
             var vd = new DNSModel
             {
                 View = DashboardModel.Views.DNS,
-                Zones = CloudFlareAPI.Instance.Zones.SafeData(true),
-                DNSRecords = CloudFlareAPI.Instance.DNSRecords.Data,
-                DataCenters = DataCenters.All
+                Zones = Module.API.Zones.SafeData(true),
+                DNSRecords = Module.API.DNSRecords.Data,
+                DataCenters = Module.AllDatacenters
             };
             return View(vd);
         }

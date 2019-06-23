@@ -1,7 +1,4 @@
 ﻿@using StackExchange.Profiling
-@using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Views.Dashboard
 @inject IJsonHelper Json
 @model DashboardModel
 @{
@@ -16,7 +13,7 @@
 {
     string Graph(Node n, string type)
     {
-        if (DashboardModule.HasData)
+        if (Module.HasData)
         {
             if (Current.Request.Query.TryGetValue("allGraph", out _))
             {

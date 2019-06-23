@@ -16,13 +16,17 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController
     {
-        public SQLController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private SQLModule Module { get; }
+        public SQLController(IOptions<OpserverSettings> _settings, SQLModule sqlModule) : base(_settings)
+        {
+            Module = sqlModule;
+        }
 
         public override ISecurableModule SettingsModule => Settings.SQL;
 
         public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
         {
-            GetMonitorStatus = () => SQLModule.AllInstances.GetWorstStatus()
+            GetMonitorStatus = () => Module.MonitorStatus
         };
 
         [Route("sql")]
@@ -36,8 +40,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new ServersModel
                 {
-                    StandaloneInstances = SQLModule.StandaloneInstances,
-                    Clusters = SQLModule.Clusters,
+                    StandaloneInstances = Module.StandaloneInstances,
+                    Clusters = Module.Clusters,
                     Refresh = node.HasValue() ? 10 : 5
                 };
 
@@ -58,8 +62,8 @@ namespace StackExchange.Opserver.Controllers
             var vd = new ServersModel
             {
                 View = SQLViews.Jobs,
-                StandaloneInstances = SQLModule.StandaloneInstances,
-                Clusters = SQLModule.Clusters,
+                StandaloneInstances = Module.StandaloneInstances,
+                Clusters = Module.Clusters,
                 Refresh = 30,
                 JobSort = sort,
                 SortDirection = dir
@@ -71,7 +75,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/instance")]
         public ActionResult Instance(string node)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new InstanceModel
             {
@@ -85,7 +89,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/instance/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i == null) return NoInstanceRedirect(node);
 
             switch (type)
@@ -133,7 +137,7 @@ namespace StackExchange.Opserver.Controllers
 
         private OperationsTopModel GetOperationsModel(string node, SQLInstance.TopSearchOptions options)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
             options.SetDefaults();
 
             return new OperationsTopModel
@@ -149,7 +153,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var planHandle = WebEncoders.Base64UrlDecode(handle);
 
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new OperationsTopDetailModel
             {
@@ -163,7 +167,7 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult TopPlan(string node, string handle)
         {
             var planHandle = WebEncoders.Base64UrlDecode(handle);
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
             var op = i.GetTopOperation(planHandle).Data;
             if (op == null) return ContentNotFound("Plan was not found.");
 
@@ -188,7 +192,7 @@ namespace StackExchange.Opserver.Controllers
 
         private OperationsActiveModel GetOperationsActiveModel(string node, SQLInstance.ActiveSearchOptions options)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
             return new OperationsActiveModel
             {
                 View = SQLViews.Active,
@@ -200,7 +204,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/connections")]
         public async Task<ActionResult> Connections(string node)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new DashboardModel
             {
@@ -215,7 +219,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/databases")]
         public ActionResult Databases(string node)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new DashboardModel
             {
@@ -230,7 +234,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/db/{database}/{view}/{objectName}")]
         public ActionResult DatabaseDetail(string node, string database, string view, string objectName)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new DatabasesModel
             {
@@ -271,7 +275,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("sql/databases/tables")]
         public ActionResult DatabaseTables(string node, string database)
         {
-            var i = SQLInstance.Get(node);
+            var i = Module.GetInstance(node);
 
             var vd = new DatabasesModel
             {

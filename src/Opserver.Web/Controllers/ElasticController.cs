@@ -11,20 +11,26 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Elastic)]
     public class ElasticController : StatusController
     {
-        public ElasticController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private ElasticModule Module { get; }
 
         public override ISecurableModule SettingsModule => Settings.Elastic;
 
         public override TopTab TopTab => new TopTab("Elastic", nameof(Dashboard), this, 30)
         {
-            GetMonitorStatus = () => ElasticModule.Clusters.GetWorstStatus()
+            GetMonitorStatus = () => Module.MonitorStatus
         };
+
+        public ElasticController(IOptions<OpserverSettings> _settings, ElasticModule module) : base(_settings)
+        {
+            Module = module;
+        }
 
         [Route("elastic")]
         public ActionResult Dashboard()
         {
             var vd = new DashboardModel
             {
+                Clusters = Module.Clusters,
                 View = DashboardModel.Views.AllClusters,
                 DisplayMode = DashboardModel.DisplayModes.InterestingOnly
             };
@@ -86,17 +92,18 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        private static DashboardModel GetViewData(string cluster, string node = null, string index = null)
+        private DashboardModel GetViewData(string cluster, string node = null, string index = null)
         {
             // Cluster names are not unique, names + node names should be though
             // If we see too many people with crazy combos, then node GUIDs it is.
-            var cc = ElasticModule.Clusters.Find(
+            var cc = Module.Clusters.Find(
                 c => string.Equals(c.Name, cluster, StringComparison.InvariantCultureIgnoreCase)
                   && (node.IsNullOrEmpty() || (c.Nodes.Data?.Get(node) != null)));
             var cn = cc?.Nodes.Data.Get(node);
 
             return new DashboardModel
             {
+                Clusters = Module.Clusters,
                 CurrentNodeName = node,
                 CurrentClusterName = cc?.Name,
                 CurrentIndexName = index,

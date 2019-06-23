@@ -1,13 +1,19 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Views.Dashboard
+﻿@inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
+@inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
+@inject StackExchange.Opserver.Data.Redis.RedisModule Redis
+@inject StackExchange.Opserver.Data.SQL.SQLModule Sql
 @model NodeModel
 @{
     var s = Model.CurrentNode;
 
     this.SetPageTitle((s?.PrettyName ?? "Unknown Node") + " Status");
-    this.SetTopNodes(DashboardModule.AllNodes, "Dashboard", Model.CurrentNode);
+    this.SetTopNodes(Module.AllNodes, "Dashboard", Model.CurrentNode);
+
+    if (Model.CurrentStatusType.HasValue && !StatusTypes.Contains(Model.CurrentStatusType.Value))
+    {
+        // Sanity check, needs to happen here due to DI order at the moment
+        Model.CurrentStatusType = null;
+    }
 }
 @section head {
     <script>
@@ -22,6 +28,44 @@
     void SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
     {
         <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)</a></li>
+    }
+    public IEnumerable<CurrentStatusTypes> StatusTypes
+    {
+        get
+        {
+            var node = Model.CurrentNode;
+            if (node == null) yield break;
+
+            // TODO: Move to a method that takes a list of modules instead, and gets types from each.
+            // Where these "types" should be defined is a question though - an enum isn't extensible for plugins later
+
+            yield return CurrentStatusTypes.Stats;
+
+            // TODO: Redis, SQL, etc node recognition - more pluggable?
+            // Need to nuke the enum here...
+            if (Sql.IsMember(node))
+            {
+                yield return CurrentStatusTypes.SQLInstance;
+                yield return CurrentStatusTypes.SQLTop;
+                yield return CurrentStatusTypes.SQLActive;
+            }
+            if (Redis.IsMember(node))
+            {
+                yield return CurrentStatusTypes.Redis;
+            }
+            if (Elastic.IsMember(node))
+            {
+                yield return CurrentStatusTypes.Elastic;
+            }
+            if (HAProxy.IsMember(node))
+            {
+                yield return CurrentStatusTypes.HAProxy;
+            }
+            if (Model.CurrentNode.IsVMHost)
+                yield return CurrentStatusTypes.VMHost;
+            //if (CurrentNode.Interfaces.Any())
+            //    yield return CurrentStatusTypes.Interfaces;
+        }
     }
 }
 @if (s == null)
@@ -152,10 +196,10 @@
         </div>
     </div>
 </div>
-@if (Model.StatusTypes.Count() > 1)
+@if (StatusTypes.Count() > 1)
 { // only show nav if there's actual nav - save the vertical space on stats-only nodes
     <ul class="nav nav-tabs nav-tabs-right">
-        @foreach (var st in Model.StatusTypes.OrderBy(i => i))
+        @foreach (var st in StatusTypes.OrderBy(i => i))
         {
             // TODO: Re-vamp this whole section
             switch (st)

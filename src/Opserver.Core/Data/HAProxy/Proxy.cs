@@ -94,7 +94,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         private string _niceName;
         public string NiceName =>
-            _niceName ?? (_niceName = Current.Settings.HAProxy.Aliases.TryGetValue(Name, out string result)
+            _niceName ?? (_niceName = Instance.Module.Settings.Aliases.TryGetValue(Name, out string result)
                           ? result
                           : Name);
 

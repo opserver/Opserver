@@ -1,9 +1,7 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Redis
-@model RedisMemoryAnalysis
+﻿@model RedisMemoryAnalysis
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    var serverInfo = RedisInstance.Get(Model.ConnectionInfo);
+    var serverInfo = Module.GetInstance(Model.ConnectionInfo);
 }
 @functions
 {

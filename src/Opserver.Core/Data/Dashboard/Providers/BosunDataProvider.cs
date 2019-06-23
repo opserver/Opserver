@@ -27,7 +27,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        public BosunDataProvider(BosunSettings settings) : base(settings) { }
+        public BosunDataProvider(DashboardModule module, BosunSettings settings) : base(module, settings) { }
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return null; }

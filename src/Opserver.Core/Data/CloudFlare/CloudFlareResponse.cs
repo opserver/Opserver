@@ -110,10 +110,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
         //  "id": "f510c13207fc4c7d068e3896525995c9",
         //  "name": "StackExchange"
         //}
-        public List<CloudFlareDNSRecord> DNSRecords
-        {
-            get { return CloudFlareAPI.Instance.DNSRecords.Data?.Where(r => r.ZoneId == Id).ToList() ?? new List<CloudFlareDNSRecord>(); }
-        }
 
         public MonitorStatus MonitorStatus
         {
@@ -189,23 +185,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
                 if (_ipAddress == null && !IPAddress.TryParse(Content, out _ipAddress))
                     _ipAddress = IPAddress.None;
                 return _ipAddress;
-            }
-        }
-
-        public List<IPAddress> RootIPAddresses
-        {
-            get
-            {
-                switch (Type)
-                {
-                    case DNSRecordType.A:
-                    case DNSRecordType.AAAA:
-                        return new List<IPAddress> { IPAddress };
-                    case DNSRecordType.CNAME:
-                        return CloudFlareAPI.Instance.GetIPs(Content);
-                    default:
-                        return null;
-                }
             }
         }
     }

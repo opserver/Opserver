@@ -23,18 +23,18 @@ namespace StackExchange.Opserver.Data.Redis
             }
         }
 
-        public static RedisInstanceOperation FromString(string s)
+        public static RedisInstanceOperation FromString(RedisModule module, string s)
         {
             var parts = s.Split(StringSplits.VerticalBar);
             if (parts.Length > 1 && Enum.TryParse<InstanceCommandType>(parts[0], out var opType))
             {
-                var opee = RedisModule.Instances.Find(i => i.UniqueKey == parts[1]);
+                var opee = module.Instances.Find(i => i.UniqueKey == parts[1]);
                 switch (opType)
                 {
                     case InstanceCommandType.MakeMaster:
                         return MakeMaster(opee);
                     case InstanceCommandType.SlaveTo:
-                        var newMaster = RedisModule.Instances.Find(i => i.UniqueKey == parts[2]);
+                        var newMaster = module.Instances.Find(i => i.UniqueKey == parts[2]);
                         return SlaveTo(opee, newMaster);
                     default:
                         throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));

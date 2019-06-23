@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public Task<bool> EnableAsync(string node) => HAProxyAdmin.PerformServerActionAsync(node, Action.Ready);
-        public Task<bool> DisableAsync(string node) => HAProxyAdmin.PerformServerActionAsync(node, Action.Drain);
+        public Task<bool> EnableAsync(string node) => Module.Admin.PerformServerActionAsync(node, Action.Ready);
+        public Task<bool> DisableAsync(string node) => Module.Admin.PerformServerActionAsync(node, Action.Drain);
     }
 }

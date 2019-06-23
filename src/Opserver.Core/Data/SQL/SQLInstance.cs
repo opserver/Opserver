@@ -3,20 +3,20 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Data.Dashboard;
 
 namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode, ISearchableNode
     {
+        private SQLModule Module { get; }
+
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
-        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds()).Value;
+        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds()).Value;
         public string ObjectName { get; internal set; }
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
@@ -30,10 +30,11 @@ namespace StackExchange.Opserver.Data.SQL
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
         public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
 
-        public SQLInstance(SQLSettings.Instance settings) : base(settings.Name)
+        public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(settings.Name)
         {
+            Module = module;
             Settings = settings;
-            ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Current.Settings.SQL.DefaultConnectionString.Replace("$ServerName$", settings.Name));
+            ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Module.Settings.DefaultConnectionString.Replace("$ServerName$", settings.Name));
             // Grab the instance name for performance counters and such
             var csb = new SqlConnectionStringBuilder(ConnectionString);
             var parts = csb.DataSource?.Split(StringSplits.BackSlash);
@@ -45,11 +46,6 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 ObjectName = parts?.Length == 2 ? "MSSQL$" + parts[1].ToUpper() : "SQLServer";
             }
-        }
-
-        public static SQLInstance Get(string name)
-        {
-            return SQLModule.AllInstances.Find(i => string.Equals(i.Name, name, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public override string NodeType => "SQL";
@@ -101,8 +97,6 @@ namespace StackExchange.Opserver.Data.SQL
         {
             return Databases.Data?.GetReasonSummary();
         }
-
-        public Node ServerInfo => DashboardModule.GetNodeByName(Name);
 
         /// <summary>
         /// Gets a connection for this server - YOU NEED TO DISPOSE OF IT

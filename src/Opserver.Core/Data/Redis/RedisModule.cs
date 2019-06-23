@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using Microsoft.Extensions.Options;
+using static StackExchange.Opserver.Data.Redis.RedisInfo;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public class RedisModule : StatusModule
+    public class RedisModule : StatusModule<RedisSettings>
     {
-        public static bool Enabled => Instances.Count > 0;
-        public static List<RedisReplicationGroup> ReplicationGroups { get; }
-        public static List<RedisHost> Hosts { get; }
-        public static List<RedisInstance> Instances { get; }
-        public static List<RedisConnectionInfo> Connections { get; }
+        public override bool Enabled => Instances.Count > 0;
+        public List<RedisReplicationGroup> ReplicationGroups { get; }
+        public List<RedisHost> Hosts { get; }
+        public List<RedisInstance> Instances { get; }
+        public List<RedisConnectionInfo> Connections { get; }
 
-        private static readonly HashSet<string> HostNames;
+        private readonly HashSet<string> HostNames;
 
-        static RedisModule()
+        public RedisModule(IOptions<RedisSettings> settings) : base(settings)
         {
-            Connections = LoadRedisConnections();
-            Instances = Connections.Select(rci => new RedisInstance(rci))
+            Connections = LoadRedisConnections(settings.Value);
+            Instances = Connections.Select(rci => new RedisInstance(this, rci))
                                    .Where(rsi => rsi.TryAddToGlobalPollers())
                                    .ToList();
 
@@ -33,17 +36,18 @@ namespace StackExchange.Opserver.Data.Redis
             HostNames = new HashSet<string>(Hosts.Select(h => h.HostName), StringComparer.OrdinalIgnoreCase);
         }
 
+        public override MonitorStatus MonitorStatus => Instances.GetWorstStatus();
         public override bool IsMember(string node) => HostNames.Contains(node);
 
-        private static List<RedisConnectionInfo> LoadRedisConnections()
+        private List<RedisConnectionInfo> LoadRedisConnections(RedisSettings settings)
         {
             var result = new List<RedisConnectionInfo>();
-            var defaultServerInstances = Current.Settings.Redis.Defaults.Instances;
-            var allServerInstances = Current.Settings.Redis.AllServers.Instances ?? Enumerable.Empty<RedisSettings.Instance>();
+            var defaultServerInstances = settings.Defaults.Instances;
+            var allServerInstances = settings.AllServers.Instances ?? Enumerable.Empty<RedisSettings.Instance>();
 
-            foreach (var s in Current.Settings.Redis.Servers)
+            foreach (var s in settings.Servers)
             {
-                var server = new RedisHost(s);
+                var server = new RedisHost(this, s);
 
                 var count = result.Count;
                 // Add instances that belong to any servers
@@ -68,6 +72,72 @@ namespace StackExchange.Opserver.Data.Redis
                 }
             }
             return result;
+        }
+
+        public RedisHost GetHost(string hostName)
+        {
+            if (hostName.IsNullOrEmpty() || hostName.Contains(":")) return null;
+
+            return Hosts.Find(h => string.Equals(h.HostName, hostName, StringComparison.InvariantCultureIgnoreCase));
+        }
+
+        public RedisInstance GetInstance(RedisConnectionInfo info)
+        {
+            foreach (var i in Instances)
+            {
+                if (i.ConnectionInfo == info) return i;
+            }
+            return null;
+        }
+
+        public RedisInstance GetInstance(string connectionString)
+        {
+            if (connectionString.IsNullOrEmpty()) return null;
+            if (connectionString.Contains(":"))
+            {
+                var parts = connectionString.Split(StringSplits.Colon);
+                if (parts.Length != 2) return null;
+                if (int.TryParse(parts[1], out int port)) return GetInstance(parts[0], port);
+            }
+            else
+            {
+                return GetAllInstances(connectionString).FirstOrDefault();
+            }
+            return null;
+        }
+
+        public RedisInstance GetInstance(string host, int port)
+        {
+            foreach (var ri in Instances)
+            {
+                if (ri.Host.HostName == host && ri.Port == port) return ri;
+            }
+            var shortHost = host.Split(StringSplits.Period)[0];
+            foreach (var ri in Instances)
+            {
+                if (ri.Port == port && ri.ShortHost == shortHost) return ri;
+            }
+            return null;
+        }
+
+        public RedisInstance GetInstance(int port, IPAddress ipAddress)
+        {
+            foreach (var i in Instances)
+            {
+                if (i.ConnectionInfo.Port != port) continue;
+                foreach (var ip in i.ConnectionInfo.IPAddresses)
+                {
+                    if (ip.Equals(ipAddress)) return i;
+                }
+            }
+            return null;
+        }
+
+        public RedisInstance GetInstance(RedisSlaveInfo info) => GetInstance(info.Port, info.IPAddress);
+
+        public List<RedisInstance> GetAllInstances(string node)
+        {
+            return Instances.Where(ri => string.Equals(ri.Host.HostName, node, StringComparison.InvariantCultureIgnoreCase)).ToList();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace StackExchange.Opserver.Views.Elastic
 {
     public class DashboardModel
     {
-        public List<ElasticCluster> Clusters => ElasticModule.Clusters;
+        public List<ElasticCluster> Clusters { get; set; }
 
         public string CurrentNodeName { get; set; }
         public string CurrentClusterName { get; set; }

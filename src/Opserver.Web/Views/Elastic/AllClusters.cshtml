@@ -1,7 +1,4 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Elastic
-@using StackExchange.Opserver.Views.Elastic
-@model DashboardModel
+﻿@model DashboardModel
 @{
     var knownClusters = Model.Clusters.Where(c => c.Nodes.Data?.Nodes != null && c.Nodes.Data.Nodes.Any()).ToList();
     var unknownClusters = Model.Clusters.Where(c => !c.Nodes.Data?.Nodes?.Any() ?? true);

@@ -1,14 +1,10 @@
 ﻿using System;
-using System.IO;
-using System.Xml;
-using System.Xml.Xsl;
 using EnumsNET;
 using Microsoft.AspNetCore.Html;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Data.SQL;
 
-namespace StackExchange.Opserver.Models
+namespace StackExchange.Opserver.Helpers
 {
     public static class ExtensionMethods
     {

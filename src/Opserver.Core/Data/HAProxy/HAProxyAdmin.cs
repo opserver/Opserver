@@ -10,7 +10,7 @@ using EnumsNET;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public static class HAProxyAdmin
+    public class HAProxyAdmin
     {
         public const string AllServersKey = "*";
 
@@ -20,7 +20,14 @@ namespace StackExchange.Opserver.Data.HAProxy
             public Server Server { get; set; }
         }
 
-        public static Task<bool> PerformProxyActionAsync(IEnumerable<Proxy> proxies, string serverName, Action action)
+        private HAProxyModule Module { get; }
+
+        public HAProxyAdmin(HAProxyModule module)
+        {
+            Module = module;
+        }
+
+        public Task<bool> PerformProxyActionAsync(IEnumerable<Proxy> proxies, string serverName, Action action)
         {
             var pairs = proxies
                 .SelectMany(p => p.Servers
@@ -31,9 +38,9 @@ namespace StackExchange.Opserver.Data.HAProxy
             return PostActionsAsync(pairs, action);
         }
 
-        public static Task<bool> PerformServerActionAsync(string server, Action action)
+        public Task<bool> PerformServerActionAsync(string server, Action action)
         {
-            var proxies = HAProxyGroup.GetAllProxies();
+            var proxies = Module.GetAllProxies();
             var pairs = proxies
                 .SelectMany(p => p.Servers
                     .Where(s => s.Name == server)
@@ -43,9 +50,9 @@ namespace StackExchange.Opserver.Data.HAProxy
             return PostActionsAsync(pairs, action);
         }
 
-        public static Task<bool> PerformGroupActionAsync(string group, Action action)
+        public Task<bool> PerformGroupActionAsync(string group, Action action)
         {
-            var haGroup = HAProxyGroup.GetGroup(group);
+            var haGroup = Module.GetGroup(group);
             if (haGroup == null) return Task.FromResult(false);
 
             var pairs = haGroup.GetProxies()
@@ -56,7 +63,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             return PostActionsAsync(pairs, action);
         }
 
-        private static async Task<bool> PostActionsAsync(List<ActionPair> pairs, Action action)
+        private async Task<bool> PostActionsAsync(List<ActionPair> pairs, Action action)
         {
             var instances = new HashSet<HAProxyInstance>();
             var tasks = new List<Task<bool>>(pairs.Count);
@@ -72,7 +79,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             return result;
         }
 
-        private static async Task<bool> PostAction(Proxy p, Server server, Action action)
+        private async Task<bool> PostAction(Proxy p, Server server, Action action)
         {
             var instance = p.Instance;
             // if we can't issue any commands, bomb out

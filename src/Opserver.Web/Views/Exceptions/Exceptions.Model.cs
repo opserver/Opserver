@@ -12,6 +12,7 @@ namespace StackExchange.Opserver.Views.Exceptions
         private NameValueCollection _requestQueryString;
         public NameValueCollection RequestQueryString => _requestQueryString ?? (_requestQueryString = HttpUtility.ParseQueryString(Current.Request.QueryString.ToString()));
 
+        public ExceptionsModule Module { get; internal set; }
         public ExceptionStore Store { get; internal set; }
         public List<ApplicationGroup> Groups { get; set; }
         public ApplicationGroup Group { get; set; }
@@ -33,7 +34,7 @@ namespace StackExchange.Opserver.Views.Exceptions
 
         private int? _totalCount;
         public int TotalCount => _totalCount ?? (_totalCount = GetTotal()).Value;
-        private int GetTotal() => Log?.ExceptionCount ?? Group?.Total ?? Store?.TotalExceptionCount ?? ExceptionsModule.TotalExceptionCount;
+        private int GetTotal() => Log?.ExceptionCount ?? Group?.Total ?? Store?.TotalExceptionCount ?? Module.TotalExceptionCount;
 
         public bool HasMore => TotalCount > ShownCount;
         public string Title

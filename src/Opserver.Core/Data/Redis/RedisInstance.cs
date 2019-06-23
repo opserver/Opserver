@@ -1,17 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
     public partial class RedisInstance : PollNode, IEquatable<RedisInstance>, ISearchableNode
     {
+        private RedisModule Module { get; }
+
         // TODO: Per-Instance searchability, sub-nodes
         string ISearchableNode.DisplayName => HostAndPort + " - " + Name;
         string ISearchableNode.Name => HostAndPort;
@@ -99,23 +98,12 @@ namespace StackExchange.Opserver.Data.Redis
             return null;
         }
 
-        public RedisInstance(RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
+        public RedisInstance(RedisModule module, RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
         {
+            Module = module;
             ConnectionInfo = connectionInfo;
             ShortHost = connectionInfo.Host.Split(StringSplits.Period)[0];
-            ReplicatesCrossRegion = Current.Settings.Redis.Replication?.CrossRegionNameRegex?.IsMatch(ConnectionInfo.Name) ?? true;
-        }
-
-        public string GetServerName(string hostOrIp)
-        {
-            if (Current.Settings.Dashboard.Enabled && IPAddress.TryParse(hostOrIp, out var addr))
-            {
-                var nodes = DashboardModule.GetNodesByIP(addr).ToList();
-                if (nodes.Count == 1) return nodes[0].PrettyName;
-            }
-            //System.Net.Dns.GetHostEntry("10.7.0.46").HostName.Split(StringSplits.Period).First()
-            //TODO: Redis instance search
-            return AppCache.GetHostName(hostOrIp);
+            ReplicatesCrossRegion = module.Settings.Replication?.CrossRegionNameRegex?.IsMatch(ConnectionInfo.Name) ?? true;
         }
 
         // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
@@ -171,23 +159,22 @@ namespace StackExchange.Opserver.Data.Redis
 
         public RedisMemoryAnalysis GetDatabaseMemoryAnalysis(int database, bool runIfMaster = false)
         {
-            var ci = ConnectionInfo;
             if (IsMaster && !runIfMaster)
             {
                 // no slaves, and a master - boom
                 if (SlaveCount == 0)
                 {
-                    return new RedisMemoryAnalysis(ConnectionInfo, database)
+                    return new RedisMemoryAnalysis(new RedisAnalyzer(this), ConnectionInfo, database)
                     {
                         ErrorMessage = "Cannot run memory analysis on a master - it hurts."
                     };
                 }
 
                 // Go to the first slave, automagically
-                ci = SlaveInstances[0].ConnectionInfo;
+                return new RedisAnalyzer(SlaveInstances[0]).AnalyzeDatabaseMemory(database);
             }
 
-            return RedisAnalyzer.AnalyzeDatabaseMemory(ci, database);
+            return new RedisAnalyzer(this).AnalyzeDatabaseMemory(database);
         }
 
         public void ClearDatabaseMemoryAnalysisCache(int database)

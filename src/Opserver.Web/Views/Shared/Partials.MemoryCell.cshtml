@@ -1,12 +1,13 @@
 ﻿@using StackExchange.Opserver.Data.SQL
-@using StackExchange.Opserver.Models
+@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
 @model (SQLInstance Instance, int DecimalPlaces)
 @{ 
     var i = Model.Instance;
+    var serverInfo = Dashboard.GetNodeByName(i.Name);
 }
-@if (i.ServerInfo != null)
+@if (serverInfo != null)
 {
-    <td>@(i.ServerInfo?.MemoryPercentStatusSpan())</td>
+    <td>@(serverInfo?.MemoryPercentStatusSpan())</td>
 }
 else
 {

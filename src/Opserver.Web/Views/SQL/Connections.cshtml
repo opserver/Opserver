@@ -1,13 +1,12 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Views.SQL
+﻿@using StackExchange.Opserver.Data.Dashboard
+@inject DashboardModule Dashboard
 @model DashboardModel
 @{
     var i = Model.CurrentInstance;
     if (i == null) { return; }
     var connections = Model.Connections;
     var enableDashboardLinks = Settings.Dashboard.Enabled;
-    var monitoredList = new HashSet<string>(DashboardModule.AllNodes.Select(si => si.Name.ToLower()));
+    var monitoredList = new HashSet<string>(Dashboard.AllNodes.Select(si => si.Name.ToLower()));
 }
 <h5 class="page-header">
     @(connections?.Count.Pluralize("Active connection") ?? "Unknown connections") on @i.Name:

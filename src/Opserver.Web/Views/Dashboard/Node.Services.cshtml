@@ -1,6 +1,4 @@
-﻿@using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Models
-@model Node
+﻿@model Node
 @{
     bool showServiceActions = (Current.IsInRole(StackExchange.Opserver.Models.Roles.DashboardAdmin) && Model.HasServiceControl());
 }

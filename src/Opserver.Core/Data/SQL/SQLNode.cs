@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Data.SQL
         public override string Description => base.Description ?? Cluster?.Description;
         public SQLCluster Cluster { get; internal set; }
 
-        public SQLNode(SQLCluster sqlCluster, SQLSettings.Instance node) : base(node)
+        public SQLNode(SQLModule module, SQLCluster sqlCluster, SQLSettings.Instance node) : base(module, node)
         {
             Cluster = sqlCluster;
         }

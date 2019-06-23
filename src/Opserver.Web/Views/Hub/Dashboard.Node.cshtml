@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
+@inject DashboardModule Dashboard
 @model Node
 @{
     var s = Model;
@@ -14,7 +15,7 @@
     }
     string Graph(Node s, string type)
     {
-        if (!DashboardModule.HasData)
+        if (!Dashboard.HasData)
         {
             <div class="text-muted">No Data Available</div>
         }

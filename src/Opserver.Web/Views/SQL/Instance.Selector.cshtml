@@ -1,8 +1,8 @@
-﻿@using StackExchange.Opserver.Data.SQL
+﻿@inject SQLModule Sql
 @{
     Layout = null;
-    var clusters = SQLModule.Clusters;
-    var standalone = SQLModule.StandaloneInstances;
+    var clusters = Sql.Clusters;
+    var standalone = Sql.StandaloneInstances;
 }
 @functions
 {

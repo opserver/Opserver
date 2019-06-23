@@ -14,15 +14,15 @@ namespace StackExchange.Opserver.Controllers
         {
             // Entire server
             if (proxy.IsNullOrEmpty() && group.IsNullOrEmpty() && server.HasValue())
-                return Json(await HAProxyAdmin.PerformServerActionAsync(server, act).ConfigureAwait(false));
+                return Json(await Module.Admin.PerformServerActionAsync(server, act).ConfigureAwait(false));
             // Entire group
             if (proxy.IsNullOrEmpty() && server.IsNullOrEmpty() && group.HasValue())
-                return Json(await HAProxyAdmin.PerformGroupActionAsync(group, act).ConfigureAwait(false));
+                return Json(await Module.Admin.PerformGroupActionAsync(group, act).ConfigureAwait(false));
 
-            var haGroup = HAProxyGroup.GetGroup(group);
-            var proxies = (haGroup != null ? haGroup.GetProxies() : HAProxyGroup.GetAllProxies()).Where(pr => pr.Name == proxy);
+            var haGroup = Module.GetGroup(group);
+            var proxies = (haGroup != null ? haGroup.GetProxies() : Module.GetAllProxies()).Where(pr => pr.Name == proxy);
 
-            return Json(await HAProxyAdmin.PerformProxyActionAsync(proxies, server, act).ConfigureAwait(false));
+            return Json(await Module.Admin.PerformProxyActionAsync(proxies, server, act).ConfigureAwait(false));
         }
     }
 }

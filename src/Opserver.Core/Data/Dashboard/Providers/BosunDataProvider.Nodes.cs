@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 foreach (var h in hostsDict.Values)
                 {
-                    if (Current.Settings.Dashboard.ExcludePatternRegex?.IsMatch(h.Name) ?? false)
+                    if (Module.Settings.ExcludePatternRegex?.IsMatch(h.Name) ?? false)
                         continue;
 
                     if (h.Name == "unspecified")

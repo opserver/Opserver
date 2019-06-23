@@ -1,5 +1,6 @@
 ﻿@using StackExchange.Redis
-@model StackExchange.Opserver.Data.Redis.RedisInstance
+@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
+@model RedisInstance
 @{
     Layout = null;
     var clients = Model.Clients.SafeData(true);
@@ -27,7 +28,7 @@
             @foreach (var c in clients)
             {
                 var ip = c.Host;
-                var server = Model.GetServerName(ip);
+                var server = Dashboard.GetServerName(ip);
                 <tr title="@c.Raw">
                     <td>
                         @if ((c.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)

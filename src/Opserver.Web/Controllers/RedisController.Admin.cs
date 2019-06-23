@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -11,8 +10,6 @@ namespace StackExchange.Opserver.Controllers
 {
     public partial class RedisController
     {
-        public RedisController(IOptions<OpserverSettings> _settings) : base(_settings) { }
-
         [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public Task<ActionResult> KillClient(string node, string address)
         {
@@ -22,12 +19,12 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/actions/{node}"), OnlyAllow(Roles.RedisAdmin)]
         public ActionResult InstanceActions(string node)
         {
-            var h = RedisHost.Get(node);
+            var h = Module.GetHost(node);
             if (h != null)
             {
                 return PartialView("Server.Actions", h);
             }
-            var i = RedisInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i != null)
             {
                 return PartialView("Instance.Actions", i);
@@ -43,7 +40,7 @@ namespace StackExchange.Opserver.Controllers
 
         private async Task<ActionResult> Deslave(string node, bool promote)
         {
-            var i = RedisInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             var oldMaster = i.Master;
@@ -74,7 +71,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/actions/{node}/key-purge"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
         public async Task<ActionResult> KeyPurge(string node, int db, string key)
         {
-            var i = RedisInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             try
@@ -102,7 +99,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 foreach (var a in operations)
                 {
-                    ops.Add(RedisInstanceOperation.FromString(a));
+                    ops.Add(RedisInstanceOperation.FromString(Module, a));
                 }
             }
             return PartialView("Server.Actions.Preview", ops);
@@ -116,7 +113,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 foreach (var a in operations)
                 {
-                    tasks.Add(RedisInstanceOperation.FromString(a).PerformAsync());
+                    tasks.Add(RedisInstanceOperation.FromString(Module, a).PerformAsync());
                 }
             }
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -137,7 +134,7 @@ namespace StackExchange.Opserver.Controllers
 
         private async Task<ActionResult> PerformInstanceAction(string node, Func<RedisInstance, Task<bool>> action, bool poll = false)
         {
-            var i = RedisInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i == null) return JsonNotFound();
 
             try

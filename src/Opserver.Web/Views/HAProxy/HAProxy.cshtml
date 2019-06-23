@@ -1,13 +1,9 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.HAProxy
-@using StackExchange.Opserver.Views.HAProxy
-@using Action = StackExchange.Opserver.Data.HAProxy.Action
-@model HAProxyModel
+﻿@model HAProxyModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("HAProxy");
-    var allGroups = HAProxyModule.Groups;
-    this.SetTopNodes(HAProxyModule.Groups, "HAProxy Groups", Model.SelectedGroup);
+    var allGroups = Module.Groups;
+    this.SetTopNodes(Module.Groups, "HAProxy Groups", Model.SelectedGroup);
 }
 @section head {
 @if (Model.IsInstanceFilterable)
@@ -33,16 +29,12 @@
 <ul class="nav nav-tabs nav-tabs-right">
     @{
         TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard");
-        if (Settings.HAProxy.Traffic.Enabled)
-        {
-            TabLink(HAProxyModel.Views.Traffic, nameof(HAProxyController.Traffic), "traffic");
-        }
     }
 </ul>
 <div class="js-refresh" data-name="haproxy-header">
     @if (Model.IsInstanceFilterable)
     {
-        var allProxies = HAProxyGroup.GetAllProxies();
+        var allProxies = Module.GetAllProxies();
         <ul class="badge-link-list small">
             <li class="@(Model.SelectedGroup == null ? "active" : null)">
                 <a href="?">All</a>

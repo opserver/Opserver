@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
+using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 
@@ -36,6 +37,9 @@ namespace StackExchange.Opserver
         {
             services.Configure<OpserverSettings>(_configuration);
             services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
+
+            services.AddStatusModules();
+
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {

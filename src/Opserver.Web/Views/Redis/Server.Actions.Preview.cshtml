@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Data.Redis;
-@model List<RedisInstanceOperation>
+﻿@model List<RedisInstanceOperation>
 @{ 
     var operations = Model;
 }
@@ -36,7 +35,7 @@
                 <ul>
                     @foreach (var sc in top.SlaveConnections)
                     {
-                        var slave = sc.GetServer();
+                        var slave = Module.GetInstance(sc);
                         if (controlling != null && slave.HostAndPort == controlling.HostAndPort) { continue; }
                         @RenderTolopogy(slave, newMaster, command, controlling)
                     }

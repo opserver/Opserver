@@ -1,7 +1,8 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Models
+@inject DashboardModule Dashboard
 @{
-    var nodes = DashboardModule.AllNodes;
+    var nodes = Dashboard.AllNodes;
     var groups = nodes.GroupBy(n => n.Category).OrderBy(g => g.Key.Index).ToList();
 }
 <div class="panel panel-default">

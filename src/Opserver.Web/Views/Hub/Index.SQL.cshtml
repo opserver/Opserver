@@ -1,6 +1,7 @@
 ﻿@using StackExchange.Opserver.Data.SQL
+@inject SQLModule Sql
 @{
-    var all = SQLModule.AllInstances;
+    var all = Sql.AllInstances;
 }
 <div class="panel panel-default">
     <div class="panel-heading">@all.GetWorstStatus().IconSpan() SQL</div>
@@ -9,13 +10,13 @@
             <partial Name="Guages.Circle" Model="@(("Instance", all))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("AG", SQLModule.Clusters.SelectMany(c => c.AvailabilityGroups)))" />
+            <partial Name="Guages.Circle" Model="@(("AG", Sql.Clusters.SelectMany(c => c.AvailabilityGroups)))" />
         </div>
         <div class="col-xs-4">
             <partial Name="Guages.Circle" Model="@(("Database", all.SelectMany(i => i.Databases.SafeData(true))))" />
         </div>
         <table class="table table-super-condensed table-striped col-md-12">
-            @foreach (var c in SQLModule.Clusters)
+            @foreach (var c in Sql.Clusters)
             {
                 <tbody>
                 <tr>
@@ -45,7 +46,7 @@
                 <th>DBs</th>
                 <th>Batches</th>
             </tr>
-            @foreach (var i in SQLModule.StandaloneInstances)
+            @foreach (var i in Sql.StandaloneInstances)
             {
                 <tr class="@i.RowClass()">
                     <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>

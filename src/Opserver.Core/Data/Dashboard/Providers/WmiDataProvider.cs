@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private readonly List<WmiNode> _wmiNodes = new List<WmiNode>();
         private readonly Dictionary<string, WmiNode> _wmiNodeLookup;
 
-        public WmiDataProvider(WMISettings settings) : base(settings)
+        public WmiDataProvider(DashboardModule module, WMISettings settings) : base(module, settings)
         {
             _config = settings;
 
@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         private IEnumerable<WmiNode> InitNodeList(IList<string> nodeNames)
         {
             var nodesList = new List<WmiNode>(nodeNames.Count);
-            var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
+            var exclude = Module.Settings.ExcludePatternRegex;
 
             foreach (var nodeName in nodeNames)
             {

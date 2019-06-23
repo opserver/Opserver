@@ -36,8 +36,11 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         protected override string GetMonitorStatusReason() { return null; }
 
+        private ExceptionsModule Module { get; }
+
         public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)
         {
+            Module = Module;
             Settings = settings;
             ApplicationGroups = GetConfiguredApplicationGroups();
             KnownApplications = ApplicationGroups.SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();
@@ -51,8 +54,8 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         private List<ApplicationGroup> GetConfiguredApplicationGroups()
         {
-            var groups = Settings.Groups ?? Current.Settings.Exceptions.Groups;
-            var applications = Settings.Applications ?? Current.Settings.Exceptions.Applications;
+            var groups = Settings.Groups ?? Module.Settings.Groups;
+            var applications = Settings.Applications ?? Module.Settings.Applications;
             if (groups?.Any() ?? false)
             {
                 var configured = groups
@@ -96,7 +99,7 @@ Select ApplicationName as Name,
 	   MAX(CreationDate) as MostRecent
   From Exceptions
  Where DeletionDate Is Null
- Group By ApplicationName", new {Current.Settings.Exceptions.RecentSeconds}).ConfigureAwait(false);
+ Group By ApplicationName", new { Module.Settings.RecentSeconds }).ConfigureAwait(false);
                     result.ForEach(a =>
                     {
                         a.StoreName = Name;

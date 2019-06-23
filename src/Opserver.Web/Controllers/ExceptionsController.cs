@@ -16,15 +16,17 @@ namespace StackExchange.Opserver.Controllers
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class ExceptionsController : StatusController
     {
+        private ExceptionsModule Module { get; }
+
         public const int MaxSearchResults = 2000;
 
         public override ISecurableModule SettingsModule => Settings.Exceptions;
 
         public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
         {
-            GetMonitorStatus = () => ExceptionsModule.MonitorStatus,
-            GetBadgeCount = () => ExceptionsModule.TotalExceptionCount,
-            GetTooltip = () => ExceptionsModule.TotalRecentExceptionCount.ToComma() + " recent"
+            GetMonitorStatus = () => Module.MonitorStatus,
+            GetBadgeCount = () => Module.TotalExceptionCount,
+            GetTooltip = () => Module.TotalRecentExceptionCount.ToComma() + " recent"
         };
 
         private List<ApplicationGroup> ApplicationGroups => CurrentStore.ApplicationGroups;
@@ -35,9 +37,10 @@ namespace StackExchange.Opserver.Controllers
         private Guid? CurrentSimilarId;
         private readonly ExceptionSorts CurrentSort;
 
-        public ExceptionsController(IOptions<OpserverSettings> _settings) : base(_settings) 
+        public ExceptionsController(IOptions<OpserverSettings> _settings, ExceptionsModule module) : base(_settings)
         {
-            CurrentStore = ExceptionsModule.GetStore(GetParam("store"));
+            Module = module;
+            CurrentStore = Module.GetStore(GetParam("store"));
             CurrentGroup = GetParam("group");
             CurrentLog = GetParam("log") ?? GetParam("app"); // old link compat
             CurrentId = GetParam("id").HasValue() && Guid.TryParse(GetParam("id"), out var guid) ? guid : (Guid?)null;
@@ -111,6 +114,7 @@ namespace StackExchange.Opserver.Controllers
             }
             return new ExceptionsModel
             {
+                Module = Module,
                 Store = CurrentStore,
                 Groups = ApplicationGroups,
                 Group = group,
@@ -236,7 +240,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/counts")]
         public ActionResult Counts()
         {
-            var stores = ExceptionsModule.Stores.Select(s => new
+            var stores = Module.Stores.Select(s => new
             {
                 s.Name,
                 Total = s.TotalExceptionCount
@@ -255,7 +259,7 @@ namespace StackExchange.Opserver.Controllers
             {
                 Stores = stores,
                 Groups = groups,
-                Total = ExceptionsModule.TotalExceptionCount
+                Total = Module.TotalExceptionCount
             });
         }
 

@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Views.Redis
 
     public class DashboardModel
     {
-        public List<RedisReplicationGroup> ReplicationGroups => RedisModule.ReplicationGroups;
+        public List<RedisReplicationGroup> ReplicationGroups { get; set; }
         public List<RedisInstance> Instances { get; set; }
         public string CurrentRedisServer { get; set; }
         public RedisInstance CurrentInstance { get; set; }

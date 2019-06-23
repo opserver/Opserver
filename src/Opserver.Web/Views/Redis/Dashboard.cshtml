@@ -1,11 +1,8 @@
-﻿@using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Redis
-@using StackExchange.Opserver.Views.Redis
-@model DashboardModel
+﻿@model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("Redis Dashboard");
-    this.SetTopNodes(RedisModule.Instances, "Redis Servers", Model.CurrentInstance);
+    this.SetTopNodes(Module.Instances, "Redis Servers", Model.CurrentInstance);
 }
 @functions
 {

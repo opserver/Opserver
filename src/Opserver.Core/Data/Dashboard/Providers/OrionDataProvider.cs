@@ -21,7 +21,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             get { yield return NodeCache; }
         }
 
-        public OrionDataProvider(OrionSettings settings) : base(settings) { }
+        public OrionDataProvider(DashboardModule module, OrionSettings settings) : base(module, settings) { }
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return null; }
@@ -143,7 +143,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                         i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
                     }
 
-                    var exclude = Current.Settings.Dashboard.ExcludePatternRegex;
+                    var exclude = Module.Settings.ExcludePatternRegex;
                     if (exclude != null)
                     {
                         nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.VMHostID == n.Id))).ToList();

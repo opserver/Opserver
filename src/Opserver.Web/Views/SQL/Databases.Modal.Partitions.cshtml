@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Data.SQL
-@model IEnumerable<SQLInstance.DatabasePartition>
+﻿@model IEnumerable<SQLInstance.DatabasePartition>
 @{
     var partitions = Model.OrderBy(p => p.RangeValue).ToList();
     if (partitions.Count == 0)

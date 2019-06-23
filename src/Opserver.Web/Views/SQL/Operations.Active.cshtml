@@ -3,6 +3,7 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.SQL
 @using StackExchange.Opserver.Views.SQL
+@inject DashboardModule Dashboard
 @model OperationsActiveModel
 @{
     var i = Model.CurrentInstance;
@@ -108,7 +109,7 @@ else
                     <td>@w.Writes.ToComma()</td>
                     <td title="@w.WaitInfo">@w.Status</td>
                     <td title="Program: @w.ProgramName">
-                        @if (enableDashboardLinks && DashboardModule.GetNodeByName(w.HostName) != null)
+                        @if (enableDashboardLinks && Dashboard.GetNodeByName(w.HostName) != null)
                         {
                             <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = w.HostName })">@w.HostName</a>
                         }

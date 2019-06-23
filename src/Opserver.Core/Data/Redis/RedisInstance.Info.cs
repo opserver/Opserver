@@ -49,7 +49,7 @@ namespace StackExchange.Opserver.Data.Redis
                 var lastRole = Replication?.RedisInstanceRole;
                 // If we think we're a master and the last poll failed - look to other nodes for info
                 if (!Info.LastPollSuccessful && lastRole == RedisInfo.RedisInstanceRole.Master
-                    && RedisModule.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                    && Module.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
                 {
                     return RedisInfo.RedisInstanceRole.Slave;
                 }
@@ -92,8 +92,8 @@ namespace StackExchange.Opserver.Data.Redis
 
         public RedisInstance Master =>
             Replication?.MasterHost.HasValue() == true
-            ? Get(Replication.MasterHost, Replication.MasterPort)
-            : RedisModule.Instances.Find(i => i.SlaveInstances.Contains(this));
+            ? Module.GetInstance(Replication.MasterHost, Replication.MasterPort)
+            : Module.Instances.Find(i => i.SlaveInstances.Contains(this));
 
         public int SlaveCount => Replication?.ConnectedSlaves ?? 0;
 
@@ -108,7 +108,7 @@ namespace StackExchange.Opserver.Data.Redis
         {
             get
             {
-                return Info.LastPollSuccessful ? (Replication?.SlaveConnections.Select(s => s.GetServer()).Where(s => s != null).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
+                return Info.LastPollSuccessful ? (Replication?.SlaveConnections.Select(s => Module.GetInstance(s)).Where(s => s != null).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
                 // If we can't poll this server, ONLY trust the other nodes we can poll
                 //return AllInstances.Where(i => i.Master == this).ToList();
             }

@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
     public partial class HAProxyGroup : IMonitedService, ISearchableNode
     {
+        private HAProxyModule Module { get; }
+
         public string DisplayName => Name;
         public string CategoryName => "HAProxy";
 
@@ -20,10 +20,11 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public string MonitorStatusReason => Instances.GetReasonSummary();
 
-        public HAProxyGroup(HAProxySettings.Group group)
+        public HAProxyGroup(HAProxyModule module, HAProxySettings.Group group)
         {
+            Module = module;
             Settings = group;
-            Instances = group.Instances.Select(i => new HAProxyInstance(i, group) { Group = this }).ToList();
+            Instances = group.Instances.Select(i => new HAProxyInstance(module, i, group) { Group = this }).ToList();
             Instances.ForEach(i => i.TryAddToGlobalPollers());
         }
 
@@ -31,8 +32,9 @@ namespace StackExchange.Opserver.Data.HAProxy
         /// Creates a single instance group for consistent management at a higher level.
         /// </summary>
         /// <param name="instance">The <see cref="HAProxyInstance"/> to create a single-item group for.</param>
-        public HAProxyGroup(HAProxySettings.Instance instance)
+        public HAProxyGroup(HAProxyModule module, HAProxySettings.Instance instance)
         {
+            Module = module;
             Settings = new HAProxySettings.Group
                 {
                     Name = instance.Name,
@@ -40,7 +42,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                 };
             Instances = new List<HAProxyInstance>
             {
-                new HAProxyInstance(instance)
+                new HAProxyInstance(module, instance)
                 {
                     Group = this
                 }
@@ -54,42 +56,8 @@ namespace StackExchange.Opserver.Data.HAProxy
         }
 
         /// <summary>
-        /// Gets the HAProxy instance with the given name, null if it doesn't exist
-        /// </summary>
-        /// <param name="name">The name of the <see cref="HAProxyGroup"/> to fetch.</param>
-        public static HAProxyGroup GetGroup(string name)
-        {
-            return HAProxyModule.Groups.Find(e => string.Equals(e.Name, name, StringComparison.InvariantCultureIgnoreCase));
-        }
-
-        /// <summary>
-        /// Gets the list of proxies from HAProxy
-        /// </summary>
-        public static List<Proxy> GetAllProxies()
-        {
-            if (!HAProxyModule.Enabled) return new List<Proxy>();
-            var instances = HAProxyModule.Groups.SelectMany(g => g.Instances).ToList();
-            return GetProxies(instances);
-        }
-
-        /// <summary>
         /// Gets the list of proxies for this group
         /// </summary>
-        public List<Proxy> GetProxies()
-        {
-            if (!HAProxyModule.Enabled) return new List<Proxy>();
-            return GetProxies(Instances);
-        }
-
-        private static List<Proxy> GetProxies(List<HAProxyInstance> instances)
-        {
-            using (MiniProfiler.Current.Step("HAProxy - GetProxies()"))
-            {
-                return instances.AsParallel().SelectMany(i => i.Proxies.Data ?? Enumerable.Empty<Proxy>())
-                    .Where(p => p != null)
-                    .OrderBy(p => instances.IndexOf(p.Instance))
-                    .ToList();
-            }
-        }
+        public List<Proxy> GetProxies() => Module.GetProxies(Instances);
     }
 }

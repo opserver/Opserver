@@ -9,8 +9,9 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.CloudFlare
 {
-    public partial class CloudFlareAPI : SinglePollNode<CloudFlareAPI>
+    public partial class CloudFlareAPI : PollNode
     {
+        public CloudFlareModule Module { get; }
         private const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
 
         public CloudFlareSettings Settings { get; internal set; }
@@ -34,9 +35,10 @@ namespace StackExchange.Opserver.Data.CloudFlare
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
 
-        public CloudFlareAPI()
+        public CloudFlareAPI(CloudFlareModule module) : base(nameof(CloudFlareAPI))
         {
-            Settings = Current.Settings.CloudFlare;
+            Module = module;
+            Settings = module.Settings;
         }
 
         private Cache<T> GetCloudFlareCache<T>(

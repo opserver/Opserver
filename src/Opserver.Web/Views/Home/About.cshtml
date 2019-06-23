@@ -2,9 +2,11 @@
 @using System.Reflection
 @using StackExchange.Opserver.Controllers
 @using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Data.Exceptions
-@using StackExchange.Opserver.Data.HAProxy
 @using StackExchange.Opserver.Data.SQL
+@inject DashboardModule Dashboard
+@inject SQLModule Sql
+@inject StackExchange.Opserver.Data.Exceptions.ExceptionsModule Exceptions
+@inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
 @{
     this.SetPageTitle("About");
 
@@ -12,7 +14,7 @@
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
     var s = Settings;
-    var cacheStats = ExtensionMethods.GetGetSetStatistics();
+    var cacheStats = StackExchange.Opserver.ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
     var currentTheme = Theme.Current;
 }
@@ -113,7 +115,6 @@
                 @EnabledLabel("Redis", s.Redis.Enabled)
                 @EnabledLabel("Elastic", s.Elastic.Enabled)
                 @EnabledLabel("HAProxy", s.HAProxy.Enabled)
-                @EnabledLabel("HAProxy Traffic", s.HAProxy.Traffic.Enabled)
             </div>
         </div>
     </div>
@@ -206,7 +207,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Dashboard</div>
                 <div class="panel-body">
-                    @foreach (var p in DashboardModule.Providers)
+                    @foreach (var p in Dashboard.Providers)
                     {
                         <h6 class="page-header">@p.IconSpan() @p.Name</h6>
                         <ul class="list-group">
@@ -234,8 +235,8 @@
     </div>
     @if (s.SQL.Enabled)
     {
-        var clusters = SQLModule.Clusters;
-        var instances = SQLModule.StandaloneInstances;
+        var clusters = Sql.Clusters;
+        var instances = Sql.StandaloneInstances;
         <div class="col-md-4">
             <div class="panel panel-default panel-@instances.GetWorstStatus().RawClass(showGood: true)">
                 <div class="panel-heading">SQL Instances</div>
@@ -264,7 +265,7 @@
     }
     @if (s.Exceptions.Enabled)
     {
-        var exceptionStatus = ExceptionsModule.MonitorStatus;
+        var exceptionStatus = Exceptions.MonitorStatus;
         <div class="col-md-4">
             <div class="panel panel-default panel-@exceptionStatus.RawClass(showGood: true)">
                 <div class="panel-heading">Exceptions</div>
@@ -297,7 +298,7 @@
                     </ul>
                     @foreach (var store in s.Exceptions.Stores)
                     {
-                        var es = ExceptionsModule.Stores.First(ess => ess.Name == store.Name);
+                        var es = Exceptions.Stores.First(ess => ess.Name == store.Name);
                         <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
                         <ul class="list-group">
                             <li class="list-group-item">
@@ -320,9 +321,9 @@
     }
     @if (s.HAProxy.Enabled)
     {
-        var groups = HAProxyModule.Groups;
+        var groups = HAProxy.Groups;
         <div class="col-md-4">
-            <div class="panel panel-default panel-@HAProxyModule.Groups.GetWorstStatus().RawClass(showGood: true)">
+            <div class="panel panel-default panel-@HAProxy.Groups.GetWorstStatus().RawClass(showGood: true)">
                 <div class="panel-heading">HAProxy</div>
                 <div class="panel-body small">
                     <ul class="list-group">

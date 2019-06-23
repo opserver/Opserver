@@ -6,6 +6,7 @@ namespace StackExchange.Opserver.Data.SQL
 {
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {
+        private SQLModule Module { get; }
         public string Name => Settings.Name;
         public string Description => Settings.Description;
         public TimeSpan RefreshInterval { get; }
@@ -37,14 +38,15 @@ namespace StackExchange.Opserver.Data.SQL
         public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
         public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
 
-        public SQLCluster(SQLSettings.Cluster cluster)
+        public SQLCluster(SQLModule module, SQLSettings.Cluster cluster)
         {
+            Module = module;
             Settings = cluster;
             Nodes = cluster.Nodes
-                           .Select(n => new SQLNode(this, n))
+                           .Select(n => new SQLNode(module, this, n))
                            .Where(n => n.TryAddToGlobalPollers())
                            .ToList();
-            RefreshInterval = (cluster.RefreshIntervalSeconds ?? Current.Settings.SQL.RefreshIntervalSeconds).Seconds();
+            RefreshInterval = (cluster.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds();
         }
 
         public bool Equals(SQLCluster other) =>

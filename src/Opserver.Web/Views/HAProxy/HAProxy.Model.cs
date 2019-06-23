@@ -10,7 +10,6 @@ namespace StackExchange.Opserver.Views.HAProxy
             Admin = 0,
             Dashboard = 1,
             Detailed = 2,
-            Traffic = 3
         }
 
         public Views View { get; set; }
@@ -51,6 +50,5 @@ namespace StackExchange.Opserver.Views.HAProxy
 
         public string Host { get; set; }
         public IEnumerable<string> Hosts { get; set; }
-        public List<HAProxyTraffic.RouteHit> TopRoutes { get; set; }
     }
 }

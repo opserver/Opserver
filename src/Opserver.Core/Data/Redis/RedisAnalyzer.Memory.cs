@@ -13,20 +13,18 @@ using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public static class RedisAnalyzer
+    public class RedisAnalyzer
     {
-        internal static readonly Dictionary<RedisConnectionInfo, List<KeyMatcher>> KeyMatchers;
-        static RedisAnalyzer()
+        private RedisInstance Instance { get; }
+        internal readonly List<KeyMatcher> KeyMatchers;
+        public RedisAnalyzer(RedisInstance instance)
         {
-            KeyMatchers = new Dictionary<RedisConnectionInfo, List<KeyMatcher>>();
-            foreach (var i in RedisModule.Instances.Select(rci => rci.ConnectionInfo))
-            {
-                KeyMatchers[i] = i.Settings.AnalysisRegexes
+            Instance = instance;
+            KeyMatchers = instance.ConnectionInfo.Settings.AnalysisRegexes
                                   .Where(r => r.Value.HasValue())
-                                  .Select(r => new KeyMatcher {Name = r.Key, Regex = new Regex(r.Value, RegexOptions.Compiled)})
+                                  .Select(r => new KeyMatcher { Name = r.Key, Regex = new Regex(r.Value, RegexOptions.Compiled) })
                                   .ToList();
-                KeyMatchers[i].Add(new KeyMatcher {Name = "Other (unrecognized)", Regex = new Regex(".", RegexOptions.Compiled)});
-            }
+            KeyMatchers.Add(new KeyMatcher { Name = "Other (unrecognized)", Regex = new Regex(".", RegexOptions.Compiled) });
         }
 
         private static string GetMemoryAnalysisKey(RedisConnectionInfo connectionInfo, int database)
@@ -34,8 +32,9 @@ namespace StackExchange.Opserver.Data.Redis
             return $"redis-memory-analysis-{connectionInfo.Host}:{connectionInfo.Port}:{database}";
         }
 
-        public static RedisMemoryAnalysis AnalyzeDatabaseMemory(RedisConnectionInfo connectionInfo, int database)
+        public RedisMemoryAnalysis AnalyzeDatabaseMemory(int database)
         {
+            var connectionInfo = Instance.ConnectionInfo;
             using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database.ToString()))
             {
                 return Current.LocalCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (_, __) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
@@ -47,7 +46,7 @@ namespace StackExchange.Opserver.Data.Redis
             Current.LocalCache.Remove(GetMemoryAnalysisKey(connectionInfo, database));
         }
 
-        private static RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
+        private RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
         {
             var config = new ConfigurationOptions
             {
@@ -63,13 +62,13 @@ namespace StackExchange.Opserver.Data.Redis
             };
             using (var muxer = ConnectionMultiplexer.Connect(config))
             {
-                var ma = new RedisMemoryAnalysis(connectionInfo, database);
+                var ma = new RedisMemoryAnalysis(this, connectionInfo, database);
                 if (ma.ErrorMessage.HasValue())
                 {
                     return ma;
                 }
                 // Prep the match dictionary
-                foreach (var km in KeyMatchers[connectionInfo])
+                foreach (var km in KeyMatchers)
                 {
                     ma.KeyStats[km] = new KeyStats();
                 }
@@ -182,20 +181,20 @@ namespace StackExchange.Opserver.Data.Redis
             sw.Stop();
         }
 
-        public RedisMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)
+        public RedisMemoryAnalysis(RedisAnalyzer analyzer, RedisConnectionInfo connectionInfo, int database)
         {
             CreationDate = DateTime.UtcNow;
             KeyStats = new ConcurrentDictionary<KeyMatcher, KeyStats>();
 
             ConnectionInfo = connectionInfo;
             Database = database;
-            if (!RedisAnalyzer.KeyMatchers.TryGetValue(connectionInfo, out var matchers))
+            KeyMatchers = analyzer.KeyMatchers;
+            if (KeyMatchers.Count == 0)
             {
                 ErrorMessage = "Could not find regexes defined for " + connectionInfo;
                 return;
             }
-            KeyMatchers = matchers;
-            foreach (var km in matchers)
+            foreach (var km in KeyMatchers)
             {
                 KeyStats[km] = new KeyStats();
             }

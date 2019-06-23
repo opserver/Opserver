@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using StackExchange.Exceptional;
+using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Data.Exceptions
 {
-    public class ExceptionsModule : StatusModule
+    public class ExceptionsModule : StatusModule<ExceptionsSettings>
     {
-        public static bool Enabled => Stores.Count > 0;
+        public override bool Enabled => Stores.Count > 0;
 
-        public static List<ExceptionStore> Stores { get; }
+        public List<ExceptionStore> Stores { get; }
 
-        static ExceptionsModule()
+        public ExceptionsModule(IOptions<ExceptionsSettings> settings) : base(settings)
         {
-            Stores = Current.Settings.Exceptions.Stores
+            Stores = settings.Value.Stores
                 .Select(s => new ExceptionStore(s))
                 .Where(s => s.TryAddToGlobalPollers())
                 .ToList();
@@ -22,37 +20,37 @@ namespace StackExchange.Opserver.Data.Exceptions
 
         public override bool IsMember(string node) => false;
 
-        public static int TotalExceptionCount =>
+        public int TotalExceptionCount =>
             Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(a => a.ExceptionCount) ?? 0 : 0);
-        public static int TotalRecentExceptionCount =>
+        public int TotalRecentExceptionCount =>
             Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(a => a.RecentExceptionCount) ?? 0 : 0);
 
-        public static MonitorStatus MonitorStatus
+        public override MonitorStatus MonitorStatus
         {
             get
             {
-                var settings = Current.Settings.Exceptions;
+                var snapshot = Settings;
                 int total = TotalExceptionCount,
                     recent = TotalRecentExceptionCount;
 
                 if (Stores.Any(s => s.MonitorStatus == MonitorStatus.Critical))
                     return MonitorStatus.Critical;
 
-                if (settings.CriticalCount.HasValue && total > settings.CriticalCount)
+                if (snapshot.CriticalCount.HasValue && total > snapshot.CriticalCount)
                     return MonitorStatus.Critical;
-                if (settings.CriticalRecentCount.HasValue && recent > settings.CriticalRecentCount)
+                if (snapshot.CriticalRecentCount.HasValue && recent > snapshot.CriticalRecentCount)
                     return MonitorStatus.Critical;
 
-                if (settings.WarningCount.HasValue && total > settings.WarningCount)
+                if (snapshot.WarningCount.HasValue && total > snapshot.WarningCount)
                     return MonitorStatus.Warning;
-                if (settings.WarningRecentCount.HasValue && recent > settings.WarningRecentCount)
+                if (snapshot.WarningRecentCount.HasValue && recent > snapshot.WarningRecentCount)
                     return MonitorStatus.Warning;
 
                 return MonitorStatus.Good;
             }
         }
 
-        public static ExceptionStore GetStore(string storeName)
+        public ExceptionStore GetStore(string storeName)
         {
             if (storeName.IsNullOrEmpty() || Stores.Count == 1)
             {

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
@@ -9,17 +10,23 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController
     {
+        private RedisModule Module { get; }
         public override ISecurableModule SettingsModule => Settings.Redis;
 
         public override TopTab TopTab => new TopTab("Redis", nameof(Dashboard), this, 20)
         {
-            GetMonitorStatus = () => RedisModule.Instances.GetWorstStatus()
+            GetMonitorStatus = () => Module.MonitorStatus
         };
+
+        public RedisController(IOptions<OpserverSettings> _settings, RedisModule module) : base(_settings)
+        {
+            Module = module;
+        }
 
         [Route("redis")]
         public ActionResult Dashboard(string node)
         {
-            var instances = RedisInstance.GetAll(node);
+            var instances = Module.GetAllInstances(node);
             if (instances.Count == 1 && instances[0] != null)
             {
                 // In the 1 case, redirect
@@ -27,7 +34,8 @@ namespace StackExchange.Opserver.Controllers
             }
             var vd = new DashboardModel
             {
-                Instances = instances.Count > 1 ? instances : RedisModule.Instances,
+                ReplicationGroups = Module.ReplicationGroups,
+                Instances = instances.Count > 1 ? instances : Module.Instances,
                 View = node.HasValue() ? RedisViews.Server : RedisViews.All,
                 CurrentRedisServer = node,
                 Refresh = true
@@ -38,11 +46,11 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance")]
         public ActionResult Instance(string node)
         {
-            var instance = RedisInstance.Get(node);
+            var instance = Module.GetInstance(node);
 
             var vd = new DashboardModel
             {
-                Instances = RedisModule.Instances,
+                Instances = Module.Instances,
                 CurrentInstance = instance,
                 View = RedisViews.Instance,
                 CurrentRedisServer = node,
@@ -54,7 +62,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/get-config/{host}-{port}-config.zip")]
         public ActionResult DownloadConfiguration(string host, int port)
         {
-            var instance = RedisInstance.Get(host, port);
+            var instance = Module.GetInstance(host, port);
             var configZip = instance.GetConfigZip();
             return new FileContentResult(configZip, "application/zip");
         }
@@ -62,7 +70,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/instance/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
-            var i = RedisInstance.Get(node);
+            var i = Module.GetInstance(node);
             if (i == null) return ContentNotFound("Could not find instance " + node);
 
             switch (type)
@@ -83,7 +91,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/analyze/memory")]
         public ActionResult Analysis(string node, int db, bool runOnMaster = false)
         {
-            var instance = RedisInstance.Get(node);
+            var instance = Module.GetInstance(node);
             if (instance == null)
                 return TextPlain("Instance not found");
             var analysis = instance.GetDatabaseMemoryAnalysis(db, runOnMaster);
@@ -94,7 +102,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("redis/analyze/memory/clear")]
         public ActionResult ClearAnalysis(string node, int db)
         {
-            var instance = RedisInstance.Get(node);
+            var instance = Module.GetInstance(node);
             if (instance == null)
                 return TextPlain("Instance not found");
             instance.ClearDatabaseMemoryAnalysisCache(db);

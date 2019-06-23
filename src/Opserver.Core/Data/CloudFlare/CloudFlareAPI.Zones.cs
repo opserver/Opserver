@@ -43,10 +43,29 @@ namespace StackExchange.Opserver.Data.CloudFlare
             !Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri) ? null : GetZoneFromHost(uri.Host);
 
         /// <summary>
-        /// Get the IP Addresses for a given fully qualified host (star records not supported), even through CNAME chains
+        /// Get the IP Addresses for a given DNS record reponse.
         /// </summary>
-        /// <param name="host">The host to get an IP for</param>
-        /// <returns>Root IP Addresses for this host</returns>
+        /// <param name="record">The DNS record to get an IP for</param>
+        /// <returns>Root IP Addresses for this record.</returns>
+        public List<IPAddress> GetIPs(CloudFlareDNSRecord record)
+        {
+            switch (record.Type)
+            {
+                case DNSRecordType.A:
+                case DNSRecordType.AAAA:
+                    return new List<IPAddress> { record.IPAddress };
+                case DNSRecordType.CNAME:
+                    return GetIPs(record.Content);
+                default:
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Get the IP Addresses for a given fully qualified host (star records not supported), even through CNAME chains.
+        /// </summary>
+        /// <param name="host">The host to get an IP for.</param>
+        /// <returns>Root IP Addresses for this host.</returns>
         public List<IPAddress> GetIPs(string host)
         {
             if (DNSRecords.Data == null)

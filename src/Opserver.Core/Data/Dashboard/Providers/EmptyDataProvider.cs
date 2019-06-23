@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
     public class EmptyDataProvider : DashboardDataProvider
     {
         public override bool HasData => false;
-        public EmptyDataProvider(string uniqueKey) : base(uniqueKey) { }
+        public EmptyDataProvider(DashboardModule module, string uniqueKey) : base(module, uniqueKey) { }
 
         public override int MinSecondsBetweenPolls => 10;
         public override string NodeType => "None";

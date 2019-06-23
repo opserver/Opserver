@@ -9,14 +9,14 @@ namespace StackExchange.Opserver.Data.Redis
     public partial class RedisInstance
     {
         /// <summary>
-        /// Slave this instance to another instance
+        /// Slave this instance to another instance.
         /// </summary>
         /// <param name="address">The address of the <see cref="RedisInstance"/> to slave to.</param>
         public async Task<bool> SlaveToAsync(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
             await _connection.GetSingleServer().SlaveOfAsync(newMaster).ConfigureAwait(false);
-            var newMasterInstance = Get(address);
+            var newMasterInstance = Module.GetInstance(address);
             if (newMasterInstance != null)
             {
                 await newMasterInstance.PublishSERedisReconfigureAsync().ConfigureAwait(false);
@@ -124,7 +124,7 @@ namespace StackExchange.Opserver.Data.Redis
         ///  - Itself
         /// </summary>
         public List<RedisInstance> RecommendedMasterTargets =>
-            RedisModule.Instances
+            Module.Instances
             .Where(s => s.Port == Port && s.Name == Name && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s)
             .ToList();
     }

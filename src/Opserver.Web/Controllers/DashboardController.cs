@@ -1,21 +1,28 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Jil;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Dashboard;
+using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
 
 namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController
     {
+        private DashboardModule Module { get; }
         public override ISecurableModule SettingsModule => Settings.Dashboard;
 
         public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
+
+        public DashboardController(IOptions<OpserverSettings> _settings, DashboardModule module) : base(_settings)
+        {
+            Module = module;
+        }
 
         [Route("dashboard")]
         public ActionResult Dashboard(string q)
@@ -23,22 +30,22 @@ namespace StackExchange.Opserver.Controllers
             var vd = new DashboardModel
             {
                 Nodes = GetNodes(q),
-                ErrorMessages = DashboardModule.ProviderExceptions.ToList(),
+                ErrorMessages = Module.ProviderExceptions.ToList(),
                 Filter = q,
-                IsStartingUp = DashboardModule.AnyDoingFirstPoll
+                IsStartingUp = Module.AnyDoingFirstPoll
             };
             return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
         }
 
         private List<Node> GetNodes(string search) =>
             search.HasValue()
-            ? DashboardModule.AllNodes.Where(n => n.SearchString?.IndexOf(search, StringComparison.InvariantCultureIgnoreCase) > -1).ToList()
-            : DashboardModule.AllNodes.ToList();
+            ? Module.AllNodes.Where(n => n.SearchString?.IndexOf(search, StringComparison.InvariantCultureIgnoreCase) > -1).ToList()
+            : Module.AllNodes.ToList();
 
         [Route("dashboard/json")]
         public ActionResult DashboardJson()
         {
-            var categories = DashboardModule.AllNodes
+            var categories = Module.AllNodes
                 .GroupBy(n => n.Category)
                 .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Settings.Dashboard.ShowOther))
                 .OrderBy(g => g.Key.Index);
@@ -80,9 +87,9 @@ namespace StackExchange.Opserver.Controllers
             }).ToList();
             return Json(new
             {
-                DashboardModule.HasData,
+                Module.HasData,
                 Categories = resultCategories
-            }, Options.ExcludeNulls);
+            }, Jil.Options.ExcludeNulls);
         }
 
         [Route("dashboard/node")]
@@ -90,7 +97,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var vd = new NodeModel
             {
-                CurrentNode = DashboardModule.GetNodeByName(node),
+                CurrentNode = Module.GetNodeByName(node),
                 CurrentStatusType = view
             };
 
@@ -100,7 +107,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/node/summary/{type}")]
         public ActionResult InstanceSummary(string node, string type)
         {
-            var n = DashboardModule.GetNodeByName(node);
+            var n = Module.GetNodeByName(node);
             switch (type)
             {
                 case "hardware":
@@ -116,7 +123,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/graph/{nodeId}/{type}/{subId?}")]
         public async Task<ActionResult> NodeGraph(string nodeId, string type, string subId)
         {
-            var n = DashboardModule.GetNodeById(nodeId);
+            var n = Module.GetNodeById(nodeId);
             var vd = new NodeGraphModel
             {
                 Node = n,

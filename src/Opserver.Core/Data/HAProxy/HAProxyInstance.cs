@@ -10,6 +10,8 @@ namespace StackExchange.Opserver.Data.HAProxy
 {
     public partial class HAProxyInstance : PollNode, INodeRoleProvider
     {
+        internal HAProxyModule Module { get; }
+
         public string Name => Settings.Name;
         public string Description => Settings.Description;
         public int? QueryTimeoutMs => Settings.QueryTimeoutMs;
@@ -56,11 +58,12 @@ namespace StackExchange.Opserver.Data.HAProxy
                    }));
         }
 
-        public HAProxyInstance(HAProxySettings.Instance instance, HAProxySettings.Group group = null)
+        public HAProxyInstance(HAProxyModule module, HAProxySettings.Instance instance, HAProxySettings.Group group = null)
             : base(instance.Name + ":" + instance.Description + " - " + instance.Url)
         {
+            Module = module;
             RawSettings = instance;
-            Settings = Current.Settings.HAProxy.GetInstanceSettings(instance, group);
+            Settings = Module.Settings.GetInstanceSettings(instance, group);
         }
 
         private Cache<List<Proxy>> _proxies;

@@ -6,6 +6,7 @@ namespace StackExchange.Opserver.Data.Redis
 {
     public class RedisHost : IMonitorStatus
     {
+        private RedisModule Module { get; }
         public string HostName { get; }
         internal string ReplicationGroupName { get; }
 
@@ -16,18 +17,12 @@ namespace StackExchange.Opserver.Data.Redis
         public MonitorStatus MonitorStatus => Instances.GetWorstStatus();
         public string MonitorStatusReason => "Instance Status";
 
-        public RedisHost(RedisSettings.Server server)
+        public RedisHost(RedisModule module, RedisSettings.Server server)
         {
+            Module = module;
             HostName = server.Name;
-            Region = Current.Settings.Redis.Replication?.RegionHostRegex?.Match(HostName)?.Value ?? "Global";
+            Region = Module.Settings.Replication?.RegionHostRegex?.Match(HostName)?.Value ?? "Global";
             ReplicationGroupName = server.ReplicationGroup;
-        }
-
-        public static RedisHost Get(string hostName)
-        {
-            if (hostName.IsNullOrEmpty() || hostName.Contains(":")) return null;
-
-            return RedisModule.Hosts.Find(h => string.Equals(h.HostName, hostName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public bool InSameRegionAs(RedisHost host) => string.Equals(Region, host.Region, StringComparison.OrdinalIgnoreCase);

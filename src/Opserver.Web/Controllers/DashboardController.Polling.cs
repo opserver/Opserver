@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("dashboard/node/poll/cpu")]
         public async Task<ActionResult> PollCPU(string id = null, string node = null)
         {
-            var n = id.HasValue() ? DashboardModule.GetNodeById(id) : DashboardModule.GetNodeByName(node);
+            var n = id.HasValue() ? Module.GetNodeById(id) : Module.GetNodeByName(node);
             if (n == null)
                 return JsonNotFound();
 
