@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public CloudFlareModule Module { get; }
         private const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
 
-        public CloudFlareSettings Settings { get; internal set; }
+        public CloudFlareSettings Settings => Module.Settings;
         public string Email => Settings.Email;
         public string APIKey => Settings.APIKey;
 
@@ -38,7 +38,6 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public CloudFlareAPI(CloudFlareModule module) : base(nameof(CloudFlareAPI))
         {
             Module = module;
-            Settings = module.Settings;
         }
 
         private Cache<T> GetCloudFlareCache<T>(
