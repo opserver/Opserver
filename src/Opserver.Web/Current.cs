@@ -36,8 +36,6 @@ namespace StackExchange.Opserver
         /// </summary>
         public static User User => new User(Context.User); // TODO: Move this to efficiency
 
-        public static bool IsSecureConnection => Request.IsHttps;
-
         /// <summary>
         /// Gets the IP this request came from, gets the real IP when behind a proxy
         /// </summary>
