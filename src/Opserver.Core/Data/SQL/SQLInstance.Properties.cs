@@ -1,5 +1,4 @@
 ﻿using System;
-using Dapper;
 
 namespace StackExchange.Opserver.Data.SQL
 {

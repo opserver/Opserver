@@ -75,6 +75,6 @@ namespace StackExchange.Opserver.Data.Redis
     public enum InstanceCommandType
     {
         MakeMaster,
-        SlaveTo
+        SlaveTo,
     }
 }

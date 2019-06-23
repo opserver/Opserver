@@ -98,7 +98,7 @@
         }
         var rootIPs = Module.API.GetIPs(r);
         var servedDCs = rootIPs != null ? dcs.Where(dc => dc.Value.Any(range => rootIPs.Any(range.Contains))).ToList() : null;
-        var masked = rootIPs != null ? DataCenters.GetMasked(rootIPs).ToList() : null;
+        var masked = rootIPs != null ? Module.GetMaskedIPs(rootIPs).ToList() : null;
         var recordDCs = servedDCs != null && servedDCs.Any() ? string.Join(", ", servedDCs.Select(dc => dc.Key)) : "Other";
         <tr class="@(r.Proxied ? "success" : null)">
             <td class="@(r.Type == DNSRecordType.CNAME ? "text-warning" : null)">@r.Type</td>
