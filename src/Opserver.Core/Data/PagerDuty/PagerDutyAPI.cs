@@ -11,15 +11,16 @@ using System.Diagnostics;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyAPI : SinglePollNode<PagerDutyAPI>
+    public partial class PagerDutyAPI : PollNode
     {
+        public PagerDutyModule Module { get; }
         internal static readonly Options JilOptions = new Options(
             dateFormat: DateTimeFormat.ISO8601,
             unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC,
             excludeNulls: true
             );
 
-        public PagerDutySettings Settings { get; internal set; }
+        public PagerDutySettings Settings => Module.Settings;
         public override string NodeType => nameof(PagerDutyAPI);
         public override int MinSecondsBetweenPolls => 3600;
 
@@ -72,9 +73,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             );
         }
 
-        public PagerDutyAPI()
+        public PagerDutyAPI(PagerDutyModule module) : base(nameof(PagerDutyAPI))
         {
-            Settings = Current.Settings.PagerDuty;
+            Module = module;
         }
 
         /// <summary>

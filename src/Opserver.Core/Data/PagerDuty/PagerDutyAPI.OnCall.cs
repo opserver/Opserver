@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         private Cache<List<OnCall>> _oncallinfo;
         public Cache<List<OnCall>> OnCallInfo => _oncallinfo ?? (_oncallinfo = new Cache<List<OnCall>>(
-            Instance,
+            this,
             "On Call information for Pagerduty",
             5.Minutes(),
             getData: GetOnCallUsers,
@@ -44,6 +44,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 {
                     foreach (var u in p)
                     {
+                        u.Module = Module;
                         u.SharedLevelCount = p.Count(tu => tu.EscalationLevel == u.EscalationLevel);
                         if (p.Count(pu => pu.User?.Id == u.User?.Id) > 1)
                         {
@@ -219,6 +220,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
     public class OnCall : IMonitorStatus
     {
+        internal PagerDutyModule Module { private get; set; }
         [DataMember(Name = "escalation_level")]
         public int? EscalationLevel { get; set; }
         [DataMember(Name = "start")]
@@ -235,10 +237,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string ScheduleTitle => Schedule?.Title ?? "Default";
         public string PolicyTitle => Policy?.Title;
 
-        public PagerDutyPerson AssignedUser => PagerDutyAPI.Instance.AllUsers.Data?.FirstOrDefault(u => u.Id == User.Id);
+        public PagerDutyPerson AssignedUser => Module.API.AllUsers.Data?.FirstOrDefault(u => u.Id == User.Id);
 
         public bool IsOverride =>
-            PagerDutyAPI.Instance.PrimaryScheduleOverrides.Data?.Any(
+            Module.API.PrimaryScheduleOverrides.Data?.Any(
                 o => o.StartTime <= DateTime.UtcNow && DateTime.UtcNow <= o.EndTime && o.User.Id == AssignedUser.Id) ?? false;
 
         public bool IsPrimary => EscalationLevel == 1;

@@ -19,10 +19,16 @@ namespace StackExchange.Opserver.Data.PagerDuty
                        until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
                 var url = $"incidents?since={since}&until={until}&sort_by=created_at:desc";
                 return GetFromPagerDutyAsync(url, getFromJson: response =>
-                    JSON.Deserialize<IncidentResponse>(response, JilOptions)
+                {
+                    var results = JSON.Deserialize<IncidentResponse>(response, JilOptions)
                         .Incidents.OrderBy(ic => ic.CreationDate)
-                        .ToList()
-                    );
+                        .ToList();
+                    foreach (var i in results)
+                    {
+                        i.Module = Module;
+                    }
+                    return results;
+                });
             }));
     }
 
@@ -42,6 +48,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
     public class Incident : IncidentMinimal, IMonitorStatus
     {
+        internal PagerDutyModule Module { private get; set; }
         [DataMember(Name = "incident_number")]
         public int Number { get; set; }
         [DataMember(Name = "created_at")]
@@ -56,27 +63,27 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public DateTime? LastChangedOn { get; set; }
         [DataMember(Name = "last_status_change_by")]
         public PagerDutyInfoReference LastChangedBy { get; set; }
-        [DataMember(Name = "resolved_by_user")]
-        public string ResolvedBy => Logs.Result.Find(r => r.LogType == "resolve_log_entry")?.Agent.Person;
         [DataMember(Name = "resolve_reason")]
         public string ResolveReason { get; set; }
 
-        [DataMember(Name = "acknowledgers")]
-        public List<Acknowledgement> AcknowledgedBy
+        public async Task<string> GetResolvedByAsync()
         {
-            get
+            var logs = await GetLogsAsync().ConfigureAwait(false);
+            return logs.Find(r => r.LogType == "resolve_log_entry")?.Agent.Person;
+        }
+
+        public async Task<List<Acknowledgement>> GetAcknowledgedByAsync()
+        {
+            var a = new List<Acknowledgement>();
+            foreach (var i in (await GetLogsAsync().ConfigureAwait(false)).FindAll(l => l.LogType == "acknowledge_log_entry"))
             {
-                var a = new List<Acknowledgement>();
-                foreach (var i in Logs.Result.FindAll(l => l.LogType == "acknowledge_log_entry"))
+                a.Add(new Acknowledgement()
                 {
-                    a.Add(new Acknowledgement()
-                    {
-                        AckPerson = i.Agent.Person,
-                        AckTime = i.CreationTime
-                    });
-                }
-                return a;
+                    AckPerson = i.Agent.Person,
+                    AckTime = i.CreationTime
+                });
             }
+            return a;
         }
 
         [DataMember(Name = "title")]
@@ -90,7 +97,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
         [DataMember(Name = "number_of_escalations")]
         public int? NumberOfEscalations { get; set; }
 
-        public Task<List<LogEntry>> Logs => PagerDutyAPI.Instance.GetIncidentEntriesAsync(Id);
+        public Task<List<LogEntry>> GetLogsAsync() => Module.API.GetIncidentEntriesAsync(Id);
 
         public MonitorStatus MonitorStatus
         {

@@ -1,5 +1,4 @@
-﻿@using StackExchange.Opserver.Data.PagerDuty
-@model OnCall
+﻿@model OnCall
 <tr class="@Model.RowClass()@(Model.IsOnlyPrimary ? " info" : null)" title="@Model.MonitorStatusReason">
     <td>@Model.AssignedUser.FullName</td>
     <td>
@@ -18,5 +17,5 @@
     </td>
     <td>@Model.PolicyTitle</td>
     <td><a href="mailto:@Model.AssignedUser.Email">@Model.AssignedUser.Email</a></td>
-    <td>@PagerDutyAPI.Instance.AllUsers.Data.FirstOrDefault(u => u.Id == @Model.AssignedUser.Id).Phone</td>
+    <td>@Module.API.AllUsers.Data.FirstOrDefault(u => u.Id == @Model.AssignedUser.Id).Phone</td>
 </tr>

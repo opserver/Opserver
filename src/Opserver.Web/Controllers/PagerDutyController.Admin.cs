@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Person Not Found for " + Current.User.AccountName);
 
-            var newIncident = await PagerDutyAPI.Instance.UpdateIncidentStatusAsync(incident, pdUser, newStatus).ConfigureAwait(false);
+            var newIncident = await Module.API.UpdateIncidentStatusAsync(incident, pdUser, newStatus).ConfigureAwait(false);
             return Json(newIncident?.Status == newStatus);
         }
 
@@ -23,17 +23,17 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Persoon Not Found for " + Current.User.AccountName);
 
-            var currentPrimarySchedule = PagerDutyAPI.Instance.PrimarySchedule;
+            var currentPrimarySchedule = Module.API.PrimarySchedule;
             if (currentPrimarySchedule == null)
             {
-                return ContentNotFound(PagerDutyAPI.Instance.Settings.PrimaryScheduleName.IsNullOrEmpty()
+                return ContentNotFound(Module.Settings.PrimaryScheduleName.IsNullOrEmpty()
                    ? "PagerDuty PrimarySchedule is not defined (\"PrimaryScheduleName\" in config)."
-                   : "PagerDuty Schedule '" + PagerDutyAPI.Instance.Settings.PrimaryScheduleName + "' not found.");
+                   : "PagerDuty Schedule '" + Module.Settings.PrimaryScheduleName + "' not found.");
             }
 
             start = start ?? DateTime.UtcNow;
 
-            await currentPrimarySchedule.SetOverrideAsync(start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson).ConfigureAwait(false);
+            await Module.API.SetOverrideAsync(currentPrimarySchedule, start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson).ConfigureAwait(false);
 
             return Json(true);
         }

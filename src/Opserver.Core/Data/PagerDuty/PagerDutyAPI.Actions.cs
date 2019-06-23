@@ -26,14 +26,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
             };
             try
             {
-               var result = await Instance.GetFromPagerDutyAsync($"incidents/{incidentId}",
-               response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response, JilOptions),
-               httpMethod: "PUT",
-               data: data,
-               extraHeaders: headers).ConfigureAwait(false);
-               await Incidents.PollAsync(true).ConfigureAwait(false);
+                var result = await GetFromPagerDutyAsync($"incidents/{incidentId}",
+                response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response, JilOptions),
+                httpMethod: "PUT",
+                data: data,
+                extraHeaders: headers).ConfigureAwait(false);
+                await Incidents.PollAsync(true).ConfigureAwait(false);
 
-               return result?.Response ?? new Incident();
+                return result?.Response ?? new Incident();
             }
             catch (DeserializationException de)
             {

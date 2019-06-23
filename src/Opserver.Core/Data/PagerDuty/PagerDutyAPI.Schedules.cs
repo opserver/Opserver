@@ -38,8 +38,40 @@ namespace StackExchange.Opserver.Data.PagerDuty
             {
                 var schedule = PrimarySchedule;
                 if (schedule == null) return null;
-                return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10.Minutes(), PrimarySchedule.GetOverridesAsync));
+                return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10.Minutes(), () => GetOverridesAsync(PrimarySchedule)));
             }
+        }
+
+        public async Task<string> SetOverrideAsync(PagerDutySchedule shedule, DateTime start, DateTime end, PagerDutyPerson pdPerson)
+        {
+            var overrideData = new
+            {
+                @override = new
+                {
+                    start,
+                    end,
+                    user = new
+                    {
+                        id = pdPerson.Id,
+                        type = "user_reference"
+                    }
+                }
+            };
+            var result = await GetFromPagerDutyAsync("schedules/" + shedule.Id + "/overrides",
+                getFromJson: response => response, httpMethod: "POST", data: overrideData).ConfigureAwait(false);
+
+            await OnCallInfo.PollAsync(true).ConfigureAwait(false);
+            await PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
+            return result;
+        }
+
+        public Task<List<PagerDutyScheduleOverride>> GetOverridesAsync(PagerDutySchedule shedule)
+        {
+            string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
+                    until = DateTime.UtcNow.AddDays(1).ToString("s");
+
+            return GetFromPagerDutyAsync("schedules/" + shedule.Id + "/overrides?since=" + since + "&until=" + until, getFromJson:
+                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response, JilOptions).Overrides);
         }
     }
 
@@ -57,38 +89,6 @@ namespace StackExchange.Opserver.Data.PagerDuty
         public string Name { get; set; }
         [DataMember(Name="time_zone")]
         public string TimeZone { get; set; }
-
-        public async Task<string> SetOverrideAsync(DateTime start, DateTime end, PagerDutyPerson pdPerson)
-        {
-            var overrideData = new
-            {
-                @override = new
-                {
-                    start,
-                    end,
-                    user = new
-                    {
-                        id = pdPerson.Id,
-                        type = "user_reference"
-                    }
-                }
-            };
-            var result = await PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides",
-                getFromJson: response => response, httpMethod: "POST", data: overrideData).ConfigureAwait(false);
-
-            await PagerDutyAPI.Instance.OnCallInfo.PollAsync(true).ConfigureAwait(false);
-            await PagerDutyAPI.Instance.PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
-            return result;
-        }
-
-        public Task<List<PagerDutyScheduleOverride>> GetOverridesAsync()
-        {
-            string since = DateTime.UtcNow.AddDays(-1).ToString("s"),
-                    until = DateTime.UtcNow.AddDays(1).ToString("s");
-
-            return PagerDutyAPI.Instance.GetFromPagerDutyAsync("schedules/" + Id + "/overrides?since=" + since  + "&until=" + until, getFromJson:
-                response => JSON.Deserialize<PagerDutyScheduleOverrideResponse>(response, PagerDutyAPI.JilOptions).Overrides);
-        }
     }
 
     internal class PagerDutyScheduleOverrideResponse
