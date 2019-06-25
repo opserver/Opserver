@@ -13,13 +13,14 @@ namespace StackExchange.Opserver.Data
         private static readonly object _pollAllLock = new object();
         public static readonly HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
 
+        private static CancellationToken _cancellationToken;
         private static Thread _globalPollingThread;
         private static volatile bool _shuttingDown;
         private static long _totalPollIntervals;
         internal static long _activePolls;
         private static DateTime? _lastPollAll;
         private static DateTime _startTime;
-        private static Action<Func<Task>> _taskRunner;
+        private static Action<Func<Task>> _taskRunner = t => Task.Run(t);
 
         public static void Configure(Action<Func<Task>> taskRunner)
         {
@@ -52,8 +53,9 @@ namespace StackExchange.Opserver.Data
         /// <summary>
         /// What do you think it does?
         /// </summary>
-        public static void StartPolling()
+        public static void StartPolling(CancellationToken cancellationToken)
         {
+            _cancellationToken = cancellationToken;
             _startTime = DateTime.UtcNow;
             _globalPollingThread = _globalPollingThread ?? new Thread(MonitorPollingLoop)
                 {
@@ -90,7 +92,7 @@ namespace StackExchange.Opserver.Data
 
         private static void MonitorPollingLoop()
         {
-            while (!_shuttingDown)
+            while (!_shuttingDown && !_cancellationToken.IsCancellationRequested)
             {
                 try
                 {

@@ -5,7 +5,7 @@
     var nodes = Model.Nodes;
     var cache = Model.Cache;
 }
-@if (!node.HasPolled || node.LastFetch?.LastSuccess == null)
+@if (node != null && (!node.HasPolled || node.LastFetch?.LastSuccess == null))
 {
     <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">
@@ -29,7 +29,7 @@
         </div>
     </div>
 }
-else if (nodes.All(n => !n.HasPolled))
+else if (nodes?.All(n => !n.HasPolled) == true)
 {
     <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">
@@ -39,7 +39,7 @@ else if (nodes.All(n => !n.HasPolled))
         </div>
     </div>
 }
-else if (!cache.LastPoll.HasValue || !cache.LastPollSuccessful)
+else if (cache != null && (!cache.LastPoll.HasValue || !cache.LastPollSuccessful))
 {
     <div class="row">
         <div class="col-md-6 col-md-offset-3 text-center" style="margin-top: 10px; margin-bottom: 10px;">

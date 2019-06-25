@@ -1,15 +1,13 @@
 ﻿using System.Collections;
-using System.Net;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Profiling;
 
@@ -30,16 +28,14 @@ namespace StackExchange.Opserver
             Cache.LogExceptions = SiteSettings.LogPollerExceptions;
             // When settings change, reload the app pool
             //Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
-            //PollingEngine.Configure(t => HostingEnvironment.QueueBackgroundWorkItem(_ => t()));
         }
 
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<OpserverSettings>(_configuration);
             services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
-
-            services.AddStatusModules();
-
+            services.AddStatusModules(_configuration);
+            services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
@@ -77,6 +73,7 @@ namespace StackExchange.Opserver
                     };
                 });
 
+            services.AddSingleton<IHostedService, PollingService>();
             services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerCacheStorageDefaults>();
             //services.AddMiniProfiler(options =>
             //{
@@ -105,15 +102,12 @@ namespace StackExchange.Opserver
             //});
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
-
-            //services.Configure<SqlSettings>(_configuration.GetSection("Sql"));
         }
 
         public void Configure(
             IApplicationBuilder appBuilder,
             IHostApplicationLifetime appLifetime,
-            IHttpContextAccessor httpAccessor,
-            IOptions<OpserverSettings> settings
+            IHttpContextAccessor httpAccessor
         )
         {
             appBuilder.UseStaticFiles()

@@ -47,7 +47,9 @@ namespace StackExchange.Opserver.Models
                         // TODO: Spin up user in middleware
                         //var settings = OpserverSettings.Current;
 
-                        //if (Current.Security.IsAdmin) result |= Roles.GlobalAdmin;
+                        //if (Current.Security.IsAdmin)
+                        // TODO: Secure the shizzle
+                        result |= Roles.GlobalAdmin;
 
                         //result |= GetRoles(settings.CloudFlare, Roles.CloudFlare, Roles.CloudFlareAdmin);
                         //result |= GetRoles(settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);

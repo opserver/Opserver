@@ -39,7 +39,7 @@ namespace StackExchange.Opserver.Models.Security
             InternalNetworks = new List<IPNet>();
             if (SecuritySettings.Current?.InternalNetworks != null)
             {
-                foreach (var n in SecuritySettings.Current.InternalNetworks.All)
+                foreach (var n in SecuritySettings.Current.InternalNetworks)
                 {
                     if ((n.CIDR.HasValue() || (n.IP.HasValue() && n.Subnet.IsNullOrEmpty())) && IPNet.TryParse(n.CIDR.IsNullOrEmptyReturn(n.IP), out IPNet net))
                     {

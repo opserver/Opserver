@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data
         {
             _cancellationToken = cancellationToken;
             _logger.LogInformation("Polling service is starting.");
-            PollingEngine.StartPolling();
+            PollingEngine.StartPolling(_cancellationToken);
             return Task.CompletedTask;
         }
 

@@ -56,13 +56,13 @@ namespace StackExchange.Opserver.Controllers
         protected ContentResult JsonRaw(object content) =>
             new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
 
-        protected ActionResult Json<T>(T data, Jil.Options options = null) =>
-            new JsonJilResult<T> { Data = data, Options = options };
+        //protected ActionResult Json<T>(T data, Jil.Options options = null) =>
+        //    new JsonJilResult<T> { Data = data, Options = options };
 
         protected ActionResult JsonNotFound()
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
-            return Json<object>(null);
+            return Json(null);
         }
 
         protected ActionResult JsonNotFound<T>(T toSerialize = default)
@@ -99,7 +99,7 @@ namespace StackExchange.Opserver.Controllers
 
                 using (var sw = new StreamWriter(response.Body))
                 {
-                    JSON.Serialize(sw, Options);
+                    JSON.Serialize(Data, sw, Options);
                 }
             }
         }

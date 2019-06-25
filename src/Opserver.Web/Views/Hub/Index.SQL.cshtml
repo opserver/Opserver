@@ -31,7 +31,7 @@
                     <tr class="@i.RowClass()@(i.IsAllAGsPrimary ? " info" : null)">
                         <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16"/></td>
-                        <partial Name="Partials.MemoryCell.cshtml" Model="@((i, 0))" />
+                        <partial Name="Partials.MemoryCell" Model="@((i, 0))" />
                         <td>@Health.Description(i.Databases.SafeData(true))</td>
                         <td>@(i.BatchesPerSec?.ToComma())</td>
                     </tr>
@@ -51,7 +51,7 @@
                 <tr class="@i.RowClass()">
                     <td>@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                     <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16"/></td>
-                    <partial Name="Partials.MemoryCell.cshtml" Model="@((i, 0))" />
+                    <partial Name="Partials.MemoryCell" Model="@((i, 0))" />
                     <td>@Health.Description(i.Databases.SafeData(true))</td>
                     <td>@(i.BatchesPerSec?.ToComma())</td>
                 </tr>

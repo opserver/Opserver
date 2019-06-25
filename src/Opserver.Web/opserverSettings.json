@@ -1,0 +1,10 @@
+﻿{
+  /* Configuration for the SQL Server dashboard */
+  "Sql": {
+    "defaultConnectionString": "Data Source=$ServerName$;Initial Catalog=master;Integrated Security=SSPI;",
+    "refreshIntervalSeconds": 30,
+    "instances": [
+      { "name": "localhost" }
+    ]
+  }
+}
