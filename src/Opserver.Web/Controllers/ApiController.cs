@@ -29,7 +29,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("api/node/enable"), HttpPost]
         public async Task<ActionResult> NodeEnable(string node)
         {
-            if (!Current.IsInRole(Roles.ApiRequest)) return JsonError("Invalid API key");
+            if (!Current.User.Is(Roles.ApiRequest)) return JsonError("Invalid API key");
 
             await NodeRole.EnableAllAsync(node).ConfigureAwait(false);
             return NodeRoles(node);
@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("api/node/disable"), HttpPost]
         public async Task<ActionResult> NodeDisable(string node)
         {
-            if (!Current.IsInRole(Roles.ApiRequest)) return JsonError("Invalid API key");
+            if (!Current.User.Is(Roles.ApiRequest)) return JsonError("Invalid API key");
 
             await NodeRole.DisableAllAsync(node).ConfigureAwait(false);
             return NodeRoles(node);

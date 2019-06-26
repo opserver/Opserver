@@ -1,6 +1,6 @@
 ﻿@model ExceptionsModel
 @{
-    var showActions = Current.User.IsExceptionAdmin;
+    var showActions = Current.User.Is(Roles.ExceptionsAdmin);
     var displayed = Model.Errors.Sum(e => e.DuplicateCount.GetValueOrDefault(1));
 }
 @functions

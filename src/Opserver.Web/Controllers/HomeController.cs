@@ -112,7 +112,7 @@ namespace StackExchange.Opserver.Controllers
                 .AppendLine("Request Info")
                 .Append("  IP: ").AppendLine(Current.RequestIP)
                 .Append("  User: ").AppendLine(Current.User.AccountName)
-                .Append("  Roles: ").AppendLine(Current.User.Role.ToString())
+                .Append("  Roles: ").AppendLine(Current.User.Roles.ToString())
                 .AppendLine()
                 .AppendLine("Headers");
             foreach (string k in Request.Headers.Keys)

@@ -287,7 +287,7 @@ namespace StackExchange.Opserver.Controllers
 
         private ActionResult NoInstanceRedirect(string node)
         {
-            if (Current.IsAjaxRequest)
+            if (Request.IsAjax())
                 return ContentNotFound("Instance " + node + " was not found.");
             return View("Instance.Selector", new DashboardModel());
         }

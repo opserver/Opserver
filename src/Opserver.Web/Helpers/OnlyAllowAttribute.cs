@@ -30,13 +30,13 @@ namespace StackExchange.Opserver.Helpers
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (Current.IsInRole(Roles))
+            if (Current.User.Is(Roles))
             {
                 return; // Authorized via OnlyAllow
             }
             if (context.ActionDescriptor is ControllerActionDescriptor cad
                 && cad?.MethodInfo.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() is AlsoAllowAttribute alsoAllow
-                && Current.IsInRole(alsoAllow.Roles))
+                && Current.User.Is(alsoAllow.Roles))
             {
                 return; // Authorized via AlsoAllow
             }

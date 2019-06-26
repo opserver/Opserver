@@ -498,6 +498,12 @@ namespace StackExchange.Opserver
             }
             return routeValues;
         }
+
+        public static bool IsAjax(this HttpRequest request) =>
+            request != null && request.Headers["X-Requested-With"] == "XMLHttpRequest";
+
+        public static bool IsAjaxRequest(this RazorPageBase page) =>
+            page.ViewContext.HttpContext.Request.IsAjax();
     }
 
     public static class ViewsExtensionMethods

@@ -1,6 +1,4 @@
-﻿using System.Net;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Models.Security;
+﻿using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver
 {
@@ -23,32 +21,6 @@ namespace StackExchange.Opserver
                 //case "allview":
                 default:
                     return new EveryonesReadOnlyProvider();
-            }
-        }
-
-        public static bool IsInRole(Roles roles)
-        {
-            if (User == null)
-            {
-                return ((RequestRoles | Roles.Anonymous) & roles) != 0;
-            }
-            return ((User.Role | RequestRoles) & roles) != Roles.None || (User.Role & Roles.GlobalAdmin) != 0;
-        }
-
-        public static Roles RequestRoles
-        {
-            get
-            {
-                var roles = Context.Items[nameof(RequestRoles)];
-                if (roles != null) return (Roles)roles;
-
-                var result = Roles.None;
-                if (IPAddress.IsLoopback(Context.Connection.RemoteIpAddress)) result |= Roles.LocalRequest;
-                if (Security.IsInternalIP(RequestIP)) result |= Roles.InternalRequest;
-                if (IsValidApiRequest()) result |= Roles.ApiRequest;
-
-                Context.Items[nameof(RequestRoles)] = result;
-                return result;
             }
         }
 

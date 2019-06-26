@@ -55,7 +55,7 @@ namespace StackExchange.Opserver
                         if (Current.Context != null && Current.User != null)
                         {
                             data.Add("User", Current.User.AccountName);
-                            data.Add("Roles", Current.User.RawRoles.ToString());
+                            data.Add("Roles", Current.User.Roles.ToString());
                         }
 
                         while (ex != null)

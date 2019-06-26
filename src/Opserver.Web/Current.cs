@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
@@ -24,14 +25,27 @@ namespace StackExchange.Opserver
         public static HttpRequest Request => Context.Request;
 
         /// <summary>
-        /// Is the current request ajax? Determined by checking the X-Requested-With header
-        /// </summary>
-        public static bool IsAjaxRequest => Request != null && Request.Headers["X-Requested-With"] == "XMLHttpRequest";
-
-        /// <summary>
         /// Gets the current user from the request
         /// </summary>
-        public static User User => new User(Context.User); // TODO: Move this to efficiency
+        public static User User
+        {
+            get
+            {
+                var cached = Context.Items[nameof(User)];
+                if (cached != null) return (User)cached;
+
+                // Calc request-based roles
+                var roles = Roles.None;
+                if (IPAddress.IsLoopback(Context.Connection.RemoteIpAddress)) roles |= Roles.LocalRequest;
+                if (Security.IsInternalIP(RequestIP)) roles |= Roles.InternalRequest;
+                if (IsValidApiRequest()) roles |= Roles.ApiRequest;
+
+                var result = new User(Context.User, roles);
+
+                Context.Items[nameof(User)] = result;
+                return result;
+            }
+        }
 
         /// <summary>
         /// Gets the IP this request came from, gets the real IP when behind a proxy

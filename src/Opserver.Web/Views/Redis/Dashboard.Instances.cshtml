@@ -71,7 +71,7 @@
         var isMissing = Model.Missing.Contains(server);
         <tr class="@(nest == 0 && server.Name != prevMaster && !isMissing ? "first-of-group " : "")@server.RowClass()">
             <td>
-                @if (Current.User.IsRedisAdmin)
+                @if (Current.User.Is(Roles.RedisAdmin))
                 {
                     <a href="#/redis/actions/@server.HostAndPort" class="hover-spin">@Icon.Cog</a>
                 }
@@ -133,7 +133,7 @@
     string ServerControls()
     {
         var groups = Model.ReplicationGroups;
-        if (!Current.User.IsRedisAdmin || groups.Count == 0)
+        if (!Current.User.Is(Roles.RedisAdmin) || groups.Count == 0)
         {
             return null;
         }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Data.Exceptions;
+using StackExchange.Opserver.Models;
 
 namespace StackExchange.Opserver.Views.Exceptions
 {
@@ -27,7 +28,7 @@ namespace StackExchange.Opserver.Views.Exceptions
         public bool ShowAll => Group == null && Log == null;
         private int? _shownCount;
         public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
-        public bool ShowClearLink => Current.User.IsExceptionAdmin && Errors.Any(e => !e.IsProtected) && (Log != null || SearchParams.SearchQuery.HasValue() || SearchParams.SearchQuery.HasValue());
+        public bool ShowClearLink => Current.User.Is(Roles.ExceptionsAdmin) && Errors.Any(e => !e.IsProtected) && (Log != null || SearchParams.SearchQuery.HasValue() || SearchParams.SearchQuery.HasValue());
         public bool ShowDeleted { get; set; }
 
         public int LoadAsyncSize { get; set; }

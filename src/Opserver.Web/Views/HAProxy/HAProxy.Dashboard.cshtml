@@ -4,7 +4,7 @@
 @{
     Layout = "HAProxy.cshtml";
 
-    var isAdmin = Current.User.IsHAProxyAdmin;
+    var isAdmin = Current.User.Is(Roles.HAProxyAdmin);
     // TODO: Fold in
     var groupQS = Model.SelectedGroup != null ? "&group=" + Model.SelectedGroup.Name.UrlEncode() : "";
     var proxies = Model.Proxies;

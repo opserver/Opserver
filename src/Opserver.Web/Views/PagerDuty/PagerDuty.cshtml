@@ -1,6 +1,6 @@
 ﻿@model PagerDutyModel
 @{
-    Layout = Current.IsAjaxRequest ? null : "~/Views/Shared/Master.cshtml";
+    Layout = this.IsAjaxRequest() ? null : "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("PagerDuty");
     var settings = Settings.PagerDuty;
     var scheduleCache = Module.API.AllSchedules;

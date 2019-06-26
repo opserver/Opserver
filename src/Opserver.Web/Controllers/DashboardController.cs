@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Controllers
                 Filter = q,
                 IsStartingUp = Module.AnyDoingFirstPoll
             };
-            return View(Current.IsAjaxRequest ? "Dashboard.Table" : "Dashboard", vd);
+            return View(Request.IsAjax() ? "Dashboard.Table" : "Dashboard", vd);
         }
 
         private List<Node> GetNodes(string search) =>

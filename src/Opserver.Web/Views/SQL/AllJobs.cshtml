@@ -61,7 +61,7 @@
                     SortLink(JobSort.End, "End");
                     SortLink(JobSort.Duration, "Duration");
                     SortLink(JobSort.Enabled, "Enabled");
-                    if (Current.IsInRole(Roles.SQLAdmin))
+                    if (Current.User.Is(Roles.SQLAdmin))
                     {
                         <th>Actions</th>
                     }
@@ -115,7 +115,7 @@ Last Run Message: @j.LastRunMessage">
                         <td data-val="-1"></td>
                     }
                     <td class="@(j.IsEnabled ? "" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
-                    @if (Current.IsInRole(Roles.SQLAdmin))
+                    @if (Current.User.Is(Roles.SQLAdmin))
                     {
                         <td class="actions">
                             @if (j.IsEnabled)

@@ -15,7 +15,7 @@
     {
         if (Module.HasData)
         {
-            if (Current.Request.Query.TryGetValue("allGraph", out _))
+            if (ViewContext.HttpContext.Request.Query.TryGetValue("allGraph", out _))
             {
                 <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/gaph/")@type/spark/all#@n.Id" alt="" /></a>
             }
