@@ -11,8 +11,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Elastic)]
     public class ElasticController : StatusController<ElasticModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public ElasticController(ElasticModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("elastic")]

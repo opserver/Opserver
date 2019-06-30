@@ -8,12 +8,17 @@ namespace StackExchange.Opserver.Controllers
 {
     public class StatusController<T> : StatusController where T : StatusModule
     {
+        public override NavTab NavTab => NavTab.Get(this);
         public override ISecurableModule SettingsModule => Module.SecuritySettings;
         protected virtual T Module { get; }
 
         public StatusController(T module, IOptions<OpserverSettings> settings) : base(settings)
         {
             Module = module;
+            if (NavTab != null)
+            {
+                Current.NavTab = NavTab;
+            }
         }
     }
 
@@ -27,11 +32,6 @@ namespace StackExchange.Opserver.Controllers
         public StatusController(IOptions<OpserverSettings> settings)
         {
             Settings = settings.Value;
-            if (NavTab != null)
-            {
-                Current.NavTab = NavTab;
-            }
-
             // TODO: Figure out enabled/disabled (maybe we handle it in route registration instead, or a filter?)
             //var iSettings = SettingsModule as ModuleSettings;
             //if (iSettings?.Enabled == false)

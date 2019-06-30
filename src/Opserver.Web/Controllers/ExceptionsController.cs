@@ -25,8 +25,6 @@ namespace StackExchange.Opserver.Controllers
         private Guid? CurrentSimilarId;
         private readonly ExceptionSorts CurrentSort;
 
-        public override NavTab NavTab => new NavTab(Module, nameof(Exceptions), this);
-
         public ExceptionsController(ExceptionsModule module, IOptions<OpserverSettings> settings) : base(module, settings)
         {
             CurrentStore = Module.GetStore(GetParam("store"));

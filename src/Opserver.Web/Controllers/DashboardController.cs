@@ -7,15 +7,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
 using StackExchange.Opserver.Views.Dashboard;
 
 namespace StackExchange.Opserver.Controllers
 {
     public partial class DashboardController : StatusController<DashboardModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public DashboardController(DashboardModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("dashboard")]

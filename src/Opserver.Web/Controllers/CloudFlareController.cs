@@ -11,8 +11,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.CloudFlare)]
     public class CloudFlareController : StatusController<CloudFlareModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public CloudFlareController(CloudFlareModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("cloudflare")]

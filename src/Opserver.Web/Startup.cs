@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -106,7 +107,8 @@ namespace StackExchange.Opserver
 
         public void Configure(
             IApplicationBuilder appBuilder,
-            IHostApplicationLifetime appLifetime
+            IHostApplicationLifetime appLifetime,
+            IEnumerable<StatusModule> modules
         )
         {
             appBuilder.UseStaticFiles()
@@ -125,6 +127,7 @@ namespace StackExchange.Opserver
                           endpoints.MapDefaultControllerRoute();
                       });
             appLifetime.ApplicationStopping.Register(OnShutdown);
+            NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
         }
 
         private void OnShutdown()

@@ -13,8 +13,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController<PagerDutyModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public PagerDutyController(PagerDutyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         public PagerDutyPerson CurrentPagerDutyPerson

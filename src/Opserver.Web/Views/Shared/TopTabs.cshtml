@@ -11,22 +11,15 @@
             // Optimism!
             using (MiniProfiler.Current.Step("Render Tab: " + tab.Name))
             {
-                int? badgeCount = null;
-                string tooltip = null;
-                if (tab.Module is IOverallStatusCount sc)
-                {
-                    badgeCount = sc.Count;
-                    tooltip = sc.Tooltip;
-                }
-                        <li class="@(tab == Current.NavTab ? "active" : null)">
-                            <a href="@Url.Action(tab.Action, tab.Controller)" title="@tooltip">
-                                <span class="@(tab.Module.MonitorStatus.TextClass())">@tab.Name</span>
-                                @if (badgeCount > 0)
-                                {
-                                    <span class="badge" data-name="@tab.Name">@badgeCount.ToComma()</span>
-                                }
-                            </a>
-                        </li>
+                <li class="@(tab == Current.NavTab ? "active" : null)">
+                    <a href="@Url.Content(tab.Route)" title="@tab.Tooltip">
+                        <span class="@(tab.Module.MonitorStatus.TextClass())">@tab.Name</span>
+                        @if (tab.BadgeCount > 0)
+                        {
+                            <span class="badge" data-name="@tab.Name">@tab.BadgeCount.ToComma()</span>
+                        }
+                    </a>
+                </li>
             }
         }
     }
@@ -34,9 +27,9 @@
 @using (MiniProfiler.Current.Step("TopTabs"))
 {
     <ul class="nav navbar-nav navbar-right js-top-tabs">
-        @*@foreach (var tab in NavTab.Tabs)
+        @foreach (var tab in NavTab.AllTabs)
         {
             RenderTab(tab);
-        }*@
+        }
     </ul>
 }

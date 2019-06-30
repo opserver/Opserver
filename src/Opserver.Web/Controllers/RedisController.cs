@@ -10,8 +10,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController<RedisModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public RedisController(RedisModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("redis")]

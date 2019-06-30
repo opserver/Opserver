@@ -11,8 +11,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController<HAProxyModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
-
         public HAProxyController(HAProxyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("haproxy")]

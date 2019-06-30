@@ -35,30 +35,23 @@ namespace StackExchange.Opserver
     {
         public static IServiceCollection AddStatusModules(this IServiceCollection services, IConfiguration _configuration)
         {
+            void Add<TSettings, TModule>(string settingsSection) where TSettings : ModuleSettings where TModule : StatusModule
+            {
+                services.Configure<TSettings>(_configuration.GetSection(settingsSection))   // Add settings
+                        .AddSingleton<TModule>()                                            // Actual Singleton
+                        .AddSingleton<StatusModule, TModule>(x => x.GetService<TModule>()); // For IEnumerable discovery
+            }
+
             // TODO: Discovery instead
-            services.Configure<DashboardSettings>(_configuration.GetSection("Dashboard"))
-                    .AddSingleton<DashboardModule>();
+            Add<DashboardSettings, DashboardModule>("Dashboard");
+            Add<SQLSettings, Data.SQL.SQLModule>("SQL");
+            Add<RedisSettings, Data.Redis.RedisModule>("Redis");
+            Add<ElasticSettings, Data.Elastic.ElasticModule>("Elastic");
+            Add<PagerDutySettings, Data.PagerDuty.PagerDutyModule>("PagerDuty");
+            Add<ExceptionsSettings, Data.Exceptions.ExceptionsModule>("Exceptions");
+            Add<HAProxySettings, Data.HAProxy.HAProxyModule>("HAProxy");
+            //Add<CloudFlareSettings, Data.CloudFlare.CloudFlareModule>("CloudFlare");
 
-            services.Configure<SQLSettings>(_configuration.GetSection("SQL"))
-                    .AddSingleton<Data.SQL.SQLModule>();
-
-            services.Configure<RedisSettings>(_configuration.GetSection("Redis"))
-                    .AddSingleton<Data.Redis.RedisModule>();
-
-            services.Configure<ElasticSettings>(_configuration.GetSection("Elastic"))
-                    .AddSingleton<Data.Elastic.ElasticModule>();
-
-            services.Configure<PagerDutySettings>(_configuration.GetSection("PagerDuty"))
-                    .AddSingleton<Data.PagerDuty.PagerDutyModule>();
-
-            services.Configure<ExceptionsSettings>(_configuration.GetSection("Exceptions"))
-                    .AddSingleton<Data.Exceptions.ExceptionsModule>();
-
-            services.Configure<HAProxySettings>(_configuration.GetSection("HAProxy"))
-                    .AddSingleton<Data.HAProxy.HAProxyModule>();
-
-            //services.Configure<CloudFlareSettings>(_configuration.GetSection("CloudFlare"));
-            //services.AddSingleton<Data.CloudFlare.CloudFlareModule>();
             return services;
         }
     }

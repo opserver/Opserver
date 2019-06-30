@@ -16,8 +16,6 @@ namespace StackExchange.Opserver.Controllers
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController<SQLModule>
     {
-        public override NavTab NavTab => new NavTab(Module, nameof(Servers), this);
-
         public SQLController(SQLModule sqlModule, IOptions<OpserverSettings> settings) : base(sqlModule, settings) { }
 
         [DefaultRoute("sql")]

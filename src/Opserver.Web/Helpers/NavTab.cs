@@ -2,59 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Opserver.Controllers;
 using StackExchange.Opserver.Models.Security;
 
 namespace StackExchange.Opserver.Helpers
 {
-    public static class NavTabs
-    {
-        public static List<NavTab> All { get; }
-
-        static NavTabs()
-        {
-            var newTabs = new List<NavTab>();
-
-            var tabControllers = typeof(NavTab).Assembly.GetTypes()
-                .Where(t => t.BaseType == typeof (StatusController));
-
-            foreach (var tc in tabControllers)
-            {
-                try
-                {
-                    //var tt = (Activator.CreateInstance(tc) as StatusController)?.TopTab;
-                    //if (tt != null) newTabs.Add(tt);
-                }
-                catch (Exception e)
-                {
-                    Current.LogException("Error creating StatusController instance for " + tc, e);
-                }
-            }
-            All = newTabs;
-        }
-
-        private static List<NavTab> GetAll(IEnumerable<StatusModule> modules)
-        {
-            var moduleControllers = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.BaseType == typeof(StatusController<>));
-            var result = new List<NavTab>();
-            foreach (var m in modules)
-            {
-            }
-            result.Sort((a, b) => a.Order.CompareTo(b.Order));
-            return result;
-        }
-    }
-
     public class NavTab
     {
-        public string Name => Module?.Name ?? "Unknown"; // TODO: Remove when ordering is correct
-        public string Controller { get; set; }
-        public string Action { get; set; }
-        public int Order { get; set; }
         public StatusModule Module { get; }
+        public string Name => Module.Name;
+        public string Route { get; }
+        public int Order { get; set; } = 0;
+
+        public int? BadgeCount => Module is IOverallStatusCount isc ? isc.Count : (int?)null;
+        public string Tooltip => Module is IOverallStatusCount isc ? isc.Tooltip : null;
 
         public bool IsEnabled
         {
@@ -63,30 +24,77 @@ namespace StackExchange.Opserver.Helpers
                 var ss = Module.SecuritySettings;
                 if (ss != null)
                 {
-                    if (!ss.Enabled|| !ss.HasAccess()) return false;
+                    if (!ss.Enabled || !ss.HasAccess()) return false;
                 }
                 return true;
             }
         }
 
-        public NavTab(StatusModule module, string action, StatusController controller)
+        public NavTab(StatusModule module, string route)
         {
             Module = module;
-            Controller = controller.GetType().Name.Replace("Controller", "");
-            Action = action;
+            Route = route;
         }
-    }
 
-    public static class NavTabExtensions
-    {
-        public static IServiceCollection AddNavTabs(this IServiceCollection services, IConfiguration _configuration)
+        public static List<NavTab> AllTabs { get; private set; }
+        private static Dictionary<Type, NavTab> _controllerMappings = new Dictionary<Type, NavTab>();
+
+        public static NavTab Get(StatusController c) => _controllerMappings.TryGetValue(c.GetType(), out var tab) ? tab : null;
+
+        /// <summary>
+        /// https://www.youtube.com/watch?v=JnbfuAcCqpY
+        /// </summary>
+        public static void ConfigureAll(IEnumerable<StatusModule> modules)
         {
-            // TODO: Discovery instead
+            var allTabs = new List<NavTab>();
+            var mappings = new Dictionary<Type, NavTab>();
+            var moduleControllerTypes = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.BaseType.IsGenericType);
 
-            services.Configure<HAProxySettings>(_configuration.GetSection("HAProxy"))
-                    .AddSingleton<Data.HAProxy.HAProxyModule>();
+            foreach (var controllerType in moduleControllerTypes)
+            {
+                // Get the module type for this controller
+                var controllerModuleType = controllerType.BaseType.GetGenericArguments()[0];
+                // Was the type a StatusModule?
+                if (typeof(StatusModule).IsAssignableFrom(controllerModuleType))
+                {
+                    // Get all the potential actions
+                    foreach (var method in controllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public))
+                    {
+                        // Check for [DefaultRoute]
+                        var defaultRoute = method.GetCustomAttribute<DefaultRoute>();
+                        if (defaultRoute != null)
+                        {
+                            // Get the active module this controller goes with and make a NavTab based on it
+                            var module = modules.FirstOrDefault(m => m.GetType() == controllerModuleType);
+                            if (module != null)
+                            {
+                                // Do you believe in maaaaaaaaagic?
+                                var tab = new NavTab(module, "~/" + defaultRoute.Template);
+                                allTabs.Add(tab);
+                                mappings.Add(controllerType, tab);
+                            }
+                        }
+                    }
+                }
+            }
+            _controllerMappings = mappings;
+            allTabs.Sort((a, b) => a.Order.CompareTo(b.Order));
 
-            return services;
+            AllTabs = allTabs;
         }
     }
+
+    //public static class NavTabExtensions
+    //{
+    //    public static IServiceCollection AddNavTabs(this IServiceCollection services, IConfiguration _configuration)
+    //    {
+    //        // TODO: Discovery instead
+
+    //        services.Configure<HAProxySettings>(_configuration.GetSection("HAProxy"))
+    //                .AddSingleton<Data.HAProxy.HAProxyModule>();
+
+    //        return services;
+    //    }
+    //}
 }
