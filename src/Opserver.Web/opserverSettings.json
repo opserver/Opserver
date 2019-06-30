@@ -6,5 +6,28 @@
     "instances": [
       { "name": "localhost" }
     ]
+  },
+  /* Configuration for the Redis dashboard */
+  "Redis": {
+    "Servers": [
+      {
+        "name": "localhost",
+        "instances": [
+          {
+            "name": "Default",
+            "port": 6379
+          }
+        ]
+      }
+    ]
+  },
+  /* Configuration for the Elastic dashboard */
+  "Elastic": {
+    "clusters": [
+      {
+        "name": "Local",
+        "nodes": ["localhost"]
+      }
+    ]
   }
 }
