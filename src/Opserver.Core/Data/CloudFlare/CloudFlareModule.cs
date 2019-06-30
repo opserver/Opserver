@@ -9,6 +9,8 @@ namespace StackExchange.Opserver.Data.CloudFlare
 {
     public class CloudFlareModule : StatusModule<CloudFlareSettings>
     {
+        // TODO: Fix class naming...the company renamed.
+        public override string Name => "Cloudflare";
         public override bool Enabled => Settings.Enabled;
 
         public CloudFlareAPI API { get; }

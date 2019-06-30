@@ -10,6 +10,7 @@ namespace StackExchange.Opserver
     {
         private readonly IOptions<T> _settings;
         public T Settings => _settings.Value;
+        public override ISecurableModule SecuritySettings => Settings;
         protected StatusModule(IOptions<T> settings)
         {
             _settings = settings;
@@ -22,10 +23,12 @@ namespace StackExchange.Opserver
     public abstract class StatusModule
     {
         // TODO: Top tab registration
+        public abstract string Name { get; }
         public abstract bool Enabled { get; }
         public abstract MonitorStatus MonitorStatus { get; }
         public abstract bool IsMember(string node);
         public bool IsMember(Node node) => IsMember(node.PrettyName);
+        public abstract ISecurableModule SecuritySettings { get; }
     }
 
     public static class StatusModuleExtensions

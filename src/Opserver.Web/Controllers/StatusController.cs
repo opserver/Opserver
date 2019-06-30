@@ -1,7 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using Jil;
+﻿using System.Net;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -9,18 +6,31 @@ using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Controllers
 {
+    public class StatusController<T> : StatusController where T : StatusModule
+    {
+        public override ISecurableModule SettingsModule => Module.SecuritySettings;
+        protected virtual T Module { get; }
+
+        public StatusController(T module, IOptions<OpserverSettings> settings) : base(settings)
+        {
+            Module = module;
+        }
+    }
+
     [OnlyAllow(Roles.Authenticated)]
     public partial class StatusController : Controller
     {
         public virtual ISecurableModule SettingsModule => null;
-        public virtual TopTab TopTab => null;
+        public virtual NavTab NavTab => null;
         protected OpserverSettings Settings { get; }
 
-        public StatusController(IOptions<OpserverSettings> _settings)
+        public StatusController(IOptions<OpserverSettings> settings)
         {
-            Settings = _settings.Value;
-            // TODO: Change how all this works
-            TopTabs.SetCurrent(GetType());
+            Settings = settings.Value;
+            if (NavTab != null)
+            {
+                Current.NavTab = NavTab;
+            }
 
             // TODO: Figure out enabled/disabled (maybe we handle it in route registration instead, or a filter?)
             //var iSettings = SettingsModule as ModuleSettings;
@@ -56,9 +66,6 @@ namespace StackExchange.Opserver.Controllers
         protected ContentResult JsonRaw(object content) =>
             new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
 
-        //protected ActionResult Json<T>(T data, Jil.Options options = null) =>
-        //    new JsonJilResult<T> { Data = data, Options = options };
-
         protected ActionResult JsonNotFound()
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
@@ -81,27 +88,6 @@ namespace StackExchange.Opserver.Controllers
         {
             Response.StatusCode = (int)(status ?? HttpStatusCode.InternalServerError);
             return Json(toSerialize);
-        }
-
-        public class JsonJilResult<T> : ActionResult
-        {
-            public T Data { get; set; }
-            public string ContentType { get; set; }
-            public Jil.Options Options { get; set; }
-
-            public override void ExecuteResult(ActionContext context)
-            {
-                if (context == null)
-                    throw new ArgumentNullException(nameof(context));
-
-                var response = context.HttpContext.Response;
-                response.ContentType = ContentType.HasValue() ? ContentType : "application/json";
-
-                using (var sw = new StreamWriter(response.Body))
-                {
-                    JSON.Serialize(Data, sw, Options);
-                }
-            }
         }
     }
 }

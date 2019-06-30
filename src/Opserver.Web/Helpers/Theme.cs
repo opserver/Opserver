@@ -16,7 +16,7 @@ namespace StackExchange.Opserver.Helpers
         // "Members predict that the world will end in 2026, when an asteroid would collide with Earth..."
         private static readonly DateTime CookieExpirationDate = new DateTime(2026, 1, 1);
 
-        public static string Current => Opserver.Current.Request.Cookies[CookieName] ?? Default;
+        public static string Get(HttpRequest request) => request.Cookies[CookieName] ?? Default;
 
         public static void Set(string theme, HttpResponse response)
         {

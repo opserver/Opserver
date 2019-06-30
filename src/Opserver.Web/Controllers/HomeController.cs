@@ -14,11 +14,13 @@ using StackExchange.Opserver.Data.Redis;
 using StackExchange.Opserver.Data.Exceptions;
 using StackExchange.Opserver.Data.Elastic;
 using StackExchange.Opserver.Data.HAProxy;
+using System.Collections.Generic;
 
 namespace StackExchange.Opserver.Controllers
 {
     public class HomeController : StatusController
     {
+        private IEnumerable<StatusModule> Modules { get; }
         private DashboardModule Dashboard { get; }
         private SQLModule Sql { get; }
         private RedisModule Redis { get; }
@@ -28,6 +30,7 @@ namespace StackExchange.Opserver.Controllers
 
         public HomeController(
             IOptions<OpserverSettings> _settings,
+            IEnumerable<StatusModule> modules,
             DashboardModule dashboard,
             SQLModule sql,
             RedisModule redis,
@@ -36,6 +39,7 @@ namespace StackExchange.Opserver.Controllers
             HAProxyModule haproxy
             ) : base(_settings)
         {
+            Modules = modules;
             Dashboard = dashboard;
             Sql = sql;
             Redis = redis;
@@ -44,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
             HAProxy = haproxy;
         }
 
-        [Route("")]
+        [DefaultRoute("")]
         public ActionResult Home()
         {
             var s = Settings;
@@ -52,6 +56,13 @@ namespace StackExchange.Opserver.Controllers
             // TODO: Plugin registrations - middleware?
             // Should be able to IEnumerable<StatusModule> DI for this
             // ...and have order added to the module, with 20x spacing
+
+            // TODO: Order
+            foreach (var m in Modules)
+            {
+                //if (m.Enabled && m.SecuritySettings.HasAccess())
+                //    return RedirectToAction()...
+            }
 
             if (Dashboard.Enabled && s.Dashboard.HasAccess())
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
@@ -72,7 +83,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("top-refresh")]
         public ActionResult TopRefresh(string tab)
         {
-            TopTabs.CurrentTab = tab;
+            //Current.NavTab = NavTab.Get(tab);
 
             var vd = new TopRefreshModel
                 {

@@ -7,6 +7,7 @@ namespace StackExchange.Opserver.Data.Elastic
 {
     public class ElasticModule : StatusModule<ElasticSettings>
     {
+        public override string Name => "Elastic";
         public override bool Enabled => Clusters.Count > 0;
         public List<ElasticCluster> Clusters { get; }
 

@@ -8,10 +8,10 @@ namespace StackExchange.Opserver.Data.HAProxy
 {
     public class HAProxyModule : StatusModule<HAProxySettings>
     {
+        public override string Name => "HAProxy"; 
         public override bool Enabled => Groups.Count > 0;
         public List<HAProxyGroup> Groups { get; }
         public HAProxyAdmin Admin { get; }
-
 
         public HAProxyModule(IOptions<HAProxySettings> settings) : base(settings)
         {

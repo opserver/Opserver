@@ -11,18 +11,11 @@ using Microsoft.Extensions.Options;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.PagerDuty)]
-    public partial class PagerDutyController : StatusController
+    public partial class PagerDutyController : StatusController<PagerDutyModule>
     {
-        private PagerDutyModule Module { get; }
-        public PagerDutyController(IOptions<OpserverSettings> _settings, PagerDutyModule module) : base(_settings) =>
-            Module = module;
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override ISecurableModule SettingsModule => Settings.PagerDuty;
-
-        public override TopTab TopTab => new TopTab("PagerDuty", nameof(Dashboard), this, 45)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
+        public PagerDutyController(PagerDutyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         public PagerDutyPerson CurrentPagerDutyPerson
         {
@@ -37,7 +30,7 @@ namespace StackExchange.Opserver.Controllers
             }
         }
 
-        [Route("pagerduty")]
+        [DefaultRoute("pagerduty")]
         public async Task<ActionResult> Dashboard()
         {
             var api = Module.API;

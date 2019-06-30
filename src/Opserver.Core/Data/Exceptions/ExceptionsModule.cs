@@ -4,8 +4,9 @@ using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Data.Exceptions
 {
-    public class ExceptionsModule : StatusModule<ExceptionsSettings>
+    public class ExceptionsModule : StatusModule<ExceptionsSettings>, IOverallStatusCount
     {
+        public override string Name => "Exceptions";
         public override bool Enabled => Stores.Count > 0;
 
         public List<ExceptionStore> Stores { get; }
@@ -49,6 +50,9 @@ namespace StackExchange.Opserver.Data.Exceptions
                 return MonitorStatus.Good;
             }
         }
+
+        int IOverallStatusCount.Count => TotalExceptionCount;
+        string IOverallStatusCount.Tooltip => TotalRecentExceptionCount.ToComma() + " recent";
 
         public ExceptionStore GetStore(string storeName)
         {

@@ -8,22 +8,13 @@ using StackExchange.Opserver.Views.Redis;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Redis)]
-    public partial class RedisController : StatusController
+    public partial class RedisController : StatusController<RedisModule>
     {
-        private RedisModule Module { get; }
-        public override ISecurableModule SettingsModule => Settings.Redis;
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override TopTab TopTab => new TopTab("Redis", nameof(Dashboard), this, 20)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
+        public RedisController(RedisModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
-        public RedisController(IOptions<OpserverSettings> _settings, RedisModule module) : base(_settings)
-        {
-            Module = module;
-        }
-
-        [Route("redis")]
+        [DefaultRoute("redis")]
         public ActionResult Dashboard(string node)
         {
             var instances = Module.GetAllInstances(node);

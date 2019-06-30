@@ -14,22 +14,13 @@ using StackExchange.Opserver.Views.SQL;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.SQL)]
-    public partial class SQLController : StatusController
+    public partial class SQLController : StatusController<SQLModule>
     {
-        private SQLModule Module { get; }
-        public SQLController(IOptions<OpserverSettings> _settings, SQLModule sqlModule) : base(_settings)
-        {
-            Module = sqlModule;
-        }
+        public override NavTab NavTab => new NavTab(Module, nameof(Servers), this);
 
-        public override ISecurableModule SettingsModule => Settings.SQL;
+        public SQLController(SQLModule sqlModule, IOptions<OpserverSettings> settings) : base(sqlModule, settings) { }
 
-        public override TopTab TopTab => new TopTab("SQL", nameof(Servers), this, 10)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
-
-        [Route("sql")]
+        [DefaultRoute("sql")]
         public ActionResult Dashboard()
         {
             return RedirectToAction(nameof(Servers));

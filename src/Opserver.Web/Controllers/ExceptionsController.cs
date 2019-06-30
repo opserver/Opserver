@@ -14,21 +14,9 @@ namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Exceptions)]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
-    public class ExceptionsController : StatusController
+    public class ExceptionsController : StatusController<ExceptionsModule>
     {
-        private ExceptionsModule Module { get; }
-
         public const int MaxSearchResults = 2000;
-
-        public override ISecurableModule SettingsModule => Settings.Exceptions;
-
-        public override TopTab TopTab => new TopTab("Exceptions", nameof(Exceptions), this, 50)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus,
-            GetBadgeCount = () => Module.TotalExceptionCount,
-            GetTooltip = () => Module.TotalRecentExceptionCount.ToComma() + " recent"
-        };
-
         private List<ApplicationGroup> ApplicationGroups => CurrentStore.ApplicationGroups;
         private readonly ExceptionStore CurrentStore;
         private readonly string CurrentGroup;
@@ -37,9 +25,10 @@ namespace StackExchange.Opserver.Controllers
         private Guid? CurrentSimilarId;
         private readonly ExceptionSorts CurrentSort;
 
-        public ExceptionsController(IOptions<OpserverSettings> _settings, ExceptionsModule module) : base(_settings)
+        public override NavTab NavTab => new NavTab(Module, nameof(Exceptions), this);
+
+        public ExceptionsController(ExceptionsModule module, IOptions<OpserverSettings> settings) : base(module, settings)
         {
-            Module = module;
             CurrentStore = Module.GetStore(GetParam("store"));
             CurrentGroup = GetParam("group");
             CurrentLog = GetParam("log") ?? GetParam("app"); // old link compat
@@ -124,7 +113,7 @@ namespace StackExchange.Opserver.Controllers
             };
         }
 
-        [Route("exceptions")]
+        [DefaultRoute("exceptions")]
         public async Task<ActionResult> Exceptions()
         {
             var search = await GetSearchAsync().ConfigureAwait(false);

@@ -9,26 +9,14 @@ using StackExchange.Opserver.Views.CloudFlare;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.CloudFlare)]
-    public class CloudFlareController : StatusController
+    public class CloudFlareController : StatusController<CloudFlareModule>
     {
-        private CloudFlareModule Module { get; }
-        public CloudFlareController(IOptions<OpserverSettings> _settings, CloudFlareModule module) : base(_settings)
-        {
-            Module = module;
-        }
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override ISecurableModule SettingsModule => Settings.CloudFlare;
+        public CloudFlareController(CloudFlareModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
-        public override TopTab TopTab => new TopTab("CloudFlare", nameof(Dashboard), this, 40)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
-
-        [Route("cloudflare")]
-        public ActionResult Dashboard()
-        {
-            return RedirectToAction(nameof(DNS));
-        }
+        [DefaultRoute("cloudflare")]
+        public ActionResult Dashboard() => RedirectToAction(nameof(DNS));
 
         [Route("cloudflare/dns")]
         public async Task<ActionResult> DNS()

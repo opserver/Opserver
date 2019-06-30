@@ -9,24 +9,13 @@ using StackExchange.Opserver.Views.HAProxy;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.HAProxy)]
-    public partial class HAProxyController : StatusController
+    public partial class HAProxyController : StatusController<HAProxyModule>
     {
-        public HAProxyModule Module { get; }
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override ISecurableModule SettingsModule => Settings.HAProxy;
+        public HAProxyController(HAProxyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
-        public override TopTab TopTab => new TopTab("HAProxy", nameof(Dashboard), this, 60)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
-
-        public HAProxyController(IOptions<OpserverSettings> _settings, HAProxyModule module) : base(_settings)
-        {
-            Module = module;
-        }
-
-        [Route("haproxy")]
-        [Route("haproxy/dashboard")]
+        [DefaultRoute("haproxy")]
         public ActionResult Dashboard(string group, string node, string watch = null, bool norefresh = false)
         {
             var haGroup = Module.GetGroup(group ?? node);

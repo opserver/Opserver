@@ -106,8 +106,7 @@ namespace StackExchange.Opserver
 
         public void Configure(
             IApplicationBuilder appBuilder,
-            IHostApplicationLifetime appLifetime,
-            IHttpContextAccessor httpAccessor
+            IHostApplicationLifetime appLifetime
         )
         {
             appBuilder.UseStaticFiles()
@@ -116,12 +115,16 @@ namespace StackExchange.Opserver
                       .UseAuthentication()
                       .UseAuthorization()
                       .UseRouting()
+                      .Use(async (httpContext, next)  =>
+                      {
+                          Current.SetContext(new Current.CurrentContext(httpContext));
+                          await next();
+                      })
                       .UseEndpoints(endpoints =>
                       {
                           endpoints.MapDefaultControllerRoute();
                       });
             appLifetime.ApplicationStopping.Register(OnShutdown);
-            Current.Init(httpAccessor);
         }
 
         private void OnShutdown()

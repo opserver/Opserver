@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net;
+using System.Threading;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Exceptional;
 using StackExchange.Opserver.Helpers;
@@ -9,42 +10,80 @@ namespace StackExchange.Opserver
 {
     public static partial class Current
     {
-        private static IHttpContextAccessor _httpAccessor;
-        public static void Init(IHttpContextAccessor accessor) => _httpAccessor = accessor;
+        private static readonly AsyncLocal<CurrentContext> _context = new AsyncLocal<CurrentContext>();
+        public static CurrentContext Context => _context.Value;
+        public static void SetContext(CurrentContext context) => _context.Value = context;
+
+        public class CurrentContext
+        {
+            /// <summary>
+            /// Shortcut to HttpContext.Current.
+            /// </summary>
+            public HttpContext HttpContext { get; }
+
+            /// <summary>
+            /// The current top level tab we're on.
+            /// </summary>
+            public NavTab NavTab { get; set; }
+
+            private string _theme;
+            /// <summary>
+            /// The current theme were on.
+            /// </summary>
+            public string Theme => _theme ?? (_theme = Helpers.Theme.Get(HttpContext.Request));
+
+            private User _user;
+            /// <summary>
+            /// Gets the current user from the request.
+            /// </summary>
+            public User User
+            {
+                get
+                {
+                    if (_user == null)
+                    {
+                        // Calc request-based roles
+                        var roles = Roles.None;
+                        if (IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress)) roles |= Roles.LocalRequest;
+                        if (Security.IsInternalIP(RequestIP)) roles |= Roles.InternalRequest;
+                        if (IsValidApiRequest()) roles |= Roles.ApiRequest;
+
+                        _user = new User(HttpContext.User, roles);
+                    }
+                    return _user;
+                }
+            }
+
+            public CurrentContext(HttpContext httpContext)
+            {
+                HttpContext = httpContext;
+            }
+        }
 
         public static LocalCache LocalCache => CoreCurrent.LocalCache;
 
         /// <summary>
-        /// Shortcut to HttpContext.Current.
-        /// </summary>
-        public static HttpContext Context => _httpAccessor.HttpContext;
-
-        /// <summary>
         /// Shortcut to HttpContext.Current.Request.
         /// </summary>
-        public static HttpRequest Request => Context.Request;
+        public static HttpRequest Request => Context.HttpContext.Request;
 
         /// <summary>
-        /// Gets the current user from the request
+        /// Gets the current user from the request.
         /// </summary>
-        public static User User
+        public static User User => Context.User;
+
+        /// <summary>
+        /// Gets the theme for the current request.
+        /// </summary>
+        public static string Theme => Context.Theme;
+
+        /// <summary>
+        /// Gets or set the top tab for this request.
+        /// </summary>
+        public static NavTab NavTab
         {
-            get
-            {
-                var cached = Context.Items[nameof(User)];
-                if (cached != null) return (User)cached;
-
-                // Calc request-based roles
-                var roles = Roles.None;
-                if (IPAddress.IsLoopback(Context.Connection.RemoteIpAddress)) roles |= Roles.LocalRequest;
-                if (Security.IsInternalIP(RequestIP)) roles |= Roles.InternalRequest;
-                if (IsValidApiRequest()) roles |= Roles.ApiRequest;
-
-                var result = new User(Context.User, roles);
-
-                Context.Items[nameof(User)] = result;
-                return result;
-            }
+            get => Context.NavTab;
+            set => Context.NavTab = value;
         }
 
         /// <summary>
@@ -71,7 +110,7 @@ namespace StackExchange.Opserver
         public static void LogException(Exception exception, string key = null)
         {
             if (!ShouldLog(key)) return;
-            exception.Log(Context);
+            exception.Log(Context.HttpContext);
             RecordLogged(key);
         }
 

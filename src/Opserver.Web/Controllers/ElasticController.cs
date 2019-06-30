@@ -9,23 +9,13 @@ using StackExchange.Opserver.Views.Elastic;
 namespace StackExchange.Opserver.Controllers
 {
     [OnlyAllow(Roles.Elastic)]
-    public class ElasticController : StatusController
+    public class ElasticController : StatusController<ElasticModule>
     {
-        private ElasticModule Module { get; }
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override ISecurableModule SettingsModule => Settings.Elastic;
+        public ElasticController(ElasticModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
-        public override TopTab TopTab => new TopTab("Elastic", nameof(Dashboard), this, 30)
-        {
-            GetMonitorStatus = () => Module.MonitorStatus
-        };
-
-        public ElasticController(IOptions<OpserverSettings> _settings, ElasticModule module) : base(_settings)
-        {
-            Module = module;
-        }
-
-        [Route("elastic")]
+        [DefaultRoute("elastic")]
         public ActionResult Dashboard()
         {
             var vd = new DashboardModel

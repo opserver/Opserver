@@ -12,19 +12,13 @@ using StackExchange.Opserver.Views.Dashboard;
 
 namespace StackExchange.Opserver.Controllers
 {
-    public partial class DashboardController : StatusController
+    public partial class DashboardController : StatusController<DashboardModule>
     {
-        private DashboardModule Module { get; }
-        public override ISecurableModule SettingsModule => Settings.Dashboard;
+        public override NavTab NavTab => new NavTab(Module, nameof(Dashboard), this);
 
-        public override TopTab TopTab => new TopTab("Dashboard", nameof(Dashboard), this, 0);
+        public DashboardController(DashboardModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
-        public DashboardController(IOptions<OpserverSettings> _settings, DashboardModule module) : base(_settings)
-        {
-            Module = module;
-        }
-
-        [Route("dashboard")]
+        [DefaultRoute("dashboard")]
         public ActionResult Dashboard(string q)
         {
             var vd = new DashboardModel

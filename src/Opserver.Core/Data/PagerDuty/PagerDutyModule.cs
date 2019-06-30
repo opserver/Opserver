@@ -1,14 +1,10 @@
-﻿using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Linq;
-using System.Net;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
     public class PagerDutyModule : StatusModule<PagerDutySettings>
     {
+        public override string Name => "PagerDuty";
         public override bool Enabled => Settings.Enabled;
 
         public PagerDutyAPI API { get; }
