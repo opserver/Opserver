@@ -11,6 +11,7 @@ namespace StackExchange.Opserver.Data.Redis
     {
         public override string Name => "Redis";
         public override bool Enabled => Instances.Count > 0;
+
         public List<RedisReplicationGroup> ReplicationGroups { get; }
         public List<RedisHost> Hosts { get; }
         public List<RedisInstance> Instances { get; }

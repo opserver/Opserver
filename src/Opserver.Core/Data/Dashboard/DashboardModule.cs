@@ -12,6 +12,7 @@ namespace StackExchange.Opserver.Data.Dashboard
     {
         public override string Name => "Dashboard";
         public override bool Enabled { get; }
+
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
