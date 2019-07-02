@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         public DashboardModule(IOptions<DashboardSettings> settings) : base(settings)
         {
             var providers = settings.Value.Providers;
-            if (providers == null || !providers.Any())
+            if (providers?.Any() != true)
             {
                 Providers.Add(new EmptyDataProvider(this, "EmptyDataProvider"));
                 return;

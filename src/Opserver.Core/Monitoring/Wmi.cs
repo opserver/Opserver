@@ -18,10 +18,10 @@ namespace StackExchange.Opserver.Monitoring
             return new WmiQuery(machineName, query, wmiNamespace);
         }
 
-        internal static async Task<bool> ClassExists(string machineName, string @class, string wmiNamespace = defaultWmiNamespace)
+        internal static async Task<bool> ClassExists(string machineName, string className, string wmiNamespace = defaultWmiNamespace)
         {
             // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
-            var query = $"SELECT * FROM {@class}";
+            var query = $"SELECT * FROM {className}";
 
             try
             {
@@ -50,10 +50,8 @@ namespace StackExchange.Opserver.Monitoring
                 Authentication = AuthenticationLevel.Packet,
                 Timeout = TimeSpan.FromSeconds(30)
             };
-            string username = Current.Settings.Dashboard.Providers?.WMI?.Username ??
-                              Current.Settings.Polling.Windows?.AuthUser.IsNullOrEmptyReturn(null),
-                password = Current.Settings.Dashboard.Providers?.WMI?.Password ??
-                           Current.Settings.Polling.Windows?.AuthPassword.IsNullOrEmptyReturn(null);
+            string username = Current.Settings.Dashboard.Providers?.WMI?.Username,
+                   password = Current.Settings.Dashboard.Providers?.WMI?.Password;
 
             if (username.HasValue() && password.HasValue())
             {

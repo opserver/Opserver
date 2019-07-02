@@ -36,7 +36,7 @@ namespace StackExchange.Opserver
             var host = hostBuilder
                 .UseKestrel()
                 .ConfigureAppConfiguration(
-                    (hostingContext, config) =>
+                    (_, config) =>
                     {
                         config
                             .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)

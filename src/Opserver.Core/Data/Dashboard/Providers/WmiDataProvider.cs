@@ -99,7 +99,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
 
         private WmiNode GetWmiNodeById(string id) =>
-            _wmiNodeLookup.TryGetValue(id, out WmiNode n) ? n : null;
+            _wmiNodeLookup.TryGetValue(id, out var n) ? n : null;
 
         public override int MinSecondsBetweenPolls => 10;
 

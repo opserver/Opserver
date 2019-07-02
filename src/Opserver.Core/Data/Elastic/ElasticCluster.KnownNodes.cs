@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Data.Elastic
 
             public ElasticNode(string hostAndPort)
             {
-                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out Uri uri))
+                if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out var uri))
                 {
                     Url = uri.ToString();
                     Host = uri.Host;

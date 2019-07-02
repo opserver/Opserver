@@ -1,9 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -112,20 +110,17 @@ namespace StackExchange.Opserver
         )
         {
             appBuilder.UseStaticFiles()
+                      .UseRouting()
                       .UseExceptional()
                       //.UseMiniProfiler()
                       .UseAuthentication()
                       .UseAuthorization()
-                      .UseRouting()
                       .Use(async (httpContext, next)  =>
                       {
                           Current.SetContext(new Current.CurrentContext(httpContext));
                           await next();
                       })
-                      .UseEndpoints(endpoints =>
-                      {
-                          endpoints.MapDefaultControllerRoute();
-                      });
+                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
             appLifetime.ApplicationStopping.Register(OnShutdown);
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
         }
