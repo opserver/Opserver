@@ -43,10 +43,13 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
             internal List<Cache> Caches { get; }
 
-            internal WMISettings Config { get; set; }
+            private WmiDataProvider WmiProvider { get; }
+            private WMISettings Config => WmiProvider.Settings;
 
-            public WmiNode(string endpoint)
+            public WmiNode(WmiDataProvider provider, string endpoint)
             {
+                WmiProvider = provider;
+                DataProvider = provider;
                 Endpoint = endpoint;
                 Id = endpoint.ToLower();
                 Name = endpoint.ToLower();

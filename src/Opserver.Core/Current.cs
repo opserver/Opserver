@@ -6,8 +6,6 @@ namespace StackExchange.Opserver
 {
     internal static partial class Current
     {
-        public static OpserverSettings Settings { get; } = new OpserverSettings();
-
         /// <summary>
         /// Manually write an exception to our standard exception log.
         /// </summary>

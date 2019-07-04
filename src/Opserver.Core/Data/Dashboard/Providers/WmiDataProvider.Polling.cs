@@ -28,6 +28,27 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
             }
 
+            private Wmi.WmiQuery Query(string query, string wmiNamespace = Wmi.DefaultWmiNamespace) =>
+                new Wmi.WmiQuery(Config, Endpoint, query, wmiNamespace);
+
+            private async Task<bool> ClassExists(string className, string wmiNamespace = Wmi.DefaultWmiNamespace)
+            {
+                // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
+                var query = $"SELECT * FROM {className}";
+
+                try
+                {
+                    using (var q = Query(query, wmiNamespace))
+                    {
+                        return (await q.GetFirstResultAsync().ConfigureAwait(false)) != null;
+                    }
+                }
+                catch
+                {
+                    return false;
+                }
+            }
+
             public async Task<Node> PollNodeInfoAsync()
             {
                 try
@@ -94,7 +115,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Model,
                 NumberOfLogicalProcessors
                 FROM Win32_ComputerSystem";
-                using (var q = Wmi.Query(Endpoint, machineQuery))
+                using (var q = Query(machineQuery))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data != null)
@@ -118,7 +139,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 Version
                 FROM Win32_OperatingSystem";
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data != null)
@@ -135,7 +156,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     SerialNumber
                     FROM Win32_BIOS";
 
-                using (var q = Wmi.Query(Endpoint, servicetagquery))
+                using (var q = Query(servicetagquery))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data != null)
@@ -150,7 +171,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 IsVMHost = await GetIsVMHost().ConfigureAwait(false);
 
                 _canQueryAdapterUtilization = await GetCanQueryAdapterUtilization().ConfigureAwait(false);
-                _canQueryTeamingInformation = await Wmi.ClassExists(Endpoint, "MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
+                _canQueryTeamingInformation = await ClassExists("MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
             }
 
             private async Task GetAllInterfacesAsync()
@@ -169,7 +190,7 @@ SELECT Name,
                 //'AND PhysicalAdapter = True' causes exceptions with old windows versions.
 
                 var indexMap = new Dictionary<uint, Interface>();
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -204,7 +225,7 @@ SELECT Name,
                     const string teamsQuery = "SELECT InstanceID, Name FROM MSFT_NetLbfoTeam";
                     var teamNamesToInterfaces = new Dictionary<string, Interface>();
 
-                    using (var q = Wmi.Query(Endpoint, teamsQuery, @"root\standardcimv2"))
+                    using (var q = Query(teamsQuery, @"root\standardcimv2"))
                     {
                         foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
@@ -220,7 +241,7 @@ SELECT Name,
                     }
 
                     const string teamMembersQuery = "SELECT InstanceID, Name, Team FROM MSFT_NetLbfoTeamMember";
-                    using (var q = Wmi.Query(Endpoint, teamMembersQuery, @"root\standardcimv2"))
+                    using (var q = Query(teamMembersQuery, @"root\standardcimv2"))
                     {
                         foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                         {
@@ -247,7 +268,7 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
   FROM WIn32_NetworkAdapterConfiguration 
  WHERE IPEnabled = 'True'";
 
-                using (var q = Wmi.Query(Endpoint, ipQuery))
+                using (var q = Query(ipQuery))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -293,7 +314,7 @@ SELECT Caption,
   FROM Win32_LogicalDisk
  WHERE DriveType = 3"; //fixed disks
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var disk in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -336,7 +357,7 @@ SELECT Caption,
        State
   FROM Win32_Service"; // windows services
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -388,7 +409,7 @@ SELECT Caption,
                     ? "PercentTotalRunTime"
                     : "PercentProcessorTime";
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -418,7 +439,7 @@ SELECT Caption,
             {
                 const string query = "SELECT AvailableKBytes FROM Win32_PerfRawData_PerfOS_Memory";
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     var data = await q.GetFirstResultAsync().ConfigureAwait(false);
                     if (data == null)
@@ -473,7 +494,7 @@ SELECT Caption,
                     OutAvgBps = 0
                 };
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -525,7 +546,7 @@ SELECT Caption,
                     WriteAvgBps = 0
                 };
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -565,7 +586,7 @@ SELECT Caption,
 
                 uint returnCode = 0;
 
-                using (var q = Wmi.Query(Endpoint, query))
+                using (var q = Query(query))
                 {
                     foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
                     {
@@ -586,15 +607,12 @@ SELECT Caption,
                 return new ServiceActionResult(returnCode == 0, Win32ServiceReturnCodes[(int)returnCode]);
             }
 
-            #region private helpers
-
-            private Task<bool> GetIsVMHost()
-                => Wmi.ClassExists(Endpoint, "Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor");
+            private Task<bool> GetIsVMHost() => ClassExists("Win32_PerfRawData_HvStats_HyperVHypervisorLogicalProcessor");
 
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {
                 var query = $"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'";
-                var data = await Wmi.Query(Endpoint, query).GetFirstResultAsync().ConfigureAwait(false);
+                var data = await Query(query).GetFirstResultAsync().ConfigureAwait(false);
 
                 return data?.Name;
             }
@@ -606,7 +624,7 @@ SELECT Caption,
 
                 try
                 {
-                    using (var q = Wmi.Query(Endpoint, query))
+                    using (var q = Query(query))
                     {
                         await q.GetFirstResultAsync().ConfigureAwait(false);
                     }
@@ -618,8 +636,6 @@ SELECT Caption,
 
                 return true;
             }
-
-            #endregion
 
             /// <summary>
             /// Possible return codes from service actions

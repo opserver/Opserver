@@ -43,11 +43,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     continue;
                 }
 
-                var node = new WmiNode(nodeName)
-                {
-                    Config = _config,
-                    DataProvider = this
-                };
+                var node = new WmiNode(this, nodeName);
 
                 try
                 {

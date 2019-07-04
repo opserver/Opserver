@@ -11,73 +11,15 @@ namespace StackExchange.Opserver.Monitoring
 {
     internal static class Wmi
     {
-        private const string defaultWmiNamespace = @"root\cimv2";
-
-        internal static WmiQuery Query(string machineName, string query, string wmiNamespace = defaultWmiNamespace)
-        {
-            return new WmiQuery(machineName, query, wmiNamespace);
-        }
-
-        internal static async Task<bool> ClassExists(string machineName, string className, string wmiNamespace = defaultWmiNamespace)
-        {
-            // it's much faster trying to query something potentially non existent and catching an exception than to query the "meta_class" table.
-            var query = $"SELECT * FROM {className}";
-
-            try
-            {
-                using (var q = Query(machineName, query, wmiNamespace))
-                {
-                    return (await q.GetFirstResultAsync().ConfigureAwait(false)) != null;
-                }
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        private static readonly ConnectionOptions _localOptions, _remoteOptions;
-
-        static Wmi()
-        {
-            _localOptions = new ConnectionOptions
-            {
-                EnablePrivileges = true
-            };
-            _remoteOptions = new ConnectionOptions
-            {
-                EnablePrivileges = true,
-                Authentication = AuthenticationLevel.Packet,
-                Timeout = TimeSpan.FromSeconds(30)
-            };
-            string username = Current.Settings.Dashboard.Providers?.WMI?.Username,
-                   password = Current.Settings.Dashboard.Providers?.WMI?.Password;
-
-            if (username.HasValue() && password.HasValue())
-            {
-                _remoteOptions.Username = username;
-                _remoteOptions.Password = password;
-            }
-        }
-
-        private static ConnectionOptions GetConnectOptions(string machineName)
-        {
-            if (machineName == Environment.MachineName)
-                return _localOptions;
-
-            switch (machineName)
-            {
-                case "localhost":
-                case "127.0.0.1":
-                case "::1":
-                    return _localOptions;
-                default:
-                    return _remoteOptions;
-            }
-        }
+        public const string DefaultWmiNamespace = @"root\cimv2";
 
         internal class WmiQuery : IDisposable
         {
+            private static readonly ConnectionOptions _localOptions = new ConnectionOptions
+            {
+                EnablePrivileges = true
+            };
+            private static readonly ConcurrentDictionary<(string Username, string Password), ConnectionOptions> _optionsCache = new ConcurrentDictionary<(string Username, string Password), ConnectionOptions>();
             private static readonly ConcurrentDictionary<string, ManagementScope> _scopeCache = new ConcurrentDictionary<string, ManagementScope>();
             private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> _searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
 
@@ -87,19 +29,52 @@ namespace StackExchange.Opserver.Monitoring
             private readonly string _rawQuery;
             private readonly string _wmiNamespace;
 
-            public WmiQuery(string machineName, string q, string wmiNamespace = @"root\cimv2")
+            public WmiQuery(WMISettings settings, string machineName, string query, string wmiNamespace = @"root\cimv2") :
+                this(machineName, query, wmiNamespace, credentials: (settings.Username, settings.Password)) { }
+
+            public WmiQuery(string machineName, string query, string wmiNamespace = @"root\cimv2", (string Username, string Password) credentials = default)
             {
                 _machineName = machineName;
-                _rawQuery = q;
+                _rawQuery = query;
                 _wmiNamespace = wmiNamespace;
                 if (machineName.IsNullOrEmpty())
                     throw new ArgumentException("machineName should not be empty.");
 
-                var connectionOptions = GetConnectOptions(machineName);
+                var connectionOptions = GetConnectOptions(credentials, machineName);
 
                 var path = $@"\\{machineName}\{wmiNamespace}";
                 var scope = _scopeCache.GetOrAdd(path, x => new ManagementScope(x, connectionOptions));
-                _searcher = _searcherCache.GetOrAdd(path + q, _ => new ManagementObjectSearcher(scope, new ObjectQuery(q), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
+                _searcher = _searcherCache.GetOrAdd(path + query, _ => new ManagementObjectSearcher(scope, new ObjectQuery(query), new EnumerationOptions { Timeout = connectionOptions.Timeout }));
+            }
+
+            private static ConnectionOptions GetConnectOptions((string Username, string Password) credentials, string machineName)
+            {
+                if (machineName == Environment.MachineName)
+                    return _localOptions;
+
+                switch (machineName)
+                {
+                    case "localhost":
+                    case "127.0.0.1":
+                    case "::1":
+                        return _localOptions;
+                    default:
+                        return _optionsCache.GetOrAdd(credentials, tuple =>
+                        {
+                            var options = new ConnectionOptions
+                            {
+                                EnablePrivileges = true,
+                                Authentication = AuthenticationLevel.Packet,
+                                Timeout = TimeSpan.FromSeconds(30)
+                            };
+                            if (tuple.Username.HasValue() && tuple.Password.HasValue())
+                            {
+                                options.Username = tuple.Username;
+                                options.Password = tuple.Password;
+                            }
+                            return options;
+                        });
+                }
             }
 
             public Task<ManagementObjectCollection> Result

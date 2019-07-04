@@ -44,9 +44,19 @@ namespace StackExchange.Opserver
                     {
                         // Calc request-based roles
                         var roles = Roles.None;
-                        if (IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress)) roles |= Roles.LocalRequest;
-                        if (Security.IsInternalIP(RequestIP)) roles |= Roles.InternalRequest;
-                        if (IsValidApiRequest()) roles |= Roles.ApiRequest;
+                        if (IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress))
+                        {
+                            roles |= Roles.LocalRequest;
+                        }
+                        if (Security.IsInternalIP(RequestIP))
+                        {
+                            roles |= Roles.InternalRequest;
+                        }
+                        if (SecuritySettings.Current?.ApiKey.HasValue() == true
+                            && string.Equals(SecuritySettings.Current?.ApiKey, Request?.Query["key"]))
+                        {
+                            roles |= Roles.ApiRequest;
+                        }
 
                         _user = new User(HttpContext.User, roles);
                     }

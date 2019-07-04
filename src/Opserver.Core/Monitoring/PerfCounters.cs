@@ -26,7 +26,8 @@ namespace StackExchange.Opserver.Monitoring
             {
                 var timer = Stopwatch.StartNew();
 
-                using (var q = Wmi.Query(machineName, query))
+                // TODO: Poll creds
+                using (var q = new Wmi.WmiQuery(machineName, query))
                 {
                     var queryResults = (await q.Result.ConfigureAwait(false)).Cast<ManagementObject>();
                     timer.Stop();

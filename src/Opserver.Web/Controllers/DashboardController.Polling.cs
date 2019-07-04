@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Opserver.Data.Dashboard;
 
 namespace StackExchange.Opserver.Controllers
 {
