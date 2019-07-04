@@ -7,7 +7,6 @@ using StackExchange.Opserver.Views.Home;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Models.Security;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Opserver.Data.SQL;
 using StackExchange.Opserver.Data.Redis;
@@ -51,30 +50,24 @@ namespace StackExchange.Opserver.Controllers
         [DefaultRoute("")]
         public ActionResult Home()
         {
-            var s = Settings;
-
-            // TODO: Plugin registrations - middleware?
-            // Should be able to IEnumerable<StatusModule> DI for this
-            // ...and have order added to the module, with 20x spacing
-
             // TODO: Order
             foreach (var m in Modules)
             {
-                //if (m.Enabled && m.SecuritySettings.HasAccess())
+                //if (m.Enabled && m.SecuritySettings)
                 //    return RedirectToAction()...
             }
 
-            if (Dashboard.Enabled && s.Dashboard.HasAccess())
+            if (Current.User.HasAccess(Dashboard))
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
-            if (Sql.Enabled && s.SQL.HasAccess())
+            if (Current.User.HasAccess(Sql))
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
-            if (Redis.Enabled && s.Redis.HasAccess())
+            if (Current.User.HasAccess(Redis))
                 return RedirectToAction(nameof(RedisController.Dashboard), "Redis");
-            if (Elastic.Enabled && s.Elastic.HasAccess())
+            if (Current.User.HasAccess(Elastic))
                 return RedirectToAction(nameof(ElasticController.Dashboard), "Elastic");
-            if (Exceptions.Enabled && s.Exceptions.HasAccess())
+            if (Current.User.HasAccess(Exceptions))
                 return RedirectToAction(nameof(ExceptionsController.Exceptions), "Exceptions");
-            if (HAProxy.Enabled && s.HAProxy.HasAccess())
+            if (Current.User.HasAccess(HAProxy))
                 return RedirectToAction(nameof(HAProxyController.Dashboard), "HAProxy");
 
             return View("NoConfiguration");
@@ -83,7 +76,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("top-refresh")]
         public ActionResult TopRefresh(string tab)
         {
-            //Current.NavTab = NavTab.Get(tab);
+            Current.NavTab = NavTab.GetByName(tab);
 
             var vd = new TopRefreshModel
                 {

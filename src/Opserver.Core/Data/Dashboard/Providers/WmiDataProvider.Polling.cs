@@ -24,7 +24,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 catch (ActiveDirectoryObjectNotFoundException) { }
                 catch (Exception e)
                 {
-                    Current.LogException(e);
+                    e.Log();
                 }
             }
 
@@ -68,12 +68,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
                 catch (COMException e)
                 {
-                    Current.LogException(e);
+                    e.Log();
                     Status = NodeStatus.Unreachable;
                 }
                 catch (Exception e) when (e.InnerException is COMException)
                 {
-                    Current.LogException(e);
+                    e.Log();
                     Status = NodeStatus.Unreachable;
                 }
                 return this;
@@ -95,12 +95,12 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
                 catch (COMException e)
                 {
-                    Current.LogException(e);
+                    e.Log();
                     Status = NodeStatus.Unreachable;
                 }
                 catch (Exception e) when (e.InnerException is COMException)
                 {
-                    Current.LogException(e);
+                    e.Log();
                     Status = NodeStatus.Unreachable;
                 }
                 return this;

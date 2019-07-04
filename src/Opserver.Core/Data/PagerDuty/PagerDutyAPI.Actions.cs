@@ -37,10 +37,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
             catch (DeserializationException de)
             {
-                Current.LogException(
-                    de.AddLoggedData("Message", de.Message)
-                    .AddLoggedData("Snippet After", de.SnippetAfterError)
-                    );
+                de.AddLoggedData("Message", de.Message)
+                  .AddLoggedData("Snippet After", de.SnippetAfterError)
+                  .Log();
                 return null;
             }
         }

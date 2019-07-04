@@ -407,7 +407,7 @@ Update Exceptions
             }
             catch (Exception e)
             {
-                Current.LogException(e);
+                e.Log();
                 return null;
             }
         }
@@ -441,7 +441,7 @@ Update Exceptions
             }
             catch (Exception e)
             {
-                Current.LogException(e);
+                e.Log();
                 return new List<T>();
             }
         }

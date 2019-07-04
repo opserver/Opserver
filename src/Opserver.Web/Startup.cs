@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Data;
 using StackExchange.Opserver.Helpers;
+using StackExchange.Opserver.Security;
 using StackExchange.Profiling;
 
 namespace StackExchange.Opserver
@@ -19,14 +20,6 @@ namespace StackExchange.Opserver
         public Startup(IConfiguration configuration)
         {
             _configuration = configuration;
-        }
-
-        public void TODO()
-        {
-            Cache.EnableProfiling = SiteSettings.PollerProfiling;
-            Cache.LogExceptions = SiteSettings.LogPollerExceptions;
-            // When settings change, reload the app pool
-            //Current.Settings.OnChanged += HttpRuntime.UnloadAppDomain;
         }
 
         public void ConfigureServices(IServiceCollection services)
@@ -99,6 +92,7 @@ namespace StackExchange.Opserver
             //           .IgnorePath("/spark")
             //           .IgnorePath("/top-refresh");
             //});
+            services.AddSingleton<SecurityProvider>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
         }
@@ -106,6 +100,8 @@ namespace StackExchange.Opserver
         public void Configure(
             IApplicationBuilder appBuilder,
             IHostApplicationLifetime appLifetime,
+            IOptions<OpserverSettings> settings,
+            SecurityProvider securityProvider,
             IEnumerable<StatusModule> modules
         )
         {
@@ -117,12 +113,13 @@ namespace StackExchange.Opserver
                       .UseAuthorization()
                       .Use(async (httpContext, next)  =>
                       {
-                          Current.SetContext(new Current.CurrentContext(httpContext));
+                          Current.SetContext(new Current.CurrentContext(securityProvider, httpContext));
                           await next();
                       })
                       .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
             appLifetime.ApplicationStopping.Register(OnShutdown);
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
+            Cache.Configure(settings);
         }
 
         private void OnShutdown()

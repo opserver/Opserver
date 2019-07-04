@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Data.SQL
             }
             catch (Exception e)
             {
-                Current.LogException(e);
+                e.Log();
                 return false;
             }
         }

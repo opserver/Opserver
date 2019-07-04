@@ -150,11 +150,11 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         Trace.WriteLine(rex);
                     }
 
-                    Current.LogException(
-                        e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
-                         .AddLoggedData("Endpoint", fullUri)
-                         .AddLoggedData("Headers", req.Headers.ToString())
-                         .AddLoggedData("Content Type", req.ContentType));
+                    e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
+                     .AddLoggedData("Endpoint", fullUri)
+                     .AddLoggedData("Headers", req.Headers.ToString())
+                     .AddLoggedData("Content Type", req.ContentType)
+                     .Log();
                     return getFromJson("fail");
                 }
             }

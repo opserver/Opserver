@@ -510,8 +510,7 @@ namespace StackExchange.Opserver
     {
         public static void SetPageTitle(this RazorPage page, string title)
         {
-            page.ViewContext.ViewData[ViewDataKeys.PageTitle] =
-                title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title.HtmlEncode(), " - ", SiteSettings.SiteName);
+            page.ViewContext.ViewData[ViewDataKeys.PageTitle] = title;
         }
 
         public static void SetTopSearch(this RazorPage page,

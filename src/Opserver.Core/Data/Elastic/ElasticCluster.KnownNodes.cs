@@ -50,10 +50,9 @@ namespace StackExchange.Opserver.Data.Elastic
                     }
                     else
                     {
-                        Current.LogException(
-                            new OpserverConfigException($"Invalid port specified for {parts[0]}: '{parts[1]}'")
+                        new OpserverConfigException($"Invalid port specified for {parts[0]}: '{parts[1]}'")
                             .AddLoggedData("Config Value", hostAndPort)
-                        );
+                            .Log();
                         Port = DefaultElasticPort;
                     }
                 }
@@ -94,7 +93,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 catch (Exception e)
                 {
                     LastException = e;
-                    Current.LogException(e);
+                    e.Log();
                     // In the case of a 404, 500, etc - carry on to the next node
                 }
                 return null;

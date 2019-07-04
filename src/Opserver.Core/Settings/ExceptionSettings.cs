@@ -123,7 +123,7 @@ namespace StackExchange.Opserver
                     }
                     catch (Exception ex)
                     {
-                        Current.LogException($"Unable to parse source link pattern for '{str.Name}': '{str.Pattern}'", ex);
+                        new Exception($"Unable to parse source link pattern for '{str.Name}': '{str.Pattern}'", ex).Log();
                     }
                 }
             }

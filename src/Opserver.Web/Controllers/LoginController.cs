@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Helpers;
+using StackExchange.Opserver.Security;
 using StackExchange.Opserver.Views.Login;
 using Roles = StackExchange.Opserver.Models.Roles;
 

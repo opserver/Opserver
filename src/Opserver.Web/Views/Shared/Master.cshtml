@@ -1,14 +1,15 @@
-﻿@using StackExchange.Opserver.Models
-@using StackExchange.Opserver.Views.Shared
+﻿@using StackExchange.Opserver.Views.Shared
 @using StackExchange.Profiling
 @inject IJsonHelper Json
 @{
     var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
+    var baseTitle = ViewData[ViewDataKeys.PageTitle] as string;
+    var title = baseTitle.HasValue() ? Settings.Global.SiteName + " - " + baseTitle : Settings.Global.SiteName;
 }
 <!DOCTYPE html>
 <html>
 <head>
-    <title>@Html.Raw((string)ViewData[ViewDataKeys.PageTitle])</title>
+    <title>@title</title>
     <meta name="viewport" content="width=device-width">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="google" value="notranslate" />
@@ -19,7 +20,7 @@
     <script src="~/Content/js/Scripts.js" asp-append-version="true"></script>
     <script>
         $(function() {
-            Status.init({ SiteName: '@SiteSettings.SiteName', Tab:'@Current.NavTab?.Name', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
+            Status.init({ SiteName: '@Settings.Global.SiteName', Tab:'@Current.NavTab?.Name', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
             @if (topNodes?.AllNodes?.Any() ?? false)
             {
                 var serverJson = topNodes.AllNodes.Select(n => new

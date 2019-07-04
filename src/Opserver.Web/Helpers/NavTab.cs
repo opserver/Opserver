@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using StackExchange.Opserver.Controllers;
-using StackExchange.Opserver.Models.Security;
+using StackExchange.Opserver.Security;
 
 namespace StackExchange.Opserver.Helpers
 {
@@ -17,18 +17,10 @@ namespace StackExchange.Opserver.Helpers
         public int? BadgeCount => Module is IOverallStatusCount isc ? isc.Count : (int?)null;
         public string Tooltip => Module is IOverallStatusCount isc ? isc.Tooltip : null;
 
-        public bool IsEnabled
-        {
-            get
-            {
-                var ss = Module.SecuritySettings;
-                if (ss != null)
-                {
-                    if (!ss.Enabled || !ss.HasAccess()) return false;
-                }
-                return true;
-            }
-        }
+        /// <summary>
+        /// Enabled if the module is active and it either has no security, or the current user can see it.
+        /// </summary>
+        public bool IsEnabled => Module.Enabled && (Module.SecuritySettings == null || Current.User.HasAccess(Module));
 
         public NavTab(StatusModule module, string route)
         {
@@ -40,6 +32,7 @@ namespace StackExchange.Opserver.Helpers
         private static Dictionary<Type, NavTab> _controllerMappings = new Dictionary<Type, NavTab>();
 
         public static NavTab Get(StatusController c) => _controllerMappings.TryGetValue(c.GetType(), out var tab) ? tab : null;
+        public static NavTab GetByName(string tabName) => AllTabs.FirstOrDefault(t => t.Name == tabName);
 
         /// <summary>
         /// https://www.youtube.com/watch?v=JnbfuAcCqpY

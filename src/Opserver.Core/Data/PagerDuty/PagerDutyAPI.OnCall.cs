@@ -58,9 +58,9 @@ namespace StackExchange.Opserver.Data.PagerDuty
             }
             catch (DeserializationException de)
             {
-                Current.LogException(
-                    de.AddLoggedData("Snippet After", de.SnippetAfterError)
-                      .AddLoggedData("Message", de.Message));
+                de.AddLoggedData("Snippet After", de.SnippetAfterError)
+                  .AddLoggedData("Message", de.Message)
+                  .Log();
                 return null;
             }
         }

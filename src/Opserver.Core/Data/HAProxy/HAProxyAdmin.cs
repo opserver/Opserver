@@ -114,8 +114,9 @@ namespace StackExchange.Opserver.Data.HAProxy
             catch (Exception e)
             {
                 //if (e is WebException we && we.Response is HttpWebResponse hwr && hwr.StatusCode == HttpStatusCode.Unauthorized) return false;
-                Current.LogException(e.AddLoggedData("Instance", instance.Name)
-                                      .AddLoggedData("InstanceUrl", instance.Url));
+                e.AddLoggedData("Instance", instance.Name)
+                 .AddLoggedData("InstanceUrl", instance.Url)
+                 .Log();
                 return false;
             }
         }

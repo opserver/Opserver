@@ -69,7 +69,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 }
                 catch (DeserializationException de)
                 {
-                    Current.LogException(de);
+                    de.Log();
                     return new BosunApiResult<T>
                     {
                         Error = $"Error deserializing response from bosun to {typeof(T).Name}: {de}. Details logged."
@@ -79,7 +79,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     e.AddLoggedData("Url", url);
                     // TODO Log response in Data? Could be huge, likely truncate
-                    Current.LogException(e);
+                    e.Log();
                     return new BosunApiResult<T>
                     {
                         Error = $"Error fetching data from bosun: {e}. Details logged."

@@ -1,16 +1,9 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver
+namespace StackExchange.Opserver.Security
 {
     public class SecuritySettings
     {
-        public static SecuritySettings Current { get; } = new SecuritySettings
-        {
-            Provider = "EveryonesAnAdmin"
-        };
-
-        public bool Enabled => Provider.HasValue();
-
         /// <summary>
         /// Security Provider to use, e.g. "ActiveDirectory"
         /// </summary>

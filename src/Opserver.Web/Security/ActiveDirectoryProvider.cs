@@ -4,18 +4,20 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security;
 using System.Threading;
+using StackExchange.Opserver.Models;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Models.Security
+namespace StackExchange.Opserver.Security
 {
     public class ActiveDirectoryProvider : SecurityProvider
     {
+        public override string ProviderName => "Active Directory";
         private HashSet<string> GroupNames { get; } = new HashSet<string>();
         private List<string> Servers { get; }
         private string AuthUser { get; }
         private string AuthPassword { get; }
 
-        public ActiveDirectoryProvider(SecuritySettings settings)
+        public ActiveDirectoryProvider(SecuritySettings settings) : base(settings)
         {
             if (settings.Server.HasValue()) Servers = settings.Server.Split(StringSplits.Comma_SemiColon).ToList();
             AuthUser = settings.AuthUser;
@@ -29,12 +31,15 @@ namespace StackExchange.Opserver.Models.Security
             return RunCommand(pc => pc.ValidateCredentials(userName, password));
         }
 
-        public override bool InGroups(string groupNames, string accountName)
+        public override bool InGroups(User user, string groupNames)
         {
             var groups = groupNames.Split(StringSplits.Comma_SemiColon);
             if (groupNames.Length == 0) return false;
 
-            return groups.Any(g => GetGroupMembers(g)?.Contains(accountName, StringComparer.InvariantCultureIgnoreCase) == true);
+            // TODO: Move this elsewhere
+            if (groups.Any(g => g == "*")) return true;
+
+            return groups.Any(g => GetGroupMembers(g)?.Contains(user.AccountName, StringComparer.InvariantCultureIgnoreCase) == true);
         }
 
         public override void PurgeCache()
@@ -47,7 +52,7 @@ namespace StackExchange.Opserver.Models.Security
             }
         }
 
-        public override List<string> GetGroupMembers(string groupName)
+        public List<string> GetGroupMembers(string groupName)
         {
             GroupNames.Add(groupName);
             return Current.LocalCache.GetSet<List<string>>("ADMembers-" + groupName,

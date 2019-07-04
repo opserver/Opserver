@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
@@ -192,7 +193,7 @@ namespace StackExchange.Opserver.Data
                         if (logExceptions.Value)
                         {
                             addExceptionData?.Invoke(e);
-                            Current.LogException(e);
+                            e.Log();
                         }
                         var errorMessage = StringBuilderCache.Get()
                             .Append("Unable to fetch from ")
@@ -246,7 +247,7 @@ namespace StackExchange.Opserver.Data
                     catch (Exception e)
                     {
                         tc.Error = e;
-                        Current.LogException(e);
+                        e.Log();
                     }
                     tc.LastFetch = DateTime.UtcNow;
                     return tc;
@@ -290,8 +291,11 @@ namespace StackExchange.Opserver.Data
         /// </summary>
         public MiniProfiler Profiler { get; protected set; }
 
-        public static bool EnableProfiling { get; set; }
-        public static bool LogExceptions { get; set; }
+        private static IOptions<OpserverSettings> Settings { get; set; }
+        public static bool EnableProfiling => Settings.Value.Global.ProfilePollers;
+        public static bool LogExceptions => Settings.Value.Global.LogPollerExceptions;
+
+        public static void Configure(IOptions<OpserverSettings> settings) => Settings = settings;
 
         internal void SetSuccess()
         {

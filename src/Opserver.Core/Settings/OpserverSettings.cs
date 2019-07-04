@@ -2,6 +2,7 @@
 {
     public class OpserverSettings
     {
+        public GlobalSettings Global { get; set; } = new GlobalSettings();
         public PagerDutySettings PagerDuty { get; set; } = new PagerDutySettings();
         public CloudFlareSettings CloudFlare { get; set; } = new CloudFlareSettings();
         public DashboardSettings Dashboard { get; set; } = new DashboardSettings();

@@ -55,7 +55,7 @@
     }
 }
 <h5 class="page-header">
-    @SiteSettings.SiteNameLong <span class="text-muted">(@SiteSettings.SiteName)</span>
+    @(Settings.Global.SiteName)
 </h5>
 <div class="row small">
     <div class="col-md-4">
@@ -162,8 +162,8 @@
         <div class="panel panel-default">
             <div class="panel-heading">Security</div>
             <div class="panel-body small">
-                <div class="value-block col-xs-4 @((SecuritySettings.Current.Enabled ? MonitorStatus.Good : MonitorStatus.Warning).BackgroundClass())">
-                    @(SecuritySettings.Current.Enabled ? "Enabled" : "Disabled")
+                <div class="value-block col-xs-4">
+                    @Current.Security.ProviderName
                     <label>Security</label>
                 </div>
                 <div class="value-block col-xs-4">
@@ -191,10 +191,10 @@
                         <span class="text-muted">Internal Networks</span>
                     </li>
                     <li class="list-group-item">
-                        <span class="text-muted">Admins:</span> @(SiteSettings.AdminGroups?.Replace(";", ", "))
+                        <span class="text-muted">Admins:</span> @(s.Global.AdminGroups?.Replace(";", ", "))
                     </li>
                     <li class="list-group-item">
-                        <span class="text-muted">Viewers:</span> @(SiteSettings.ViewGroups?.Replace(";", ", "))
+                        <span class="text-muted">Viewers:</span> @(s.Global.ViewGroups?.Replace(";", ", "))
                     </li>
                 </ul>
             </div>

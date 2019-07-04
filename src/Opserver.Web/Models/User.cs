@@ -1,6 +1,5 @@
-﻿using System;
-using System.Security.Claims;
-using StackExchange.Opserver.Models.Security;
+﻿using System.Security.Claims;
+using StackExchange.Opserver.Security;
 
 namespace StackExchange.Opserver.Models
 {
@@ -9,13 +8,15 @@ namespace StackExchange.Opserver.Models
         public string AccountName { get; }
         public bool IsAnonymous { get; }
         public bool IsGlobalAdmin { get; }
+        private SecurityProvider Provider { get; }
         /// <summary>
         /// Returns this user's role on the current site.
         /// </summary>
         public Roles Roles { get; }
 
-        public User(ClaimsPrincipal principle, Roles baseRoles)
+        public User(SecurityProvider provider, ClaimsPrincipal principle, Roles baseRoles)
         {
+            Provider = provider;
             var identity = principle?.Identity;
             if (identity == null)
             {
@@ -56,14 +57,15 @@ namespace StackExchange.Opserver.Models
             IsGlobalAdmin = (roles & Roles.GlobalAdmin) == Roles.GlobalAdmin;
             Roles = roles;
         }
-        private Roles GetRoles(ISecurableModule module, Roles user, Roles admin)
+        private Roles GetRoles(StatusModule module, Roles user, Roles admin)
         {
-            if (module.IsAdmin()) return admin | user;
-            if (module.HasAccess()) return user;
+            if (IsAdmin(module)) return admin | user;
+            if (HasAccess(module)) return user;
             return Roles.None;
         }
 
         public bool Is(Roles role) => (Roles & role) == role || IsGlobalAdmin;
-        public bool IsInRole(string role) => Enum.TryParse(role, out Roles r) && Is(r);
+        public bool HasAccess(StatusModule module) => Provider.InReadGroups(this, module);
+        public bool IsAdmin(StatusModule module) => Provider.InAdminGroups(this, module);
     }
 }

@@ -20,7 +20,7 @@ namespace StackExchange.Opserver.Data.SQL
             }
             catch (Exception ex)
             {
-                Current.LogException(ex);
+                ex.Log();
                 return 0;
             }
         }

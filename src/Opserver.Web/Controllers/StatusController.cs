@@ -41,7 +41,7 @@ namespace StackExchange.Opserver.Controllers
         public void SetTitle(string title)
         {
             title = title.HtmlEncode();
-            ViewData[ViewDataKeys.PageTitle] = title.IsNullOrEmpty() ? SiteSettings.SiteName : string.Concat(title, " - ", SiteSettings.SiteName);
+            ViewData[ViewDataKeys.PageTitle] = title.IsNullOrEmpty() ? Settings.Global.SiteName : string.Concat(title, " - ", Settings.Global.SiteName);
         }
 
         /// <summary>

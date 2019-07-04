@@ -46,12 +46,12 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 get
                 {
-                   switch (Role)
-                   {
-                       case "master": return RedisInstanceRole.Master;
-                       case "slave": return RedisInstanceRole.Slave;
-                       default: return RedisInstanceRole.Unknown;
-                   }
+                    switch (Role)
+                    {
+                        case "master": return RedisInstanceRole.Master;
+                        case "slave": return RedisInstanceRole.Slave;
+                        default: return RedisInstanceRole.Unknown;
+                    }
                 }
             }
 
@@ -103,12 +103,12 @@ namespace StackExchange.Opserver.Data.Redis
                     if (parts.Length == 3)
                     {
                         SlaveConnections.Add(new RedisSlaveInfo
-                            {
-                                Index = int.Parse(key.Replace("slave", "")),
-                                IP = parts[0],
-                                Port = int.Parse(parts[1]),
-                                Status = parts[2]
-                            });
+                        {
+                            Index = int.Parse(key.Replace("slave", "")),
+                            IP = parts[0],
+                            Port = int.Parse(parts[1]),
+                            Status = parts[2]
+                        });
                     }
                     // redis 2.8+
                     if (parts.Length > 3)
@@ -116,12 +116,14 @@ namespace StackExchange.Opserver.Data.Redis
                         try
                         {
                             var si = new RedisSlaveInfo { Index = int.Parse(key.Replace("slave", "")) };
-                            foreach(var p in parts) {
+                            foreach (var p in parts)
+                            {
                                 var pair = p.Split(StringSplits.Equal);
                                 if (pair.Length != 2) continue;
                                 var val = pair[1];
 
-                                switch(pair[0]) {
+                                switch (pair[0])
+                                {
                                     case "ip":
                                         si.IP = val;
                                         break;
@@ -137,8 +139,10 @@ namespace StackExchange.Opserver.Data.Redis
                                 }
                             }
                             SlaveConnections.Add(si);
-                        } catch (Exception e) {
-                            Current.LogException("Redis error: couldn't parse slave string: " + value, e);
+                        }
+                        catch (Exception e)
+                        {
+                            new Exception("Redis error: couldn't parse slave string: " + value, e).Log();
                         }
                     }
                 }
@@ -344,8 +348,8 @@ namespace StackExchange.Opserver.Data.Redis
                         }
                         catch (Exception e)
                         {
-                            var ex = new Exception("Error Pasing " + key + ":" + value + " from redis INFO - Parsed Keys=" + keysMatch.Groups[1].Value + ", Expires=" + keysMatch.Groups[2].Value + ".", e);
-                            Current.LogException(ex);
+                            new Exception("Error Pasing " + key + ":" + value + " from redis INFO - Parsed Keys=" + keysMatch.Groups[1].Value + ", Expires=" + keysMatch.Groups[2].Value + ".", e)
+                                .Log();
                         }
                     }
                 }

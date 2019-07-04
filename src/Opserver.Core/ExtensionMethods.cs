@@ -501,7 +501,7 @@ namespace StackExchange.Opserver
                     if (t.IsFaulted)
                     {
                         Interlocked.Increment(ref totalGetSetAsyncError);
-                        Current.LogException(t.Exception);
+                        t.Exception.Log();
                     }
                     else
                     {

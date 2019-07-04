@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>@SiteSettings.SiteNameLong</title>
+        <title>@Settings.Global.SiteName</title>
         <link href="~/Content/themes/light.min.css" asp-append-version="true" rel="stylesheet" type="text/css" />
         <link href="~/Content/img/apple-touch-icon.png" asp-append-version="true" rel="apple-touch-icon" />
     </head>
@@ -20,7 +20,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-4 col-sm-offset-4 col-xs-8 col-xs-offset-2" style="margin-top: 50px;">
-                    <h4 class="page-header">@SiteSettings.SiteNameLong Login</h4>
+                    <h4 class="page-header">@Settings.Global.SiteName Login</h4>
                     <form action="~/login" method="POST">
                         <div class="form-group form-group-sm">
                             <input type="hidden" name="url" value="@Context.Request.Query["ReturnUrl"]" />
