@@ -4,9 +4,11 @@
 @using StackExchange.Opserver.Data.Dashboard
 @using StackExchange.Opserver.Data.SQL
 @inject DashboardModule Dashboard
-@inject SQLModule Sql
+@inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
 @inject StackExchange.Opserver.Data.Exceptions.ExceptionsModule Exceptions
 @inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
+@inject StackExchange.Opserver.Data.Redis.RedisModule Redis
+@inject SQLModule Sql
 @{
     this.SetPageTitle("About");
 
@@ -108,12 +110,12 @@
         <div class="panel panel-default">
             <div class="panel-heading">Sections</div>
             <div class="panel-body">
-                @EnabledLabel("Dashboard", s.Dashboard.Enabled)
-                @EnabledLabel("Exceptions", s.Exceptions.Enabled)
-                @EnabledLabel("SQL", s.SQL.Enabled)
-                @EnabledLabel("Redis", s.Redis.Enabled)
-                @EnabledLabel("Elastic", s.Elastic.Enabled)
-                @EnabledLabel("HAProxy", s.HAProxy.Enabled)
+                @EnabledLabel("Dashboard", Dashboard.Enabled)
+                @EnabledLabel("Exceptions", Exceptions.Enabled)
+                @EnabledLabel("SQL", Sql.Enabled)
+                @EnabledLabel("Redis", Redis.Enabled)
+                @EnabledLabel("Elastic", Elastic.Enabled)
+                @EnabledLabel("HAProxy", HAProxy.Enabled)
             </div>
         </div>
     </div>
@@ -201,7 +203,7 @@
         </div>
     </div>
     <div class="col-md-4">
-        @if (s.Dashboard.Enabled)
+        @if (Dashboard.Enabled)
         {
             <div class="panel panel-default">
                 <div class="panel-heading">Dashboard</div>
@@ -232,7 +234,7 @@
             </div>
         }
     </div>
-    @if (s.SQL.Enabled)
+    @if (Sql.Enabled)
     {
         var clusters = Sql.Clusters;
         var instances = Sql.StandaloneInstances;
@@ -262,7 +264,7 @@
             </div>
         </div>
     }
-    @if (s.Exceptions.Enabled)
+    @if (Exceptions.Enabled)
     {
         var exceptionStatus = Exceptions.MonitorStatus;
         <div class="col-md-4">
@@ -272,44 +274,43 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <span class="text-muted">Admins:</span>
-                            @((s.Exceptions.AdminGroups ?? "None").ColorCode())
+                            @((Exceptions.Settings.AdminGroups ?? "None").ColorCode())
                         </li>
                         <li class="list-group-item">
                             <span class="text-muted">Viewers:</span>
-                            @((s.Exceptions.ViewGroups ?? "None").ColorCode())
+                            @((Exceptions.Settings.ViewGroups ?? "None").ColorCode())
                         </li>
                         <li class="list-group-item">
-                            <span class="badge@(s.Exceptions.EnablePreviews ? "" : " alert-warning")">@s.Exceptions.EnablePreviews</span>
+                            <span class="badge@(Exceptions.Settings.EnablePreviews ? "" : " alert-warning")">@Exceptions.Settings.EnablePreviews</span>
                             Previews
                         </li>
                         <li class="list-group-item">
-                            <span class="badge">@s.Exceptions.RecentSeconds.Pluralize("Second")</span>
+                            <span class="badge">@Exceptions.Settings.RecentSeconds.Pluralize("Second")</span>
                             Recent Threshold
                         </li>
                         <li class="list-group-item">
-                            <span class="badge alert-warning">@s.Exceptions.WarningCount.ToComma() / @s.Exceptions.WarningRecentCount.ToComma() Recent</span>
+                            <span class="badge alert-warning">@Exceptions.Settings.WarningCount.ToComma() / @Exceptions.Settings.WarningRecentCount.ToComma() Recent</span>
                             Warning Thresholds
                         </li>
                         <li class="list-group-item">
-                            <span class="badge alert-danger">@s.Exceptions.CriticalCount.ToComma() / @s.Exceptions.CriticalRecentCount.ToComma() Recent</span>
+                            <span class="badge alert-danger">@Exceptions.Settings.CriticalCount.ToComma() / @Exceptions.Settings.CriticalRecentCount.ToComma() Recent</span>
                             Critical Thresholds
                         </li>
                     </ul>
-                    @foreach (var store in s.Exceptions.Stores)
+                    @foreach (var store in Exceptions.Stores)
                     {
-                        var es = Exceptions.Stores.First(ess => ess.Name == store.Name);
-                        <h6 class="page-header">@es.LastFetch.IconSpan() @store.Name</h6>
+                        <h6 class="page-header">@store.LastFetch.IconSpan() @store.Name</h6>
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <span class="badge">@(store.QueryTimeoutMs.ToComma())ms</span>
+                                <span class="badge">@(store.Settings.QueryTimeoutMs.ToComma())ms</span>
                                 Timeout
                             </li>
                             <li class="list-group-item">
-                                <span class="badge">@(store.PollIntervalSeconds.ToComma())s</span>
+                                <span class="badge">@(store.Settings.PollIntervalSeconds.ToComma())s</span>
                                 Poll Interval
                             </li>
                             <li class="list-group-item">
-                                <span class="badge">@(es.Applications.Data?.Sum(a => a.ExceptionCount).ToComma() ?? "0")</span>
+                                <span class="badge">@(store.Applications.Data?.Sum(a => a.ExceptionCount).ToComma() ?? "0")</span>
                                 Exception Count
                             </li>
                         </ul>
@@ -318,7 +319,7 @@
             </div>
         </div>
     }
-    @if (s.HAProxy.Enabled)
+    @if (HAProxy.Enabled)
     {
         var groups = HAProxy.Groups;
         <div class="col-md-4">
@@ -328,18 +329,18 @@
                     <ul class="list-group">
                         <li class="list-group-item">
                             <span class="text-muted">Admins:</span>
-                            @((s.HAProxy.AdminGroups ?? "None").ColorCode())
+                            @((HAProxy.Settings.AdminGroups ?? "None").ColorCode())
                         </li>
                         <li class="list-group-item">
                             <span class="text-muted">Viewers:</span>
-                            @((s.HAProxy.ViewGroups ?? "None").ColorCode())
+                            @((HAProxy.Settings.ViewGroups ?? "None").ColorCode())
                         </li>
                         <li class="list-group-item">
                             <span class="text-muted">User:</span>
-                            @s.HAProxy.User
+                            @HAProxy.Settings.User
                         </li>
                         <li class="list-group-item">
-                            <span class="badge">@(s.HAProxy.QueryTimeoutMs.ToComma())ms</span>
+                            <span class="badge">@(HAProxy.Settings.QueryTimeoutMs.ToComma())ms</span>
                             Timeout
                         </li>
                     </ul>

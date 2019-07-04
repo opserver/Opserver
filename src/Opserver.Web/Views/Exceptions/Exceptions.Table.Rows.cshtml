@@ -46,7 +46,7 @@
             {
                 <i class="js-protected fa fa-lock text-primary fa-fw" aria-hidden="true" title="This error is protected"></i>
             }
-            @if (Settings.Exceptions.EnablePreviews)
+            @if (Module.Settings.EnablePreviews)
             {
                 <span class="js-preview">
                     <a href="~/exceptions/detail?id=@e.GUID&log=@e.ApplicationName.UrlEncode()&store=@Model.Store.Name.UrlEncode()"><i class="fa fa-eye" aria-hidden="true"></i></a>

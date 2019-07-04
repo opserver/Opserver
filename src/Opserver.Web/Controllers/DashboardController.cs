@@ -38,7 +38,7 @@ namespace StackExchange.Opserver.Controllers
         {
             var categories = Module.AllNodes
                 .GroupBy(n => n.Category)
-                .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Settings.Dashboard.ShowOther))
+                .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Module.Settings.ShowOther))
                 .OrderBy(g => g.Key.Index);
 
             var resultCategories = categories.Select(g =>

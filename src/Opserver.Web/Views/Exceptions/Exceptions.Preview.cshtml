@@ -31,7 +31,7 @@ else
     </h6>
     <p class="small text-danger">@error.Message</p>
     <div class="error-info">
-        <pre class="stack dark"><code class="nohighlight">@ExceptionalUtils.StackTrace.HtmlPrettify(error.Detail, Settings.Exceptions.StackTraceSettings).AsHtml()</code></pre>
+        <pre class="stack dark"><code class="nohighlight">@ExceptionalUtils.StackTrace.HtmlPrettify(error.Detail, Module.Settings.StackTraceSettings).AsHtml()</code></pre>
         <p class="small">occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
     </div>
 }

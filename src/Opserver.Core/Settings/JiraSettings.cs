@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace StackExchange.Opserver
 {
-    public class JiraSettings : ModuleSettings
+    public class JiraSettings
     {
-        public override bool Enabled => Actions.Count > 0;
+        public bool Enabled => Actions.Count > 0;
 
         public List<JiraAction> Actions { get; set; } = new List<JiraAction>();
 

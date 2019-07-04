@@ -119,7 +119,7 @@ namespace StackExchange.Opserver.Controllers
 
             var vd = GetModel(errors);
             vd.SearchParams = search;
-            vd.LoadAsyncSize = Settings.Exceptions.PageSize;
+            vd.LoadAsyncSize = Module.Settings.PageSize;
             return View(vd);
         }
 
@@ -127,7 +127,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> LoadMore(int? count = null, Guid? prevLast = null)
         {
             var search = await GetSearchAsync().ConfigureAwait(false);
-            search.Count = count ?? Settings.Exceptions.PageSize;
+            search.Count = count ?? Module.Settings.PageSize;
             search.StartAt = prevLast;
 
             var errors = await CurrentStore.GetErrorsAsync(search).ConfigureAwait(false);
@@ -253,7 +253,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("exceptions/jiraactions"), HttpGet, OnlyAllow(Roles.ExceptionsAdmin)]
         public ActionResult JiraActions(string appName)
         {
-            var issues = Settings.Jira.GetActionsForApplication(appName);
+            var issues = Module.Settings.Jira.GetActionsForApplication(appName);
             return View("Exceptions.Jira", issues);
         }
 
@@ -262,8 +262,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var e = await CurrentStore.GetErrorAsync(CurrentLog, id).ConfigureAwait(false);
             var user = Current.User;
-            var action = Settings.Jira.Actions.Find(i => i.Id == actionid);
-            var jiraClient = new JiraClient(Settings.Jira);
+            var action = Module.Settings.Jira.Actions.Find(i => i.Id == actionid);
+            var jiraClient = new JiraClient(Module.Settings.Jira);
             var result = await jiraClient.CreateIssueAsync(action, e, user == null ? "" : user.AccountName).ConfigureAwait(false);
 
             if (string.IsNullOrWhiteSpace(result.Key))

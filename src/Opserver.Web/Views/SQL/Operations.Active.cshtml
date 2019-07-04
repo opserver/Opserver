@@ -41,7 +41,7 @@
 else
 {
     var activeOps = i.GetActiveOperations(Model.ActiveSearchOptions);
-    var enableDashboardLinks = Settings.Dashboard.Enabled;
+    var enableDashboardLinks = Dashboard.Settings.Enabled;
     if (activeOps.ErrorMessage.HasValue())
     {
         <h5 class="page-header">Unknown active queries on @i.Name</h5>

@@ -22,7 +22,7 @@
                 log: @log.ToJson(),
                 sort: '@Model.Sort',
                 loadMore: @(Model.LoadAsyncSize),
-                enablePreviews: @Settings.Exceptions.EnablePreviews.ToJson(),
+                enablePreviews: @Module.Settings.EnablePreviews.ToJson(),
                 showDeleted: @Model.ShowDeleted.ToJson(),
                 search: @Model.Search.ToJson()
             });

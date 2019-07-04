@@ -219,7 +219,7 @@
         </h5>
         <p class="small text-danger js-error-message">@error.Message</p>
         <div class="error-info">
-            <pre class="stack dark"><code class="nohighlight">@ExceptionalUtils.StackTrace.HtmlPrettify(error.Detail, Settings.Exceptions.StackTraceSettings).AsHtml()</code></pre>
+            <pre class="stack dark"><code class="nohighlight">@ExceptionalUtils.StackTrace.HtmlPrettify(error.Detail, Module.Settings.StackTraceSettings).AsHtml()</code></pre>
             <p class="small">
                 occurred <b title="@error.CreationDate.ToLongDateString() at @error.CreationDate.ToLongTimeString()">@error.CreationDate.ToRelativeTime()</b> (@error.CreationDate.ToZuluTime()) on @error.MachineName
                 @if (!error.DeletionDate.HasValue && Current.User.Is(Roles.ExceptionsAdmin))
@@ -233,7 +233,7 @@
                 }
             </p>
             @{ 
-            if ((Settings.Jira?.Enabled ?? false) && Current.User.Is(Roles.ExceptionsAdmin))
+            if (Module.Settings.Jira.Enabled && Current.User.Is(Roles.ExceptionsAdmin))
             {
                 // TODO: Jira Actions
                 //@Html.Action("JiraActions", new { appName = error.ApplicationName })

@@ -14,6 +14,8 @@ namespace StackExchange.Opserver
 
         public List<ExceptionsGroup> Groups { get; set; } = new List<ExceptionsGroup>();
 
+        public JiraSettings Jira { get; set; } = new JiraSettings();
+
         public List<string> Applications { get; set; } = new List<string>();
 
         public List<StackTraceSourceLinkPattern> StackTraceReplacements { get; set; } = new List<StackTraceSourceLinkPattern>();
