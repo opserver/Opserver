@@ -92,7 +92,8 @@ namespace StackExchange.Opserver
             //           .IgnorePath("/spark")
             //           .IgnorePath("/top-refresh");
             //});
-            services.AddSingleton<SecurityProvider>();
+            services.Configure<SecuritySettings>(_configuration.GetSection("Security"));
+            services.AddSingleton<SecurityManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
         }
@@ -101,7 +102,7 @@ namespace StackExchange.Opserver
             IApplicationBuilder appBuilder,
             IHostApplicationLifetime appLifetime,
             IOptions<OpserverSettings> settings,
-            SecurityProvider securityProvider,
+            SecurityManager securityManager,
             IEnumerable<StatusModule> modules
         )
         {
@@ -113,7 +114,7 @@ namespace StackExchange.Opserver
                       .UseAuthorization()
                       .Use(async (httpContext, next)  =>
                       {
-                          Current.SetContext(new Current.CurrentContext(securityProvider, httpContext));
+                          Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext));
                           await next();
                       })
                       .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());

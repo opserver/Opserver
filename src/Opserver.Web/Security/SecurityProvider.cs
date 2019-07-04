@@ -34,27 +34,6 @@ namespace StackExchange.Opserver.Security
             }
         }
 
-        public static void Configure(SecuritySettings settings)
-        {
-            _ = settings ?? throw new ArgumentNullException(nameof(settings), "Securitysettings must be provided");
-            // TODO: Figure out dynamic type init
-            _ = GetProvider(settings);
-        }
-
-        private static SecurityProvider GetProvider(SecuritySettings settings)
-        {
-            switch (settings.Provider.ToLowerInvariant())
-            {
-                case "ActiveDirectory":
-                    return new ActiveDirectoryProvider(settings);
-                case "EveryonesAnAdmin":
-                    return new EveryonesAnAdminProvider(settings);
-                //case "EveryonesReadOnly":
-                default:
-                    return new EveryonesReadOnlyProvider(settings);
-            }
-        }
-
         internal virtual bool InReadGroups(User user, StatusModule module)
         {
             var settings = module.SecuritySettings;
