@@ -1,6 +1,4 @@
-﻿using StackExchange.Opserver.Helpers;
-
-namespace StackExchange.Opserver.Views.Shared
+﻿namespace StackExchange.Opserver.Views.Shared
 {
     public class TopRefreshModel
     {

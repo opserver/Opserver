@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using StackExchange.Opserver.Controllers;
-using StackExchange.Opserver.Security;
 
 namespace StackExchange.Opserver.Helpers
 {

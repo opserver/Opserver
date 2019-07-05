@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
