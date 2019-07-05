@@ -293,8 +293,8 @@ namespace StackExchange.Opserver.Data
         public MiniProfiler Profiler { get; protected set; }
 
         private static IOptions<OpserverSettings> Settings { get; set; }
-        public static bool EnableProfiling => Settings.Value.Global.ProfilePollers;
-        public static bool LogExceptions => Settings.Value.Global.LogPollerExceptions;
+        public static bool EnableProfiling => false; // Settings.Value.Global.ProfilePollers;
+        public static bool LogExceptions => false; // Settings.Value.Global.LogPollerExceptions;
 
         public static void Configure(IOptions<OpserverSettings> settings) => Settings = settings;
 
