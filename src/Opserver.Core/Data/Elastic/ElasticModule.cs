@@ -15,7 +15,7 @@ namespace StackExchange.Opserver.Data.Elastic
         public ElasticModule(IOptions<ElasticSettings> settings) : base(settings)
         {
             Clusters = settings.Value.Clusters
-                .Select(c => new ElasticCluster(c))
+                .Select(c => new ElasticCluster(this, c))
                 .Where(i => i.TryAddToGlobalPollers())
                 .ToList();
         }

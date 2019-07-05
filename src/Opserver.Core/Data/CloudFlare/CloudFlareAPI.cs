@@ -9,9 +9,8 @@ using Jil;
 
 namespace StackExchange.Opserver.Data.Cloudflare
 {
-    public partial class CloudflareAPI : PollNode
+    public partial class CloudflareAPI : PollNode<CloudflareModule>
     {
-        public CloudflareModule Module { get; }
         private const string APIBaseUrl = "https://api.cloudflare.com/client/v4/";
 
         public CloudflareSettings Settings => Module.Settings;
@@ -35,10 +34,7 @@ namespace StackExchange.Opserver.Data.Cloudflare
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() { yield break; }
         protected override string GetMonitorStatusReason() { return ""; }
 
-        public CloudflareAPI(CloudflareModule module) : base(nameof(CloudflareAPI))
-        {
-            Module = module;
-        }
+        public CloudflareAPI(CloudflareModule module) : base(module, nameof(CloudflareAPI)) { }
 
         private Cache<T> GetCloudflareCache<T>(
             TimeSpan cacheDuration,

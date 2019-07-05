@@ -8,10 +8,8 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.HAProxy
 {
-    public partial class HAProxyInstance : PollNode, INodeRoleProvider
+    public partial class HAProxyInstance : PollNode<HAProxyModule>, INodeRoleProvider
     {
-        internal HAProxyModule Module { get; }
-
         public string Name => Settings.Name;
         public string Description => Settings.Description;
         public int? QueryTimeoutMs => Settings.QueryTimeoutMs;
@@ -59,9 +57,8 @@ namespace StackExchange.Opserver.Data.HAProxy
         }
 
         public HAProxyInstance(HAProxyModule module, HAProxySettings.Instance instance, HAProxySettings.Group group = null)
-            : base(instance.Name + ":" + instance.Description + " - " + instance.Url)
+            : base(module, instance.Name + ":" + instance.Description + " - " + instance.Url)
         {
-            Module = module;
             RawSettings = instance;
             Settings = Module.Settings.GetInstanceSettings(instance, group);
         }

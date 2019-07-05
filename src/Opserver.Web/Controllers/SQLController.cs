@@ -19,10 +19,7 @@ namespace StackExchange.Opserver.Controllers
         public SQLController(SQLModule sqlModule, IOptions<OpserverSettings> settings) : base(sqlModule, settings) { }
 
         [DefaultRoute("sql")]
-        public ActionResult Dashboard()
-        {
-            return RedirectToAction(nameof(Servers));
-        }
+        public ActionResult Dashboard() => RedirectToAction(nameof(Servers));
 
         [Route("sql/servers")]
         public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
@@ -65,7 +62,6 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Instance(string node)
         {
             var i = Module.GetInstance(node);
-
             var vd = new InstanceModel
             {
                 View = SQLViews.Instance,
@@ -118,11 +114,8 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/top/filters")]
-        public ActionResult TopFilters(string node, SQLInstance.TopSearchOptions options)
-        {
-            var vd = GetOperationsModel(node, options);
-            return View("Operations.Top.Filters", vd);
-        }
+        public ActionResult TopFilters(string node, SQLInstance.TopSearchOptions options) =>
+            View("Operations.Top.Filters", GetOperationsModel(node, options));
 
         private OperationsTopModel GetOperationsModel(string node, SQLInstance.TopSearchOptions options)
         {
@@ -166,18 +159,12 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("sql/active")]
-        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options)
-        {
-            var vd = GetOperationsActiveModel(node, options);
-            return View("Operations.Active", vd);
-        }
+        public ActionResult Active(string node, SQLInstance.ActiveSearchOptions options) =>
+            View("Operations.Active", GetOperationsActiveModel(node, options));
 
         [Route("sql/active/filters")]
-        public ActionResult ActiveFilters(string node, SQLInstance.ActiveSearchOptions options)
-        {
-            var vd = GetOperationsActiveModel(node, options);
-            return View("Operations.Active.Filters", vd);
-        }
+        public ActionResult ActiveFilters(string node, SQLInstance.ActiveSearchOptions options) =>
+            View("Operations.Active.Filters", GetOperationsActiveModel(node, options));
 
         private OperationsActiveModel GetOperationsActiveModel(string node, SQLInstance.ActiveSearchOptions options)
         {
@@ -194,7 +181,6 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> Connections(string node)
         {
             var i = Module.GetInstance(node);
-
             var vd = new DashboardModel
             {
                 View = SQLViews.Connections,
@@ -209,7 +195,6 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Databases(string node)
         {
             var i = Module.GetInstance(node);
-
             var vd = new DashboardModel
             {
                 View = SQLViews.Databases,
@@ -224,7 +209,6 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult DatabaseDetail(string node, string database, string view, string objectName)
         {
             var i = Module.GetInstance(node);
-
             var vd = new DatabasesModel
             {
                 Instance = i,
@@ -265,7 +249,6 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult DatabaseTables(string node, string database)
         {
             var i = Module.GetInstance(node);
-
             var vd = new DatabasesModel
             {
                 Instance = i,
@@ -274,11 +257,9 @@ namespace StackExchange.Opserver.Controllers
             return View("Databases.Modal.Tables", vd);
         }
 
-        private ActionResult NoInstanceRedirect(string node)
-        {
-            if (Request.IsAjax())
-                return ContentNotFound("Instance " + node + " was not found.");
-            return View("Instance.Selector", new DashboardModel());
-        }
+        private ActionResult NoInstanceRedirect(string node) =>
+            Request.IsAjax()
+            ? ContentNotFound("Instance " + node + " was not found.")
+            : (ActionResult)View("Instance.Selector", new DashboardModel());
     }
 }

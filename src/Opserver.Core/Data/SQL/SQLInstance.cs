@@ -9,10 +9,8 @@ using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.SQL
 {
-    public partial class SQLInstance : PollNode, ISearchableNode
+    public partial class SQLInstance : PollNode<SQLModule>, ISearchableNode
     {
-        private SQLModule Module { get; }
-
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
@@ -30,9 +28,8 @@ namespace StackExchange.Opserver.Data.SQL
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
         public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
 
-        public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(settings.Name)
+        public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(module, settings.Name)
         {
-            Module = module;
             Settings = settings;
             ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Module.Settings.DefaultConnectionString.Replace("$ServerName$", settings.Name));
             // Grab the instance name for performance counters and such

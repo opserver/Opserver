@@ -9,7 +9,7 @@ using StackExchange.Opserver.Helpers;
 
 namespace StackExchange.Opserver.Data.Exceptions
 {
-    public class ExceptionStore : PollNode
+    public class ExceptionStore : PollNode<ExceptionsModule>
     {
         public const int PerAppSummaryCount = 1000;
 
@@ -34,13 +34,10 @@ namespace StackExchange.Opserver.Data.Exceptions
             yield return DataPollers.GetWorstStatus();
         }
 
-        protected override string GetMonitorStatusReason() { return null; }
+        protected override string GetMonitorStatusReason() => null;
 
-        private ExceptionsModule Module { get; }
-
-        public ExceptionStore(ExceptionsSettings.Store settings) : base(settings.Name)
+        public ExceptionStore(ExceptionsModule module, ExceptionsSettings.Store settings) : base(module, settings.Name)
         {
-            Module = Module;
             Settings = settings;
             ApplicationGroups = GetConfiguredApplicationGroups();
             KnownApplications = ApplicationGroups.SelectMany(g => g.Applications.Select(a => a.Name)).ToHashSet();

@@ -7,10 +7,8 @@ using StackExchange.Redis;
 
 namespace StackExchange.Opserver.Data.Redis
 {
-    public partial class RedisInstance : PollNode, IEquatable<RedisInstance>, ISearchableNode
+    public partial class RedisInstance : PollNode<RedisModule>, IEquatable<RedisInstance>, ISearchableNode
     {
-        private RedisModule Module { get; }
-
         // TODO: Per-Instance searchability, sub-nodes
         string ISearchableNode.DisplayName => HostAndPort + " - " + Name;
         string ISearchableNode.Name => HostAndPort;
@@ -98,9 +96,8 @@ namespace StackExchange.Opserver.Data.Redis
             return null;
         }
 
-        public RedisInstance(RedisModule module, RedisConnectionInfo connectionInfo) : base(connectionInfo.Host + ":" + connectionInfo.Port.ToString())
+        public RedisInstance(RedisModule module, RedisConnectionInfo connectionInfo) : base(module, connectionInfo.Host + ":" + connectionInfo.Port.ToString())
         {
-            Module = module;
             ConnectionInfo = connectionInfo;
             ShortHost = connectionInfo.Host.Split(StringSplits.Period)[0];
             ReplicatesCrossRegion = module.Settings.Replication?.CrossRegionNameRegex?.IsMatch(ConnectionInfo.Name) ?? true;

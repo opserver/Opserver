@@ -7,7 +7,7 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data.Elastic
 {
-    public partial class ElasticCluster : PollNode, ISearchableNode, IMonitedService
+    public partial class ElasticCluster : PollNode<ElasticModule>, ISearchableNode, IMonitedService
     {
         string ISearchableNode.Name => SettingsName;
         string ISearchableNode.DisplayName => SettingsName;
@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data.Elastic
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;
 
-        public ElasticCluster(ElasticSettings.Cluster cluster) : base(cluster.Name)
+        public ElasticCluster(ElasticModule module, ElasticSettings.Cluster cluster) : base(module, cluster.Name)
         {
             Settings = cluster;
             KnownNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();

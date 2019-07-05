@@ -58,9 +58,6 @@ namespace StackExchange.Opserver.Controllers
         }
 
         [Route("pagerduty/escalation/full")]
-        public ActionResult FullEscalation()
-        {
-            return View("PagerDuty.EscFull", Module.API.OnCallInfo.Data);
-        }
+        public ActionResult FullEscalation() => View("PagerDuty.EscFull", Module.API.OnCallInfo.Data);
     }
 }

@@ -11,9 +11,8 @@ using System.Diagnostics;
 
 namespace StackExchange.Opserver.Data.PagerDuty
 {
-    public partial class PagerDutyAPI : PollNode
+    public partial class PagerDutyAPI : PollNode<PagerDutyModule>
     {
-        public PagerDutyModule Module { get; }
         internal static readonly Options JilOptions = new Options(
             dateFormat: DateTimeFormat.ISO8601,
             unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC,
@@ -73,10 +72,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             );
         }
 
-        public PagerDutyAPI(PagerDutyModule module) : base(nameof(PagerDutyAPI))
-        {
-            Module = module;
-        }
+        public PagerDutyAPI(PagerDutyModule module) : base(module, nameof(PagerDutyAPI)) { }
 
         /// <summary>
         /// Gets content from the PagerDuty API.

@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.Exceptions
         public ExceptionsModule(IOptions<ExceptionsSettings> settings) : base(settings)
         {
             Stores = settings.Value.Stores
-                .Select(s => new ExceptionStore(s))
+                .Select(s => new ExceptionStore(this, s))
                 .Where(s => s.TryAddToGlobalPollers())
                 .ToList();
         }

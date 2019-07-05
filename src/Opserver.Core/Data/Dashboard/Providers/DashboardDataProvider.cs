@@ -17,9 +17,8 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         }
     }
 
-    public abstract class DashboardDataProvider : PollNode, IIssuesProvider
+    public abstract class DashboardDataProvider : PollNode<DashboardModule>, IIssuesProvider
     {
-        public DashboardModule Module { get; }
         public abstract bool HasData { get; }
         public string Name { get; protected set; }
 
@@ -39,14 +38,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
         public override string ToString() => GetType().Name;
 
-        protected DashboardDataProvider(DashboardModule module, string uniqueKey) : base(uniqueKey)
-        {
-            Module = module;
-        }
+        protected DashboardDataProvider(DashboardModule module, string uniqueKey) : base(module, uniqueKey) { }
 
-        protected DashboardDataProvider(DashboardModule module, IProviderSettings settings) : base(settings.Name + "Dashboard")
+        protected DashboardDataProvider(DashboardModule module, IProviderSettings settings) : base(module, settings.Name + "Dashboard")
         {
-            Module = module;
             Name = settings.Name;
         }
 

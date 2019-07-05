@@ -8,6 +8,17 @@ using StackExchange.Profiling;
 
 namespace StackExchange.Opserver.Data
 {
+    public abstract class PollNode<T> : PollNode where T : StatusModule
+    {
+        public T Module { get; }
+        protected override StatusModule GetParentModule() => Module;
+
+        protected PollNode(T module, string uniqueKey) : base(uniqueKey)
+        {
+            Module = module;
+        }
+    }
+
     public abstract partial class PollNode : IMonitorStatus, IDisposable, IEquatable<PollNode>
     {
         private int _totalPolls;
@@ -18,6 +29,7 @@ namespace StackExchange.Opserver.Data
         public abstract IEnumerable<Cache> DataPollers { get; }
         protected abstract IEnumerable<MonitorStatus> GetMonitorStatus();
         protected abstract string GetMonitorStatusReason();
+        protected abstract StatusModule GetParentModule();
 
         /// <summary>
         /// Number of consecutive cache fetch failures before backing off of polling the entire node for <see cref="BackoffDuration"/>
@@ -28,13 +40,13 @@ namespace StackExchange.Opserver.Data
         /// Length of time to backoff once <see cref="FailsBeforeBackoff"/> is hit
         /// </summary>
         protected virtual TimeSpan BackoffDuration => TimeSpan.FromSeconds(30);
+        public string UniqueKey { get; }
 
         /// <summary>
         /// Indicates if this was added to the global poller list, if false that means this is a duplicate
         /// and should not be used anywhere, you lost the race, let it go.
         /// </summary>
         public bool AddedToGlobalPollers { get; private set; }
-        public string UniqueKey { get; }
 
         protected PollNode(string uniqueKey)
         {
