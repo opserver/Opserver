@@ -223,20 +223,5 @@ namespace StackExchange.Opserver.Controllers
                     : null
             };
         }
-
-        //[ResponseCache(Duration = 120, VaryByParam = "id;start;end")]
-        //[Route("graph/builds/json")]
-        //public ActionResult BuildsJson(string id, long start, long end)
-        //{
-        //    return Json(new
-        //    {
-        //        builds = GetBuilds(id, start, end).Select(b => new
-        //        {
-        //            date = b.StartDate.ToEpochTime(true),
-        //            text = GetFlagTooltip(b),
-        //            link = b.WebUrl
-        //        })
-        //    });
-        //}
     }
 }
