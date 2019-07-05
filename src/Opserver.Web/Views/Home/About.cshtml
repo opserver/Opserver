@@ -1,21 +1,18 @@
 ﻿@using System.IO
 @using System.Reflection
 @using StackExchange.Opserver.Controllers
-@using StackExchange.Opserver.Data.Dashboard
-@using StackExchange.Opserver.Data.SQL
-@inject DashboardModule Dashboard
+@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
 @inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
 @inject StackExchange.Opserver.Data.Exceptions.ExceptionsModule Exceptions
 @inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
 @inject StackExchange.Opserver.Data.Redis.RedisModule Redis
-@inject SQLModule Sql
+@inject StackExchange.Opserver.Data.SQL.SQLModule Sql
 @{
     this.SetPageTitle("About");
 
     var asm = Assembly.GetExecutingAssembly();
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
-    var s = Settings;
     var cacheStats = StackExchange.Opserver.ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
 }
@@ -31,7 +28,7 @@
         <span class="label label-@(enabled ? "success" : "default")">@text</span>
         return null;
     }
-    string SQLInstanceList(SQLInstance instance)
+    string SQLInstanceList(StackExchange.Opserver.Data.SQL.SQLInstance instance)
     {
         var props = instance.ServerProperties.SafeData(true);
         var features = instance.ServerFeatures.SafeData();
@@ -193,10 +190,10 @@
                         <span class="text-muted">Internal Networks</span>
                     </li>
                     <li class="list-group-item">
-                        <span class="text-muted">Admins:</span> @(s.Global.AdminGroups?.Replace(";", ", "))
+                        <span class="text-muted">Admins:</span> @(Settings.Global.AdminGroups?.Replace(";", ", "))
                     </li>
                     <li class="list-group-item">
-                        <span class="text-muted">Viewers:</span> @(s.Global.ViewGroups?.Replace(";", ", "))
+                        <span class="text-muted">Viewers:</span> @(Settings.Global.ViewGroups?.Replace(";", ", "))
                     </li>
                 </ul>
             </div>
