@@ -22,7 +22,6 @@ namespace StackExchange.Opserver
     /// </summary>
     public abstract class StatusModule
     {
-        // TODO: Top tab registration
         public abstract string Name { get; }
         public abstract bool Enabled { get; }
         public abstract MonitorStatus MonitorStatus { get; }

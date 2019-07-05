@@ -146,6 +146,7 @@ namespace StackExchange.Opserver.Data
             : base(cacheDuration, memberName, sourceFilePath, sourceLineNumber)
         {
             MiniProfilerDescription = "Poll: " + description; // concatenate once
+            // TODO: Settings via owner
             logExceptions = logExceptions ?? LogExceptions;
 
             _updateFunc = async () =>
