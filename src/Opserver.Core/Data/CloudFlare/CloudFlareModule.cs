@@ -5,20 +5,20 @@ using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.CloudFlare
+namespace StackExchange.Opserver.Data.Cloudflare
 {
-    public class CloudFlareModule : StatusModule<CloudFlareSettings>
+    public class CloudflareModule : StatusModule<CloudflareSettings>
     {
         // TODO: Fix class naming...the company renamed.
         public override string Name => "Cloudflare";
         public override bool Enabled => Settings.Enabled;
 
-        public CloudFlareAPI API { get; }
+        public CloudflareAPI API { get; }
         public Dictionary<string, List<IPNet>> AllDatacenters { get; }
 
-        public CloudFlareModule(IOptions<CloudFlareSettings> settings) : base(settings)
+        public CloudflareModule(IOptions<CloudflareSettings> settings) : base(settings)
         {
-            API = new CloudFlareAPI(this);
+            API = new CloudflareAPI(this);
             API.TryAddToGlobalPollers();
             AllDatacenters = settings.Value?.DataCenters
                         .ToDictionary(
@@ -30,24 +30,24 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public override MonitorStatus MonitorStatus => API.MonitorStatus;
         public override bool IsMember(string node) => false;
 
-        public List<CloudFlareDNSRecord> GetDNSRecords(CloudFlareZone zone) =>
-            API.DNSRecords.Data?.Where(r => r.ZoneId == zone.Id).ToList() ?? new List<CloudFlareDNSRecord>();
+        public List<CloudflareDNSRecord> GetDNSRecords(CloudflareZone zone) =>
+            API.DNSRecords.Data?.Where(r => r.ZoneId == zone.Id).ToList() ?? new List<CloudflareDNSRecord>();
 
         private static readonly NameValueCollection _purgeAllParams = new NameValueCollection
         {
             ["purge_everything"] = "true"
         };
 
-        public bool PurgeAllFiles(CloudFlareZone zone)
+        public bool PurgeAllFiles(CloudflareZone zone)
         {
-            var result = API.Post<CloudFlareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
+            var result = API.Post<CloudflareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
             return result.Success;
         }
 
-        public bool PurgeFiles(CloudFlareZone zone, IEnumerable<string> files)
+        public bool PurgeFiles(CloudflareZone zone, IEnumerable<string> files)
         {
             var nvc = new NameValueCollection { ["files"] = Jil.JSON.Serialize(files) };
-            var result = API.Delete<CloudFlareResult>($"zones/{zone.Id}/purge_cache", nvc);
+            var result = API.Delete<CloudflareResult>($"zones/{zone.Id}/purge_cache", nvc);
             return result.Success;
         }
 

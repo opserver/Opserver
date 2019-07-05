@@ -1,17 +1,17 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.CloudFlare;
+using StackExchange.Opserver.Data.Cloudflare;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.CloudFlare;
+using StackExchange.Opserver.Views.Cloudflare;
 
 namespace StackExchange.Opserver.Controllers
 {
-    [OnlyAllow(Roles.CloudFlare)]
-    public class CloudFlareController : StatusController<CloudFlareModule>
+    [OnlyAllow(Roles.Cloudflare)]
+    public class CloudflareController : StatusController<CloudflareModule>
     {
-        public CloudFlareController(CloudFlareModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
+        public CloudflareController(CloudflareModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
         [DefaultRoute("cloudflare")]
         public ActionResult Dashboard() => RedirectToAction(nameof(DNS));

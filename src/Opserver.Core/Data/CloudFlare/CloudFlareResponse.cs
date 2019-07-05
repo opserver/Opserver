@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data.CloudFlare
+namespace StackExchange.Opserver.Data.Cloudflare
 {
-    public class CloudFlareResult<T> : CloudFlareResult
+    public class CloudflareResult<T> : CloudflareResult
     {
         [DataMember(Name = "result")]
         public T Result { get; set; }
     }
 
-    public class CloudFlareResult
+    public class CloudflareResult
     {
         [DataMember(Name = "success")]
         public bool Success { get; set; }
@@ -20,13 +20,13 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public List<string> Messages { get; set; }
 
         [DataMember(Name = "errors")]
-        public List<CloudFlareError> Errors { get; set; }
+        public List<CloudflareError> Errors { get; set; }
 
         [DataMember(Name = "result_info")]
-        public CloudFlareResultInfo ResultInfo { get; set; }
+        public CloudflareResultInfo ResultInfo { get; set; }
     }
 
-    public class CloudFlareError
+    public class CloudflareError
     {
         [DataMember(Name = "code")]
         public int Code { get; set; }
@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public string Message { get; set; }
     }
 
-    public class CloudFlareResultInfo
+    public class CloudflareResultInfo
     {
         [DataMember(Name = "page")]
         public int Page { get; set; }
@@ -50,7 +50,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         public int TotalCount { get; set; }
     }
 
-    public class CloudFlareZone : IMonitorStatus
+    public class CloudflareZone : IMonitorStatus
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -145,7 +145,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         [DataMember(Name = "deactivated")] Deactivated = 5
     }
 
-    public class CloudFlareDNSRecord
+    public class CloudflareDNSRecord
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -174,7 +174,7 @@ namespace StackExchange.Opserver.Data.CloudFlare
         [DataMember(Name = "data")]
         public object Data { get; set; }
 
-        public bool IsAutoTTL => TTL == 1; // 1 is auto in CloudFlare land
+        public bool IsAutoTTL => TTL == 1; // 1 is auto in Cloudflare land
 
         private IPAddress _ipAddress;
         public IPAddress IPAddress

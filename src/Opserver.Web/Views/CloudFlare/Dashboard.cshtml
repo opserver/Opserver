@@ -1,7 +1,7 @@
 ﻿@model DashboardModel
 @{
     Layout = "~/Views/Shared/Master.cshtml";
-    this.SetPageTitle("CloudFlare Dashboard");
+    this.SetPageTitle("Cloudflare Dashboard");
 }
 @section head {
     <script>
@@ -19,6 +19,6 @@
     }
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @TabLink(DashboardModel.Views.DNS, nameof(CloudFlareController.DNS), "DNS")
+    @TabLink(DashboardModel.Views.DNS, nameof(CloudflareController.DNS), "DNS")
 </ul>
 @RenderBody()

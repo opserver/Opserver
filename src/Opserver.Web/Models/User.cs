@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Models
                 // TODO: Secure the shizzle
                 roles |= Roles.GlobalAdmin;
 
-                //result |= GetRoles(settings.CloudFlare, Roles.CloudFlare, Roles.CloudFlareAdmin);
+                //result |= GetRoles(settings.Cloudflare, Roles.Cloudflare, Roles.CloudflareAdmin);
                 //result |= GetRoles(settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);
                 //result |= GetRoles(settings.Elastic, Roles.Elastic, Roles.ElasticAdmin);
                 //result |= GetRoles(settings.Exceptions, Roles.Exceptions, Roles.ExceptionsAdmin);

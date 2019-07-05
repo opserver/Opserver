@@ -1,8 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver.Data.CloudFlare
+namespace StackExchange.Opserver.Data.Cloudflare
 {
-    public partial class CloudFlareAPI
+    public partial class CloudflareAPI
     {
         public bool PurgeFile(string url)
         {

@@ -4,7 +4,7 @@
     {
         public GlobalSettings Global { get; set; } = new GlobalSettings();
         //public PagerDutySettings PagerDuty { get; set; } = new PagerDutySettings();
-        //public CloudFlareSettings CloudFlare { get; set; } = new CloudFlareSettings();
+        //public CloudflareSettings Cloudflare { get; set; } = new CloudflareSettings();
         //public DashboardSettings Dashboard { get; set; } = new DashboardSettings();
         //public ElasticSettings Elastic { get; set; } = new ElasticSettings();
         //public ExceptionsSettings Exceptions { get; set; } = new ExceptionsSettings();

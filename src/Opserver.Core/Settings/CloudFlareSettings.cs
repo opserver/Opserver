@@ -2,18 +2,18 @@
 
 namespace StackExchange.Opserver
 {
-    public class CloudFlareSettings : ModuleSettings
+    public class CloudflareSettings : ModuleSettings
     {
         public override bool Enabled => Email.HasValue() && APIKey.HasValue();
         public List<DataCenter> DataCenters { get; set; } = new List<DataCenter>();
 
         /// <summary>
-        /// Email for the CloudFlare account
+        /// Email for the Cloudflare account
         /// </summary>
         public string Email { get; set; }
 
         /// <summary>
-        /// APIKey for the CloudFlare account
+        /// APIKey for the Cloudflare account
         /// </summary>
         public string APIKey { get; set; }
 

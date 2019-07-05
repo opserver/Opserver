@@ -27,8 +27,8 @@ namespace StackExchange.Opserver.Models
         Dashboard = 1 << 13,
         DashboardAdmin = 1 << 14,
 
-        CloudFlare = 1 << 15,
-        CloudFlareAdmin = 1 << 16,
+        Cloudflare = 1 << 15,
+        CloudflareAdmin = 1 << 16,
 
         PagerDuty = 1 << 17,
         PagerDutyAdmin = 1 << 18,

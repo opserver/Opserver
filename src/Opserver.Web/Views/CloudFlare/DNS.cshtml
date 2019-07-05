@@ -8,7 +8,7 @@
     var showDCs = dcs.Any();
     var hiddenRecordTypes = new List<DNSRecordType> {DNSRecordType.TXT};
 }
-<h5 class="page-header">CloudFlare DNS @Poll.Now(Module.API)</h5>
+<h5 class="page-header">Cloudflare DNS @Poll.Now(Module.API)</h5>
 <table class="table table-striped table-hover table-responsive table-super-condensed js-sortable-table">
     <thead>
         <tr>
@@ -30,7 +30,7 @@
             <tr>
                 <td colspan="@((3 + (showDCs ? dcs.Count : 0)).ToString())">
                     <div class="alert alert-warning">
-                        <h5>Error fetching DNS zones from CloudFlare</h5>
+                        <h5>Error fetching DNS zones from Cloudflare</h5>
                         <p class="error-stack">@Module.API.Zones.ErrorMessage</p>
                     </div>
                 </td>
@@ -72,7 +72,7 @@
             <th>Name</th>
             <th>Value</th>
             <th>TTL</th>
-            <th title="Is this domain being proxied through CloudFlare?">CF</th>
+            <th title="Is this domain being proxied through Cloudflare?">CF</th>
             <th>Data Centers</th>
         </tr>
     </thead>
@@ -82,7 +82,7 @@
             <tr>
                 <td colspan="6">
                     <div class="alert alert-warning">
-                        <h5>Error fetching DNS records from CloudFlare</h5>
+                        <h5>Error fetching DNS records from Cloudflare</h5>
                         <p class="error-stack">@Module.API.DNSRecords.ErrorMessage</p>
                     </div>
                 </td>

@@ -50,7 +50,7 @@ namespace StackExchange.Opserver
             Add<PagerDutySettings, Data.PagerDuty.PagerDutyModule>("PagerDuty");
             Add<ExceptionsSettings, Data.Exceptions.ExceptionsModule>("Exceptions");
             Add<HAProxySettings, Data.HAProxy.HAProxyModule>("HAProxy");
-            //Add<CloudFlareSettings, Data.CloudFlare.CloudFlareModule>("CloudFlare");
+            Add<CloudflareSettings, Data.Cloudflare.CloudflareModule>("Cloudflare");
 
             return services;
         }
