@@ -22,7 +22,6 @@ namespace StackExchange.Opserver.Controllers
         }
     }
 
-    [OnlyAllow(Roles.Authenticated)]
     public partial class StatusController : Controller
     {
         public virtual ISecurableModule SettingsModule => null;

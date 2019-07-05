@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,8 +32,9 @@ namespace StackExchange.Opserver
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
                     {
+                        options.AccessDeniedPath = "/denied";
                         options.LoginPath = "/login";
-                        options.LoginPath = "/logout";
+                        options.LogoutPath = "/logout";
                     });
             services.AddHttpContextAccessor()
                     .AddMemoryCache()
@@ -106,18 +108,34 @@ namespace StackExchange.Opserver
             IEnumerable<StatusModule> modules
         )
         {
+            //appBuilder.UseStaticFiles()
+            //          .UseExceptional()
+            //          //.UseMiniProfiler()
+            //          .UseAuthentication()
+            //          .Use(async (httpContext, next)  =>
+            //          {
+            //              Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext));
+            //              await next();
+            //          })
+            //          .UseAuthorization()
+            //          .UseRouting()
+            //          .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
+
             appBuilder.UseStaticFiles()
                       .UseRouting()
                       .UseExceptional()
                       //.UseMiniProfiler()
                       .UseAuthentication()
                       .UseAuthorization()
-                      .Use(async (httpContext, next)  =>
+                      .Use(async (httpContext, next) =>
                       {
                           Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext));
                           await next();
                       })
-                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
+                      .UseResponseCaching()
+                      .UseEndpoints(endpoints => {
+                          endpoints.MapDefaultControllerRoute();
+                      });
             appLifetime.ApplicationStopping.Register(OnShutdown);
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
             Cache.Configure(settings);

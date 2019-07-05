@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using StackExchange.Opserver.Data.Jira;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StackExchange.Opserver.Controllers
 {
@@ -155,7 +156,8 @@ namespace StackExchange.Opserver.Controllers
             return PartialView("Exceptions.Preview", vd);
         }
 
-        [Route("exceptions/detail/json"), AlsoAllow(Roles.Anonymous)]
+        [AllowAnonymous]
+        [Route("exceptions/detail/json")]
         public async Task<ActionResult> DetailJson(Guid id)
         {
             var e = await CurrentStore.GetErrorAsync(CurrentLog, id).ConfigureAwait(false);

@@ -36,7 +36,7 @@ namespace StackExchange.Opserver.Controllers
             Dashboard = dashboardModule;
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSparkSvg(string id)
         {
@@ -59,7 +59,7 @@ namespace StackExchange.Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> MemorySpark(string id)
         {
@@ -82,7 +82,7 @@ namespace StackExchange.Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
         {
@@ -105,7 +105,7 @@ namespace StackExchange.Opserver.Controllers
                 getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
         [Route("graph/interface/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> InterfaceSpark(string direction, string id, string iid)
         {
@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/volumePerformance/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string id)
         {
@@ -134,7 +134,7 @@ namespace StackExchange.Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
         [Route("graph/volumePerformance/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string direction, string id, string iid)
         {
@@ -150,7 +150,7 @@ namespace StackExchange.Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
-        //[ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "node" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "node" })]
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)
         {
