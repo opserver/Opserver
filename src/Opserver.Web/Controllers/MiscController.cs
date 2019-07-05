@@ -11,10 +11,7 @@ namespace StackExchange.Opserver.Controllers
         public MiscController(IOptions<OpserverSettings> _settings) : base(_settings) { }
 
         [Route("no-config")]
-        public ViewResult NoConfig()
-        {
-            return View("NoConfiguration");
-        }
+        public ViewResult NoConfig() => View("NoConfiguration");
 
         [Route("404")]
         public ViewResult PageNotFound(string title = null, string message = null)
@@ -34,7 +31,7 @@ namespace StackExchange.Opserver.Controllers
         {
             if (Current.User.IsAnonymous)
             {
-                return RedirectToAction(nameof(LoginController.Login), "Login"); //, new { returnUrl = Request.GetEncodedPathAndQuery() });
+                return RedirectToAction(nameof(AuthController.Login), "Login"); //, new { returnUrl = Request.GetEncodedPathAndQuery() });
             }
 
             Response.StatusCode = (int)HttpStatusCode.Forbidden;

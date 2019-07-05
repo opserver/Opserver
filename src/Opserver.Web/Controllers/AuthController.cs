@@ -5,15 +5,14 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Security;
 using StackExchange.Opserver.Views.Login;
 using Roles = StackExchange.Opserver.Models.Roles;
 
 namespace StackExchange.Opserver.Controllers
 {
-    public class LoginController : StatusController
+    public class AuthController : StatusController
     {
-        public LoginController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        public AuthController(IOptions<OpserverSettings> _settings) : base(_settings) { }
 
         [Route("login"), HttpGet, AlsoAllow(Roles.Anonymous)]
         public ActionResult Login(string returnUrl)
