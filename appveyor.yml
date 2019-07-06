@@ -1,0 +1,20 @@
+image: Visual Studio 2017
+
+install:
+  - choco install dotnetcore-sdk --version 3.0.100-preview6-012264
+
+skip_branch_with_pr: true
+skip_tags: true
+skip_commits:
+  files:
+    - '**/*.md'
+    - docs/*
+
+environment:
+  Appveyor: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+
+build_script:
+  - cmd: dotnet build
+
+test: off
