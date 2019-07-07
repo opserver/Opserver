@@ -13,7 +13,7 @@
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Include="MiniProfiler.Shared" Version="4.0.169" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.1.0-preview.7" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.78" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.596" />

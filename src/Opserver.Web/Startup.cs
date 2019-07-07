@@ -68,31 +68,31 @@ namespace StackExchange.Opserver
 
             services.AddSingleton<IHostedService, PollingService>();
             services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerCacheStorageDefaults>();
-            //services.AddMiniProfiler(options =>
-            //{
-            //    options.RouteBasePath = "/profiler/";
-            //    options.PopupRenderPosition = RenderPosition.Left;
-            //    options.PopupMaxTracesToShow = 5;
-            //    options.ShouldProfile = req =>
-            //    {
-            //        var conn = req.HttpContext.Connection;
-            //        switch (SiteSettings.ProfilingMode)
-            //        {
-            //            case SiteSettings.ProfilingModes.Enabled:
-            //                return true;
-            //            case SiteSettings.ProfilingModes.LocalOnly:
-            //                return conn.RemoteIpAddress.Equals(conn.LocalIpAddress) || IPAddress.IsLoopback(conn.RemoteIpAddress);
-            //            case SiteSettings.ProfilingModes.AdminOnly:
-            //                return Current.User?.IsGlobalAdmin == true;
-            //            default:
-            //                return false;
-            //        }
-            //    };
-            //    options.IgnorePath("/graph")
-            //           .IgnorePath("/login")
-            //           .IgnorePath("/spark")
-            //           .IgnorePath("/top-refresh");
-            //});
+            services.AddMiniProfiler(options =>
+            {
+                //options.RouteBasePath = "/profiler/";
+                options.PopupRenderPosition = RenderPosition.Left;
+                options.PopupMaxTracesToShow = 5;
+                options.ShouldProfile = _ =>
+                {
+                    return true;
+                    //switch (SiteSettings.ProfilingMode)
+                    //{
+                    //    case ProfilingModes.Enabled:
+                    //        return true;
+                    //    case SiteSettings.ProfilingModes.LocalOnly:
+                    //        return Current.User?.Is(Models.Roles.LocalRequest) == true;
+                    //    case SiteSettings.ProfilingModes.AdminOnly:
+                    //        return Current.User?.IsGlobalAdmin == true;
+                    //    default:
+                    //        return false;
+                    //}
+                };
+                options.IgnorePath("/graph")
+                       .IgnorePath("/login")
+                       .IgnorePath("/spark")
+                       .IgnorePath("/top-refresh");
+            });
             services.Configure<SecuritySettings>(_configuration.GetSection("Security"));
             services.AddSingleton<SecurityManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
@@ -121,9 +121,9 @@ namespace StackExchange.Opserver
             //          .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
 
             appBuilder.UseStaticFiles()
-                      .UseRouting()
                       .UseExceptional()
-                      //.UseMiniProfiler()
+                      .UseRouting()
+                      .UseMiniProfiler()
                       .UseAuthentication()
                       .UseAuthorization()
                       .Use(async (httpContext, next) =>
