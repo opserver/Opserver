@@ -88,6 +88,7 @@ namespace StackExchange.Opserver
                     //        return false;
                     //}
                 };
+                options.EnableServerTimingHeader = true;
                 options.IgnorePath("/graph")
                        .IgnorePath("/login")
                        .IgnorePath("/spark")
