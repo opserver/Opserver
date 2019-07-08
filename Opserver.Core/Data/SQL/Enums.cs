@@ -130,7 +130,7 @@ namespace StackExchange.Opserver.Data.SQL
         [Description("Capture")] Capture = 4,
         [Description("Restart")] Restart = 5,
         [Description("Undo")] Undo = 6,
-        [Description("Revalidiation")] Revalidiation = 7,
+        [Description("Revalidation")] Revalidiation = 7,
         [Description("Error in the calculation of the secondary replica synchronization point")] ErrorInSecondaryReplicaSyncPoint = 8
     }
 
