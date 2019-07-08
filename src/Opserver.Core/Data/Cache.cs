@@ -38,6 +38,11 @@ namespace StackExchange.Opserver.Data
         // TODO: Find name that doesn't suck, has to override so...
         public override Task PollGenericAsync(bool force = false) => PollAsync(force);
 
+        /// <summary>
+        /// Allows awaiting of this cache directly.
+        /// </summary>
+        public TaskAwaiter<T> GetAwaiter() => DataTask.GetAwaiter();
+
         // This makes more semantic sense...
         public Task<T> GetData() => PollAsync();
 
