@@ -9,7 +9,7 @@ namespace StackExchange.Opserver.Data.SQL
             _serverProperties ?? (_serverProperties = GetSqlCache(
                 nameof(ServerProperties), async conn =>
                 {
-                    var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL).ConfigureAwait(false);
+                    var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL);
                     if (result != null)
                     {
                         Version = result.ParsedVersion;

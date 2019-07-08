@@ -19,7 +19,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("cloudflare/dns")]
         public async Task<ActionResult> DNS()
         {
-            await Module.API.PollAsync().ConfigureAwait(false);
+            await Module.API.PollAsync();
             var vd = new DNSModel
             {
                 View = DashboardModel.Views.DNS,

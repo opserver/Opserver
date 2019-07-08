@@ -66,7 +66,7 @@ namespace StackExchange.Opserver.Data.Cloudflare
             using (var wc = GetWebClient())
             {
                 var url = new Uri(APIBaseUrl + path + (values != null ? "?" + values : ""));
-                var rawResult = await wc.DownloadStringTaskAsync(url).ConfigureAwait(false);
+                var rawResult = await wc.DownloadStringTaskAsync(url);
                 return JSON.Deserialize<CloudflareResult<T>>(rawResult, JilOptions).Result;
             }
         }

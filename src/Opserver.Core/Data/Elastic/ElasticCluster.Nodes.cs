@@ -17,7 +17,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 // Note without ?all, we have dropped support for < v0.90
                 var statsTask = GetAsync<ClusterNodesStats>("_nodes/stats");
 
-                await Task.WhenAll(resultTask, statsTask).ConfigureAwait(false);
+                await Task.WhenAll(resultTask, statsTask);
                 var result = (await resultTask)?.Prep();
                 var stats = await statsTask;
 

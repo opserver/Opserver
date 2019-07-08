@@ -23,14 +23,12 @@ namespace StackExchange.Opserver.Data.Cloudflare
             _dnsRecords ?? (_dnsRecords = GetCloudflareCache(5.Minutes(), async () =>
             {
                 var records = new List<CloudflareDNSRecord>();
-                var data = await Zones.GetData().ConfigureAwait(false); // wait on zones to load first...
+                var data = await Zones.GetData(); // wait on zones to load first...
                 if (data == null) return records;
                 foreach (var z in data)
                 {
                     var zoneRecords =
-                        await
-                            Get<List<CloudflareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams)
-                                .ConfigureAwait(false);
+                        await Get<List<CloudflareDNSRecord>>($"zones/{z.Id}/dns_records", _dnsRecordFetchParams);
                     records.AddRange(zoneRecords);
                 }
                 return records;

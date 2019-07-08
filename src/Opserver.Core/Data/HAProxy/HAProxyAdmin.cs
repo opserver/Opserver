@@ -72,10 +72,10 @@ namespace StackExchange.Opserver.Data.HAProxy
                 tasks.Add(PostAction(p.Proxy, p.Server, action));
                 instances.Add(p.Proxy.Instance);
             }
-            var result = (await Task.WhenAll(tasks).ConfigureAwait(false)).All(r => r);
+            var result = (await Task.WhenAll(tasks)).All(r => r);
             // Actions complete, now re-check status
             var instanceTasks = instances.Select(i => i.Proxies.PollAsync(true));
-            await Task.WhenAll(instanceTasks).ConfigureAwait(false);
+            await Task.WhenAll(instanceTasks);
             return result;
         }
 
@@ -106,7 +106,7 @@ namespace StackExchange.Opserver.Data.HAProxy
                         ["s"] = server.Name,
                         ["action"] = action.AsString(EnumFormat.Description),
                         ["b"] = p.Name
-                    }).ConfigureAwait(false);
+                    });
                     var response = Encoding.UTF8.GetString(responseBytes);
                     return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
                 }

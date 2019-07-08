@@ -58,10 +58,10 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 }
             };
             var result = await GetFromPagerDutyAsync("schedules/" + shedule.Id + "/overrides",
-                getFromJson: response => response, httpMethod: "POST", data: overrideData).ConfigureAwait(false);
+                getFromJson: response => response, httpMethod: "POST", data: overrideData);
 
-            await OnCallInfo.PollAsync(true).ConfigureAwait(false);
-            await PrimaryScheduleOverrides.PollAsync(true).ConfigureAwait(false);
+            await OnCallInfo.PollAsync(true);
+            await PrimaryScheduleOverrides.PollAsync(true);
             return result;
         }
 

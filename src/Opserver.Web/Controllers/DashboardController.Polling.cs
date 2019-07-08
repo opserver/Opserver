@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Controllers
             if (n == null)
                 return JsonNotFound();
 
-            var data = await n.GetCPUUtilization().ConfigureAwait(false);
+            var data = await n.GetCPUUtilization();
             if (data?.Data == null)
                 return JsonNotFound();
 

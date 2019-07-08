@@ -60,7 +60,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                         wc.Headers.Add("X-Access-Token", Settings.APIKey);
                     }
 
-                    using (var s = await wc.OpenReadTaskAsync(url).ConfigureAwait(false))
+                    using (var s = await wc.OpenReadTaskAsync(url))
                     using (var sr = new StreamReader(s))
                     {
                         var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
@@ -121,7 +121,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 metricName,
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
-                id).ConfigureAwait(false);
+                id);
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
 
@@ -144,7 +144,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 node.Id,
-                TagCombos.AllNetDirections).ConfigureAwait(false);
+                TagCombos.AllNetDirections);
 
             return JoinNetwork(apiResponse?.Series) ?? new List<DoubleGraphPoint>();
         }
@@ -158,7 +158,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 volume.NodeId,
-                TagCombos.AllDisks).ConfigureAwait(false);
+                TagCombos.AllDisks);
 
             return apiResponse?.Series?[0]?.PointData ?? new List<GraphPoint>();
         }
@@ -175,7 +175,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 start.GetValueOrDefault(DateTime.UtcNow.AddYears(-1)),
                 end,
                 iface.NodeId,
-                TagCombos.AllDirectionsForInterface(iface.Id)).ConfigureAwait(false);
+                TagCombos.AllDirectionsForInterface(iface.Id));
 
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }

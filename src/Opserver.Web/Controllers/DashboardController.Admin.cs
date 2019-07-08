@@ -13,8 +13,8 @@ namespace StackExchange.Opserver.Controllers
         {
             var n = Module.GetNodeByName(node);
             var s = n.GetService(name);
-            var result = Json(await s.Update(serviceAction).ConfigureAwait(false));
-            await n.DataProvider.PollAsync(true).ConfigureAwait(false);
+            var result = Json(await s.Update(serviceAction));
+            await n.DataProvider.PollAsync(true);
             return result;
         }
     }

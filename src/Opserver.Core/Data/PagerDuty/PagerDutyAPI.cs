@@ -111,13 +111,13 @@ namespace StackExchange.Opserver.Data.PagerDuty
                         var byteData = new ASCIIEncoding().GetBytes(stringData);
                         req.ContentType = "application/json";
                         req.ContentLength = byteData.Length;
-                        var putStream = await req.GetRequestStreamAsync().ConfigureAwait(false);
-                        await putStream.WriteAsync(byteData, 0, byteData.Length).ConfigureAwait(false);
+                        var putStream = await req.GetRequestStreamAsync();
+                        await putStream.WriteAsync(byteData, 0, byteData.Length);
                     }
                 }
                 try
                 {
-                    var resp = await req.GetResponseAsync().ConfigureAwait(false);
+                    var resp = await req.GetResponseAsync();
                     using (var rs = resp.GetResponseStream())
                     {
                         if (rs == null) return getFromJson(null);

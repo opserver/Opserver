@@ -177,12 +177,12 @@ namespace StackExchange.Opserver.Data
                 var cache = node.DataPollers.FirstOrDefault(p => p.UniqueId == cacheGuid);
                 if (cache != null)
                 {
-                    await cache.PollGenericAsync(true).ConfigureAwait(false);
+                    await cache.PollGenericAsync(true);
                 }
                 return cache?.LastPollSuccessful ?? false;
             }
             // Polling an entire server
-            await node.PollAsync(true).ConfigureAwait(false);
+            await node.PollAsync(true);
             return true;
         }
 

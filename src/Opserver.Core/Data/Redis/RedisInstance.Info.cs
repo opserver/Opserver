@@ -34,7 +34,7 @@ namespace StackExchange.Opserver.Data.Redis
                 string infoStr;
                 using (MiniProfiler.Current.CustomTiming("redis", "INFO"))
                 {
-                    infoStr = await server.InfoRawAsync().ConfigureAwait(false);
+                    infoStr = await server.InfoRawAsync();
                 }
                 ConnectionInfo.Features = server.Features;
                 var ri = RedisInfo.FromInfoString(infoStr);

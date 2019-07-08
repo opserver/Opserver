@@ -45,10 +45,10 @@ namespace StackExchange.Opserver.Data.SQL
         {
             try
             {
-                using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+                using (var conn = await GetConnectionAsync())
                 {
-                    await action(conn).ConfigureAwait(false);
-                    await JobSummary.PollAsync(true).ConfigureAwait(false);
+                    await action(conn);
+                    await JobSummary.PollAsync(true);
                     return true;
                 }
             }

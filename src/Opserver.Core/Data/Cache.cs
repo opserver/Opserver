@@ -70,7 +70,7 @@ namespace StackExchange.Opserver.Data
 
             Interlocked.Increment(ref PollingEngine._activePolls);
             PollStatus = "Awaiting Semaphore";
-            await _pollSemaphoreSlim.WaitAsync().ConfigureAwait(false);
+            await _pollSemaphoreSlim.WaitAsync();
             bool errored = false;
             try
             {
@@ -79,7 +79,7 @@ namespace StackExchange.Opserver.Data
                 CurrentPollDuration = Stopwatch.StartNew();
                 _isPolling = true;
                 PollStatus = "UpdateCache";
-                await _updateFunc().ConfigureAwait(false);
+                await _updateFunc();
                 PollStatus = "UpdateCache Complete";
                 Interlocked.Increment(ref _pollsTotal);
                 if (DataTask != null)
@@ -168,7 +168,7 @@ namespace StackExchange.Opserver.Data
                             var task = getData();
                             if (timeoutMs.HasValue)
                             {
-                                if (await Task.WhenAny(task, Task.Delay(timeoutMs.Value)).ConfigureAwait(false) == task)
+                                if (await Task.WhenAny(task, Task.Delay(timeoutMs.Value)) == task)
                                 {
                                     // Re-await for throws.
                                     Data = await task;

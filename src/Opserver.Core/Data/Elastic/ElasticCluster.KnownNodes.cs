@@ -71,7 +71,7 @@ namespace StackExchange.Opserver.Data.Elastic
                 var wc = new WebClient();
                 try
                 {
-                    using (var rs = await wc.OpenReadTaskAsync(Url + path).ConfigureAwait(false))
+                    using (var rs = await wc.OpenReadTaskAsync(Url + path))
                     using (var sr = new StreamReader(rs))
                     {
                         LastSeen = DateTime.UtcNow;

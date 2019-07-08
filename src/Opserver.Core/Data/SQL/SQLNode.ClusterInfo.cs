@@ -17,13 +17,13 @@ namespace StackExchange.Opserver.Data.SQL
                 );
 
                 AGClusterState state;
-                using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
+                using (var multi = await conn.QueryMultipleAsync(sql))
                 {
-                    state = await multi.ReadFirstOrDefaultAsync<AGClusterState>().ConfigureAwait(false);
+                    state = await multi.ReadFirstOrDefaultAsync<AGClusterState>();
                     if (state != null)
                     {
-                        state.Members = await multi.ReadAsync<AGClusterMemberInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                        state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                        state.Members = await multi.ReadAsync<AGClusterMemberInfo>().AsList();
+                        state.Networks = await multi.ReadAsync<AGClusterNetworkInfo>().AsList();
                     }
                 }
                 if (state != null)

@@ -89,7 +89,7 @@ namespace StackExchange.Opserver.Data.Jira
 
             var payload = new { fields };
 
-            var result = await client.PostAsync<JiraCreateIssueResponse, object>("issue", payload).ConfigureAwait(false);
+            var result = await client.PostAsync<JiraCreateIssueResponse, object>("issue", payload);
 
             var commentBody = RenderVariableTable("Server Variables", error.ServerVariables)
                 + RenderVariableTable("QueryString", error.QueryString)
@@ -99,7 +99,7 @@ namespace StackExchange.Opserver.Data.Jira
 
             if (commentBody.HasValue())
             {
-                await CommentAsync(action, result, commentBody).ConfigureAwait(false);
+                await CommentAsync(action, result, commentBody);
             }
 
             result.Host = GetHost(action);
@@ -125,7 +125,7 @@ namespace StackExchange.Opserver.Data.Jira
 
             var resource = $"issue/{createResponse.Key}/comment";
 
-            var response = await client.PostAsync<string, object>(resource, payload).ConfigureAwait(false);
+            var response = await client.PostAsync<string, object>(resource, payload);
             return response;
         }
 
@@ -271,7 +271,7 @@ namespace StackExchange.Opserver.Data.Jira
                 client.Headers.Add(HttpRequestHeader.Authorization, authz);
 
             var uri = GetUriForResource(resource);
-            var responseBytes = await client.DownloadDataTaskAsync(uri).ConfigureAwait(false);
+            var responseBytes = await client.DownloadDataTaskAsync(uri);
 
             string response = Encoding.UTF8.GetString(responseBytes);
             return JSON.Deserialize<TResponse>(response);
@@ -290,7 +290,7 @@ namespace StackExchange.Opserver.Data.Jira
             byte[] dataBytes = Encoding.UTF8.GetBytes(json);
             var uri = GetUriForResource(resource);
             var responseBytes = new byte[0];
-            await client.UploadDataTaskAsync(uri, "POST", dataBytes).ConfigureAwait(false);
+            await client.UploadDataTaskAsync(uri, "POST", dataBytes);
 
             string response = Encoding.UTF8.GetString(responseBytes);
             if (typeof(TResponse) == typeof(string))

@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Data
             {
                 tasks.Add(p.EnableAsync(node));
             }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await Task.WhenAll(tasks);
             return tasks.TrueForAll(b => b.Result);
         }
 
@@ -44,7 +44,7 @@ namespace StackExchange.Opserver.Data
             {
                 tasks.Add(p.DisableAsync(node));
             }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await Task.WhenAll(tasks);
             return tasks.TrueForAll(b => b.Result);
         }
     }

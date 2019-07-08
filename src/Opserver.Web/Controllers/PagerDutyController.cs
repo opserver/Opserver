@@ -32,7 +32,7 @@ namespace StackExchange.Opserver.Controllers
         public async Task<ActionResult> Dashboard()
         {
             var api = Module.API;
-            await api.PollAsync().ConfigureAwait(false);
+            await api.PollAsync();
 
             var vd = new PagerDutyModel
             {

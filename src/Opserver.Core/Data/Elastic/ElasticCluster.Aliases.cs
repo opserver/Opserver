@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Elastic
         public Cache<IndexAliasInfo> Aliases =>
             _aliases ?? (_aliases = GetElasticCache(async () =>
             {
-                var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases").ConfigureAwait(false);
+                var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases");
                 return new IndexAliasInfo
                 {
                     Aliases = aliases?.Where(a => a.Value?.Aliases != null && a.Value.Aliases.Count > 0)

@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.SQL
             _resourceHistory ?? (_resourceHistory = GetSqlCache(nameof(ResourceHistory), async conn =>
             {
                 var sql = GetFetchSQL<ResourceEvent>();
-                var result = await conn.QueryAsync<ResourceEvent>(sql).ConfigureAwait(false);
+                var result = await conn.QueryAsync<ResourceEvent>(sql);
                 CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
                 return result;
             }));

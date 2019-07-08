@@ -160,9 +160,9 @@ namespace StackExchange.Opserver.Data.SQL
                 getData: async () =>
                 {
                     if (shouldRun != null && !shouldRun()) return new T();
-                    using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+                    using (var conn = await GetConnectionAsync())
                     {
-                        return await get(conn).ConfigureAwait(false);
+                        return await get(conn);
                     }
                 },
                 logExceptions: logExceptions,

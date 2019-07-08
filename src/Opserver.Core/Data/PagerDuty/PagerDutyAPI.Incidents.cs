@@ -68,14 +68,14 @@ namespace StackExchange.Opserver.Data.PagerDuty
 
         public async Task<string> GetResolvedByAsync()
         {
-            var logs = await GetLogsAsync().ConfigureAwait(false);
+            var logs = await GetLogsAsync();
             return logs.Find(r => r.LogType == "resolve_log_entry")?.Agent.Person;
         }
 
         public async Task<List<Acknowledgement>> GetAcknowledgedByAsync()
         {
             var a = new List<Acknowledgement>();
-            foreach (var i in (await GetLogsAsync().ConfigureAwait(false)).FindAll(l => l.LogType == "acknowledge_log_entry"))
+            foreach (var i in (await GetLogsAsync()).FindAll(l => l.LogType == "acknowledge_log_entry"))
             {
                 a.Add(new Acknowledgement()
                 {

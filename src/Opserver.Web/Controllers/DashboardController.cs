@@ -126,8 +126,8 @@ namespace StackExchange.Opserver.Controllers
                 switch (type)
                 {
                     case NodeGraphModel.KnownTypes.Live:
-                        await PopulateModel(vd, NodeGraphModel.KnownTypes.CPU, subId).ConfigureAwait(false);
-                        await PopulateModel(vd, NodeGraphModel.KnownTypes.Memory, subId).ConfigureAwait(false);
+                        await PopulateModel(vd, NodeGraphModel.KnownTypes.CPU, subId);
+                        await PopulateModel(vd, NodeGraphModel.KnownTypes.Memory, subId);
                         //await PopulateModel(vd, NodeGraphModel.KnownTypes.Network, subId);
                         break;
                     case NodeGraphModel.KnownTypes.CPU:
@@ -135,7 +135,7 @@ namespace StackExchange.Opserver.Controllers
                     case NodeGraphModel.KnownTypes.Network:
                     case NodeGraphModel.KnownTypes.Volume:
                     case NodeGraphModel.KnownTypes.VolumePerformance:
-                        await PopulateModel(vd, type, subId).ConfigureAwait(false);
+                        await PopulateModel(vd, type, subId);
                         break;
                 }
             }
@@ -150,11 +150,11 @@ namespace StackExchange.Opserver.Controllers
             {
                 case NodeGraphModel.KnownTypes.CPU:
                     vd.Title = "CPU Utilization (" + (n.PrettyName ?? "Unknown") + ")";
-                    vd.CpuData = await GraphController.CPUData(n, summary: true).ConfigureAwait(false);
+                    vd.CpuData = await GraphController.CPUData(n, summary: true);
                     break;
                 case NodeGraphModel.KnownTypes.Memory:
                     vd.Title = "Memory Utilization (" + (n.TotalMemory?.ToSize() ?? "Unknown Max") + ")";
-                    vd.MemoryData = await GraphController.MemoryData(n, summary: true).ConfigureAwait(false);
+                    vd.MemoryData = await GraphController.MemoryData(n, summary: true);
                     break;
                 case NodeGraphModel.KnownTypes.Network:
                     if (subId.HasValue())
@@ -162,12 +162,12 @@ namespace StackExchange.Opserver.Controllers
                         var i = vd.Node.GetInterface(subId);
                         vd.Interface = i;
                         vd.Title = "Network Utilization (" + (i?.PrettyName ?? "Unknown") + ")";
-                        vd.NetworkData = await GraphController.NetworkData(i, summary: true).ConfigureAwait(false);
+                        vd.NetworkData = await GraphController.NetworkData(i, summary: true);
                     }
                     else
                     {
                         vd.Title = "Network Utilization (" + (n.PrettyName ?? "Unknown") + ")";
-                        vd.NetworkData = await GraphController.NetworkData(n, summary: true).ConfigureAwait(false);
+                        vd.NetworkData = await GraphController.NetworkData(n, summary: true);
                     }
                     break;
                 case NodeGraphModel.KnownTypes.Volume:
@@ -184,12 +184,12 @@ namespace StackExchange.Opserver.Controllers
                         var v = vd.Node.GetVolume(subId);
                         vd.Volume = v;
                         vd.Title = "Volume Performance (" + (v?.PrettyName ?? "Unknown") + ")";
-                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(v, summary: true).ConfigureAwait(false);
+                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(v, summary: true);
                     }
                     else
                     {
                         vd.Title = "Volume Performance (" + (n.PrettyName ?? "Unknown") + ")";
-                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(n, summary: true).ConfigureAwait(false);
+                        vd.VolumePerformanceData = await GraphController.VolumePerformanceData(n, summary: true);
                     }
                     break;
             }

@@ -14,7 +14,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
                 {
-                    return (await Connection.GetSingleServer().ConfigGetAsync("*").ConfigureAwait(false)).ToDictionary(x => x.Key, x => x.Value);
+                    return (await Connection.GetSingleServer().ConfigGetAsync("*")).ToDictionary(x => x.Key, x => x.Value);
                 }
             }));
 

@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Controllers
             var pdUser = CurrentPagerDutyPerson;
             if (pdUser == null) return ContentNotFound("PagerDuty Person Not Found for " + Current.User.AccountName);
 
-            var newIncident = await Module.API.UpdateIncidentStatusAsync(incident, pdUser, newStatus).ConfigureAwait(false);
+            var newIncident = await Module.API.UpdateIncidentStatusAsync(incident, pdUser, newStatus);
             return Json(newIncident?.Status == newStatus);
         }
 
@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Controllers
 
             start = start ?? DateTime.UtcNow;
 
-            await Module.API.SetOverrideAsync(currentPrimarySchedule, start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson).ConfigureAwait(false);
+            await Module.API.SetOverrideAsync(currentPrimarySchedule, start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson);
 
             return Json(true);
         }

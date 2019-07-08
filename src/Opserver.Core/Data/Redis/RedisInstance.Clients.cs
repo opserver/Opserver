@@ -13,7 +13,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "CLIENT LIST"))
                 {
-                    var result = await Connection.GetSingleServer().ClientListAsync().ConfigureAwait(false);
+                    var result = await Connection.GetSingleServer().ClientListAsync();
                     return result.ToList();
                 }
             }));

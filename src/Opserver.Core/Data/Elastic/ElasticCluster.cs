@@ -105,7 +105,7 @@ namespace StackExchange.Opserver.Data.Elastic
             {
                 foreach (var n in KnownNodes)
                 {
-                    var result = await n.GetAsync<T>(path).ConfigureAwait(false);
+                    var result = await n.GetAsync<T>(path);
                     if (result != null)
                     {
                         return result;

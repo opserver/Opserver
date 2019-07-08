@@ -81,8 +81,8 @@ namespace StackExchange.Opserver.Helpers
 
             if (connectionTimeoutMs.GetValueOrDefault(0) == 0)
             {
-                await conn.OpenAsync().ConfigureAwait(false);
-                await conn.SetReadUncommittedAsync().ConfigureAwait(false);
+                await conn.OpenAsync();
+                await conn.SetReadUncommittedAsync();
             }
             else
             {
@@ -95,8 +95,8 @@ namespace StackExchange.Opserver.Helpers
                     tokenSource.CancelAfter(connectionTimeoutMs.Value);
                     try
                     {
-                        await conn.OpenAsync(tokenSource.Token).ConfigureAwait(false); // Throwing Null Refs
-                        await conn.SetReadUncommittedAsync().ConfigureAwait(false);
+                        await conn.OpenAsync(tokenSource.Token); // Throwing Null Refs
+                        await conn.SetReadUncommittedAsync();
                     }
                     catch (TaskCanceledException e)
                     {

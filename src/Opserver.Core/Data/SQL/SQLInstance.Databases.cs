@@ -23,19 +23,12 @@ namespace StackExchange.Opserver.Data.SQL
                     );
 
                     List<Database> dbs;
-                    using (var multi = await conn.QueryMultipleAsync(sql).ConfigureAwait(false))
+                    using (var multi = await conn.QueryMultipleAsync(sql))
                     {
-                        dbs = await multi.ReadAsync<Database>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                        var backups =
-                            await
-                                multi.ReadAsync<DatabaseLastBackup>()
-                                    .ConfigureAwait(false)
-                                    .AsList()
-                                    .ConfigureAwait(false);
-                        var files =
-                            await multi.ReadAsync<DatabaseFile>().ConfigureAwait(false).AsList().ConfigureAwait(false);
-                        var vlfs =
-                            await multi.ReadAsync<DatabaseVLF>().ConfigureAwait(false).AsList().ConfigureAwait(false);
+                        dbs = await multi.ReadAsync<Database>().AsList();
+                        var backups = await multi.ReadAsync<DatabaseLastBackup>().AsList();
+                        var files = await multi.ReadAsync<DatabaseFile>().AsList();
+                        var vlfs = await multi.ReadAsync<DatabaseVLF>().AsList();
 
                         // Safe groups
                         var backupLookup = backups.GroupBy(b => b.DatabaseId).ToDictionary(g => g.Key, g => g.ToList());
@@ -45,9 +38,9 @@ namespace StackExchange.Opserver.Data.SQL
 
                         foreach (var db in dbs)
                         {
-                            db.Backups = backupLookup.TryGetValue(db.Id, out List<DatabaseLastBackup> b) ? b : new List<DatabaseLastBackup>();
-                            db.Files = fileLookup.TryGetValue(db.Id, out List<DatabaseFile> f) ? f : new List<DatabaseFile>();
-                            db.VLFCount = vlfsLookup.TryGetValue(db.Id, out DatabaseVLF v) ? v?.VLFCount : null;
+                            db.Backups = backupLookup.TryGetValue(db.Id, out var b) ? b : new List<DatabaseLastBackup>();
+                            db.Files = fileLookup.TryGetValue(db.Id, out var f) ? f : new List<DatabaseFile>();
+                            db.VLFCount = vlfsLookup.TryGetValue(db.Id, out var v) ? v?.VLFCount : null;
                         }
                     }
                     return dbs;

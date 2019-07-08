@@ -82,11 +82,11 @@ namespace StackExchange.Opserver.Data.HAProxy
                 req.Credentials = new NetworkCredential(User, Password);
                 if (QueryTimeoutMs.HasValue)
                     req.Timeout = QueryTimeoutMs.Value;
-                using (var resp = await req.GetResponseAsync().ConfigureAwait(false))
+                using (var resp = await req.GetResponseAsync())
                 using (var rs = resp.GetResponseStream())
                 {
                     if (rs == null) return null;
-                    return await ParseHAProxyStats(rs).ConfigureAwait(false);
+                    return await ParseHAProxyStats(rs);
                 }
             }
         }
@@ -97,7 +97,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             using (var sr = new StreamReader(stream))
             {
                 string line;
-                while ((line = await sr.ReadLineAsync().ConfigureAwait(false)) != null)
+                while ((line = await sr.ReadLineAsync()) != null)
                 {
                     //Skip the header
                     if (line.IsNullOrEmpty() || line.StartsWith("#")) continue;

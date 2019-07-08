@@ -37,7 +37,7 @@ namespace StackExchange.Opserver.Controllers
                     };
                 var userIdentity = new ClaimsIdentity(claims, "login");
                 var principal = new ClaimsPrincipal(userIdentity);
-                await HttpContext.SignInAsync(principal).ConfigureAwait(false);
+                await HttpContext.SignInAsync(principal);
                 return Redirect(url.HasValue() ? url : "~/");
             }
             vd.ErrorMessage = "Login failed";
@@ -48,7 +48,7 @@ namespace StackExchange.Opserver.Controllers
         [Route("logout")]
         public async Task<ActionResult> Logout()
         {
-            await HttpContext.SignOutAsync().ConfigureAwait(false);
+            await HttpContext.SignOutAsync();
             return RedirectToAction(nameof(Login));
         }
     }

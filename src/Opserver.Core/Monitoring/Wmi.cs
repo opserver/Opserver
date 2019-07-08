@@ -115,14 +115,14 @@ namespace StackExchange.Opserver.Monitoring
             public async Task<IEnumerable<dynamic>> GetDynamicResultAsync()
             {
                 using (MiniProfiler.Current.CustomTiming("WMI", _rawQuery, _machineName))
-                    return (await Result.ConfigureAwait(false)).Cast<ManagementObject>().Select(mo => new WmiDynamic(mo));
+                    return (await Result).Cast<ManagementObject>().Select(mo => new WmiDynamic(mo));
             }
 
             public async Task<dynamic> GetFirstResultAsync()
             {
                 ManagementObject obj;
                 using (MiniProfiler.Current.CustomTiming("WMI", _rawQuery, _machineName))
-                    obj = (await Result.ConfigureAwait(false)).Cast<ManagementObject>().FirstOrDefault();
+                    obj = (await Result).Cast<ManagementObject>().FirstOrDefault();
                 return obj == null ? null : new WmiDynamic(obj);
             }
 

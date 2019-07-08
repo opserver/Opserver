@@ -27,5 +27,4 @@ namespace StackExchange.Opserver.Security
             }
         }
     }
-
 }

@@ -49,16 +49,16 @@ namespace StackExchange.Opserver.Controllers
                 var message = i.PromoteToMaster();
                 if (promote)
                 {
-                    await i.SetSERedisTiebreakerAsync().ConfigureAwait(false);
+                    await i.SetSERedisTiebreakerAsync();
                     await oldMaster?.ClearSERedisTiebreakerAsync();
                     await oldMaster?.SlaveToAsync(i.HostAndPort);
                 }
                 else
                 {
-                    await i.ClearSERedisTiebreakerAsync().ConfigureAwait(false);
+                    await i.ClearSERedisTiebreakerAsync();
                 }
                 // We want these to be synchronous
-                await i.PollAsync(true).ConfigureAwait(false);
+                await i.PollAsync(true);
                 await oldMaster?.PollAsync(true);
                 return Json(new { message });
             }
@@ -76,7 +76,7 @@ namespace StackExchange.Opserver.Controllers
 
             try
             {
-                var removed = await i.KeyPurge(db, key).ConfigureAwait(false);
+                var removed = await i.KeyPurge(db, key);
                 return Json(new {removed});
             }
             catch (Exception ex)
@@ -116,7 +116,7 @@ namespace StackExchange.Opserver.Controllers
                     tasks.Add(RedisInstanceOperation.FromString(Module, a).PerformAsync());
                 }
             }
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            await Task.WhenAll(tasks);
             return Json(new { success = true, result = $"{tasks.Count.Pluralize("operation")} running..." });
         }
 
@@ -139,10 +139,10 @@ namespace StackExchange.Opserver.Controllers
 
             try
             {
-                var success = await action(i).ConfigureAwait(false);
+                var success = await action(i);
                 if (poll)
                 {
-                    await i.PollAsync(true).ConfigureAwait(false);
+                    await i.PollAsync(true);
                 }
                 return Json(new { success });
             }

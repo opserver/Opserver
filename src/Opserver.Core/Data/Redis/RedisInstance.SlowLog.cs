@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Data.Redis
                 //TODO: Remove when StackExchange.Redis gets profiling
                 using (MiniProfiler.Current.CustomTiming("redis", "slowlog get " + SlowLogCountToFetch.ToString()))
                 {
-                    return (await Connection.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch).ConfigureAwait(false)).ToList();
+                    return (await Connection.GetSingleServer().SlowlogGetAsync(SlowLogCountToFetch)).ToList();
                 }
             }));
 
@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.Redis
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "tiebreaker fetch"))
                 {
-                    return await GetSERedisTiebreakerAsync(Connection).ConfigureAwait(false);
+                    return await GetSERedisTiebreakerAsync(Connection);
                 }
             }));
 

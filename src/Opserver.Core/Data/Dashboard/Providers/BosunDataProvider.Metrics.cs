@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             var json = JSON.SerializeDynamic(query, Options.ExcludeNullsUtc);
             var url = GetUrl($"api/graph?json={json}{(pointCount.HasValue ? "&autods=" + pointCount.ToString() : "")}");
-            var apiResult = await GetFromBosunAsync<BosunMetricResponse>(url).ConfigureAwait(false);
+            var apiResult = await GetFromBosunAsync<BosunMetricResponse>(url);
             return apiResult.Result;
         }
 
@@ -85,7 +85,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     async Task addMetric(string metricName, string[] tags)
                     {
                         var tagDict = tags?.ToDictionary(t => t, _ => "*");
-                        var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict).ConfigureAwait(false);
+                        var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict);
                         if (apiResult == null) return;
                         if (tags?.Any() ?? false)
                         {
@@ -102,7 +102,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     var c = addMetric(BosunMetric.Globals.CPU, null);
                     var m = addMetric(BosunMetric.Globals.MemoryUsed, null);
                     var n = addMetric(BosunMetric.Globals.NetBytes, new[] {BosunMetric.Tags.Direction});
-                    await Task.WhenAll(c, m, n).ConfigureAwait(false); // parallel baby!
+                    await Task.WhenAll(c, m, n); // parallel baby!
 
                     return result;
                 }, 60.Seconds(), 60.Minutes()));

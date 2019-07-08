@@ -35,7 +35,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         {
             using (MiniProfiler.Current.Step("Get Server Nodes"))
             {
-                using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+                using (var conn = await GetConnectionAsync())
                 {
                     var nodes = await conn.QueryAsync<Node>(@"
 Select Cast(n.NodeID as varchar(50)) as Id,
@@ -63,7 +63,7 @@ Select Cast(n.NodeID as varchar(50)) as Id,
        Left Join VIM_Hosts vh On n.NodeID = vh.NodeID
        Left Join APM_HardwareInfo hi On n.NodeID = hi.NodeID
  Where LastSync Is Not Null
- Order By Id, Caption", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+ Order By Id, Caption", commandTimeout: QueryTimeoutMs);
 
                     var interfaces = await conn.QueryAsync<Interface>(@"
 Select Cast(InterfaceID as varchar(50)) as Id,
@@ -83,7 +83,7 @@ Select Cast(InterfaceID as varchar(50)) as Id,
        OutPps,
        InterfaceMTU as MTU,
        InterfaceSpeed as Speed
-From Interfaces", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+From Interfaces", commandTimeout: QueryTimeoutMs);
 
                     var volumes = await conn.QueryAsync<Volume>(@"
 Select Cast(VolumeID as varchar(50)) as Id,
@@ -99,7 +99,7 @@ Select Cast(VolumeID as varchar(50)) as Id,
        VolumeSpaceAvailable as Available,
        VolumePercentUsed as PercentUsed
   From Volumes
- Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+ Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs);
 
                     var apps = await conn.QueryAsync<Application>(@"
 Select Cast(com.ApplicationID as varchar(50)) as Id, 
@@ -127,7 +127,7 @@ From APM_Application app
        On com.ID = ccs.ComponentID
      Inner Join APM_ProcessEvidence pe
        On ccs.ComponentStatusID = pe.ComponentStatusID
-Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+Order By NodeID", commandTimeout: QueryTimeoutMs);
 
                     foreach (var a in apps)
                     {
@@ -136,7 +136,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
                             : (a.ComponentName ?? "").Replace(" IIS App Pool", "");
                     }
 
-                    var ips = await GetNodeIPMapAsync(conn).ConfigureAwait(false);
+                    var ips = await GetNodeIPMapAsync(conn);
 
                     foreach (var i in interfaces)
                     {
@@ -202,11 +202,11 @@ Select Cast(i.InterfaceID as varchar(50)) as InterfaceID, ipa.IPAddress, ipa.Sub
        Join Interfaces i 
          On ipa.NodeID = i.NodeID
          And ipa.InterfaceIndex = i.InterfaceIndex",
-                commandTimeout: QueryTimeoutMs).ConfigureAwait(false);
+                commandTimeout: QueryTimeoutMs);
 
             foreach (var m in result)
             {
-                if (IPNet.TryParse(m.IPAddress, m.SubnetMask, out IPNet net))
+                if (IPNet.TryParse(m.IPAddress, m.SubnetMask, out var net))
                 {
                     m.IPNet = net;
                 }
@@ -244,7 +244,7 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return (await UtilizationQueryAsync<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Node.CPUUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
         public override async Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
@@ -272,7 +272,7 @@ Where c.RowNumber % ((Select Count(*) + @intervals
                          And c.NodeID = @id)/@intervals) = 0
 Order By c.DateTime";
 
-            return (await UtilizationQueryAsync<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Node.MemoryUtilization>(node.Id, allSql, sampledSql, "c.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
         public override async Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
@@ -308,12 +308,12 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
 
             if (node.PrimaryInterfaces.Count == 0) return new List<DoubleGraphPoint>();
 
-            using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+            using (var conn = await GetConnectionAsync())
             {
                 var result = await conn.QueryAsync<Interface.InterfaceUtilization>(
                     (pointCount.HasValue ? sampledSql : allSql)
                         .Replace("{dateRange}", GetOptionalDateClause("itd.DateTime", start, end)),
-                    new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, intervals = pointCount }).ConfigureAwait(false);
+                    new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, intervals = pointCount });
                 return result.ToList<DoubleGraphPoint>();
             }
         }
@@ -349,12 +349,12 @@ Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
  Group By vp.DateTime
  Order By vp.DateTime";
 
-            using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+            using (var conn = await GetConnectionAsync())
             {
                 var result = await conn.QueryAsync<Volume.VolumePerformanceUtilization>(
                     (pointCount.HasValue ? sampledSql : allSql)
                         .Replace("{dateRange}", GetOptionalDateClause("vp.DateTime", start, end)),
-                    new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = pointCount }).ConfigureAwait(false);
+                    new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = pointCount });
                 return result.ToList<DoubleGraphPoint>();
             }
         }
@@ -390,7 +390,7 @@ Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
  Group By vp.DateTime
  Order By vp.DateTime";
 
-            return (await UtilizationQueryAsync<Volume.VolumePerformanceUtilization>(volume.Id, allSql, sampledSql, "vp.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<DoubleGraphPoint>();
+            return (await UtilizationQueryAsync<Volume.VolumePerformanceUtilization>(volume.Id, allSql, sampledSql, "vp.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
         }
 
         public override async Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
@@ -418,7 +418,7 @@ Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
                           And v.VolumeID = @id)/@intervals) = 0
  Order By v.DateTime";
 
-            return (await UtilizationQueryAsync<Volume.VolumeUtilization>(volume.Id, allSql, sampledSql, "v.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<GraphPoint>();
+            return (await UtilizationQueryAsync<Volume.VolumeUtilization>(volume.Id, allSql, sampledSql, "v.DateTime", start, end, pointCount)).ToList<GraphPoint>();
         }
 
         public override async Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null)
@@ -450,13 +450,10 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
                             And {dateRange})/@intervals) = 0
  Order By itd.DateTime";
 
-            return (await UtilizationQueryAsync<Interface.InterfaceUtilization>(iface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount).ConfigureAwait(false)).ToList<DoubleGraphPoint>();
+            return (await UtilizationQueryAsync<Interface.InterfaceUtilization>(iface.Id, allSql, sampledSql, "itd.DateTime", start, end, pointCount)).ToList<DoubleGraphPoint>();
         }
 
-        public Task<DbConnection> GetConnectionAsync()
-        {
-            return Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeoutMs);
-        }
+        public Task<DbConnection> GetConnectionAsync() => Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeoutMs);
 
         private string GetOptionalDateClause(string field, DateTime? start, DateTime? end)
         {
@@ -471,12 +468,12 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
 
         private async Task<List<T>> UtilizationQueryAsync<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount) where T : IGraphPoint
         {
-            using (var conn = await GetConnectionAsync().ConfigureAwait(false))
+            using (var conn = await GetConnectionAsync())
             {
                 return await conn.QueryAsync<T>(
                     (pointCount.HasValue ? sampledSql : allSql)
                         .Replace("{dateRange}", GetOptionalDateClause(dateField, start, end)),
-                    new { id = int.Parse(id), start, end, intervals = pointCount }).ConfigureAwait(false);
+                    new { id = int.Parse(id), start, end, intervals = pointCount });
             }
         }
     }

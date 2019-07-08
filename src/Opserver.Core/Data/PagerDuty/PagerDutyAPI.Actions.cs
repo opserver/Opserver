@@ -30,8 +30,8 @@ namespace StackExchange.Opserver.Data.PagerDuty
                 response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response, JilOptions),
                 httpMethod: "PUT",
                 data: data,
-                extraHeaders: headers).ConfigureAwait(false);
-                await Incidents.PollAsync(true).ConfigureAwait(false);
+                extraHeaders: headers);
+                await Incidents.PollAsync(true);
 
                 return result?.Response ?? new Incident();
             }

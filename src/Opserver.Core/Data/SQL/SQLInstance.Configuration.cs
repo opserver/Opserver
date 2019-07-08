@@ -11,7 +11,7 @@ namespace StackExchange.Opserver.Data.SQL
             _configuration ?? (_configuration = GetSqlCache(nameof(Configuration),
                 async conn =>
                 {
-                    var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>()).ConfigureAwait(false);
+                    var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>());
                     foreach (var r in result)
                     {
                         if (ConfigurationDefaults.TryGetValue(r.Name, out int defaultVal))

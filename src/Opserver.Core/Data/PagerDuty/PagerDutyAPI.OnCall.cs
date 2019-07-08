@@ -33,7 +33,7 @@ namespace StackExchange.Opserver.Data.PagerDuty
             try
             {
                 var users = await GetFromPagerDutyAsync("oncalls", getFromJson:
-                    response => JSON.Deserialize<PagerDutyOnCallResponse>(response, JilOptions).OnCallInfo).ConfigureAwait(false);
+                    response => JSON.Deserialize<PagerDutyOnCallResponse>(response, JilOptions).OnCallInfo);
 
                 users.Sort((a, b) =>
                     a.EscalationLevel.GetValueOrDefault(int.MaxValue)

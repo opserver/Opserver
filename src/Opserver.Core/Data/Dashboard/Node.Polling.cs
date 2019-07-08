@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Dashboard
         {
             if (MachineType.Contains("Windows"))
             {
-                return await PerfCounters.Windows.GetCPUUtilization(Ip).ConfigureAwait(false);
+                return await PerfCounters.Windows.GetCPUUtilization(Ip);
             }
             return new PerfCounters.QueryResult<PerfCounters.CPUUtilization>
                 {

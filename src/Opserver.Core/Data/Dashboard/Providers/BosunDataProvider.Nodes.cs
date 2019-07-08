@@ -17,8 +17,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             => _nodeMetricCache ?? (_nodeMetricCache = ProviderCache(
                 async () =>
                 {
-                    var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host"))
-                        .ConfigureAwait(false);
+                    var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host"));
                     return response.Result ?? new Dictionary<string, List<string>>();
                 }, 10.Minutes(), 4.Hours()));
 
@@ -28,7 +27,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             {
                 var nodes = new List<Node>();
 
-                var apiResponse = await GetFromBosunAsync<Dictionary<string, BosunHost>>(GetUrl("api/host")).ConfigureAwait(false);
+                var apiResponse = await GetFromBosunAsync<Dictionary<string, BosunHost>>(GetUrl("api/host"));
                 if (!apiResponse.Success) return nodes;
 
                 var hostsDict = apiResponse.Result;

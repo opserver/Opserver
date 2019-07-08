@@ -10,7 +10,7 @@ namespace StackExchange.Opserver.Data.Elastic
         private Cache<ClusterHealthInfo> _healthStatus;
         public Cache<ClusterHealthInfo> HealthStatus =>
             _healthStatus ?? (_healthStatus = GetElasticCache(
-                    async () => (await GetAsync<ClusterHealthInfo>("_cluster/health?level=shards").ConfigureAwait(false))?.Prep()
+                    async () => (await GetAsync<ClusterHealthInfo>("_cluster/health?level=shards"))?.Prep()
                 )
             );
 

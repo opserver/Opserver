@@ -40,7 +40,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 {
                     using (var q = Query(query, wmiNamespace))
                     {
-                        return (await q.GetFirstResultAsync().ConfigureAwait(false)) != null;
+                        return (await q.GetFirstResultAsync()) != null;
                     }
                 }
                 catch
@@ -54,7 +54,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync(), GetServicesAsync() };
-                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    await Task.WhenAll(tasks);
                     SetReferences();
                     ClearSummaries();
 
@@ -62,7 +62,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                     if (!_nodeInfoAvailable)
                     {
                         _nodeInfoAvailable = true;
-                        await PollStats().ConfigureAwait(false);
+                        await PollStats();
                     }
                 }
                 // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
@@ -89,7 +89,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 try
                 {
                     var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
-                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    await Task.WhenAll(tasks);
                     ClearSummaries();
                 }
                 // We can get both cases. See comment from Nick Craver at https://github.com/opserver/Opserver/pull/330
@@ -117,7 +117,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 FROM Win32_ComputerSystem";
                 using (var q = Query(machineQuery))
                 {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    var data = await q.GetFirstResultAsync();
                     if (data != null)
                     {
                         Model = data.Model;
@@ -141,7 +141,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 using (var q = Query(query))
                 {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    var data = await q.GetFirstResultAsync();
                     if (data != null)
                     {
                         LastBoot = ManagementDateTimeConverter.ToDateTime(data.LastBootUpTime);
@@ -158,7 +158,7 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
 
                 using (var q = Query(servicetagquery))
                 {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    var data = await q.GetFirstResultAsync();
                     if (data != null)
                     {
                         ServiceTag = data.SerialNumber;
@@ -168,10 +168,10 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
                 LastSync = DateTime.UtcNow;
                 Status = NodeStatus.Active;
 
-                IsVMHost = await GetIsVMHost().ConfigureAwait(false);
+                IsVMHost = await GetIsVMHost();
 
-                _canQueryAdapterUtilization = await GetCanQueryAdapterUtilization().ConfigureAwait(false);
-                _canQueryTeamingInformation = await ClassExists("MSFT_NetLbfoTeamMember", @"root\standardcimv2").ConfigureAwait(false);
+                _canQueryAdapterUtilization = await GetCanQueryAdapterUtilization();
+                _canQueryTeamingInformation = await ClassExists("MSFT_NetLbfoTeamMember", @"root\standardcimv2");
             }
 
             private async Task GetAllInterfacesAsync()
@@ -192,7 +192,7 @@ SELECT Name,
                 var indexMap = new Dictionary<uint, Interface>();
                 using (var q = Query(query))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         string id = $"{data.DeviceID}";
                         var i = Interfaces.Find(x => x.Id == id) ?? new Interface();
@@ -204,7 +204,7 @@ SELECT Name,
                         i.FullName = data.Description;
                         i.NodeId = Id;
                         i.LastSync = DateTime.UtcNow;
-                        i.Name = await GetRealAdapterName(data.PNPDeviceID).ConfigureAwait(false);
+                        i.Name = await GetRealAdapterName(data.PNPDeviceID);
                         i.PhysicalAddress = data.MACAddress;
                         i.Speed = data.Speed;
                         i.Status = NodeStatus.Active;
@@ -227,7 +227,7 @@ SELECT Name,
 
                     using (var q = Query(teamsQuery, @"root\standardcimv2"))
                     {
-                        foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                        foreach (var data in await q.GetDynamicResultAsync())
                         {
                             var teamInterface = Interfaces.Find(x => x.Caption == data.Name);
 
@@ -243,7 +243,7 @@ SELECT Name,
                     const string teamMembersQuery = "SELECT InstanceID, Name, Team FROM MSFT_NetLbfoTeamMember";
                     using (var q = Query(teamMembersQuery, @"root\standardcimv2"))
                     {
-                        foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                        foreach (var data in await q.GetDynamicResultAsync())
                         {
                             string teamName = data.Team;
 
@@ -270,7 +270,7 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
 
                 using (var q = Query(ipQuery))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         uint index = data.InterfaceIndex;
                         if (indexMap.TryGetValue(index, out var i))
@@ -316,7 +316,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    foreach (var disk in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var disk in await q.GetDynamicResultAsync())
                     {
                         var id = $"{disk.DeviceID}";
                         var v = Volumes.Find(x => x.Id == id) ?? new Volume();
@@ -359,7 +359,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var service in await q.GetDynamicResultAsync())
                     {
                         if (ServicesPatternRegEx?.IsMatch(service.Name) ?? true)
                         {
@@ -411,7 +411,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
 
@@ -441,7 +441,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    var data = await q.GetFirstResultAsync().ConfigureAwait(false);
+                    var data = await q.GetFirstResultAsync();
                     if (data == null)
                         return;
 
@@ -496,7 +496,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         var perfData = new PerfRawData(this, data);
                         var name = perfData.Identifier;
@@ -548,7 +548,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    foreach (var data in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var data in await q.GetDynamicResultAsync())
                     {
                         var perfData = new PerfRawData(this, data);
 
@@ -588,7 +588,7 @@ SELECT Caption,
 
                 using (var q = Query(query))
                 {
-                    foreach (var service in await q.GetDynamicResultAsync().ConfigureAwait(false))
+                    foreach (var service in await q.GetDynamicResultAsync())
                     {
                         switch (action)
                         {
@@ -612,7 +612,7 @@ SELECT Caption,
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {
                 var query = $"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'";
-                var data = await Query(query).GetFirstResultAsync().ConfigureAwait(false);
+                var data = await Query(query).GetFirstResultAsync();
 
                 return data?.Name;
             }
@@ -626,7 +626,7 @@ SELECT Caption,
                 {
                     using (var q = Query(query))
                     {
-                        await q.GetFirstResultAsync().ConfigureAwait(false);
+                        await q.GetFirstResultAsync();
                     }
                 }
                 catch
