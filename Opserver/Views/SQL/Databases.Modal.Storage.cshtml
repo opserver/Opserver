@@ -9,7 +9,7 @@
     var files = filesRaw?.Data?.Where(f => f.DatabaseId == db?.Id).OrderBy(f => f.FileType).ThenBy(f => f.PhysicalName);
     var tablesRaw = i?.GetTableInfo(Model.Database);
     var tables = tablesRaw.Data?.OrderByDescending(t => t.TotalSpaceKB).ThenBy(t => t.TableName).ToList();
-    var spaceIds = files?.Select(f => f.DataSpaceId).Where(id => id > 0).ToHashSet() ?? new HashSet<int>();
+    var spaceIds = StackExchange.Opserver.ExtensionMethods.ToHashSet(files?.Select(f => f.DataSpaceId).Where(id => id > 0))  ?? new HashSet<int>();
     var spacesRaw = i?.GetDataSpaceInfo(Model.Database);
     var spaces = spacesRaw.Data?.Where(ds => spaceIds.Contains(ds.Id)) ?? new List<SQLInstance.DatabaseDataSpace>();
     const int topTableShowCount = 10;
