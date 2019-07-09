@@ -133,9 +133,7 @@ namespace StackExchange.Opserver
                           await next();
                       })
                       .UseResponseCaching()
-                      .UseEndpoints(endpoints => {
-                          endpoints.MapDefaultControllerRoute();
-                      });
+                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
             appLifetime.ApplicationStopping.Register(OnShutdown);
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
             Cache.Configure(settings);

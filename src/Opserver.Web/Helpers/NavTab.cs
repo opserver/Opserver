@@ -31,7 +31,7 @@ namespace StackExchange.Opserver.Helpers
         private static Dictionary<Type, NavTab> _controllerMappings = new Dictionary<Type, NavTab>();
 
         public static NavTab Get(StatusController c) => _controllerMappings.TryGetValue(c.GetType(), out var tab) ? tab : null;
-        public static NavTab GetByName(string tabName) => AllTabs.FirstOrDefault(t => t.Name == tabName);
+        public static NavTab GetByName(string tabName) => AllTabs.Find(t => t.Name == tabName);
 
         /// <summary>
         /// https://www.youtube.com/watch?v=JnbfuAcCqpY
