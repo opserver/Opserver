@@ -6,8 +6,6 @@ namespace StackExchange.Opserver.Data.HAProxy
 {
     public class Item : IMonitorStatus
     {
-        #region HAProxy Statistics
-
         /// <summary>
         /// pxname: proxy name
         /// </summary>
@@ -351,14 +349,10 @@ namespace StackExchange.Opserver.Data.HAProxy
         [Stat("srv_abrt", 50)]
         public long ServerTransferAborts { get; internal set; }
 
-        #endregion
-
         /// <summary>
         /// The raw CSV stats line
         /// </summary>
         public string RawData { get; internal set; }
-
-        #region Parsing
 
         /// <summary>
         /// Position of the "type" stat, which determines if this is a Backend, Frontend, Server or Socket
@@ -370,7 +364,7 @@ namespace StackExchange.Opserver.Data.HAProxy
             //Parse the line into an array (CSV format)            
             string[] stats = csvLine.Split(StringSplits.Comma, StringSplitOptions.None);
 
-            Item result = GetStatOfType(stats[_typePosition]);
+            var result = GetStatOfType(stats[_typePosition]);
             result.RawData = csvLine;
 
             for (var i = 0; i < StatProperty.AllOrdered.Count; i++)
@@ -397,8 +391,7 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         private static Item GetStatOfType(string typeNum)
         {
-            var type = (StatusType)int.Parse(typeNum);
-            switch (type)
+            switch ((StatusType)int.Parse(typeNum))
             {
                 case StatusType.Frontend:
                     return new Frontend();
@@ -413,21 +406,15 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        #endregion
-
-        #region IsChecks
-
         public bool IsFrontend => Type == StatusType.Frontend;
         public bool IsServer => Type == StatusType.Server;
         public bool IsSocket => Type == StatusType.Socket;
         public bool IsBackend => Type == StatusType.Backend;
+        public bool IsChecked => Status != "no check";
+        public bool IsActive => Active == 1;
+        public bool IsBackup => Backup == 1;
 
-        #endregion
-
-        public override string ToString()
-        {
-            return RawData;
-        }
+        public override string ToString() => RawData;
 
         private static readonly Regex _upGoingDown = new Regex(@"UP \d+/\d+", RegexOptions.Compiled);
         private static readonly Regex _downGoingUp = new Regex(@"DOWN \d+/\d+", RegexOptions.Compiled);
@@ -467,11 +454,10 @@ namespace StackExchange.Opserver.Data.HAProxy
             }
         }
 
-        public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : ProxyName + " Status: " + ProxyServerStatus.AsString(EnumFormat.Description);
-
-        public bool IsChecked => Status != "no check";
-        public bool IsActive => Active == 1;
-        public bool IsBackup => Backup == 1;
+        public string MonitorStatusReason =>
+            MonitorStatus == MonitorStatus.Good
+            ? null
+            : ProxyName + " Status: " + ProxyServerStatus.AsString(EnumFormat.Description);
 
         private ProxyServerStatus? _proxyServerStatus;
         public ProxyServerStatus ProxyServerStatus => _proxyServerStatus ?? (_proxyServerStatus = GetProxyServerStatus()).Value;

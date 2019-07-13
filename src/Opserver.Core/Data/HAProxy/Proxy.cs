@@ -77,20 +77,13 @@ namespace StackExchange.Opserver.Data.HAProxy
 
         public int Order => Frontend != null ? 0 : HasServers ? 1 : 2;
 
-        #region Display Properties
-
-        public bool ShowQueue
-        {
-            get { return HasServers && Servers.Any(s => s.LimitSessions > 0 || s.LimitNewSessionPerSecond > 0); }
-        }
+        public bool ShowQueue => HasServers && Servers.Any(s => s.LimitSessions > 0 || s.LimitNewSessionPerSecond > 0);
 
         public bool ShowWarnings => HasServers;
 
         public bool ShowServers => HasServers;
 
         public bool ShowThrottle => HasServers && Servers.Any(s => s.Throttle > 0);
-
-        #endregion
 
         private string _niceName;
         public string NiceName =>

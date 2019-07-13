@@ -31,8 +31,6 @@ namespace StackExchange.Opserver.Data.HAProxy
             PropertyInfo = p;
         }
 
-        #region Static Collection
-
         //Load properties to parse initially on load
         public static readonly List<StatProperty> AllOrdered = GetAll();
 
@@ -44,7 +42,5 @@ namespace StackExchange.Opserver.Data.HAProxy
                    .OrderBy(s => s.Position)
                    .ToList();
         }
-
-        #endregion
     }
 }

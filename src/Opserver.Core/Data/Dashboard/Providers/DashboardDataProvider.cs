@@ -57,8 +57,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
             }
         }
 
-        #region Nodes
-
         public abstract List<Node> AllNodes { get; }
 
         public Node GetNodeById(string id) => AllNodes.Find(s => s.Id == id);
@@ -84,8 +82,6 @@ namespace StackExchange.Opserver.Data.Dashboard.Providers
         public abstract Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null);
 
         public Application GetApplication(string id) => AllNodes.SelectMany(n => n.Apps.Where(a => a.Id == id)).FirstOrDefault();
-
-        #endregion
 
         protected Cache<T> ProviderCache<T>(
             Func<Task<T>> fetch,

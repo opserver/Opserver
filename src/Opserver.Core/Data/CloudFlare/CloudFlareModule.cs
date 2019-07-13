@@ -9,7 +9,6 @@ namespace StackExchange.Opserver.Data.Cloudflare
 {
     public class CloudflareModule : StatusModule<CloudflareSettings>
     {
-        // TODO: Fix class naming...the company renamed.
         public override string Name => "Cloudflare";
         public override bool Enabled => Settings.Enabled;
 

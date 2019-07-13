@@ -6,8 +6,6 @@ namespace StackExchange.Opserver.Helpers
 {
     public static class AppCache
     {
-        #region IP Cache
-
         public static List<IPAddress> GetHostAddresses(string hostOrIp)
         {
             return Current.LocalCache.GetSet<List<IPAddress>>("host-ip-cache-" + hostOrIp, (_, __) =>
@@ -40,7 +38,5 @@ namespace StackExchange.Opserver.Helpers
                 }
             }, 10.Minutes(), 24.Hours());
         }
-
-        #endregion
     }
 }

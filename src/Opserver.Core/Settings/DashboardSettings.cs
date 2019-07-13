@@ -19,8 +19,6 @@ namespace StackExchange.Opserver
         public NodeSettings GetNodeSettings(string node) =>
             PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node)) ?? NodeSettings.Empty;
 
-        #region Direct Properties
-
         /// <summary>
         /// The Pattern to match on server names for hiding from the dashboard
         /// </summary>
@@ -69,15 +67,12 @@ namespace StackExchange.Opserver
         private Regex _servicesPatternRegEx;
         public Regex ServicesPatternRegEx
         {
-            get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
-            set { _servicesPatternRegEx = value; }
+            get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+            set => _servicesPatternRegEx = value;
         }
 
-        protected Regex GetPatternMatcher(string pattern)
-        {
-            return pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-        }
-        #endregion
+        protected Regex GetPatternMatcher(string pattern) =>
+            pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
         /// <summary>
         /// Category that a server belongs to
@@ -108,14 +103,12 @@ namespace StackExchange.Opserver
             private Regex _primaryInterfacePatternRegEx;
             public Regex PrimaryInterfacePatternRegex
             {
-                get { return _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern)); }
-                set { _primaryInterfacePatternRegEx = value; }
+                get => _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern));
+                set => _primaryInterfacePatternRegEx = value;
             }
 
-            protected Regex GetPatternMatcher(string pattern)
-            {
-                return pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-            }
+            protected Regex GetPatternMatcher(string pattern) =>
+                pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
             /// <summary>
             /// Percent at which CPU on a node is marked at a warning level
@@ -152,8 +145,8 @@ namespace StackExchange.Opserver
             private Regex _servicesPatternRegEx;
             public Regex ServicesPatternRegEx
             {
-                get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
-                set { _servicesPatternRegEx = value; }
+                get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+                set => _servicesPatternRegEx = value;
             }
         }
 
@@ -184,14 +177,12 @@ namespace StackExchange.Opserver
             private Regex _primaryInterfacePatternRegEx;
             public Regex PrimaryInterfacePatternRegex
             {
-                get { return _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern)); }
-                set { _primaryInterfacePatternRegEx = value; }
+                get => _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern));
+                set => _primaryInterfacePatternRegEx = value;
             }
 
-            protected Regex GetPatternMatcher(string pattern)
-            {
-                return pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
-            }
+            protected Regex GetPatternMatcher(string pattern) =>
+                pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
             /// <summary>
             /// Percent at which CPU on a node is marked at a warning level
@@ -228,8 +219,8 @@ namespace StackExchange.Opserver
             private Regex _servicesPatternRegEx;
             public Regex ServicesPatternRegEx
             {
-                get { return _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern)); }
-                set { _servicesPatternRegEx = value; }
+                get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+                set => _servicesPatternRegEx = value;
             }
         }
     }
