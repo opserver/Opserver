@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
-using StackExchange.Opserver.Controllers;
-using StackExchange.Opserver.Models;
+using Opserver.Controllers;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     /// <summary>
     /// Constrain routes to certain <see cref="Roles"/>.  Can be placed at the class or method level.

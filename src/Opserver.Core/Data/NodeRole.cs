@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class NodeRole
     {

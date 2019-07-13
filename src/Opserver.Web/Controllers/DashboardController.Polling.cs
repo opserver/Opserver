@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class DashboardController
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Net;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class AppCache
     {

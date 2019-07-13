@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data.Dashboard;
+using Opserver.Data.Dashboard;
 
-namespace StackExchange.Opserver.Views.Dashboard
+namespace Opserver.Views.Dashboard
 {
     public class DashboardModel
     {

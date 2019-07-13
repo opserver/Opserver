@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class JiraSettings
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public class SQLModule : StatusModule<SQLSettings>
     {

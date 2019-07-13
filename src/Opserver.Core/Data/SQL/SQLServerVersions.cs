@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public static class SQLServerVersions
     {

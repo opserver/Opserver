@@ -3,11 +3,11 @@ using System.Net;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using StackExchange.Exceptional;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Security;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Security;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public static class Current
     {

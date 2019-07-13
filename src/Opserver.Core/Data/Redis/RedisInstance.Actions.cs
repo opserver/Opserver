@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public partial class RedisInstance
     {

@@ -1,10 +1,10 @@
 ﻿using System;
 using EnumsNET;
 using Microsoft.AspNetCore.Html;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Dashboard;
+using Opserver.Data;
+using Opserver.Data.Dashboard;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class ExtensionMethods
     {

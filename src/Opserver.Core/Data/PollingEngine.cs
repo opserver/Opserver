@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public static class PollingEngine
     {

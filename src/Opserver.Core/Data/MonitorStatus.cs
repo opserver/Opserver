@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public enum MonitorStatus
     {

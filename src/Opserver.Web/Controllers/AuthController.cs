@@ -5,9 +5,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Views.Login;
+using Opserver.Views.Login;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public class AuthController : StatusController
     {

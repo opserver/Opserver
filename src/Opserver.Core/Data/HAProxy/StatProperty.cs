@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Reflection;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     public class StatProperty
     {

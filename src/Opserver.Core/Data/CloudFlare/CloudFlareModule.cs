@@ -5,7 +5,7 @@ using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.Cloudflare
+namespace Opserver.Data.Cloudflare
 {
     public class CloudflareModule : StatusModule<CloudflareSettings>
     {

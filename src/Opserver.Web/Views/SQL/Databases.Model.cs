@@ -1,7 +1,7 @@
-﻿using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Helpers;
+﻿using Opserver.Data.SQL;
+using Opserver.Helpers;
 
-namespace StackExchange.Opserver.Views.SQL
+namespace Opserver.Views.SQL
 {
     public class DatabasesModel
     {

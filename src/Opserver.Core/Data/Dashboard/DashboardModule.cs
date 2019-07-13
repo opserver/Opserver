@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Dashboard.Providers;
-using StackExchange.Opserver.Helpers;
+using Opserver.Data.Dashboard.Providers;
+using Opserver.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     public class DashboardModule : StatusModule<DashboardSettings>
     {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using EnumsNET;
 using Jil;
 
-namespace StackExchange.Opserver.Data.PagerDuty
+namespace Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI
     {

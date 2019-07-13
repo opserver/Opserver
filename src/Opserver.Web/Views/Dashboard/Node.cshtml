@@ -1,7 +1,7 @@
-﻿@inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
-@inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
-@inject StackExchange.Opserver.Data.Redis.RedisModule Redis
-@inject StackExchange.Opserver.Data.SQL.SQLModule Sql
+﻿@inject Opserver.Data.Elastic.ElasticModule Elastic
+@inject Opserver.Data.HAProxy.HAProxyModule HAProxy
+@inject Opserver.Data.Redis.RedisModule Redis
+@inject Opserver.Data.SQL.SQLModule Sql
 @model NodeModel
 @{
     var s = Model.CurrentNode;

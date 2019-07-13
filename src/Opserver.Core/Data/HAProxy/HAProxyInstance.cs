@@ -6,7 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     public partial class HAProxyInstance : PollNode<HAProxyModule>, INodeRoleProvider
     {

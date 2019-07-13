@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data;
+using Opserver.Data;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Storage;
 using System;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public class MiniProfilerCacheStorage : MemoryCacheStorage, IAsyncStorage
     {

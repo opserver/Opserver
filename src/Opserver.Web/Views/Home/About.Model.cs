@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Views.Home
+﻿namespace Opserver.Views.Home
 {
     public class AboutModel
     {

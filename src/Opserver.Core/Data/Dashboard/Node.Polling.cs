@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Monitoring;
+using Opserver.Monitoring;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     public partial class Node
     {

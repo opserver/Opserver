@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using StackExchange.Opserver.Controllers;
+using Opserver.Controllers;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public class NavTab
     {

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Redis;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public class RedisAnalyzer
     {

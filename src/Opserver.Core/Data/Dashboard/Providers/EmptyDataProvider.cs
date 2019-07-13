@@ -4,7 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     public class EmptyDataProvider : DashboardDataProvider
     {

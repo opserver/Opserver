@@ -1,10 +1,10 @@
 ﻿using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Data.Dashboard;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Data.Dashboard;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class DashboardController
     {

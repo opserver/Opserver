@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [AttributeUsage(AttributeTargets.Method)]
     public class DefaultRoute : RouteAttribute

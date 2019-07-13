@@ -1,5 +1,5 @@
-﻿@using Roles = StackExchange.Opserver.Models.Roles
-@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
+﻿@using Roles = Opserver.Models.Roles
+@inject Opserver.Data.Dashboard.DashboardModule Dashboard
 @model DashboardModel
 @{
     var i = Model.CurrentInstance;
@@ -11,7 +11,7 @@
         <small class="text-muted">(<a href="#/redis/summary/info">View INFO</a>)</small>
         @Poll.Now(i)
     </h5>
-    <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Node = i, Name = i.Name })" />
+    <partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Node = i, Name = i.Name })" />
     @if (i.HasPolledCacheSuccessfully)
     {
     <div class="row small">

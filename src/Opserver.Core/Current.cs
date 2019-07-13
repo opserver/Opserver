@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver
+﻿namespace Opserver
 {
     internal static class Current
     {

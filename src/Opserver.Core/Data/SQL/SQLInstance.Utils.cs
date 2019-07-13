@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance
     {

@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Hub;
+using Opserver.Data.Dashboard;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.Hub;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public class HubController : StatusController<DashboardModule>
     {

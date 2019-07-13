@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     /// <summary>
     /// Current server statuses

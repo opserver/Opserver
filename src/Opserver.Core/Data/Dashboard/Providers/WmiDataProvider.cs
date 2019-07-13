@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     internal partial class WmiDataProvider : DashboardDataProvider<WMISettings>, IServiceControlProvider
     {

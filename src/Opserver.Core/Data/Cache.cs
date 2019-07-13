@@ -9,7 +9,7 @@ using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
 using StackExchange.Profiling.Storage;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class Cache<T> : Cache where T : class
     {

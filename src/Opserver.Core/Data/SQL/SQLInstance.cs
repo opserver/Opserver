@@ -5,9 +5,9 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode<SQLModule>, ISearchableNode
     {

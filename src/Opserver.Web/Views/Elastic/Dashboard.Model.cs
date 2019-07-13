@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data.Elastic;
+using Opserver.Data.Elastic;
 
-namespace StackExchange.Opserver.Views.Elastic
+namespace Opserver.Views.Elastic
 {
     public class DashboardModel
     {

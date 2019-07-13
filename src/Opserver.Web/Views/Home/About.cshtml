@@ -1,19 +1,19 @@
 ﻿@using System.IO
 @using System.Reflection
-@using StackExchange.Opserver.Controllers
-@inject StackExchange.Opserver.Data.Dashboard.DashboardModule Dashboard
-@inject StackExchange.Opserver.Data.Elastic.ElasticModule Elastic
-@inject StackExchange.Opserver.Data.Exceptions.ExceptionsModule Exceptions
-@inject StackExchange.Opserver.Data.HAProxy.HAProxyModule HAProxy
-@inject StackExchange.Opserver.Data.Redis.RedisModule Redis
-@inject StackExchange.Opserver.Data.SQL.SQLModule Sql
+@using Opserver.Controllers
+@inject Opserver.Data.Dashboard.DashboardModule Dashboard
+@inject Opserver.Data.Elastic.ElasticModule Elastic
+@inject Opserver.Data.Exceptions.ExceptionsModule Exceptions
+@inject Opserver.Data.HAProxy.HAProxyModule HAProxy
+@inject Opserver.Data.Redis.RedisModule Redis
+@inject Opserver.Data.SQL.SQLModule Sql
 @{
     this.SetPageTitle("About");
 
     var asm = Assembly.GetExecutingAssembly();
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
-    var cacheStats = StackExchange.Opserver.ExtensionMethods.GetGetSetStatistics();
+    var cacheStats = Opserver.ExtensionMethods.GetGetSetStatistics();
     var pollingInfo = PollingEngine.GetPollingStatus();
 }
 @functions
@@ -28,7 +28,7 @@
         <span class="label label-@(enabled ? "success" : "default")">@text</span>
         return null;
     }
-    string SQLInstanceList(StackExchange.Opserver.Data.SQL.SQLInstance instance)
+    string SQLInstanceList(Opserver.Data.SQL.SQLInstance instance)
     {
         var props = instance.ServerProperties.SafeData(true);
         var features = instance.ServerFeatures.SafeData();
@@ -150,7 +150,7 @@
                     {
                         <li class="list-group-item">
                             <span class="badge">@ng.Item2.ToComma()</span>
-                            @ng.Item1.Name.Replace("StackExchange.Opserver.Data.", "")
+                            @ng.Item1.Name.Replace("Opserver.Data.", "")
                         </li>
                     }
                 </ul>

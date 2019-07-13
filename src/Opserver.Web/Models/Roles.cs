@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Models
+namespace Opserver.Models
 {
     [Flags]
     public enum Roles

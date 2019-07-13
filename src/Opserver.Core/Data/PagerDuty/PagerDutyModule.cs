@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.PagerDuty
+namespace Opserver.Data.PagerDuty
 {
     public class PagerDutyModule : StatusModule<PagerDutySettings>
     {

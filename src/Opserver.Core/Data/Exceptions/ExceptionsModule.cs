@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.Exceptions
+namespace Opserver.Data.Exceptions
 {
     public class ExceptionsModule : StatusModule<ExceptionsSettings>, IOverallStatusCount
     {

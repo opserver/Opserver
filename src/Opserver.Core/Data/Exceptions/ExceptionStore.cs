@@ -5,9 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 
-namespace StackExchange.Opserver.Data.Exceptions
+namespace Opserver.Data.Exceptions
 {
     public class ExceptionStore : PollNode<ExceptionsModule>
     {

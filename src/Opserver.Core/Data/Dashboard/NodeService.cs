@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     /// <summary>
     /// Service class 

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data.HAProxy;
+using Opserver.Data.HAProxy;
 
-namespace StackExchange.Opserver.Views.HAProxy
+namespace Opserver.Views.HAProxy
 {
     public class HAProxyModel
     {

@@ -1,6 +1,6 @@
 ﻿using System.Threading;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public class ThreadStats
     {

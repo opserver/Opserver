@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance
     {

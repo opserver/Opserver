@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     /// <summary>
     /// Represents a statistic from the proxy stat dump, since these are always added at the end in newer versions, they're parsed based on position.

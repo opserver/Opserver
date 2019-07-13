@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
 
-namespace StackExchange.Opserver.Data.PagerDuty
+namespace Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI
     {

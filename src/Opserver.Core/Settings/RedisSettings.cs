@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class RedisSettings : ModuleSettings
     {

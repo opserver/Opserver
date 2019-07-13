@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 using StackExchange.Redis;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public class RedisConnectionInfo
     {

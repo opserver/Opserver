@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Data.Elastic
+namespace Opserver.Data.Elastic
 {
     public class ElasticModule : StatusModule<ElasticSettings>
     {

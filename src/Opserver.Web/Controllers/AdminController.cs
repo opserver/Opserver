@@ -1,11 +1,11 @@
 ﻿using StackExchange.Exceptional;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
+using Opserver.Helpers;
+using Opserver.Models;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.GlobalAdmin)]
     public class AdminController : StatusController

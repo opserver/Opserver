@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using EnumsNET;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLNode
     {

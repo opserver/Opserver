@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class IPNet
     {

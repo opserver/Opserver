@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data;
+using Opserver.Data;
 
-namespace StackExchange.Opserver.Views
+namespace Opserver.Views
 {
     public class PollInfoModel
     {

@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver
+﻿namespace Opserver
 {
     public abstract class ModuleSettings : ISecurableModule
     {

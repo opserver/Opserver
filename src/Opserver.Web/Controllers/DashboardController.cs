@@ -5,11 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Views.Dashboard;
+using Opserver.Data.Dashboard;
+using Opserver.Helpers;
+using Opserver.Views.Dashboard;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class DashboardController : StatusController<DashboardModule>
     {

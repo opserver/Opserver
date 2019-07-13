@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class PagerDutySettings : ModuleSettings
     {

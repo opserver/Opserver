@@ -1,21 +1,21 @@
 ﻿using System;
-using StackExchange.Opserver.Views.Shared;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Home;
+using Opserver.Views.Shared;
+using Opserver.Data;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.Home;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Data.Redis;
-using StackExchange.Opserver.Data.Exceptions;
-using StackExchange.Opserver.Data.Elastic;
-using StackExchange.Opserver.Data.HAProxy;
+using Opserver.Data.Dashboard;
+using Opserver.Data.SQL;
+using Opserver.Data.Redis;
+using Opserver.Data.Exceptions;
+using Opserver.Data.Elastic;
+using Opserver.Data.HAProxy;
 using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public class HomeController : StatusController
     {

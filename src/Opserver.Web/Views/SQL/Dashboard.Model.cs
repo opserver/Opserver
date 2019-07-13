@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.SQL;
+using Opserver.Data;
+using Opserver.Data.SQL;
 
-namespace StackExchange.Opserver.Views.SQL
+namespace Opserver.Views.SQL
 {
     public enum SQLViews
     {

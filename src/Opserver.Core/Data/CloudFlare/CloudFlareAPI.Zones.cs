@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 
-namespace StackExchange.Opserver.Data.Cloudflare
+namespace Opserver.Data.Cloudflare
 {
     public partial class CloudflareAPI
     {

@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public partial class RedisInstance
     {

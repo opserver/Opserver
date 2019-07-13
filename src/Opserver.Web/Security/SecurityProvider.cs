@@ -2,10 +2,10 @@
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Primitives;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Models;
+using Opserver.Data;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Security
+namespace Opserver.Security
 {
     public abstract class SecurityProvider
     {

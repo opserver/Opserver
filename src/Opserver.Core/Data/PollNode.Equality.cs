@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data
+﻿namespace Opserver.Data
 {
     public partial class PollNode
     {

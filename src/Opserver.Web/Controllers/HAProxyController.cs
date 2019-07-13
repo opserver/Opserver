@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.HAProxy;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.HAProxy;
+using Opserver.Data.HAProxy;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.HAProxy;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.HAProxy)]
     public partial class HAProxyController : StatusController<HAProxyModule>

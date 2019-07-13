@@ -7,12 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
+using Opserver.Data.Dashboard;
+using Opserver.Data.SQL;
+using Opserver.Helpers;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class GraphController
     {

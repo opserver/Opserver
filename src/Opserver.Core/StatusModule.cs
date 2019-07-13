@@ -1,10 +1,10 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Dashboard;
+using Opserver.Data;
+using Opserver.Data.Dashboard;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public abstract class StatusModule<T> : StatusModule where T : ModuleSettings, new()
     {

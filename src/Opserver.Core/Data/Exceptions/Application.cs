@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver.Data.Exceptions
+namespace Opserver.Data.Exceptions
 {
     /// <summary>
     /// Represents an application and its store location

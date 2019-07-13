@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Dapper;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public static partial class ExtensionMethods
     {

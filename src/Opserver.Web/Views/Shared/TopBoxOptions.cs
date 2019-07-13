@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Views.Shared
+namespace Opserver.Views.Shared
 {
     public class TopBoxOptions
     {

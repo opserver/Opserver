@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.SQL;
+using Opserver.Data.SQL;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.SQL;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.SQL)]
     public partial class SQLController : StatusController<SQLModule>

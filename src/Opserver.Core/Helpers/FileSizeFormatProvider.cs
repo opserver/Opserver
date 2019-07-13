@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     //No need to reinvent the wheel, this is from https://stackoverflow.com/questions/128618/c-file-size-format-provider
     //Originally from: http://flimflan.com/blog/FileSizeFormatProvider.aspx

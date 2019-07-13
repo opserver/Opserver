@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver
+﻿namespace Opserver
 {
     /// <summary>
     /// From Marc Gravell - every time a split is used you can either allocate an array

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public enum AutomatedBackupPreferences : byte
     {

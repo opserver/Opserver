@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class Theme
     {

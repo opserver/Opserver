@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Jil;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     public partial class BosunDataProvider
     {

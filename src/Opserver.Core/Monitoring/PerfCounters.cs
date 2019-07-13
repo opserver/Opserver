@@ -5,7 +5,7 @@ using System.Linq;
 using System.Management;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Monitoring
+namespace Opserver.Monitoring
 {
     public static class PerfCounters
     {

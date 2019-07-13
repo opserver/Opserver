@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public partial class RedisInfo
     {

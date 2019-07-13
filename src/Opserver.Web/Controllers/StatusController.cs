@@ -1,9 +1,9 @@
 ﻿using System.Net;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public class StatusController<T> : StatusController where T : StatusModule
     {

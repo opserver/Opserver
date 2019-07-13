@@ -1,11 +1,11 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Opserver.Data.HAProxy;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
+using Opserver.Data.HAProxy;
+using Opserver.Helpers;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class HAProxyController
     {

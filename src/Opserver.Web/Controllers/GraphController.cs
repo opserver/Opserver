@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Controllers
+﻿namespace Opserver.Controllers
 {
     public partial class GraphController : StatusController
     {

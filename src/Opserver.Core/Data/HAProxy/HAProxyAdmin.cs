@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using EnumsNET;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     public class HAProxyAdmin
     {

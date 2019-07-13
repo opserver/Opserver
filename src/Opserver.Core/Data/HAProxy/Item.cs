@@ -2,7 +2,7 @@
 using System.Text.RegularExpressions;
 using EnumsNET;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     public class Item : IMonitorStatus
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Html;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class StatusIndicator
     {

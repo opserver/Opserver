@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data.Elastic
+namespace Opserver.Data.Elastic
 {
     public partial class ElasticCluster : PollNode<ElasticModule>, ISearchableNode, IMonitedService
     {

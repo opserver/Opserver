@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using StackExchange.Opserver.Data.Redis;
+using Opserver.Data.Redis;
 
-namespace StackExchange.Opserver.Views.Redis
+namespace Opserver.Views.Redis
 {
     public enum RedisViews
     {

@@ -2,9 +2,9 @@
 using System.Linq;
 using Jil;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using StackExchange.Opserver.Data;
+using Opserver.Data;
 
-namespace StackExchange.Opserver.Helpers.Tag
+namespace Opserver.Helpers.Tag
 {
     [HtmlTargetElement("poll", TagStructure = TagStructure.WithoutEndTag)]
     public class PollTagHelper : TagHelper
@@ -63,12 +63,12 @@ namespace StackExchange.Opserver.Helpers.Tag
 //{
 //    if (caches != null)
 //    {
-//        <a data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@Json.Encode(caches.Where(i => i != null).Select(i => i.Key))"></a>
+//        <a data-type="@Opserver.Data.Cache.TimedCacheKey" data-uk="@Json.Encode(caches.Where(i => i != null).Select(i => i.Key))"></a>
 //    }
 //}
 //@helper PollNow(LightweightCache cache)
 //{
-//    <a data-type="@StackExchange.Opserver.Data.Cache.TimedCacheKey" data-uk="@cache.Key"></a>
+//    <a data-type="@Opserver.Data.Cache.TimedCacheKey" data-uk="@cache.Key"></a>
 //}
         }
     }

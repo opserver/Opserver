@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Opserver.Data.Redis;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
+using Opserver.Data.Redis;
+using Opserver.Helpers;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class RedisController
     {

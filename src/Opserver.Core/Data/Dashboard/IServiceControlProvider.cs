@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     public interface IServiceControlProvider
     {

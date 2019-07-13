@@ -38,7 +38,7 @@
     @dbs.GetWorstStatus().IconSpan() @(dbs?.Count.Pluralize("Database") ?? "No Databases") on @i.Name:
     @Poll.Now(i, dbCache)
 </h5>
-<partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Cache = i.Databases, Name = i.Name + " databases" })" />
+<partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Cache = i.Databases, Name = i.Name + " databases" })" />
 @if (dbs?.Any() ?? false)
 {
     <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-databases-table">

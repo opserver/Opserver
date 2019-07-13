@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using Jil;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Dashboard;
-using StackExchange.Opserver.Data.SQL;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Views.Shared;
+using Opserver.Data;
+using Opserver.Data.Dashboard;
+using Opserver.Data.SQL;
+using Opserver.Helpers;
+using Opserver.Views.Shared;
 using System.Text;
 using EnumsNET;
 using Microsoft.AspNetCore.Routing;
@@ -15,7 +15,7 @@ using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Http;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     /// <summary>
     /// Provides a centralized place for common functionality exposed via extension methods.

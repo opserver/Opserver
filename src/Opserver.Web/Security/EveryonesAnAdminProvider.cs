@@ -1,6 +1,6 @@
-﻿using StackExchange.Opserver.Models;
+﻿using Opserver.Models;
 
-namespace StackExchange.Opserver.Security
+namespace Opserver.Security
 {
     /// <summary>
     /// Does this REALLY need an explanation?

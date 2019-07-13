@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class ExceptionsSettings : ModuleSettings
     {

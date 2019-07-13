@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public class OpserverConfigException : Exception
     {

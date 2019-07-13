@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using StackExchange.Opserver.Data.Dashboard.Providers;
+using Opserver.Data.Dashboard.Providers;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     public partial class Node : IMonitorStatus, ISearchableNode
     {

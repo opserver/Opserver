@@ -6,9 +6,9 @@ using System.Net;
 using System.Threading.Tasks;
 using Jil;
 using StackExchange.Profiling;
-using static StackExchange.Opserver.Data.Dashboard.Providers.BosunMetric;
+using static Opserver.Data.Dashboard.Providers.BosunMetric;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     public partial class BosunDataProvider : DashboardDataProvider<BosunSettings>
     {

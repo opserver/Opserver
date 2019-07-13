@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data.Elastic
+namespace Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {

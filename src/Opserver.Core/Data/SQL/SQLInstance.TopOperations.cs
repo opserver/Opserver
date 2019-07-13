@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
 using Dapper;
-using StackExchange.Opserver.Data.SQL.QueryPlans;
+using Opserver.Data.SQL.QueryPlans;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance
     {

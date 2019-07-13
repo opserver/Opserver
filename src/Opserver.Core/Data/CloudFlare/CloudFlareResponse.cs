@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data.Cloudflare
+namespace Opserver.Data.Cloudflare
 {
     public class CloudflareResult<T> : CloudflareResult
     {

@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
+using Opserver.Data;
+using Opserver.Helpers;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.GlobalAdmin | Roles.InternalRequest)]
     public class DataController : StatusController

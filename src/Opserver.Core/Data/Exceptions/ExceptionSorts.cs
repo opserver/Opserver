@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data.Exceptions
+﻿namespace Opserver.Data.Exceptions
 {
     public enum ExceptionSorts
     {

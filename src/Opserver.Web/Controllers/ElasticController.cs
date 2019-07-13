@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Elastic;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Elastic;
+using Opserver.Data.Elastic;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.Elastic;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.Elastic)]
     public class ElasticController : StatusController<ElasticModule>

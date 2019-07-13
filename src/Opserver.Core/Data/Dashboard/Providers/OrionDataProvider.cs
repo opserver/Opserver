@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     public class OrionDataProvider : DashboardDataProvider<OrionSettings>
     {

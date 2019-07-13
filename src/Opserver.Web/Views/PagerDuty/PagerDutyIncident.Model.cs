@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data.PagerDuty;
+using Opserver.Data.PagerDuty;
 
-namespace StackExchange.Opserver.Views.PagerDuty
+namespace Opserver.Views.PagerDuty
 {
     public class PagerDutyIncidentModel
     {

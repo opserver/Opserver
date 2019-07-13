@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using StackExchange.Opserver.Data.Exceptions;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Exceptions;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Data.Jira;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Authorization;
+using Opserver.Data.Exceptions;
+using Opserver.Data.Jira;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.Exceptions;
+using StackExchange.Exceptional;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.Exceptions)]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
@@ -91,7 +92,7 @@ namespace StackExchange.Opserver.Controllers
             return result;
         }
 
-        private ExceptionsModel GetModel(List<Exceptional.Error> errors)
+        private ExceptionsModel GetModel(List<Error> errors)
         {
             var group = CurrentGroup.HasValue() ? CurrentStore.ApplicationGroups.Find(g => g.Name == CurrentGroup) : null;
             var log = group != null && CurrentLog.HasValue() ? group.Applications.Find(a => a.Name == CurrentLog) : null;

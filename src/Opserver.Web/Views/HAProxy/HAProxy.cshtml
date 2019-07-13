@@ -58,6 +58,6 @@ Error: @(erroring.Proxies.ErrorMessage)</text>
         </ul>
     }
     
-    <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Nodes = allGroups.SelectMany(g => g.Instances), Name = "HAProxy" })" />
+    <partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Nodes = allGroups.SelectMany(g => g.Instances), Name = "HAProxy" })" />
 </div>
 @RenderBody()

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class Issue<T> : Issue where T : IMonitorStatus
     {

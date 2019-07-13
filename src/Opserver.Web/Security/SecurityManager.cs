@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Security
+namespace Opserver.Security
 {
     public class SecurityManager
     {

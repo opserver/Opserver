@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data.HAProxy
+﻿namespace Opserver.Data.HAProxy
 {
     public class Server : Item
     {

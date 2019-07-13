@@ -1,14 +1,14 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Data.PagerDuty;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.PagerDuty;
+using Opserver.Data.PagerDuty;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.PagerDuty;
 using System;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.PagerDuty)]
     public partial class PagerDutyController : StatusController<PagerDutyModule>

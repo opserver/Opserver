@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver.Data.Cloudflare
+namespace Opserver.Data.Cloudflare
 {
     public partial class CloudflareAPI
     {

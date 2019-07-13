@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jil;
 
-namespace StackExchange.Opserver.Data.Cloudflare
+namespace Opserver.Data.Cloudflare
 {
     public partial class CloudflareAPI : PollNode<CloudflareModule>
     {

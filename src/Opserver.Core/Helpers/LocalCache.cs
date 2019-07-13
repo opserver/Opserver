@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Caching;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public class LocalCache
     {

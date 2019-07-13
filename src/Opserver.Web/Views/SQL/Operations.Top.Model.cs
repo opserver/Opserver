@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Html;
-using StackExchange.Opserver.Data.SQL;
-using static StackExchange.Opserver.Data.SQL.SQLInstance.TopSearchOptions;
+using Opserver.Data.SQL;
+using static Opserver.Data.SQL.SQLInstance.TopSearchOptions;
 
-namespace StackExchange.Opserver.Views.SQL
+namespace Opserver.Views.SQL
 {
     public class OperationsTopModel : DashboardModel
     {

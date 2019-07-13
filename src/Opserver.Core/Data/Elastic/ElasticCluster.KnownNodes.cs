@@ -6,9 +6,9 @@ using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
-using StackExchange.Opserver.Helpers;
+using Opserver.Helpers;
 
-namespace StackExchange.Opserver.Data.Elastic
+namespace Opserver.Data.Elastic
 {
     public partial class ElasticCluster
     {

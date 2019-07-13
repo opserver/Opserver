@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Data.Dashboard
+namespace Opserver.Data.Dashboard
 {
     public class Application
     {

@@ -9,7 +9,7 @@ using StackExchange.Profiling;
 using Jil;
 using System.Diagnostics;
 
-namespace StackExchange.Opserver.Data.PagerDuty
+namespace Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI : PollNode<PagerDutyModule>
     {

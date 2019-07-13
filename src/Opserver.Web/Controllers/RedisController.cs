@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data.Redis;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Models;
-using StackExchange.Opserver.Views.Redis;
+using Opserver.Data.Redis;
+using Opserver.Helpers;
+using Opserver.Models;
+using Opserver.Views.Redis;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     [OnlyAllow(Roles.Redis)]
     public partial class RedisController : StatusController<RedisModule>

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public static partial class ExtensionMethods
     {

@@ -4,10 +4,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using StackExchange.Opserver.Data.SQL.QueryPlans;
+using Opserver.Data.SQL.QueryPlans;
 using Dapper;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance
     {

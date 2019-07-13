@@ -3,7 +3,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Serialization;
 
-namespace StackExchange.Opserver.Data.SQL.QueryPlans
+namespace Opserver.Data.SQL.QueryPlans
 {
     public partial class ShowPlanXML
     {

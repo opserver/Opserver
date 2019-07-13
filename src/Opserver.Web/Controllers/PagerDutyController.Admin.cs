@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using StackExchange.Opserver.Data.PagerDuty;
+using Opserver.Data.PagerDuty;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public partial class PagerDutyController
     {

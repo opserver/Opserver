@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Data.Cloudflare;
+using Opserver.Data;
+using Opserver.Data.Cloudflare;
 
-namespace StackExchange.Opserver.Views.Cloudflare
+namespace Opserver.Views.Cloudflare
 {
     public class DNSModel : DashboardModel
     {

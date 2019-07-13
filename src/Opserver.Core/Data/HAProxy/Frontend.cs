@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data.HAProxy
+﻿namespace Opserver.Data.HAProxy
 {
     /// <summary>
     /// Represents a HAProxy Frontend for a proxy

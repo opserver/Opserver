@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace StackExchange.Opserver.Views.Dashboard
+namespace Opserver.Views.Dashboard
 {
     public enum CurrentStatusTypes
     {

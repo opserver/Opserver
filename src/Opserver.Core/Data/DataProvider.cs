@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using StackExchange.Opserver.Data.SQL;
+using Opserver.Data.SQL;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public static class DataProvider
     {

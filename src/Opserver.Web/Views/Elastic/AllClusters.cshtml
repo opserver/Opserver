@@ -22,7 +22,7 @@
 <div class="js-refresh" data-name="elastic-overview">
     @if (knownClusters.Count == 0)
     {
-        <partial name="PollInfo" model="@(new StackExchange.Opserver.Views.PollInfoModel { Nodes = knownClusters, Name = "any Elastic clusters" })" />
+        <partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Nodes = knownClusters, Name = "any Elastic clusters" })" />
     }
     else
     {

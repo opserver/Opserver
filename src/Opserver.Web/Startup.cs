@@ -6,12 +6,12 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Helpers;
-using StackExchange.Opserver.Security;
+using Opserver.Data;
+using Opserver.Helpers;
+using Opserver.Security;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class Startup
     {

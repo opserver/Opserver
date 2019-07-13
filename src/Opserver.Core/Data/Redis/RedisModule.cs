@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Options;
-using static StackExchange.Opserver.Data.Redis.RedisInfo;
+using static Opserver.Data.Redis.RedisInfo;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public class RedisModule : StatusModule<RedisSettings>
     {

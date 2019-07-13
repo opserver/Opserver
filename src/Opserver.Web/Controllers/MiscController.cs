@@ -1,10 +1,10 @@
-﻿using StackExchange.Opserver.Views.Shared;
+﻿using Opserver.Views.Shared;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
 
-namespace StackExchange.Opserver.Controllers
+namespace Opserver.Controllers
 {
     public class MiscController : StatusController
     {

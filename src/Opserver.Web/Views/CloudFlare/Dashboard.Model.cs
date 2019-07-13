@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Views.Cloudflare
+﻿namespace Opserver.Views.Cloudflare
 {
     public class DashboardModel
     {

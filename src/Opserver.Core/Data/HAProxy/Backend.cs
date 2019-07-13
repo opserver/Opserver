@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     /// <summary>
     /// Represents an HAProxy backend for a proxy

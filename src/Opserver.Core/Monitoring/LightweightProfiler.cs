@@ -6,7 +6,7 @@ using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 using StackExchange.Profiling.SqlFormatters;
 
-namespace StackExchange.Opserver.Monitoring
+namespace Opserver.Monitoring
 {
     public class LightweightProfiler : IDbProfiler
     {

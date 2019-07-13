@@ -5,7 +5,7 @@ using System.Linq;
 using System.Management;
 using System.Threading.Tasks;
 
-namespace StackExchange.Opserver.Data.Dashboard.Providers
+namespace Opserver.Data.Dashboard.Providers
 {
     internal partial class WmiDataProvider
     {

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class Connection
     {

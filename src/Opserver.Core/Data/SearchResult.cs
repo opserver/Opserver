@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class SearchResult<T> : SearchResult
     {

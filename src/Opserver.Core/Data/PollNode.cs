@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public abstract class PollNode<T> : PollNode where T : StatusModule
     {

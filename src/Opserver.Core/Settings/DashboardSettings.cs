@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public class DashboardSettings : ModuleSettings, INodeSettings
     {

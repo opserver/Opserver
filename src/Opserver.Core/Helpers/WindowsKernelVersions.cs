@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class WindowsKernelVersions
     {

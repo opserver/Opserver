@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Data.Elastic
+namespace Opserver.Data.Elastic
 {
     public partial class ElasticCluster : IIssuesProvider
     {

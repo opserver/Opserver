@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Helpers
+﻿namespace Opserver.Helpers
 {
     /// <summary>
     /// Contains keys for common ViewData collection values

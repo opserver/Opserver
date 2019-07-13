@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <RootNamespace>StackExchange.Opserver</RootNamespace>
-    <AssemblyName>StackExchange.Opserver.Core</AssemblyName>
+    <RootNamespace>Opserver</RootNamespace>
+    <AssemblyName>Opserver.Core</AssemblyName>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>pdbonly</DebugType>

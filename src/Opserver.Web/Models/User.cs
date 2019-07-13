@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
-using StackExchange.Opserver.Security;
+using Opserver.Security;
 
-namespace StackExchange.Opserver.Models
+namespace Opserver.Models
 {
     public class User
     {

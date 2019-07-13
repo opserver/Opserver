@@ -4,7 +4,7 @@ using System.Linq;
 using StackExchange.Profiling;
 using StackExchange.Redis;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     public static class ServerUtils
     {

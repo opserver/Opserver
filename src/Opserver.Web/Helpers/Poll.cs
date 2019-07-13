@@ -2,9 +2,9 @@
 using System.Linq;
 using Jil;
 using Microsoft.AspNetCore.Html;
-using StackExchange.Opserver.Data;
+using Opserver.Data;
 
-namespace StackExchange.Opserver.Helpers
+namespace Opserver.Helpers
 {
     public static class Poll
     {

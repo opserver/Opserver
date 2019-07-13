@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     /// <summary>
     /// Provides optimized access to StringBuilder instances

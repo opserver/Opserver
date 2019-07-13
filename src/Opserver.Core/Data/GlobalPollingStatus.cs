@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class GlobalPollingStatus : IMonitorStatus
     {

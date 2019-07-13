@@ -7,12 +7,12 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using StackExchange.Opserver.Data;
-using StackExchange.Opserver.Helpers;
+using Opserver.Data;
+using Opserver.Helpers;
 using StackExchange.Redis;
 using System.Text;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     /// <summary>
     /// Provides a centralized place for common functionality exposed via extension methods.

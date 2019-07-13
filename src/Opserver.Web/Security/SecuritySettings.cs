@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace StackExchange.Opserver.Security
+namespace Opserver.Security
 {
     public class SecuritySettings
     {

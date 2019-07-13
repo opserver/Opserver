@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using EnumsNET;
 
-namespace StackExchange.Opserver.Data.SQL
+namespace Opserver.Data.SQL
 {
     public partial class SQLInstance
     {

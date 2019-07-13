@@ -1,6 +1,6 @@
-﻿using StackExchange.Opserver.Data;
+﻿using Opserver.Data;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public interface ISearchableNode
     {

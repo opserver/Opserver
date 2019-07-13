@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data.Elastic
+﻿namespace Opserver.Data.Elastic
 {
     public static class ShardStates
     {

@@ -3,10 +3,10 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Web;
 using StackExchange.Exceptional;
-using StackExchange.Opserver.Data.Exceptions;
-using StackExchange.Opserver.Models;
+using Opserver.Data.Exceptions;
+using Opserver.Models;
 
-namespace StackExchange.Opserver.Views.Exceptions
+namespace Opserver.Views.Exceptions
 {
     public class ExceptionsModel
     {

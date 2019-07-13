@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StackExchange.Opserver.Data.Redis
+namespace Opserver.Data.Redis
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class RedisInfoPropertyAttribute : Attribute

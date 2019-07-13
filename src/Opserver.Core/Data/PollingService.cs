@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace StackExchange.Opserver.Data
+namespace Opserver.Data
 {
     public class PollingService : IHostedService
     {

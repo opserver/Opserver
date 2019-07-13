@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jil;
 
-namespace StackExchange.Opserver.Data.Jira
+namespace Opserver.Data.Jira
 {
     public class JiraClient
     {
@@ -236,7 +236,7 @@ namespace StackExchange.Opserver.Data.Jira
         public JsonRestClient(string baseUrl)
         {
             if (baseUrl.IsNullOrEmpty())
-                throw new TypeInitializationException("StackExchange.Opserver.Data.Jira.JsonService", new ApplicationException("BaseUrl is required"));
+                throw new TypeInitializationException("Opserver.Data.Jira.JsonService", new ApplicationException("BaseUrl is required"));
 
             BaseUrl = baseUrl.Trim().TrimEnd(StringSplits.ForwardSlash) + "/";
         }

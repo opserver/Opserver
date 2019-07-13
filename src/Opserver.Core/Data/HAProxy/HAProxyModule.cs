@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     public class HAProxyModule : StatusModule<HAProxySettings>
     {

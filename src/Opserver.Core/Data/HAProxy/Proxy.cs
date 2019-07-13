@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver.Data.HAProxy
+namespace Opserver.Data.HAProxy
 {
     /// <summary>
     /// Represents the a single proxy instance in HAProxy including the Frontends, Servers, and Backends currently configured.

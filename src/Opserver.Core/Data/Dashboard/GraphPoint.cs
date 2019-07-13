@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Data.Dashboard
+﻿namespace Opserver.Data.Dashboard
 {
     public interface IGraphPoint
     {

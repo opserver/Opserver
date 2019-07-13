@@ -1,4 +1,4 @@
-﻿namespace StackExchange.Opserver.Views.Login
+﻿namespace Opserver.Views.Login
 {
     public class LoginModel
     {

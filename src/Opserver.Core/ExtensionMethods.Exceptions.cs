@@ -2,7 +2,7 @@
 using Jil;
 using StackExchange.Exceptional;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public static partial class ExtensionMethods
     {

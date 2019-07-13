@@ -4,10 +4,10 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security;
 using System.Threading;
-using StackExchange.Opserver.Models;
+using Opserver.Models;
 using StackExchange.Profiling;
 
-namespace StackExchange.Opserver.Security
+namespace Opserver.Security
 {
     public class ActiveDirectoryProvider : SecurityProvider
     {

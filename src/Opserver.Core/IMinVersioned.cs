@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace StackExchange.Opserver
+namespace Opserver
 {
     public interface IMinVersioned
     {
