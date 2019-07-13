@@ -26,7 +26,24 @@
     "clusters": [
       {
         "name": "Local",
-        "nodes": ["localhost"]
+        "nodes": [ "localhost" ]
+      }
+    ]
+  },
+  /* Configuration for the Exceptions dashboard */
+  "Exceptions": {
+    "stores": [
+      {
+        "name": "Local",
+        "queryTimeoutMs": 2000,
+        "connectionString": "Server=.;Database=Local.Exceptions;Integrated Security=SSPI;"
+      }
+    ],
+    "stackTraceReplacements": [
+      {
+        "name": "github",
+        "pattern": "(?<= in )https?://raw.githubusercontent.com/([^/]+/)([^/]+/)([^/]+/)(.*?):line (\\d+)",
+        "replacement": "<a href=\"https://github.com/$1$2blob/$3$4#L$5\">$4:line $5</a>"
       }
     ]
   }
