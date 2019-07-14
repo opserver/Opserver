@@ -29,7 +29,7 @@
         return null;
     }
 
-    string CommonVersionHeader() => Model.AllVersionsMatch ? "(Version " + Model.CommonVersion + ")" : null;
+    string CommonVersionHeader() => Model.AllVersionsMatch ? "(Version " + (Model.CommonVersion?.ToString() ?? "Unknown") + ")" : null;
     void SectionHeader(List<RedisInstance> instances, string label, bool defaultHeaders = true, bool countChain = false)
     {
         var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllSlavesInChain())).ToList() : instances;
