@@ -1,5 +1,6 @@
 @using Opserver.Controllers
 @using Opserver.Data.Elastic
+@using Opserver.Views.Shared.Guages
 @inject ElasticModule Module
 @{
     var all = Module.Clusters;
@@ -8,13 +9,13 @@
     <div class="panel-heading">@all.GetWorstStatus().IconSpan() Elasticsearch</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Cluster", all))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Cluster", all))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Index", all.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>())))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Index", all.SelectMany(c => c.HealthStatus.Data?.Indexes?.Values ?? Enumerable.Empty<ElasticCluster.ClusterHealthInfo.IndexHealthInfo>())))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Shard", all.SelectMany(c => c.AllShards)))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Shard", all.SelectMany(c => c.AllShards)))" />
         </div>
 
         <table class="table table-super-condensed table-striped col-md-12">

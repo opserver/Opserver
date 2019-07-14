@@ -1,7 +1,8 @@
 ﻿@using System.Globalization
 @using Opserver
 @using Opserver.Data
-@model (string Label, IEnumerable<IMonitorStatus> Items)
+@using Opserver.Views.Shared.Guages
+@model CircleModel
 @{
     const double Full = 45 * 2 * Math.PI;
     string FullStr = Full.ToString(CultureInfo.InvariantCulture);

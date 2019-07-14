@@ -1,4 +1,5 @@
 ﻿@using Opserver.Data.SQL
+@using Opserver.Views.Shared.Guages
 @inject SQLModule Sql
 @{
     var all = Sql.AllInstances;
@@ -7,13 +8,13 @@
     <div class="panel-heading">@all.GetWorstStatus().IconSpan() SQL</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Instance", all))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Instance", all))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("AG", Sql.Clusters.SelectMany(c => c.AvailabilityGroups)))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("AG", Sql.Clusters.SelectMany(c => c.AvailabilityGroups)))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Database", all.SelectMany(i => i.Databases.SafeData(true))))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Database", all.SelectMany(i => i.Databases.SafeData(true))))" />
         </div>
         <table class="table table-super-condensed table-striped col-md-12">
             @foreach (var c in Sql.Clusters)
