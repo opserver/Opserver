@@ -27,22 +27,15 @@ namespace Opserver
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Register Opserver.Core config and polling
+            services.AddCoreOpserverServices(_configuration);
+
             // Preview 6 workaround, see https://github.com/aspnet/AspNetCore/issues/11246#issuecomment-502381495
             services.Add(
                 new ServiceDescriptor(
                     typeof(IActionResultExecutor<JsonResult>),
                     Type.GetType("Microsoft.AspNetCore.Mvc.Infrastructure.SystemTextJsonResultExecutor, Microsoft.AspNetCore.Mvc.Core"),
                     ServiceLifetime.Singleton));
-
-            services.Configure<OpserverSettings>(_configuration);
-            services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
-            services.AddSingleton<AddressCache>();
-
-            // Add the polling service as a concrete singleton and as a IHostedService so it starts, etc.
-            services.AddSingleton<PollingService>()
-                    .AddSingleton<IHostedService>(x => x.GetRequiredService<PollingService>());
-            // Register all the modules
-            services.AddStatusModules(_configuration);
 
             services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
