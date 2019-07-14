@@ -12,7 +12,9 @@ namespace Opserver.Controllers
     [OnlyAllow(Roles.InternalRequest | Roles.ApiRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
-        public ApiController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private PollingService Poller { get; }
+
+        public ApiController(IOptions<OpserverSettings> _settings, PollingService poller) : base(_settings) => Poller = poller;
 
         private Jil.Options JilOptions =>
             Request.Query.ContainsKey("pretty")
@@ -22,7 +24,8 @@ namespace Opserver.Controllers
         [Route("api/node/roles")]
         public ActionResult NodeRoles(string node)
         {
-            return Json(new NodeResults(node), JilOptions);
+            var roles = Poller.GetNodeRoles(node).ToList();
+            return Json(new NodeResults(roles), JilOptions);
         }
 
         [Route("api/node/enable"), HttpPost]
@@ -30,7 +33,7 @@ namespace Opserver.Controllers
         {
             if (!Current.User.Is(Roles.ApiRequest)) return JsonError("Invalid API key");
 
-            await NodeRole.EnableAllAsync(node);
+            await Poller.EnableAllNodeRolesAsync(node);
             return NodeRoles(node);
         }
 
@@ -39,7 +42,7 @@ namespace Opserver.Controllers
         {
             if (!Current.User.Is(Roles.ApiRequest)) return JsonError("Invalid API key");
 
-            await NodeRole.DisableAllAsync(node);
+            await Poller.DisableAllNodeRolesAsync(node);
             return NodeRoles(node);
         }
 
@@ -49,9 +52,9 @@ namespace Opserver.Controllers
             public int Inactive { get; set; }
             public List<NodeRole> Roles { get; set; }
 
-            public NodeResults(string node)
+            public NodeResults(List<NodeRole> roles)
             {
-                Roles = NodeRole.Get(node).ToList();
+                Roles = roles;
                 foreach (var r in Roles)
                 {
                     if (r.Active) Active++;

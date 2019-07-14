@@ -67,14 +67,7 @@ namespace Opserver.Data
         /// <returns>Whether the node was added to the list of global pollers</returns>
         public bool TryAddToGlobalPollers()
         {
-            AddedToGlobalPollers = GetParentModule().Poller.TryAdd(this);
-            RegisterProviders();
-            return AddedToGlobalPollers;
-        }
-
-        private void RegisterProviders()
-        {
-            (this as INodeRoleProvider)?.Register();
+            return AddedToGlobalPollers = GetParentModule().Poller.TryAdd(this);
         }
 
         private readonly object _monitorStatusLock = new object();

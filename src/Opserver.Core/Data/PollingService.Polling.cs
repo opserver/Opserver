@@ -35,6 +35,10 @@ namespace Opserver.Data
                     {
                         IssueProviders.Add(iProvider);
                     }
+                    if (node is INodeRoleProvider nrProvider)
+                    {
+                        NodeRoleProviders.Add(nrProvider);
+                    }
                 }
                 return success;
             }
