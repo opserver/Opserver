@@ -175,22 +175,10 @@ namespace Opserver
         public static string GetReasonSummary(this IEnumerable<IMonitorStatus> items) =>
             string.Join(", ", items.WithIssues().Select(i => i.MonitorStatusReason));
 
-        public static MonitorStatus GetWorstStatus(this IEnumerable<IMonitorStatus> ims, string cacheKey = null, TimeSpan? duration = null)
-        {
-            duration = duration ?? 5.Seconds();
-            if (ims == null)
-                return MonitorStatus.Unknown;
-            MonitorStatus? result = null;
-            if (cacheKey.HasValue())
-                result = Current.LocalCache.Get<MonitorStatus?>(cacheKey);
-            if (result == null)
-            {
-                result = GetWorstStatus(ims.Where(i => i != null).Select(i => i.MonitorStatus));
-                if (cacheKey.HasValue())
-                    Current.LocalCache.Set(cacheKey, result, duration);
-            }
-            return result.Value;
-        }
+        public static MonitorStatus GetWorstStatus(this IEnumerable<IMonitorStatus> ims) =>
+            (ims == null)
+            ? MonitorStatus.Unknown
+            : GetWorstStatus(ims.Where(i => i != null).Select(i => i.MonitorStatus));
 
         public static MonitorStatus GetWorstStatus(this IEnumerable<MonitorStatus> ims) => ims?.OrderByDescending(i => i).FirstOrDefault() ?? MonitorStatus.Unknown;
 

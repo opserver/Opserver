@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver.Data.SQL
 {
@@ -29,7 +30,7 @@ namespace Opserver.Data.SQL
                 .SelectMany(n => n.AvailabilityGroups.Data?.Where(agMatch) ?? Enumerable.Empty<SQLNode.AGInfo>());
         }
 
-        public MonitorStatus MonitorStatus => Nodes.GetWorstStatus("SQLCluster-" + Name);
+        public MonitorStatus MonitorStatus => Nodes.GetWorstStatus();
         public string MonitorStatusReason => MonitorStatus == MonitorStatus.Good ? null : Nodes.GetReasonSummary();
 
         public SQLNode.AGClusterState ClusterStatus =>
@@ -38,12 +39,12 @@ namespace Opserver.Data.SQL
         public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
         public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
 
-        public SQLCluster(SQLModule module, SQLSettings.Cluster cluster)
+        public SQLCluster(SQLModule module, SQLSettings.Cluster cluster, IMemoryCache cache)
         {
             Module = module;
             Settings = cluster;
             Nodes = cluster.Nodes
-                           .Select(n => new SQLNode(module, this, n))
+                           .Select(n => new SQLNode(module, this, n, cache))
                            .Where(n => n.TryAddToGlobalPollers())
                            .ToList();
             RefreshInterval = (cluster.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds();

@@ -10,14 +10,16 @@ namespace Opserver.Data.Dashboard
 {
     public class DashboardModule : StatusModule<DashboardSettings>
     {
+        private AddressCache AddressCache { get; }
         public override string Name => "Dashboard";
         public override bool Enabled { get; }
 
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
-        public DashboardModule(IOptions<DashboardSettings> settings) : base(settings)
+        public DashboardModule(IOptions<DashboardSettings> settings, AddressCache addressCache) : base(settings)
         {
+            AddressCache = addressCache;
             var providers = settings.Value.Providers;
             if (providers?.Any() != true)
             {
@@ -82,7 +84,7 @@ namespace Opserver.Data.Dashboard
                 var nodes = GetNodesByIP(addr).ToList();
                 if (nodes.Count == 1) return nodes[0].PrettyName;
             }
-            return AppCache.GetHostName(hostOrIp);
+            return AddressCache.GetHostName(hostOrIp);
         }
 
         public IEnumerable<Node> GetNodesByIP(IPAddress ip) =>

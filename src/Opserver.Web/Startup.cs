@@ -36,6 +36,7 @@ namespace Opserver
 
             services.Configure<OpserverSettings>(_configuration);
             services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
+            services.AddSingleton<AddressCache>();
             services.AddStatusModules(_configuration);
             services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)

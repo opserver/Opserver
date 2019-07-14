@@ -4,6 +4,7 @@ using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security;
 using System.Threading;
+using Microsoft.Extensions.Caching.Memory;
 using Opserver.Models;
 using StackExchange.Profiling;
 
@@ -11,14 +12,16 @@ namespace Opserver.Security
 {
     public class ActiveDirectoryProvider : SecurityProvider
     {
+        private IMemoryCache Cache { get; }
         public override string ProviderName => "Active Directory";
         private HashSet<string> GroupNames { get; } = new HashSet<string>();
         private List<string> Servers { get; }
         private string AuthUser { get; }
         private string AuthPassword { get; }
 
-        public ActiveDirectoryProvider(SecuritySettings settings) : base(settings)
+        public ActiveDirectoryProvider(SecuritySettings settings, IMemoryCache cache) : base(settings)
         {
+            Cache = cache;
             if (settings.Server.HasValue()) Servers = settings.Server.Split(StringSplits.Comma_SemiColon).ToList();
             AuthUser = settings.AuthUser;
             AuthPassword = settings.AuthPassword;
@@ -48,14 +51,14 @@ namespace Opserver.Security
             GroupNames.Clear();
             foreach (var g in toClear)
             {
-                Current.LocalCache.Remove("ADMembers-" + g);
+                Cache.Remove("ADMembers-" + g);
             }
         }
 
         public List<string> GetGroupMembers(string groupName)
         {
             GroupNames.Add(groupName);
-            return Current.LocalCache.GetSet<List<string>>("ADMembers-" + groupName,
+            return Cache.GetSet<List<string>>("ADMembers-" + groupName,
                 (old, _) =>
                 {
                     using (MiniProfiler.Current.Step("Getting members for " + groupName))

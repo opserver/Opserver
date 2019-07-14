@@ -1,14 +1,22 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver.Helpers
 {
-    public static class AppCache
+    public class AddressCache
     {
-        public static List<IPAddress> GetHostAddresses(string hostOrIp)
+        public IMemoryCache MemCache { get; }
+
+        public AddressCache(IMemoryCache cache)
         {
-            return Current.LocalCache.GetSet<List<IPAddress>>("host-ip-cache-" + hostOrIp, (_, __) =>
+            MemCache = cache;
+        }
+
+        public List<IPAddress> GetHostAddresses(string hostOrIp)
+        {
+            return MemCache.GetSet<List<IPAddress>>("host-ip-cache-" + hostOrIp, (_, __) =>
                 {
                     try
                     {
@@ -23,9 +31,9 @@ namespace Opserver.Helpers
                 }, 10.Hours(), 24.Hours());
         }
 
-        public static string GetHostName(string ip)
+        public string GetHostName(string ip)
         {
-            return Current.LocalCache.GetSet<string>("host-name-cache-" + ip, (_, __) =>
+            return MemCache.GetSet<string>("host-name-cache-" + ip, (_, __) =>
             {
                 try
                 {

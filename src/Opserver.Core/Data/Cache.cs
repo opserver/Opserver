@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
@@ -238,12 +239,12 @@ namespace Opserver.Data
         public string ErrorMessage => Error?.Message + (Error?.InnerException != null ? "\n" + Error.InnerException.Message : "");
 
         // Temp: all async when views can be in MVC Core
-        public static LightweightCache<T> Get(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
+        public static LightweightCache<T> Get(IMemoryCache cache, string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
         {
             using (MiniProfiler.Current.Step("LightweightCache: " + key))
             {
                 // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
-                return Current.LocalCache.GetSet<LightweightCache<T>>(key, (_, __) =>
+                return cache.GetSet<LightweightCache<T>>(key, (_, __) =>
                 {
                     var tc = new LightweightCache<T>() { Key = key };
                     try
@@ -369,21 +370,10 @@ namespace Opserver.Data
         }
 
         /// <summary>
-        /// Gets a cache stored in LocalCache by key...these are not polled and expire when stale.
-        /// </summary>
-        /// <typeparam name="T">The type this cache contains.</typeparam>
-        /// <param name="key">The cache key to use for this cache.</param>
-        /// <param name="getData">The getter for this cache.</param>
-        /// <param name="duration">The duration to cache results for.</param>
-        /// <param name="staleDuration">The duration to serve stale results for after expiration (which a background refresh happens).</param>
-        public static LightweightCache<T> GetTimedCache<T>(string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration) where T : class
-            => LightweightCache<T>.Get(key, getData, duration, staleDuration);
-
-        /// <summary>
         /// Purge an existing cache from storage, thereby forcing a fresh fetch next time.
         /// </summary>
         /// <param name="key">The key to purge.</param>
-        public static void Purge(string key) => Current.LocalCache.Remove(key);
+        public static void Purge(string key) => PollingEngine.MemCache.Remove(key);
 
         public const string TimedCacheKey = "TimedCache";
     }

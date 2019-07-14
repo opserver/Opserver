@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Opserver.Helpers;
 using static Opserver.Data.Redis.RedisInfo;
 
 namespace Opserver.Data.Redis
@@ -19,10 +21,10 @@ namespace Opserver.Data.Redis
 
         private readonly HashSet<string> HostNames;
 
-        public RedisModule(IOptions<RedisSettings> settings) : base(settings)
+        public RedisModule(IOptions<RedisSettings> settings, IMemoryCache cache, AddressCache addressCache) : base(settings)
         {
-            Connections = LoadRedisConnections(settings.Value);
-            Instances = Connections.Select(rci => new RedisInstance(this, rci))
+            Connections = LoadRedisConnections(settings.Value, addressCache);
+            Instances = Connections.Select(rci => new RedisInstance(this, rci, cache))
                                    .Where(rsi => rsi.TryAddToGlobalPollers())
                                    .ToList();
 
@@ -41,7 +43,7 @@ namespace Opserver.Data.Redis
         public override MonitorStatus MonitorStatus => Instances.GetWorstStatus();
         public override bool IsMember(string node) => HostNames.Contains(node);
 
-        private List<RedisConnectionInfo> LoadRedisConnections(RedisSettings settings)
+        private List<RedisConnectionInfo> LoadRedisConnections(RedisSettings settings, AddressCache addressCache)
         {
             var result = new List<RedisConnectionInfo>();
             var defaultServerInstances = settings.Defaults.Instances;
@@ -55,13 +57,13 @@ namespace Opserver.Data.Redis
                 // Add instances that belong to any servers
                 foreach (var asi in allServerInstances)
                 {
-                    result.Add(new RedisConnectionInfo(server, asi));
+                    result.Add(new RedisConnectionInfo(server, asi, addressCache));
                 }
 
                 // Add instances defined on this server
                 foreach (var si in s.Instances)
                 {
-                    result.Add(new RedisConnectionInfo(server, si));
+                    result.Add(new RedisConnectionInfo(server, si, addressCache));
                 }
 
                 // If we have no instances added at this point, defaults it is!
@@ -69,7 +71,7 @@ namespace Opserver.Data.Redis
                 {
                     foreach (var dsi in defaultServerInstances)
                     {
-                        result.Add(new RedisConnectionInfo(server, dsi));
+                        result.Add(new RedisConnectionInfo(server, dsi, addressCache));
                     }
                 }
             }

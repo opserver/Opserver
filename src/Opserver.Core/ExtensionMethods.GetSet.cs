@@ -2,12 +2,13 @@
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using Opserver.Helpers;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver
 {
     public static partial class ExtensionMethods
     {
+        private static readonly object _syncLock = new object();
         private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new ConcurrentDictionary<string, object>();
         private static readonly ConcurrentDictionary<string, SemaphoreSlim> _getSetSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
 
@@ -17,8 +18,38 @@ namespace Opserver
             public T Data { get; set; }
         }
 
+        /// <summary>
+        /// A context passed to GetSet methods, in case there is some context we want here later.
+        /// </summary>
+        public class MicroContext : IDisposable
+        {
+            void IDisposable.Dispose() { }
+        }
+
+        /// <summary>
+        /// Sets a value in cache *only if it's not already there*.
+        /// Note: this requires all competition to flow through the same method (as it uses a lock specific to this path).
+        /// </summary>
+        /// <typeparam name="T">The type to insert into cache.</typeparam>
+        /// <param name="cache">The cache to put the value in.</param>
+        /// <param name="key">The key in cache to use.</param>
+        /// <param name="val">The value to insert.</param>
+        /// <returns>True if the value was inserted (not already present), false if it already existed.</returns>
+        public static bool SetNXSync<T>(this IMemoryCache cache, string key, T val)
+        {
+            lock (_syncLock)
+            {
+                if (cache.Get<T>(key).Equals(default(T)))
+                {
+                    cache.Set(key, val);
+                    return true;
+                }
+                return false;
+            }
+        }
+
         // return true if this caller won the race to load whatever would go at key
-        private static bool GotCompeteLock(LocalCache cache, string key)
+        private static bool GotCompeteLock(IMemoryCache cache, string key)
         {
             while (true)
             {
@@ -43,7 +74,7 @@ namespace Opserver
         }
 
         // called by a winner of CompeteToLoad, to make it so the next person to call CompeteToLoad will get true
-        private static void ReleaseCompeteLock(LocalCache cache, string key) => cache.Remove(key + "-cload");
+        private static void ReleaseCompeteLock(IMemoryCache cache, string key) => cache.Remove(key + "-cload");
 
         private static SemaphoreSlim GetNullSemaphore(ref SemaphoreSlim semaphore, string key)
         {
@@ -74,7 +105,7 @@ namespace Opserver
         /// <param name="lookup">Refreshes the data if necessary, passing the old data if we have it.</param>
         /// <param name="duration">The time to cache the data, before it's considered stale.</param>
         /// <param name="staleDuration">The time available to serve stale data, while a background fetch is performed.</param>
-        public static T GetSet<T>(this LocalCache cache, string key, Func<T, MicroContext, T> lookup, TimeSpan duration, TimeSpan staleDuration)
+        public static T GetSet<T>(this IMemoryCache cache, string key, Func<T, MicroContext, T> lookup, TimeSpan duration, TimeSpan staleDuration)
             where T : class
         {
             var possiblyStale = cache.Get<GetSetWrapper<T>>(key);
@@ -164,12 +195,6 @@ namespace Opserver
             return possiblyStale.Data;
         }
 
-        // In case there is some context we want here later...
-        public class MicroContext : IDisposable
-        {
-            void IDisposable.Dispose() { }
-        }
-
         /// <summary>
         /// Asynchronously gets the current data via <paramref name="lookup"/>. 
         /// When data is missing or stale (older than <paramref name="duration"/>), a background refresh is 
@@ -182,7 +207,7 @@ namespace Opserver
         /// <param name="duration">The time to cache the data, before it's considered stale.</param>
         /// <param name="staleDuration">The time available to serve stale data, while a background fetch is performed.</param>
         public static Task<T> GetSetAsync<T>(
-            this LocalCache cache,
+            this IMemoryCache cache,
             string key,
             Func<T, MicroContext, Task<T>> lookup,
             TimeSpan duration,
@@ -198,7 +223,7 @@ namespace Opserver
         }
 
         private static async Task<T> GetSetAsyncFallback<T>(
-            LocalCache cache,
+            IMemoryCache cache,
             string key,
             Func<T, MicroContext, Task<T>> lookup,
             TimeSpan duration,

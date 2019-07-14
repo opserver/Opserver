@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 
 namespace Opserver.Data.SQL
@@ -19,13 +20,13 @@ namespace Opserver.Data.SQL
         /// </summary>
         public List<SQLInstance> AllInstances { get; }
 
-        public SQLModule(IOptions<SQLSettings> settings) : base(settings)
+        public SQLModule(IOptions<SQLSettings> settings, IMemoryCache cache) : base(settings)
         {
             StandaloneInstances = settings.Value.Instances
-                .Select(i => new SQLInstance(this, i))
+                .Select(i => new SQLInstance(this, i, cache))
                 .Where(i => i.TryAddToGlobalPollers())
                 .ToList();
-            Clusters = settings.Value.Clusters.Select(c => new SQLCluster(this, c)).ToList();
+            Clusters = settings.Value.Clusters.Select(c => new SQLCluster(this, c, cache)).ToList();
             AllInstances = StandaloneInstances.Union(Clusters.SelectMany(n => n.Nodes)).ToList();
         }
 

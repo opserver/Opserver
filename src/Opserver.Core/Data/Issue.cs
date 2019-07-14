@@ -41,7 +41,7 @@ namespace Opserver.Data
         {
             using (MiniProfiler.Current.Step(nameof(GetAll)))
             {
-                return Current.LocalCache.GetSet<List<Issue>>("IssuesList", (_, __) =>
+                return PollingEngine.MemCache.GetSet<List<Issue>>("IssuesList", (_, __) =>
                 {
                     var result = new List<Issue>();
                     Parallel.ForEach(Providers, p =>

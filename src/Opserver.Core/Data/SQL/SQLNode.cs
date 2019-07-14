@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver.Data.SQL
 {
@@ -9,7 +10,7 @@ namespace Opserver.Data.SQL
         public override string Description => base.Description ?? Cluster?.Description;
         public SQLCluster Cluster { get; internal set; }
 
-        public SQLNode(SQLModule module, SQLCluster sqlCluster, SQLSettings.Instance node) : base(module, node)
+        public SQLNode(SQLModule module, SQLCluster sqlCluster, SQLSettings.Instance node, IMemoryCache cache) : base(module, node, cache)
         {
             Cluster = sqlCluster;
         }

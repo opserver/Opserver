@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Opserver.Helpers;
 
 namespace Opserver.Data
@@ -12,6 +13,7 @@ namespace Opserver.Data
         private static readonly object _addLock = new object();
         private static readonly object _pollAllLock = new object();
         public static readonly HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
+        private static readonly Action<Func<Task>> _taskRunner = t => Task.Run(t);
 
         private static CancellationToken _cancellationToken;
         private static Thread _globalPollingThread;
@@ -20,12 +22,9 @@ namespace Opserver.Data
         internal static long _activePolls;
         private static DateTime? _lastPollAll;
         private static DateTime _startTime;
-        private static Action<Func<Task>> _taskRunner = t => Task.Run(t);
 
-        public static void Configure(Action<Func<Task>> taskRunner)
-        {
-            _taskRunner = taskRunner;
-        }
+        // TODO: Make this whole class not-static - maybe it merges with PollingService?
+        public static IMemoryCache MemCache { get; private set; }
 
         /// <summary>
         /// Adds a node to the global polling list ONLY IF IT IS NEW
@@ -53,8 +52,9 @@ namespace Opserver.Data
         /// <summary>
         /// What do you think it does?
         /// </summary>
-        public static void StartPolling(CancellationToken cancellationToken)
+        public static void StartPolling(IMemoryCache cache, CancellationToken cancellationToken)
         {
+            MemCache = cache;
             _cancellationToken = cancellationToken;
             _startTime = DateTime.UtcNow;
             _globalPollingThread = _globalPollingThread ?? new Thread(MonitorPollingLoop)
@@ -165,7 +165,7 @@ namespace Opserver.Data
         {
             if (nodeType == Cache.TimedCacheKey)
             {
-                Cache.Purge(key);
+                MemCache.Remove(key);
                 return true;
             }
 

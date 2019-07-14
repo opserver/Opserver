@@ -76,8 +76,6 @@ namespace Opserver
             }
         }
 
-        public static LocalCache LocalCache => CoreCurrent.LocalCache;
-
         /// <summary>
         /// Shortcut to HttpContext.Current.Request.
         /// </summary>
