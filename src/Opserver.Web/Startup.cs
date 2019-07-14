@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -24,6 +27,13 @@ namespace Opserver
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Preview 6 workaround, see https://github.com/aspnet/AspNetCore/issues/11246#issuecomment-502381495
+            services.Add(
+                new ServiceDescriptor(
+                    typeof(IActionResultExecutor<JsonResult>),
+                    Type.GetType("Microsoft.AspNetCore.Mvc.Infrastructure.SystemTextJsonResultExecutor, Microsoft.AspNetCore.Mvc.Core"),
+                    ServiceLifetime.Singleton));
+
             services.Configure<OpserverSettings>(_configuration);
             services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
             services.AddStatusModules(_configuration);
