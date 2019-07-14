@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Internal;
@@ -149,7 +148,7 @@ namespace Opserver.Data
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
-            : base(cacheDuration, memberName, sourceFilePath, sourceLineNumber)
+            : base(owner, cacheDuration, memberName, sourceFilePath, sourceLineNumber)
         {
             MiniProfilerDescription = "Poll: " + description; // concatenate once
             // TODO: Settings via owner
@@ -239,12 +238,12 @@ namespace Opserver.Data
         public string ErrorMessage => Error?.Message + (Error?.InnerException != null ? "\n" + Error.InnerException.Message : "");
 
         // Temp: all async when views can be in MVC Core
-        public static LightweightCache<T> Get(IMemoryCache cache, string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
+        public static LightweightCache<T> Get(PollNode owner, string key, Func<T> getData, TimeSpan duration, TimeSpan staleDuration)
         {
             using (MiniProfiler.Current.Step("LightweightCache: " + key))
             {
                 // Let GetSet handle the overlap and locking, for now. That way it's store dependent.
-                return cache.GetSet<LightweightCache<T>>(key, (_, __) =>
+                return owner.MemCache.GetSet<LightweightCache<T>>(key, (_, __) =>
                 {
                     var tc = new LightweightCache<T>() { Key = key };
                     try
@@ -268,8 +267,9 @@ namespace Opserver.Data
         public string Key { get; protected set; }
     }
 
-    public abstract class Cache : IMonitorStatus
+    public abstract class Cache : IMonitorStatus, IDisposable
     {
+        public PollNode Owner { get; private set; }
         public virtual Type Type => typeof(Cache);
         public Guid UniqueId { get; }
         public TimeSpan CacheDuration { get; }
@@ -357,11 +357,13 @@ namespace Opserver.Data
         public int SourceLineNumber { get; }
 
         protected Cache(
+            PollNode owner,
             TimeSpan cacheDuration,
             [CallerMemberName] string memberName = "",
             [CallerFilePath] string sourceFilePath = "",
             [CallerLineNumber] int sourceLineNumber = 0)
         {
+            Owner = owner;
             UniqueId = Guid.NewGuid();
             CacheDuration = cacheDuration;
             ParentMemberName = memberName;
@@ -369,11 +371,10 @@ namespace Opserver.Data
             SourceLineNumber = sourceLineNumber;
         }
 
-        /// <summary>
-        /// Purge an existing cache from storage, thereby forcing a fresh fetch next time.
-        /// </summary>
-        /// <param name="key">The key to purge.</param>
-        public static void Purge(string key) => PollingEngine.MemCache.Remove(key);
+        public void Dispose()
+        {
+            Owner = null;
+        }
 
         public const string TimedCacheKey = "TimedCache";
     }

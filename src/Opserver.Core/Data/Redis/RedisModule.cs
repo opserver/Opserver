@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Opserver.Helpers;
 using static Opserver.Data.Redis.RedisInfo;
@@ -21,10 +20,10 @@ namespace Opserver.Data.Redis
 
         private readonly HashSet<string> HostNames;
 
-        public RedisModule(IOptions<RedisSettings> settings, IMemoryCache cache, AddressCache addressCache) : base(settings)
+        public RedisModule(IOptions<RedisSettings> settings, PollingService poller, AddressCache addressCache) : base(settings, poller)
         {
             Connections = LoadRedisConnections(settings.Value, addressCache);
-            Instances = Connections.Select(rci => new RedisInstance(this, rci, cache))
+            Instances = Connections.Select(rci => new RedisInstance(this, rci))
                                    .Where(rsi => rsi.TryAddToGlobalPollers())
                                    .ToList();
 

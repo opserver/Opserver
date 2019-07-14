@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver.Data.SQL
 {
@@ -39,12 +38,12 @@ namespace Opserver.Data.SQL
         public QuorumTypes QuorumType => ClusterStatus?.QuorumType ?? QuorumTypes.Unknown;
         public QuorumStates QuorumState => ClusterStatus?.QuorumState ?? QuorumStates.Unknown;
 
-        public SQLCluster(SQLModule module, SQLSettings.Cluster cluster, IMemoryCache cache)
+        public SQLCluster(SQLModule module, SQLSettings.Cluster cluster)
         {
             Module = module;
             Settings = cluster;
             Nodes = cluster.Nodes
-                           .Select(n => new SQLNode(module, this, n, cache))
+                           .Select(n => new SQLNode(module, this, n))
                            .Where(n => n.TryAddToGlobalPollers())
                            .ToList();
             RefreshInterval = (cluster.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds();

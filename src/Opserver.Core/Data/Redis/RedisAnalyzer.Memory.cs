@@ -8,7 +8,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Profiling;
 using StackExchange.Redis;
 
@@ -16,13 +15,11 @@ namespace Opserver.Data.Redis
 {
     public class RedisAnalyzer
     {
-        private IMemoryCache MemCache { get; }
         private RedisInstance Instance { get; }
         internal readonly List<KeyMatcher> KeyMatchers;
-        public RedisAnalyzer(RedisInstance instance, IMemoryCache cache)
+        public RedisAnalyzer(RedisInstance instance)
         {
             Instance = instance;
-            MemCache = cache;
             KeyMatchers = instance.ConnectionInfo.Settings.AnalysisRegexes
                                   .Where(r => r.Value.HasValue())
                                   .Select(r => new KeyMatcher { Name = r.Key, Regex = new Regex(r.Value, RegexOptions.Compiled) })
@@ -40,13 +37,13 @@ namespace Opserver.Data.Redis
             var connectionInfo = Instance.ConnectionInfo;
             using (MiniProfiler.Current.Step("Redis Memory Analysis for " + connectionInfo + " - DB:" + database.ToString()))
             {
-                return MemCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (_, __) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
+                return Instance.MemCache.GetSet<RedisMemoryAnalysis>(GetMemoryAnalysisKey(connectionInfo, database), (_, __) => GetDatabaseMemoryAnalysis(connectionInfo, database), 24.Hours(), 24.Hours());
             }
         }
 
-        public static void ClearDatabaseMemoryAnalysisCache(IMemoryCache cache, RedisConnectionInfo connectionInfo, int database)
+        public static void ClearDatabaseMemoryAnalysisCache(RedisInstance instance, int database)
         {
-            cache.Remove(GetMemoryAnalysisKey(connectionInfo, database));
+            instance.MemCache.Remove(GetMemoryAnalysisKey(instance.ConnectionInfo, database));
         }
 
         private RedisMemoryAnalysis GetDatabaseMemoryAnalysis(RedisConnectionInfo connectionInfo, int database)

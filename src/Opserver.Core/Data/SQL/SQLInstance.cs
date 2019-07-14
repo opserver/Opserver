@@ -5,14 +5,12 @@ using System.Data.Common;
 using System.Data.SqlClient;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using Opserver.Helpers;
 
 namespace Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode<SQLModule>, ISearchableNode
     {
-        private IMemoryCache MemCache { get; }
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
@@ -30,10 +28,9 @@ namespace Opserver.Data.SQL
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
         public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
 
-        public SQLInstance(SQLModule module, SQLSettings.Instance settings, IMemoryCache cache) : base(module, settings.Name)
+        public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(module, settings.Name)
         {
             Settings = settings;
-            MemCache = cache;
             ConnectionString = settings.ConnectionString.IsNullOrEmptyReturn(Module.Settings.DefaultConnectionString.Replace("$ServerName$", settings.Name));
             // Grab the instance name for performance counters and such
             var csb = new SqlConnectionStringBuilder(ConnectionString);
@@ -177,7 +174,7 @@ namespace Opserver.Data.SQL
         }
 
         public LightweightCache<T> TimedCache<T>(string key, Func<DbConnection, T> get, TimeSpan duration, TimeSpan staleDuration) where T : class
-            => LightweightCache<T>.Get(MemCache, GetCacheKey(key),
+            => LightweightCache<T>.Get(this, GetCacheKey(key),
             () =>
             {
                 using (var conn = GetConnection())

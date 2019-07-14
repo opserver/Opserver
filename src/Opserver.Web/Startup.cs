@@ -37,7 +37,13 @@ namespace Opserver
             services.Configure<OpserverSettings>(_configuration);
             services.AddTransient(s => s.GetRequiredService<IOptions<OpserverSettings>>().Value);
             services.AddSingleton<AddressCache>();
+
+            // Add the polling service as a concrete singleton and as a IHostedService so it starts, etc.
+            services.AddSingleton<PollingService>()
+                    .AddSingleton<IHostedService>(x => x.GetRequiredService<PollingService>());
+            // Register all the modules
             services.AddStatusModules(_configuration);
+
             services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
@@ -77,7 +83,6 @@ namespace Opserver
                     };
                 });
 
-            services.AddSingleton<IHostedService, PollingService>();
             services.AddSingleton<IConfigureOptions<MiniProfilerOptions>, MiniProfilerCacheStorageDefaults>();
             services.AddMiniProfiler(options =>
             {

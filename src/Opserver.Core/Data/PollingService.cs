@@ -8,13 +8,14 @@ namespace Opserver.Data
 {
     public class PollingService : IHostedService
     {
-        private readonly IMemoryCache _memCache;
         private readonly ILogger _logger;
         private CancellationToken _cancellationToken;
 
+        public IMemoryCache MemCache { get; }
+
         public PollingService(IMemoryCache cache, ILogger<PollingService> logger)
         {
-            _memCache = cache;
+            MemCache = cache;
             _logger = logger;
         }
 
@@ -22,7 +23,7 @@ namespace Opserver.Data
         {
             _cancellationToken = cancellationToken;
             _logger.LogInformation("Polling service is starting.");
-            PollingEngine.StartPolling(_memCache, _cancellationToken);
+            PollingEngine.StartPolling(MemCache, _cancellationToken);
             return Task.CompletedTask;
         }
 

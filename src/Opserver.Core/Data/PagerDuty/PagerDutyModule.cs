@@ -9,7 +9,7 @@ namespace Opserver.Data.PagerDuty
 
         public PagerDutyAPI API { get; }
 
-        public PagerDutyModule(IOptions<PagerDutySettings> settings) : base(settings)
+        public PagerDutyModule(IOptions<PagerDutySettings> settings, PollingService poller) : base(settings, poller)
         {
             API = new PagerDutyAPI(this);
             API.TryAddToGlobalPollers();

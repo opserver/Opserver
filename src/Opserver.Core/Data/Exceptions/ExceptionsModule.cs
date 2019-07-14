@@ -11,7 +11,7 @@ namespace Opserver.Data.Exceptions
 
         public List<ExceptionStore> Stores { get; }
 
-        public ExceptionsModule(IOptions<ExceptionsSettings> settings) : base(settings)
+        public ExceptionsModule(IOptions<ExceptionsSettings> settings, PollingService poller) : base(settings, poller)
         {
             Stores = settings.Value.Stores
                 .Select(s => new ExceptionStore(this, s))

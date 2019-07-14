@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using StackExchange.Profiling;
 
 namespace Opserver.Data
@@ -30,6 +31,11 @@ namespace Opserver.Data
         protected abstract IEnumerable<MonitorStatus> GetMonitorStatus();
         protected abstract string GetMonitorStatusReason();
         protected abstract StatusModule GetParentModule();
+
+        /// <summary>
+        /// The memcache of the poller for this node.
+        /// </summary>
+        internal IMemoryCache MemCache => GetParentModule().Poller.MemCache;
 
         /// <summary>
         /// Number of consecutive cache fetch failures before backing off of polling the entire node for <see cref="BackoffDuration"/>

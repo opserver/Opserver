@@ -14,7 +14,7 @@ namespace Opserver.Data.HAProxy
         public List<HAProxyGroup> Groups { get; }
         public HAProxyAdmin Admin { get; }
 
-        public HAProxyModule(IOptions<HAProxySettings> settings) : base(settings)
+        public HAProxyModule(IOptions<HAProxySettings> settings, PollingService poller) : base(settings, poller)
         {
             var snapshot = settings.Value;
             Groups = snapshot.Groups.Select(g => new HAProxyGroup(this, g))

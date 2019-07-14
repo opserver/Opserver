@@ -12,7 +12,7 @@ namespace Opserver.Data.Elastic
 
         public List<ElasticCluster> Clusters { get; }
 
-        public ElasticModule(IOptions<ElasticSettings> settings) : base(settings)
+        public ElasticModule(IOptions<ElasticSettings> settings, PollingService poller) : base(settings, poller)
         {
             Clusters = settings.Value.Clusters
                 .Select(c => new ElasticCluster(this, c))

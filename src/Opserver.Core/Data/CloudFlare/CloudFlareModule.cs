@@ -15,7 +15,7 @@ namespace Opserver.Data.Cloudflare
         public CloudflareAPI API { get; }
         public Dictionary<string, List<IPNet>> AllDatacenters { get; }
 
-        public CloudflareModule(IOptions<CloudflareSettings> settings) : base(settings)
+        public CloudflareModule(IOptions<CloudflareSettings> settings, PollingService poller) : base(settings, poller)
         {
             API = new CloudflareAPI(this);
             API.TryAddToGlobalPollers();

@@ -17,7 +17,7 @@ namespace Opserver.Data.Dashboard
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
-        public DashboardModule(IOptions<DashboardSettings> settings, AddressCache addressCache) : base(settings)
+        public DashboardModule(IOptions<DashboardSettings> settings, PollingService poller, AddressCache addressCache) : base(settings, poller)
         {
             AddressCache = addressCache;
             var providers = settings.Value.Providers;

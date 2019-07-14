@@ -11,7 +11,7 @@ namespace Opserver
         private readonly IOptions<T> _settings;
         public T Settings => _settings.Value;
         public override ISecurableModule SecuritySettings => Settings;
-        protected StatusModule(IOptions<T> settings)
+        protected StatusModule(IOptions<T> settings, PollingService poller) : base(poller)
         {
             _settings = settings;
         }
@@ -28,6 +28,9 @@ namespace Opserver
         public abstract bool IsMember(string node);
         public bool IsMember(Node node) => IsMember(node.PrettyName);
         public abstract ISecurableModule SecuritySettings { get; }
+        public PollingService Poller { get; }
+
+        protected StatusModule(PollingService poller) => Poller = poller;
     }
 
     public static class StatusModuleExtensions
