@@ -18,7 +18,7 @@ namespace Opserver.Data
         /// </summary>
         public override bool ContainsData => _hasData == 1 && Data != null;
         private int _hasData;
-        internal override object InnerCache => DataTask;
+        internal override object InnerCache => Data;
         public override Type Type => typeof (T);
         private readonly SemaphoreSlim _pollSemaphoreSlim = new SemaphoreSlim(1);
 

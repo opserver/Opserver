@@ -133,7 +133,7 @@ namespace Opserver.Data.PagerDuty
                     {
                         using (var ers = e.Response.GetResponseStream())
                         {
-                            if (ers == null) return getFromJson("fail");
+                            if (ers == null) return getFromJson(null);
                             using (var er = new StreamReader(ers))
                             {
                                 e.AddLoggedData("API Response JSON", er.ReadToEnd());
@@ -151,7 +151,7 @@ namespace Opserver.Data.PagerDuty
                      .AddLoggedData("Headers", req.Headers.ToString())
                      .AddLoggedData("Content Type", req.ContentType)
                      .Log();
-                    return getFromJson("fail");
+                    return getFromJson(null);
                 }
             }
         }

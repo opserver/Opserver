@@ -11,8 +11,11 @@ namespace Opserver.Data.PagerDuty
 
         public PagerDutyModule(IOptions<PagerDutySettings> settings, PollingService poller) : base(settings, poller)
         {
-            API = new PagerDutyAPI(this);
-            API.TryAddToGlobalPollers();
+            if (settings.Value.Enabled)
+            {
+                API = new PagerDutyAPI(this);
+                API.TryAddToGlobalPollers();
+            }
         }
 
         public override MonitorStatus MonitorStatus => API.MonitorStatus;

@@ -5,7 +5,7 @@
 // a specific target and scoped to a namespace, type, member, etc.
 
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "RCS1194:Implement exception constructors.", Justification = "Meh", Scope = "type", Target = "~T:Opserver.Data.IPNet.IPNetParseException")]
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "RCS1194:Implement exception constructors.", Justification = "Meh", Scope = "type", Target = "~T:Opserver.Data.DataPullException")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "RCS1194:Implement exception constructors.", Justification = "Meh", Scope = "type", Target = "~T:Opserver.Data.JsonApiException")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Matching SQL fields", Scope = "type", Target = "~T:Opserver.Data.SQL.SQLInstance.WhoIsActiveRow")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "RCS1221:Use pattern matching instead of combination of 'as' operator and null check.", Justification = "<Pending>", Scope = "member", Target = "~M:Opserver.SettingsProviders.SettingsProvider.GetCurrentProvider~Opserver.SettingsProviders.SettingsProvider")]
 [assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0019:Use pattern matching", Justification = "<Pending>", Scope = "member", Target = "~M:Opserver.Data.Dashboard.Providers.WmiDataProvider.WmiNode.GetAllInterfacesAsync~System.Threading.Tasks.Task")]

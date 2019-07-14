@@ -17,13 +17,16 @@ namespace Opserver.Data.Cloudflare
 
         public CloudflareModule(IOptions<CloudflareSettings> settings, PollingService poller) : base(settings, poller)
         {
-            API = new CloudflareAPI(this);
-            API.TryAddToGlobalPollers();
-            AllDatacenters = settings.Value?.DataCenters
-                        .ToDictionary(
-                            dc => dc.Name,
-                            dc => dc.Ranges.Concat(dc.MaskedRanges).Select(r => IPNet.Parse(r)).ToList()
-                        ) ?? new Dictionary<string, List<IPNet>>();
+            if (settings.Value.Enabled)
+            {
+                API = new CloudflareAPI(this);
+                API.TryAddToGlobalPollers();
+                AllDatacenters = settings.Value?.DataCenters
+                            .ToDictionary(
+                                dc => dc.Name,
+                                dc => dc.Ranges.Concat(dc.MaskedRanges).Select(r => IPNet.Parse(r)).ToList()
+                            ) ?? new Dictionary<string, List<IPNet>>();
+            }
         }
 
         public override MonitorStatus MonitorStatus => API.MonitorStatus;
