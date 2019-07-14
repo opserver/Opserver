@@ -61,7 +61,7 @@ namespace Opserver.Data.SQL
 
         public class SQLJobInfo : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public MonitorStatus MonitorStatus => !IsEnabled
                 ? MonitorStatus.Unknown

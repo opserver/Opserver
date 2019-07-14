@@ -19,9 +19,9 @@ namespace Opserver.Controllers
             if (type.IsNullOrEmpty()) return JsonNullParam("Type");
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, includeCaches: cacheData));
+                return JsonRaw(JsonApi.Get(Poller, type, includeCaches: cacheData));
             }
-            catch (DataPullException e)
+            catch (JsonApiException e)
             {
                 return JsonCacheError(e);
             }
@@ -45,9 +45,9 @@ namespace Opserver.Controllers
             if (key.IsNullOrEmpty()) return JsonNullParam("Key");
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, key, includeCaches: includeCache));
+                return JsonRaw(JsonApi.Get(Poller, type, key, includeCaches: includeCache));
             }
-            catch (DataPullException e)
+            catch (JsonApiException e)
             {
                 return JsonCacheError(e);
             }
@@ -62,22 +62,18 @@ namespace Opserver.Controllers
 
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, key, property, includeCaches: true));
+                return JsonRaw(JsonApi.Get(Poller, type, key, property, includeCaches: true));
             }
-            catch (DataPullException e)
+            catch (JsonApiException e)
             {
                 return JsonCacheError(e);
             }
         }
 
-        private ActionResult JsonNullParam(string param)
-        {
-            return JsonError(new { error = param + " cannot be null, usage is /data/{type}/{key}/{property}" });
-        }
+        private ActionResult JsonNullParam(string param) =>
+            JsonError(new { error = param + " cannot be null, usage is /data/{type}/{key}/{property}" });
 
-        private ActionResult JsonCacheError(DataPullException e)
-        {
-            return JsonError(new { error = e.Message });
-        }
+        private ActionResult JsonCacheError(JsonApiException e) =>
+            JsonError(new { error = e.Message });
     }
 }

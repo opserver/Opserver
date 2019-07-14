@@ -14,7 +14,7 @@ namespace Opserver.Data.SQL
         /// </summary>
         public class AGInfo : ISQLVersioned, IMonitedService
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 
             [IgnoreDataMember]
             public SQLNode Node { get; internal set; }

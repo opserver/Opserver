@@ -9,7 +9,7 @@ namespace Opserver.Data.SQL
         /// </summary>
         public class AGLisenerIPAddress : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public string ListenerId { get; internal set; }
             public string IPAddress { get; internal set; }

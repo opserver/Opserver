@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
         public class TraceFlagInfo : ISQLVersioned
         {
             // This likely works fine on 6+, need to test
-            public Version MinVersion => SQLServerVersions.SQL2000.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
 
             public int TraceFlag { get; internal set; }
             public bool Enabled { get; internal set; }

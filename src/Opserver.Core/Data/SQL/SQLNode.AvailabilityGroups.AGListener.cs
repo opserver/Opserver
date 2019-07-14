@@ -10,7 +10,7 @@ namespace Opserver.Data.SQL
         /// </summary>
         public class AGListener : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public Guid GroupId { get; internal set; }
             public string ListenerId { get; internal set; }

@@ -38,7 +38,7 @@ namespace Opserver.Data.SQL
 
         public class TopOperation : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public long AvgCPU { get; internal set; }
             public long TotalCPU { get; internal set; }

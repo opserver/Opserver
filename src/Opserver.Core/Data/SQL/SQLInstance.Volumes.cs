@@ -10,7 +10,7 @@ namespace Opserver.Data.SQL
 
         public class VolumeInfo : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2008R2.SP1;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008R2.SP1;
 
             public string VolumeId { get; internal set; }
             public string VolumeMountPoint { get; internal set; }

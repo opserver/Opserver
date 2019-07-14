@@ -18,7 +18,7 @@ namespace Opserver.Data.SQL
 
         public class SQLErrorLogInfo : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public DateTime LogDate { get; internal set; }
             public string ProcessInfo { get; internal set; }

@@ -16,7 +16,7 @@ namespace Opserver.Data.SQL
 
         public class WaitStatRecord : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string WaitType { get; internal set; }
             public int SecondsBetween { get; internal set; }

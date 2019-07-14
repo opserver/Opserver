@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
 
         public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion => SQLServerVersions.SQL2008R2.SP1;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008R2.SP1;
 
             public MonitorStatus MonitorStatus
             {

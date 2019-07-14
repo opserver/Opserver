@@ -38,7 +38,7 @@ namespace Opserver.Data.SQL
 
         public class AGClusterState : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 
             public string ClusterName { get; internal set; }
             public QuorumTypes QuorumType { get; internal set; }
@@ -57,7 +57,7 @@ Select cluster_name ClusterName,
 
         public class AGClusterMemberInfo : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
             public string MemberName { get; internal set; }
             public ClusterMemberTypes Type { get; internal set; }
             public ClusterMemberStates State { get; internal set; }
@@ -74,7 +74,7 @@ Select member_name MemberName,
 
         public class AGClusterNetworkInfo : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2012.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
             public string MemberName { get; internal set; }
             public string NetworkSubnetIP { get; internal set; }
             public string NetworkSubnetIPMask { get; internal set; }

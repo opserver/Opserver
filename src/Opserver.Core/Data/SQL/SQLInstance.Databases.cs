@@ -107,7 +107,7 @@ namespace Opserver.Data.SQL
 
         public class Database : ISQLVersioned, IMonitorStatus
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string OverallStateDescription
             {
@@ -255,7 +255,7 @@ From sys.databases db
 
         public class DatabaseLastBackup : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
@@ -353,7 +353,7 @@ Select db.database_id DatabaseId,
             public string InEqualityColumns { get; internal set; }
             public string IncludedColumns { get; internal set; }
             public decimal EstimatedImprovement { get; internal set; }
-            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
 
             public string GetFetchSQL(Version v)
             {
@@ -394,7 +394,7 @@ Select db.database_id DatabaseId,
             public string IncludedColumnNames { get; internal set; }
             public bool HasFilter { get; internal set; }
             public string FilterDefinition { get; internal set; }
-            public Version MinVersion => SQLServerVersions.SQL2008.SP1;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
 
             public string GetFetchSQL(Version v) => @"
  Select sc.name SchemaName,
@@ -441,7 +441,7 @@ Order By t.name, i.index_id";
 
         public class StoredProcedure : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
             public string SchemaName { get; internal set; }
             public string ProcedureName { get; internal set; }
             public DateTime CreationDate { get; internal set; }
@@ -508,7 +508,7 @@ Select p.object_id,
                 }
             }
 
-            public Version MinVersion =>  SQLServerVersions.SQL2008.SP1;
+            Version IMinVersioned.MinVersion =>  SQLServerVersions.SQL2008.SP1;
             public string GetFetchSQL(Version v)
             {
                 return @"
@@ -529,7 +529,7 @@ Select r.restore_date RestoreFinishDate,
 
         public class DatabaseBackup : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public char? Type { get; internal set; }
             public string TypeDescription => GetTypeDescription(Type);
@@ -595,7 +595,7 @@ Select Top 100
 
         public class DatabaseFile : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             private string _volumeMountPoint;
             public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon)[0]);
@@ -687,7 +687,7 @@ Select mf.database_id DatabaseId,
 
         public class DatabaseDataSpace : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int Id { get; internal set; }
             public string Name { get; internal set; }
@@ -724,7 +724,7 @@ Select data_space_id Id,
 
         public class DatabaseVLF : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
@@ -782,7 +782,7 @@ Drop Table #vlfTemp;";
 
         public class DatabaseTable : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -847,7 +847,7 @@ Drop Table #partStats;";
 
         public class DatabaseView : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -875,7 +875,7 @@ Select v.object_id Id,
 
         public class DatabaseColumn : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string Id => SchemaName + "." + TableName + "." + ColumnName;
 
@@ -1028,7 +1028,7 @@ Order By 1, 2, 3";
 
         public class DatabasePartition : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -1117,7 +1117,7 @@ Group By t.name,
 
         public class DatabaseIndex : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }

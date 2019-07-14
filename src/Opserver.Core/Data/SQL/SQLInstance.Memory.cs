@@ -10,7 +10,7 @@ namespace Opserver.Data.SQL
 
         public class SQLMemoryClerkSummaryInfo : ISQLVersioned
         {
-            public Version MinVersion => SQLServerVersions.SQL2005.RTM;
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             public string ClerkType { get; internal set; }
             public long UsedBytes { get; internal set; }
