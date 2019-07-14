@@ -1,5 +1,6 @@
+@inject PollingService Poller
 @{
-    var issues = Issue.GetAll().OrderByWorst().ToList();
+    var issues = Poller.GetIssues().OrderByWorst().ToList();
 }
 <div class="panel panel-default">
     <div class="panel-heading">@((issues.Count > 0 ? MonitorStatus.Warning : MonitorStatus.Good).IconSpan()) @issues.Count.Pluralize("Issue")</div>

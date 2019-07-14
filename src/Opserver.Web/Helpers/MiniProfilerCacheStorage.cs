@@ -10,22 +10,31 @@ namespace Opserver.Helpers
 {
     public class MiniProfilerCacheStorage : MemoryCacheStorage, IAsyncStorage
     {
-        public MiniProfilerCacheStorage(IMemoryCache cache, TimeSpan cacheDuration) : base(cache, cacheDuration) {}
+        private readonly PollingService _poller;
+        public MiniProfilerCacheStorage(IMemoryCache cache, PollingService poller, TimeSpan cacheDuration) : base(cache, cacheDuration)
+        {
+            _poller = poller;
+        }
 
-        MiniProfiler IAsyncStorage.Load(Guid id) => Load(id) ?? PollingEngine.GetCache(id)?.Profiler;
-        Task<MiniProfiler> IAsyncStorage.LoadAsync(Guid id) => LoadAsync(id) ?? Task.FromResult(PollingEngine.GetCache(id)?.Profiler);
+        MiniProfiler IAsyncStorage.Load(Guid id) => Load(id) ?? _poller.GetCache(id)?.Profiler;
+        Task<MiniProfiler> IAsyncStorage.LoadAsync(Guid id) => LoadAsync(id) ?? Task.FromResult(_poller.GetCache(id)?.Profiler);
     }
 
     internal class MiniProfilerCacheStorageDefaults : IConfigureOptions<MiniProfilerOptions>
     {
         private readonly IMemoryCache _cache;
-        public MiniProfilerCacheStorageDefaults(IMemoryCache cache) => _cache = cache;
+        private readonly PollingService _poller;
+        public MiniProfilerCacheStorageDefaults(IMemoryCache cache, PollingService poller)
+        {
+            _cache = cache;
+            _poller = poller;
+        }
 
         public void Configure(MiniProfilerOptions options)
         {
             if (options.Storage == null)
             {
-                options.Storage = new MiniProfilerCacheStorage(_cache, TimeSpan.FromMinutes(10));
+                options.Storage = new MiniProfilerCacheStorage(_cache, _poller, TimeSpan.FromMinutes(10));
             }
         }
     }

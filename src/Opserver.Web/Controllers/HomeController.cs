@@ -19,6 +19,7 @@ namespace Opserver.Controllers
 {
     public class HomeController : StatusController
     {
+        private PollingService Poller { get; }
         private IEnumerable<StatusModule> Modules { get; }
         private DashboardModule Dashboard { get; }
         private SQLModule Sql { get; }
@@ -29,6 +30,7 @@ namespace Opserver.Controllers
 
         public HomeController(
             IOptions<OpserverSettings> _settings,
+            PollingService poller,
             IEnumerable<StatusModule> modules,
             DashboardModule dashboard,
             SQLModule sql,
@@ -38,6 +40,7 @@ namespace Opserver.Controllers
             HAProxyModule haproxy
             ) : base(_settings)
         {
+            Poller = poller;
             Modules = modules;
             Dashboard = dashboard;
             Sql = sql;
@@ -124,7 +127,7 @@ namespace Opserver.Controllers
                 sb.AppendFormat("  {0}: {1}\n", k, Request.Headers[k]);
             }
 
-            var ps = PollingEngine.GetPollingStatus();
+            var ps = Poller.GetPollingStatus();
             sb.AppendLine()
               .AppendLine("Polling Info")
               .AppendLine(ps.GetPropertyNamesAndValues(prefix: "  "));

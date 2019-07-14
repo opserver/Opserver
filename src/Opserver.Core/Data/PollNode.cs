@@ -67,7 +67,7 @@ namespace Opserver.Data
         /// <returns>Whether the node was added to the list of global pollers</returns>
         public bool TryAddToGlobalPollers()
         {
-            AddedToGlobalPollers = PollingEngine.TryAdd(this);
+            AddedToGlobalPollers = GetParentModule().Poller.TryAdd(this);
             RegisterProviders();
             return AddedToGlobalPollers;
         }
@@ -75,7 +75,6 @@ namespace Opserver.Data
         private void RegisterProviders()
         {
             (this as INodeRoleProvider)?.Register();
-            (this as IIssuesProvider)?.Register();
         }
 
         private readonly object _monitorStatusLock = new object();
@@ -252,7 +251,7 @@ namespace Opserver.Data
 
         public void Dispose()
         {
-            PollingEngine.TryRemove(this);
+            GetParentModule()?.Poller?.TryRemove(this);
         }
 
         public Cache GetCache(string property)

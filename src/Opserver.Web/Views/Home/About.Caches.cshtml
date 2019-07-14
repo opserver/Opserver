@@ -1,8 +1,9 @@
 ﻿@model Opserver.Views.Home.AboutModel
+@inject PollingService Poller
 @{
     this.SetPageTitle("About - Caches");
-    var pollingInfo = PollingEngine.GetPollingStatus();
-    var ts = PollingEngine.GetThreadStats();
+    var pollingInfo = Poller.GetPollingStatus();
+    var ts = Poller.GetThreadStats();
     var pollerNodes = pollingInfo.Nodes
         .OrderByWorst(n => n.DataPollers.GetWorstStatus())
         .ThenByDescending(n => n.IsPolling)

@@ -1,6 +1,7 @@
-﻿@{
+﻿@inject PollingService Poller
+@{
     Layout = null;
-    var issues = Issue.GetAll();
+    var issues = Poller.GetIssues();
 }
 @if (issues.Any())
 {

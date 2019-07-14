@@ -9,7 +9,9 @@ namespace Opserver.Controllers
     [OnlyAllow(Roles.GlobalAdmin | Roles.InternalRequest)]
     public class DataController : StatusController
     {
-        public DataController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private PollingService Poller { get; }
+
+        public DataController(IOptions<OpserverSettings> _settings, PollingService poller) : base(_settings) => Poller = poller;
 
         [Route("json/{type}")]
         public ActionResult JsonNodes(string type, bool cacheData = false)
@@ -17,7 +19,7 @@ namespace Opserver.Controllers
             if (type.IsNullOrEmpty()) return JsonNullParam("Type");
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(type, includeCaches: cacheData));
+                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, includeCaches: cacheData));
             }
             catch (DataPullException e)
             {
@@ -43,7 +45,7 @@ namespace Opserver.Controllers
             if (key.IsNullOrEmpty()) return JsonNullParam("Key");
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(type, key, includeCaches: includeCache));
+                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, key, includeCaches: includeCache));
             }
             catch (DataPullException e)
             {
@@ -60,7 +62,7 @@ namespace Opserver.Controllers
 
             try
             {
-                return JsonRaw(DataProvider.GetNodeJSON(type, key, property, includeCaches: true));
+                return JsonRaw(DataProvider.GetNodeJSON(Poller, type, key, property, includeCaches: true));
             }
             catch (DataPullException e)
             {

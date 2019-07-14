@@ -1,6 +1,7 @@
 ﻿@using System.IO
 @using System.Reflection
 @using Opserver.Controllers
+@inject PollingService Poller
 @inject Opserver.Data.Dashboard.DashboardModule Dashboard
 @inject Opserver.Data.Elastic.ElasticModule Elastic
 @inject Opserver.Data.Exceptions.ExceptionsModule Exceptions
@@ -14,7 +15,7 @@
     var rev = asm.GetName().Version.ToString(4);
     var buildDate = new FileInfo(asm.Location).LastWriteTime.ToUniversalTime();
     var cacheStats = Opserver.ExtensionMethods.GetGetSetStatistics();
-    var pollingInfo = PollingEngine.GetPollingStatus();
+    var pollingInfo = Poller.GetPollingStatus();
 }
 @functions
 {

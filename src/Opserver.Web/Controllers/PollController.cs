@@ -12,7 +12,9 @@ namespace Opserver.Controllers
     [OnlyAllow(Roles.Authenticated)]
     public class PollController : StatusController
     {
-        public PollController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        private PollingService Poller { get; }
+
+        public PollController(IOptions<OpserverSettings> _settings, PollingService poller) : base(_settings) => Poller = poller;
 
         [Route("poll")]
         public async Task<ActionResult> PollNodes(string type, string[] key, Guid? guid = null)
@@ -23,7 +25,7 @@ namespace Opserver.Controllers
                 return JsonError("key is missing");
             try
             {
-                var polls = key.Select(k => PollingEngine.PollAsync(type, k, guid));
+                var polls = key.Select(k => Poller.PollAsync(type, k, guid));
                 var results = await Task.WhenAll(polls);
                 return Json(results.Aggregate(true, (current, r) => current && r));
             }

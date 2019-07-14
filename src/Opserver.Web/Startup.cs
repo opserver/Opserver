@@ -143,14 +143,8 @@ namespace Opserver
                       })
                       .UseResponseCaching()
                       .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
-            appLifetime.ApplicationStopping.Register(OnShutdown);
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
             Cache.Configure(settings);
-        }
-
-        private void OnShutdown()
-        {
-            PollingEngine.StopPolling();
         }
     }
 }

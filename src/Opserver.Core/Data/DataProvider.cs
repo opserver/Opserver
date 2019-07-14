@@ -30,15 +30,16 @@ namespace Opserver.Data
             }
         }
 
-        public static string GetNodeJSON(string type, string key = null, string property = null, bool includeCaches = false)
+        // TODO: Refactor this...it's in a weird spot from when Opserver.Core could run elsewhere but makes little sense now
+        public static string GetNodeJSON(PollingService poller, string type, string key = null, string property = null, bool includeCaches = false)
         {
             if (key.IsNullOrEmpty())
             {
-                var nodesToSerialize = PollingEngine.GetNodes(type).Select(n => NodeData.FromNode(n));
+                var nodesToSerialize = poller.GetNodes(type).Select(n => NodeData.FromNode(n));
                 return JsonConvert.SerializeObject(nodesToSerialize, _serializationSettings);
             }
 
-            var node = PollingEngine.GetNode(type, key);
+            var node = poller.GetNode(type, key);
             if (node == null)
                 throw new DataPullException("No {0} node found with key: {1}", type, key);
 

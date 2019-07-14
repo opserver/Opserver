@@ -73,7 +73,7 @@ namespace Opserver.Data
             PollStatus = "UpdateAsync";
             if (!force && !IsStale) return Data;
 
-            Interlocked.Increment(ref PollingEngine._activePolls);
+            Interlocked.Increment(ref PollingService._globalActivePolls);
             PollStatus = "Awaiting Semaphore";
             await _pollSemaphoreSlim.WaitAsync();
             bool errored = false;
@@ -108,7 +108,7 @@ namespace Opserver.Data
                 _isPolling = false;
                 PollStatus = errored ? "Failed" : "Completed";
                 _pollSemaphoreSlim.Release();
-                Interlocked.Decrement(ref PollingEngine._activePolls);
+                Interlocked.Decrement(ref PollingService._globalActivePolls);
             }
             return Data;
         }
