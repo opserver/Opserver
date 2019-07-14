@@ -10,6 +10,7 @@
     <PackageReference Include="Dapper" Version="1.60.9" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="Jil" Version="2.17.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />

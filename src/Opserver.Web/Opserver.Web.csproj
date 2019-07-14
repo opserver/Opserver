@@ -7,7 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.0.0-preview4-19216-03" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.0.0-preview6.19307.2" />
     <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.1.0-preview.11" />
     <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.0.78" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.5.0" />
