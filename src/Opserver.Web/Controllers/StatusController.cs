@@ -61,6 +61,11 @@ namespace Opserver.Controllers
             return Content(message);
         }
 
+        protected JsonResult Json(object data, System.Text.Json.Serialization.JsonSerializerOptions serializerOptions = null) =>
+            serializerOptions != null
+            ? base.Json(data, serializerOptions)
+            : base.Json(data);
+
         protected ContentResult JsonRaw(object content) =>
             new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
 
