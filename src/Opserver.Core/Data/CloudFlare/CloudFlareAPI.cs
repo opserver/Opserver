@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
-using Jil;
+using StackExchange.Utils;
 
 namespace Opserver.Data.Cloudflare
 {
@@ -20,7 +18,13 @@ namespace Opserver.Data.Cloudflare
         public override string NodeType => nameof(CloudflareAPI);
         public override int MinSecondsBetweenPolls => 5;
 
-        private static readonly Options JilOptions = Options.ISO8601;
+        private Dictionary<string, string> _requestHeaders;
+        private IDictionary<string, string> RequestHeaders => _requestHeaders ?? (_requestHeaders = new Dictionary<string, string>
+        {
+            ["X-Auth-Email"] = Email,
+            ["X-Auth-Key"] = APIKey,
+            ["Content-Type"] = "application/json"
+        });
 
         public override IEnumerable<Cache> DataPollers
         {
@@ -63,12 +67,11 @@ namespace Opserver.Data.Cloudflare
         /// <returns>The Cloudflare API response</returns>
         public async Task<T> Get<T>(string path, NameValueCollection values = null)
         {
-            using (var wc = GetWebClient())
-            {
-                var url = new Uri(APIBaseUrl + path + (values != null ? "?" + values : ""));
-                var rawResult = await wc.DownloadStringTaskAsync(url);
-                return JSON.Deserialize<CloudflareResult<T>>(rawResult, JilOptions).Result;
-            }
+            var result = await Http.Request(APIBaseUrl + path + (values != null ? "?" + values : ""))
+                                   .AddHeaders(RequestHeaders)
+                                   .ExpectJson<CloudflareResult<T>>()
+                                   .GetAsync();
+            return result.Data.Result;
         }
 
         /// <summary>
@@ -78,7 +81,15 @@ namespace Opserver.Data.Cloudflare
         /// <param name="path">The API path to call, e.g. zones</param>
         /// <param name="values">Variables to pass into this method</param>
         /// <returns>The Cloudflare API response</returns>
-        public T Post<T>(string path, NameValueCollection values = null) => Action<T>("POST", path, values);
+        public async Task<T> PostAsync<T>(string path, NameValueCollection values = null)
+        {
+            var result = await Http.Request(APIBaseUrl + path)
+                                   .AddHeaders(RequestHeaders)
+                                   .SendForm(values)
+                                   .ExpectJson<T>()
+                                   .PostAsync();
+            return result.Data;
+        }
 
         /// <summary>
         /// Gets a response from the Cloudflare API via DELETE
@@ -87,29 +98,15 @@ namespace Opserver.Data.Cloudflare
         /// <param name="path">The API path to call, e.g. zones</param>
         /// <param name="values">Variables to pass into this method</param>
         /// <returns>The Cloudflare API response</returns>
-        public T Delete<T>(string path, NameValueCollection values = null) => Action<T>("DELETE", path, values);
-
-        private T Action<T>(string method, string path, NameValueCollection values)
+        public async Task<T> DeleteAsync<T>(string path, NameValueCollection values = null)
         {
-            using (var wc = GetWebClient())
-            {
-                var url = new Uri(APIBaseUrl + path);
-                var rawResult = wc.UploadValues(url, method, values);
-                var resultString = Encoding.ASCII.GetString(rawResult);
-                return JSON.Deserialize<T>(resultString, JilOptions);
-            }
+            var result = await Http.Request(APIBaseUrl + path)
+                                   .AddHeaders(RequestHeaders)
+                                   .SendForm(values)
+                                   .ExpectJson<T>()
+                                   .DeleteAsync();
+            return result.Data;
         }
-
-        private WebClient GetWebClient(string contentType = "application/json") =>
-            new WebClient
-            {
-                Headers =
-                {
-                    ["X-Auth-Email"] = Email,
-                    ["X-Auth-Key"] = APIKey,
-                    ["Content-Type"] = contentType
-                }
-            };
 
         public override string ToString() => string.Concat("Cloudflare API: ", Email);
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 
 namespace Opserver.Data.Cloudflare
@@ -40,16 +41,16 @@ namespace Opserver.Data.Cloudflare
             ["purge_everything"] = "true"
         };
 
-        public bool PurgeAllFiles(CloudflareZone zone)
+        public async Task<bool> PurgeAllFilesAsync(CloudflareZone zone)
         {
-            var result = API.Post<CloudflareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
+            var result = await API.PostAsync<CloudflareResult>($"zones/{zone.Id}/purge_cache", _purgeAllParams);
             return result.Success;
         }
 
-        public bool PurgeFiles(CloudflareZone zone, IEnumerable<string> files)
+        public async Task<bool> PurgeFilesAsync(CloudflareZone zone, IEnumerable<string> files)
         {
             var nvc = new NameValueCollection { ["files"] = Jil.JSON.Serialize(files) };
-            var result = API.Delete<CloudflareResult>($"zones/{zone.Id}/purge_cache", nvc);
+            var result = await API.DeleteAsync<CloudflareResult>($"zones/{zone.Id}/purge_cache", nvc);
             return result.Success;
         }
 
