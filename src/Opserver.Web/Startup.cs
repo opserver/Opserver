@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -52,6 +53,7 @@ namespace Opserver
                 settings =>
                 {
                     settings.UseExceptionalPageOnThrow = true;
+                    settings.DataIncludeRegex = new Regex("^(Redis|Elastic|ErrorLog|Jil)", RegexOptions.Singleline | RegexOptions.Compiled);
                     settings.GetCustomData = (ex, data) =>
                     {
                         // everything below needs a context
