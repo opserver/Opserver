@@ -6,6 +6,7 @@ using StackExchange.Exceptional;
 using Opserver.Helpers;
 using Opserver.Models;
 using Opserver.Security;
+using System.Collections.Generic;
 
 namespace Opserver
 {
@@ -17,6 +18,8 @@ namespace Opserver
 
         public class CurrentContext
         {
+            private IEnumerable<StatusModule> _modules;
+
             /// <summary>
             /// The security provider for this context.
             /// </summary>
@@ -63,16 +66,17 @@ namespace Opserver
                             roles |= Roles.ApiRequest;
                         }
 
-                        _user = new User(Security, HttpContext.User, roles);
+                        _user = new User(Security, HttpContext.User, roles, _modules);
                     }
                     return _user;
                 }
             }
 
-            public CurrentContext(SecurityProvider security, HttpContext httpContext)
+            public CurrentContext(SecurityProvider security, HttpContext httpContext, IEnumerable<StatusModule> modules)
             {
                 Security = security;
                 HttpContext = httpContext;
+                _modules = modules;
             }
         }
 

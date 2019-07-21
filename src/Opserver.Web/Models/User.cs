@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
 using Opserver.Security;
 
 namespace Opserver.Models
@@ -14,7 +15,7 @@ namespace Opserver.Models
         /// </summary>
         public Roles Roles { get; }
 
-        public User(SecurityProvider provider, ClaimsPrincipal principle, Roles baseRoles)
+        public User(SecurityProvider provider, ClaimsPrincipal principle, Roles baseRoles, IEnumerable<StatusModule> modules)
         {
             Provider = provider;
             var identity = principle?.Identity;
@@ -37,26 +38,47 @@ namespace Opserver.Models
             else
             {
                 roles |= Roles.Authenticated;
-                // TODO: Spin up user in middleware
-                //var settings = OpserverSettings.Current;
 
                 //if (Current.Security.IsAdmin)
                 // TODO: Secure the shizzle
                 roles |= Roles.GlobalAdmin;
+            }
 
-                //result |= GetRoles(settings.Cloudflare, Roles.Cloudflare, Roles.CloudflareAdmin);
-                //result |= GetRoles(settings.Dashboard, Roles.Dashboard, Roles.DashboardAdmin);
-                //result |= GetRoles(settings.Elastic, Roles.Elastic, Roles.ElasticAdmin);
-                //result |= GetRoles(settings.Exceptions, Roles.Exceptions, Roles.ExceptionsAdmin);
-                //result |= GetRoles(Current.Settings.HAProxy, Roles.HAProxy, Roles.HAProxyAdmin);
-                //result |= GetRoles(Current.Settings.Redis, Roles.Redis, Roles.RedisAdmin);
-                //result |= GetRoles(Current.Settings.SQL, Roles.SQL, Roles.SQLAdmin);
-                //result |= GetRoles(Current.Settings.PagerDuty, Roles.PagerDuty, Roles.PagerDutyAdmin);
+            foreach (var m in modules)
+            {
+                roles |= GetRoles(m);
             }
 
             IsGlobalAdmin = (roles & Roles.GlobalAdmin) == Roles.GlobalAdmin;
             Roles = roles;
         }
+
+        // TODO: Move from modules being known here
+        private Roles GetRoles(StatusModule module)
+        {
+            switch (module)
+            {
+                case Data.Cloudflare.CloudflareModule m:
+                    return GetRoles(m, Roles.Cloudflare, Roles.CloudflareAdmin);
+                case Data.Dashboard.DashboardModule m:
+                    return GetRoles(m, Roles.Dashboard, Roles.DashboardAdmin);
+                case Data.Elastic.ElasticModule m:
+                    return GetRoles(m, Roles.Elastic, Roles.ElasticAdmin);
+                case Data.Exceptions.ExceptionsModule m:
+                    return GetRoles(m, Roles.Exceptions, Roles.ExceptionsAdmin);
+                case Data.HAProxy.HAProxyModule m:
+                    return GetRoles(m, Roles.HAProxy, Roles.HAProxyAdmin);
+                case Data.Redis.RedisModule m:
+                    return GetRoles(m, Roles.Redis, Roles.RedisAdmin);
+                case Data.SQL.SQLModule m:
+                    return GetRoles(m, Roles.SQL, Roles.SQLAdmin);
+                case Data.PagerDuty.PagerDutyModule m:
+                    return GetRoles(m, Roles.PagerDuty, Roles.PagerDutyAdmin);
+                default:
+                    return Roles.None;
+            }
+        }
+
         private Roles GetRoles(StatusModule module, Roles user, Roles admin)
         {
             if (IsAdmin(module)) return admin | user;
