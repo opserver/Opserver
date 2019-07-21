@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
-using Jil;
 using Opserver.Helpers;
+using StackExchange.Utils;
 
 namespace Opserver.Data.Elastic
 {
@@ -68,35 +65,16 @@ namespace Opserver.Data.Elastic
 
             public async Task<T> GetAsync<T>(string path) where T : class
             {
-                var wc = new WebClient();
-                try
+                var result = await Http.Request(Url + path)
+                                       .ExpectJson<T>()
+                                       .GetAsync();
+                if (result.Success)
                 {
-                    using (var rs = await wc.OpenReadTaskAsync(Url + path))
-                    using (var sr = new StreamReader(rs))
-                    {
-                        LastSeen = DateTime.UtcNow;
-                        var result = JSON.Deserialize<T>(sr);
-                        LastException = null;
-                        return result;
-                    }
+                    LastSeen = DateTime.UtcNow;
                 }
-                catch (SocketException e)
-                {
-                    LastException = e;
-                    // nothing - we failed to reach a downed node which is to be expected
-                }
-                catch (WebException e)
-                {
-                    LastException = e;
-                    // nothing - we failed to reach a downed node which is to be expected
-                }
-                catch (Exception e)
-                {
-                    LastException = e;
-                    e.Log();
-                    // In the case of a 404, 500, etc - carry on to the next node
-                }
-                return null;
+
+                LastException = result.Error;
+                return result.Data;
             }
         }
 
