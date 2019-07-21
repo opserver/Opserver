@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Opserver.Data;
 using Opserver.Helpers;
@@ -113,35 +112,21 @@ namespace Opserver
 
         public void Configure(
             IApplicationBuilder appBuilder,
-            IHostApplicationLifetime appLifetime,
             IOptions<OpserverSettings> settings,
             SecurityManager securityManager,
             IEnumerable<StatusModule> modules
         )
         {
-            //appBuilder.UseStaticFiles()
-            //          .UseExceptional()
-            //          //.UseMiniProfiler()
-            //          .UseAuthentication()
-            //          .Use(async (httpContext, next)  =>
-            //          {
-            //              Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext));
-            //              await next();
-            //          })
-            //          .UseAuthorization()
-            //          .UseRouting()
-            //          .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
-
             appBuilder.UseStaticFiles()
                       .UseExceptional()
                       .UseRouting()
                       .UseMiniProfiler()
                       .UseAuthentication()
                       .UseAuthorization()
-                      .Use(async (httpContext, next) =>
+                      .Use((httpContext, next) =>
                       {
-                          Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext));
-                          await next();
+                          Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext, modules));
+                          return next();
                       })
                       .UseResponseCaching()
                       .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
