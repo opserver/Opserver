@@ -9,6 +9,11 @@
           "ExtensionMethods.*": [ ".cs" ],
           "Models\\*.*": [ "*.cs" ]
         }
+      },
+      "fileSuffixToExtension": {
+        "add": {
+          ".Model.cs": [ ".cshtml" ]
+        }
       }
     }
   }
