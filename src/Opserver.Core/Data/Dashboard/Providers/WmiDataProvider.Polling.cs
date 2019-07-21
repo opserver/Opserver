@@ -5,7 +5,7 @@ using System.DirectoryServices.ActiveDirectory;
 using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Opserver.Monitoring;
+using Opserver.Helpers;
 
 namespace Opserver.Data.Dashboard.Providers
 {

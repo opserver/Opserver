@@ -7,7 +7,7 @@ using System.Management;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
-namespace Opserver.Monitoring
+namespace Opserver.Helpers
 {
     internal static class Wmi
     {

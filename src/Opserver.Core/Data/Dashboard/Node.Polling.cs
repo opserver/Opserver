@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Opserver.Monitoring;
+using Opserver.Helpers;
 
 namespace Opserver.Data.Dashboard
 {
