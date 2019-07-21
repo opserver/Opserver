@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Jil;
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Opserver.Data;
 
@@ -46,13 +46,13 @@ namespace Opserver.Helpers.Tag
                 }
                 else if (Caches != null)
                 {
-                    output.Attributes.SetAttribute("data-guid", JSON.Serialize(Caches.Select(i => i.UniqueId)));
+                    output.Attributes.SetAttribute("data-guid", JsonSerializer.ToString(Caches.Select(i => i.UniqueId)));
                 }
             }
             else if (Nodes != null)
             {
                 output.Attributes.SetAttribute("data-type", Nodes.FirstOrDefault()?.NodeType);
-                output.Attributes.SetAttribute("data-uk", JSON.Serialize(Nodes.Where(n => n != null).Select(n => n.UniqueKey)));
+                output.Attributes.SetAttribute("data-uk", JsonSerializer.ToString(Nodes.Where(n => n != null).Select(n => n.UniqueKey)));
             }
 
             output.Content.SetContent(Icon.Refresh + @" <span class=""js-text"">Poll Now</span>");
