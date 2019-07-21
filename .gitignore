@@ -106,3 +106,4 @@ src/Opserver.Web/config/*.json
 !src/Opserver.Web/config/*.example.json
 src/Opserver.Web/config/*.config
 *.StackOverflow.*
+src/Opserver.Web/localSettings.json

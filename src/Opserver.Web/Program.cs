@@ -40,7 +40,8 @@ namespace Opserver
                     {
                         config
                             .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
-                            .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true);
+                            .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true)
+                            .AddJsonFile("localSettings.json", optional: true, reloadOnChange: true);
                     }
                 )
                 .ConfigureLogging(
