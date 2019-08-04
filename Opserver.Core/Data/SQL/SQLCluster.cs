@@ -22,10 +22,12 @@ namespace StackExchange.Opserver.Data.SQL
         {
             bool agMatch(SQLNode.AGInfo ag) => agName.IsNullOrEmpty() || ag.Name == agName;
 
-            return (node.HasValue()
-                ? Nodes.Where(n => string.Equals(n.Name, node))
-                : Nodes)
-                .SelectMany(n => n.AvailabilityGroups.Data?.Where(agMatch) ?? Enumerable.Empty<SQLNode.AGInfo>());
+            var nodes = Enumerable.Empty<SQLNode>();
+
+            if (node.HasValue())
+                nodes = Nodes.Where(n => string.Equals(n.Name, node));
+
+            return (nodes.Any() ? nodes : Nodes).SelectMany(n => n.AvailabilityGroups.Data?.Where(agMatch) ?? Enumerable.Empty<SQLNode.AGInfo>());
         }
 
         public MonitorStatus MonitorStatus => Nodes.GetWorstStatus("SQLCluster-" + Name);

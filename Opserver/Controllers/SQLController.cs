@@ -32,16 +32,19 @@ namespace StackExchange.Opserver.Controllers
         public ActionResult Servers(string cluster, string node, string ag, bool detailOnly = false)
         {
             var vd = new ServersModel
-                {
-                    StandaloneInstances = SQLModule.StandaloneInstances,
-                    Clusters = SQLModule.Clusters,
-                    Refresh = node.HasValue() ? 10 : 5
-                };
+            {
+                StandaloneInstances = SQLModule.StandaloneInstances,
+                Clusters = SQLModule.Clusters,
+                Refresh = node.HasValue() ? 10 : 5
+            };
 
+            // It's possible to pass values
+            // like 'S001+DB', so UrlDecode
+            // must be used.
             if (cluster.HasValue())
-                vd.CurrentCluster = vd.Clusters.Find(c => string.Equals(c.Name, cluster, StringComparison.OrdinalIgnoreCase));
+                vd.CurrentCluster = vd.Clusters.Find(c => string.Equals(c.Name, HttpUtility.UrlDecode(cluster), StringComparison.OrdinalIgnoreCase));
             if (vd.CurrentCluster != null)
-                vd.AvailabilityGroups = vd.CurrentCluster.GetAvailabilityGroups(node, ag).ToList();
+                vd.AvailabilityGroups = vd.CurrentCluster.GetAvailabilityGroups(HttpUtility.UrlDecode(node), ag).ToList();
 
             if (detailOnly && vd.CurrentCluster != null)
                 return View("Servers.ClusterDetail", vd);

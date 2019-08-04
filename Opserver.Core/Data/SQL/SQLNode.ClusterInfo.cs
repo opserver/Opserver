@@ -30,7 +30,7 @@ namespace StackExchange.Opserver.Data.SQL
                 {
                     foreach (var m in state.Members)
                     {
-                        m.IsLocal = string.Equals(m.MemberName, ServerProperties.Data?.ServerName, StringComparison.InvariantCultureIgnoreCase);
+                        m.IsLocal = string.Equals(m.MemberName, ServerProperties.Data?.MachineName, StringComparison.InvariantCultureIgnoreCase);
                     }
                 }
                 return state;

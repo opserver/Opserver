@@ -51,7 +51,13 @@ Suspension Reason: @db.SuspendReason.Value.AsString(EnumFormat.Description)</tex
                     <i class="fa fa-database @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i>  @SQLHelpers.HealthDescriptionAGs(ag.LocalReplica.Databases, minimal: true)
                 </div>
                 <div>
-                    @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.Node.Name</a> <span class="text-success">(Master)</span>
+                    @*Used ag.PrimaryReplica instead ag.Node.Name, because:
+            If the listener name is used in
+            the configuration, the name  of
+            the listener will be instead of
+            the replica name.
+                    *@
+                    @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.PrimaryReplica</a> <span class="text-success">(Master)</span>
                 </div>
 
                 @RenderDBIssues(ag.LocalReplica)
