@@ -61,7 +61,7 @@ namespace Opserver.Controllers
             return Content(message);
         }
 
-        protected JsonResult Json(object data, System.Text.Json.Serialization.JsonSerializerOptions serializerOptions = null) =>
+        protected JsonResult Json(object data, System.Text.Json.JsonSerializerOptions serializerOptions = null) =>
             serializerOptions != null
             ? base.Json(data, serializerOptions)
             : base.Json(data);

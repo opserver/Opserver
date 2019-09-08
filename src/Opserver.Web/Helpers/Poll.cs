@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json.Serialization;
+using System.Text.Json;
 using Microsoft.AspNetCore.Html;
 using Opserver.Data;
 
@@ -14,11 +14,11 @@ namespace Opserver.Helpers
             new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{n.NodeType}"" data-uk=""{n.UniqueKey.HtmlEncode()}"" data-guid=""{c?.UniqueId.ToString().HtmlEncode()}"" title=""Updated {n.LastPoll?.ToZuluTime()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>");
 
         public static IHtmlContent Now(PollNode n, params Cache[] c) =>
-            new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{n.NodeType}"" data-uk=""{n.UniqueKey.HtmlEncode()}"" data-guid=""{JsonSerializer.ToString(c.Select(i => i.UniqueId)).HtmlEncode()}"" title=""Updated {n.LastPoll?.ToZuluTime()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>");
+            new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{n.NodeType}"" data-uk=""{n.UniqueKey.HtmlEncode()}"" data-guid=""{JsonSerializer.Serialize(c.Select(i => i.UniqueId)).HtmlEncode()}"" title=""Updated {n.LastPoll?.ToZuluTime()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>");
 
         public static IHtmlContent Now(IEnumerable<PollNode> nodes) =>
             nodes != null
-                ? new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{nodes.FirstOrDefault()?.NodeType}"" data-uk=""{JsonSerializer.ToString(nodes.Where(i => i != null).Select(i => i.UniqueKey)).HtmlEncode()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>")
+                ? new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{nodes.FirstOrDefault()?.NodeType}"" data-uk=""{JsonSerializer.Serialize(nodes.Where(i => i != null).Select(i => i.UniqueKey)).HtmlEncode()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>")
                 : (IHtmlContent)HtmlString.Empty;
 
         public static IHtmlContent Now(string nodeType) =>
@@ -29,7 +29,7 @@ namespace Opserver.Helpers
 
         public static IHtmlContent Now(params LightweightCache[] caches) =>
             caches != null
-                ? new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{Cache.TimedCacheKey}"" data-uk=""{JsonSerializer.ToString(caches.Where(i => i != null).Select(i => i.Key)).HtmlEncode()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>")
+                ? new HtmlString($@"<a href=""#"" class=""pull-right hover-pulsate js-reload-link"" data-type=""{Cache.TimedCacheKey}"" data-uk=""{JsonSerializer.Serialize(caches.Where(i => i != null).Select(i => i.Key)).HtmlEncode()}"">{Icon.Refresh} <span class=""js-text"">Poll Now</span></a>")
                 : (IHtmlContent)HtmlString.Empty;
     }
 }
