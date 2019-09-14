@@ -20,7 +20,7 @@ namespace Opserver.Data.SQL
                 );
 
                 List<AGInfo> ags;
-                using (var multi = await conn.QueryMultipleAsync(sql))
+                using (var multi = await conn.QueryMultipleAsync(sql, commandTimeout: 1200).ConfigureAwait(false))
                 {
                     ags = await multi.ReadAsync<AGInfo>().AsList();
                     var replicas = await multi.ReadAsync<AGReplica>().AsList();
