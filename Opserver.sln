@@ -10,6 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.filenesting.json = .filenesting.json
 		Build.bat = Build.bat
+		global.json = global.json
 		nuget.config = nuget.config
 		readme.md = readme.md
 		WebEssentials-Settings.json = WebEssentials-Settings.json
@@ -21,6 +22,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D924C9E2-44B
 	ProjectSection(SolutionItems) = preProject
 		src\Directory.Build.props = src\Directory.Build.props
 		src\Opserver.ruleset = src\Opserver.ruleset
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{5304B28F-5CF0-4191-A195-EB4C8EEC068F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{08F532FF-9F35-4D92-AD15-5A30BC8F2AF8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main.yml = .github\workflows\main.yml
 	EndProjectSection
 EndProject
 Global
@@ -44,6 +52,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{C58AFF99-F4D9-4A83-866E-18DA0A633F6B} = {D924C9E2-44B2-4ACE-8BD9-C21348F5B6FB}
 		{B3D85A10-C7B4-4254-B387-688EF4C138EB} = {D924C9E2-44B2-4ACE-8BD9-C21348F5B6FB}
+		{08F532FF-9F35-4D92-AD15-5A30BC8F2AF8} = {5304B28F-5CF0-4191-A195-EB4C8EEC068F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {003C9475-D1B9-4600-9BB2-39769162858D}
