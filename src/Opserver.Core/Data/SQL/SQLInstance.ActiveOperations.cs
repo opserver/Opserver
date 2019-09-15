@@ -17,7 +17,7 @@ namespace Opserver.Data.SQL
                 throw new ArgumentNullException(nameof(options), "Active Operations requires options");
 
             return TimedCache("ActiveOperations-" + options.GetHashCode().ToString(),
-                conn => conn.Query<WhoIsActiveRow>(options.ToSQLQuery(), options, commandTimeout: 300)
+                conn => conn.Query<WhoIsActiveRow>(ActiveSearchOptions.SQLQuery, options, commandTimeout: 300)
                                 .Select(row => new ActiveOperation(row))
                                 .ToList(),
                 10.Seconds(), 5.Minutes());
@@ -280,9 +280,7 @@ Exec sp_WhoIsActive @format_output = 0;
                 }
             }
 
-            public string ToSQLQuery()
-            {
-                return @"
+            internal const string SQLQuery = @"
 Exec sp_WhoIsActive 
     @format_output = 0,
     @show_own_spid = @IncludeSelf,
@@ -297,7 +295,6 @@ Exec sp_WhoIsActive
     @get_locks = @GetLocks,
     @filter_type = @FilterFieldString,
     @filter = @FilterValueString;";
-            }
 
             public enum ShowSleepingSessionOptions
             {
