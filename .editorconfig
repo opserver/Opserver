@@ -1,3 +1,4 @@
+# Suppress: EC112
 # editorconfig.org
 root = true
 
