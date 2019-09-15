@@ -177,6 +177,9 @@ namespace Opserver.Data
         public class IPNetParseException : Exception
         {
             public IPNetParseException(string msg, params object[] format) : base(string.Format(msg, format)) { }
+            public IPNetParseException() { }
+            public IPNetParseException(string message) : base(message) { }
+            public IPNetParseException(string message, Exception innerException) : base(message, innerException) { }
         }
 
         [DataContract]
