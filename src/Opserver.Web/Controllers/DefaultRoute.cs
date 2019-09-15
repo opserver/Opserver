@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Opserver.Controllers
 {
     [AttributeUsage(AttributeTargets.Method)]
-    public class DefaultRoute : RouteAttribute
+    public sealed class DefaultRoute : RouteAttribute
     {
         private static Dictionary<Type, DefaultRoute> AllRoutes => new Dictionary<Type, DefaultRoute>();
 
