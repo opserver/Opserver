@@ -101,3 +101,24 @@ dotnet_naming_symbols.constant_fields.required_modifiers        = const
 
 dotnet_naming_style.prefix_underscore.capitalization = camel_case
 dotnet_naming_style.prefix_underscore.required_prefix = _
+
+# CA1027: Mark enums with FlagsAttribute
+dotnet_diagnostic.CA1027.severity = none
+
+# CA1031: Do not catch general exception types
+dotnet_diagnostic.CA1031.severity = none
+
+# CA1034: Nested types should not be visible
+dotnet_diagnostic.CA1034.severity = none
+
+# CA1063: Implement IDisposable Correctly
+dotnet_diagnostic.CA1063.severity = none
+
+# CA1810: Initialize reference type static fields inline
+dotnet_diagnostic.CA1810.severity = none
+
+# CA1819: Properties should not return arrays
+dotnet_diagnostic.CA1819.severity = none
+
+# CA1822: Mark members as static
+dotnet_diagnostic.CA1822.severity = none
