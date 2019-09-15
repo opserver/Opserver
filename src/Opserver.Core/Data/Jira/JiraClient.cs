@@ -289,7 +289,7 @@ namespace Opserver.Data.Jira
             var json = JSON.Serialize(data);
             byte[] dataBytes = Encoding.UTF8.GetBytes(json);
             var uri = GetUriForResource(resource);
-            var responseBytes = new byte[0];
+            var responseBytes = Array.Empty<byte>();
             await client.UploadDataTaskAsync(uri, "POST", dataBytes);
 
             string response = Encoding.UTF8.GetString(responseBytes);
