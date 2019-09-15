@@ -85,14 +85,14 @@ namespace Opserver
             return semaphore;
         }
 
-        private static int totalGetSetSync, totalGetSetAsyncSuccess, totalGetSetAsyncError;
+        private static int _totalGetSetSync, _totalGetSetAsyncSuccess, _totalGetSetAsyncError;
         /// <summary>
         /// Indicates how many sync (first), async-success (second) and async-error (third) GetSet operations have been completed
         /// </summary>
         public static Tuple<int, int, int> GetGetSetStatistics() =>
-            Tuple.Create(Interlocked.CompareExchange(ref totalGetSetSync, 0, 0),
-                Interlocked.CompareExchange(ref totalGetSetAsyncSuccess, 0, 0),
-                Interlocked.CompareExchange(ref totalGetSetAsyncError, 0, 0));
+            Tuple.Create(Interlocked.CompareExchange(ref _totalGetSetSync, 0, 0),
+                Interlocked.CompareExchange(ref _totalGetSetAsyncSuccess, 0, 0),
+                Interlocked.CompareExchange(ref _totalGetSetAsyncError, 0, 0));
 
         /// <summary>
         /// Gets the current data via <paramref name="lookup"/>. 
@@ -133,7 +133,7 @@ namespace Opserver
                         };
 
                         cache.Set(key, possiblyStale, duration + staleDuration);
-                        Interlocked.Increment(ref totalGetSetSync);
+                        Interlocked.Increment(ref _totalGetSetSync);
                     }
                 }
             }
@@ -181,12 +181,12 @@ namespace Opserver
                 {
                     if (t.IsFaulted)
                     {
-                        Interlocked.Increment(ref totalGetSetAsyncError);
+                        Interlocked.Increment(ref _totalGetSetAsyncError);
                         t.Exception.Log();
                     }
                     else
                     {
-                        Interlocked.Increment(ref totalGetSetAsyncSuccess);
+                        Interlocked.Increment(ref _totalGetSetAsyncSuccess);
                     }
                 });
                 task.Start();
@@ -255,7 +255,7 @@ namespace Opserver
 
                     cache.Set(key, possiblyStale, duration + staleDuration);
 
-                    Interlocked.Increment(ref totalGetSetSync);
+                    Interlocked.Increment(ref _totalGetSetSync);
                 }
             }
             finally
@@ -306,11 +306,11 @@ namespace Opserver
 
                             cache.Remove(key);
                             cache.Set(key, updated, duration + staleDuration);
-                            Interlocked.Increment(ref totalGetSetAsyncSuccess);
+                            Interlocked.Increment(ref _totalGetSetAsyncSuccess);
                         }
                         catch (Exception ex)
                         {
-                            Interlocked.Increment(ref totalGetSetAsyncError);
+                            Interlocked.Increment(ref _totalGetSetAsyncError);
                             ex.Log();
                         }
                         finally

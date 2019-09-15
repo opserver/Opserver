@@ -622,10 +622,10 @@ Select Top 100
             public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / (double)NumReads;
             public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / (double)NumWrites;
 
-            private static readonly Regex _ShortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
+            private static readonly Regex _shortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
-                    _shortPhysicalName ?? (_shortPhysicalName = _ShortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
+                    _shortPhysicalName ?? (_shortPhysicalName = _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
 
             public string GrowthDescription
             {

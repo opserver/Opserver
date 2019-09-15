@@ -89,3 +89,15 @@ csharp_new_line_before_members_in_anonymous_types = true
 
 # Space settings
 csharp_space_after_keywords_in_control_flow_statements = true:suggestion
+
+# Naming
+dotnet_naming_rule.private_members_with_underscore.symbols  = private_fields
+dotnet_naming_rule.private_members_with_underscore.style    = prefix_underscore
+dotnet_naming_rule.private_members_with_underscore.severity = silent
+
+dotnet_naming_symbols.private_fields.applicable_kinds           = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_symbols.constant_fields.required_modifiers        = const
+
+dotnet_naming_style.prefix_underscore.capitalization = camel_case
+dotnet_naming_style.prefix_underscore.required_prefix = _
