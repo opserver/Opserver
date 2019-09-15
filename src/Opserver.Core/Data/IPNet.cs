@@ -399,6 +399,8 @@ namespace Opserver.Data
                 (a.IPv4Address.HasValue && b.IPv4Address.HasValue && a.IPv4Address != b.IPv4Address)
                 || (a.FirstV6Leg.HasValue && b.FirstV6Leg.HasValue && (a.FirstV6Leg != b.FirstV6Leg || a.LastV6Leg != b.LastV6Leg));
 
+            public static bool operator <(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) < 0;
+            public static bool operator >(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) > 0;
             public static bool operator <=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) <= 0;
             public static bool operator >=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) >= 0;
 
