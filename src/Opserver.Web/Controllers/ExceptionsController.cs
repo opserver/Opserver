@@ -58,7 +58,7 @@ namespace Opserver.Controllers
             }
         }
 
-        public string GetParam(string param) => Current.Request.HasFormContentType ? Current.Request.Form[param] : Current.Request.Query[param];
+        public string GetParam(string param) => Request.HasFormContentType ? Request.Form[param] : Request.Query[param];
 
         // TODO: Move entirely to model binder
         private async Task<ExceptionStore.SearchParams> GetSearchAsync()

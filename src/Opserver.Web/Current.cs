@@ -18,7 +18,7 @@ namespace Opserver
 
         public class CurrentContext
         {
-            private IEnumerable<StatusModule> _modules;
+            private readonly IEnumerable<StatusModule> _modules;
 
             /// <summary>
             /// The security provider for this context.

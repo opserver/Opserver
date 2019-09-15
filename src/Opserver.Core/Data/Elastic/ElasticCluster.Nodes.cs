@@ -25,7 +25,7 @@ namespace Opserver.Data.Elastic
                 {
                     foreach (var s in stats.Nodes)
                     {
-                        if (result.RawNodes.TryGetValue(s.Key, out NodeInfo node))
+                        if (result.RawNodes.TryGetValue(s.Key, out var node))
                         {
                             node.Stats = s.Value;
                         }

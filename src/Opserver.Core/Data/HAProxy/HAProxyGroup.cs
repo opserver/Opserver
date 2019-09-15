@@ -58,6 +58,6 @@ namespace Opserver.Data.HAProxy
         /// <summary>
         /// Gets the list of proxies for this group
         /// </summary>
-        public List<Proxy> GetProxies() => Module.GetProxies(Instances);
+        public List<Proxy> GetProxies() => HAProxyModule.GetProxies(Instances);
     }
 }
