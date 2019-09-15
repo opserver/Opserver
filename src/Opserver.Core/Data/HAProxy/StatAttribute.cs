@@ -6,7 +6,7 @@ namespace Opserver.Data.HAProxy
     /// Represents a statistic from the proxy stat dump, since these are always added at the end in newer versions, they're parsed based on position.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
-    public class StatAttribute : Attribute
+    public sealed class StatAttribute : Attribute
     {
         public int Position { get; set; }
         public string Name { get; set; }

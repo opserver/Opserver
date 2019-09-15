@@ -16,7 +16,7 @@ namespace Opserver.Helpers
     /// When constrainting an entire controller/class, per-route additions can be made using the <see cref="AlsoAllowAttribute"/>.
     /// </remarks>
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
-    public class OnlyAllowAttribute : AuthorizeAttribute, IAuthorizationFilter
+    public sealed class OnlyAllowAttribute : AuthorizeAttribute, IAuthorizationFilter
     {
         public new Roles Roles { get; set; }
 
@@ -50,7 +50,7 @@ namespace Opserver.Helpers
     /// Specifies that an action method constrained by a class-level <see cref="OnlyAllowAttribute"/> can authorize additional <see cref="Roles"/>.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class AlsoAllowAttribute : Attribute
+    public sealed class AlsoAllowAttribute : Attribute
     {
         public Roles Roles { get; set; }
 
