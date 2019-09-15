@@ -611,10 +611,11 @@ SELECT Caption,
 
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {
-                var query = $"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'";
-                var data = await Query(query).GetFirstResultAsync();
-
-                return data?.Name;
+                using (var query = Query($"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'"))
+                {
+                    var data = await query.GetFirstResultAsync();
+                    return data?.Name;
+                }
             }
 
             private async Task<bool> GetCanQueryAdapterUtilization()
