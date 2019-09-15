@@ -66,9 +66,6 @@ namespace Opserver.Controllers
             ? base.Json(data, serializerOptions)
             : base.Json(data);
 
-        protected ContentResult JsonRaw(object content) =>
-            new ContentResult { Content = content?.ToString(), ContentType = "application/json" };
-
         protected ActionResult JsonNotFound()
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
