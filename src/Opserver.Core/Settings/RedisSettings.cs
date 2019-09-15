@@ -32,7 +32,7 @@ namespace Opserver
             /// </summary>
             public Regex CrossRegionNameRegex => _crossRegionNameRegex ?? (_crossRegionNameRegex = GetRegex(CrossRegionNamePattern));
 
-            private Regex GetRegex(string pattern) =>
+            private static Regex GetRegex(string pattern) =>
                 pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
         }
 

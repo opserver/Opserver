@@ -37,7 +37,7 @@ namespace Opserver.Views.HAProxy
         public List<Proxy> Proxies { get; set; }
         public string WatchProxy { get; set; }
 
-        public string GetClass(Item s)
+        public static string GetClass(Item s)
         {
             if (s.IsFrontend)
                 return "frontend";

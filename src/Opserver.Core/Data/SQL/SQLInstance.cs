@@ -26,7 +26,7 @@ namespace Opserver.Data.SQL
             new ConcurrentDictionary<Tuple<string, Version>, string>();
 
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
-        public string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
+        public static string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
 
         public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(module, settings.Name)
         {

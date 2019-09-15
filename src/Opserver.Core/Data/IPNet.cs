@@ -59,7 +59,7 @@ namespace Opserver.Data
         private bool Contains(TinyIPAddress tip) =>
             AddressFamily == tip.AddressFamily && (TSubnet & TIPAddress) == (TSubnet & tip);
 
-        public bool IsPrivateNetwork(IPNet network) =>
+        public static bool IsPrivateNetwork(IPNet network) =>
             ReservedPrivateRanges.Any(r => r.Contains(network));
 
         public IPNet(IPAddress ip, IPAddress subnet, int? cidr = null)

@@ -301,7 +301,7 @@ namespace Opserver.Data.Dashboard.Providers
             }
         }
 
-        private MonitorStatus GetStatusFromString(string status)
+        private static MonitorStatus GetStatusFromString(string status)
         {
             switch (status)
             {

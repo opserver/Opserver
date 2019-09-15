@@ -455,7 +455,7 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
 
         public Task<DbConnection> GetConnectionAsync() => Connection.GetOpenAsync(Settings.ConnectionString, QueryTimeoutMs);
 
-        private string GetOptionalDateClause(string field, DateTime? start, DateTime? end)
+        private static string GetOptionalDateClause(string field, DateTime? start, DateTime? end)
         {
             if (start.HasValue && end.HasValue) // start & end
                 return $"{field} Between @start and @end";

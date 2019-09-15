@@ -188,7 +188,7 @@ namespace Opserver.Data.Dashboard.Providers
         /// <param name="end">Optional end date of the range</param>
         /// <param name="fuzzySeconds">How many seconds to allow on each side of *exactly* 24 hours ago to be a match</param>
         /// <returns></returns>
-        public bool IsApproximatelyLast24Hrs(DateTime? start, DateTime? end, int fuzzySeconds = 90)
+        public static bool IsApproximatelyLast24Hrs(DateTime? start, DateTime? end, int fuzzySeconds = 90)
         {
             if (!start.HasValue) return false;
             if (Math.Abs((DateTime.UtcNow.AddDays(-1) - start.Value).TotalSeconds) <= fuzzySeconds)

@@ -143,7 +143,7 @@ namespace Opserver.Controllers
             return View("Node.Graph", vd);
         }
 
-        private async Task PopulateModel(NodeGraphModel vd, string type, string subId)
+        private static async Task PopulateModel(NodeGraphModel vd, string type, string subId)
         {
             var n = vd.Node;
             switch (type)

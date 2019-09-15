@@ -40,7 +40,7 @@ namespace Opserver.Data
         /// <summary>
         /// Number of consecutive cache fetch failures before backing off of polling the entire node for <see cref="BackoffDuration"/>
         /// </summary>
-        protected int FailsBeforeBackoff => 3;
+        protected static int FailsBeforeBackoff => 3;
 
         /// <summary>
         /// Length of time to backoff once <see cref="FailsBeforeBackoff"/> is hit

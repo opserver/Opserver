@@ -49,7 +49,7 @@ namespace Opserver.Data.HAProxy
             return GetProxies(instances);
         }
 
-        internal List<Proxy> GetProxies(List<HAProxyInstance> instances)
+        internal static List<Proxy> GetProxies(List<HAProxyInstance> instances)
         {
             using (MiniProfiler.Current.Step("HAProxy - GetProxies()"))
             {

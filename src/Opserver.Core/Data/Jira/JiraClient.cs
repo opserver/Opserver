@@ -154,7 +154,7 @@ namespace Opserver.Data.Jira
             return action.Host.IsNullOrEmptyReturn(_jiraSettings.DefaultHost);
         }
 
-        private string RenderVariableTable(string title, NameValueCollection vars)
+        private static string RenderVariableTable(string title, NameValueCollection vars)
         {
             if (vars == null || vars.Count == 0)
             {
@@ -182,7 +182,7 @@ namespace Opserver.Data.Jira
             return sb.ToStringRecycle();
         }
 
-        private string RenderDescription(Error error, string accountName)
+        private static string RenderDescription(Error error, string accountName)
         {
             var sb = StringBuilderCache.Get();
             sb.AppendLine("{noformat}");

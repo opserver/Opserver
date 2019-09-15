@@ -318,7 +318,7 @@ Select e.Id,
             }
         }
 
-        private string GetSortString(ExceptionSorts sort)
+        private static string GetSortString(ExceptionSorts sort)
         {
             switch (sort)
             {

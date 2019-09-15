@@ -71,7 +71,7 @@ namespace Opserver
             set => _servicesPatternRegEx = value;
         }
 
-        protected Regex GetPatternMatcher(string pattern) =>
+        protected static Regex GetPatternMatcher(string pattern) =>
             pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Opserver
                 set => _primaryInterfacePatternRegEx = value;
             }
 
-            protected Regex GetPatternMatcher(string pattern) =>
+            protected static Regex GetPatternMatcher(string pattern) =>
                 pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
             /// <summary>
@@ -181,7 +181,7 @@ namespace Opserver
                 set => _primaryInterfacePatternRegEx = value;
             }
 
-            protected Regex GetPatternMatcher(string pattern) =>
+            protected static Regex GetPatternMatcher(string pattern) =>
                 pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
             /// <summary>
