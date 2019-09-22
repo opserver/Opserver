@@ -13,11 +13,11 @@
     <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
-    <PackageReference Include="MiniProfiler.Shared" Version="4.1.0-preview.25" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.1.0-preview.32" />
     <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.85" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.596" />
     <PackageReference Include="StackExchange.Utils.Http" Version="0.3.2" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.7.0-preview9.19421.4" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.7.0-rc1.19456.4" />
     <PackageReference Include="System.DirectoryServices" Version="4.5.0" />
     <PackageReference Include="System.Management" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.5.0" />
