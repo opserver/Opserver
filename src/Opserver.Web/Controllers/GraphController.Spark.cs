@@ -226,7 +226,7 @@ namespace Opserver.Controllers
                 sb.Append(width)
                   .Append(" ")
                   .Append(SparkHeight)
-                  .Append(@" z""/>\n")
+                  .Append(" z\"/>\n")
                   .Append("\t</g>\n");
 
                 currentYTop += SparkHeight;
