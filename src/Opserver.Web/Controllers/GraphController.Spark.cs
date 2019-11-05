@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Opserver.Data.Dashboard;
 using Opserver.Data.SQL;
@@ -16,6 +17,7 @@ namespace Opserver.Controllers
 {
     public partial class GraphController
     {
+        private const int SparkGraphDuration = 600; // Seconds
         private const int SparkHeight = 50;
         private const int SparkPoints = 500;
         private const int SparkHours = 24;
@@ -26,17 +28,20 @@ namespace Opserver.Controllers
 
         private SQLModule Sql { get; }
         private DashboardModule Dashboard { get; }
+        private IMemoryCache MemCache { get; }
 
         public GraphController(
             SQLModule sqlModule,
             DashboardModule dashboardModule,
+            IMemoryCache cache,
             IOptions<OpserverSettings> settings) : base(settings)
         {
             Sql = sqlModule;
             Dashboard = dashboardModule;
+            MemCache = cache;
         }
 
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSparkSvg(string id)
         {
@@ -49,7 +54,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, 100, p => p.Value.GetValueOrDefault());
         }
 
-        [ResponseCache(Duration = 120)]
+        [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/cpu/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> CPUSparkSvgAll()
         {
@@ -59,7 +64,7 @@ namespace Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> MemorySpark(string id)
         {
@@ -72,7 +77,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(node.TotalMemory.GetValueOrDefault()), p => p.Value.GetValueOrDefault());
         }
 
-        [ResponseCache(Duration = 120)]
+        [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/memory/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> MemorySparkSvgAll()
         {
@@ -82,7 +87,7 @@ namespace Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
         {
@@ -95,7 +100,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
-        [ResponseCache(Duration = 120)]
+        [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/network/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> NetworkSparkSvgAll()
         {
@@ -150,7 +155,7 @@ namespace Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "node" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" })]
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)
         {
@@ -168,72 +173,78 @@ namespace Opserver.Controllers
         {
             const int width = SparkPoints;
 
-            var nodes = Dashboard.AllNodes;
-            var overallHeight = nodes.Count * SparkHeight;
-
-            long nowEpoch = DateTime.UtcNow.ToEpochTime(),
-                startEpoch = SparkStart.ToEpochTime();
-            var range = (nowEpoch - startEpoch) / (float)width;
-
-            var sb = StringBuilderCache.Get()
-                .AppendFormat("<svg version=\"1.1\" baseProfile=\"full\" width=\"{0}\" height=\"{1}\" xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"none\">\n", width.ToString(), overallHeight.ToString())
-                .AppendLine("\t<style>")
-                .AppendFormat("\t\tline {{ stroke:{0}; stroke-width:1 }}\n", AxisColor)
-                .AppendFormat("\t\tpath {{ fill:{0}; stroke:none; }}\n", Color)
-                .AppendLine("\t</style>");
-
-            var pointsLookup = new ConcurrentDictionary<string, List<T>>();
-            var maxLookup = new ConcurrentDictionary<string, long>();
-            var lookups = new List<Task>(nodes.Count);
-            foreach (var node in nodes)
+            // Filter to nodes we'd show, to trim on size
+            var nodes = Dashboard.AllNodes.Where(n => n.Category != DashboardCategory.Unknown || Dashboard.Settings.ShowOther).ToList();
+            // TODO: Better hashcode
+            var bytes = await MemCache.GetSetAsync<byte[]>("AllNodesSVG-" + nodes.Count(), async (_, __) =>
             {
-                lookups.Add(getPoints(node).ContinueWith(t =>
-                {
-                    if (!t.IsFaulted)
-                    {
-                        pointsLookup[node.Id] = t.Result;
-                        maxLookup[node.Id] = getMax(node, t.Result);
-                    }
-                }));
-            }
-            await Task.WhenAll(lookups);
+                var overallHeight = nodes.Count * SparkHeight;
 
-            int currentYTop = 0;
-            foreach (var pl in pointsLookup)
-            {
-                sb.AppendFormat("\t<view id=\"{0}\" viewBox=\"0 {1} {2} {3}\" />\n", pl.Key, currentYTop, width, SparkHeight)
-                  .AppendFormat("\t<g transform=\"translate(0, {0})\">\n", currentYTop)
-                  .AppendFormat("\t\t<line x1=\"0\" y1=\"{0}\" x2=\"{1}\" y2=\"{0}\" />\n", SparkHeight.ToString(), width.ToString())
-                  .AppendFormat("\t\t<path d=\"M0 {0} L", SparkHeight);
+                long nowEpoch = DateTime.UtcNow.ToEpochTime(),
+                    startEpoch = SparkStart.ToEpochTime();
+                var range = (nowEpoch - startEpoch) / (float)width;
 
-                var first = true;
-                long divisor = maxLookup[pl.Key] / SparkHeight;
-                foreach (var p in pl.Value)
+                var sb = StringBuilderCache.Get()
+                    .AppendFormat("<svg version=\"1.1\" baseProfile=\"full\" width=\"{0}\" height=\"{1}\" xmlns=\"http://www.w3.org/2000/svg\" preserveAspectRatio=\"none\">\n", width.ToString(), overallHeight.ToString())
+                    .AppendLine("\t<style>")
+                    .AppendFormat("\t\tline {{ stroke:{0}; stroke-width:1 }}\n", AxisColor)
+                    .AppendFormat("\t\tpath {{ fill:{0}; stroke:none; }}\n", Color)
+                    .AppendLine("\t</style>");
+
+                var pointsLookup = new ConcurrentDictionary<string, List<T>>();
+                var maxLookup = new ConcurrentDictionary<string, long>();
+                var lookups = new List<Task>(nodes.Count);
+                foreach (var node in nodes)
                 {
-                    var pos = (p.DateEpoch - startEpoch) / range;
-                    if (first && pos > 0)
+                    lookups.Add(getPoints(node).ContinueWith(t =>
                     {
-                        // TODO: Indicate a missing, ungraphed time portion?
-                        sb.Append((pos - 1).ToString("f1", CultureInfo.InvariantCulture))
-                          .Append(" ")
-                          .Append(SparkHeight)
-                          .Append(" ");
-                        first = false;
-                    }
-                    sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
-                      .Append((SparkHeight - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                        if (!t.IsFaulted)
+                        {
+                            pointsLookup[node.Id] = t.Result;
+                            maxLookup[node.Id] = getMax(node, t.Result);
+                        }
+                    }));
                 }
-                sb.Append(width)
-                  .Append(" ")
-                  .Append(SparkHeight)
-                  .Append(" z\"/>\n")
-                  .Append("\t</g>\n");
+                await Task.WhenAll(lookups);
 
-                currentYTop += SparkHeight;
-            }
+                int currentYTop = 0;
+                foreach (var pl in pointsLookup.OrderBy(pl => pl.Key))
+                {
+                    sb.AppendFormat("\t<view id=\"{0}\" viewBox=\"0 {1} {2} {3}\"/>\n", pl.Key, currentYTop, width, SparkHeight)
+                      .AppendFormat("\t<g transform=\"translate(0, {0})\">\n", currentYTop)
+                      .AppendFormat("\t\t<line x1=\"0\" y1=\"{0}\" x2=\"{1}\" y2=\"{0}\"/>\n", SparkHeight.ToString(), width.ToString())
+                      .AppendFormat("\t\t<path d=\"M0 {0} L", SparkHeight);
 
-            sb.Append("</svg>");
-            var bytes = Encoding.UTF8.GetBytes(sb.ToStringRecycle());
+                    var first = true;
+                    long divisor = maxLookup[pl.Key] / SparkHeight;
+                    foreach (var p in pl.Value)
+                    {
+                        var pos = (p.DateEpoch - startEpoch) / range;
+                        if (first && pos > 0)
+                        {
+                            // TODO: Indicate a missing, ungraphed time portion?
+                            sb.Append((pos - 1).ToString("f1", CultureInfo.InvariantCulture))
+                              .Append(" ")
+                              .Append(SparkHeight)
+                              .Append(" ");
+                            first = false;
+                        }
+                        sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
+                          .Append((SparkHeight - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                    }
+                    sb.Append(width)
+                      .Append(" ")
+                      .Append(SparkHeight)
+                      .Append(" z\"/>\n")
+                      .Append("\t</g>\n");
+
+                    currentYTop += SparkHeight;
+                }
+
+                sb.Append("</svg>");
+                return Encoding.UTF8.GetBytes(sb.ToStringRecycle());
+            }, TimeSpan.FromMinutes(10), TimeSpan.FromMinutes(20));
+
             return new FileContentResult(bytes, "image/svg+xml");
         }
 
