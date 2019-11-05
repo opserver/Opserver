@@ -15,13 +15,13 @@
     {
         if (Module.HasData)
         {
-            if (ViewContext.HttpContext.Request.Query.TryGetValue("allGraph", out _))
+            if (ViewContext.HttpContext.Request.Query.TryGetValue("singleGraph", out _))
             {
-                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/gaph/")@type/spark/all#@n.Id" alt="" /></a>
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark?id=@n.Id" alt="" /></a>
             }
             else
             {
-                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/gaph/")@type/spark?id=@n.Id" alt="" /></a>
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark/all#@n.Id" alt="" /></a>
             }
         }
         else
