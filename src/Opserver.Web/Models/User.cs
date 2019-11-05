@@ -39,17 +39,20 @@ namespace Opserver.Models
             {
                 roles |= Roles.Authenticated;
 
-                //if (Current.Security.IsAdmin)
-                // TODO: Secure the shizzle
-                roles |= Roles.GlobalAdmin;
+                // Global admins are unique and can see a few more things about Opserver itself (not per-module)
+                if (provider.IsGlobalAdmin(this))
+                {
+                    roles |= Roles.GlobalAdmin;
+                    IsGlobalAdmin = true;
+                }
             }
 
+            // Add per-module roles
             foreach (var m in modules)
             {
                 roles |= GetRoles(m);
             }
 
-            IsGlobalAdmin = (roles & Roles.GlobalAdmin) == Roles.GlobalAdmin;
             Roles = roles;
         }
 

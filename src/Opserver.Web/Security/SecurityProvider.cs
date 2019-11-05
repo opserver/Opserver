@@ -36,7 +36,10 @@ namespace Opserver.Security
         internal virtual bool InReadGroups(User user, StatusModule module)
         {
             var settings = module.SecuritySettings;
-            return settings != null && (InGroups(user, settings.ViewGroups) || InAdminGroups(user, module));
+            // User has direct access, global access, or is an admin
+            return settings != null && (InGroups(user, settings.ViewGroups)
+                                        || InGroups(user, Settings.ViewEverythingGroups)
+                                        || InAdminGroups(user, module));
         }
 
         /// <summary>
@@ -51,11 +54,14 @@ namespace Opserver.Security
         internal virtual bool InAdminGroups(User user, StatusModule module)
         {
             var settings = module.SecuritySettings;
-            return settings != null && InGroups(user, settings.AdminGroups);
+            // User either has direct access or via global
+            return settings != null && (InGroups(user, settings.AdminGroups) || InGroups(user, Settings.AdminEverythingGroups));
         }
 
         public virtual bool InGroups(User user, string groupNames) => false;
         public abstract bool ValidateUser(string userName, string password);
+
+        public bool IsGlobalAdmin(User user) => InGroups(user, Settings.AdminEverythingGroups);
 
         public virtual void PurgeCache() { }
 

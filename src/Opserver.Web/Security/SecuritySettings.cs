@@ -14,6 +14,16 @@ namespace Opserver.Security
         public string ApiKey { get; set; }
         public List<Network> InternalNetworks { get; set; }
 
+        /// <summary>
+        /// Semilcolon delimited list of security groups that can see everything, but not perform actions
+        /// </summary>
+        public string ViewEverythingGroups { get; set; }
+
+        /// <summary>
+        /// Semilcolon delimited list of security groups that can do anything, including management actions
+        /// </summary>
+        public string AdminEverythingGroups { get; set; }
+
         public class Network
         {
             /// <summary>
