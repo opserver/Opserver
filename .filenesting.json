@@ -12,7 +12,8 @@
       },
       "fileSuffixToExtension": {
         "add": {
-          ".Model.cs": [ ".cshtml" ]
+          ".Model.cs": [ ".cshtml" ],
+          ".json.defaults": [ ".json" ]
         }
       }
     }
