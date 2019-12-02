@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Opserver.Data.HAProxy;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.HAProxy;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.HAProxy)]
+    [OnlyAllow(HAProxyRoles.Viewer)]
     public partial class HAProxyController : StatusController<HAProxyModule>
     {
         public HAProxyController(HAProxyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }

@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Opserver.Data.Cloudflare;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.Cloudflare;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.Cloudflare)]
+    [OnlyAllow(CloudflareRoles.Viewer)]
     public class CloudflareController : StatusController<CloudflareModule>
     {
         public CloudflareController(CloudflareModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }

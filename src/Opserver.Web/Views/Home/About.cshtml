@@ -183,7 +183,10 @@
                         }
                         else
                         {
-                            @Current.User.Roles
+                            @foreach (var r in Current.User.Roles.OrderBy(r => r))
+                            {
+                                <div>@r</div>
+                            }
                         }
                     </li>
                     <li class="list-group-item">

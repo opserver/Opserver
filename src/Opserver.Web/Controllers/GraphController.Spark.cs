@@ -176,7 +176,7 @@ namespace Opserver.Controllers
             // Filter to nodes we'd show, to trim on size
             var nodes = Dashboard.AllNodes.Where(n => n.Category != DashboardCategory.Unknown || Dashboard.Settings.ShowOther).ToList();
             // TODO: Better hashcode
-            var bytes = await MemCache.GetSetAsync<byte[]>("AllNodesSVG-" + nodes.Count(), async (_, __) =>
+            var bytes = await MemCache.GetSetAsync<byte[]>("AllNodesSVG-" + nodes.Count, async (_, __) =>
             {
                 var overallHeight = nodes.Count * SparkHeight;
 

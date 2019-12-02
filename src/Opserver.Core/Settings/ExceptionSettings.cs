@@ -1,4 +1,5 @@
-﻿using StackExchange.Exceptional;
+﻿using Opserver.Data.Exceptions;
+using StackExchange.Exceptional;
 using System;
 using System.Collections.Generic;
 
@@ -7,6 +8,8 @@ namespace Opserver
     public class ExceptionsSettings : ModuleSettings
     {
         public override bool Enabled => Stores.Count > 0;
+        public override string AdminRole => ExceptionsRoles.Admin;
+        public override string ViewRole => ExceptionsRoles.Viewer;
 
         public int PageSize { get; set; } = 500;
 

@@ -4,30 +4,32 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Options;
 using Opserver.Data.Exceptions;
 using Opserver.Data.Jira;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.Exceptions;
 using StackExchange.Exceptional;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.Exceptions)]
+    [OnlyAllow(ExceptionsRoles.Viewer)]
     [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     public class ExceptionsController : StatusController<ExceptionsModule>
     {
         public const int MaxSearchResults = 2000;
         private List<ApplicationGroup> ApplicationGroups => CurrentStore.ApplicationGroups;
-        private readonly ExceptionStore CurrentStore;
-        private readonly string CurrentGroup;
-        private readonly string CurrentLog;
+        private ExceptionStore CurrentStore;
+        private string CurrentGroup;
+        private string CurrentLog;
         private Guid? CurrentId;
         private Guid? CurrentSimilarId;
-        private readonly ExceptionSorts CurrentSort;
+        private ExceptionSorts CurrentSort;
 
-        public ExceptionsController(ExceptionsModule module, IOptions<OpserverSettings> settings) : base(module, settings)
+        public ExceptionsController(ExceptionsModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
+
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
             CurrentStore = Module.GetStore(GetParam("store"));
             CurrentGroup = GetParam("group");
@@ -56,6 +58,7 @@ namespace Opserver.Controllers
                     }
                 }
             }
+            base.OnActionExecuting(context);
         }
 
         public string GetParam(string param) => Request.HasFormContentType ? Request.Form[param] : Request.Query[param];
@@ -189,7 +192,7 @@ namespace Opserver.Controllers
             }
         }
 
-        [Route("exceptions/protect"), HttpPost, OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/protect"), HttpPost, OnlyAllow(ExceptionsRoles.Admin)]
         public async Task<ActionResult> Protect(Guid id, bool redirect = false)
         {
             var success = await CurrentStore.ProtectErrorAsync(id);
@@ -197,7 +200,7 @@ namespace Opserver.Controllers
             return redirect ? Json(new { url = Url.Action(nameof(Exceptions), new { store = CurrentStore.Name, group = CurrentGroup, log = CurrentLog }) }) : Counts();
         }
 
-        [Route("exceptions/delete"), HttpPost, OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/delete"), HttpPost, OnlyAllow(ExceptionsRoles.Admin)]
         public async Task<ActionResult> Delete()
         {
             var toDelete = await GetSearchAsync();
@@ -218,7 +221,7 @@ namespace Opserver.Controllers
                 : Json(new { url = Url.Action(nameof(Exceptions), new { store = CurrentStore.Name, group = CurrentGroup, log = CurrentLog }) });
         }
 
-        [Route("exceptions/delete-list"), HttpPost, OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/delete-list"), HttpPost, OnlyAllow(ExceptionsRoles.Admin)]
         public async Task<ActionResult> DeleteList(Guid[] ids, bool returnCounts = false)
         {
             if (ids == null || ids.Length == 0) return Json(true);
@@ -253,14 +256,14 @@ namespace Opserver.Controllers
             });
         }
 
-        [Route("exceptions/jiraactions"), HttpGet, OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/jiraactions"), HttpGet, OnlyAllow(ExceptionsRoles.Admin)]
         public ActionResult JiraActions(string appName)
         {
             var issues = Module.Settings.Jira.GetActionsForApplication(appName);
             return View("Exceptions.Jira", issues);
         }
 
-        [Route("exceptions/jiraaction"), HttpGet, OnlyAllow(Roles.ExceptionsAdmin)]
+        [Route("exceptions/jiraaction"), HttpGet, OnlyAllow(ExceptionsRoles.Admin)]
         public async Task<ActionResult> JiraAction(Guid id, int actionid)
         {
             var e = await CurrentStore.GetErrorAsync(CurrentLog, id);

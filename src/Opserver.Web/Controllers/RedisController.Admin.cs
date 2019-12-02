@@ -4,19 +4,18 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Opserver.Data.Redis;
 using Opserver.Helpers;
-using Opserver.Models;
 
 namespace Opserver.Controllers
 {
     public partial class RedisController
     {
-        [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/kill-client"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> KillClient(string node, string address)
         {
             return PerformInstanceAction(node, i => i.KillClientAsync(address));
         }
 
-        [Route("redis/instance/actions/{node}"), OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}"), OnlyAllow(RedisRoles.Admin)]
         public ActionResult InstanceActions(string node)
         {
             var h = Module.GetHost(node);
@@ -32,10 +31,10 @@ namespace Opserver.Controllers
             return JsonNotFound();
         }
 
-        [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> PromoteToMaster(string node) => Deslave(node, false);
 
-        [Route("redis/instance/actions/{node}/make-master-promote"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/make-master-promote"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> PromoteToMasterTiebreaker(string node) => Deslave(node, true);
 
         private async Task<ActionResult> Deslave(string node, bool promote)
@@ -68,7 +67,7 @@ namespace Opserver.Controllers
             }
         }
 
-        [Route("redis/instance/actions/{node}/key-purge"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/key-purge"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public async Task<ActionResult> KeyPurge(string node, int db, string key)
         {
             var i = Module.GetInstance(node);
@@ -85,13 +84,13 @@ namespace Opserver.Controllers
             }
         }
 
-        [Route("redis/instance/actions/{node}/slave-to"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/slave-to"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> SlaveInstance(string node, string newMaster)
         {
             return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
         }
 
-        [Route("redis/server/actions/preview"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/server/actions/preview"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public ActionResult ServerActionPreview(string[] operations)
         {
             var ops = new List<RedisInstanceOperation>();
@@ -105,7 +104,7 @@ namespace Opserver.Controllers
             return PartialView("Server.Actions.Preview", ops);
         }
 
-        [Route("redis/server/actions/perform"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/server/actions/perform"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public async Task<ActionResult> ServerActionPerform(string[] operations)
         {
             var tasks = new List<Task>();
@@ -120,13 +119,13 @@ namespace Opserver.Controllers
             return Json(new { success = true, result = $"{tasks.Count.Pluralize("operation")} running..." });
         }
 
-        [Route("redis/instance/actions/{node}/set-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/set-tiebreaker"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> SetTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.SetSERedisTiebreakerAsync());
         }
 
-        [Route("redis/instance/actions/{node}/clear-tiebreaker"), HttpPost, OnlyAllow(Roles.RedisAdmin)]
+        [Route("redis/instance/actions/{node}/clear-tiebreaker"), HttpPost, OnlyAllow(RedisRoles.Admin)]
         public Task<ActionResult> ClearTiebreaker(string node)
         {
             return PerformInstanceAction(node, i => i.ClearSERedisTiebreakerAsync());

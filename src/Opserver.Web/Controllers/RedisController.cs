@@ -2,12 +2,11 @@
 using Microsoft.Extensions.Options;
 using Opserver.Data.Redis;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.Redis;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.Redis)]
+    [OnlyAllow(RedisRoles.Viewer)]
     public partial class RedisController : StatusController<RedisModule>
     {
         public RedisController(RedisModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }

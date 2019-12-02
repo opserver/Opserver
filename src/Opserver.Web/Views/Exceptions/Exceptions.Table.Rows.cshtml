@@ -1,7 +1,7 @@
 ﻿@model ExceptionsModel
 @{
     Layout = null;
-    var showActions = Current.User.Is(Roles.ExceptionsAdmin);
+    var showActions = Current.User.Is(ExceptionsRoles.Admin);
 }
 @functions {
     public string ErrorStyle(StackExchange.Exceptional.Error e)

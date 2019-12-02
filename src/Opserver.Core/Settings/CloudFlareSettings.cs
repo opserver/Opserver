@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using Opserver.Data.Cloudflare;
 
 namespace Opserver
 {
     public class CloudflareSettings : ModuleSettings
     {
         public override bool Enabled => Email.HasValue() && APIKey.HasValue();
+        public override string AdminRole => CloudflareRoles.Admin;
+        public override string ViewRole => CloudflareRoles.Viewer;
         public List<DataCenter> DataCenters { get; set; } = new List<DataCenter>();
 
         /// <summary>

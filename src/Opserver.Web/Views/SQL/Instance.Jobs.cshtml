@@ -20,7 +20,7 @@
                 <th>End</th>
                 <th>Duration</th>
                 <th>Enabled</th>
-                @if (Current.User.Is(Roles.SQLAdmin))
+                @if (Current.User.Is(SQLRoles.Admin))
                 {
                     <th>Actions</th>
                 }
@@ -67,7 +67,7 @@ Last Run Message: @j.LastRunMessage">
                         <td colspan="4" class="text-muted">no run history found</td>   
                     }
                     <td class="@(j.IsEnabled ? "" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
-                    @if (Current.User.Is(Roles.SQLAdmin))
+                    @if (Current.User.Is(SQLRoles.Admin))
                     {
                         <td class="actions">
                             @if (j.IsEnabled)

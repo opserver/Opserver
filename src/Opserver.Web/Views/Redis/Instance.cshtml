@@ -244,7 +244,7 @@
                             @foreach (var kd in info.Keyspace.KeyData)
                             {
                                 <tr>
-                                    <td>@kd.Key.ToString()@if (Current.User.Is(Roles.RedisAdmin))
+                                    <td>@kd.Key.ToString()@if (Current.User.Is(RedisRoles.Admin))
                                     { <span class="text-muted">(<a href="~/redis/analyze/memory?node=@i.HostAndPort&db=@kd.Key.ToString()">analyze</a>)</span>}</td>
                                     <td>@kd.Value.Keys.ToComma()</td>
                                     <td>@kd.Value.Expires.ToComma()</td>

@@ -9,6 +9,7 @@ namespace Opserver.Data.SQL
     {
         public override string Name => "SQL";
         public override bool Enabled => AllInstances.Count > 0;
+
         /// <summary>
         /// SQL Instances not in clusters
         /// </summary>

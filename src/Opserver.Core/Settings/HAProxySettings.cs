@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using Opserver.Data.HAProxy;
 
 namespace Opserver
 {
-    public partial class HAProxySettings : ModuleSettings
+    public class HAProxySettings : ModuleSettings
     {
         public override bool Enabled => Instances.Count > 0 || Groups.Count > 0;
+        public override string AdminRole => HAProxyRoles.Admin;
+        public override string ViewRole => HAProxyRoles.Viewer;
 
         public List<Group> Groups { get; set; } = new List<Group>();
 

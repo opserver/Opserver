@@ -3,12 +3,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Opserver.Data.Elastic;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.Elastic;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.Elastic)]
+    [OnlyAllow(ElasticRoles.Viewer)]
     public class ElasticController : StatusController<ElasticModule>
     {
         public ElasticController(ElasticModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }

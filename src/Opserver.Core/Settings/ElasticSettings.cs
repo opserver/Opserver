@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Opserver.Data.Elastic;
 
 namespace Opserver
 {
     public class ElasticSettings : ModuleSettings
     {
         public override bool Enabled => Clusters?.Any() ?? false;
+        public override string AdminRole => ElasticRoles.Admin;
+        public override string ViewRole => ElasticRoles.Viewer;
 
         /// <summary>
         /// elastic search clusters to monitor

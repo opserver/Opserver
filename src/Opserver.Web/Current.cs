@@ -52,18 +52,18 @@ namespace Opserver
                     if (_user == null)
                     {
                         // Calc request-based roles
-                        var roles = Roles.None;
+                        var roles = new List<string>();
                         if (IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress))
                         {
-                            roles |= Roles.LocalRequest;
+                            roles.Add(Roles.LocalRequest);
                         }
                         if (Security.IsInternalIP(RequestIP))
                         {
-                            roles |= Roles.InternalRequest;
+                            roles.Add(Roles.InternalRequest);
                         }
                         if (Security.IsValidApiKey(Request?.Query["key"]))
                         {
-                            roles |= Roles.ApiRequest;
+                            roles.Add(Roles.ApiRequest);
                         }
 
                         _user = new User(Security, HttpContext.User, roles, _modules);

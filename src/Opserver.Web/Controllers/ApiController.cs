@@ -9,7 +9,7 @@ using Opserver.Models;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.InternalRequest | Roles.ApiRequest)] // API Requests are internal only
+    [OnlyAllow(Roles.InternalRequest), AlsoAllow(Roles.ApiRequest)] // API Requests are internal only
     public class ApiController : StatusController
     {
         private PollingService Poller { get; }

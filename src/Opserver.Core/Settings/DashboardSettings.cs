@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Opserver.Data.Dashboard;
 
 namespace Opserver
 {
     public class DashboardSettings : ModuleSettings, INodeSettings
     {
         public override bool Enabled => Providers.Any();
+        public override string AdminRole => DashboardRoles.Admin;
+        public override string ViewRole => DashboardRoles.Viewer;
 
         public List<Category> Categories { get; set; } = new List<Category>();
 

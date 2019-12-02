@@ -3,13 +3,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Opserver.Data.HAProxy;
 using Opserver.Helpers;
-using Opserver.Models;
 
 namespace Opserver.Controllers
 {
     public partial class HAProxyController
     {
-        [Route("haproxy/admin/action"), HttpPost, OnlyAllow(Roles.HAProxyAdmin)]
+        [Route("haproxy/admin/action"), HttpPost, OnlyAllow(HAProxyRoles.Admin)]
         public async Task<ActionResult> HAProxyAdminProxy(string group, string proxy, string server, Action act)
         {
             // Entire server

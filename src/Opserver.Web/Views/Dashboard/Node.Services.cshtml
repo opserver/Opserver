@@ -1,6 +1,6 @@
 ﻿@model Node
 @{
-    bool showServiceActions = (Current.User.Is(Roles.DashboardAdmin) && Model.HasServiceControl());
+    bool showServiceActions = (Current.User.Is(DashboardRoles.Admin) && Model.HasServiceControl());
 }
 
 <h5 class="page-header">@Model.Services.Count.Pluralize("Service")</h5>

@@ -18,25 +18,23 @@ namespace Opserver.Helpers
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false)]
     public sealed class OnlyAllowAttribute : AuthorizeAttribute, IAuthorizationFilter
     {
-        public new Roles Roles { get; set; }
+        public string Role { get; set; }
 
-        public OnlyAllowAttribute(Roles roles)
+        public OnlyAllowAttribute(string role)
         {
-            if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException(nameof(roles));
-
-            Roles = roles;
+            Role = role ?? throw new ArgumentOutOfRangeException(nameof(role));
         }
 
         public void OnAuthorization(AuthorizationFilterContext context)
         {
-            if (Current.User.Is(Roles))
+            if (Current.User.Is(Role))
             {
                 return; // Authorized via OnlyAllow
             }
+            // TODO: Make this work for `n` [AlsoAllow], or take a params perhaps
             if (context.ActionDescriptor is ControllerActionDescriptor cad
                 && cad?.MethodInfo.GetCustomAttributes(typeof(AlsoAllowAttribute), inherit: false).SingleOrDefault() is AlsoAllowAttribute alsoAllow
-                && Current.User.Is(alsoAllow.Roles))
+                && Current.User.Is(alsoAllow.Role))
             {
                 return; // Authorized via AlsoAllow
             }
@@ -49,17 +47,14 @@ namespace Opserver.Helpers
     /// <summary>
     /// Specifies that an action method constrained by a class-level <see cref="OnlyAllowAttribute"/> can authorize additional <see cref="Roles"/>.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.All)]
     public sealed class AlsoAllowAttribute : Attribute
     {
-        public Roles Roles { get; set; }
+        public string Role { get; set; }
 
-        public AlsoAllowAttribute(Roles roles)
+        public AlsoAllowAttribute(string role)
         {
-            if (roles == Roles.None)
-                throw new ArgumentOutOfRangeException(nameof(roles));
-
-            Roles = roles;
+            Role = role ?? throw new ArgumentOutOfRangeException(nameof(role));
         }
     }
 }

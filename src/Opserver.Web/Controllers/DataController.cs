@@ -7,7 +7,7 @@ using Opserver.Models;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.GlobalAdmin | Roles.InternalRequest)]
+    [OnlyAllow(Roles.GlobalAdmin), AlsoAllow(Roles.InternalRequest)]
     public class DataController : StatusController
     {
         private PollingService Poller { get; }

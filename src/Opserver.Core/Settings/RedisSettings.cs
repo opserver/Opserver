@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Opserver.Data.Redis;
 
 namespace Opserver
 {
     public class RedisSettings : ModuleSettings
     {
         public override bool Enabled => Servers.Count > 0;
+        public override string AdminRole => RedisRoles.Admin;
+        public override string ViewRole => RedisRoles.Viewer;
 
         public List<Server> Servers { get; set; } = new List<Server>();
 

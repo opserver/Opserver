@@ -1,4 +1,6 @@
-﻿namespace Opserver
+﻿using Opserver.Models;
+
+namespace Opserver
 {
     public class GlobalSettings : ISecurableModule
     {
@@ -33,6 +35,9 @@
         /// Semicolon delimited list of groups that can view the entire site, exceptions, HAProxy servers, etc.
         /// </summary>
         public string ViewGroups { get; set; }
+
+        public string AdminRole => Roles.GlobalAdmin;
+        public string ViewRole => Roles.GlobalViewer;
 
         public enum ProfilingModes
         {

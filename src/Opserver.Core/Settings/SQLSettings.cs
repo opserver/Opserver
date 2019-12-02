@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using Opserver.Data.SQL;
 
 namespace Opserver
 {
     public class SQLSettings : ModuleSettings
     {
         public override bool Enabled => Clusters.Count > 0 || Instances.Count > 0;
+        public override string AdminRole => SQLRoles.Admin;
+        public override string ViewRole => SQLRoles.Viewer;
 
         public List<Cluster> Clusters { get; set; } = new List<Cluster>();
 

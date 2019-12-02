@@ -8,12 +8,11 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Options;
 using Opserver.Data.SQL;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.SQL;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.SQL)]
+    [OnlyAllow(SQLRoles.Viewer)]
     public partial class SQLController : StatusController<SQLModule>
     {
         public SQLController(SQLModule sqlModule, IOptions<OpserverSettings> settings) : base(sqlModule, settings) { }

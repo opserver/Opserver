@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using Opserver.Data.PagerDuty;
 using Opserver.Helpers;
-using Opserver.Models;
 using Opserver.Views.PagerDuty;
 using System;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Options;
 
 namespace Opserver.Controllers
 {
-    [OnlyAllow(Roles.PagerDuty)]
+    [OnlyAllow(PagerDutyRoles.Viewer)]
     public partial class PagerDutyController : StatusController<PagerDutyModule>
     {
         public PagerDutyController(PagerDutyModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
