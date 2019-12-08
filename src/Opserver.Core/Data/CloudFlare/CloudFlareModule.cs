@@ -4,7 +4,7 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Opserver.Data.Cloudflare
 {
@@ -16,13 +16,13 @@ namespace Opserver.Data.Cloudflare
         public CloudflareAPI API { get; }
         public Dictionary<string, List<IPNet>> AllDatacenters { get; }
 
-        public CloudflareModule(IOptions<CloudflareSettings> settings, PollingService poller) : base(settings, poller)
+        public CloudflareModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
-            if (settings.Value.Enabled)
+            if (Settings.Enabled)
             {
                 API = new CloudflareAPI(this);
                 API.TryAddToGlobalPollers();
-                AllDatacenters = settings.Value?.DataCenters
+                AllDatacenters = Settings?.DataCenters
                             .ToDictionary(
                                 dc => dc.Name,
                                 dc => dc.Ranges.Concat(dc.MaskedRanges).Select(r => IPNet.Parse(r)).ToList()

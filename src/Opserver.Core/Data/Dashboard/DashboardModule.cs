@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
 using Opserver.Data.Dashboard.Providers;
 using Opserver.Helpers;
 using System;
@@ -17,10 +17,10 @@ namespace Opserver.Data.Dashboard
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
-        public DashboardModule(IOptions<DashboardSettings> settings, PollingService poller, AddressCache addressCache) : base(settings, poller)
+        public DashboardModule(IConfiguration config, PollingService poller, AddressCache addressCache) : base(config, poller)
         {
             AddressCache = addressCache;
-            var providers = settings.Value.Providers;
+            var providers = Settings.Providers;
             if (providers?.Any() != true)
             {
                 Providers.Add(new EmptyDataProvider(this, "EmptyDataProvider"));
@@ -43,7 +43,7 @@ namespace Opserver.Data.Dashboard
 
             Providers.ForEach(p => p.TryAddToGlobalPollers());
 
-            AllCategories = settings.Value.Categories
+            AllCategories = Settings.Categories
                 .Select(sc => new DashboardCategory(this, sc))
                 .ToList();
         }

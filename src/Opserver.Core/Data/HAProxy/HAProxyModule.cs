@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 using StackExchange.Profiling;
 
 namespace Opserver.Data.HAProxy
@@ -14,9 +14,9 @@ namespace Opserver.Data.HAProxy
         public List<HAProxyGroup> Groups { get; }
         public HAProxyAdmin Admin { get; }
 
-        public HAProxyModule(IOptions<HAProxySettings> settings, PollingService poller) : base(settings, poller)
+        public HAProxyModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
-            var snapshot = settings.Value;
+            var snapshot = Settings;
             Groups = snapshot.Groups.Select(g => new HAProxyGroup(this, g))
                 .Union(snapshot.Instances.Select(c => new HAProxyGroup(this, c)))
                 .ToList();

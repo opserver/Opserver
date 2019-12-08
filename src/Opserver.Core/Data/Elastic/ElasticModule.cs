@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Opserver.Data.Elastic
 {
@@ -12,9 +12,9 @@ namespace Opserver.Data.Elastic
 
         public List<ElasticCluster> Clusters { get; }
 
-        public ElasticModule(IOptions<ElasticSettings> settings, PollingService poller) : base(settings, poller)
+        public ElasticModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
-            Clusters = settings.Value.Clusters
+            Clusters = Settings.Clusters
                 .Select(c => new ElasticCluster(this, c))
                 .Where(i => i.TryAddToGlobalPollers())
                 .ToList();

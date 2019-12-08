@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using System;
+using System.Linq;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Opserver.Data;
@@ -11,6 +13,12 @@ namespace Opserver
         private readonly IOptions<T> _settings;
         public T Settings => _settings.Value;
         public override ISecurableModule SecuritySettings => Settings;
+        protected StatusModule(IConfiguration config, PollingService poller) : base(poller)
+        {
+            // TODO: See if there's a way to get back to a proper reloadable IOptions here?
+            // To be fair, it needs proper stpport down the whole module tree, e.g. which instances are created and such
+            _settings = Options.Create(config.GetSection("Modules").GetSection(typeof(T).Name.Replace("Settings", "")).Get<T>() ?? new T());
+        }
         protected StatusModule(IOptions<T> settings, PollingService poller) : base(poller)
         {
             _settings = settings;
@@ -35,24 +43,15 @@ namespace Opserver
 
     public static class StatusModuleExtensions
     {
-        public static IServiceCollection AddStatusModules(this IServiceCollection services, IConfiguration _configuration)
+        public static IServiceCollection AddStatusModules(this IServiceCollection services)
         {
-            void Add<TSettings, TModule>(string settingsSection) where TSettings : ModuleSettings where TModule : StatusModule
+            var allTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(a => a.DefinedTypes).Where(t => !t.IsAbstract);
+            // Register all modules
+            foreach (var type in allTypes.Where(typeof(StatusModule).IsAssignableFrom))
             {
-                services.Configure<TSettings>(_configuration.GetSection(settingsSection))   // Add settings
-                        .AddSingleton<TModule>()                                            // Actual Singleton
-                        .AddSingleton<StatusModule, TModule>(x => x.GetService<TModule>()); // For IEnumerable discovery
+                services.Add(new ServiceDescriptor(type, type, ServiceLifetime.Singleton));
+                services.Add(new ServiceDescriptor(typeof(StatusModule), x => x.GetService(type), ServiceLifetime.Singleton));
             }
-
-            // TODO: Discovery instead
-            Add<DashboardSettings, DashboardModule>("Dashboard");
-            Add<SQLSettings, Data.SQL.SQLModule>("SQL");
-            Add<RedisSettings, Data.Redis.RedisModule>("Redis");
-            Add<ElasticSettings, Data.Elastic.ElasticModule>("Elastic");
-            Add<PagerDutySettings, Data.PagerDuty.PagerDutyModule>("PagerDuty");
-            Add<ExceptionsSettings, Data.Exceptions.ExceptionsModule>("Exceptions");
-            Add<HAProxySettings, Data.HAProxy.HAProxyModule>("HAProxy");
-            Add<CloudflareSettings, Data.Cloudflare.CloudflareModule>("Cloudflare");
 
             return services;
         }

@@ -30,7 +30,7 @@ namespace Opserver
                     .AddSingleton<IHostedService>(x => x.GetRequiredService<PollingService>());
 
             // Register all the modules
-            services.AddStatusModules(_configuration);
+            services.AddStatusModules();
 
             return services;
         }

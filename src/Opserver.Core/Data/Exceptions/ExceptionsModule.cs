@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Configuration;
 
 namespace Opserver.Data.Exceptions
 {
@@ -11,9 +11,9 @@ namespace Opserver.Data.Exceptions
 
         public List<ExceptionStore> Stores { get; }
 
-        public ExceptionsModule(IOptions<ExceptionsSettings> settings, PollingService poller) : base(settings, poller)
+        public ExceptionsModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
-            Stores = settings.Value.Stores
+            Stores = Settings.Stores
                 .Select(s => new ExceptionStore(this, s))
                 .Where(s => s.TryAddToGlobalPollers())
                 .ToList();

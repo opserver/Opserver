@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Configuration;
 
 namespace Opserver.Data.PagerDuty
 {
@@ -9,9 +9,9 @@ namespace Opserver.Data.PagerDuty
 
         public PagerDutyAPI API { get; }
 
-        public PagerDutyModule(IOptions<PagerDutySettings> settings, PollingService poller) : base(settings, poller)
+        public PagerDutyModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
-            if (settings.Value.Enabled)
+            if (Settings.Enabled)
             {
                 API = new PagerDutyAPI(this);
                 API.TryAddToGlobalPollers();
