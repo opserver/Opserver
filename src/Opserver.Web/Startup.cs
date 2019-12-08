@@ -30,13 +30,6 @@ namespace Opserver
             // Register Opserver.Core config and polling
             services.AddCoreOpserverServices(_configuration);
 
-            // Preview 6 workaround, see https://github.com/aspnet/AspNetCore/issues/11246#issuecomment-502381495
-            services.Add(
-                new ServiceDescriptor(
-                    typeof(IActionResultExecutor<JsonResult>),
-                    Type.GetType("Microsoft.AspNetCore.Mvc.Infrastructure.SystemTextJsonResultExecutor, Microsoft.AspNetCore.Mvc.Core"),
-                    ServiceLifetime.Singleton));
-
             services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                     .AddCookie(options =>
