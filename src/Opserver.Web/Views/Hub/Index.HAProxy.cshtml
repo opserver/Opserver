@@ -1,4 +1,5 @@
 @using Opserver.Data.HAProxy
+@using Opserver.Views.Shared.Guages
 @inject HAProxyModule HAProxy
 @{
     var allGroups = HAProxy.Groups;
@@ -12,13 +13,13 @@
     <div class="panel-heading">@allGroups.GetWorstStatus().IconSpan() HAProxy</div>
     <div class="panel-body">
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Group", allGroups))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Group", allGroups))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Proxy", allProxies))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Proxy", allProxies))" />
         </div>
         <div class="col-xs-4">
-            <partial Name="Guages.Circle" Model="@(("Server", allServers))" />
+            <partial Name="Gauges/Circle" Model="@(new CircleModel("Server", allServers))" />
         </div>
         <table class="table table-super-condensed table-striped col-md-12">
             <thead>
