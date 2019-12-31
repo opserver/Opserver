@@ -76,10 +76,8 @@ namespace Opserver.Data.SQL
             {
                 if (QueryPlan == null) return new ShowPlanXML();
                 var s = new XmlSerializer(typeof(ShowPlanXML));
-                using (var r = new StringReader(QueryPlan))
-                {
-                    return (ShowPlanXML)s.Deserialize(r);
-                }
+                using var r = new StringReader(QueryPlan);
+                return (ShowPlanXML)s.Deserialize(r);
             }
 
             internal const string FetchSQL = @"

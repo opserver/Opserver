@@ -45,12 +45,10 @@ namespace Opserver.Data.SQL
         {
             try
             {
-                using (var conn = await GetConnectionAsync())
-                {
-                    await action(conn);
-                    await JobSummary.PollAsync(true);
-                    return true;
-                }
+                using var conn = await GetConnectionAsync();
+                await action(conn);
+                await JobSummary.PollAsync(true);
+                return true;
             }
             catch (Exception e)
             {

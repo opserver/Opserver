@@ -13,10 +13,8 @@ namespace Opserver.Data.SQL
         {
             try
             {
-                using (var conn = await GetConnectionAsync())
-                {
-                    return await conn.ExecuteAsync("DBCC FREEPROCCACHE (@planHandle);", new { planHandle });
-                }
+                using var conn = await GetConnectionAsync();
+                return await conn.ExecuteAsync("DBCC FREEPROCCACHE (@planHandle);", new { planHandle });
             }
             catch (Exception ex)
             {

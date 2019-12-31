@@ -118,27 +118,19 @@ namespace Opserver.Data.PagerDuty
                 try
                 {
                     var resp = await req.GetResponseAsync();
-                    using (var rs = resp.GetResponseStream())
-                    {
-                        if (rs == null) return getFromJson(null);
-                        using (var sr = new StreamReader(rs))
-                        {
-                            return getFromJson(sr.ReadToEnd());
-                        }
-                    }
+                    using var rs = resp.GetResponseStream();
+                    if (rs == null) return getFromJson(null);
+                    using var sr = new StreamReader(rs);
+                    return getFromJson(sr.ReadToEnd());
                 }
                 catch (WebException e)
                 {
                     try
                     {
-                        using (var ers = e.Response.GetResponseStream())
-                        {
-                            if (ers == null) return getFromJson(null);
-                            using (var er = new StreamReader(ers))
-                            {
-                                e.AddLoggedData("API Response JSON", er.ReadToEnd());
-                            }
-                        }
+                        using var ers = e.Response.GetResponseStream();
+                        if (ers == null) return getFromJson(null);
+                        using var er = new StreamReader(ers);
+                        e.AddLoggedData("API Response JSON", er.ReadToEnd());
                     }
                     catch (Exception rex)
                     {

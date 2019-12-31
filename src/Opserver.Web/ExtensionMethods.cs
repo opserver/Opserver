@@ -298,7 +298,7 @@ namespace Opserver
         {
             // TODO: Make this a setting?
             // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
-            compareTo = compareTo ?? DateTime.UtcNow;
+            compareTo ??= DateTime.UtcNow;
             return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
         }
 

@@ -24,11 +24,9 @@ namespace Opserver.Helpers
             var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
             static void setReadUncommitted(DbConnection c)
             {
-                using (var cmd = c.CreateCommand())
-                {
-                    cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
-                    cmd.ExecuteNonQuery();
-                }
+                using var cmd = c.CreateCommand();
+                cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
+                cmd.ExecuteNonQuery();
             }
 
             if (connectionTimeoutMs.GetValueOrDefault(0) == 0)

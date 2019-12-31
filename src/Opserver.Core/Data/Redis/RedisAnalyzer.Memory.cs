@@ -60,23 +60,21 @@ namespace Opserver.Data.Redis
                     { connectionInfo.Host, connectionInfo.Port }
                 }
             };
-            using (var muxer = ConnectionMultiplexer.Connect(config))
+            using var muxer = ConnectionMultiplexer.Connect(config);
+            var ma = new RedisMemoryAnalysis(this, connectionInfo, database);
+            if (ma.ErrorMessage.HasValue())
             {
-                var ma = new RedisMemoryAnalysis(this, connectionInfo, database);
-                if (ma.ErrorMessage.HasValue())
-                {
-                    return ma;
-                }
-                // Prep the match dictionary
-                foreach (var km in KeyMatchers)
-                {
-                    ma.KeyStats[km] = new KeyStats();
-                }
-
-                ma.Analyze(muxer);
-
                 return ma;
             }
+            // Prep the match dictionary
+            foreach (var km in KeyMatchers)
+            {
+                ma.KeyStats[km] = new KeyStats();
+            }
+
+            ma.Analyze(muxer);
+
+            return ma;
         }
     }
 

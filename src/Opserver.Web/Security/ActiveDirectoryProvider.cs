@@ -65,10 +65,8 @@ namespace Opserver.Security
                     {
                         var group = RunCommand(pc =>
                             {
-                                using (var gp = GroupPrincipal.FindByIdentity(pc, groupName))
-                                {
-                                    return gp?.GetMembers(true).ToList().Select(mp => mp.SamAccountName).ToList() ?? new List<string>();
-                                }
+                                using var gp = GroupPrincipal.FindByIdentity(pc, groupName);
+                                return gp?.GetMembers(true).ToList().Select(mp => mp.SamAccountName).ToList() ?? new List<string>();
                             });
                         return group ?? old ?? new List<string>();
                     }
@@ -83,12 +81,9 @@ namespace Opserver.Security
                 {
                     try
                     {
-                        using (var pc = UserAuth
-                                            ? new PrincipalContext(ContextType.Domain, s, AuthUser, AuthPassword)
-                                            : new PrincipalContext(ContextType.Domain, s))
-                        {
-                            return command(pc);
-                        }
+                        using var pc = UserAuth ? new PrincipalContext(ContextType.Domain, s, AuthUser, AuthPassword)
+                                                : new PrincipalContext(ContextType.Domain, s);
+                        return command(pc);
                     }
                     catch (Exception ex)
                     {
@@ -102,8 +97,8 @@ namespace Opserver.Security
                 // try the current domain
                 try
                 {
-                    using (var pc = new PrincipalContext(ContextType.Domain))
-                        return command(pc);
+                    using var pc = new PrincipalContext(ContextType.Domain);
+                    return command(pc);
                 }
                 catch (Exception ex)
                 {

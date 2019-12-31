@@ -38,10 +38,8 @@ namespace Opserver.Data.Dashboard.Providers
 
                 try
                 {
-                    using (var q = Query(query, wmiNamespace))
-                    {
-                        return (await q.GetFirstResultAsync()) != null;
-                    }
+                    using var q = Query(query, wmiNamespace);
+                    return (await q.GetFirstResultAsync()) != null;
                 }
                 catch
                 {
@@ -314,32 +312,30 @@ SELECT Caption,
   FROM Win32_LogicalDisk
  WHERE DriveType = 3"; //fixed disks
 
-                using (var q = Query(query))
+                using var q = Query(query);
+                foreach (var disk in await q.GetDynamicResultAsync())
                 {
-                    foreach (var disk in await q.GetDynamicResultAsync())
-                    {
-                        var id = $"{disk.DeviceID}";
-                        var v = Volumes.Find(x => x.Id == id) ?? new Volume();
+                    var id = $"{disk.DeviceID}";
+                    var v = Volumes.Find(x => x.Id == id) ?? new Volume();
 
-                        v.Id = $"{disk.DeviceID}";
-                        v.Available = disk.FreeSpace;
-                        v.Caption = disk.VolumeSerialNumber;
-                        v.Description = disk.Name + " - " + disk.Description;
-                        v.Name = disk.Name;
-                        v.NodeId = Id;
-                        v.Size = disk.Size;
-                        v.Type = "Fixed Disk";
-                        v.Status = NodeStatus.Active;
-                        v.Used = v.Size - v.Available;
-                        if (v.Size > 0)
-                        {
-                            v.PercentUsed = 100 * v.Used / v.Size;
-                        }
-                        if (v.Node == null)
-                        {
-                            v.Node = this;
-                            Volumes.Add(v);
-                        }
+                    v.Id = $"{disk.DeviceID}";
+                    v.Available = disk.FreeSpace;
+                    v.Caption = disk.VolumeSerialNumber;
+                    v.Description = disk.Name + " - " + disk.Description;
+                    v.Name = disk.Name;
+                    v.NodeId = Id;
+                    v.Size = disk.Size;
+                    v.Type = "Fixed Disk";
+                    v.Status = NodeStatus.Active;
+                    v.Used = v.Size - v.Available;
+                    if (v.Size > 0)
+                    {
+                        v.PercentUsed = 100 * v.Used / v.Size;
+                    }
+                    if (v.Node == null)
+                    {
+                        v.Node = this;
+                        Volumes.Add(v);
                     }
                 }
             }
@@ -357,43 +353,41 @@ SELECT Caption,
        State
   FROM Win32_Service"; // windows services
 
-                using (var q = Query(query))
+                using var q = Query(query);
+                foreach (var service in await q.GetDynamicResultAsync())
                 {
-                    foreach (var service in await q.GetDynamicResultAsync())
+                    if (ServicesPatternRegEx?.IsMatch(service.Name) ?? true)
                     {
-                        if (ServicesPatternRegEx?.IsMatch(service.Name) ?? true)
+                        var id = service.Name;
+                        var s = Services.Find(x => x.Id == id) ?? new NodeService();
+
+                        s.Id = id;
+                        s.Caption = service.Caption;
+                        s.DisplayName = service.DisplayName;
+                        s.Description = service.Description;
+                        s.Name = service.Name;
+                        s.State = service.State;
+                        s.LastSync = DateTime.UtcNow;
+                        switch (service.State)
                         {
-                            var id = service.Name;
-                            var s = Services.Find(x => x.Id == id) ?? new NodeService();
+                            case "Running":
+                                s.Status = NodeStatus.Active;
+                                break;
+                            case "Stopped":
+                                s.Status = NodeStatus.Down;
+                                break;
+                            default:
+                                s.Status = NodeStatus.Unknown;
+                                break;
+                        }
+                        s.Running = service.Started;
+                        s.StartMode = service.StartMode;
+                        s.StartName = service.StartName;
 
-                            s.Id = id;
-                            s.Caption = service.Caption;
-                            s.DisplayName = service.DisplayName;
-                            s.Description = service.Description;
-                            s.Name = service.Name;
-                            s.State = service.State;
-                            s.LastSync = DateTime.UtcNow;
-                            switch (service.State)
-                            {
-                                case "Running":
-                                    s.Status = NodeStatus.Active;
-                                    break;
-                                case "Stopped":
-                                    s.Status = NodeStatus.Down;
-                                    break;
-                                default:
-                                    s.Status = NodeStatus.Unknown;
-                                    break;
-                            }
-                            s.Running = service.Started;
-                            s.StartMode = service.StartMode;
-                            s.StartName = service.StartName;
-
-                            if (s.Node == null)
-                            {
-                                s.Node = this;
-                                Services.Add(s);
-                            }
+                        if (s.Node == null)
+                        {
+                            s.Node = this;
+                            Services.Add(s);
                         }
                     }
                 }
@@ -409,51 +403,47 @@ SELECT Caption,
                     ? "PercentTotalRunTime"
                     : "PercentProcessorTime";
 
-                using (var q = Query(query))
+                using var q = Query(query);
+                var data = await q.GetFirstResultAsync();
+                if (data == null)
+                    return;
+
+                var perfData = new PerfRawData(this, data);
+
+                if (IsVMHost)
                 {
-                    var data = await q.GetFirstResultAsync();
-                    if (data == null)
-                        return;
-
-                    var perfData = new PerfRawData(this, data);
-
-                    if (IsVMHost)
-                    {
-                        CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / NumberOfLogicalProcessors);
-                    }
-                    else
-                    {
-                        CPULoad = (short)Math.Round((1 - perfData.GetCalculatedValue(property)) * 100);
-                    }
-
-                    var cpuUtilization = new CPUUtilization
-                    {
-                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
-                        AvgLoad = CPULoad
-                    };
-                    UpdateHistoryStorage(CPUHistory, cpuUtilization);
+                    CPULoad = (short)(perfData.GetCalculatedValue(property, 100D) / NumberOfLogicalProcessors);
                 }
+                else
+                {
+                    CPULoad = (short)Math.Round((1 - perfData.GetCalculatedValue(property)) * 100);
+                }
+
+                var cpuUtilization = new CPUUtilization
+                {
+                    DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                    AvgLoad = CPULoad
+                };
+                UpdateHistoryStorage(CPUHistory, cpuUtilization);
             }
 
             private async Task PollMemoryUtilizationAsync()
             {
                 const string query = "SELECT AvailableKBytes FROM Win32_PerfRawData_PerfOS_Memory";
 
-                using (var q = Query(query))
-                {
-                    var data = await q.GetFirstResultAsync();
-                    if (data == null)
-                        return;
+                using var q = Query(query);
+                var data = await q.GetFirstResultAsync();
+                if (data == null)
+                    return;
 
-                    var available = data.AvailableKBytes * 1024;
-                    MemoryUsed = TotalMemory - available;
-                    var utilization = new MemoryUtilization
-                    {
-                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
-                        AvgMemoryUsed = MemoryUsed
-                    };
-                    UpdateHistoryStorage(MemoryHistory, utilization);
-                }
+                var available = data.AvailableKBytes * 1024;
+                MemoryUsed = TotalMemory - available;
+                var utilization = new MemoryUtilization
+                {
+                    DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                    AvgMemoryUsed = MemoryUsed
+                };
+                UpdateHistoryStorage(MemoryHistory, utilization);
             }
 
             private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();
@@ -611,11 +601,9 @@ SELECT Caption,
 
             private async Task<string> GetRealAdapterName(string pnpDeviceId)
             {
-                using (var query = Query($"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'"))
-                {
-                    var data = await query.GetFirstResultAsync();
-                    return data?.Name;
-                }
+                using var query = Query($"SELECT Name FROM Win32_PnPEntity WHERE DeviceId = '{pnpDeviceId.Replace("\\", "\\\\")}'");
+                var data = await query.GetFirstResultAsync();
+                return data?.Name;
             }
 
             private async Task<bool> GetCanQueryAdapterUtilization()
@@ -625,10 +613,8 @@ SELECT Caption,
 
                 try
                 {
-                    using (var q = Query(query))
-                    {
-                        await q.GetFirstResultAsync();
-                    }
+                    using var q = Query(query);
+                    await q.GetFirstResultAsync();
                 }
                 catch
                 {

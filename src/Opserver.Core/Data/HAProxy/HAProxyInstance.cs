@@ -82,12 +82,10 @@ namespace Opserver.Data.HAProxy
                 req.Credentials = new NetworkCredential(User, Password);
                 if (QueryTimeoutMs.HasValue)
                     req.Timeout = QueryTimeoutMs.Value;
-                using (var resp = await req.GetResponseAsync())
-                using (var rs = resp.GetResponseStream())
-                {
-                    if (rs == null) return null;
-                    return await ParseHAProxyStats(rs);
-                }
+                using var resp = await req.GetResponseAsync();
+                using var rs = resp.GetResponseStream();
+                if (rs == null) return null;
+                return await ParseHAProxyStats(rs);
             }
         }
 

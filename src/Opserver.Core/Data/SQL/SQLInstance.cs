@@ -160,10 +160,8 @@ namespace Opserver.Data.SQL
                 getData: async () =>
                 {
                     if (shouldRun != null && !shouldRun()) return new T();
-                    using (var conn = await GetConnectionAsync())
-                    {
-                        return await get(conn);
-                    }
+                    using var conn = await GetConnectionAsync();
+                    return await get(conn);
                 },
                 logExceptions: logExceptions,
                 addExceptionData: e => e.AddLoggedData("Server", Name),
@@ -177,10 +175,8 @@ namespace Opserver.Data.SQL
             => LightweightCache<T>.Get(this, GetCacheKey(key),
             () =>
             {
-                using (var conn = GetConnection())
-                {
-                    return get(conn);
-                }
+                using var conn = GetConnection();
+                return get(conn);
             }, duration, staleDuration);
 
         public override string ToString() => Name;
