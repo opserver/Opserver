@@ -42,18 +42,13 @@ namespace Opserver.Data.Redis
         public ReplicationInfo Replication { get; internal set; } = new ReplicationInfo();
         public class ReplicationInfo : RedisInfoSection
         {
-            public RedisInstanceRole RedisInstanceRole
-            {
-                get
+            public RedisInstanceRole RedisInstanceRole =>
+                Role switch
                 {
-                    switch (Role)
-                    {
-                        case "master": return RedisInstanceRole.Master;
-                        case "slave": return RedisInstanceRole.Slave;
-                        default: return RedisInstanceRole.Unknown;
-                    }
-                }
-            }
+                    "master" => RedisInstanceRole.Master,
+                    "slave" => RedisInstanceRole.Slave,
+                    _ => RedisInstanceRole.Unknown,
+                };
 
             [RedisInfoProperty("role")]
             public string Role { get; internal set; }

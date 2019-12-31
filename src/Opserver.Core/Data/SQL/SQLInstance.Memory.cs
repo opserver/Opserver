@@ -15,95 +15,89 @@ namespace Opserver.Data.SQL
             public string ClerkType { get; internal set; }
             public long UsedBytes { get; internal set; }
             public decimal UsedPercent { get; internal set; }
-            public string Name
-            {
-                get
+            public string Name =>
+                ClerkType switch
                 {
-                    switch (ClerkType)
-                    {
-                        case "CACHESTORE_BROKERDSH": return "Service Broker Dialog Security Header Cache";
-                        case "CACHESTORE_BROKERKEK": return "Service Broker Key Exchange Key Cache";
-                        case "CACHESTORE_BROKERREADONLY": return "Service Broker (Read-Only)";
-                        case "CACHESTORE_BROKERRSB": return "Service Broker Null Remote Service Binding Cache";
-                        case "CACHESTORE_BROKERTBLACS": return "Broker dormant rowsets";
-                        case "CACHESTORE_BROKERTO": return "Service Broker Transmission Object Cache";
-                        case "CACHESTORE_BROKERUSERCERTLOOKUP": return "Service Broker user certificates lookup result cache";
-                        case "CACHESTORE_CLRPROC": return "CLR Procedure Cache";
-                        case "CACHESTORE_CLRUDTINFO": return "CLR UDT Info";
-                        case "CACHESTORE_COLUMNSTOREOBJECTPOOL": return "Column Store Object Pool";
-                        case "CACHESTORE_CONVPRI": return "Conversation Priority Cache";
-                        case "CACHESTORE_EVENTS": return "Event Notification Cache";
-                        case "CACHESTORE_FULLTEXTSTOPLIST": return "Full Text Stoplist Cache";
-                        case "CACHESTORE_NOTIF": return "Notification Store";
-                        case "CACHESTORE_OBJCP": return "Object Plans";
-                        case "CACHESTORE_PHDR": return "Bound Trees";
-                        case "CACHESTORE_SEARCHPROPERTYLIST": return "Search Property List Cache";
-                        case "CACHESTORE_SEHOBTCOLUMNATTRIBUTE": return "SE Shared Column Metadata Cache";
-                        case "CACHESTORE_SQLCP": return "SQL Plans";
-                        case "CACHESTORE_STACKFRAMES": return "SOS_StackFramesStore";
-                        case "CACHESTORE_SYSTEMROWSET": return "System Rowset Store";
-                        case "CACHESTORE_TEMPTABLES": return "Temporary Tables & Table Variables";
-                        case "CACHESTORE_VIEWDEFINITIONS": return "View Definition Cache";
-                        case "CACHESTORE_XML_SELECTIVE_DG": return "XML DB Cache (Selective)";
-                        case "CACHESTORE_XMLDBATTRIBUTE": return "XML DB Cache (Attribute)";
-                        case "CACHESTORE_XMLDBELEMENT": return "XML DB Cache (Element)";
-                        case "CACHESTORE_XMLDBTYPE": return "XML DB Cache (Type)";
-                        case "CACHESTORE_XPROC": return "Extended Stored Procedures";
-                        case "MEMORYCLERK_BHF": return "Best Hugging Friend (According to Brent Ozar)";
-                        case "MEMORYCLERK_FILETABLE": return "Memory Clerk (File Table)";
-                        case "MEMORYCLERK_FSCHUNKER": return "Memory Clerk (FS Chunker)";
-                        case "MEMORYCLERK_FULLTEXT": return "Full Text";
-                        case "MEMORYCLERK_FULLTEXT_SHMEM": return "Full-text IG";
-                        case "MEMORYCLERK_HADR": return "HADR";
-                        case "MEMORYCLERK_HOST": return "Host";
-                        case "MEMORYCLERK_LANGSVC": return "Language Service";
-                        case "MEMORYCLERK_LWC": return "Light Weight Cache";
-                        case "MEMORYCLERK_QSRANGEPREFETCH": return "QS Range Prefetch";
-                        case "MEMORYCLERK_SERIALIZATION": return "Serialization";
-                        case "MEMORYCLERK_SNI": return "SNI";
-                        case "MEMORYCLERK_SOSMEMMANAGER": return "SOS Memory Manager";
-                        case "MEMORYCLERK_SOSNODE": return "SOS Node";
-                        case "MEMORYCLERK_SOSOS": return "SOS Memory Clerk";
-                        case "MEMORYCLERK_SQLBUFFERPOOL": return "Buffer Pool";
-                        case "MEMORYCLERK_SQLCLR": return "CLR";
-                        case "MEMORYCLERK_SQLCLRASSEMBLY": return "CLR Assembly";
-                        case "MEMORYCLERK_SQLCONNECTIONPOOL": return "Connection Pool";
-                        case "MEMORYCLERK_SQLGENERAL": return "General";
-                        case "MEMORYCLERK_SQLHTTP": return "HTTP";
-                        case "MEMORYCLERK_SQLLOGPOOL": return "Log Pool";
-                        case "MEMORYCLERK_SQLOPTIMIZER": return "SQL Optimizer";
-                        case "MEMORYCLERK_SQLQERESERVATIONS": return "SQL Reservations";
-                        case "MEMORYCLERK_SQLQUERYCOMPILE": return "SQL Query Compile";
-                        case "MEMORYCLERK_SQLQUERYEXEC": return "SQL Query Exec";
-                        case "MEMORYCLERK_SQLQUERYPLAN": return "SQL Query Plan";
-                        case "MEMORYCLERK_SQLSERVICEBROKER": return "SQL Service Broker";
-                        case "MEMORYCLERK_SQLSERVICEBROKERTRANSPORT": return "Unified Communication Stack";
-                        case "MEMORYCLERK_SQLSOAP": return "SQL SOAP";
-                        case "MEMORYCLERK_SQLSOAPSESSIONSTORE": return "SQL SOAP (Session Store)";
-                        case "MEMORYCLERK_SQLSTORENG": return "SQL Storage Engine";
-                        case "MEMORYCLERK_SQLUTILITIES": return "SQL Utilities";
-                        case "MEMORYCLERK_SQLXML": return "SQL XML";
-                        case "MEMORYCLERK_SQLXP": return "SQL XP";
-                        case "MEMORYCLERK_TRACE_EVTNOTIF": return "Trace Event Notification";
-                        case "MEMORYCLERK_XE": return "XE Engine";
-                        case "MEMORYCLERK_XE_BUFFER": return "XE Buffer";
-                        case "MEMORYCLERK_XTP": return "XTP Processor";
-                        case "OBJECTSTORE_LBSS": return "Lbss Cache (Object Store)";
-                        case "OBJECTSTORE_LOCK_MANAGER": return "Lock Manager (Object Store)";
-                        case "OBJECTSTORE_SECAUDIT_EVENT_BUFFER": return "Audit Event Buffer (Object Store)";
-                        case "OBJECTSTORE_SERVICE_BROKER": return "Service Broker (Object Store)";
-                        case "OBJECTSTORE_SNI_PACKET": return "SNI Packet (Object Store)";
-                        case "OBJECTSTORE_XACT_CACHE": return "Transactions Cache (Object Store)";
-                        case "USERSTORE_DBMETADATA": return "DB Metadata (User Store)";
-                        case "USERSTORE_OBJPERM": return "Object Permissions (User Store)";
-                        case "USERSTORE_SCHEMAMGR": return "Schema Manager (User Store)";
-                        case "USERSTORE_SXC": return "SXC (User Store)";
-                        case "USERSTORE_TOKENPERM": return "Token Permissions (User Store)";
-                        default:
-                            return "Other (" + ClerkType + ")";
-                    }
-                }
-            }
+                    "CACHESTORE_BROKERDSH" => "Service Broker Dialog Security Header Cache",
+                    "CACHESTORE_BROKERKEK" => "Service Broker Key Exchange Key Cache",
+                    "CACHESTORE_BROKERREADONLY" => "Service Broker (Read-Only)",
+                    "CACHESTORE_BROKERRSB" => "Service Broker Null Remote Service Binding Cache",
+                    "CACHESTORE_BROKERTBLACS" => "Broker dormant rowsets",
+                    "CACHESTORE_BROKERTO" => "Service Broker Transmission Object Cache",
+                    "CACHESTORE_BROKERUSERCERTLOOKUP" => "Service Broker user certificates lookup result cache",
+                    "CACHESTORE_CLRPROC" => "CLR Procedure Cache",
+                    "CACHESTORE_CLRUDTINFO" => "CLR UDT Info",
+                    "CACHESTORE_COLUMNSTOREOBJECTPOOL" => "Column Store Object Pool",
+                    "CACHESTORE_CONVPRI" => "Conversation Priority Cache",
+                    "CACHESTORE_EVENTS" => "Event Notification Cache",
+                    "CACHESTORE_FULLTEXTSTOPLIST" => "Full Text Stoplist Cache",
+                    "CACHESTORE_NOTIF" => "Notification Store",
+                    "CACHESTORE_OBJCP" => "Object Plans",
+                    "CACHESTORE_PHDR" => "Bound Trees",
+                    "CACHESTORE_SEARCHPROPERTYLIST" => "Search Property List Cache",
+                    "CACHESTORE_SEHOBTCOLUMNATTRIBUTE" => "SE Shared Column Metadata Cache",
+                    "CACHESTORE_SQLCP" => "SQL Plans",
+                    "CACHESTORE_STACKFRAMES" => "SOS_StackFramesStore",
+                    "CACHESTORE_SYSTEMROWSET" => "System Rowset Store",
+                    "CACHESTORE_TEMPTABLES" => "Temporary Tables & Table Variables",
+                    "CACHESTORE_VIEWDEFINITIONS" => "View Definition Cache",
+                    "CACHESTORE_XML_SELECTIVE_DG" => "XML DB Cache (Selective)",
+                    "CACHESTORE_XMLDBATTRIBUTE" => "XML DB Cache (Attribute)",
+                    "CACHESTORE_XMLDBELEMENT" => "XML DB Cache (Element)",
+                    "CACHESTORE_XMLDBTYPE" => "XML DB Cache (Type)",
+                    "CACHESTORE_XPROC" => "Extended Stored Procedures",
+                    "MEMORYCLERK_BHF" => "Best Hugging Friend (According to Brent Ozar)",
+                    "MEMORYCLERK_FILETABLE" => "Memory Clerk (File Table)",
+                    "MEMORYCLERK_FSCHUNKER" => "Memory Clerk (FS Chunker)",
+                    "MEMORYCLERK_FULLTEXT" => "Full Text",
+                    "MEMORYCLERK_FULLTEXT_SHMEM" => "Full-text IG",
+                    "MEMORYCLERK_HADR" => "HADR",
+                    "MEMORYCLERK_HOST" => "Host",
+                    "MEMORYCLERK_LANGSVC" => "Language Service",
+                    "MEMORYCLERK_LWC" => "Light Weight Cache",
+                    "MEMORYCLERK_QSRANGEPREFETCH" => "QS Range Prefetch",
+                    "MEMORYCLERK_SERIALIZATION" => "Serialization",
+                    "MEMORYCLERK_SNI" => "SNI",
+                    "MEMORYCLERK_SOSMEMMANAGER" => "SOS Memory Manager",
+                    "MEMORYCLERK_SOSNODE" => "SOS Node",
+                    "MEMORYCLERK_SOSOS" => "SOS Memory Clerk",
+                    "MEMORYCLERK_SQLBUFFERPOOL" => "Buffer Pool",
+                    "MEMORYCLERK_SQLCLR" => "CLR",
+                    "MEMORYCLERK_SQLCLRASSEMBLY" => "CLR Assembly",
+                    "MEMORYCLERK_SQLCONNECTIONPOOL" => "Connection Pool",
+                    "MEMORYCLERK_SQLGENERAL" => "General",
+                    "MEMORYCLERK_SQLHTTP" => "HTTP",
+                    "MEMORYCLERK_SQLLOGPOOL" => "Log Pool",
+                    "MEMORYCLERK_SQLOPTIMIZER" => "SQL Optimizer",
+                    "MEMORYCLERK_SQLQERESERVATIONS" => "SQL Reservations",
+                    "MEMORYCLERK_SQLQUERYCOMPILE" => "SQL Query Compile",
+                    "MEMORYCLERK_SQLQUERYEXEC" => "SQL Query Exec",
+                    "MEMORYCLERK_SQLQUERYPLAN" => "SQL Query Plan",
+                    "MEMORYCLERK_SQLSERVICEBROKER" => "SQL Service Broker",
+                    "MEMORYCLERK_SQLSERVICEBROKERTRANSPORT" => "Unified Communication Stack",
+                    "MEMORYCLERK_SQLSOAP" => "SQL SOAP",
+                    "MEMORYCLERK_SQLSOAPSESSIONSTORE" => "SQL SOAP (Session Store)",
+                    "MEMORYCLERK_SQLSTORENG" => "SQL Storage Engine",
+                    "MEMORYCLERK_SQLUTILITIES" => "SQL Utilities",
+                    "MEMORYCLERK_SQLXML" => "SQL XML",
+                    "MEMORYCLERK_SQLXP" => "SQL XP",
+                    "MEMORYCLERK_TRACE_EVTNOTIF" => "Trace Event Notification",
+                    "MEMORYCLERK_XE" => "XE Engine",
+                    "MEMORYCLERK_XE_BUFFER" => "XE Buffer",
+                    "MEMORYCLERK_XTP" => "XTP Processor",
+                    "OBJECTSTORE_LBSS" => "Lbss Cache (Object Store)",
+                    "OBJECTSTORE_LOCK_MANAGER" => "Lock Manager (Object Store)",
+                    "OBJECTSTORE_SECAUDIT_EVENT_BUFFER" => "Audit Event Buffer (Object Store)",
+                    "OBJECTSTORE_SERVICE_BROKER" => "Service Broker (Object Store)",
+                    "OBJECTSTORE_SNI_PACKET" => "SNI Packet (Object Store)",
+                    "OBJECTSTORE_XACT_CACHE" => "Transactions Cache (Object Store)",
+                    "USERSTORE_DBMETADATA" => "DB Metadata (User Store)",
+                    "USERSTORE_OBJPERM" => "Object Permissions (User Store)",
+                    "USERSTORE_SCHEMAMGR" => "Schema Manager (User Store)",
+                    "USERSTORE_SXC" => "SXC (User Store)",
+                    "USERSTORE_TOKENPERM" => "Token Permissions (User Store)",
+                    _ => "Other (" + ClerkType + ")",
+                };
 
             public bool IsBufferPool => ClerkType == "MEMORYCLERK_SQLBUFFERPOOL";
             public bool IsPlanCache => ClerkType == "CACHESTORE_SQLCP";

@@ -203,22 +203,15 @@ namespace Opserver.Data.Dashboard.Providers
             }
         }
 
-        public static string InterfaceMetricName(Interface i)
-        {
-            switch (i.TypeDescription)
+        public static string InterfaceMetricName(Interface i) =>
+            i.TypeDescription switch
             {
-                case "bond":
-                    return Globals.NetBondBytes;
-                case "other":
-                    return Globals.NetOtherBytes;
-                case "tunnel":
-                    return Globals.NetTunnelBytes;
-                case "virtual":
-                    return Globals.NetVirtualBytes;
-                default:
-                    return Globals.NetBytes;
-            }
-        }
+                "bond" => Globals.NetBondBytes,
+                "other" => Globals.NetOtherBytes,
+                "tunnel" => Globals.NetTunnelBytes,
+                "virtual" => Globals.NetVirtualBytes,
+                _ => Globals.NetBytes,
+            };
 
         public static string GetDenormalized(string metric, string host, Dictionary<string, List<string>> metricCache)
         {

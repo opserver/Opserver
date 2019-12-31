@@ -76,23 +76,16 @@ namespace Opserver.Controllers
             var i = Module.GetInstance(node);
             if (i == null) return NoInstanceRedirect(node);
 
-            switch (type)
+            return type switch
             {
-                case "configuration":
-                    return View("Instance.Configuration", i);
-                case "connections":
-                    return View("Instance.Connections", i);
-                case "errors":
-                    return View("Instance.Errors", i);
-                case "memory":
-                    return View("Instance.Memory", i);
-                case "jobs":
-                    return View("Instance.Jobs", i);
-                case "db-files":
-                    return View("Instance.DBFiles", i);
-                default:
-                    return ContentNotFound("Unknown summary view requested");
-            }
+                "configuration" => View("Instance.Configuration", i),
+                "connections" => View("Instance.Connections", i),
+                "errors" => View("Instance.Errors", i),
+                "memory" => View("Instance.Memory", i),
+                "jobs" => View("Instance.Jobs", i),
+                "db-files" => View("Instance.DBFiles", i),
+                _ => ContentNotFound("Unknown summary view requested"),
+            };
         }
 
         [ResponseCache(Duration = 5 * 1, VaryByQueryKeys = new string[] { "node", "sort", "options" })]

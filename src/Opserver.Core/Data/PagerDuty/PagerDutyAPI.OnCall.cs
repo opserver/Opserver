@@ -117,22 +117,15 @@ namespace Opserver.Data.PagerDuty
         [DataMember(Name = "escalation_level")]
         public int? EscalationLevel { get; set; }
 
-        public static string GetEscalationLevelDescription(int? level)
-        {
-            switch (level)
+        public static string GetEscalationLevelDescription(int? level) =>
+            level switch
             {
-                case 1:
-                    return "Primary";
-                case 2:
-                    return "Secondary";
-                case 3:
-                    return "Third";
-                case null:
-                    return "Unknown";
-                default:
-                    return level.ToString() + "th";
-            }
-        }
+                1 => "Primary",
+                2 => "Secondary",
+                3 => "Third",
+                null => "Unknown",
+                _ => level.ToString() + "th",
+            };
 
         private string _emailusername;
         public string EmailUserName => _emailusername ??= Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : "";
@@ -257,17 +250,13 @@ namespace Opserver.Data.PagerDuty
             {
                 if (EscalationLevel.HasValue)
                 {
-                    switch (EscalationLevel.Value)
+                    return EscalationLevel.Value switch
                     {
-                        case 1:
-                            return "Primary";
-                        case 2:
-                            return "Secondary";
-                        case 3:
-                            return "Third";
-                        default:
-                            return EscalationLevel.Value + "th";
-                    }
+                        1 => "Primary",
+                        2 => "Secondary",
+                        3 => "Third",
+                        _ => EscalationLevel.Value + "th",
+                    };
                 }
 
                 return "unknown";

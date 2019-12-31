@@ -389,22 +389,15 @@ namespace Opserver.Data.HAProxy
             return result;
         }
 
-        private static Item GetStatOfType(string typeNum)
-        {
-            switch ((StatusType)int.Parse(typeNum))
+        private static Item GetStatOfType(string typeNum) =>
+            ((StatusType)int.Parse(typeNum)) switch
             {
-                case StatusType.Frontend:
-                    return new Frontend();
-                case StatusType.Backend:
-                    return new Backend();
-                case StatusType.Server:
-                    return new Server();
-                case StatusType.Socket:
-                    return new Socket();
-                default:
-                    throw new ArgumentOutOfRangeException("Unrecognized StatusType " + typeNum);
-            }
-        }
+                StatusType.Frontend => new Frontend(),
+                StatusType.Backend => new Backend(),
+                StatusType.Server => new Server(),
+                StatusType.Socket => new Socket(),
+                _ => throw new ArgumentOutOfRangeException("Unrecognized StatusType " + typeNum),
+            };
 
         public bool IsFrontend => Type == StatusType.Frontend;
         public bool IsServer => Type == StatusType.Server;
@@ -471,27 +464,20 @@ namespace Opserver.Data.HAProxy
             if (_downGoingUp.IsMatch(Status))
                 return IsActive ? ProxyServerStatus.ActiveDownGoingUp : ProxyServerStatus.BackupDownGoingUp;
 
-            switch (Status)
+            return Status switch
             {
                 // Server is fully up
-                case "UP":
-                    return IsActive ? ProxyServerStatus.ActiveUp : ProxyServerStatus.BackupUp;
-                case "OPEN":
-                    return ProxyServerStatus.Open;
+                "UP" => IsActive ? ProxyServerStatus.ActiveUp : ProxyServerStatus.BackupUp,
+                "OPEN" => ProxyServerStatus.Open,
                 // Server is completely down
-                case "DOWN":
-                    return ProxyServerStatus.Down;
-                case "MAINT":
-                    return ProxyServerStatus.Maintenance;
-                case "DRAIN":
-                    return ProxyServerStatus.Drain;
+                "DOWN" => ProxyServerStatus.Down,
+                "MAINT" => ProxyServerStatus.Maintenance,
+                "DRAIN" => ProxyServerStatus.Drain,
                 // Server is not checked
-                case "no check":
-                    return ProxyServerStatus.NotChecked;
+                "no check" => ProxyServerStatus.NotChecked,
                 // We have no idea what happened to this poor server, someone go check on it?...or we're not a server
-                default:
-                    return ProxyServerStatus.None;
-            }
+                _ => ProxyServerStatus.None,
+            };
         }
     }
 }

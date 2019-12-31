@@ -28,24 +28,15 @@ namespace Opserver.Data.SQL
             private IPNet _networkIPNet;
             public IPNet NetworkIPNet => _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength);
 
-            public MonitorStatus MonitorStatus
-            {
-                get
+            public MonitorStatus MonitorStatus =>
+                State switch
                 {
-                    switch (State)
-                    {
-                        case ListenerStates.Online:
-                            return MonitorStatus.Good;
-                        case ListenerStates.OnlinePending:
-                            return MonitorStatus.Warning;
-                        case ListenerStates.Failed:
-                            return MonitorStatus.Critical;
-                        //case ListenerStates.Offline:
-                        default:
-                            return MonitorStatus.Unknown;
-                    }
-                }
-            }
+                    ListenerStates.Online => MonitorStatus.Good,
+                    ListenerStates.OnlinePending => MonitorStatus.Warning,
+                    ListenerStates.Failed => MonitorStatus.Critical,
+                    //case ListenerStates.Offline:
+                    _ => MonitorStatus.Unknown,
+                };
 
             public string MonitorStatusReason => State.ToString();
 

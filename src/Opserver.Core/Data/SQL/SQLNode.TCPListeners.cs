@@ -18,21 +18,13 @@ namespace Opserver.Data.SQL
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 
-            public MonitorStatus MonitorStatus
-            {
-                get
+            public MonitorStatus MonitorStatus =>
+                State switch
                 {
-                    switch (State)
-                    {
-                        case TCPListenerStates.Online:
-                            return MonitorStatus.Good;
-                        case TCPListenerStates.PendingRestart:
-                            return MonitorStatus.Maintenance;
-                        default:
-                            return MonitorStatus.Unknown;
-                    }
-                }
-            }
+                    TCPListenerStates.Online => MonitorStatus.Good,
+                    TCPListenerStates.PendingRestart => MonitorStatus.Maintenance,
+                    _ => MonitorStatus.Unknown,
+                };
 
             public string MonitorStatusReason => State == TCPListenerStates.Online ? null : State.AsString(EnumFormat.Description);
 

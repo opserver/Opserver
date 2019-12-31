@@ -57,21 +57,13 @@ namespace Opserver.Data.Redis
             }
         }
 
-        public string RoleDescription
-        {
-            get
+        public string RoleDescription =>
+            Role switch
             {
-                switch (Role)
-                {
-                    case RedisInfo.RedisInstanceRole.Master:
-                        return "Master";
-                    case RedisInfo.RedisInstanceRole.Slave:
-                        return "Slave";
-                    default:
-                        return "Unknown";
-                }
-            }
-        }
+                RedisInfo.RedisInstanceRole.Master => "Master",
+                RedisInfo.RedisInstanceRole.Slave => "Slave",
+                _ => "Unknown",
+            };
 
         public bool IsMaster => Role == RedisInfo.RedisInstanceRole.Master;
         public bool IsSlave => Role == RedisInfo.RedisInstanceRole.Slave;

@@ -368,18 +368,12 @@ SELECT Caption,
                         s.Name = service.Name;
                         s.State = service.State;
                         s.LastSync = DateTime.UtcNow;
-                        switch (service.State)
+                        s.Status = service.State switch
                         {
-                            case "Running":
-                                s.Status = NodeStatus.Active;
-                                break;
-                            case "Stopped":
-                                s.Status = NodeStatus.Down;
-                                break;
-                            default:
-                                s.Status = NodeStatus.Unknown;
-                                break;
-                        }
+                            "Running" => NodeStatus.Active,
+                            "Stopped" => NodeStatus.Down,
+                            _ => NodeStatus.Unknown,
+                        };
                         s.Running = service.Started;
                         s.StartMode = service.StartMode;
                         s.StartName = service.StartName;
@@ -580,17 +574,12 @@ SELECT Caption,
                 {
                     foreach (var service in await q.GetDynamicResultAsync())
                     {
-                        switch (action)
+                        returnCode = action switch
                         {
-                            case NodeService.Action.Stop:
-                                returnCode = service.StopService();
-                                break;
-                            case NodeService.Action.Start:
-                                returnCode = service.StartService();
-                                break;
-                            default:
-                                throw new ArgumentOutOfRangeException(nameof(action));
-                        }
+                            NodeService.Action.Stop => service.StopService(),
+                            NodeService.Action.Start => service.StartService(),
+                            _ => throw new ArgumentOutOfRangeException(nameof(action)),
+                        };
                     }
                 }
 

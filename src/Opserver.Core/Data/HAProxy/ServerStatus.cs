@@ -38,35 +38,22 @@ namespace Opserver.Data.HAProxy
 
     public static class ProxyServerStatusExtensions
     {
-        public static string ShortDescription(this ProxyServerStatus status)
-        {
-            switch (status)
+        public static string ShortDescription(this ProxyServerStatus status) =>
+            status switch
             {
-                case ProxyServerStatus.ActiveUp:
-                    return "Active";
-                case ProxyServerStatus.ActiveUpGoingDown:
-                    return "Active (Up -> Down)";
-                case ProxyServerStatus.ActiveDownGoingUp:
-                    return "Active (Down -> Up)";
-                case ProxyServerStatus.BackupUp:
-                    return "Backup";
-                case ProxyServerStatus.BackupUpGoingDown:
-                    return "Backup (Up -> Down)";
-                case ProxyServerStatus.BackupDownGoingUp:
-                    return "Backup (Down -> Up)";
-                case ProxyServerStatus.NotChecked:
-                    return "Not Checked";
-                case ProxyServerStatus.Down:
-                    return "Down";
-                case ProxyServerStatus.Maintenance:
-                    return "Maintenance";
-                case ProxyServerStatus.Open:
-                    return "Open";
+                ProxyServerStatus.ActiveUp => "Active",
+                ProxyServerStatus.ActiveUpGoingDown => "Active (Up -> Down)",
+                ProxyServerStatus.ActiveDownGoingUp => "Active (Down -> Up)",
+                ProxyServerStatus.BackupUp => "Backup",
+                ProxyServerStatus.BackupUpGoingDown => "Backup (Up -> Down)",
+                ProxyServerStatus.BackupDownGoingUp => "Backup (Down -> Up)",
+                ProxyServerStatus.NotChecked => "Not Checked",
+                ProxyServerStatus.Down => "Down",
+                ProxyServerStatus.Maintenance => "Maintenance",
+                ProxyServerStatus.Open => "Open",
                 //case ProxyServerStatus.None:
-                default:
-                    return "Unknown";
-            }
-        }
+                _ => "Unknown",
+            };
 
         public static bool IsBad(this ProxyServerStatus status)
         {

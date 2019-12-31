@@ -44,39 +44,33 @@ namespace Opserver.Controllers
         public ActionResult NodeModal(string cluster, string node, string type)
         {
             var vd = GetViewData(cluster, node);
-            switch (type)
+            return type switch
             {
-                case "settings":
-                    return View("Node.Settings", vd);
-                default:
-                    return ContentNotFound("Unknown modal view requested");
-            }
+                "settings" => View("Node.Settings", vd),
+                _ => ContentNotFound("Unknown modal view requested"),
+            };
         }
 
         [Route("elastic/cluster/modal/{type}")]
         public ActionResult ClusterModal(string cluster, string node, string type)
         {
             var vd = GetViewData(cluster, node);
-            switch (type)
+            return type switch
             {
-                case "indexes":
-                    return View("Cluster.Indexes", vd);
-                default:
-                    return ContentNotFound("Unknown modal view requested");
-            }
+                "indexes" => View("Cluster.Indexes", vd),
+                _ => ContentNotFound("Unknown modal view requested"),
+            };
         }
 
         [Route("elastic/index/modal/{type}")]
         public ActionResult IndexModal(string cluster, string node, string index, string type)
         {
             var vd = GetViewData(cluster, node, index);
-            switch (type)
+            return type switch
             {
-                case "shards":
-                    return View("Cluster.Shards", vd);
-                default:
-                    return ContentNotFound("Unknown modal view requested");
-            }
+                "shards" => View("Cluster.Shards", vd),
+                _ => ContentNotFound("Unknown modal view requested"),
+            };
         }
 
         private DashboardModel GetViewData(string cluster, string node = null, string index = null)

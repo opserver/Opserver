@@ -136,15 +136,13 @@ namespace Opserver.Data
         public static IPAddress ToNetmask(AddressFamily addressFamily, int cidr) =>
             IPAddressFromCIDR(GetBitLength(addressFamily), cidr);
 
-        private static int GetBitLength(AddressFamily family)
-        {
-            switch (family)
+        private static int GetBitLength(AddressFamily family) =>
+            family switch
             {
-                case AddressFamily.InterNetwork: return 32;
-                case AddressFamily.InterNetworkV6: return 128;
-                default: throw new ArgumentOutOfRangeException(nameof(family), "You're probably from the future, they added another more IPs, fix me.");
-            }
-        }
+                AddressFamily.InterNetwork => 32,
+                AddressFamily.InterNetworkV6 => 128,
+                _ => throw new ArgumentOutOfRangeException(nameof(family), "You're probably from the future, they added another more IPs, fix me."),
+            };
 
         // This is a much faster version thanks to Marc Gravell
         private static IPAddress IPAddressFromCIDR(int bitLength, int cidr)
