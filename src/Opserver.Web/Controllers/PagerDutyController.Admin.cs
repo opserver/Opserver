@@ -31,7 +31,7 @@ namespace Opserver.Controllers
                    : "PagerDuty Schedule '" + Module.Settings.PrimaryScheduleName + "' not found.");
             }
 
-            start = start ?? DateTime.UtcNow;
+            start ??= DateTime.UtcNow;
 
             await Module.API.SetOverrideAsync(currentPrimarySchedule, start.Value, start.Value.AddMinutes(durationMins), CurrentPagerDutyPerson);
 

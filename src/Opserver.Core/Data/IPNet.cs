@@ -26,10 +26,10 @@ namespace Opserver.Data
         private TinyIPAddress? _tinySubnet { get; set; }
 
         internal TinyIPAddress TIPAddress =>
-            (_tinyIPAddress ?? (_tinyIPAddress = TinyIPAddress.FromIPAddress(IPAddress))).Value;
+            (_tinyIPAddress ??= TinyIPAddress.FromIPAddress(IPAddress)).Value;
 
         internal TinyIPAddress TSubnet =>
-            (_tinySubnet ?? (_tinySubnet = TinyIPAddress.FromIPAddress(Subnet ?? IPAddress))).Value;
+            (_tinySubnet ??= TinyIPAddress.FromIPAddress(Subnet ?? IPAddress)).Value;
 
         public IPAddress FirstAddressInSubnet => TinyFirstAddressInSubnet.ToIPAddress();
         public IPAddress LastAddressInSubnet => TinyLastAddressInSubnet.ToIPAddress();

@@ -87,9 +87,9 @@ namespace Opserver.Data.HAProxy
 
         private string _niceName;
         public string NiceName =>
-            _niceName ?? (_niceName = Instance.Module.Settings.Aliases.TryGetValue(Name, out string result)
+            _niceName ??= Instance.Module.Settings.Aliases.TryGetValue(Name, out string result)
                           ? result
-                          : Name);
+                          : Name;
 
         public override string ToString() =>
             (Instance.Group != null ? Instance.Group.Name + ": " : "") + Instance.Name + ": " + Name;

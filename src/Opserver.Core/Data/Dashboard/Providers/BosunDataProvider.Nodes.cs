@@ -9,17 +9,17 @@ namespace Opserver.Data.Dashboard.Providers
     public partial class BosunDataProvider
     {
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 60.Seconds(), 4.Hours()));
+        public Cache<List<Node>> NodeCache => _nodeCache ??= ProviderCache(GetAllNodesAsync, 60.Seconds(), 4.Hours());
 
         private Cache<Dictionary<string, List<string>>> _nodeMetricCache;
 
         public Cache<Dictionary<string, List<string>>> NodeMetricCache
-            => _nodeMetricCache ?? (_nodeMetricCache = ProviderCache(
+            => _nodeMetricCache ??= ProviderCache(
                 async () =>
                 {
                     var response = await GetFromBosunAsync<Dictionary<string, List<string>>>(GetUrl("api/metric/host"));
                     return response.Result ?? new Dictionary<string, List<string>>();
-                }, 10.Minutes(), 4.Hours()));
+                }, 10.Minutes(), 4.Hours());
 
         public async Task<List<Node>> GetAllNodesAsync()
         {

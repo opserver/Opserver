@@ -160,7 +160,7 @@ namespace Opserver.Data.Jira
             {
                 return string.Empty;
             }
-            bool isHidden(string k) => DefaultHttpKeys.Contains(k);
+            static bool isHidden(string k) => DefaultHttpKeys.Contains(k);
             var allKeys = vars.AllKeys.Where(key => !HiddenHttpKeys.Contains(key) && vars[key].HasValue()).OrderBy(k => k);
 
             var sb = StringBuilderCache.Get();
@@ -263,7 +263,7 @@ namespace Opserver.Data.Jira
 
         public async Task<TResponse> GetAsync<TResponse>(string resource)
         {
-            client = client ?? new WebClient();
+            client ??= new WebClient();
             client.Headers.Add(HttpRequestHeader.Accept, "application/json");
             client.Encoding = Encoding.UTF8;
             var authz = GetBasicAuthzValue();
@@ -279,7 +279,7 @@ namespace Opserver.Data.Jira
 
         public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
         {
-            client = client ?? new WebClient();
+            client ??= new WebClient();
             client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
             client.Encoding = Encoding.UTF8;
             var authz = GetBasicAuthzValue();

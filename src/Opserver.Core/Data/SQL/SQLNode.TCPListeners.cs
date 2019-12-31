@@ -9,7 +9,7 @@ namespace Opserver.Data.SQL
         private Cache<List<TCPListenerState>> _tcpListeners;
 
         public Cache<List<TCPListenerState>> TCPListeners =>
-            _tcpListeners ?? (_tcpListeners = SqlCacheList<TCPListenerState>(Cluster.RefreshInterval));
+            _tcpListeners ??= SqlCacheList<TCPListenerState>(Cluster.RefreshInterval);
 
         /// <summary>
         /// http://msdn.microsoft.com/en-us/library/hh245287.aspx

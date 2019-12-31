@@ -10,13 +10,13 @@ namespace Opserver.Data.Redis
         private Cache<Dictionary<string, string>> _config;
 
         public Cache<Dictionary<string, string>> Config =>
-            _config ?? (_config = GetRedisCache(2.Minutes(), async () =>
+            _config ??= GetRedisCache(2.Minutes(), async () =>
             {
                 using (MiniProfiler.Current.CustomTiming("redis", "CONFIG"))
                 {
                     return (await Connection.GetSingleServer().ConfigGetAsync("*")).ToDictionary(x => x.Key, x => x.Value);
                 }
-            }));
+            });
 
         /// <summary>
         /// Sets a config value without needing a restart

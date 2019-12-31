@@ -158,7 +158,7 @@ namespace Opserver.Data.Redis
             public long Offset { get; internal set; }
 
             private IPAddress _ipAddress;
-            public IPAddress IPAddress => _ipAddress ?? (_ipAddress = IPAddress.Parse(IP));
+            public IPAddress IPAddress => _ipAddress ??= IPAddress.Parse(IP);
         }
 
         public ClientInfo Clients { get; internal set; } = new ClientInfo();
@@ -178,7 +178,7 @@ namespace Opserver.Data.Redis
         public class ServerInfo : RedisInfoSection
         {
             private Version _version;
-            public Version Version => _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version());
+            public Version Version => _version ??= VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version();
 
             [RedisInfoProperty("redis_version")]
             public string VersionNumber { get; internal set; }

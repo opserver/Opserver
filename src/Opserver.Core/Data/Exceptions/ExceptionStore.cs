@@ -83,7 +83,7 @@ namespace Opserver.Data.Exceptions
 
         private Cache<List<Application>> _applications;
         public Cache<List<Application>> Applications =>
-            _applications ?? (_applications = new Cache<List<Application>>(
+            _applications ??= new Cache<List<Application>>(
                 this,
                 "Exceptions Fetch: " + Name + ":" + nameof(Applications),
                 Settings.PollIntervalSeconds.Seconds(),
@@ -104,7 +104,7 @@ Select ApplicationName as Name,
                     });
                     return result;
                 },
-                afterPoll: _ => UpdateApplicationGroups()));
+                afterPoll: _ => UpdateApplicationGroups());
 
         internal List<ApplicationGroup> UpdateApplicationGroups()
         {

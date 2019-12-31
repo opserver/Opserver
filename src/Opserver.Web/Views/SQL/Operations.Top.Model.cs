@@ -11,8 +11,7 @@ namespace Opserver.Views.SQL
         public List<SQLInstance.TopOperation> TopOperations { get; set; }
 
         private HtmlString _topSearchOptionsQueryString;
-        public HtmlString TopSearchOptionsQueryString =>
-            _topSearchOptionsQueryString ?? (_topSearchOptionsQueryString = GetQueryString(TopSearchOptions));
+        public HtmlString TopSearchOptionsQueryString => _topSearchOptionsQueryString ??= GetQueryString(TopSearchOptions);
 
         public static HtmlString GetQueryString(SQLInstance.TopSearchOptions options)
         {

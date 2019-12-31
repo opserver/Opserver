@@ -8,7 +8,7 @@ namespace Opserver.Data.SQL
         private Cache<List<SQLConfigurationOption>> _configuration;
 
         public Cache<List<SQLConfigurationOption>> Configuration =>
-            _configuration ?? (_configuration = GetSqlCache(nameof(Configuration),
+            _configuration ??= GetSqlCache(nameof(Configuration),
                 async conn =>
                 {
                     var result = await conn.QueryAsync<SQLConfigurationOption>(GetFetchSQL<SQLConfigurationOption>());
@@ -18,10 +18,10 @@ namespace Opserver.Data.SQL
                             r.Default = defaultVal;
                     }
                     return result;
-                }));
+                });
 
         private Dictionary<string, int> _configurationDefaults;
-        public Dictionary<string, int> ConfigurationDefaults => _configurationDefaults ?? (_configurationDefaults = SQLConfigurationOption.GetDefaults(this));
+        public Dictionary<string, int> ConfigurationDefaults => _configurationDefaults ??= SQLConfigurationOption.GetDefaults(this);
 
         public class SQLConfigurationOption : ISQLVersioned
         {

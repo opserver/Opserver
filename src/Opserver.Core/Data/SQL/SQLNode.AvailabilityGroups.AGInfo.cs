@@ -36,7 +36,7 @@ namespace Opserver.Data.SQL
 
             private bool? _hasDatabases;
             public bool HasDatabases =>
-                _hasDatabases ?? (_hasDatabases = LocalReplica?.Databases.Count > 0|| RemoteReplicas?.Sum(r => r.Databases?.Count ?? 0) > 0).Value;
+                _hasDatabases ??= LocalReplica?.Databases.Count > 0 || RemoteReplicas?.Sum(r => r.Databases?.Count ?? 0) > 0;
 
             public List<AGReplica> Replicas { get; internal set; }
             public List<AGListener> Listeners { get; internal set; }

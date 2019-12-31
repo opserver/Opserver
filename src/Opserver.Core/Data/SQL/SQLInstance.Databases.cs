@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
         private Cache<List<Database>> _databases;
 
         public Cache<List<Database>> Databases =>
-            _databases ?? (_databases = GetSqlCache(nameof(Databases),
+            _databases ??= GetSqlCache(nameof(Databases),
                 async conn =>
                 {
                     var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
@@ -45,7 +45,7 @@ namespace Opserver.Data.SQL
                     }
                     return dbs;
                 },
-                cacheDuration: 5.Minutes()));
+                cacheDuration: 5.Minutes());
 
         public LightweightCache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
             DatabaseFetch<DatabaseFile>(databaseName);
@@ -164,7 +164,7 @@ namespace Opserver.Data.SQL
 
             private bool? _isSystemDatabase;
             public int Id { get; internal set; }
-            public bool IsSystemDatabase => (_isSystemDatabase ?? (_isSystemDatabase = SystemDatabaseNames.Contains(Name))).Value;
+            public bool IsSystemDatabase => _isSystemDatabase ??= SystemDatabaseNames.Contains(Name);
             public string Name { get; internal set; }
             public DatabaseStates State { get; internal set; }
             public CompatabilityLevels CompatibilityLevel { get; internal set; }
@@ -598,7 +598,7 @@ Select Top 100
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             private string _volumeMountPoint;
-            public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon)[0]);
+            public string VolumeMountPoint => _volumeMountPoint ??= PhysicalName?.Split(StringSplits.Colon)[0];
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
             public int FileId { get; internal set; }
@@ -625,7 +625,7 @@ Select Top 100
             private static readonly Regex _shortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
-                    _shortPhysicalName ?? (_shortPhysicalName = _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
+                    _shortPhysicalName ??= _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA");
 
             public string GrowthDescription
             {

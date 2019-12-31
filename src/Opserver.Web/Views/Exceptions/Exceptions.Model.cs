@@ -11,7 +11,7 @@ namespace Opserver.Views.Exceptions
     public class ExceptionsModel
     {
         private NameValueCollection _requestQueryString;
-        public NameValueCollection RequestQueryString => _requestQueryString ?? (_requestQueryString = HttpUtility.ParseQueryString(Current.Request.QueryString.ToString()));
+        public NameValueCollection RequestQueryString => _requestQueryString ??= HttpUtility.ParseQueryString(Current.Request.QueryString.ToString());
 
         public ExceptionsModule Module { get; internal set; }
         public ExceptionStore Store { get; internal set; }
@@ -27,14 +27,14 @@ namespace Opserver.Views.Exceptions
 
         public bool ShowAll => Group == null && Log == null;
         private int? _shownCount;
-        public int ShownCount => _shownCount ?? (_shownCount = Errors.Sum(e => e.DuplicateCount)).Value;
+        public int ShownCount => _shownCount ??= Errors.Sum(e => e.DuplicateCount) ?? 0;
         public bool ShowClearLink => Current.User.Is(ExceptionsRoles.Admin) && Errors.Any(e => !e.IsProtected) && (Log != null || SearchParams.SearchQuery.HasValue() || SearchParams.SearchQuery.HasValue());
         public bool ShowDeleted { get; set; }
 
         public int LoadAsyncSize { get; set; }
 
         private int? _totalCount;
-        public int TotalCount => _totalCount ?? (_totalCount = GetTotal()).Value;
+        public int TotalCount => _totalCount ??= GetTotal();
         private int GetTotal() => Log?.ExceptionCount ?? Group?.Total ?? Store?.TotalExceptionCount ?? Module.TotalExceptionCount;
 
         public bool HasMore => TotalCount > ShownCount;

@@ -11,7 +11,7 @@ namespace Opserver.Data.Elastic
     {
         private Cache<ClusterNodesInfo> _nodes;
         public Cache<ClusterNodesInfo> Nodes =>
-            _nodes ?? (_nodes = GetElasticCache(async () =>
+            _nodes ??= GetElasticCache(async () =>
             {
                 var resultTask = GetAsync<ClusterNodesInfo>("_nodes");
                 // Note without ?all, we have dropped support for < v0.90
@@ -32,7 +32,7 @@ namespace Opserver.Data.Elastic
                     }
                 }
                 return result;
-            }));
+            });
 
         public string Name => Nodes.Data?.Name ?? SettingsName;
         public string ShortName(NodeInfo node) => node?.Name.TrimEnd("-" + Name);
@@ -74,7 +74,7 @@ namespace Opserver.Data.Elastic
 
             //private Version _version;
             //[IgnoreDataMember]
-            //public Version Version => _version ?? (_version = VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0"));
+            //public Version Version => _version ??= VersionString.HasValue() ? Version.Parse(VersionString) : new Version("0.0");
 
             [IgnoreDataMember]
             public string Version => VersionString;
@@ -208,7 +208,7 @@ namespace Opserver.Data.Elastic
                 [DataMember(Name = "max_content_length_in_bytes")] public long MaxContentLengthInBytes { get; internal set; }
 
                 private string _publishPrettyAddress;
-                public string PublishAddressPretty => _publishPrettyAddress ?? (_publishPrettyAddress = _inetStrip.Replace(PublishAddress, "$1"));
+                public string PublishAddressPretty => _publishPrettyAddress ??= _inetStrip.Replace(PublishAddress, "$1");
             }
         }
 

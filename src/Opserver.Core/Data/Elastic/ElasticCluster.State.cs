@@ -8,8 +8,8 @@ namespace Opserver.Data.Elastic
     {
         private Cache<ClusterStateInfo> _state;
 
-        public Cache<ClusterStateInfo> State => _state ?? (_state = GetElasticCache(
-            () => GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/"))
+        public Cache<ClusterStateInfo> State => _state ??= GetElasticCache(
+            () => GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/")
         );
 
         public NodeInfo MasterNode => Nodes.Data?.Nodes?.FirstOrDefault(n => State?.Data?.MasterNode == n.GUID);
@@ -21,9 +21,9 @@ namespace Opserver.Data.Elastic
         {
             private MonitorStatus? _monitorStatus;
             public MonitorStatus MonitorStatus =>
-                _monitorStatus ?? (_monitorStatus = RoutingNodes?.Nodes.Values.SelectMany(n => n)
+                _monitorStatus ??= RoutingNodes?.Nodes.Values.SelectMany(n => n)
                     .Union(RoutingNodes.Unassigned)
-                    .GetWorstStatus() ?? MonitorStatus.Unknown).Value;
+                    .GetWorstStatus() ?? MonitorStatus.Unknown;
             // TODO: Implement
             public string MonitorStatusReason => null;
 

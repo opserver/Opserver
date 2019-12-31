@@ -65,13 +65,13 @@ namespace Opserver.Data.HAProxy
 
         private Cache<List<Proxy>> _proxies;
         public Cache<List<Proxy>> Proxies =>
-            _proxies ?? (_proxies = new Cache<List<Proxy>>(this, "HAProxy Fetch: " + Name,
+            _proxies ??= new Cache<List<Proxy>>(this, "HAProxy Fetch: " + Name,
                 cacheDuration: 10.Seconds(),
                 getData: FetchHAProxyStatsAsync,
                 addExceptionData: e => e.AddLoggedData("Server", Name)
                     .AddLoggedData("Url", Url)
                     .AddLoggedData("QueryTimeout", QueryTimeoutMs.ToString())
-            ));
+            );
 
         private async Task<List<Proxy>> FetchHAProxyStatsAsync()
         {

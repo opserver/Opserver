@@ -26,10 +26,10 @@ namespace Opserver.Data.PagerDuty
         private Cache<List<PagerDutySchedule>> _schedules;
 
         public Cache<List<PagerDutySchedule>> AllSchedules =>
-            _schedules ?? (_schedules = GetPagerDutyCache(10.Minutes(),
+            _schedules ??= GetPagerDutyCache(10.Minutes(),
                 () => GetFromPagerDutyAsync("schedules",
                         response => JSON.Deserialize<PagerDutyScheduleResponse>(response, JilOptions).Schedules)
-            ));
+            );
 
         private Cache<List<PagerDutyScheduleOverride>> _primaryScheduleOverrides;
         public Cache<List<PagerDutyScheduleOverride>> PrimaryScheduleOverrides
@@ -38,7 +38,7 @@ namespace Opserver.Data.PagerDuty
             {
                 var schedule = PrimarySchedule;
                 if (schedule == null) return null;
-                return _primaryScheduleOverrides ?? (_primaryScheduleOverrides = GetPagerDutyCache(10.Minutes(), () => GetOverridesAsync(PrimarySchedule)));
+                return _primaryScheduleOverrides ??= GetPagerDutyCache(10.Minutes(), () => GetOverridesAsync(PrimarySchedule));
             }
         }
 

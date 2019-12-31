@@ -12,7 +12,7 @@ namespace Opserver.Data.Elastic
         string ISearchableNode.Name => SettingsName;
         string ISearchableNode.DisplayName => SettingsName;
         private TimeSpan? _refreshInteval;
-        public TimeSpan RefreshInterval => _refreshInteval ?? (_refreshInteval = Settings.RefreshIntervalSeconds.Seconds()).Value;
+        public TimeSpan RefreshInterval => _refreshInteval ??= Settings.RefreshIntervalSeconds.Seconds();
         string ISearchableNode.CategoryName => "elastic";
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;

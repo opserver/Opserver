@@ -70,7 +70,7 @@ namespace Opserver
         private Regex _servicesPatternRegEx;
         public Regex ServicesPatternRegEx
         {
-            get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+            get => _servicesPatternRegEx ??= GetPatternMatcher(ServicesPattern);
             set => _servicesPatternRegEx = value;
         }
 
@@ -96,7 +96,7 @@ namespace Opserver
             /// <summary>
             /// The pattern to match for these node settings
             /// </summary>
-            public Regex PatternRegex => _patternRegEx ?? (_patternRegEx = GetPatternMatcher(Pattern));
+            public Regex PatternRegex => _patternRegEx ??= GetPatternMatcher(Pattern);
 
             /// <summary>
             /// The Pattern to match on node interfaces, an interface matching this pattern will be shown on the dashboard.
@@ -106,7 +106,7 @@ namespace Opserver
             private Regex _primaryInterfacePatternRegEx;
             public Regex PrimaryInterfacePatternRegex
             {
-                get => _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern));
+                get => _primaryInterfacePatternRegEx ??= GetPatternMatcher(PrimaryInterfacePattern);
                 set => _primaryInterfacePatternRegEx = value;
             }
 
@@ -148,7 +148,7 @@ namespace Opserver
             private Regex _servicesPatternRegEx;
             public Regex ServicesPatternRegEx
             {
-                get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+                get => _servicesPatternRegEx ??= GetPatternMatcher(ServicesPattern);
                 set => _servicesPatternRegEx = value;
             }
         }
@@ -170,7 +170,7 @@ namespace Opserver
             /// <summary>
             /// The pattern to match for these node settings
             /// </summary>
-            public Regex PatternRegex => _patternRegEx ?? (_patternRegEx = GetPatternMatcher(Pattern));
+            public Regex PatternRegex => _patternRegEx ??= GetPatternMatcher(Pattern);
 
             /// <summary>
             /// The Pattern to match on node interfaces, an interface matching this pattern will be shown on the dashboard.
@@ -180,7 +180,7 @@ namespace Opserver
             private Regex _primaryInterfacePatternRegEx;
             public Regex PrimaryInterfacePatternRegex
             {
-                get => _primaryInterfacePatternRegEx ?? (_primaryInterfacePatternRegEx = GetPatternMatcher(PrimaryInterfacePattern));
+                get => _primaryInterfacePatternRegEx ??= GetPatternMatcher(PrimaryInterfacePattern);
                 set => _primaryInterfacePatternRegEx = value;
             }
 
@@ -222,7 +222,7 @@ namespace Opserver
             private Regex _servicesPatternRegEx;
             public Regex ServicesPatternRegEx
             {
-                get => _servicesPatternRegEx ?? (_servicesPatternRegEx = GetPatternMatcher(ServicesPattern));
+                get => _servicesPatternRegEx ??= GetPatternMatcher(ServicesPattern);
                 set => _servicesPatternRegEx = value;
             }
         }

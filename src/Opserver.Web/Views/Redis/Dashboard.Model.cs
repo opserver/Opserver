@@ -22,10 +22,7 @@ namespace Opserver.Views.Redis
         public RedisViews View { get; set; }
 
         public bool? _allVersionsMatch;
-        public bool AllVersionsMatch
-        {
-            get { return _allVersionsMatch ?? (_allVersionsMatch = Instances?.All(i => i.Version == Instances[0].Version) == true).Value; }
-        }
+        public bool AllVersionsMatch => _allVersionsMatch ??= Instances?.All(i => i.Version == Instances[0].Version) == true;
 
         public Version CommonVersion => AllVersionsMatch ? Instances[0].Version : null;
 

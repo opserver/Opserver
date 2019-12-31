@@ -28,7 +28,7 @@ namespace Opserver.Data.Redis
         public bool UseSsl => ConnectionInfo.Settings.UseSSL;
 
         private string _hostAndPort;
-        public string HostAndPort => _hostAndPort ?? (_hostAndPort = Host + ":" + Port.ToString());
+        public string HostAndPort => _hostAndPort ??= Host + ":" + Port.ToString();
 
         // Redis is spanish for WE LOVE DANGER, I think.
         protected override TimeSpan BackoffDuration => TimeSpan.FromSeconds(5);
@@ -43,7 +43,7 @@ namespace Opserver.Data.Redis
             {
                 if (_connection?.IsConnected != true)
                 {
-                    _connection = _connection ?? GetConnection(allowAdmin: true);
+                    _connection ??= GetConnection(allowAdmin: true);
                     if (!_connection.IsConnected)
                     {
                         _connection.Configure();

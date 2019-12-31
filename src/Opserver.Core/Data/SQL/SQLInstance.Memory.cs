@@ -6,7 +6,7 @@ namespace Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLMemoryClerkSummaryInfo>> _memoryClerkSummary;
-        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary => _memoryClerkSummary ?? (_memoryClerkSummary = SqlCacheList<SQLMemoryClerkSummaryInfo>(RefreshInterval));
+        public Cache<List<SQLMemoryClerkSummaryInfo>> MemoryClerkSummary => _memoryClerkSummary ??= SqlCacheList<SQLMemoryClerkSummaryInfo>(RefreshInterval);
 
         public class SQLMemoryClerkSummaryInfo : ISQLVersioned
         {

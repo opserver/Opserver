@@ -22,7 +22,7 @@ namespace Opserver.Data.HAProxy
         private static readonly Regex _compactReplacer = new Regex(@"-\d+$", RegexOptions.Compiled);
         private string _compactServerName;
         public string CompactServerName =>
-            _compactServerName ?? (_compactServerName = _compactReplacer.Replace(ServerName, ""));
+            _compactServerName ??= _compactReplacer.Replace(ServerName, "");
 
         /// <summary>
         /// qcur: current queued requests
@@ -460,7 +460,7 @@ namespace Opserver.Data.HAProxy
             : ProxyName + " Status: " + ProxyServerStatus.AsString(EnumFormat.Description);
 
         private ProxyServerStatus? _proxyServerStatus;
-        public ProxyServerStatus ProxyServerStatus => _proxyServerStatus ?? (_proxyServerStatus = GetProxyServerStatus()).Value;
+        public ProxyServerStatus ProxyServerStatus => _proxyServerStatus ??= GetProxyServerStatus();
 
         private ProxyServerStatus GetProxyServerStatus()
         {

@@ -220,11 +220,11 @@ FROM (SELECT TOP (@MaxResultCount)
 
             public TopSearchOptions SetDefaults()
             {
-                Sort = Sort ?? TopSorts.AvgCPUPerMinute;
-                MinExecs = MinExecs ?? DefaultMinExecs;
-                LastRunSeconds = LastRunSeconds ?? DefaultLastRunSeconds;
-                MinLastRunDate = MinLastRunDate ?? DateTime.UtcNow.AddDays(-1);
-                MaxResultCount = MaxResultCount ?? DefaultMaxResultCount;
+                Sort ??= TopSorts.AvgCPUPerMinute;
+                MinExecs ??= DefaultMinExecs;
+                LastRunSeconds ??= DefaultLastRunSeconds;
+                MinLastRunDate ??= DateTime.UtcNow.AddDays(-1);
+                MaxResultCount ??= DefaultMaxResultCount;
                 return this;
             }
 

@@ -18,12 +18,12 @@ namespace Opserver.Data.PagerDuty
             OnCallInfo.Data?.FirstOrDefault(p => p.EscalationLevel == 2)?.AssignedUser;
 
         private Cache<List<OnCall>> _oncallinfo;
-        public Cache<List<OnCall>> OnCallInfo => _oncallinfo ?? (_oncallinfo = new Cache<List<OnCall>>(
+        public Cache<List<OnCall>> OnCallInfo => _oncallinfo ??= new Cache<List<OnCall>>(
             this,
             "On Call information for Pagerduty",
             5.Minutes(),
             getData: GetOnCallUsers,
-            logExceptions: true));
+            logExceptions: true);
 
         public List<OnCall> GetOnCall(int? maxPerSchedule = null) =>
             OnCallInfo.SafeData(true).Where(c => c.EscalationLevel.GetValueOrDefault(int.MaxValue) <= (maxPerSchedule ?? Settings.OnCallToShow)).ToList();
@@ -135,7 +135,7 @@ namespace Opserver.Data.PagerDuty
         }
 
         private string _emailusername;
-        public string EmailUserName => _emailusername ?? (_emailusername = Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : "");
+        public string EmailUserName => _emailusername ??= Email.HasValue() ? Email.Split(StringSplits.AtSign)[0] : "";
     }
 
     public class PagerDutyContactMethod

@@ -14,7 +14,7 @@ namespace Opserver.Data.SQL
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
-        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds()).Value;
+        public TimeSpan RefreshInterval => _refreshInterval ??= (Settings.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds();
         public string ObjectName { get; internal set; }
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;

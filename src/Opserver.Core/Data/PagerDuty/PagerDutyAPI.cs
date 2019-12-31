@@ -158,8 +158,8 @@ namespace Opserver.Data.PagerDuty
 
         private Cache<List<PagerDutyPerson>> _allusers;
         public Cache<List<PagerDutyPerson>> AllUsers =>
-            _allusers ?? (_allusers = GetPagerDutyCache(60.Minutes(),
-                    () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r, JilOptions).Users))
+            _allusers ??= GetPagerDutyCache(60.Minutes(),
+                    () => GetFromPagerDutyAsync("users?include[]=contact_methods", r => JSON.Deserialize<PagerDutyUserResponse>(r, JilOptions).Users)
             );
     }
 }

@@ -6,7 +6,7 @@ namespace Opserver.Data.SQL
     {
         private Cache<SQLServerProperties> _serverProperties;
         public Cache<SQLServerProperties> ServerProperties =>
-            _serverProperties ?? (_serverProperties = GetSqlCache(
+            _serverProperties ??= GetSqlCache(
                 nameof(ServerProperties), async conn =>
                 {
                     var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL);
@@ -19,7 +19,7 @@ namespace Opserver.Data.SQL
                         }
                     }
                     return result;
-                }));
+                });
 
         public decimal? CurrentMemoryPercent { get; private set; }
 
@@ -62,7 +62,7 @@ namespace Opserver.Data.SQL
             public int CPUSocketCount => CPUCount/HyperthreadRatio;
 
             private Version _version;
-            public Version ParsedVersion => _version ?? (_version = Version != null ? System.Version.Parse(Version) : new Version(0, 0));
+            public Version ParsedVersion => _version ??= Version != null ? System.Version.Parse(Version) : new Version(0, 0);
 
             public string ShortEdition
             {

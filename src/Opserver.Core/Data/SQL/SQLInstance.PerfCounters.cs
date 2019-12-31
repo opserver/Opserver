@@ -8,11 +8,11 @@ namespace Opserver.Data.SQL
     {
         private Cache<List<PerfCounterRecord>> _perfCounters;
         public Cache<List<PerfCounterRecord>> PerfCounters =>
-            _perfCounters ?? (_perfCounters = GetSqlCache(nameof(PerfCounters), conn =>
+            _perfCounters ??= GetSqlCache(nameof(PerfCounters), conn =>
             {
                 var sql = GetFetchSQL<PerfCounterRecord>();
                 return conn.QueryAsync<PerfCounterRecord>(sql, new {maxEvents = 60});
-            }));
+            });
 
         public long? BatchesPerSec => (long?)GetPerfCounter("SQL Statistics", "Batch Requests/sec", "")?.CalculatedValue;
 

@@ -8,7 +8,7 @@ namespace Opserver.Data.SQL
     {
         private Cache<List<AGInfo>> _availabilityGroups;
         public Cache<List<AGInfo>> AvailabilityGroups =>
-            _availabilityGroups ?? (_availabilityGroups = GetSqlCache(nameof(AvailabilityGroups), async conn =>
+            _availabilityGroups ??= GetSqlCache(nameof(AvailabilityGroups), async conn =>
             {
                 PerfCounterRecord getCounter(string cn, string n) => GetPerfCounter("Availability Replica", cn, n);
                 var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AvailabilityGroups), Version), k =>
@@ -64,6 +64,6 @@ namespace Opserver.Data.SQL
                     }
                 }
                 return ags;
-            }));
+            });
     }
 }

@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLJobInfo>> _jobSummary;
-        public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ?? (_jobSummary = SqlCacheList<SQLJobInfo>(2.Minutes()));
+        public Cache<List<SQLJobInfo>> JobSummary => _jobSummary ??= SqlCacheList<SQLJobInfo>(2.Minutes());
 
         /// <summary>
         /// Enables or disables a SQL agent job

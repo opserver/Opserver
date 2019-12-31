@@ -28,7 +28,7 @@ namespace Opserver.Data.Redis
 
         private Cache<RedisInfo> _info;
         public Cache<RedisInfo> Info =>
-            _info ?? (_info = GetRedisCache(10.Seconds(), async () =>
+            _info ??= GetRedisCache(10.Seconds(), async () =>
             {
                 var server = Connection.GetSingleServer();
                 string infoStr;
@@ -40,7 +40,7 @@ namespace Opserver.Data.Redis
                 var ri = RedisInfo.FromInfoString(infoStr);
                 if (ri != null) Replication = ri.Replication;
                 return ri;
-            }));
+            });
 
         public RedisInfo.RedisInstanceRole Role
         {
