@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using StackExchange.Opserver.Helpers;
 using StackExchange.Opserver.Data.Dashboard;
 using StackExchange.Redis;
+using System.Security.Authentication;
 
 namespace StackExchange.Opserver.Data.Redis
 {
@@ -29,6 +30,7 @@ namespace StackExchange.Opserver.Data.Redis
         public string Password => ConnectionInfo.Password;
         public int Port => ConnectionInfo.Port;
         public bool UseSsl => ConnectionInfo.Settings.UseSSL;
+        public SslProtocols? SslProtocols => ConnectionInfo.SslProtocols;
 
         private string _hostAndPort;
         public string HostAndPort => _hostAndPort ?? (_hostAndPort = Host + ":" + Port.ToString());
@@ -130,7 +132,8 @@ namespace StackExchange.Opserver.Data.Redis
                 ConnectTimeout = 60000,
                 AllowAdmin = allowAdmin,
                 Password = Password,
-                Ssl=UseSsl,
+                Ssl = UseSsl,
+                SslProtocols = SslProtocols,
                 EndPoints =
                 {
                     { ConnectionInfo.Host, ConnectionInfo.Port }

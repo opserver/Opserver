@@ -71,9 +71,10 @@
           "name": "Machine Learning",
           "port": 6379,
           "password": "superSecret", // Instance has a password
-          "useSSL": "true" // Connect via SSL (not built into redis itself - default is false)
-        }
-      ]
-    }
-  ]
-}
+          "useSSL": "true", // Connect via SSL (not built into redis itself - default is false)
+          "sslProtocols": "Tls11,Tls12" // Warning: case sensitive. Valid values are Ssl2, Ssl3, Tls, Tls11, Tls12
+        }                     
+      ]                       
+    }                        
+  ]                          
+}                            
