@@ -82,6 +82,7 @@ namespace Opserver.Data.SQL
                 {
                     if (Version.HasValue())
                     {
+                        if (Version.StartsWith("15.")) return "SQL 2019";
                         if (Version.StartsWith("14.")) return "SQL 2017";
                         if (Version.StartsWith("13.")) return "SQL 2016";
                         if (Version.StartsWith("12.")) return "SQL 2014";
