@@ -94,22 +94,6 @@ namespace Opserver.Data.Cloudflare
         [DataMember(Name = "permissions")]
         public List<string> Permissons { get; set; }
 
-        // TODO: Meta:
-        //"meta": {
-        //    "step": 4,
-        //    "wildcard_proxiable": true,
-        //    "custom_certificate_quota": "1",
-        //    "page_rule_quota": "100",
-        //    "phishing_detected": false,
-        //    "multiple_railguns_allowed": false
-        //}
-        // TODO: Owner:
-        //"owner": {
-        //  "type": "organization",
-        //  "id": "f510c13207fc4c7d068e3896525995c9",
-        //  "name": "StackExchange"
-        //}
-
         public MonitorStatus MonitorStatus
         {
             get
