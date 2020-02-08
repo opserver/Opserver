@@ -2,6 +2,7 @@
 using Opserver.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Opserver.Controllers
 {
@@ -27,14 +28,19 @@ namespace Opserver.Controllers
         public virtual NavTab NavTab => null;
         protected OpserverSettings Settings { get; }
 
-        public StatusController(IOptions<OpserverSettings> settings)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            Settings = settings.Value;
-            // TODO: Figure out enabled/disabled (maybe we handle it in route registration instead, or a filter?)
-            //var iSettings = SettingsModule as ModuleSettings;
-            //if (iSettings?.Enabled == false)
-            //    filterContext.Result = DefaultAction();
+            var iSettings = SettingsModule as ModuleSettings;
+            if (iSettings?.Enabled == false)
+            {
+                // TODO: "Module isn't enabled" page?
+                context.Result = Redirect("~/");
+            }
+
+            base.OnActionExecuting(context);
         }
+
+        public StatusController(IOptions<OpserverSettings> settings) => Settings = settings.Value;
 
         public void SetTitle(string title)
         {
