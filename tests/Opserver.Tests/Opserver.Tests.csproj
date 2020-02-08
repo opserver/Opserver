@@ -2,11 +2,11 @@
   <PropertyGroup>
     <RootNamespace>Opserver.Tests</RootNamespace>
     <AssemblyName>Opserver.Tests</AssemblyName>
-    <TargetFrameworks>netcoreapp3.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../../src/Opserver.Web/Opserver.Web.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" Version="3.1.0" />
    </ItemGroup>
 </Project>
