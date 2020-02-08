@@ -61,12 +61,6 @@ namespace Opserver.Controllers
             return Content(message ?? "404");
         }
 
-        protected ContentResult NotFound(string message = null)
-        {
-            Response.StatusCode = (int)HttpStatusCode.NotFound;
-            return Content(message);
-        }
-
         protected JsonResult Json(object data, System.Text.Json.JsonSerializerOptions serializerOptions = null) =>
             serializerOptions != null
             ? base.Json(data, serializerOptions)
@@ -76,12 +70,6 @@ namespace Opserver.Controllers
         {
             Response.StatusCode = (int)HttpStatusCode.NotFound;
             return Json(null);
-        }
-
-        protected ActionResult JsonNotFound<T>(T toSerialize = default)
-        {
-            Response.StatusCode = (int)HttpStatusCode.NotFound;
-            return Json(toSerialize);
         }
 
         protected ActionResult JsonError(string message, HttpStatusCode? status = null)
