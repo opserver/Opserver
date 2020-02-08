@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting.WindowsServices;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Opserver.Helpers;
 
 namespace Opserver
 {
@@ -40,6 +41,16 @@ namespace Opserver
                     {
                         config
                             .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
+                            // v1.0 compat, for easier migrations
+                            .AddPrefixedJsonFile("Modules:Dashboard", "Config/DashboardSettings.json")
+                            .AddPrefixedJsonFile("Modules:Cloudflare", "Config/CloudFlareSettings.json")
+                            .AddPrefixedJsonFile("Modules:Elastic", "Config/ElasticSettings.json")
+                            .AddPrefixedJsonFile("Modules:Exceptions", "Config/ExceptionSettings.json")
+                            .AddPrefixedJsonFile("Modules:HAProxy", "Config/HAProxySettings.json")
+                            .AddPrefixedJsonFile("Modules:PagerDuty", "Config/PagerDutySettings.json")
+                            .AddPrefixedJsonFile("Modules:Redis", "Config/RedisSettings.json")
+                            .AddPrefixedJsonFile("Modules:SQL", "Config/SQLSettings.json")
+                            // End compat
                             .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true)
                             .AddJsonFile("localSettings.json", optional: true, reloadOnChange: true);
                     }
