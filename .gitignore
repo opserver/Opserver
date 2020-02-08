@@ -76,10 +76,6 @@ Backup*/
 UpgradeLog*.XML
 UpgradeLog*.htm
 
-# SQL Server files
-App_Data/*.mdf
-App_Data/*.ldf
-
 #############
 ## Windows detritus
 #############
@@ -107,3 +103,4 @@ src/Opserver.Web/config/*.json
 src/Opserver.Web/config/*.config
 *.StackOverflow.*
 src/Opserver.Web/localSettings.json
+.idea/*
