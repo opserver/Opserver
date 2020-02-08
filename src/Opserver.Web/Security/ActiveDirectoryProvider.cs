@@ -36,6 +36,8 @@ namespace Opserver.Security
 
         public override bool InGroups(User user, string groupNames)
         {
+            if (groupNames.IsNullOrEmpty()) return false;
+
             var groups = groupNames.Split(StringSplits.Comma_SemiColon);
             if (groupNames.Length == 0) return false;
 

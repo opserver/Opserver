@@ -42,6 +42,7 @@ namespace Opserver
                         config
                             .AddJsonFile("appSettings.json", optional: true, reloadOnChange: true)
                             // v1.0 compat, for easier migrations
+                            .AddPrefixedJsonFile("Security", "Config/SecuritySettings.json") // Note: manual migration from XML
                             .AddPrefixedJsonFile("Modules:Dashboard", "Config/DashboardSettings.json")
                             .AddPrefixedJsonFile("Modules:Cloudflare", "Config/CloudFlareSettings.json")
                             .AddPrefixedJsonFile("Modules:Elastic", "Config/ElasticSettings.json")
