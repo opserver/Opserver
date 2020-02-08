@@ -1,6 +1,5 @@
-﻿@using Opserver.Data.SQL
-@inject Opserver.Data.Dashboard.DashboardModule Dashboard
-@model (SQLInstance Instance, int DecimalPlaces)
+﻿@inject Opserver.Data.Dashboard.DashboardModule Dashboard
+@model PartialsMemoryCellModel
 @{ 
     var i = Model.Instance;
     var serverInfo = Dashboard.GetNodeByName(i.Name);

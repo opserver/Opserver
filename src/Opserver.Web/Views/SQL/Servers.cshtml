@@ -53,7 +53,7 @@
                             <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.AsString(EnumFormat.Description)</td>
                             <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
-                            <partial Name="Partials.MemoryCell" Model="@((n, 2))" />
+                            <partial Name="Partials.MemoryCell" Model="new PartialsMemoryCellModel(n, 2)" />
                             <td>@Health.OfAGs(cAgs)</td>
                             <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Health.Description(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
                             @ConnectionsCell(n)
@@ -98,7 +98,7 @@
                         <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                         <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
-                        <partial Name="Partials.MemoryCell" Model="@((i, 2))" />
+                        <partial Name="Partials.MemoryCell" Model="@new PartialsMemoryCellModel(i, 2)" />
                         <td title="@dbs.Count.Pluralize("Database"):
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
                             @Health.Description(dbs)
