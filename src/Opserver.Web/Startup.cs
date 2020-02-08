@@ -49,10 +49,12 @@ namespace Opserver
                     settings.GetCustomData = (ex, data) =>
                     {
                         // everything below needs a context
-                        if (Current.Context != null && Current.User != null)
+                        // Don't *init* a user here, since that'll stack overflow when it errors
+                        var u = Current.Context?.UserIfExists;
+                        if (u != null)
                         {
-                            data.Add("User", Current.User.AccountName);
-                            data.Add("Roles", Current.User.Roles.ToString());
+                            data.Add("User", u.AccountName);
+                            data.Add("Roles", u.Roles.ToString());
                         }
 
                         while (ex != null)

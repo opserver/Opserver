@@ -72,6 +72,8 @@ namespace Opserver
                 }
             }
 
+            public User UserIfExists => _user;
+
             public CurrentContext(SecurityProvider security, HttpContext httpContext, IEnumerable<StatusModule> modules)
             {
                 Security = security;
