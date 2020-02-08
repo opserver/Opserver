@@ -55,16 +55,10 @@ namespace Opserver.Data.Cloudflare
         }
 
         private List<IPNet> _maskedRanges;
-        public List<IPNet> MaskedRanges
-        {
-            get
-            {
-                return _maskedRanges ?? (_maskedRanges = Settings.DataCenters?.SelectMany(dc => dc.MaskedRanges)
-                        .Select(r => IPNet.Parse(r))
-                        .ToList()
-                    ?? new List<IPNet>());
-            }
-        }
+        public List<IPNet> MaskedRanges =>
+            _maskedRanges ??= Settings.DataCenters?.SelectMany(dc => dc.MaskedRanges)
+                                                   .Select(r => IPNet.Parse(r))
+                                                   .ToList() ?? new List<IPNet>();
 
         public IEnumerable<string> GetMaskedIPs(List<IPAddress> addresses)
         {

@@ -13,7 +13,7 @@ namespace Opserver.Data.PagerDuty
         private Cache<List<Incident>> _incidents;
 
         public Cache<List<Incident>> Incidents =>
-            _incidents ?? (_incidents = GetPagerDutyCache(10.Minutes(), () =>
+            _incidents ??= GetPagerDutyCache(10.Minutes(), () =>
             {
                 string since = DateTime.UtcNow.AddDays(-Settings.DaysToCache).ToString("yyyy-MM-dd"),
                        until = DateTime.UtcNow.AddDays(1).ToString("yyyy-MM-dd");
@@ -29,7 +29,7 @@ namespace Opserver.Data.PagerDuty
                     }
                     return results;
                 });
-            }));
+            });
     }
 
     public class IncidentResponse
@@ -99,23 +99,14 @@ namespace Opserver.Data.PagerDuty
 
         public Task<List<LogEntry>> GetLogsAsync() => Module.API.GetIncidentEntriesAsync(Id);
 
-        public MonitorStatus MonitorStatus
-        {
-            get
+        public MonitorStatus MonitorStatus =>
+            Status switch
             {
-                switch (Status)
-                {
-                    case IncidentStatus.triggered:
-                        return MonitorStatus.Critical;
-                    case IncidentStatus.acknowledged:
-                        return MonitorStatus.Warning;
-                    case IncidentStatus.resolved:
-                        return MonitorStatus.Good;
-                    default:
-                        return MonitorStatus.Unknown;
-                }
-            }
-        }
+                IncidentStatus.triggered => MonitorStatus.Critical,
+                IncidentStatus.acknowledged => MonitorStatus.Warning,
+                IncidentStatus.resolved => MonitorStatus.Good,
+                _ => MonitorStatus.Unknown,
+            };
 
         public string MonitorStatusReason => "Status is " + Status.AsString(EnumFormat.Description);
     }

@@ -99,15 +99,12 @@ namespace Opserver.Controllers
         public ActionResult InstanceSummary(string node, string type)
         {
             var n = Module.GetNodeByName(node);
-            switch (type)
+            return type switch
             {
-                case "hardware":
-                    return View("Node.Hardware", n);
-                case "network":
-                    return View("Node.Network", n);
-                default:
-                    return ContentNotFound("Unknown summary view requested");
-            }
+                "hardware" => View("Node.Hardware", n),
+                "network" => View("Node.Network", n),
+                _ => ContentNotFound("Unknown summary view requested"),
+            };
         }
 
         [Route("dashboard/graph/{nodeId}/{type}")]

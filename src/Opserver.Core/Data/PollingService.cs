@@ -26,7 +26,7 @@ namespace Opserver.Data
             _cancellationToken = cancellationToken;
             _logger.LogInformation("Polling service is starting.");
             _startTime = DateTime.UtcNow;
-            _globalPollingThread = _globalPollingThread ?? new Thread(MonitorPollingLoop)
+            _globalPollingThread ??= new Thread(MonitorPollingLoop)
             {
                 Name = "GlobalPolling",
                 Priority = ThreadPriority.Lowest,

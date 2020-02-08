@@ -21,7 +21,7 @@ namespace Opserver.Data.Exceptions
         private static readonly Regex _shortLogStripRegex = new Regex(@"[^A-Za-z_0-9_\-_\.\/]", RegexOptions.Compiled);
         private string _shortName;
 
-        public string ShortName => _shortName ?? (_shortName = _shortLogStripRegex.Replace(Name, ""));
+        public string ShortName => _shortName ??= _shortLogStripRegex.Replace(Name, "");
 
         public JSONApplication ToJSON()
         {

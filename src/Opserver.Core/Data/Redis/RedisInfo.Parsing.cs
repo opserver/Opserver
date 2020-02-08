@@ -53,7 +53,7 @@ namespace Opserver.Data.Redis
                     else
                     {
                         currentSection = new RedisInfoSection { Name = sectionName, IsUnrecognized = true };
-                        info.UnrecognizedSections = info.UnrecognizedSections ?? new List<RedisInfoSection>();
+                        info.UnrecognizedSections ??= new List<RedisInfoSection>();
                         info.UnrecognizedSections.Add(currentSection);
                     }
                     continue;

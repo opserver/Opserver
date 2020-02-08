@@ -37,7 +37,7 @@ namespace Opserver.Data.Dashboard
             public string Size { get; internal set; }
             public string PrettyName => Name?.Replace("DIMM_", "");
             private string _bank;
-            public string Bank => _bank ?? (_bank = Name?.TrimEnd(StringSplits.Numbers));
+            public string Bank => _bank ??= Name?.TrimEnd(StringSplits.Numbers);
             private int? _label;
             public int? Label
             {

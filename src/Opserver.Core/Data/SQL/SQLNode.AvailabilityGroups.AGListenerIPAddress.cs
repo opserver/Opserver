@@ -23,29 +23,20 @@ namespace Opserver.Data.SQL
             // and ClusterNetwork bits match here ()
 
             private IPNet _ipNet;
-            public IPNet IPNet => _ipNet ?? (_ipNet = IPNet.Parse(IPAddress, NetworkSubnetPrefixLength));
+            public IPNet IPNet => _ipNet ??= IPNet.Parse(IPAddress, NetworkSubnetPrefixLength);
 
             private IPNet _networkIPNet;
-            public IPNet NetworkIPNet => _networkIPNet ?? (_networkIPNet = IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength));
+            public IPNet NetworkIPNet => _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength);
 
-            public MonitorStatus MonitorStatus
-            {
-                get
+            public MonitorStatus MonitorStatus =>
+                State switch
                 {
-                    switch (State)
-                    {
-                        case ListenerStates.Online:
-                            return MonitorStatus.Good;
-                        case ListenerStates.OnlinePending:
-                            return MonitorStatus.Warning;
-                        case ListenerStates.Failed:
-                            return MonitorStatus.Critical;
-                        //case ListenerStates.Offline:
-                        default:
-                            return MonitorStatus.Unknown;
-                    }
-                }
-            }
+                    ListenerStates.Online => MonitorStatus.Good,
+                    ListenerStates.OnlinePending => MonitorStatus.Warning,
+                    ListenerStates.Failed => MonitorStatus.Critical,
+                    //case ListenerStates.Offline:
+                    _ => MonitorStatus.Unknown,
+                };
 
             public string MonitorStatusReason => State.ToString();
 

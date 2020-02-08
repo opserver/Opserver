@@ -29,15 +29,14 @@ namespace Opserver.Data.Dashboard.Providers
         public override List<Node> AllNodes => NodeCache.Data ?? new List<Node>();
 
         private Cache<List<Node>> _nodeCache;
-        public Cache<List<Node>> NodeCache => _nodeCache ?? (_nodeCache = ProviderCache(GetAllNodesAsync, 10.Seconds()));
+        public Cache<List<Node>> NodeCache => _nodeCache ??= ProviderCache(GetAllNodesAsync, 10.Seconds());
 
         public async Task<List<Node>> GetAllNodesAsync()
         {
             using (MiniProfiler.Current.Step("Get Server Nodes"))
             {
-                using (var conn = await GetConnectionAsync())
-                {
-                    var nodes = await conn.QueryAsync<Node>(@"
+                using var conn = await GetConnectionAsync();
+                var nodes = await conn.QueryAsync<Node>(@"
 Select Cast(n.NodeID as varchar(50)) as Id,
        Caption as Name,
        LastSync,
@@ -65,7 +64,7 @@ Select Cast(n.NodeID as varchar(50)) as Id,
  Where LastSync Is Not Null
  Order By Id, Caption", commandTimeout: QueryTimeoutMs);
 
-                    var interfaces = await conn.QueryAsync<Interface>(@"
+                var interfaces = await conn.QueryAsync<Interface>(@"
 Select Cast(InterfaceID as varchar(50)) as Id,
        Cast(NodeID as varchar(50)) as NodeId,
        LastSync,
@@ -85,7 +84,7 @@ Select Cast(InterfaceID as varchar(50)) as Id,
        InterfaceSpeed as Speed
 From Interfaces", commandTimeout: QueryTimeoutMs);
 
-                    var volumes = await conn.QueryAsync<Volume>(@"
+                var volumes = await conn.QueryAsync<Volume>(@"
 Select Cast(VolumeID as varchar(50)) as Id,
        Cast(NodeID as varchar(50)) as NodeId,
        LastSync,
@@ -101,7 +100,7 @@ Select Cast(VolumeID as varchar(50)) as Id,
   From Volumes
  Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs);
 
-                    var apps = await conn.QueryAsync<Application>(@"
+                var apps = await conn.QueryAsync<Application>(@"
 Select Cast(com.ApplicationID as varchar(50)) as Id, 
        Cast(NodeID as varchar(50)) as NodeId, 
        app.Name as AppName, 
@@ -129,45 +128,45 @@ From APM_Application app
        On ccs.ComponentStatusID = pe.ComponentStatusID
 Order By NodeID", commandTimeout: QueryTimeoutMs);
 
-                    foreach (var a in apps)
+                foreach (var a in apps)
+                {
+                    a.NiceName = a.ComponentName == "Process Monitor - WMI" || a.ComponentName == "Wrapper Process"
+                        ? a.AppName
+                        : (a.ComponentName ?? "").Replace(" IIS App Pool", "");
+                }
+
+                var ips = await GetNodeIPMapAsync(conn);
+
+                foreach (var i in interfaces)
+                {
+                    i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
+                }
+
+                var exclude = Module.Settings.ExcludePatternRegex;
+                if (exclude != null)
+                {
+                    nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.VMHostID == n.Id))).ToList();
+                }
+
+                foreach (var n in nodes)
+                {
+                    n.DataProvider = this;
+                    n.ManagementUrl = GetManagementUrl(n);
+                    n.Interfaces = interfaces.Where(i => i.NodeId == n.Id).ToList();
+                    n.Volumes = volumes.Where(v => v.NodeId == n.Id).ToList();
+                    n.Apps = apps.Where(a => a.NodeId == n.Id).ToList();
+                    n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
+                    n.VMHost = nodes.Find(on => n.VMHostID == on.Id);
+                    n.SetReferences();
+
+                    if (Settings.ChildStatusForHealthy && n.Status == NodeStatus.Up && n.ChildStatus.HasValue)
                     {
-                        a.NiceName = a.ComponentName == "Process Monitor - WMI" || a.ComponentName == "Wrapper Process"
-                            ? a.AppName
-                            : (a.ComponentName ?? "").Replace(" IIS App Pool", "");
+                        n.Status = n.ChildStatus.Value;
                     }
 
-                    var ips = await GetNodeIPMapAsync(conn);
-
-                    foreach (var i in interfaces)
+                    if (n.Status != NodeStatus.Up)
                     {
-                        i.IPs = ips.Where(ip => i.Id == ip.InterfaceID && ip.IPNet != null).Select(ip => ip.IPNet).ToList();
-                    }
-
-                    var exclude = Module.Settings.ExcludePatternRegex;
-                    if (exclude != null)
-                    {
-                        nodes = nodes.Where(n => !exclude.IsMatch(n.Name) || (n.IsVMHost && nodes.Any(x => x.VMHostID == n.Id))).ToList();
-                    }
-
-                    foreach (var n in nodes)
-                    {
-                        n.DataProvider = this;
-                        n.ManagementUrl = GetManagementUrl(n);
-                        n.Interfaces = interfaces.Where(i => i.NodeId == n.Id).ToList();
-                        n.Volumes = volumes.Where(v => v.NodeId == n.Id).ToList();
-                        n.Apps = apps.Where(a => a.NodeId == n.Id).ToList();
-                        n.VMs = nodes.Where(on => on.VMHostID == n.Id).ToList();
-                        n.VMHost = nodes.Find(on => n.VMHostID == on.Id);
-                        n.SetReferences();
-
-                        if (Settings.ChildStatusForHealthy && n.Status == NodeStatus.Up && n.ChildStatus.HasValue)
-                        {
-                            n.Status = n.ChildStatus.Value;
-                        }
-
-                        if (n.Status != NodeStatus.Up)
-                        {
-                            n.Issues = new List<Issue<Node>>
+                        n.Issues = new List<Issue<Node>>
                             {
                                 new Issue<Node>(n, "Orion", n.PrettyName)
                                 {
@@ -176,11 +175,10 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
                                     MonitorStatus = n.Status.ToMonitorStatus()
                                 }
                             };
-                        }
                     }
-
-                    return nodes;
                 }
+
+                return nodes;
             }
         }
 
@@ -308,14 +306,12 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
 
             if (node.PrimaryInterfaces.Count == 0) return new List<DoubleGraphPoint>();
 
-            using (var conn = await GetConnectionAsync())
-            {
-                var result = await conn.QueryAsync<Interface.InterfaceUtilization>(
-                    (pointCount.HasValue ? sampledSql : allSql)
-                        .Replace("{dateRange}", GetOptionalDateClause("itd.DateTime", start, end)),
-                    new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, intervals = pointCount });
-                return result.ToList<DoubleGraphPoint>();
-            }
+            using var conn = await GetConnectionAsync();
+            var result = await conn.QueryAsync<Interface.InterfaceUtilization>(
+(pointCount.HasValue ? sampledSql : allSql)
+.Replace("{dateRange}", GetOptionalDateClause("itd.DateTime", start, end)),
+new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, intervals = pointCount });
+            return result.ToList<DoubleGraphPoint>();
         }
 
         public override async Task<List<DoubleGraphPoint>> GetVolumePerformanceUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
@@ -349,14 +345,12 @@ Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
  Group By vp.DateTime
  Order By vp.DateTime";
 
-            using (var conn = await GetConnectionAsync())
-            {
-                var result = await conn.QueryAsync<Volume.VolumePerformanceUtilization>(
-                    (pointCount.HasValue ? sampledSql : allSql)
-                        .Replace("{dateRange}", GetOptionalDateClause("vp.DateTime", start, end)),
-                    new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = pointCount });
-                return result.ToList<DoubleGraphPoint>();
-            }
+            using var conn = await GetConnectionAsync();
+            var result = await conn.QueryAsync<Volume.VolumePerformanceUtilization>(
+(pointCount.HasValue ? sampledSql : allSql)
+.Replace("{dateRange}", GetOptionalDateClause("vp.DateTime", start, end)),
+new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = pointCount });
+            return result.ToList<DoubleGraphPoint>();
         }
 
         public override async Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
@@ -468,13 +462,11 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
 
         private async Task<List<T>> UtilizationQueryAsync<T>(string id, string allSql, string sampledSql, string dateField, DateTime? start, DateTime? end, int? pointCount) where T : IGraphPoint
         {
-            using (var conn = await GetConnectionAsync())
-            {
-                return await conn.QueryAsync<T>(
-                    (pointCount.HasValue ? sampledSql : allSql)
-                        .Replace("{dateRange}", GetOptionalDateClause(dateField, start, end)),
-                    new { id = int.Parse(id), start, end, intervals = pointCount });
-            }
+            using var conn = await GetConnectionAsync();
+            return await conn.QueryAsync<T>(
+(pointCount.HasValue ? sampledSql : allSql)
+.Replace("{dateRange}", GetOptionalDateClause(dateField, start, end)),
+new { id = int.Parse(id), start, end, intervals = pointCount });
         }
     }
 }

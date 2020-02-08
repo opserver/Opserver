@@ -83,7 +83,7 @@ namespace Opserver.Data.Exceptions
 
         private Cache<List<Application>> _applications;
         public Cache<List<Application>> Applications =>
-            _applications ?? (_applications = new Cache<List<Application>>(
+            _applications ??= new Cache<List<Application>>(
                 this,
                 "Exceptions Fetch: " + Name + ":" + nameof(Applications),
                 Settings.PollIntervalSeconds.Seconds(),
@@ -104,7 +104,7 @@ Select ApplicationName as Name,
                     });
                     return result;
                 },
-                afterPoll: _ => UpdateApplicationGroups()));
+                afterPoll: _ => UpdateApplicationGroups());
 
         internal List<ApplicationGroup> UpdateApplicationGroups()
         {
@@ -318,49 +318,29 @@ Select e.Id,
             }
         }
 
-        private static string GetSortString(ExceptionSorts sort)
-        {
-            switch (sort)
+        private static string GetSortString(ExceptionSorts sort) =>
+            sort switch
             {
-                case ExceptionSorts.AppAsc:
-                    return " Order By ApplicationName, CreationDate Desc";
-                case ExceptionSorts.AppDesc:
-                    return " Order By ApplicationName Desc, CreationDate Desc";
-                case ExceptionSorts.TypeAsc:
-                    return " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1), CreationDate Desc";
-                case ExceptionSorts.TypeDesc:
-                    return " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1) Desc, CreationDate Desc";
-                case ExceptionSorts.MessageAsc:
-                    return " Order By Message, CreationDate Desc";
-                case ExceptionSorts.MessageDesc:
-                    return " Order By Message Desc, CreationDate Desc";
-                case ExceptionSorts.UrlAsc:
-                    return " Order By Url, CreationDate Desc";
-                case ExceptionSorts.UrlDesc:
-                    return " Order By Url Desc, CreationDate Desc";
-                case ExceptionSorts.IPAddressAsc:
-                    return " Order By IPAddress, CreationDate Desc";
-                case ExceptionSorts.IPAddressDesc:
-                    return " Order By IPAddress Desc, CreationDate Desc";
-                case ExceptionSorts.HostAsc:
-                    return " Order By Host, CreationDate Desc";
-                case ExceptionSorts.HostDesc:
-                    return " Order By Host Desc, CreationDate Desc";
-                case ExceptionSorts.MachineNameAsc:
-                    return " Order By MachineName, CreationDate Desc";
-                case ExceptionSorts.MachineNameDesc:
-                    return " Order By MachineName Desc, CreationDate Desc";
-                case ExceptionSorts.CountAsc:
-                    return " Order By IsNull(DuplicateCount, 1), CreationDate Desc";
-                case ExceptionSorts.CountDesc:
-                    return " Order By IsNull(DuplicateCount, 1) Desc, CreationDate Desc";
-                case ExceptionSorts.TimeAsc:
-                    return " Order By CreationDate";
+                ExceptionSorts.AppAsc => " Order By ApplicationName, CreationDate Desc",
+                ExceptionSorts.AppDesc => " Order By ApplicationName Desc, CreationDate Desc",
+                ExceptionSorts.TypeAsc => " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1), CreationDate Desc",
+                ExceptionSorts.TypeDesc => " Order By Right(e.Type, charindex('.', reverse(e.Type) + '.') - 1) Desc, CreationDate Desc",
+                ExceptionSorts.MessageAsc => " Order By Message, CreationDate Desc",
+                ExceptionSorts.MessageDesc => " Order By Message Desc, CreationDate Desc",
+                ExceptionSorts.UrlAsc => " Order By Url, CreationDate Desc",
+                ExceptionSorts.UrlDesc => " Order By Url Desc, CreationDate Desc",
+                ExceptionSorts.IPAddressAsc => " Order By IPAddress, CreationDate Desc",
+                ExceptionSorts.IPAddressDesc => " Order By IPAddress Desc, CreationDate Desc",
+                ExceptionSorts.HostAsc => " Order By Host, CreationDate Desc",
+                ExceptionSorts.HostDesc => " Order By Host Desc, CreationDate Desc",
+                ExceptionSorts.MachineNameAsc => " Order By MachineName, CreationDate Desc",
+                ExceptionSorts.MachineNameDesc => " Order By MachineName Desc, CreationDate Desc",
+                ExceptionSorts.CountAsc => " Order By IsNull(DuplicateCount, 1), CreationDate Desc",
+                ExceptionSorts.CountDesc => " Order By IsNull(DuplicateCount, 1) Desc, CreationDate Desc",
+                ExceptionSorts.TimeAsc => " Order By CreationDate",
                 //case ExceptionSorts.TimeDesc:
-                default:
-                    return " Order By CreationDate Desc";
-            }
-        }
+                _ => " Order By CreationDate Desc",
+            };
 
         public Task<int> DeleteErrorsAsync(SearchParams search)
         {

@@ -14,18 +14,13 @@ namespace Opserver.Security
             CurrentProvider = GetProvider(settings.Value, cache);
         }
 
-        private SecurityProvider GetProvider(SecuritySettings settings, IMemoryCache cache)
-        {
-            switch (settings.Provider)
+        private SecurityProvider GetProvider(SecuritySettings settings, IMemoryCache cache) =>
+            settings.Provider switch
             {
-                case "ActiveDirectory":
-                    return new ActiveDirectoryProvider(settings, cache);
-                case "EveryonesAnAdmin":
-                    return new EveryonesAnAdminProvider(settings);
+                "ActiveDirectory" => new ActiveDirectoryProvider(settings, cache),
+                "EveryonesAnAdmin" => new EveryonesAnAdminProvider(settings),
                 //case "EveryonesReadOnly":
-                default:
-                    return new EveryonesReadOnlyProvider(settings);
-            }
-        }
+                _ => new EveryonesReadOnlyProvider(settings),
+            };
     }
 }

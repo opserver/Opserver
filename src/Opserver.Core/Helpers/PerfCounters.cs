@@ -27,16 +27,14 @@ namespace Opserver.Helpers
                 var timer = Stopwatch.StartNew();
 
                 // TODO: Poll creds
-                using (var q = new Wmi.WmiQuery(machineName, query))
+                using var q = new Wmi.WmiQuery(machineName, query);
+                var queryResults = (await q.Result).Cast<ManagementObject>();
+                timer.Stop();
+                return new QueryResult<T>
                 {
-                    var queryResults = (await q.Result).Cast<ManagementObject>();
-                    timer.Stop();
-                    return new QueryResult<T>
-                        {
-                            Duration = timer.Elapsed,
-                            Data = conversion(queryResults).ToList()
-                        };
-                }
+                    Duration = timer.Elapsed,
+                    Data = conversion(queryResults).ToList()
+                };
             }
         }
 

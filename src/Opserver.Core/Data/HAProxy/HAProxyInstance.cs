@@ -65,13 +65,13 @@ namespace Opserver.Data.HAProxy
 
         private Cache<List<Proxy>> _proxies;
         public Cache<List<Proxy>> Proxies =>
-            _proxies ?? (_proxies = new Cache<List<Proxy>>(this, "HAProxy Fetch: " + Name,
+            _proxies ??= new Cache<List<Proxy>>(this, "HAProxy Fetch: " + Name,
                 cacheDuration: 10.Seconds(),
                 getData: FetchHAProxyStatsAsync,
                 addExceptionData: e => e.AddLoggedData("Server", Name)
                     .AddLoggedData("Url", Url)
                     .AddLoggedData("QueryTimeout", QueryTimeoutMs.ToString())
-            ));
+            );
 
         private async Task<List<Proxy>> FetchHAProxyStatsAsync()
         {
@@ -82,12 +82,10 @@ namespace Opserver.Data.HAProxy
                 req.Credentials = new NetworkCredential(User, Password);
                 if (QueryTimeoutMs.HasValue)
                     req.Timeout = QueryTimeoutMs.Value;
-                using (var resp = await req.GetResponseAsync())
-                using (var rs = resp.GetResponseStream())
-                {
-                    if (rs == null) return null;
-                    return await ParseHAProxyStats(rs);
-                }
+                using var resp = await req.GetResponseAsync();
+                using var rs = resp.GetResponseStream();
+                if (rs == null) return null;
+                return await ParseHAProxyStats(rs);
             }
         }
 

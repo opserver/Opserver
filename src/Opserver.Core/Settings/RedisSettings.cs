@@ -28,12 +28,12 @@ namespace Opserver
             /// <summary>
             /// The pattern to match against a host to get the region portion (e.g. a datacenter).
             /// </summary>
-            public Regex RegionHostRegex => _regionHostRegex ?? (_regionHostRegex = GetRegex(RegionHostPattern));
+            public Regex RegionHostRegex => _regionHostRegex ??= GetRegex(RegionHostPattern);
 
             /// <summary>
             /// The pattern to match against a host to get the region portion (e.g. a datacenter).
             /// </summary>
-            public Regex CrossRegionNameRegex => _crossRegionNameRegex ?? (_crossRegionNameRegex = GetRegex(CrossRegionNamePattern));
+            public Regex CrossRegionNameRegex => _crossRegionNameRegex ??= GetRegex(CrossRegionNamePattern);
 
             private static Regex GetRegex(string pattern) =>
                 pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);

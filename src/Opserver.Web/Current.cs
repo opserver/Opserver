@@ -39,7 +39,7 @@ namespace Opserver
             /// <summary>
             /// The current theme were on.
             /// </summary>
-            public string Theme => _theme ?? (_theme = Helpers.Theme.Get(HttpContext.Request));
+            public string Theme => _theme ??= Helpers.Theme.Get(HttpContext.Request);
 
             private User _user;
             /// <summary>

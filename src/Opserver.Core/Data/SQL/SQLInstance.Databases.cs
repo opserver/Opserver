@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
         private Cache<List<Database>> _databases;
 
         public Cache<List<Database>> Databases =>
-            _databases ?? (_databases = GetSqlCache(nameof(Databases),
+            _databases ??= GetSqlCache(nameof(Databases),
                 async conn =>
                 {
                     var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
@@ -45,7 +45,7 @@ namespace Opserver.Data.SQL
                     }
                     return dbs;
                 },
-                cacheDuration: 5.Minutes()));
+                cacheDuration: 5.Minutes());
 
         public LightweightCache<List<DatabaseFile>> GetFileInfo(string databaseName) =>
             DatabaseFetch<DatabaseFile>(databaseName);
@@ -152,19 +152,17 @@ namespace Opserver.Data.SQL
                     if (IsReadOnly)
                         return Name + " database is read-only";
 
-                    switch (State)
+                    return State switch
                     {
-                        case DatabaseStates.Online:
-                            return null;
-                        default:
-                            return Name + " database is " + State.AsString(EnumFormat.Description);
-                    }
+                        DatabaseStates.Online => null,
+                        _ => Name + " database is " + State.AsString(EnumFormat.Description),
+                    };
                 }
             }
 
             private bool? _isSystemDatabase;
             public int Id { get; internal set; }
-            public bool IsSystemDatabase => (_isSystemDatabase ?? (_isSystemDatabase = SystemDatabaseNames.Contains(Name))).Value;
+            public bool IsSystemDatabase => _isSystemDatabase ??= SystemDatabaseNames.Contains(Name);
             public string Name { get; internal set; }
             public DatabaseStates State { get; internal set; }
             public CompatabilityLevels CompatibilityLevel { get; internal set; }
@@ -485,28 +483,18 @@ Select p.object_id,
             public char? RestoreType { get; internal set; }
             public string RestoreTypeDescription => GetTypeDescription(RestoreType);
 
-            public static string GetTypeDescription(char? type)
-            {
-                switch (type)
+            public static string GetTypeDescription(char? type) =>
+                type switch
                 {
-                    case 'D':
-                        return "Database";
-                    case 'F':
-                        return "File";
-                    case 'G':
-                        return "Filegroup";
-                    case 'I':
-                        return "Differential";
-                    case 'L':
-                        return "Log";
-                    case 'V':
-                        return "Verify Only";
-                    case null:
-                        return "";
-                    default:
-                        return "Unknown";
-                }
-            }
+                    'D' => "Database",
+                    'F' => "File",
+                    'G' => "Filegroup",
+                    'I' => "Differential",
+                    'L' => "Log",
+                    'V' => "Verify Only",
+                    null => "",
+                    _ => "Unknown",
+                };
 
             Version IMinVersioned.MinVersion =>  SQLServerVersions.SQL2008.SP1;
             public string GetFetchSQL(Version v)
@@ -541,30 +529,19 @@ Select r.restore_date RestoreFinishDate,
             public string LogicalDeviceName { get; internal set; }
             public string PhysicalDeviceName { get; internal set; }
 
-            public static string GetTypeDescription(char? type)
-            {
-                switch (type)
+            public static string GetTypeDescription(char? type) =>
+                type switch
                 {
-                    case 'D':
-                        return "Full";
-                    case 'I':
-                        return "Differential (DB)";
-                    case 'L':
-                        return "Log";
-                    case 'F':
-                        return "File/Filegroup";
-                    case 'G':
-                        return "Differential (File)";
-                    case 'P':
-                        return "Partial";
-                    case 'Q':
-                        return "Differential (Partial)";
-                    case null:
-                        return "";
-                    default:
-                        return "Unknown";
-                }
-            }
+                    'D' => "Full",
+                    'I' => "Differential (DB)",
+                    'L' => "Log",
+                    'F' => "File/Filegroup",
+                    'G' => "Differential (File)",
+                    'P' => "Partial",
+                    'Q' => "Differential (Partial)",
+                    null => "",
+                    _ => "Unknown",
+                };
 
             internal const string FetchSQL = @"
 Select Top 100
@@ -598,7 +575,7 @@ Select Top 100
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             private string _volumeMountPoint;
-            public string VolumeMountPoint => _volumeMountPoint ?? (_volumeMountPoint = PhysicalName?.Split(StringSplits.Colon)[0]);
+            public string VolumeMountPoint => _volumeMountPoint ??= PhysicalName?.Split(StringSplits.Colon)[0];
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
             public int FileId { get; internal set; }
@@ -625,7 +602,7 @@ Select Top 100
             private static readonly Regex _shortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
-                    _shortPhysicalName ?? (_shortPhysicalName = _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA"));
+                    _shortPhysicalName ??= _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA");
 
             public string GrowthDescription
             {
@@ -640,23 +617,14 @@ Select Top 100
                 }
             }
 
-            public string MaxSizeDescription
-            {
-                get
+            public string MaxSizeDescription =>
+                FileMaxSizePages switch
                 {
-                    switch (FileMaxSizePages)
-                    {
-                        case 0:
-                            return "At Max - No Growth";
-                        case -1:
-                            return "No Limit - Disk Capacity";
-                        case 268435456:
-                            return "2 TB";
-                        default:
-                            return (FileMaxSizePages*8*1024).ToHumanReadableSize();
-                    }
-                }
-            }
+                    0 => "At Max - No Growth",
+                    -1 => "No Limit - Disk Capacity",
+                    268435456 => "2 TB",
+                    _ => (FileMaxSizePages * 8 * 1024).ToHumanReadableSize(),
+                };
 
             public string GetFetchSQL(Version v) => @"
 Select mf.database_id DatabaseId,
@@ -696,22 +664,15 @@ Select mf.database_id DatabaseId,
             public bool IsDefault { get; internal set; }
             public bool IsSystem { get; internal set; }
 
-            public static string GetTypeDescription(string type)
-            {
-                switch (type)
+            public static string GetTypeDescription(string type) =>
+                type switch
                 {
-                    case "FG":
-                        return "Filegroup";
-                    case "PS":
-                        return "Partition Scheme";
-                    case "FD":
-                        return "FILESTREAM";
-                    case null:
-                        return "";
-                    default:
-                        return "Unknown";
-                }
-            }
+                    "FG" => "Filegroup",
+                    "PS" => "Partition Scheme",
+                    "FD" => "FILESTREAM",
+                    null => "",
+                    _ => "Unknown",
+                };
 
             public string GetFetchSQL(Version v) => @"
 Select data_space_id Id,
@@ -1046,21 +1007,13 @@ Order By 1, 2, 3";
             public long ReservedSpaceKB { get; internal set; }
             public int IndexCount { get; internal set; }
 
-            public string RangeValueString
-            {
-                get
+            public string RangeValueString =>
+                RangeValue switch
                 {
-                    switch (RangeValue)
-                    {
-                        case null:
-                            return string.Empty;
-                        case DateTime date:
-                            return date.ToString(date.TimeOfDay.Ticks == 0 ? "yyyy-MM-dd" : "u");
-                        default:
-                            return RangeValue.ToString();
-                    }
-                }
-            }
+                    null => string.Empty,
+                    DateTime date => date.ToString(date.TimeOfDay.Ticks == 0 ? "yyyy-MM-dd" : "u"),
+                    _ => RangeValue.ToString(),
+                };
 
             public string GetFetchSQL(Version v) => @"
   Select s.name SchemaName,

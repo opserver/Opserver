@@ -28,7 +28,7 @@ namespace Opserver.Data.Redis
 
         private Cache<RedisInfo> _info;
         public Cache<RedisInfo> Info =>
-            _info ?? (_info = GetRedisCache(10.Seconds(), async () =>
+            _info ??= GetRedisCache(10.Seconds(), async () =>
             {
                 var server = Connection.GetSingleServer();
                 string infoStr;
@@ -40,7 +40,7 @@ namespace Opserver.Data.Redis
                 var ri = RedisInfo.FromInfoString(infoStr);
                 if (ri != null) Replication = ri.Replication;
                 return ri;
-            }));
+            });
 
         public RedisInfo.RedisInstanceRole Role
         {
@@ -57,21 +57,13 @@ namespace Opserver.Data.Redis
             }
         }
 
-        public string RoleDescription
-        {
-            get
+        public string RoleDescription =>
+            Role switch
             {
-                switch (Role)
-                {
-                    case RedisInfo.RedisInstanceRole.Master:
-                        return "Master";
-                    case RedisInfo.RedisInstanceRole.Slave:
-                        return "Slave";
-                    default:
-                        return "Unknown";
-                }
-            }
-        }
+                RedisInfo.RedisInstanceRole.Master => "Master",
+                RedisInfo.RedisInstanceRole.Slave => "Slave",
+                _ => "Unknown",
+            };
 
         public bool IsMaster => Role == RedisInfo.RedisInstanceRole.Master;
         public bool IsSlave => Role == RedisInfo.RedisInstanceRole.Slave;

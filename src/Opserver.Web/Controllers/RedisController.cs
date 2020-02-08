@@ -61,19 +61,14 @@ namespace Opserver.Controllers
             var i = Module.GetInstance(node);
             if (i == null) return ContentNotFound("Could not find instance " + node);
 
-            switch (type)
+            return type switch
             {
-                case "config":
-                    return View("Instance.Config", i);
-                case "clients":
-                    return View("Instance.Clients", i);
-                case "info":
-                    return View("Instance.Info", i);
-                case "slow-log":
-                    return View("Instance.SlowLog", i);
-                default:
-                    return ContentNotFound("Unknown summary view requested");
-            }
+                "config" => View("Instance.Config", i),
+                "clients" => View("Instance.Clients", i),
+                "info" => View("Instance.Info", i),
+                "slow-log" => View("Instance.SlowLog", i),
+                _ => ContentNotFound("Unknown summary view requested"),
+            };
         }
 
         [Route("redis/analyze/memory")]

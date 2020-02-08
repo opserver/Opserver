@@ -73,16 +73,13 @@ namespace Opserver.Data.SQL
                     }
                     if (SynchronizationHealth.HasValue)
                     {
-                        switch (SynchronizationHealth.Value)
+                        return SynchronizationHealth.Value switch
                         {
-                            case SynchronizationHealths.NotHealthy:
-                                return MonitorStatus.Critical;
-                            case SynchronizationHealths.PartiallyHealthy:
-                                return MonitorStatus.Warning;
+                            SynchronizationHealths.NotHealthy => MonitorStatus.Critical,
+                            SynchronizationHealths.PartiallyHealthy => MonitorStatus.Warning,
                             //case SynchronizationHealths.Healthy:
-                            default:
-                                return MonitorStatus.Good;
-                        }
+                            _ => MonitorStatus.Good,
+                        };
                     }
                     return Databases.GetWorstStatus();
                 }

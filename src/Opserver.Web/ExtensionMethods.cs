@@ -52,29 +52,21 @@ namespace Opserver
         {
             if (item.Status == "UP") return HtmlString.Empty;
 
-            switch (item.MonitorStatus)
+            return item.MonitorStatus switch
             {
-                case MonitorStatus.Good:
-                    return ("(" + item.Status + ")").AsHtml();
-                default:
-                    return ("(<b>" + item.Status + "</b>)").AsHtml();
-            }
+                MonitorStatus.Good => ("(" + item.Status + ")").AsHtml(),
+                _ => ("(<b>" + item.Status + "</b>)").AsHtml(),
+            };
         }
 
-        public static HtmlString ColorCode(this string s)
-        {
-            switch (s)
+        public static HtmlString ColorCode(this string s) =>
+            s switch
             {
-                case "None":
-                    return @"<span class=""text-muted"">None</span>".AsHtml();
-                case "Unknown":
-                    return @"<span class=""text-warning"">Unknown</span>".AsHtml();
-                case "n/a":
-                    return @"<span class=""text-warning"">n/a</span>".AsHtml();
-                default:
-                    return s.HtmlEncode().AsHtml();
-            }
-        }
+                "None" => @"<span class=""text-muted"">None</span>".AsHtml(),
+                "Unknown" => @"<span class=""text-warning"">Unknown</span>".AsHtml(),
+                "n/a" => @"<span class=""text-warning"">n/a</span>".AsHtml(),
+                _ => s.HtmlEncode().AsHtml(),
+            };
 
         /// <summary>
         /// Returns an icon span representation of this MonitorStatus.
@@ -107,18 +99,14 @@ namespace Opserver
                 return @"<span class=""text-muted"">●</span>".AsHtml();
 
             var monitorStatusClass = node.MonitorStatus.TextClass(true);
-            switch (node.HardwareType)
+            return node.HardwareType switch
             {
-                case HardwareType.Physical:
-                    return $@"<i class=""{monitorStatusClass} fa fa-server"" aria-hidden=""true"" title=""Physical""></i>".AsHtml();
-                case HardwareType.VirtualMachine:
-                    return $@"<i class=""{monitorStatusClass} fa fa-cloud"" aria-hidden=""true"" title=""Virtual Machine""></i>".AsHtml();
-                case HardwareType.Network:
-                    return $@"<i class=""{monitorStatusClass} fa fa-exchange"" aria-hidden=""true"" title=""Network""></i>".AsHtml();
+                HardwareType.Physical => $@"<i class=""{monitorStatusClass} fa fa-server"" aria-hidden=""true"" title=""Physical""></i>".AsHtml(),
+                HardwareType.VirtualMachine => $@"<i class=""{monitorStatusClass} fa fa-cloud"" aria-hidden=""true"" title=""Virtual Machine""></i>".AsHtml(),
+                HardwareType.Network => $@"<i class=""{monitorStatusClass} fa fa-exchange"" aria-hidden=""true"" title=""Network""></i>".AsHtml(),
                 //case HardwareType.Unknown:
-                default:
-                    return $@"<i class=""{monitorStatusClass} fa fa-question-circle-o"" aria-hidden=""true"" title=""Unknown hardware type""></i>".AsHtml();
-            }
+                _ => $@"<i class=""{monitorStatusClass} fa fa-question-circle-o"" aria-hidden=""true"" title=""Unknown hardware type""></i>".AsHtml(),
+            };
         }
 
         public static HtmlString IconSpan(this IMonitorStatus status)
@@ -149,74 +137,49 @@ namespace Opserver
             }
         }
 
-        public static HtmlString Span(this MonitorStatus status, string text, string tooltip = null)
-        {
-            switch (status)
+        public static HtmlString Span(this MonitorStatus status, string text, string tooltip = null) =>
+            status switch
             {
-                case MonitorStatus.Good:
-                    return StatusIndicator.UpCustomSpan(text, tooltip);
-                case MonitorStatus.Warning:
-                    return StatusIndicator.WarningCustomSpan(text, tooltip);
-                case MonitorStatus.Critical:
-                    return StatusIndicator.DownCustomSpan(text, tooltip);
-                default:
-                    return StatusIndicator.UnknownCustomSpan(text, tooltip);
-            }
-        }
+                MonitorStatus.Good => StatusIndicator.UpCustomSpan(text, tooltip),
+                MonitorStatus.Warning => StatusIndicator.WarningCustomSpan(text, tooltip),
+                MonitorStatus.Critical => StatusIndicator.DownCustomSpan(text, tooltip),
+                _ => StatusIndicator.UnknownCustomSpan(text, tooltip),
+            };
 
         public static string RawClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
-        public static string RawClass(this MonitorStatus status, bool showGood = false, bool maint = false)
-        {
-            switch (status)
+        public static string RawClass(this MonitorStatus status, bool showGood = false, bool maint = false) =>
+            status switch
             {
-                case MonitorStatus.Good:
-                    return showGood ? "success" : "";
-                case MonitorStatus.Warning:
-                    return "warning";
-                case MonitorStatus.Critical:
-                    return "danger";
-                case MonitorStatus.Maintenance:
-                    return maint ? "info" : "muted";
-                default:
-                    return "muted";
-            }
-        }
+                MonitorStatus.Good => showGood ? "success" : "",
+                MonitorStatus.Warning => "warning",
+                MonitorStatus.Critical => "danger",
+                MonitorStatus.Maintenance => maint ? "info" : "muted",
+                _ => "muted",
+            };
 
         public static string RowClass(this IMonitorStatus status) => RawClass(status.MonitorStatus);
         public static string RowClass(this MonitorStatus status) => RawClass(status);
 
         public static string TextClass(this IMonitorStatus status) => TextClass(status.MonitorStatus);
-        public static string TextClass(this MonitorStatus status, bool showGood = false)
-        {
-            switch (status)
+        public static string TextClass(this MonitorStatus status, bool showGood = false) =>
+            status switch
             {
-                case MonitorStatus.Good:
-                    return showGood ? "text-success" : "";
-                case MonitorStatus.Warning:
-                    return "text-warning";
-                case MonitorStatus.Critical:
-                    return "text-danger";
+                MonitorStatus.Good => showGood ? "text-success" : "",
+                MonitorStatus.Warning => "text-warning",
+                MonitorStatus.Critical => "text-danger",
                 //case MonitorStatus.Maintenance:
-                default:
-                    return "text-muted";
-            }
-        }
+                _ => "text-muted",
+            };
 
         public static string BackgroundClass(this IMonitorStatus status) => BackgroundClass(status.MonitorStatus);
-        public static string BackgroundClass(this MonitorStatus status, bool showGood = true)
-        {
-            switch (status)
+        public static string BackgroundClass(this MonitorStatus status, bool showGood = true) =>
+            status switch
             {
-                case MonitorStatus.Good:
-                    return showGood ? "bg-success" : "";
-                case MonitorStatus.Warning:
-                    return "bg-warning";
-                case MonitorStatus.Critical:
-                    return "bg-danger";
-                default:
-                    return "bg-muted";
-            }
-        }
+                MonitorStatus.Good => showGood ? "bg-success" : "",
+                MonitorStatus.Warning => "bg-warning",
+                MonitorStatus.Critical => "bg-danger",
+                _ => "bg-muted",
+            };
 
         public static string ProgressBarClass(this MonitorStatus status)
         {
@@ -298,7 +261,7 @@ namespace Opserver
         {
             // TODO: Make this a setting?
             // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
-            compareTo = compareTo ?? DateTime.UtcNow;
+            compareTo ??= DateTime.UtcNow;
             return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
         }
 
@@ -569,16 +532,13 @@ namespace Opserver
         {
             var desc = state.HasValue ? state.Value.AsString(EnumFormat.Description) : "";
             if (abbreviate) desc = desc.Substring(0, 1);
-            switch (state)
+            return state switch
             {
-                case ReplicaRoles.Primary:
-                    return StatusIndicator.UpCustomSpan(desc, tooltip);
-                case ReplicaRoles.Secondary:
-                    return desc.AsHtml();
+                ReplicaRoles.Primary => StatusIndicator.UpCustomSpan(desc, tooltip),
+                ReplicaRoles.Secondary => desc.AsHtml(),
                 //case ReplicaRoles.Resolving:
-                default:
-                    return StatusIndicator.DownCustomSpan(desc, tooltip);
-            }
+                _ => StatusIndicator.DownCustomSpan(desc, tooltip),
+            };
         }
     }
 }

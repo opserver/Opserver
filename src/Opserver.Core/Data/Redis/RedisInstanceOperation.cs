@@ -43,18 +43,13 @@ namespace Opserver.Data.Redis
             throw new ArgumentOutOfRangeException(nameof(s), $"Invalid op string provided: '{s}'");
         }
 
-        public override string ToString()
-        {
-            switch (Command)
+        public override string ToString() =>
+            Command switch
             {
-                case InstanceCommandType.MakeMaster:
-                    return $"{InstanceCommandType.MakeMaster}|{Instance.UniqueKey}";
-                case InstanceCommandType.SlaveTo:
-                    return $"{InstanceCommandType.SlaveTo}|{Instance.UniqueKey}|{NewMaster.UniqueKey}";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));
-            }
-        }
+                InstanceCommandType.MakeMaster => $"{InstanceCommandType.MakeMaster}|{Instance.UniqueKey}",
+                InstanceCommandType.SlaveTo => $"{InstanceCommandType.SlaveTo}|{Instance.UniqueKey}|{NewMaster.UniqueKey}",
+                _ => throw new ArgumentOutOfRangeException(nameof(InstanceCommandType)),
+            };
 
         public static RedisInstanceOperation MakeMaster(RedisInstance instance) =>
             new RedisInstanceOperation

@@ -7,12 +7,12 @@ namespace Opserver.Data.SQL
     {
         private Cache<List<WaitStatRecord>> _waitStats;
         public Cache<List<WaitStatRecord>> WaitStats =>
-            _waitStats ?? (_waitStats = GetSqlCache(
+            _waitStats ??= GetSqlCache(
                 nameof(WaitStats), conn =>
                 {
                     var sql = GetFetchSQL<WaitStatRecord>();
                     return conn.QueryAsync<WaitStatRecord>(sql, new {secondsBetween = 15});
-                }));
+                });
 
         public class WaitStatRecord : ISQLVersioned
         {
@@ -26,7 +26,7 @@ namespace Opserver.Data.SQL
 
             private bool? _isIgnorable;
 
-            public bool IsIgnorable => _isIgnorable ?? (_isIgnorable = IsIgnorableWait(WaitType)).Value;
+            public bool IsIgnorable => _isIgnorable ??= IsIgnorableWait(WaitType);
 
             public static bool IsIgnorableWait(string waitType)
             {

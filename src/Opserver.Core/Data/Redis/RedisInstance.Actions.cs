@@ -29,11 +29,9 @@ namespace Opserver.Data.Redis
         /// </summary>
         public string PromoteToMaster()
         {
-            using (var log = new StringWriter())
-            {
-                _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
-                return log.ToString();
-            }
+            using var log = new StringWriter();
+            _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
+            return log.ToString();
         }
 
         /// <summary>

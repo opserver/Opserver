@@ -7,9 +7,7 @@ namespace Opserver.Data.Elastic
     {
         private Cache<IndexStatsInfo> _indexStats;
         public Cache<IndexStatsInfo> IndexStats =>
-            _indexStats ?? (_indexStats = GetElasticCache(
-                () => GetAsync<IndexStatsInfo>("_stats"))
-            );
+            _indexStats ??= GetElasticCache(() => GetAsync<IndexStatsInfo>("_stats"));
 
         public class IndexStatsInfo
         {

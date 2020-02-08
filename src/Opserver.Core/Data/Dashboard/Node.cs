@@ -23,7 +23,7 @@ namespace Opserver.Data.Dashboard
         public string MachineType { get; internal set; }
         public string MachineOSVersion { get; internal set; }
         private string _machineTypePretty;
-        public string MachineTypePretty => _machineTypePretty ?? (_machineTypePretty = GetPrettyMachineType());
+        public string MachineTypePretty => _machineTypePretty ??= GetPrettyMachineType();
         public string Ip { get; internal set; }
         public short? PollIntervalSeconds { get; internal set; }
 
@@ -32,7 +32,7 @@ namespace Opserver.Data.Dashboard
         public NodeStatus? ChildStatus { get; internal set; }
         public string StatusDescription { get; internal set; }
         private HardwareType? _hardwareType;
-        public HardwareType HardwareType => _hardwareType ?? (_hardwareType = GetHardwareType()).Value;
+        public HardwareType HardwareType => _hardwareType ??= GetHardwareType();
 
         public short? CPULoad { get; internal set; }
         public float? TotalMemory { get; internal set; }
@@ -62,7 +62,7 @@ namespace Opserver.Data.Dashboard
 
         private DashboardCategory _category;
         public DashboardCategory Category =>
-            _category ?? (_category = DataProvider.Module.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown);
+            _category ??= DataProvider.Module.AllCategories.Find(c => c.PatternRegex.IsMatch(Name)) ?? DashboardCategory.Unknown;
         private string GetPrettyMachineType()
         {
             if (MachineType?.StartsWith("Linux") ?? false) return MachineOSVersion.IsNullOrEmptyReturn("Linux");
@@ -280,7 +280,7 @@ namespace Opserver.Data.Dashboard
         public float TotalVolumePerformancebps => Volumes?.Sum(i => i.ReadBps.GetValueOrDefault(0) + i.WriteBps.GetValueOrDefault(0)) ?? 0;
 
         private DashboardSettings.NodeSettings _settings;
-        public DashboardSettings.NodeSettings Settings => _settings ?? (_settings = DataProvider.Module.Settings.GetNodeSettings(PrettyName));
+        public DashboardSettings.NodeSettings Settings => _settings ??= DataProvider.Module.Settings.GetNodeSettings(PrettyName);
 
         private decimal? GetSetting(Func<INodeSettings, decimal?> func) => func(Settings) ?? func(Category?.Settings) ?? func(DataProvider.Module.Settings);
         private Regex GetSetting(Func<INodeSettings, Regex> func) => func(Settings) ?? func(Category?.Settings) ?? func(DataProvider.Module.Settings);

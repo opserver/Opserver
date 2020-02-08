@@ -25,39 +25,23 @@ namespace Opserver.Views.Elastic
             WarningsOnly
         }
 
-        public IEnumerable<ElasticCluster.ClusterHealthInfo.IndexHealthInfo> DisplayIndexexs
-        {
-            get
+        public IEnumerable<ElasticCluster.ClusterHealthInfo.IndexHealthInfo> DisplayIndexexs =>
+            DisplayMode switch
             {
-                switch (DisplayMode)
-                {
-                    case DisplayModes.InterestingOnly:
-                        return CurrentCluster?.TroubledIndexes; // TODO: Differentiate both
-                    case DisplayModes.WarningsOnly:
-                        return CurrentCluster?.TroubledIndexes;
-                    //case DashboardModel.DisplayModes.All:
-                    default:
-                return CurrentCluster?.HealthStatus.Data?.Indexes?.Values;
-                }
-            }
-        }
+                DisplayModes.InterestingOnly => CurrentCluster?.TroubledIndexes,// TODO: Differentiate both
+                DisplayModes.WarningsOnly => CurrentCluster?.TroubledIndexes,
+                //case DashboardModel.DisplayModes.All:
+                _ => CurrentCluster?.HealthStatus.Data?.Indexes?.Values,
+            };
 
-        public IEnumerable<ElasticCluster.ClusterStateInfo.ShardState> DisplayShards
-        {
-            get
+        public IEnumerable<ElasticCluster.ClusterStateInfo.ShardState> DisplayShards =>
+            DisplayMode switch
             {
-                switch (DisplayMode)
-                {
-                    case DisplayModes.InterestingOnly:
-                        return CurrentCluster?.TroubledShards; // TODO: Differentiate both
-                    case DisplayModes.WarningsOnly:
-                        return CurrentCluster?.TroubledShards;
-                    //case DashboardModel.DisplayModes.All:
-                    default:
-                        return CurrentCluster?.AllShards;
-                }
-            }
-        }
+                DisplayModes.InterestingOnly => CurrentCluster?.TroubledShards,// TODO: Differentiate both
+                DisplayModes.WarningsOnly => CurrentCluster?.TroubledShards,
+                //case DashboardModel.DisplayModes.All:
+                _ => CurrentCluster?.AllShards,
+            };
 
         public Views View { get; set; }
 

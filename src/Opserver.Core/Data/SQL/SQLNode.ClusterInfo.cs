@@ -8,7 +8,7 @@ namespace Opserver.Data.SQL
         private Cache<AGClusterState> _agClusterInfo;
 
         public Cache<AGClusterState> AGClusterInfo =>
-            _agClusterInfo ?? (_agClusterInfo = GetSqlCache(nameof(AGClusterInfo), async conn =>
+            _agClusterInfo ??= GetSqlCache(nameof(AGClusterInfo), async conn =>
             {
                 var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Version), k =>
                         GetFetchSQL<AGClusterState>(k.Item2) + "\n" +
@@ -34,7 +34,7 @@ namespace Opserver.Data.SQL
                     }
                 }
                 return state;
-            }));
+            });
 
         public class AGClusterState : ISQLVersioned
         {
@@ -85,7 +85,7 @@ Select member_name MemberName,
 
             private IPNet _networkIPNet;
             public IPNet NetworkIPNet =>
-                _networkIPNet ?? (_networkIPNet = IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength));
+                _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength);
 
             public string GetFetchSQL(Version v) => @"
 Select member_name MemberName,

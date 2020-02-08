@@ -7,7 +7,7 @@ namespace Opserver.Data.SQL
     public partial class SQLInstance
     {
         private Cache<List<SQLServiceInfo>> _services;
-        public Cache<List<SQLServiceInfo>> Services => _services ?? (_services = SqlCacheList<SQLServiceInfo>(5.Minutes()));
+        public Cache<List<SQLServiceInfo>> Services => _services ??= SqlCacheList<SQLServiceInfo>(5.Minutes());
 
         public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {

@@ -42,18 +42,13 @@ namespace Opserver.Data.Redis
         public ReplicationInfo Replication { get; internal set; } = new ReplicationInfo();
         public class ReplicationInfo : RedisInfoSection
         {
-            public RedisInstanceRole RedisInstanceRole
-            {
-                get
+            public RedisInstanceRole RedisInstanceRole =>
+                Role switch
                 {
-                    switch (Role)
-                    {
-                        case "master": return RedisInstanceRole.Master;
-                        case "slave": return RedisInstanceRole.Slave;
-                        default: return RedisInstanceRole.Unknown;
-                    }
-                }
-            }
+                    "master" => RedisInstanceRole.Master,
+                    "slave" => RedisInstanceRole.Slave,
+                    _ => RedisInstanceRole.Unknown,
+                };
 
             [RedisInfoProperty("role")]
             public string Role { get; internal set; }
@@ -158,7 +153,7 @@ namespace Opserver.Data.Redis
             public long Offset { get; internal set; }
 
             private IPAddress _ipAddress;
-            public IPAddress IPAddress => _ipAddress ?? (_ipAddress = IPAddress.Parse(IP));
+            public IPAddress IPAddress => _ipAddress ??= IPAddress.Parse(IP);
         }
 
         public ClientInfo Clients { get; internal set; } = new ClientInfo();
@@ -178,7 +173,7 @@ namespace Opserver.Data.Redis
         public class ServerInfo : RedisInfoSection
         {
             private Version _version;
-            public Version Version => _version ?? (_version = VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version());
+            public Version Version => _version ??= VersionNumber.HasValue() ? Version.Parse(VersionNumber) : new Version();
 
             [RedisInfoProperty("redis_version")]
             public string VersionNumber { get; internal set; }

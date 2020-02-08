@@ -14,7 +14,7 @@ namespace Opserver.Data.SQL
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
-        public TimeSpan RefreshInterval => _refreshInterval ?? (_refreshInterval = (Settings.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds()).Value;
+        public TimeSpan RefreshInterval => _refreshInterval ??= (Settings.RefreshIntervalSeconds ?? Module.Settings.RefreshIntervalSeconds).Seconds();
         public string ObjectName { get; internal set; }
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
@@ -160,10 +160,8 @@ namespace Opserver.Data.SQL
                 getData: async () =>
                 {
                     if (shouldRun != null && !shouldRun()) return new T();
-                    using (var conn = await GetConnectionAsync())
-                    {
-                        return await get(conn);
-                    }
+                    using var conn = await GetConnectionAsync();
+                    return await get(conn);
                 },
                 logExceptions: logExceptions,
                 addExceptionData: e => e.AddLoggedData("Server", Name),
@@ -177,10 +175,8 @@ namespace Opserver.Data.SQL
             => LightweightCache<T>.Get(this, GetCacheKey(key),
             () =>
             {
-                using (var conn = GetConnection())
-                {
-                    return get(conn);
-                }
+                using var conn = GetConnection();
+                return get(conn);
             }, duration, staleDuration);
 
         public override string ToString() => Name;

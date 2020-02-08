@@ -12,7 +12,7 @@ namespace Opserver.Data.Elastic
         string ISearchableNode.Name => SettingsName;
         string ISearchableNode.DisplayName => SettingsName;
         private TimeSpan? _refreshInteval;
-        public TimeSpan RefreshInterval => _refreshInteval ?? (_refreshInteval = Settings.RefreshIntervalSeconds.Seconds()).Value;
+        public TimeSpan RefreshInterval => _refreshInteval ??= Settings.RefreshIntervalSeconds.Seconds();
         string ISearchableNode.CategoryName => "elastic";
         public ElasticSettings.Cluster Settings { get; }
         private string SettingsName => Settings.Name;
@@ -116,20 +116,14 @@ namespace Opserver.Data.Elastic
             return null;
         }
 
-        private static MonitorStatus ColorToStatus(string color)
-        {
-            switch (color)
+        private static MonitorStatus ColorToStatus(string color) =>
+            color switch
             {
-                case "green":
-                    return MonitorStatus.Good;
-                case "yellow":
-                    return MonitorStatus.Warning;
-                case "red":
-                    return MonitorStatus.Critical;
-                default:
-                    return MonitorStatus.Unknown;
-            }
-        }
+                "green" => MonitorStatus.Good,
+                "yellow" => MonitorStatus.Warning,
+                "red" => MonitorStatus.Critical,
+                _ => MonitorStatus.Unknown,
+            };
 
         public override string ToString() => SettingsName;
     }

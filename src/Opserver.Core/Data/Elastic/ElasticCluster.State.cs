@@ -8,8 +8,8 @@ namespace Opserver.Data.Elastic
     {
         private Cache<ClusterStateInfo> _state;
 
-        public Cache<ClusterStateInfo> State => _state ?? (_state = GetElasticCache(
-            () => GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/"))
+        public Cache<ClusterStateInfo> State => _state ??= GetElasticCache(
+            () => GetAsync<ClusterStateInfo>("_cluster/state/version,master_node,nodes,routing_table,routing_nodes/")
         );
 
         public NodeInfo MasterNode => Nodes.Data?.Nodes?.FirstOrDefault(n => State?.Data?.MasterNode == n.GUID);
@@ -21,9 +21,9 @@ namespace Opserver.Data.Elastic
         {
             private MonitorStatus? _monitorStatus;
             public MonitorStatus MonitorStatus =>
-                _monitorStatus ?? (_monitorStatus = RoutingNodes?.Nodes.Values.SelectMany(n => n)
+                _monitorStatus ??= RoutingNodes?.Nodes.Values.SelectMany(n => n)
                     .Union(RoutingNodes.Unassigned)
-                    .GetWorstStatus() ?? MonitorStatus.Unknown).Value;
+                    .GetWorstStatus() ?? MonitorStatus.Unknown;
             // TODO: Implement
             public string MonitorStatusReason => null;
 
@@ -91,67 +91,37 @@ namespace Opserver.Data.Elastic
 
             public class ShardState : IMonitorStatus
             {
-                public MonitorStatus MonitorStatus
-                {
-                    get
+                public MonitorStatus MonitorStatus =>
+                    State switch
                     {
-                        switch (State)
-                        {
-                            case ShardStates.Unassigned:
-                                return MonitorStatus.Critical;
-                            case ShardStates.Initializing:
-                                return MonitorStatus.Warning;
-                            case ShardStates.Started:
-                                return MonitorStatus.Good;
-                            case ShardStates.Relocating:
-                                return MonitorStatus.Maintenance;
-                            default:
-                                return MonitorStatus.Unknown;
-                        }
-                    }
-                }
+                        ShardStates.Unassigned => MonitorStatus.Critical,
+                        ShardStates.Initializing => MonitorStatus.Warning,
+                        ShardStates.Started => MonitorStatus.Good,
+                        ShardStates.Relocating => MonitorStatus.Maintenance,
+                        _ => MonitorStatus.Unknown,
+                    };
 
                 public string MonitorStatusReason => StateDescription;
 
-                public string StateDescription
-                {
-                    get
+                public string StateDescription =>
+                    State switch
                     {
-                        switch (State)
-                        {
-                            case ShardStates.Unassigned:
-                                return "The shard is not assigned to any node";
-                            case ShardStates.Initializing:
-                                return "The shard is initializing (probably recovering from either a peer shard or gateway)";
-                            case ShardStates.Started:
-                                return "The shard is started";
-                            case ShardStates.Relocating:
-                                return "The shard is in the process being relocated";
-                            default:
-                                return "Unknown";
-                        }
-                    }
-                }
+                        ShardStates.Unassigned => "The shard is not assigned to any node",
+                        ShardStates.Initializing => "The shard is initializing (probably recovering from either a peer shard or gateway)",
+                        ShardStates.Started => "The shard is started",
+                        ShardStates.Relocating => "The shard is in the process being relocated",
+                        _ => "Unknown",
+                    };
 
-                public string PrettyState
-                {
-                    get
+                public string PrettyState =>
+                    State switch
                     {
-                        switch (State)
-                        {
-                            case ShardStates.Unassigned:
-                                return "Unassigned";
-                            case ShardStates.Initializing:
-                                return "Initializing";
-                            case ShardStates.Started:
-                                return "Started";
-                            case ShardStates.Relocating:
-                                return "Relocating";
-                            default:
-                                return "Unknown";
-                        }
-                    }
-                }
+                        ShardStates.Unassigned => "Unassigned",
+                        ShardStates.Initializing => "Initializing",
+                        ShardStates.Started => "Started",
+                        ShardStates.Relocating => "Relocating",
+                        _ => "Unknown",
+                    };
 
                 [DataMember(Name = "state")]
                 public string State { get; internal set; }

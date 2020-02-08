@@ -10,7 +10,7 @@ namespace Opserver.Data.Cloudflare
     {
         private Cache<List<CloudflareZone>> _zones;
         public Cache<List<CloudflareZone>> Zones =>
-            _zones ?? (_zones = GetCloudflareCache(5.Minutes(), () => Get<List<CloudflareZone>>("zones")));
+            _zones ??= GetCloudflareCache(5.Minutes(), () => Get<List<CloudflareZone>>("zones"));
 
         private static readonly NameValueCollection _dnsRecordFetchParams = new NameValueCollection
         {
@@ -20,7 +20,7 @@ namespace Opserver.Data.Cloudflare
         private Cache<List<CloudflareDNSRecord>> _dnsRecords;
 
         public Cache<List<CloudflareDNSRecord>> DNSRecords =>
-            _dnsRecords ?? (_dnsRecords = GetCloudflareCache(5.Minutes(), async () =>
+            _dnsRecords ??= GetCloudflareCache(5.Minutes(), async () =>
             {
                 var records = new List<CloudflareDNSRecord>();
                 var data = await Zones.GetData(); // wait on zones to load first...
@@ -32,7 +32,7 @@ namespace Opserver.Data.Cloudflare
                     records.AddRange(zoneRecords);
                 }
                 return records;
-            }));
+            });
 
         public CloudflareZone GetZoneFromHost(string host) =>
             Zones.Data?.FirstOrDefault(z => host.EndsWith(z.Name));

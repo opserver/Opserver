@@ -60,12 +60,10 @@ namespace Opserver.Data.Dashboard.Providers
                         wc.Headers.Add("X-Access-Token", Settings.APIKey);
                     }
 
-                    using (var s = await wc.OpenReadTaskAsync(url))
-                    using (var sr = new StreamReader(s))
-                    {
-                        var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
-                        return new BosunApiResult<T> { Result = result };
-                    }
+                    using var s = await wc.OpenReadTaskAsync(url);
+                    using var sr = new StreamReader(s);
+                    var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
+                    return new BosunApiResult<T> { Result = result };
                 }
                 catch (DeserializationException de)
                 {

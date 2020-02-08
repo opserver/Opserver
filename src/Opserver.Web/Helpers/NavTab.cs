@@ -13,8 +13,8 @@ namespace Opserver.Helpers
         public string Route { get; }
         public int Order { get; set; } = 0;
 
-        public int? BadgeCount => Module is IOverallStatusCount isc ? isc.Count : (int?)null;
-        public string Tooltip => Module is IOverallStatusCount isc ? isc.Tooltip : null;
+        public int? BadgeCount => (Module as IOverallStatusCount)?.Count;
+        public string Tooltip => (Module as IOverallStatusCount)?.Tooltip;
 
         /// <summary>
         /// Enabled if the module is active and it either has no security, or the current user can see it.
@@ -47,8 +47,11 @@ namespace Opserver.Helpers
             {
                 // Get the module type for this controller
                 var controllerModuleType = controllerType.BaseType.GetGenericArguments()[0];
+                // Get the active module this controller goes with and make a NavTab based on it
+                var module = modules.FirstOrDefault(m => m.GetType() == controllerModuleType);
+
                 // Was the type a StatusModule?
-                if (typeof(StatusModule).IsAssignableFrom(controllerModuleType))
+                if (module != null && typeof(StatusModule).IsAssignableFrom(controllerModuleType))
                 {
                     // Get all the potential actions
                     foreach (var method in controllerType.GetMethods(BindingFlags.Instance | BindingFlags.Public))
@@ -57,15 +60,10 @@ namespace Opserver.Helpers
                         var defaultRoute = method.GetCustomAttribute<DefaultRoute>();
                         if (defaultRoute != null)
                         {
-                            // Get the active module this controller goes with and make a NavTab based on it
-                            var module = modules.FirstOrDefault(m => m.GetType() == controllerModuleType);
-                            if (module != null)
-                            {
-                                // Do you believe in maaaaaaaaagic?
-                                var tab = new NavTab(module, "~/" + defaultRoute.Template);
-                                allTabs.Add(tab);
-                                mappings.Add(controllerType, tab);
-                            }
+                            // Do you believe in maaaaaaaaagic?
+                            var tab = new NavTab(module, "~/" + defaultRoute.Template);
+                            allTabs.Add(tab);
+                            mappings.Add(controllerType, tab);
                         }
                     }
                 }

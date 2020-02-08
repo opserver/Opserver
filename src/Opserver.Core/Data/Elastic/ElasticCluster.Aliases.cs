@@ -8,7 +8,7 @@ namespace Opserver.Data.Elastic
     {
         private Cache<IndexAliasInfo> _aliases;
         public Cache<IndexAliasInfo> Aliases =>
-            _aliases ?? (_aliases = GetElasticCache(async () =>
+            _aliases ??= GetElasticCache(async () =>
             {
                 var aliases = await GetAsync<Dictionary<string, IndexAliasList>>("_aliases");
                 return new IndexAliasInfo
@@ -17,14 +17,14 @@ namespace Opserver.Data.Elastic
                         .ToDictionary(a => a.Key, a => a.Value.Aliases.Keys.ToList())
                               ?? new Dictionary<string, List<string>>()
                 };
-            }));
+            });
 
         public string GetIndexAliasedName(string index)
         {
             if (Aliases.Data?.Aliases == null)
                 return index;
 
-            return Aliases.Data.Aliases.TryGetValue(index, out List<string> aliases)
+            return Aliases.Data.Aliases.TryGetValue(index, out var aliases)
                        ? aliases[0].IsNullOrEmptyReturn(index)
                        : index;
         }

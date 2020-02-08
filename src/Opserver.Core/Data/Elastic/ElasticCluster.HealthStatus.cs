@@ -9,10 +9,9 @@ namespace Opserver.Data.Elastic
     {
         private Cache<ClusterHealthInfo> _healthStatus;
         public Cache<ClusterHealthInfo> HealthStatus =>
-            _healthStatus ?? (_healthStatus = GetElasticCache(
+            _healthStatus ??= GetElasticCache(
                     async () => (await GetAsync<ClusterHealthInfo>("_cluster/health?level=shards"))?.Prep()
-                )
-            );
+                );
 
         /// <summary>
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 

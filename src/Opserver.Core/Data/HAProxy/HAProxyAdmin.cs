@@ -96,20 +96,18 @@ namespace Opserver.Data.HAProxy
 
             try
             {
-                using (var wc = new WebClient())
-                {
-                    var creds = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{instance.AdminUser}:{instance.AdminPassword}"));
-                    wc.Headers[HttpRequestHeader.Authorization] = "Basic " + creds;
+                using var wc = new WebClient();
+                var creds = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{instance.AdminUser}:{instance.AdminPassword}"));
+                wc.Headers[HttpRequestHeader.Authorization] = "Basic " + creds;
 
-                    var responseBytes = await wc.UploadValuesTaskAsync(instance.Url, new NameValueCollection
-                    {
-                        ["s"] = server.Name,
-                        ["action"] = action.AsString(EnumFormat.Description),
-                        ["b"] = p.Name
-                    });
-                    var response = Encoding.UTF8.GetString(responseBytes);
-                    return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
-                }
+                var responseBytes = await wc.UploadValuesTaskAsync(instance.Url, new NameValueCollection
+                {
+                    ["s"] = server.Name,
+                    ["action"] = action.AsString(EnumFormat.Description),
+                    ["b"] = p.Name
+                });
+                var response = Encoding.UTF8.GetString(responseBytes);
+                return response.StartsWith("HTTP/1.0 303") || response.StartsWith("HTTP/1.1 303");
             }
             catch (Exception e)
             {

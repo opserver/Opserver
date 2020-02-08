@@ -10,13 +10,13 @@ namespace Opserver.Data.SQL
         private Cache<List<ResourceEvent>> _resourceHistory;
 
         public Cache<List<ResourceEvent>> ResourceHistory =>
-            _resourceHistory ?? (_resourceHistory = GetSqlCache(nameof(ResourceHistory), async conn =>
+            _resourceHistory ??= GetSqlCache(nameof(ResourceHistory), async conn =>
             {
                 var sql = GetFetchSQL<ResourceEvent>();
                 var result = await conn.QueryAsync<ResourceEvent>(sql);
                 CurrentCPUPercent = result.Count > 0 ? result.Last().ProcessUtilization : (int?) null;
                 return result;
-            }));
+            });
 
         public int? CurrentCPUPercent { get; set; }
 
@@ -25,7 +25,7 @@ namespace Opserver.Data.SQL
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
 
             private long? _dateEpoch;
-            public long DateEpoch => _dateEpoch ?? (_dateEpoch = EventTime.ToEpochTime()).Value;
+            public long DateEpoch => _dateEpoch ??= EventTime.ToEpochTime();
             public DateTime EventTime { get; internal set; }
             public int ProcessUtilization { get; internal set; }
             public int MemoryUtilization { get; internal set; }

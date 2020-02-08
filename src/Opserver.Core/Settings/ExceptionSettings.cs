@@ -24,7 +24,7 @@ namespace Opserver
         public List<StackTraceSourceLinkPattern> StackTraceReplacements { get; set; } = new List<StackTraceSourceLinkPattern>();
 
         private StackTraceSettings _stackTraceSettings;
-        public StackTraceSettings StackTraceSettings => _stackTraceSettings ?? (_stackTraceSettings = GetStackTraceSettings());
+        public StackTraceSettings StackTraceSettings => _stackTraceSettings ??= GetStackTraceSettings();
 
         /// <summary>
         /// How many exceptions before the exceptions are highlighted as a warning in the header, null (default) is ignored

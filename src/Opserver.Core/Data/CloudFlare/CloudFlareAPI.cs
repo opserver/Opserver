@@ -19,12 +19,12 @@ namespace Opserver.Data.Cloudflare
         public override int MinSecondsBetweenPolls => 5;
 
         private Dictionary<string, string> _requestHeaders;
-        private IDictionary<string, string> RequestHeaders => _requestHeaders ?? (_requestHeaders = new Dictionary<string, string>
+        private IDictionary<string, string> RequestHeaders => _requestHeaders ??= new Dictionary<string, string>
         {
             ["X-Auth-Email"] = Email,
             ["X-Auth-Key"] = APIKey,
             ["Content-Type"] = "application/json"
-        });
+        };
 
         public override IEnumerable<Cache> DataPollers
         {

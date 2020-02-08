@@ -79,7 +79,7 @@ namespace Opserver.Data.Dashboard.Providers
         {
             get
             {
-                return _dayCache ?? (_dayCache = ProviderCache(async () =>
+                return _dayCache ??= ProviderCache(async () =>
                 {
                     var result = new IntervalCache(TimeSpan.FromDays(1));
                     async Task addMetric(string metricName, string[] tags)
@@ -105,7 +105,7 @@ namespace Opserver.Data.Dashboard.Providers
                     await Task.WhenAll(c, m, n); // parallel baby!
 
                     return result;
-                }, 60.Seconds(), 60.Minutes()));
+                }, 60.Seconds(), 60.Minutes());
             }
         }
 
@@ -203,22 +203,15 @@ namespace Opserver.Data.Dashboard.Providers
             }
         }
 
-        public static string InterfaceMetricName(Interface i)
-        {
-            switch (i.TypeDescription)
+        public static string InterfaceMetricName(Interface i) =>
+            i.TypeDescription switch
             {
-                case "bond":
-                    return Globals.NetBondBytes;
-                case "other":
-                    return Globals.NetOtherBytes;
-                case "tunnel":
-                    return Globals.NetTunnelBytes;
-                case "virtual":
-                    return Globals.NetVirtualBytes;
-                default:
-                    return Globals.NetBytes;
-            }
-        }
+                "bond" => Globals.NetBondBytes,
+                "other" => Globals.NetOtherBytes,
+                "tunnel" => Globals.NetTunnelBytes,
+                "virtual" => Globals.NetVirtualBytes,
+                _ => Globals.NetBytes,
+            };
 
         public static string GetDenormalized(string metric, string host, Dictionary<string, List<string>> metricCache)
         {
@@ -301,11 +294,11 @@ namespace Opserver.Data.Dashboard.Providers
         public List<float[]> Data { get; set; }
 
         private List<GraphPoint> _pointData;
-        public List<GraphPoint> PointData => _pointData ?? (_pointData = Data.Select(p => new GraphPoint
+        public List<GraphPoint> PointData => _pointData ??= Data.Select(p => new GraphPoint
         {
             DateEpoch = (long) p[0],
             Value = p[1]
-        }).ToList());
+        }).ToList();
 
         public PointSeries() { }
         public PointSeries(string host)

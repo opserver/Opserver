@@ -76,10 +76,8 @@ namespace Opserver.Data.SQL
             {
                 if (QueryPlan == null) return new ShowPlanXML();
                 var s = new XmlSerializer(typeof(ShowPlanXML));
-                using (var r = new StringReader(QueryPlan))
-                {
-                    return (ShowPlanXML)s.Deserialize(r);
-                }
+                using var r = new StringReader(QueryPlan);
+                return (ShowPlanXML)s.Deserialize(r);
             }
 
             internal const string FetchSQL = @"
@@ -220,11 +218,11 @@ FROM (SELECT TOP (@MaxResultCount)
 
             public TopSearchOptions SetDefaults()
             {
-                Sort = Sort ?? TopSorts.AvgCPUPerMinute;
-                MinExecs = MinExecs ?? DefaultMinExecs;
-                LastRunSeconds = LastRunSeconds ?? DefaultLastRunSeconds;
-                MinLastRunDate = MinLastRunDate ?? DateTime.UtcNow.AddDays(-1);
-                MaxResultCount = MaxResultCount ?? DefaultMaxResultCount;
+                Sort ??= TopSorts.AvgCPUPerMinute;
+                MinExecs ??= DefaultMinExecs;
+                LastRunSeconds ??= DefaultLastRunSeconds;
+                MinLastRunDate ??= DateTime.UtcNow.AddDays(-1);
+                MaxResultCount ??= DefaultMaxResultCount;
                 return this;
             }
 
