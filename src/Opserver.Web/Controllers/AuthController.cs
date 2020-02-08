@@ -42,7 +42,7 @@ namespace Opserver.Controllers
             }
             vd.ErrorMessage = "Login failed";
 
-            return View("~/Views/Login/Login.cshtml", vd);
+            return View("~/Views/Auth/Login.cshtml", vd);
         }
 
         [Route("logout")]
