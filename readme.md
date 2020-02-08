@@ -93,7 +93,7 @@ JavaScript:
 [jQuery cookie plugin](https://github.com/js-cookie/js-cookie) by Klaus Hartl  
 [jQuery autocomplete](http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/) by Jörn Zaefferer  
 [prettify](https://github.com/google/code-prettify) by Google  
-[TableSorter](http://tablesorter.com) by Christian Bach  
+[TableSorter](https://github.com/christianbach/tablesorter) by Christian Bach  
 [Toastr](https://github.com/CodeSeven/toastr) by John Papa and Hans Fjällemark  
 
 ### License
