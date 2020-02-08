@@ -152,7 +152,7 @@ namespace Opserver.Data
         {
             MiniProfilerDescription = "Poll: " + description; // concatenate once
             // TODO: Settings via owner
-            logExceptions = logExceptions ?? LogExceptions;
+            logExceptions ??= LogExceptions;
 
             _updateFunc = async () =>
             {

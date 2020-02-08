@@ -262,7 +262,7 @@ namespace Opserver
             // TODO: Make this a setting?
             // UTC Time is good for Stack Exchange but many people don't run their servers on UTC
             compareTo ??= DateTime.UtcNow;
-            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
+            return $@"<span title=""{dt:u}"" class=""js-relative-time {cssClass}"">{dt.ToRelativeTime(asPlusMinus: asPlusMinus, compareTo: compareTo)}</span>".AsHtml();
         }
 
         /// <summary>
@@ -332,7 +332,7 @@ namespace Opserver
         /// <param name="includeTimeForOldDates">(Optional) Whether to include the time portion for dates 12+ months ago.</param>
         public static HtmlString ToRelativeTimeSpanMini(this DateTime dt, bool includeTimeForOldDates = true)
         {
-            return $@"<span title=""{dt.ToString("u")}"" class=""js-relative-time"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
+            return $@"<span title=""{dt:u}"" class=""js-relative-time"">{ToRelativeTimeMini(dt, includeTimeForOldDates)}</span>".AsHtml();
         }
 
         /// <summary>
