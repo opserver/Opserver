@@ -17,6 +17,7 @@ using System.Collections.Generic;
 
 namespace Opserver.Controllers
 {
+    [OnlyAllow(Roles.Authenticated)]
     public class HomeController : StatusController
     {
         private PollingService Poller { get; }
