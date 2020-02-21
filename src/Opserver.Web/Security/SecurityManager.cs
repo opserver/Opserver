@@ -17,6 +17,7 @@ namespace Opserver.Security
         private SecurityProvider GetProvider(SecuritySettings settings, IMemoryCache cache) =>
             settings.Provider switch
             {
+                "AD" => new ActiveDirectoryProvider(settings, cache),
                 "ActiveDirectory" => new ActiveDirectoryProvider(settings, cache),
                 "EveryonesAnAdmin" => new EveryonesAnAdminProvider(settings),
                 //case "EveryonesReadOnly":
