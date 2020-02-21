@@ -11,6 +11,7 @@ using Opserver.Views.Dashboard;
 
 namespace Opserver.Controllers
 {
+    [OnlyAllow(DashboardRoles.Viewer)]
     public partial class DashboardController : StatusController<DashboardModule>
     {
         public DashboardController(DashboardModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
