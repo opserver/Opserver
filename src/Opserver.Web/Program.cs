@@ -45,7 +45,7 @@ namespace Opserver
                             .AddPrefixedJsonFile("Modules:Dashboard", "Config/DashboardSettings.json")
                             .AddPrefixedJsonFile("Modules:Cloudflare", "Config/CloudFlareSettings.json")
                             .AddPrefixedJsonFile("Modules:Elastic", "Config/ElasticSettings.json")
-                            .AddPrefixedJsonFile("Modules:Exceptions", "Config/ExceptionSettings.json")
+                            .AddPrefixedJsonFile("Modules:Exceptions", "Config/ExceptionsSettings.json")
                             .AddPrefixedJsonFile("Modules:HAProxy", "Config/HAProxySettings.json")
                             .AddPrefixedJsonFile("Modules:PagerDuty", "Config/PagerDutySettings.json")
                             .AddPrefixedJsonFile("Modules:Redis", "Config/RedisSettings.json")
