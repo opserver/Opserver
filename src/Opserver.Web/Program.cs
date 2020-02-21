@@ -35,7 +35,6 @@ namespace Opserver
             }
 
             var host = hostBuilder
-                .UseKestrel()
                 .ConfigureAppConfiguration(
                     (_, config) =>
                     {
