@@ -2,44 +2,44 @@
   "Modules": {
     /* Configuration for the SQL Server dashboard */
     "Sql": {
-      "defaultConnectionString": "Data Source=$ServerName$;Initial Catalog=master;Integrated Security=SSPI;",
-      "refreshIntervalSeconds": 30,
-      "instances": [
-        { "name": "localhost" }
-      ]
+      //"defaultConnectionString": "Data Source=$ServerName$;Initial Catalog=master;Integrated Security=SSPI;",
+      //"refreshIntervalSeconds": 30,
+      //"instances": [
+      //  { "name": "localhost" }
+      //]
     },
     /* Configuration for the Redis dashboard */
     "Redis": {
-      "Servers": [
-        {
-          "name": "localhost",
-          "instances": [
-            {
-              "name": "Default",
-              "port": 6379
-            }
-          ]
-        }
-      ]
+      //"Servers": [
+      //  {
+      //    "name": "localhost",
+      //    "instances": [
+      //      {
+      //        "name": "Default",
+      //        "port": 6379
+      //      }
+      //    ]
+      //  }
+      //]
     },
     /* Configuration for the Elastic dashboard */
     "Elastic": {
-      "clusters": [
-        {
-          "name": "Local",
-          "nodes": [ "localhost" ]
-        }
-      ]
+      //"clusters": [
+      //  {
+      //    "name": "Local",
+      //    "nodes": [ "localhost" ]
+      //  }
+      //]
     },
     /* Configuration for the Exceptions dashboard */
     "Exceptions": {
-      "stores": [
-        {
-          "name": "Local",
-          "queryTimeoutMs": 2000,
-          "connectionString": "Server=.;Database=Local.Exceptions;Integrated Security=SSPI;"
-        }
-      ],
+      //"stores": [
+      //  {
+      //    "name": "Local",
+      //    "queryTimeoutMs": 2000,
+      //    "connectionString": "Server=.;Database=Local.Exceptions;Integrated Security=SSPI;"
+      //  }
+      //],
       "stackTraceReplacements": [
         {
           "name": "github",
