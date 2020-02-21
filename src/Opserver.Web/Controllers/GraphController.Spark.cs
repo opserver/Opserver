@@ -41,6 +41,7 @@ namespace Opserver.Controllers
             MemCache = cache;
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSparkSvg(string id)
@@ -54,6 +55,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, 100, p => p.Value.GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/cpu/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> CPUSparkSvgAll()
@@ -64,6 +66,7 @@ namespace Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> MemorySpark(string id)
@@ -77,6 +80,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(node.TotalMemory.GetValueOrDefault()), p => p.Value.GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/memory/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> MemorySparkSvgAll()
@@ -87,6 +91,7 @@ namespace Opserver.Controllers
                 getVal: p => p.Value.GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
@@ -100,6 +105,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration)]
         [Route("graph/network/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> NetworkSparkSvgAll()
@@ -110,6 +116,7 @@ namespace Opserver.Controllers
                 getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
         [Route("graph/interface/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> InterfaceSpark(string direction, string id, string iid)
@@ -126,6 +133,7 @@ namespace Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
         [Route("graph/volumePerformance/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string id)
@@ -139,6 +147,7 @@ namespace Opserver.Controllers
                 : SparkSVG(points, Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()), p => (p.Value + p.BottomValue).GetValueOrDefault());
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
         [Route("graph/volumePerformance/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string direction, string id, string iid)
@@ -155,6 +164,7 @@ namespace Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
+        [OnlyAllow(SQLRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" })]
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)
