@@ -18,19 +18,25 @@ namespace Opserver.Helpers
             var warning = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Warning).ToList();
             var good = ims.Where(ag => ag.MonitorStatus == MonitorStatus.Good || (unknownIsHealthy && ag.MonitorStatus == MonitorStatus.Unknown)).ToList();
             var bad = ims.Except(warning).Except(good).ToList();
+            bool addSpace = false;
 
-            if (bad.Count > 0)
+            void Append(MonitorStatus status, int count)
             {
-                sb.Append(MonitorStatus.Critical.IconSpan()).Append(" ").Append(bad.Count.ToComma());
+                if (count > 0)
+                {
+                    if (addSpace)
+                    {
+                        sb.Append(" ");
+                        addSpace = false;
+                    }
+                    sb.Append(status.IconSpan()).Append(" ").Append(count.ToComma());
+                    addSpace = true;
+                }
             }
-            if (warning.Count > 0)
-            {
-                sb.Append(MonitorStatus.Warning.IconSpan()).Append(" ").Append(warning.Count.ToComma());
-            }
-            if (good.Count > 0)
-            {
-                sb.Append(MonitorStatus.Good.IconSpan()).Append(" ").Append(good.Count.ToComma());
-            }
+
+            Append(MonitorStatus.Critical, bad.Count);
+            Append(MonitorStatus.Warning, warning.Count);
+            Append(MonitorStatus.Good, good.Count);
             return sb.ToStringRecycle().AsHtml();
         }
 
@@ -48,15 +54,16 @@ namespace Opserver.Helpers
             {
                 if (good.Count > 0)
                 {
-                    sb.Append(MonitorStatus.Good.Span(@good.Count.ToComma(), @good.Count.Pluralize("Healthy Database")));
+                    sb.Append(MonitorStatus.Good.Span(good.Count.ToComma(), good.Count.Pluralize("Healthy Database")));
                 }
+                sb.Append(" ");
                 if (bad.Count > 0)
                 {
                     if (good.Count > 0)
                     {
-                        sb.Append(@"<span class=""text-muted"">/</span>");
+                        sb.Append(@"<span class=""text-muted"">/</span> ");
                     }
-                    sb.Append(MonitorStatus.Critical.Span(@bad.Count.ToComma(), @bad.Count.Pluralize("Unhealthy Database")));
+                    sb.Append(MonitorStatus.Critical.Span(bad.Count.ToComma(), bad.Count.Pluralize("Unhealthy Database")));
                 }
             }
             else
@@ -65,6 +72,7 @@ namespace Opserver.Helpers
                 {
                     sb.Append(MonitorStatus.Critical.IconSpan()).Append(" ").Append(bad.Count.ToComma()).Append(" Unhealthy");
                 }
+                sb.Append(" ");
                 if (good.Count > 0)
                 {
                     sb.Append(MonitorStatus.Good.IconSpan()).Append(" ").Append(good.Count.ToComma()).Append(" Healthy");
