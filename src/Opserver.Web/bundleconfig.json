@@ -1,9 +1,8 @@
 [
   {
     "inputFiles": [
-      "wwwroot/Content/js/jquery-1.11.3.min.js",
-      "wwwroot/Content/bootstrap/js/bootstrap.min.js",
-      "wwwroot/Content/js/plugins/*.js"
+      "ContentSource/bootstrap/js/bootstrap.min.js",
+      "ContentSource/js/plugins/*.js"
     ],
     "outputFileName": "wwwroot/Content/js/plugins.js"
   }
