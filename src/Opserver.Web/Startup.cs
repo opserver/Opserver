@@ -38,7 +38,8 @@ namespace Opserver
                         options.LoginPath = "/login";
                         options.LogoutPath = "/logout";
                     });
-            services.AddHttpContextAccessor()
+            services.AddResponseCompression()
+                    .AddHttpContextAccessor()
                     .AddMemoryCache()
                     .AddExceptional(
                 _configuration.GetSection("Exceptional"),
@@ -112,7 +113,8 @@ namespace Opserver
             IEnumerable<StatusModule> modules
         )
         {
-            appBuilder.UseStaticFiles()
+            appBuilder.UseResponseCompression()
+                      .UseStaticFiles()
                       .UseExceptional()
                       .UseRouting()
                       .UseMiniProfiler()
