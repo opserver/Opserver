@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Opserver.Data;
 using Opserver.Helpers;
 using Opserver.Security;
@@ -114,7 +115,10 @@ namespace Opserver
         )
         {
             appBuilder.UseResponseCompression()
-                      .UseStaticFiles()
+                      .UseStaticFiles(new StaticFileOptions
+                      {
+                          OnPrepareResponse = ctx => ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=3600"
+                      })
                       .UseExceptional()
                       .UseRouting()
                       .UseMiniProfiler()
