@@ -7,7 +7,7 @@
     var title = baseTitle.HasValue() ? Settings.Global.SiteName + " - " + baseTitle : Settings.Global.SiteName;
 }
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <title>@title</title>
     <meta name="viewport" content="width=device-width">
@@ -44,7 +44,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="~/hub"></a>
+                <a class="navbar-brand" href="~/hub" aria-label="Status Hub"></a>
             </div>
 
             <div class="collapse navbar-collapse" id="topbar-collapse">
@@ -77,8 +77,8 @@
             </div>
         </div>
     </nav>
-<div class="container-fluid js-content">
-    @RenderBody()
-</div>
+    <div class="container-fluid js-content">
+        @RenderBody()
+    </div>
 </body>
 </html>

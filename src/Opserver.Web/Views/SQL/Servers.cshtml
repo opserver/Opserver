@@ -97,7 +97,7 @@
                     <tr class="@i.RowClass()">
                         <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
                         <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
-                        <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" /></td>
+                        <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" alt="SQL CPU for @i.Name Last Hour" /></td>
                         <partial Name="Partials.MemoryCell" Model="@new PartialsMemoryCellModel(i, 2)" />
                         <td title="@dbs.Count.Pluralize("Database"):
 @string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
