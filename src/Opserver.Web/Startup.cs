@@ -117,7 +117,13 @@ namespace Opserver
             appBuilder.UseResponseCompression()
                       .UseStaticFiles(new StaticFileOptions
                       {
-                          OnPrepareResponse = ctx => ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=3600"
+                          OnPrepareResponse = ctx =>
+                          {
+                              if (ctx.Context.Request.Query.ContainsKey("v")) // If cache-breaker versioned, cache for a year
+                              {
+                                  ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=31536000";
+                              }
+                          }
                       })
                       .UseExceptional()
                       .UseRouting()
