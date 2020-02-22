@@ -21,15 +21,14 @@
 }
 @functions
 {
-    void TabLink(HAProxyModel.Views view, string action, string name)
+    string TabLink(HAProxyModel.Views view, string action, string name)
     {
         <li class="@(Model.View == view ? "active" : null)"><a href="@Url.Action(action)">@name</a></li>
+        return null;
     }
 }
 <ul class="nav nav-tabs nav-tabs-right">
-    @{
-        TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard");
-    }
+    @TabLink(HAProxyModel.Views.Dashboard, nameof(HAProxyController.Dashboard), "dashboard")
 </ul>
 <div class="js-refresh" data-name="haproxy-header">
     @if (Model.IsInstanceFilterable)

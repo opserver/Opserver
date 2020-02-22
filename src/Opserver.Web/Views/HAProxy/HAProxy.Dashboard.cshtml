@@ -56,9 +56,9 @@
         foreach (var s in stats)
         {
             sb.Append(statMapping[s].Instance.Name)
-                .Append(": ")
-                .Append(getter(s))
-                .Append('\n');
+              .Append(": ")
+              .Append(getter(s))
+              .Append('\n');
         }
         sb.Length -= 1;
         return sb.ToStringRecycle();
