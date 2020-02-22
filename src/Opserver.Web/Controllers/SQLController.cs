@@ -36,7 +36,7 @@ namespace Opserver.Controllers
                 vd.AvailabilityGroups = vd.CurrentCluster.GetAvailabilityGroups(node, ag).ToList();
 
             if (detailOnly && vd.CurrentCluster != null)
-                return View("Servers.ClusterDetail", vd);
+                return PartialView("Servers.ClusterDetail", vd);
 
             return View("Servers", vd);
         }
@@ -78,12 +78,12 @@ namespace Opserver.Controllers
 
             return type switch
             {
-                "configuration" => View("Instance.Configuration", i),
-                "connections" => View("Instance.Connections", i),
-                "errors" => View("Instance.Errors", i),
-                "memory" => View("Instance.Memory", i),
-                "jobs" => View("Instance.Jobs", i),
-                "db-files" => View("Instance.DBFiles", i),
+                "configuration" => PartialView("Instance.Configuration", i),
+                "connections" => PartialView("Instance.Connections", i),
+                "errors" => PartialView("Instance.Errors", i),
+                "memory" => PartialView("Instance.Memory", i),
+                "jobs" => PartialView("Instance.Jobs", i),
+                "db-files" => PartialView("Instance.DBFiles", i),
                 _ => ContentNotFound("Unknown summary view requested"),
             };
         }
@@ -134,7 +134,7 @@ namespace Opserver.Controllers
                 Instance = i,
                 Op = i.GetTopOperation(planHandle, offset).Data
             };
-            return View("Operations.Top.Detail", vd);
+            return PartialView("Operations.Top.Detail", vd);
         }
 
         [Route("sql/top/plan")]

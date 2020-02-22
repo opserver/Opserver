@@ -1,6 +1,5 @@
 ﻿@model SQLInstance
 @{
-    Layout = null;
     var connections = Model.ConnectionsSummary.SafeData(true);
     var groups = connections.GroupBy(c => new { c.LoginName, c.TransactionIsolationLevel }).OrderByDescending(c => c.Sum(g => g.ConnectionCount));
 }

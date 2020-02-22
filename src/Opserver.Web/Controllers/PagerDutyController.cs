@@ -53,10 +53,10 @@ namespace Opserver.Controllers
                 Logs = await incident.GetLogsAsync()
             };
 
-            return View("PagerDuty.Incident", vd);
+            return PartialView("PagerDuty.Incident", vd);
         }
 
         [Route("pagerduty/escalation/full")]
-        public ActionResult FullEscalation() => View("PagerDuty.EscFull", Module.API.OnCallInfo.Data);
+        public ActionResult FullEscalation() => PartialView("PagerDuty.EscFull", Module.API.OnCallInfo.Data);
     }
 }

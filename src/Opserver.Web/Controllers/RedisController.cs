@@ -63,10 +63,10 @@ namespace Opserver.Controllers
 
             return type switch
             {
-                "config" => View("Instance.Config", i),
-                "clients" => View("Instance.Clients", i),
-                "info" => View("Instance.Info", i),
-                "slow-log" => View("Instance.SlowLog", i),
+                "config" => PartialView("Instance.Config", i),
+                "clients" => PartialView("Instance.Clients", i),
+                "info" => PartialView("Instance.Info", i),
+                "slow-log" => PartialView("Instance.SlowLog", i),
                 _ => ContentNotFound("Unknown summary view requested"),
             };
         }

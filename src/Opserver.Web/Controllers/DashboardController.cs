@@ -102,8 +102,8 @@ namespace Opserver.Controllers
             var n = Module.GetNodeByName(node);
             return type switch
             {
-                "hardware" => View("Node.Hardware", n),
-                "network" => View("Node.Network", n),
+                "hardware" => PartialView("Node.Hardware", n),
+                "network" => PartialView("Node.Network", n),
                 _ => ContentNotFound("Unknown summary view requested"),
             };
         }
@@ -138,7 +138,7 @@ namespace Opserver.Controllers
                 }
             }
 
-            return View("Node.Graph", vd);
+            return PartialView("Node.Graph", vd);
         }
 
         private static async Task PopulateModel(NodeGraphModel vd, string type, string subId)

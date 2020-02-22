@@ -1,7 +1,4 @@
 ﻿@model ExceptionsModel
-@{
-    Layout = null;
-}
 @if (Model.Groups.Count > 1)
 {
     <a href="@Url.Action(nameof(ExceptionsController.Exceptions), new { store = Model.Store.Name })" title="View All" class="btn btn-xs@(Model.ShowAll ? " btn-primary" : null)">View All</a>

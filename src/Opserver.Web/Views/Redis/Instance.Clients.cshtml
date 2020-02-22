@@ -2,7 +2,6 @@
 @inject Opserver.Data.Dashboard.DashboardModule Dashboard
 @model RedisInstance
 @{
-    Layout = null;
     var clients = Model.Clients.SafeData(true);
 }
 <h4 class="modal-title">

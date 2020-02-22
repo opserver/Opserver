@@ -9,6 +9,13 @@
                           .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Module.Settings.ShowOther))
                           .OrderBy(g => g.Key.Index);
 }
+@section preload {
+    @if (Module.HasData) {
+    <link rel="preload" href="@Url.Content("~/graph/")cpu/spark/all" as="image">
+    <link rel="preload" href="@Url.Content("~/graph/")memory/spark/all" as="image">
+    <link rel="preload" href="@Url.Content("~/graph/")network/spark/all" as="image">
+    }
+}
 @functions
 {
     string Graph(Node n, string type)

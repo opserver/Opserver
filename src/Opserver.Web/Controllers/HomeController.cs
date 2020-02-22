@@ -86,11 +86,11 @@ namespace Opserver.Controllers
                 {
                     Tab = tab
                 };
-            return View(vd);
+            return PartialView(vd);
         }
 
         [Route("issues")]
-        public ActionResult Issues() => View();
+        public ActionResult Issues() => PartialView();
 
         [Route("about"), AlsoAllow(Roles.InternalRequest)]
         public ActionResult About() => View();

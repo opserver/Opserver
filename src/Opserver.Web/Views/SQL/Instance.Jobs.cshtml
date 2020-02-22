@@ -1,7 +1,6 @@
 ﻿@using Roles = Opserver.Models.Roles
 @model SQLInstance
 @{
-    Layout = null;
     var jobs = Model.JobSummary;
     var data = jobs.SafeData(true);
 }
