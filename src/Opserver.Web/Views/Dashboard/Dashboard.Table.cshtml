@@ -116,9 +116,9 @@
                                     @n.IconSpan()
                                     <a href="~/dashboard/node?node=@n.PrettyName" class="@n.TextClass().Nullify()">@n.PrettyName</a>
                                 </td>
-                                <td title="@n.ApplicationCPUTextSummary.Nullify()" class="@n.CPUMonitorStatus().TextClass().Nullify()">@(n.CPULoad?.ToString("n0")) %</td>
+                                <td class="@n.CPUMonitorStatus().TextClass().Nullify()">@(n.CPULoad?.ToString("n0")) %</td>
                                 <td>@Graph(n, "cpu")</td>
-                                <td title="@n.ApplicationMemoryTextSummary.Nullify()">
+                                <td>
                                     <span class="@n.MemoryMonitorStatus().TextClass().Nullify()">@n.PrettyMemoryUsed() / @n.PrettyTotalMemory() (@(n.PercentMemoryUsed?.ToString("n2"))%)</span>
                                     @if (n.MemoryUsed >= 0)
                                     {
