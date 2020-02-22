@@ -26,7 +26,7 @@ namespace Opserver.Controllers
                 Filter = q,
                 IsStartingUp = Module.AnyDoingFirstPoll
             };
-            return View(Request.IsAjax() ? "Dashboard.Table" : "Dashboard", vd);
+            return Request.IsAjax() ? PartialView("Dashboard.Table", vd) : (ActionResult)View("Dashboard.Table", vd);
         }
 
         private List<Node> GetNodes(string search) =>

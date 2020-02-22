@@ -3,7 +3,7 @@
 @model DashboardModel
 @{
     // Note: not using MVC Url.Action and such here because it's too slow
-    Layout = null;
+    Layout = "Dashboard.cshtml";
     var categories = Model.Nodes
                           .GroupBy(n => n.Category)
                           .Where(g => g.Any() && (g.Key != DashboardCategory.Unknown || Module.Settings.ShowOther))

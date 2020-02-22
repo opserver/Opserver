@@ -1,5 +1,6 @@
 ﻿@model DashboardModel
 @{
+    Layout = "~/Views/Shared/Master.cshtml";
     this.SetPageTitle("Dashboard");
 
     this.SetTopSearch("All Nodes",
@@ -12,6 +13,9 @@
         Status.Dashboard.init({ refresh: 60, filter: '@(Model.Filter)' });
     });
     </script>}
+@section preload {
+    @RenderSection("preload", false)
+}
 <div>
-    <partial name="Dashboard.Table" model="Model" />
+    @RenderBody()
 </div>
