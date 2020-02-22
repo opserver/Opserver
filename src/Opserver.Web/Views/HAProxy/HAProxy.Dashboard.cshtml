@@ -225,9 +225,9 @@
                 {
                     strings.Add(a.ToString());
                 }
-                result = strings.ToJson().ToString();
-                ActionLists.TryAdd(action, result);
             }
+            result = strings.ToJson().ToString();
+            ActionLists.TryAdd(action, result);
         }
         return result;
     }
