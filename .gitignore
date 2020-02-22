@@ -104,3 +104,6 @@ src/Opserver.Web/config/*.config
 *.StackOverflow.*
 src/Opserver.Web/localSettings.json
 .idea/*
+src/Opserver.Web/wwwroot/Content/js/plugins.js
+src/Opserver.Web/wwwroot/Content/js/plugins.min.js
+src/Opserver.Web/wwwroot/Content/themes/*.css
