@@ -11,12 +11,11 @@
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/Opserver/Opserver/</RepositoryUrl>
 
-    <!--<DebugSymbols>true</DebugSymbols>-->
-    <!--<DebugType>pdbonly</DebugType>-->
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>embedded</DebugType>
     <DefaultLanguage>en-US</DefaultLanguage>
     <IncludeSymbols>false</IncludeSymbols>
-    <!--<PublishRepositoryUrl>true</PublishRepositoryUrl>-->
-    <!--<EmbedUntrackedSources>true</EmbedUntrackedSources>-->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!--<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>-->
   </PropertyGroup>
   <!-- File nesting! -->
@@ -26,6 +25,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Nerdbank.GitVersioning" Version="2.2.33" PrivateAssets="all" />
-    <!--<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>-->
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
   </ItemGroup>
 </Project>
