@@ -106,4 +106,5 @@ src/Opserver.Web/localSettings.json
 .idea/*
 src/Opserver.Web/wwwroot/Content/js/plugins.js
 src/Opserver.Web/wwwroot/Content/js/plugins.min.js
+src/Opserver.Web/wwwroot/Content/js/bundle*
 src/Opserver.Web/wwwroot/Content/themes/*.css

@@ -16,8 +16,7 @@
     <link href="~/Content/themes/@(Current.Theme).min.css" asp-append-version="true" rel="stylesheet" />
     <link href="~/Content/img/apple-touch-icon.png" asp-append-version="true" rel="apple-touch-icon" />
     <script src="~/Content/js/jquery-1.11.3.min.js" asp-append-version="true"></script>
-    <script src="~/Content/js/plugins.js" asp-append-version="true"></script>
-    <script src="~/Content/js/Scripts.js" asp-append-version="true"></script>
+    <script src="~/Content/js/bundle.min.js" asp-append-version="true"></script>
     <script>
         $(function() {
             Status.init({ SiteName: '@Settings.Global.SiteName', Tab:'@Current.NavTab?.Name', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
