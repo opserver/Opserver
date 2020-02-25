@@ -61,17 +61,19 @@ namespace Opserver.Controllers
                 //    return RedirectToAction()...
             }
 
-            if (Current.User.HasAccess(Dashboard))
+            static bool AllowMeMaybe(StatusModule m) => m.Enabled && Current.User.HasAccess(m);
+
+            if (AllowMeMaybe(Dashboard))
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
-            if (Current.User.HasAccess(Sql))
+            if (AllowMeMaybe(Sql))
                 return RedirectToAction(nameof(SQLController.Dashboard), "SQL");
-            if (Current.User.HasAccess(Redis))
+            if (AllowMeMaybe(Redis))
                 return RedirectToAction(nameof(RedisController.Dashboard), "Redis");
-            if (Current.User.HasAccess(Elastic))
+            if (AllowMeMaybe(Elastic))
                 return RedirectToAction(nameof(ElasticController.Dashboard), "Elastic");
-            if (Current.User.HasAccess(Exceptions))
+            if (AllowMeMaybe(Exceptions))
                 return RedirectToAction(nameof(ExceptionsController.Exceptions), "Exceptions");
-            if (Current.User.HasAccess(HAProxy))
+            if (AllowMeMaybe(HAProxy))
                 return RedirectToAction(nameof(HAProxyController.Dashboard), "HAProxy");
 
             return View("NoConfiguration");
