@@ -3861,6 +3861,10 @@ namespace StackExchange.Opserver.Data.SQL.QueryPlans
     {
 
         /// <remarks/>
+        [System.Xml.Serialization.XmlEnumAttribute("Adaptive Join")]
+        AdaptiveJoin,
+
+        /// <remarks/>
         Assert,
 
         /// <remarks/>
