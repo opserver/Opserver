@@ -35,6 +35,7 @@ namespace Opserver
                                 .AddPrefixedJsonFile("Modules:Redis", "Config/RedisSettings.json")
                                 .AddPrefixedJsonFile("Modules:SQL", "Config/SQLSettings.json")
                                 // End compat
+                                .AddJsonFile("Config/opserverSettings.json", optional: true, reloadOnChange: true)
                                 .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true)
                                 .AddJsonFile("localSettings.json", optional: true, reloadOnChange: true);
                         }
