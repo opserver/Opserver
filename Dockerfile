@@ -10,12 +10,8 @@ RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${fi
 COPY tests/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p tests/${file%.*}/ && mv $file tests/${file%.*}/; done
 
-# Full Restore
-RUN dotnet restore
-
-# Copy and build
+# Copy all
 COPY . .
-RUN dotnet build -c Release
 
 # FROM build AS test-runner
 # WORKDIR /app/tests/Opserver.Tests
