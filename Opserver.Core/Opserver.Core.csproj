@@ -8,13 +8,13 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.60.16" />
+    <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="Enums.NET" Version="2.3.2" />
     <PackageReference Include="Jil" Version="2.16.0" />
-    <PackageReference Include="MiniProfiler.Shared" Version="4.0.180" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.0.138" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.85" />
-    <PackageReference Include="StackExchange.Redis" Version="2.0.602" />
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.0-rc2.29" />
+    <PackageReference Include="StackExchange.Redis" Version="2.0.513" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) == 'net461'">
     <Reference Include="System.DirectoryServices" />
