@@ -8,6 +8,32 @@ namespace Opserver.Tests
     public class SecurityProviderTests
     {
         [Fact]
+        public void UnconfiguredProvider()
+        {
+            var memCache = new MemoryCache(new MemoryCacheOptions());
+            var options = Options.Create(new SecuritySettings
+            {
+                Provider = ""
+            });
+            var sm = new SecurityManager(options, memCache);
+            Assert.IsType<UnconfiguredProvider>(sm.CurrentProvider);
+
+            options = Options.Create(new SecuritySettings
+            {
+                Provider = null
+            });
+            sm = new SecurityManager(options, memCache);
+            Assert.IsType<UnconfiguredProvider>(sm.CurrentProvider);
+
+            options = Options.Create(new SecuritySettings
+            {
+                Provider = "gibberish"
+            });
+            sm = new SecurityManager(options, memCache);
+            Assert.IsType<UnconfiguredProvider>(sm.CurrentProvider);
+        }
+
+        [Fact]
         public void ActiveDirectoryProvider()
         {
             var memCache = new MemoryCache(new MemoryCacheOptions());
@@ -32,19 +58,31 @@ namespace Opserver.Tests
         }
 
         [Fact]
+        public void EveryonesReadOnlyProvider()
+        {
+            var memCache = new MemoryCache(new MemoryCacheOptions());
+            var options = Options.Create(new SecuritySettings
+            {
+                Provider = "EveryonesReadOnly"
+            });
+            var sm = new SecurityManager(options, memCache);
+            Assert.IsType<EveryonesReadOnlyProvider>(sm.CurrentProvider);
+        }
+
+        [Fact]
         public void DefaultProvider()
         {
             var memCache = new MemoryCache(new MemoryCacheOptions());
             var options = Options.Create(new SecuritySettings());
             var sm = new SecurityManager(options, memCache);
-            Assert.IsType<EveryonesReadOnlyProvider>(sm.CurrentProvider);
+            Assert.IsType<UnconfiguredProvider>(sm.CurrentProvider);
 
             var bsOptions = Options.Create(new SecuritySettings()
             {
                 Provider = "admjnfajkfnajsklfnasfd"
             });
             var bsSm = new SecurityManager(bsOptions, memCache);
-            Assert.IsType<EveryonesReadOnlyProvider>(bsSm.CurrentProvider);
+            Assert.IsType<UnconfiguredProvider>(bsSm.CurrentProvider);
         }
     }
 }

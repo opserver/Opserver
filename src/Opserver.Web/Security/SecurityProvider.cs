@@ -11,6 +11,7 @@ namespace Opserver.Security
     {
         public abstract string ProviderName { get; }
         protected SecuritySettings Settings { get; set; }
+        public virtual bool IsConfigured => true;
         public readonly List<IPNet> InternalNetworks;
 
         protected SecurityProvider(SecuritySettings settings)

@@ -17,8 +17,15 @@ namespace Opserver.Controllers
         [Route("login"), HttpGet]
         public ActionResult Login(string returnUrl)
         {
+            if (!Current.Security.IsConfigured)
+            {
+                return View("NoConfiguration");
+            }
+
             if (returnUrl == "/")
+            {
                 return RedirectToAction(nameof(Login));
+            }
 
             var vd = new LoginModel();
             return View(vd);
@@ -42,7 +49,7 @@ namespace Opserver.Controllers
             }
             vd.ErrorMessage = "Login failed";
 
-            return View("~/Views/Auth/Login.cshtml", vd);
+            return View("Login", vd);
         }
 
         [Route("logout")]
