@@ -15,6 +15,18 @@ Opserver is a monitoring system originally from the team at [Stack Exchange](htt
 
 Known as “status” internally, Opserver provides a fast overall view of all our major systems that also allows drilling in for more detail.  For an idea of the UI, you can see some [screenshots from our Velocity 2013 talk](https://imgur.com/a/dawwf).
 
+### Building
+Building Opserver (unless using Docker below) requires the .NET Core 3.1 SDK or higher ([downloaded here](https://dotnet.microsoft.com/download)). Once that's in place, in the repo root, run:
+```bash
+dotnet build -c Release
+```
+Or just run the app directly if you like (for debugging, etc.):
+```bash
+cd /src/Opserver.Web
+dotnet run -c Release
+```
+Note: you'll want to configure it - see below!
+
 ### Configuration
 Configuring Opserver is per-module. For details on each section, see [the configuration doc](docs/Configuration.md)!
 
