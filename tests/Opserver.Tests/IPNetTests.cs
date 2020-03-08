@@ -6,6 +6,7 @@ namespace Opserver.Tests
 {
     public class IPNetTests
     {
+        // TODO: IPV6 tests
         [Theory]
         [InlineData("127.1", true, "127.0.0.1", "127.0.0.1", true)]
         [InlineData("127.0.1", true, "127.0.0.1", "127.0.0.1", true)]
@@ -23,6 +24,15 @@ namespace Opserver.Tests
         [InlineData("1.1.0.0/23", true, "1.1.0.0", "1.1.1.255", false)]
         [InlineData("1.1.1.1/24", true, "1.1.1.0", "1.1.1.255", false)]
         [InlineData("1.1.1.1/31", true, "1.1.1.0", "1.1.1.1", false)]
+
+        [InlineData("::1", true, "::1", "::1", true)]
+        [InlineData("::2", true, "::2", "::2", false)]
+        [InlineData("::ffff:ffff", true, "::ffff:ffff", "::ffff:ffff", false)]
+        [InlineData("::0/32", true, "::0", "0:0:ffff:ffff:ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0/32", true, "0:0:0:0:0:0:0:0", "0:0:ffff:ffff:ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0/64", true, "::0", "::ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0/96", true, "::0", "0:0:0:0:0:0:ffff:ffff", false)]
+        [InlineData("::0/96", true, "0:0:0:0:0:0:0:0", "0:0:0:0:0:0:ffff:ffff", false)]
 
         [InlineData("0.0.0.0/0", true, "0.0.0.0", "255.255.255.255", false)]
         [InlineData("0.0.0.0/32", true, "0.0.0.0", "0.0.0.0", false)]
@@ -57,6 +67,15 @@ namespace Opserver.Tests
         [InlineData("1.1.0.0", 23, true, "1.1.0.0", "1.1.1.255", false)]
         [InlineData("1.1.1.1", 24, true, "1.1.1.0", "1.1.1.255", false)]
         [InlineData("1.1.1.1", 31, true, "1.1.1.0", "1.1.1.1", false)]
+
+        [InlineData("::1", 128, true, "::1", "::1", true)]
+        [InlineData("::2", 128, true, "::2", "::2", false)]
+        [InlineData("::ffff:ffff", 128, true, "::ffff:ffff", "::ffff:ffff", false)]
+        [InlineData("::0", 32, true, "::0", "0:0:ffff:ffff:ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0", 32, true, "0:0:0:0:0:0:0:0", "0:0:ffff:ffff:ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0", 64, true, "::0", "::ffff:ffff:ffff:ffff", false)]
+        [InlineData("::0", 96, true, "::0", "0:0:0:0:0:0:ffff:ffff", false)]
+        [InlineData("::0", 96, true, "0:0:0:0:0:0:0:0", "0:0:0:0:0:0:ffff:ffff", false)]
 
         [InlineData("0.0.0.0", 0, true, "0.0.0.0", "255.255.255.255", false)]
         [InlineData("0.0.0.0", 32, true, "0.0.0.0", "0.0.0.0", false)]
@@ -108,6 +127,34 @@ namespace Opserver.Tests
                 Assert.Equal(lastIp, ipNet.LastAddressInSubnet);
                 Assert.Equal(isPrivate, ipNet.IsPrivate);
             }
+        }
+
+        [Theory]
+        [InlineData("127.0.0.0/16", "127.0.0.1", true)]
+        [InlineData("127.0.0.0/16", "127.1.0.1", false)]
+        [InlineData("::1", "::1", true)]
+        [InlineData("::2", "::2", true)]
+        [InlineData("::1", "::2", false)]
+        // TODO: MOAR CASES!
+        public void ContainsNet(string inputStr, string childInputStr, bool shouldContain)
+        {
+            var ipNet = IPNet.Parse(inputStr);
+            var childNet = IPNet.Parse(childInputStr);
+            Assert.Equal(shouldContain, ipNet.Contains(childNet));
+        }
+
+        [Theory]
+        [InlineData("127.0.0.0/16", "127.0.0.1", true)]
+        [InlineData("127.0.0.0/16", "127.1.0.1", false)]
+        [InlineData("::1", "::1", true)]
+        [InlineData("::2", "::2", true)]
+        [InlineData("::1", "::2", false)]
+        // TODO: MOAR CASES!
+        public void ContainsIP(string inputStr, string childInputStr, bool shouldContain)
+        {
+            var ipNet = IPNet.Parse(inputStr);
+            var childNet = IPAddress.Parse(childInputStr);
+            Assert.Equal(shouldContain, ipNet.Contains(childNet));
         }
     }
 }

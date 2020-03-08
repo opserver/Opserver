@@ -40,6 +40,9 @@ namespace Opserver.Data
         private TinyIPAddress TinyBroadcast => Subnet == null ? TIPAddress : (TIPAddress | ~TSubnet);
 
         public bool IsPrivate => IsPrivateNetwork(this);
+        public bool IsMulticast => IsMulticastNetwork(this);
+        public bool IsLinkLocal => IsLinkLocalNetwork(this);
+        public bool IsDocumentation => IsDocumentationNetwork(this);
 
         public override string ToString() => IPAddress + "/" + CIDR.ToString();
 
@@ -64,6 +67,15 @@ namespace Opserver.Data
 
         public static bool IsPrivateNetwork(IPNet network) =>
             ReservedPrivateRanges.Any(r => r.Contains(network));
+
+        public static bool IsMulticastNetwork(IPNet network) =>
+            ReservedMulticastRanges.Any(r => r.Contains(network));
+
+        public static bool IsLinkLocalNetwork(IPNet network) =>
+            ReservedLinkLocalRanges.Any(r => r.Contains(network));
+
+        public static bool IsDocumentationNetwork(IPNet network) =>
+            ReservedDocumentationRanges.Any(r => r.Contains(network));
 
         public IPNet(IPAddress ip, IPAddress subnet, int? cidr = null)
         {
@@ -90,9 +102,11 @@ namespace Opserver.Data
             }
         }
 
+        private static readonly char[] _forwardSlash = new[] { '/' };
+
         public static IPNet Parse(string ipOrCidr)
         {
-            var parts = ipOrCidr.Split(StringSplits.ForwardSlash);
+            var parts = ipOrCidr.Split(_forwardSlash);
             if (parts.Length == 2)
             {
                 if (int.TryParse(parts[1], out int cidr))
@@ -199,9 +213,43 @@ namespace Opserver.Data
             {
                 Parse("10.0.0.0/8"),
                 Parse("127.0.0.0/8"),
+                Parse("100.64.0.0/10"),
                 Parse("172.16.0.0/12"),
+                Parse("192.0.0.0/24"),
                 Parse("192.168.0.0/16"),
-                Parse("fc00::/7")
+                Parse("198.18.0.0/15"),
+                Parse("::1/128"),
+                Parse("fc00::/7"),
+            };
+
+        /// <summary>
+        /// Multicast IP Ranges reserved for use by ARIN
+        /// </summary>
+        private static readonly List<IPNet> ReservedMulticastRanges = new List<IPNet>
+            {
+                Parse("224.0.0.0/4"),
+                Parse("ff00::/8"),
+            };
+
+        /// <summary>
+        /// Link-local IP Ranges reserved for use by ARIN
+        /// </summary>
+        private static readonly List<IPNet> ReservedLinkLocalRanges = new List<IPNet>
+            {
+                Parse("169.254.0.0/16"),
+                Parse("fe80::/10"),
+            };
+
+
+        /// <summary>
+        /// Documentation IP Ranges reserved for use by ARIN
+        /// </summary>
+        private static readonly List<IPNet> ReservedDocumentationRanges = new List<IPNet>
+            {
+                Parse("192.0.2.0/24"),    // TEST-NET-1
+                Parse("198.51.100.0/24"), // TEST-NET-2
+                Parse("203.0.113.0/24"),  // TEST-NET-3
+                Parse("2001:db8::/32"),
             };
 
         public class IPNetParseException : Exception
