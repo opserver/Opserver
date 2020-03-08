@@ -4,7 +4,6 @@ using System.Linq;
 using System.Web;
 using StackExchange.Exceptional;
 using Opserver.Data.Exceptions;
-using Opserver.Models;
 
 namespace Opserver.Views.Exceptions
 {
