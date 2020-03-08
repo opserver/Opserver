@@ -45,7 +45,10 @@ namespace Opserver.Data
 
         public bool Contains(IPAddress ip)
         {
-            if (AddressFamily != ip.AddressFamily) return false;
+            if (AddressFamily != ip.AddressFamily)
+            {
+                return false;
+            }
             var tip = TinyIPAddress.FromIPAddress(ip);
             return tip.HasValue && Contains(tip.Value);
         }
@@ -67,14 +70,24 @@ namespace Opserver.Data
             IPAddress = ip;
             Subnet = subnet;
             if (subnet != null && !TSubnet.IsValidSubnet)
+            {
                 throw new IPNetParseException("Error: subnet mask '{0}' is not a valid subnet", subnet);
+            }
             CIDR = cidr ?? (subnet == null ? GetBitLength(ip.AddressFamily) : TSubnet.NumberOfSetBits);
         }
 
         public static bool TryParse(string ipOrCidr, out IPNet net)
         {
-            try { net = Parse(ipOrCidr); return true; }
-            catch { net = null; return false; }
+            try
+            {
+                net = Parse(ipOrCidr);
+                return true;
+            }
+            catch
+            {
+                net = null;
+                return false;
+            }
         }
 
         public static IPNet Parse(string ipOrCidr)
@@ -97,8 +110,16 @@ namespace Opserver.Data
 
         public static bool TryParse(string ip, int cidr, out IPNet net)
         {
-            try { net = Parse(ip, cidr); return true; }
-            catch { net = null; return false; }
+            try
+            {
+                net = Parse(ip, cidr);
+                return true;
+            }
+            catch
+            {
+                net = null;
+                return false;
+            }
         }
 
         public static IPNet Parse(string ip, int cidr)
@@ -114,8 +135,16 @@ namespace Opserver.Data
 
         public static bool TryParse(string ip, string subnet, out IPNet net)
         {
-            try { net = Parse(ip, subnet); return true; }
-            catch { net = null; return false; }
+            try
+            {
+                net = Parse(ip, subnet);
+                return true;
+            }
+            catch
+            {
+                net = null;
+                return false;
+            }
         }
 
         public static IPNet Parse(string ip, string subnet)
@@ -125,7 +154,9 @@ namespace Opserver.Data
                 if (IPAddress.TryParse(subnet, out var subnetAddr))
                 {
                     if (!TinyIPAddress.FromIPAddress(subnetAddr).Value.IsValidSubnet)
+                    {
                         throw new IPNetParseException("Error parsing subnet mask Address from IP: '" + subnet + "' is not a valid subnet");
+                    }
                     return new IPNet(ipAddr, subnetAddr);
                 }
                 throw new IPNetParseException("Error parsing subnet mask from IP: '" + subnet + "'");
@@ -141,7 +172,7 @@ namespace Opserver.Data
             {
                 AddressFamily.InterNetwork => 32,
                 AddressFamily.InterNetworkV6 => 128,
-                _ => throw new ArgumentOutOfRangeException(nameof(family), "You're probably from the future, they added another more IPs, fix me."),
+                _ => throw new ArgumentOutOfRangeException(nameof(family), "You're probably from the future, they added more IPs, fix me."),
             };
 
         // This is a much faster version thanks to Marc Gravell
@@ -174,9 +205,9 @@ namespace Opserver.Data
 
         public class IPNetParseException : Exception
         {
-            public IPNetParseException(string msg, params object[] format) : base(string.Format(msg, format)) { }
             public IPNetParseException() { }
             public IPNetParseException(string message) : base(message) { }
+            public IPNetParseException(string message, params object[] format) : base(string.Format(message, format)) { }
             public IPNetParseException(string message, Exception innerException) : base(message, innerException) { }
         }
 
@@ -226,32 +257,32 @@ namespace Opserver.Data
                 if (IPv4Address.HasValue)
                 {
                     return new IPAddress(new[] {
-					(byte)(IPv4Address.Value >> 24),
-					(byte)(IPv4Address.Value >> 16),
-					(byte)(IPv4Address.Value >> 8),
-					(byte)(IPv4Address.Value)
-				});
+                        (byte)(IPv4Address.Value >> 24),
+                        (byte)(IPv4Address.Value >> 16),
+                        (byte)(IPv4Address.Value >> 8),
+                        (byte)(IPv4Address.Value)
+                    });
                 }
                 if (FirstV6Leg.HasValue && LastV6Leg.HasValue)
                 {
                     return new IPAddress(new[] {
-					(byte)(FirstV6Leg.Value >> 56),
-					(byte)(FirstV6Leg.Value >> 48),
-					(byte)(FirstV6Leg.Value >> 40),
-					(byte)(FirstV6Leg.Value >> 32),
-					(byte)(FirstV6Leg.Value >> 24),
-					(byte)(FirstV6Leg.Value >> 16),
-					(byte)(FirstV6Leg.Value >> 8),
-					(byte)(FirstV6Leg.Value),
-					(byte)(LastV6Leg.Value >> 56),
-					(byte)(LastV6Leg.Value >> 48),
-					(byte)(LastV6Leg.Value >> 40),
-					(byte)(LastV6Leg.Value >> 32),
-					(byte)(LastV6Leg.Value >> 24),
-					(byte)(LastV6Leg.Value >> 16),
-					(byte)(LastV6Leg.Value >> 8),
-					(byte)(LastV6Leg.Value)
-				});
+                        (byte)(FirstV6Leg.Value >> 56),
+                        (byte)(FirstV6Leg.Value >> 48),
+                        (byte)(FirstV6Leg.Value >> 40),
+                        (byte)(FirstV6Leg.Value >> 32),
+                        (byte)(FirstV6Leg.Value >> 24),
+                        (byte)(FirstV6Leg.Value >> 16),
+                        (byte)(FirstV6Leg.Value >> 8),
+                        (byte)(FirstV6Leg.Value),
+                        (byte)(LastV6Leg.Value >> 56),
+                        (byte)(LastV6Leg.Value >> 48),
+                        (byte)(LastV6Leg.Value >> 40),
+                        (byte)(LastV6Leg.Value >> 32),
+                        (byte)(LastV6Leg.Value >> 24),
+                        (byte)(LastV6Leg.Value >> 16),
+                        (byte)(LastV6Leg.Value >> 8),
+                        (byte)(LastV6Leg.Value)
+                    });
                 }
                 return null;
             }
@@ -303,8 +334,14 @@ namespace Opserver.Data
             {
                 get
                 {
-                    if (IPv4Address.HasValue) return NumberOfSetBitsImpl(IPv4Address.Value);
-                    if (FirstV6Leg.HasValue && LastV6Leg.HasValue) return NumberOfSetBitsImpl(FirstV6Leg.Value) + NumberOfSetBitsImpl(LastV6Leg.Value);
+                    if (IPv4Address.HasValue)
+                    {
+                        return NumberOfSetBitsImpl(IPv4Address.Value);
+                    }
+                    if (FirstV6Leg.HasValue && LastV6Leg.HasValue)
+                    {
+                        return NumberOfSetBitsImpl(FirstV6Leg.Value) + NumberOfSetBitsImpl(LastV6Leg.Value);
+                    }
                     return 0;
                 }
             }
@@ -337,7 +374,10 @@ namespace Opserver.Data
             {
                 get
                 {
-                    if (IPv4Address.HasValue) return IsValidSubnetImpl(IPv4Address.Value);
+                    if (IPv4Address.HasValue)
+                    {
+                        return IsValidSubnetImpl(IPv4Address.Value);
+                    }
                     if (FirstV6Leg.HasValue && LastV6Leg.HasValue)
                     {
                         return (FirstV6Leg == ulong.MaxValue && IsValidSubnetImpl(LastV6Leg.Value))
@@ -352,8 +392,14 @@ namespace Opserver.Data
                 bool inZeros = false;
                 for (var j = 31; j >= 0; j--)
                 {
-                    if (((i >> j) & 1) != 1) inZeros = true;
-                    else if (inZeros) return false;
+                    if (((i >> j) & 1) != 1)
+                    {
+                        inZeros = true;
+                    }
+                    else if (inZeros)
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -363,8 +409,14 @@ namespace Opserver.Data
                 bool inZeros = false;
                 for (var j = 63; j >= 0; j--)
                 {
-                    if (((l >> j) & 1) != 1) inZeros = true;
-                    else if (inZeros) return false;
+                    if (((l >> j) & 1) != 1)
+                    {
+                        inZeros = true;
+                    }
+                    else if (inZeros)
+                    {
+                        return false;
+                    }
                 }
                 return true;
             }
@@ -404,7 +456,10 @@ namespace Opserver.Data
 
             public override int GetHashCode()
             {
-                if (IPv4Address.HasValue) return IPv4Address.GetHashCode();
+                if (IPv4Address.HasValue)
+                {
+                    return IPv4Address.GetHashCode();
+                }
                 int hash = 13;
                 hash = (hash * -47) + FirstV6Leg.GetHashCode();
                 hash = (hash * -47) + LastV6Leg.GetHashCode();
@@ -418,7 +473,10 @@ namespace Opserver.Data
 
             public override bool Equals(object obj)
             {
-                if (obj is null) return false;
+                if (obj is null)
+                {
+                    return false;
+                }
                 return obj is TinyIPAddress tinyIPAddress && Equals(tinyIPAddress);
             }
 
@@ -427,9 +485,14 @@ namespace Opserver.Data
             private static int Compare(TinyIPAddress a, TinyIPAddress b)
             {
                 if (a.IPv4Address.HasValue && b.IPv4Address.HasValue)
+                {
                     return a.IPv4Address.Value.CompareTo(b.IPv4Address.Value);
+                }
                 var flc = a.FirstV6Leg.Value.CompareTo(b.FirstV6Leg.Value);
-                if (flc != 0) return flc;
+                if (flc != 0)
+                {
+                    return flc;
+                }
                 return a.LastV6Leg.Value.CompareTo(b.LastV6Leg.Value);
             }
         }
