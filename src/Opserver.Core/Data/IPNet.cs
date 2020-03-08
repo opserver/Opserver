@@ -198,6 +198,7 @@ namespace Opserver.Data
         private static readonly List<IPNet> ReservedPrivateRanges = new List<IPNet>
             {
                 Parse("10.0.0.0/8"),
+                Parse("127.0.0.0/8"),
                 Parse("172.16.0.0/12"),
                 Parse("192.168.0.0/16"),
                 Parse("fc00::/7")
