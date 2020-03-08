@@ -12,7 +12,7 @@ namespace Opserver.Security
         public override bool IsConfigured => false;
         public UnconfiguredProvider(SecuritySettings settings) : base(settings) { }
 
-        public override bool InGroups(User user, string groupNames) => false;
+        public override bool InGroups(User user, string[] groupNames) => false;
         public override bool ValidateUser(string userName, string password) => false;
     }
 }

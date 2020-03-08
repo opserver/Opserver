@@ -34,17 +34,14 @@ namespace Opserver.Security
             return RunCommand(pc => pc.ValidateCredentials(userName, password));
         }
 
-        public override bool InGroups(User user, string groupNames)
+        public override bool InGroups(User user, string[] groupNames)
         {
-            if (groupNames.IsNullOrEmpty()) return false;
-
-            var groups = groupNames.Split(StringSplits.Comma_SemiColon);
             if (groupNames.Length == 0) return false;
 
             // TODO: Move this elsewhere
-            if (groups.Any(g => g == "*")) return true;
+            if (groupNames.Any(g => g == "*")) return true;
 
-            return groups.Any(g => GetGroupMembers(g)?.Contains(user.AccountName, StringComparer.InvariantCultureIgnoreCase) == true);
+            return groupNames.Any(g => GetGroupMembers(g)?.Contains(user.AccountName, StringComparer.InvariantCultureIgnoreCase) == true);
         }
 
         public override void PurgeCache()
