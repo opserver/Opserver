@@ -69,14 +69,14 @@ Select cc.object_name ObjectName,
        cc.counter_name CounterName,
        cc.instance_name InstanceName,
        cc.cntr_value CurrentValue,
-       (Case cc.cntr_type 
+       CAST((Case cc.cntr_type 
         When 65792 Then cc.cntr_value -- Count
-        When 537003264 Then IsNull(Cast(cc.cntr_value as Money) / NullIf(cbc.cntr_value, 0), 0) -- Ratio
+        When 537003264 Then IsNull(cc.cntr_value * 1.0 / NullIf(cbc.cntr_value, 0), 0) -- Ratio
         When 272696576 Then cc.cntr_value - pc.cntr_value -- Per Second
-        When 1073874176 Then IsNull(Cast(cc.cntr_value - pc.cntr_value as Money) / NullIf(cbc.cntr_value - pbc.cntr_value, 0), 0) -- Avg
+        When 1073874176 Then IsNull((cc.cntr_value - pc.cntr_value) * 1.0 / NullIf(cbc.cntr_value - pbc.cntr_value, 0), 0) -- Avg
         When 1073939712 Then cc.cntr_value - pc.cntr_value -- Base
         Else cc.cntr_value
-        End) CalculatedValue,
+        End) as decimal(25,2)) CalculatedValue,
        cc.cntr_type Type
   From @CCounters cc
        Left Join @CCounters cbc
