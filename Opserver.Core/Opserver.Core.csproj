@@ -13,7 +13,7 @@
     <PackageReference Include="Jil" Version="2.16.0" />
     <PackageReference Include="MiniProfiler.Shared" Version="4.0.138" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.0.0-rc2.29" />
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.513" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) == 'net461'">
