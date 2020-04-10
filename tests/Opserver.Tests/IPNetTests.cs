@@ -1,11 +1,15 @@
 ﻿using System.Net;
 using Opserver.Data;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Opserver.Tests
 {
     public class IPNetTests
     {
+        private ITestOutputHelper log { get; }
+        public IPNetTests(ITestOutputHelper output) => log = output;
+
         // TODO: IPV6 tests
         [Theory]
         [InlineData("127.1", true, "127.0.0.1", "127.0.0.1", true)]
@@ -47,6 +51,7 @@ namespace Opserver.Tests
             {
                 var firstIp = IPAddress.Parse(firstIpString);
                 var lastIp = IPAddress.Parse(lastIpString);
+                log.WriteLine("Subnet: " + ipNet.Subnet?.ToString());
                 Assert.Equal(firstIp, ipNet.FirstAddressInSubnet);
                 Assert.Equal(lastIp, ipNet.LastAddressInSubnet);
                 Assert.Equal(isPrivate, ipNet.IsPrivate);
@@ -82,7 +87,7 @@ namespace Opserver.Tests
         [InlineData("localhost", 32, false, null, null, false)]
         [InlineData("", 32, false, null, null, false)]
         [InlineData(null, 32, false, null, null, false)]
-        public void TryParseCidrArg(string input, int cidr, bool success, string firstIpString, string lastIpString, bool isPrivate)
+        public void TryParseCidrArg(string input, byte cidr, bool success, string firstIpString, string lastIpString, bool isPrivate)
         {
             var parsed = IPNet.TryParse(input, cidr, out var ipNet);
             Assert.Equal(success, parsed);

@@ -23,10 +23,10 @@ namespace Opserver.Data.SQL
             // and ClusterNetwork bits match here ()
 
             private IPNet _ipNet;
-            public IPNet IPNet => _ipNet ??= IPNet.Parse(IPAddress, NetworkSubnetPrefixLength);
+            public IPNet IPNet => _ipNet ??= IPNet.Parse(IPAddress, (byte)NetworkSubnetPrefixLength);
 
             private IPNet _networkIPNet;
-            public IPNet NetworkIPNet => _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength);
+            public IPNet NetworkIPNet => _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, (byte)NetworkSubnetPrefixLength);
 
             public MonitorStatus MonitorStatus =>
                 State switch

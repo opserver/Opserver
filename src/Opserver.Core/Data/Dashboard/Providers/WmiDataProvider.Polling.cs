@@ -285,7 +285,7 @@ SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
 
                             for (var j = 0; j < (ips?.Length).GetValueOrDefault(0); j++)
                             {
-                                if (int.TryParse(subnets[j], out int cidr) && IPNet.TryParse(ips[j], cidr, out var net))
+                                if (byte.TryParse(subnets[j], out var cidr) && IPNet.TryParse(ips[j], cidr, out var net))
                                 {
                                     i.IPs.Add(net);
                                 }
