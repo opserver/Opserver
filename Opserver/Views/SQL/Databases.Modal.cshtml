@@ -29,6 +29,7 @@
         @RenderLink(DatabasesModel.Views.Storage, "Storage", "hdd-o")
         @RenderLink(DatabasesModel.Views.UnusedIndexes, "Unused Indexes", "thumbs-o-down", !Model.Instance.Supports<SQLInstance.DatabaseIndex>())
         @RenderLink(DatabasesModel.Views.MissingIndexes, "Missing Indexes", "question-circle-o", !Model.Instance.Supports<SQLInstance.MissingIndex>())
+        @RenderLink(DatabasesModel.Views.QueryStore, "Query Store", "question-circle-o") @*to do determine if qs is on for instance*@
         @*@RenderLink(DatabasesModel.Views.BlitzIndex, "Blitz Index", "bolt", true)*@
     </div>
     <div class="col-md-10 js-database-modal-right">

@@ -147,7 +147,8 @@
 </div>
 @helper SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
 {
-    <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)</a></li>
+<div>++++++</div>
+    <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)++++++++++++++</a></li>
 }
 @if (Model.StatusTypes.Count() > 1)
 { // only show nav if there's actual nav - save the vertical space on stats-only nodes

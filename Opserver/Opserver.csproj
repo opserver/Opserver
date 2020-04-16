@@ -136,6 +136,8 @@
     <None Include="Config\HAProxySettings.example.json" />
     <None Include="Config\RedisSettings.example.json" />
     <Content Include="Config\SecuritySettings.config.example" />
+    <None Include="Config\SecuritySettings.config" />
+    <Content Include="Config\SQLSettings.json" />
     <None Include="Config\SQLSettings.example.json" />
     <Content Include="Content\img\logo\logo.eps" />
     <None Include="Config\JiraSettings.example.json" />
@@ -647,6 +649,9 @@
     </Content>
     <Content Include="Views\SQL\AllJobs.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.UnusedIndexes.cshtml">
+      <DependentUpon>Databases.Modal.cshtml</DependentUpon>
+    </Content>
+    <Content Include="Views\SQL\Databases.Modal.QueryStore.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
     <Content Include="Views\Redis\Server.Actions.cshtml" />
