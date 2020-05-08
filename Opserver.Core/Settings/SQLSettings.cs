@@ -15,7 +15,7 @@ namespace StackExchange.Opserver
         /// How many seconds before polling a node or cluster for status again
         /// If specified at the node or cluster level, that setting overrides
         /// </summary>
-        public int RefreshIntervalSeconds { get; } = 60;
+        public int RefreshIntervalSeconds { get; set; } = 60;
 
         /// <summary>
         /// The default connection string to use when connecting to servers, $ServerName$ will be parameterized
