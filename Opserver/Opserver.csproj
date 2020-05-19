@@ -645,6 +645,7 @@
     <Content Include="Views\SQL\Databases.Modal.Partitions.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>
     </Content>
+    <Content Include="Views\Login\AutoLogin.cshtml" />
     <Content Include="Views\SQL\AllJobs.cshtml" />
     <Content Include="Views\SQL\Databases.Modal.UnusedIndexes.cshtml">
       <DependentUpon>Databases.Modal.cshtml</DependentUpon>

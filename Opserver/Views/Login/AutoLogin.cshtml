@@ -1,0 +1,11 @@
+﻿@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<body onload="document.autoLogin.submit()">
+    <form action="~/login" method="POST" name="autoLogin">
+        <input type="hidden" name="url" value="@Request.QueryString["ReturnUrl"]" />
+    </form>
+</body>
+</html>
