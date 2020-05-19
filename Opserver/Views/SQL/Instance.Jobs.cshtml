@@ -62,9 +62,16 @@ Last Run Message: @j.LastRunMessage">
                         <td>@(j.LastStopDate?.ToRelativeTimeSpan())</td>
                         <td>@(j.LastRunDuration.HasValue ? j.LastRunDuration.Value.ToTimeStringMini() : "")</td>
                     }
+                    else if (j.LastStartDate.HasValue && !j.LastStopDate.HasValue)
+                    {
+                        <td>@j.LastRunMonitorStatus.IconSpan() @j.LastRunMonitorStatus.Span("Server Stopped whilst Running") (@lastInitiator)</td>
+                        <td>@(j.LastStartDate?.ToRelativeTimeSpan())</td>
+                        <td></td>
+                        <td></td>
+                    }
                     else
                     {
-                        <td colspan="4" class="text-muted">no run history found</td>   
+                        <td colspan="4" class="text-muted">no run history found</td>
                     }
                     <td class="@(j.IsEnabled ? "" : "text-warning")">@(j.IsEnabled ? "Yes" : "No")</td>
                     @if (Current.IsInRole(Roles.SQLAdmin))

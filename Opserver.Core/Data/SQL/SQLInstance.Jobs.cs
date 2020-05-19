@@ -84,7 +84,13 @@ namespace StackExchange.Opserver.Data.SQL
             {
                 get
                 {
-                    if (!LastRunStatus.HasValue) return MonitorStatus.Unknown;
+                    // If there isn't a last run status, it's unknown unless it isn't running, has
+                    //  a last start date and no last stop date, in which case SQL Server was stopped
+                    //  whilst the job was running.
+                    if (!LastRunStatus.HasValue)
+                        return !IsRunning && LastStartDate.HasValue && !LastStopDate.HasValue
+                            ? MonitorStatus.Warning
+                            : MonitorStatus.Unknown;
                     switch (LastRunStatus.Value)
                     {
                         case JobStatuses.Succeeded:
@@ -131,8 +137,10 @@ Select j.job_id JobId,
        j.date_modified DateModified,
        j.version_number Version,
        Cast(j.enabled as bit) IsEnabled,
-       Cast(Case When ja.run_requested_date Is Not Null and ja.stop_execution_date Is Null Then 1
-                 Else 0 
+       Cast(Case When ja.run_requested_date Is Not Null 
+				 and ja.stop_execution_date Is Null 
+				 AND ja.session_id = (SELECT TOP 1 session_id FROM msdb.dbo.syssessions ORDER BY agent_start_date DESC) Then 1
+                Else 0 
             End as Bit) IsRunning,
        c.name as Category,
        jh.run_status LastRunStatus,
@@ -140,9 +148,11 @@ Select j.job_id JobId,
        Cast(ja.run_requested_source as int) LastRunRequestedSource,
        ja.run_requested_date LastRunRequestedDate,
        Coalesce(ja.start_execution_date, msdb.dbo.agent_datetime(jh.run_date, jh.run_time)) LastStartDate,
-       (Case When ja.run_requested_date Is Not Null and ja.stop_execution_date Is Null 
-             Then DateDiff(Second, ja.run_requested_date, GETDATE())
-             Else jh.run_duration % 100 + ROUND((jh.run_duration % 10000)/100,0,0)*60 + ROUND((jh.run_duration%1000000)/10000,0,0)*3600
+       (Case When ja.run_requested_date Is Not Null 
+			 and ja.stop_execution_date Is Null 
+			 AND ja.session_id = (SELECT TOP 1 session_id FROM msdb.dbo.syssessions ORDER BY agent_start_date DESC)
+            Then DateDiff(Second, ja.run_requested_date, GETDATE())
+            Else jh.run_duration % 100 + ROUND((jh.run_duration % 10000)/100,0,0)*60 + ROUND((jh.run_duration%1000000)/10000,0,0)*3600
         End) LastRunDurationSeconds,
        ja.stop_execution_date LastStopDate,
        ja.job_history_id LastRunInstanceId,
