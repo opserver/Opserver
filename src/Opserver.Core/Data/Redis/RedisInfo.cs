@@ -36,7 +36,7 @@ namespace Opserver.Data.Redis
         {
             Unknown = 0,
             Master = 1,
-            Slave = 2
+            Replica = 2
         }
 
         public ReplicationInfo Replication { get; internal set; } = new ReplicationInfo();
@@ -46,7 +46,8 @@ namespace Opserver.Data.Redis
                 Role switch
                 {
                     "master" => RedisInstanceRole.Master,
-                    "slave" => RedisInstanceRole.Slave,
+                    "replica" => RedisInstanceRole.Replica,
+                    "slave" => RedisInstanceRole.Replica,
                     _ => RedisInstanceRole.Unknown,
                 };
 
@@ -67,16 +68,16 @@ namespace Opserver.Data.Redis
             [RedisInfoProperty("master_sync_last_io_seconds_ago")]
             public int MasterSyncLastIOSecondsAgo { get; internal set; }
             [RedisInfoProperty("min_slaves_good_slaves")]
-            public int MinSlavesGoodSlaves { get; internal set; }
+            public int MinReplicasGoodReplicas { get; internal set; }
             [RedisInfoProperty("slave_priority")]
-            public string SlavePriority { get; internal set; }
+            public string ReplicaPriority { get; internal set; }
             [RedisInfoProperty("connected_slaves")]
-            public int ConnectedSlaves { get; internal set; }
+            public int ConnectedReplicas { get; internal set; }
 
             [RedisInfoProperty("master_repl_offset")]
             public long MasterReplicationOffset { get; internal set; }
             [RedisInfoProperty("slave_repl_offset")]
-            public long SlaveReplicationOffset { get; internal set; }
+            public long ReplicaReplicationOffset { get; internal set; }
 
             [RedisInfoProperty("repl_backlog_active")]
             public bool BacklogActive { get; internal set; }
@@ -87,17 +88,17 @@ namespace Opserver.Data.Redis
             [RedisInfoProperty("repl_backlog_histlen")]
             public long BacklogHistoryLength { get; internal set; }
 
-            public readonly List<RedisSlaveInfo> SlaveConnections = new List<RedisSlaveInfo>();
-            private static readonly Regex _slaveRegex = new Regex(@"slave\d+", RegexOptions.Compiled);
+            public readonly List<RedisReplicaInfo> ReplicaConnections = new List<RedisReplicaInfo>();
+            private static readonly Regex _replicaRegex = new Regex(@"slave\d+", RegexOptions.Compiled);
 
             public override void MapUnrecognizedLine(string key, string value)
             {
-                if (_slaveRegex.IsMatch(key) && value.HasValue())
+                if (_replicaRegex.IsMatch(key) && value.HasValue())
                 {
                     var parts = value.Split(StringSplits.Comma);
                     if (parts.Length == 3)
                     {
-                        SlaveConnections.Add(new RedisSlaveInfo
+                        ReplicaConnections.Add(new RedisReplicaInfo
                         {
                             Index = int.Parse(key.Replace("slave", "")),
                             IP = parts[0],
@@ -110,7 +111,7 @@ namespace Opserver.Data.Redis
                     {
                         try
                         {
-                            var si = new RedisSlaveInfo { Index = int.Parse(key.Replace("slave", "")) };
+                            var si = new RedisReplicaInfo { Index = int.Parse(key.Replace("slave", "")) };
                             foreach (var p in parts)
                             {
                                 var pair = p.Split(StringSplits.Equal);
@@ -133,18 +134,18 @@ namespace Opserver.Data.Redis
                                         break;
                                 }
                             }
-                            SlaveConnections.Add(si);
+                            ReplicaConnections.Add(si);
                         }
                         catch (Exception e)
                         {
-                            new Exception("Redis error: couldn't parse slave string: " + value, e).Log();
+                            new Exception("Redis error: couldn't parse replica string: " + value, e).Log();
                         }
                     }
                 }
             }
         }
 
-        public class RedisSlaveInfo
+        public class RedisReplicaInfo
         {
             public int Index { get; internal set; }
             public string IP { get; internal set; }

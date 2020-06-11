@@ -83,16 +83,16 @@ namespace Opserver.Data.Redis
                 yield return MonitorStatus.Unknown;
                 yield break;
             }
-            if (IsSlave && Replication.MasterLinkStatus != "up") yield return MonitorStatus.Warning;
-            if (IsMaster && Replication.SlaveConnections.Any(s => s.Status != "online")) yield return MonitorStatus.Warning;
+            if (IsReplica && Replication.MasterLinkStatus != "up") yield return MonitorStatus.Warning;
+            if (IsMaster && Replication.ReplicaConnections.Any(s => s.Status != "online")) yield return MonitorStatus.Warning;
         }
 
         protected override string GetMonitorStatusReason()
         {
             if (Role == RedisInfo.RedisInstanceRole.Unknown) return "Unknown role";
             if (Replication == null) return "Replication Unknown";
-            if (IsSlave && Replication.MasterLinkStatus != "up") return "Master link down";
-            if (IsMaster && Replication.SlaveConnections.Any(s => s.Status != "online")) return "Slave offline";
+            if (IsReplica && Replication.MasterLinkStatus != "up") return "Master link down";
+            if (IsMaster && Replication.ReplicaConnections.Any(s => s.Status != "online")) return "Replica offline";
             return null;
         }
 
@@ -158,8 +158,8 @@ namespace Opserver.Data.Redis
         {
             if (IsMaster && !runIfMaster)
             {
-                // no slaves, and a master - boom
-                if (SlaveCount == 0)
+                // no replicas, and a master - boom
+                if (ReplicaCount == 0)
                 {
                     return new RedisMemoryAnalysis(new RedisAnalyzer(this), ConnectionInfo, database)
                     {
@@ -167,8 +167,8 @@ namespace Opserver.Data.Redis
                     };
                 }
 
-                // Go to the first slave, automagically
-                return new RedisAnalyzer(SlaveInstances[0]).AnalyzeDatabaseMemory(database);
+                // Go to the first replica, automagically
+                return new RedisAnalyzer(ReplicaInstances[0]).AnalyzeDatabaseMemory(database);
             }
 
             return new RedisAnalyzer(this).AnalyzeDatabaseMemory(database);

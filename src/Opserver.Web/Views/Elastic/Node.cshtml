@@ -34,7 +34,7 @@ Transport: @n.Stats?.TransportAddress">
                         <label>Version</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">
-                        @(c.State?.Data?.MasterNode == n.GUID ? "Master" : "Slave")
+                        @(c.State?.Data?.MasterNode == n.GUID ? "Master" : "Replica")
                         <label>Role</label>
                     </div>
                     <div class="value-block col-md-3 col-sm-6">

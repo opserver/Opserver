@@ -949,7 +949,7 @@ Status.Redis = (function () {
                 newMaster = $(this).data('new-master');
             e.preventDefault();
             runAction(this, {
-                confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
+                confirmMessage: 'Are you sure you want make ' + node + ' a replica of ' + newMaster + '?',
                 data: {
                     newMaster: newMaster
                 }
