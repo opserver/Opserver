@@ -30,7 +30,7 @@
                 var server = Dashboard.GetServerName(ip);
                 <tr title="@c.Raw">
                     <td>
-                        @if ((c.Flags & (ClientFlags.Slave | ClientFlags.SlaveMonitor | ClientFlags.Master)) == 0)
+                        @if ((c.Flags & (ClientFlags.Replica | ClientFlags.ReplicaMonitor | ClientFlags.Master)) == 0)
                         {
                             <a class="hover-pulsate js-kill-client" href="#" data-addr="@c.Address"><i class="fa fa-times text-danger" aria-hidden="true"></i></a>
                         }

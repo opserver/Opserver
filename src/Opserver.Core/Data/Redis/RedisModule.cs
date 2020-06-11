@@ -136,7 +136,7 @@ namespace Opserver.Data.Redis
             return null;
         }
 
-        public RedisInstance GetInstance(RedisSlaveInfo info) => GetInstance(info.Port, info.IPAddress);
+        public RedisInstance GetInstance(RedisReplicaInfo info) => GetInstance(info.Port, info.IPAddress);
 
         public List<RedisInstance> GetAllInstances(string node)
         {

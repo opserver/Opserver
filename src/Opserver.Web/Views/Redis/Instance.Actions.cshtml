@@ -1,8 +1,8 @@
 ﻿@model RedisInstance
 @{
     var i = Model;
-    var allSlaveOptions = i.RecommendedMasterTargets.OrderBy(s => s.SlaveCount).ThenBy(s => s.Host.HostName);
-    var slaveOptions = allSlaveOptions.GroupBy(s => s.Name).ToList();
+    var allReplicaOptions = i.RecommendedMasterTargets.OrderBy(s => s.ReplicaCount).ThenBy(s => s.Host.HostName);
+    var replicaOptions = allReplicaOptions.GroupBy(s => s.Name).ToList();
 }
 @functions
 {
@@ -28,14 +28,14 @@
                 {
                     <ul class="proposed">@{RenderTolopogy(Model);}</ul>
                 }
-                @if (i.SlaveConnections?.Any() ?? false)
+                @if (i.ReplicaConnections?.Any() ?? false)
                 {
                     <ul>
-                        @foreach (var sc in i.SlaveConnections)
+                        @foreach (var sc in i.ReplicaConnections)
                         {
-                            var slave = Module.GetInstance(sc);
-                            if (target != null && slave.HostAndPort == Model.HostAndPort) { continue; }
-                            RenderTolopogy(slave, target);
+                            var replica = Module.GetInstance(sc);
+                            if (target != null && replica.HostAndPort == Model.HostAndPort) { continue; }
+                            RenderTolopogy(replica, target);
                         }
                     </ul>
                 }
@@ -51,19 +51,19 @@
     <div class="row small">
         <div class="col-md-6">
             <div class="panel panel-default">
-                <div class="panel-heading">Topology - @i.RoleDescription with @i.SlaveCount.Pluralize("slave")</div>
+                <div class="panel-heading">Topology - @i.RoleDescription with @i.ReplicaCount.Pluralize("replica")</div>
                 <div class="panel-body">
                     <ul class="ul-tree">
                         @RenderTolopogy(i.TopMaster)
                     </ul>
                     <h6 class="page-header">Actions</h6>
                     <div>
-                        @if (i.IsSlave)
+                        @if (i.IsReplica)
                         {
                             <div class="form-group form-group-sm">
-                                <label class="control-label label-inline">Promote to Master <span class="text-muted">(this will deslave the instance)</span></label>
+                                <label class="control-label label-inline">Promote to Master <span class="text-muted">(this will dereplicate the instance)</span></label>
                                 <button class="btn btn-success btn-xs pull-right js-instance-action" data-action="make-master-promote" data-confirm="Are you sure you want to promote @i.HostAndPort and set it to the tiebreaker?">Promote</button>
-                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="Are you sure you want to deslave @i.HostAndPort and make it a standalone master?">Deslave</button>
+                                <button class="btn btn-primary btn-xs pull-right js-instance-action" data-action="make-master" data-confirm="Are you sure you want to dereplicate @i.HostAndPort and make it a standalone master?">Rereplicate</button>
                             </div>
                         }
                         @if (i.IsMaster)
@@ -86,19 +86,19 @@
                                 </div>
                             </div>
                         }
-                        @if (slaveOptions.Any())
+                        @if (replicaOptions.Any())
                         {
-                            var optimalSlave = slaveOptions.Where(s => s.Key == i.Name)
+                            var optimalReplica = replicaOptions.Where(s => s.Key == i.Name)
                                                            .SelectMany(s => s)
-                                                           .OrderByDescending(s => s.SlaveCount == 0)
-                                                           .ThenByDescending(s => s.IsSlave)
+                                                           .OrderByDescending(s => s.ReplicaCount == 0)
+                                                           .ThenByDescending(s => s.IsReplica)
                                                            .FirstOrDefault();
                             <div class="form-group form-group-sm">
                                 <label class="control-label">Set Replication Topology</label>
                                 <div class="list-group-sm">
-                                    @foreach (var so in allSlaveOptions)
+                                    @foreach (var so in allReplicaOptions)
                                     {
-                                        <a href="#" class="list-group-item js-redis-new-master" data-action="slave-to" data-new-master="@so.HostAndPort">
+                                        <a href="#" class="list-group-item js-redis-new-master" data-action="replicate-from" data-new-master="@so.HostAndPort">
                                             <ul class="ul-tree">
                                                 @RenderTolopogy(so.TopMaster, so)
                                             </ul>
@@ -107,19 +107,19 @@
                                 </div>
                                 @*<div class="input-group">
                                     <select name="newMaster" class="form-control js-redis-role-new-master">
-                                        <option value="" disabled selected hidden>Choose a master to slave to...</option>
-                                        @foreach (var g in slaveOptions)
+                                        <option value="" disabled selected hidden>Choose a master to replica from...</option>
+                                        @foreach (var g in replicaOptions)
                                         {
                                             <optgroup label="@g.Key">
                                                 @foreach (var s in g)
                                                 {
-                                                    <option value="@s.HostAndPort" selected="@(s == optimalSlave ? "selected" : null )">@s.HostAndPort</option>
+                                                    <option value="@s.HostAndPort" selected="@(s == optimalReplica ? "selected" : null )">@s.HostAndPort</option>
                                                 }
                                             </optgroup>
                                         }
                                     </select>
                                     <span class="input-group-btn">
-                                        <button class="btn btn-sm btn-primary js-redis-role-slave" data-action="slave-to" disabled="@(optimalSlave != null ? null : "disabled")">Slave</button>
+                                        <button class="btn btn-sm btn-primary js-redis-role-replica" data-action="replicate-from" disabled="@(optimalReplica != null ? null : "disabled")">Replicate</button>
                                     </span>
                                 </div>*@
                             </div>

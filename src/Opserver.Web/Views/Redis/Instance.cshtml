@@ -50,9 +50,9 @@
                 <div class="panel-body small">
                     <div class="value-block col-md-4">
                         @i.RoleDescription
-                        @*@if (i.IsSlave)
+                        @*@if (i.IsReplica)
                         {
-                            var offset = i.Master.Replication.MasterReplicationOffset - i.Replication.SlaveReplicationOffset;
+                            var offset = i.Master.Replication.MasterReplicationOffset - i.Replication.ReplicaReplicationOffset;
                             if (offset > 0)
                             {
                                 <span class="text-muted">(@offset.ToSize() behind)</span>
@@ -61,10 +61,10 @@
                         <label>Role</label>
                     </div>
                     <div class="value-block col-md-4">
-                        @i.SlaveCount.ToComma()
-                        <label>@i.SlaveCount.Pluralize("Slave", includeNumber: false)</label>
+                        @i.ReplicaCount.ToComma()
+                        <label>@i.ReplicaCount.Pluralize("Replica", includeNumber: false)</label>
                     </div>
-                    @if (i.Role == RedisInfo.RedisInstanceRole.Slave)
+                    @if (i.Role == RedisInfo.RedisInstanceRole.Replica)
                     {
                         <div class="value-block col-md-4">
                             @if (master != null)
@@ -102,9 +102,9 @@
                     }
 
                     <div>
-                        @if (master == null && i.SlaveCount == 0)
+                        @if (master == null && i.ReplicaCount == 0)
                         {
-                            <span class="text-muted">No slaves or masters</span>
+                            <span class="text-muted">No replicas or masters</span>
                         }
                         else
                         {
@@ -117,14 +117,14 @@
                             <div class="redis-instance">
                                 @i.IconSpan() <a href="?node=@i.HostAndPort">@i.HostAndPort</a> <span class="text-muted">(Current)</span>
                             </div>
-                            var slaves = i.SlaveInstances.Where(s => s != null);
-                            if (slaves.Any())
+                            var replicas = i.ReplicaInstances.Where(s => s != null);
+                            if (replicas.Any())
                             {
                                 <div class="redis-instance">
-                                    @foreach (var s in slaves)
+                                    @foreach (var s in replicas)
                                     {
                                         <div>
-                                            @s.IconSpan() <a href="?node=@s.HostAndPort">@s.HostAndPort</a> <span class="text-muted">(Slave)</span>
+                                            @s.IconSpan() <a href="?node=@s.HostAndPort">@s.HostAndPort</a> <span class="text-muted">(Replica)</span>
                                         </div>
                                     }
                                 </div>

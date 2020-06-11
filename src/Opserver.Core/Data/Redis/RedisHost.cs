@@ -27,11 +27,11 @@ namespace Opserver.Data.Redis
 
         public bool InSameRegionAs(RedisHost host) => string.Equals(Region, host.Region, StringComparison.OrdinalIgnoreCase);
 
-        public bool CanSlaveTo(RedisHost host, out string reason)
+        public bool CanReplicateFrom(RedisHost host, out string reason)
         {
             foreach (var i in Instances)
             {
-                foreach (var di in i.GetAllSlavesInChain())
+                foreach (var di in i.GetAllReplicasInChain())
                 {
                     if (di?.ConnectionInfo?.Server == host)
                     {
@@ -54,7 +54,7 @@ namespace Opserver.Data.Redis
         public bool IsTopLevel => Instances.Any(i => i.IsMaster);
 
         public List<ReplicaSummary> GetDownstreamHosts(List<RedisInstance> filterTo = null) =>
-            Instances.SelectMany(i => i.SlaveInstances)
+            Instances.SelectMany(i => i.ReplicaInstances)
                      .Where(i => filterTo == null || filterTo.Contains(i.Master))
                      .GroupBy(i => i.Host)
                      .Select(g => new ReplicaSummary

@@ -30,14 +30,14 @@
             {
                 <ul class="proposed">@RenderTolopogy(controlling, newMaster, command, controlling)</ul>
             }
-            @if (top.SlaveConnections?.Any() ?? false)
+            @if (top.ReplicaConnections?.Any() ?? false)
             {
                 <ul>
-                    @foreach (var sc in top.SlaveConnections)
+                    @foreach (var sc in top.ReplicaConnections)
                     {
-                        var slave = Module.GetInstance(sc);
-                        if (controlling != null && slave.HostAndPort == controlling.HostAndPort) { continue; }
-                        @RenderTolopogy(slave, newMaster, command, controlling)
+                        var replica = Module.GetInstance(sc);
+                        if (controlling != null && replica.HostAndPort == controlling.HostAndPort) { continue; }
+                        @RenderTolopogy(replica, newMaster, command, controlling)
                     }
                 </ul>
             }
@@ -66,7 +66,7 @@
                     </div>
                 </div>
             }
-            else if (op.Command == InstanceCommandType.SlaveTo)
+            else if (op.Command == InstanceCommandType.ReplicateFrom)
             {
                 var newMaster = op.NewMaster;
                 <div class="col-md-12">
