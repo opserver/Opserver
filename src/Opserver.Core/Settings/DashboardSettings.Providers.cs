@@ -8,6 +8,7 @@ namespace Opserver
         public BosunSettings Bosun { get; set; }
         public OrionSettings Orion { get; set; }
         public WMISettings WMI { get; set; }
+        public SignalFxSettings SignalFx { get; set; }
 
         public bool Any() => All.Any(p => p != null);
 
@@ -18,6 +19,7 @@ namespace Opserver
                 yield return Bosun;
                 yield return Orion;
                 yield return WMI;
+                yield return SignalFx;
             }
         }
     }

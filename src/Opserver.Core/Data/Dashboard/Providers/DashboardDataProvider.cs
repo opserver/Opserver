@@ -94,7 +94,7 @@ namespace Opserver.Data.Dashboard.Providers
             where T : class
         {
             return new Cache<T>(this,
-                "Data Provieder Fetch: " + NodeType + ":" + typeof(T).Name,
+                "Data Provider Fetch: " + NodeType + ":" + typeof(T).Name,
                 cacheDuration,
                 fetch,
                 addExceptionData: e => e.AddLoggedData("NodeType", NodeType),

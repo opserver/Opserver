@@ -192,6 +192,15 @@ namespace Opserver
 
         public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source) => new HashSet<T>(source);
 
+        private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+
+        /// <summary>
+        /// Returns a Date given a unix Epoch time
+        /// </summary>
+        /// <param name="value">The unix Epoch</param>
+        /// <param name="fromMilliseconds">Whether to convert from milliseconds</param>
+        public static DateTime FromEpochTime(this long value, bool fromMilliseconds = false) => fromMilliseconds ? _epoch.AddMilliseconds(value) : _epoch.AddSeconds(value);
+
         /// <summary>
         /// Returns a unix Epoch time given a Date
         /// </summary>
@@ -199,7 +208,7 @@ namespace Opserver
         /// <param name="toMilliseconds">Whether to convert to milliseconds (x 1000)</param>
         public static long ToEpochTime(this DateTime dt, bool toMilliseconds = false)
         {
-            var seconds = (long) (dt - new DateTime(1970, 1, 1, 0, 0, 0)).TotalSeconds;
+            var seconds = (long) (dt - _epoch).TotalSeconds;
             return toMilliseconds ? seconds * 1000 : seconds;
         }
 
