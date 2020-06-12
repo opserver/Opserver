@@ -59,6 +59,7 @@ namespace Opserver.Controllers
         public Task<ActionResult> CPUSparkSvgAll()
         {
             return SparkSvgAll(
+                "CPU",
                 getPoints: n => n.GetCPUUtilization(SparkStart, null, SparkPoints),
                 getMax: (_, __) => 100,
                 getVal: p => p.Value.GetValueOrDefault());
@@ -82,6 +83,7 @@ namespace Opserver.Controllers
         public Task<ActionResult> MemorySparkSvgAll()
         {
             return SparkSvgAll(
+                "Memory",
                 getPoints: n => n.GetMemoryUtilization(SparkStart, null, SparkPoints),
                 getMax: (n, _) => Convert.ToInt64(n.TotalMemory.GetValueOrDefault()),
                 getVal: p => p.Value.GetValueOrDefault());
@@ -105,6 +107,7 @@ namespace Opserver.Controllers
         public Task<ActionResult> NetworkSparkSvgAll()
         {
             return SparkSvgAll(
+                "Network",
                 getPoints: n => n.GetNetworkUtilization(SparkStart, null, SparkPoints),
                 getMax: (_, points) => Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()),
                 getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
@@ -169,14 +172,14 @@ namespace Opserver.Controllers
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
-        public async Task<ActionResult> SparkSvgAll<T>(Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
+        public async Task<ActionResult> SparkSvgAll<T>(string key, Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
         {
             const int width = SparkPoints;
 
             // Filter to nodes we'd show, to trim on size
             var nodes = Dashboard.AllNodes.Where(n => n.Category != DashboardCategory.Unknown || Dashboard.Settings.ShowOther).ToList();
             // TODO: Better hashcode
-            var bytes = await MemCache.GetSetAsync<byte[]>("AllNodesSVG-" + nodes.Count, async (_, __) =>
+            var bytes = await MemCache.GetSetAsync<byte[]>("AllNodesSVG-" + key + "-" + nodes.Count, async (_, __) =>
             {
                 var overallHeight = nodes.Count * SparkHeight;
 
