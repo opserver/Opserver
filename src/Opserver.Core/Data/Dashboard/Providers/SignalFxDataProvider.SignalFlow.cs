@@ -25,22 +25,25 @@ namespace Opserver.Data.Dashboard.Providers
             "dsname", "computationId", "plugin", "fs_type", "mountpoint"
         );
 
-        private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
-            new SignalFlowStatement(CpuMetric),
-            new SignalFlowStatement(MemoryMetric),
-            new SignalFlowStatement(DiskUsageMetric),
-            new SignalFlowStatement(DiskUsageMetric, "sum(by=['host'])"),
-            new SignalFlowStatement(InterfaceRxMetric),
-            new SignalFlowStatement(InterfaceTxMetric),
-            new SignalFlowStatement(InterfaceRxMetric, "sum(by=['host'])"),
-            new SignalFlowStatement(InterfaceTxMetric, "sum(by=['host'])")
-        };
+        private static readonly SignalFlowStatement Cpu = new SignalFlowStatement("cpu.utilization");
+        private static readonly SignalFlowStatement Memory = new SignalFlowStatement("memory.used");
+        private static readonly SignalFlowStatement DiskUsage = new SignalFlowStatement("disk.utilization");
+        private static readonly SignalFlowStatement DiskUsageByHost = new SignalFlowStatement("disk.utilization", "sum(by=['host'])");
+        private static readonly SignalFlowStatement InterfaceRx = new SignalFlowStatement("if_octets.rx");
+        private static readonly SignalFlowStatement InterfaceRxByHost = new SignalFlowStatement("if_octets.rx", "sum(by=['host'])");
+        private static readonly SignalFlowStatement InterfaceTx = new SignalFlowStatement("if_octets.tx");
+        private static readonly SignalFlowStatement InterfaceTxByHost = new SignalFlowStatement("if_octets.tx", "sum(by=['host'])");
 
-        private const string CpuMetric = "cpu.utilization";
-        private const string MemoryMetric = "memory.used";
-        private const string InterfaceTxMetric = "if_octets.tx";
-        private const string InterfaceRxMetric = "if_octets.rx";
-        private const string DiskUsageMetric = "disk.utilization";
+        private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
+            Cpu,
+            Memory,
+            DiskUsage,
+            DiskUsageByHost,
+            InterfaceTx,
+            InterfaceTxByHost,
+            InterfaceRx,
+            InterfaceRxByHost
+        };
 
         private readonly struct TimeSeries
         {
@@ -132,34 +135,55 @@ namespace Opserver.Data.Dashboard.Providers
                     var resolution = TimeSpan.FromMinutes(10);
                     var endDate = DateTime.UtcNow.RoundDown(resolution);
                     var startDate = endDate.AddHours(-24);
-                    var results = await GetMetricsAsync(_signalFlowStatements, resolution, startDate, endDate);
+                    var results = await GetMetricsAsync(_signalFlowStatements, startDate, endDate, resolution: resolution);
                     sw.Stop();
                     _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
                     return results.GroupBy(x => x.Key).ToImmutableDictionary(x => x.Key, x => x.First());
                 }, 5.Minutes(), 60.Minutes()
             );
 
-        private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, TimeSpan resolution, DateTime start, DateTime? end = null, string host = "*")
+        private Task<ImmutableList<TimeSeries>> GetMetricsAsync(Node node, DateTime? start, DateTime? end, params SignalFlowStatement[] metrics)
         {
-            var endDate = end ?? DateTime.UtcNow;
-            var startDate = start;
+            var utcNow = DateTime.UtcNow;
+            var oneYearAgo = utcNow.AddYears(-1);
+            var startDate = start.GetValueOrDefault(oneYearAgo);
+            if (start < oneYearAgo)
+            {
+                startDate = oneYearAgo;
+            }
+            
+            var endDate = end.GetValueOrDefault(utcNow);
+            if (endDate > utcNow)
+            {
+                endDate = utcNow;
+            }
+
+            var resolution = TimeSpan.FromHours(6);
+            startDate = startDate.RoundDown(resolution);
+            endDate = endDate.RoundDown(resolution);
+
+            return GetMetricsAsync(metrics, startDate, endDate, host: node.Id, resolution: resolution);
+        }
+
+        private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, DateTime start, DateTime end, string host = "*", TimeSpan? resolution = null)
+        {
             await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger))
             {
                 await signalFlowClient.ConnectAsync();
 
                 var results = await Task.WhenAll(
-                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m, host, resolution, startDate, endDate))
+                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m, host, start, end, resolution))
                 );
 
                 return results.SelectMany(x => x).ToImmutableList();
             }
 
-            static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, SignalFlowStatement statement, string host, TimeSpan resolution, DateTime startDate, DateTime endDate)
+            static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, SignalFlowStatement statement, string host, DateTime startDate, DateTime endDate, TimeSpan? resolution = null)
             {
                 var timeSeriesMap = new Dictionary<string, TimeSeriesKey>();
                 var pointsByHost = new Dictionary<TimeSeriesKey, List<GraphPoint>>();
                 var program = statement.ToString(host);
-                await foreach (var msg in client.ExecuteAsync(program, resolution, startDate, endDate))
+                await foreach (var msg in client.ExecuteAsync(program, startDate, endDate, resolution))
                 {
                     if (msg is MetadataMessage metricMetadata)
                     {
@@ -188,7 +212,7 @@ namespace Opserver.Data.Dashboard.Providers
                                 {
                                     tagBuilder["interface"] = tag.Value.ToString();
                                 }
-                                else if (pluginValue == "signalfx-metadata" && statement.Metric == DiskUsageMetric)
+                                else if (pluginValue == "signalfx-metadata" && statement.Metric == DiskUsage.Metric)
                                 {
                                     tagBuilder["device"] = tag.Value.ToString();
                                 }
@@ -259,13 +283,20 @@ namespace Opserver.Data.Dashboard.Providers
 
         private class ExecuteMessage : SignalFlowMessage
         {
-            public ExecuteMessage(string channel, string program, TimeSpan resolution, DateTime start, DateTime stop)
+            public ExecuteMessage(string channel, string program, TimeSpan? resolution, DateTime start, DateTime stop)
             {
                 Channel = channel;
                 Program = program;
                 Start = start;
                 Stop = stop;
-                Resolution = (int)resolution.TotalMilliseconds;
+                if (resolution.HasValue)
+                {
+                    Resolution = (int)resolution.Value.TotalMilliseconds;
+                }
+                else
+                {
+                    Resolution = null;
+                }
             }
 
             public override string Type => "execute";
@@ -273,7 +304,7 @@ namespace Opserver.Data.Dashboard.Providers
             public string Program { get; }
             public DateTime Start { get; }
             public DateTime Stop { get; }
-            public int Resolution { get; }
+            public int? Resolution { get; }
         }
 
         private class ControlMessage : SignalFlowMessage, IExecutionResult
@@ -558,6 +589,7 @@ namespace Opserver.Data.Dashboard.Providers
             private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                IgnoreNullValues = true,
                 Converters =
                 {
                     new JsonEpochConverter()
@@ -647,7 +679,7 @@ namespace Opserver.Data.Dashboard.Providers
                 }
             }
 
-            public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, TimeSpan resolution, DateTime startDate, DateTime endDate)
+            public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, DateTime startDate, DateTime endDate, TimeSpan? resolution = null)
             {
                 // generate a new channel key
                 var channelId = "channel-" + Interlocked.Increment(ref _channelId).ToString();

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
 using System.Linq;
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using System.Text.Json;
 using System.Threading.Tasks;
 using StackExchange.Exceptional;
@@ -97,20 +95,15 @@ namespace Opserver.Data.Dashboard.Providers
             var volumes = volumeTask.Result;
             var interfaces = interfaceTask.Result;
             var hosts = hostTask.Result;
+            var activityThreshold = DateTime.UtcNow.AddMonths(-6);
             var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>();
             foreach (var host in hosts)
             {
+                var lastUpdated = host.Value.Max(x => x.LastUpdated);
                 var hostInterfaces = interfaces.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
                 var hostVolumes = volumes.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
-                if (hostInterfaces.IsEmpty || hostVolumes.IsEmpty)
-                {
-                    // most likely a ghost that hasn't reported in some time, skip it
-                    continue;
-                }
-
                 var properties = host.Value.SelectMany(x => x.CustomProperties).GroupBy(x => x.Key).ToImmutableDictionary(g => g.Key, g => g.Select(x => x.Value).First());
-                var lastUpdated = host.Value.Max(x => x.LastUpdated);
-
+                
                 results[host.Key] = new SignalFxHost(host.Key, lastUpdated, properties, hostInterfaces, hostVolumes);
             }
 
