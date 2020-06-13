@@ -287,6 +287,11 @@ namespace Opserver.Data.Dashboard.Providers
 
         }
 
+        /// <summary>
+        /// Explicitly aligned struct that represents a value in a SignalFlow
+        /// binary formatted message. This struct overlaps one of a Int32/Int64/Double
+        /// value. <see cref="Type"/> discriminates the actual type of the value.
+        /// </summary>
         [StructLayout(LayoutKind.Explicit)]
         private readonly struct DataMessageValue
         {
@@ -515,6 +520,19 @@ namespace Opserver.Data.Dashboard.Providers
             }
         }
 
+        /// <summary>
+        /// Implements the SignalFlow protocol over a websocket. It handles the minimal number
+        /// of JSON and binary messages needed to process a SignalFlow program and its results.
+        ///
+        /// It is implemented using the managed <see cref="WebSocket" /> implementation and it reads/writes
+        /// protocol messages using <see cref="ChannelReader{T}"/> and <see cref="ChannelWriter{T}"/>.
+        ///
+        /// The result of a SignalFlow program is exposed as an <see cref="IAsyncEnumerable{T}"/> that a
+        /// consumer can enumerate at their own pace.
+        /// 
+        /// TODOs
+        ///  - handle compression of a binary payload 
+        /// </summary>
         private class SignalFlowClient : IAsyncDisposable
         {
             private long _channelId;
@@ -548,8 +566,14 @@ namespace Opserver.Data.Dashboard.Providers
 
             private Task _sendTask;
             private Task _receiveTask;
-            
 
+            /// <summary>
+            /// Instantiates a new instance of <see cref="SignalFlowClient"/> using
+            /// the specified realm (e.g. us1, eu0) and access token.
+            /// </summary>
+            /// <remarks>
+            /// The client will remain unconnected until <see cref="ConnectAsync"/> is called.
+            /// </remarks>
             public SignalFlowClient(string realm, string accessToken, ILogger logger)
             {
                 _connectUri = new Uri($"wss://stream.{realm}.signalfx.com/v2/signalflow/connect");
@@ -560,6 +584,9 @@ namespace Opserver.Data.Dashboard.Providers
                 _logger = logger;
             }
 
+            /// <summary>
+            /// Connects this client to SignalFx's endpoint.
+            /// </summary>
             public async ValueTask ConnectAsync()
             {
                 await _socket.ConnectAsync(_connectUri, default);
