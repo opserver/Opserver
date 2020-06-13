@@ -1011,6 +1011,7 @@ namespace Opserver.Data.Dashboard.Providers
                         "metadata" => JsonSerializer.Deserialize<MetadataMessage>(ref reader, options),
                         "authenticated" => JsonSerializer.Deserialize<AuthenticatedMessage>(ref reader, options),
                         "message" => Skip(ref reader),
+                        "error" => throw new JsonException(reader.GetString()),
                         _ => throw new JsonException()
                     };
 
