@@ -103,7 +103,23 @@ namespace Opserver.Data.Dashboard.Providers
                                     };
                                 }
                         ).ToList(),
-                        Volumes = new List<Volume>(),
+                        Volumes = host.Volumes
+                            .Select(
+                                v =>
+                                {
+                                    var tags = new[] {
+                                        ("device", v)
+                                    }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                                    var usageKey = new TimeSeriesKey(host.Name, DiskUsageMetric, tags);
+                                    var usageMetrics = metrics.GetValueOrDefault(usageKey, new TimeSeries(usageKey, ImmutableArray<GraphPoint>.Empty));
+                                    return new Volume
+                                    {
+                                        Id = v,
+                                        Name = v,
+                                        PercentUsed = usageMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (decimal)x.Value).FirstOrDefault(),
+                                    };
+                                }
+                        ).ToList(),
                         // TODO: grab incidents from SignalFx
                         Status = NodeStatus.Active,
                     };
@@ -117,10 +133,13 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<GraphPoint>> GetCPUUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var key = new TimeSeriesKey(node.Id, CpuMetric);
-            if (MetricDayCache.Data.TryGetValue(key, out var timeSeries))
+            if (IsApproximatelyLast24Hrs(start, end))
             {
-                return Task.FromResult(timeSeries.Values.ToList());
+                var key = new TimeSeriesKey(node.Id, CpuMetric);
+                if (MetricDayCache.Data.TryGetValue(key, out var timeSeries))
+                {
+                    return Task.FromResult(timeSeries.Values.ToList());
+                }
             }
 
             return Task.FromResult(_emptyPoints);
@@ -128,10 +147,13 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<GraphPoint>> GetMemoryUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var key = new TimeSeriesKey(node.Id, MemoryMetric);
-            if (MetricDayCache.Data.TryGetValue(key, out var timeSeries))
+            if (IsApproximatelyLast24Hrs(start, end))
             {
-                return Task.FromResult(timeSeries.Values.ToList());
+                var key = new TimeSeriesKey(node.Id, MemoryMetric);
+                if (MetricDayCache.Data.TryGetValue(key, out var timeSeries))
+                {
+                    return Task.FromResult(timeSeries.Values.ToList());
+                }
             }
 
             return Task.FromResult(_emptyPoints);
@@ -139,31 +161,36 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<DoubleGraphPoint>> GetNetworkUtilizationAsync(Node node, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var rxKey = new TimeSeriesKey(node.Id, InterfaceRxMetric);
-            var txKey = new TimeSeriesKey(node.Id, InterfaceTxMetric);
-            var rx = ImmutableArray<GraphPoint>.Empty;
-            var tx = ImmutableArray<GraphPoint>.Empty;
-            if (MetricDayCache.Data.TryGetValue(rxKey, out var timeSeries))
+            if (IsApproximatelyLast24Hrs(start, end))
             {
-                rx = timeSeries.Values;
-            }
-
-            if (MetricDayCache.Data.TryGetValue(txKey, out timeSeries))
-            {
-                tx = timeSeries.Values;
-            }
-
-            var results = rx.Join(tx,
-                i => i.DateEpoch,
-                o => o.DateEpoch,
-                (i, o) => new DoubleGraphPoint
+                var rxKey = new TimeSeriesKey(node.Id, InterfaceRxMetric);
+                var txKey = new TimeSeriesKey(node.Id, InterfaceTxMetric);
+                var rx = ImmutableArray<GraphPoint>.Empty;
+                var tx = ImmutableArray<GraphPoint>.Empty;
+                if (MetricDayCache.Data.TryGetValue(rxKey, out var timeSeries))
                 {
-                    DateEpoch = i.DateEpoch,
-                    Value = i.Value,
-                    BottomValue = o.Value
-                }).ToList();
+                    rx = timeSeries.Values;
+                }
 
-            return Task.FromResult(results);
+                if (MetricDayCache.Data.TryGetValue(txKey, out timeSeries))
+                {
+                    tx = timeSeries.Values;
+                }
+
+                var results = rx.Join(tx,
+                    i => i.DateEpoch,
+                    o => o.DateEpoch,
+                    (i, o) => new DoubleGraphPoint
+                    {
+                        DateEpoch = i.DateEpoch,
+                        Value = i.Value,
+                        BottomValue = o.Value
+                    }).ToList();
+
+                return Task.FromResult(results);
+            }
+
+            return Task.FromResult(_emptyDoublePoints);
         }
 
         public override Task<List<DoubleGraphPoint>> GetPerformanceUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
@@ -173,39 +200,60 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            var tags = new[]
+            if (IsApproximatelyLast24Hrs(start, end))
             {
-                ("interface", iface.Id)
-            }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
-            var rxKey = new TimeSeriesKey(iface.Node.Id, InterfaceRxMetric, tags);
-            var txKey = new TimeSeriesKey(iface.Node.Id, InterfaceTxMetric, tags);
-            var rx = ImmutableArray<GraphPoint>.Empty;
-            var tx = ImmutableArray<GraphPoint>.Empty;
-            if (MetricDayCache.Data.TryGetValue(rxKey, out var timeSeries))
-            {
-                rx = timeSeries.Values;
-            }
-
-            if (MetricDayCache.Data.TryGetValue(txKey, out timeSeries))
-            {
-                tx = timeSeries.Values;
-            }
-
-            var results = rx.Join(tx,
-                i => i.DateEpoch,
-                o => o.DateEpoch,
-                (i, o) => new DoubleGraphPoint
+                var tags = new[]
                 {
-                    DateEpoch = i.DateEpoch,
-                    Value = i.Value,
-                    BottomValue = o.Value
-                }).ToList();
+                    ("interface", iface.Id)
+                }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                var rxKey = new TimeSeriesKey(iface.Node.Id, InterfaceRxMetric, tags);
+                var txKey = new TimeSeriesKey(iface.Node.Id, InterfaceTxMetric, tags);
+                var rx = ImmutableArray<GraphPoint>.Empty;
+                var tx = ImmutableArray<GraphPoint>.Empty;
+                if (MetricDayCache.Data.TryGetValue(rxKey, out var timeSeries))
+                {
+                    rx = timeSeries.Values;
+                }
 
-            return Task.FromResult(results);
+                if (MetricDayCache.Data.TryGetValue(txKey, out timeSeries))
+                {
+                    tx = timeSeries.Values;
+                }
+
+                var results = rx.Join(tx,
+                    i => i.DateEpoch,
+                    o => o.DateEpoch,
+                    (i, o) => new DoubleGraphPoint
+                    {
+                        DateEpoch = i.DateEpoch,
+                        Value = i.Value,
+                        BottomValue = o.Value
+                    }).ToList();
+
+                return Task.FromResult(results);
+            }
+
+            return Task.FromResult(_emptyDoublePoints);
         }
 
         public override Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
         {
+            if (IsApproximatelyLast24Hrs(start, end))
+            {
+                var tags = new[]
+                {
+                    ("device", volume.Id)
+                }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                var usageKey = new TimeSeriesKey(volume.Node.Id, InterfaceRxMetric, tags);
+                var usage = ImmutableArray<GraphPoint>.Empty;
+                if (MetricDayCache.Data.TryGetValue(usageKey, out var timeSeries))
+                {
+                    usage = timeSeries.Values;
+                }
+
+                return Task.FromResult(usage.ToList());
+            }
+
             return Task.FromResult(_emptyPoints);
         }
 

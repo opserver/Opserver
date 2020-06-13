@@ -21,10 +21,15 @@ namespace Opserver.Data.Dashboard.Providers
 {
     public partial class SignalFxDataProvider
     {
-        private static readonly ImmutableHashSet<string> _ignoredTags = ImmutableHashSet.Create("dsname", "computationId", "plugin");
+        private static readonly ImmutableHashSet<string> _ignoredTags = ImmutableHashSet.Create(
+            "dsname", "computationId", "plugin", "fs_type", "mountpoint"
+        );
+
         private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
             new SignalFlowStatement(CpuMetric),
             new SignalFlowStatement(MemoryMetric),
+            new SignalFlowStatement(DiskUsageMetric),
+            new SignalFlowStatement(DiskUsageMetric, "sum(by=['host'])"),
             new SignalFlowStatement(InterfaceRxMetric),
             new SignalFlowStatement(InterfaceTxMetric),
             new SignalFlowStatement(InterfaceRxMetric, "sum(by=['host'])"),
@@ -35,6 +40,7 @@ namespace Opserver.Data.Dashboard.Providers
         private const string MemoryMetric = "memory.used";
         private const string InterfaceTxMetric = "if_octets.tx";
         private const string InterfaceRxMetric = "if_octets.rx";
+        private const string DiskUsageMetric = "disk.utilization";
 
         private readonly struct TimeSeries
         {
@@ -130,7 +136,6 @@ namespace Opserver.Data.Dashboard.Providers
                     sw.Stop();
                     _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
                     return results.GroupBy(x => x.Key).ToImmutableDictionary(x => x.Key, x => x.First());
-                    //return 
                 }, 5.Minutes(), 60.Minutes()
             );
 
@@ -143,16 +148,17 @@ namespace Opserver.Data.Dashboard.Providers
                 await signalFlowClient.ConnectAsync();
 
                 var results = await Task.WhenAll(
-                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m.ToString(host), resolution, startDate, endDate))
+                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m, host, resolution, startDate, endDate))
                 );
 
                 return results.SelectMany(x => x).ToImmutableList();
             }
 
-            static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, string program, TimeSpan resolution, DateTime startDate, DateTime endDate)
+            static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, SignalFlowStatement statement, string host, TimeSpan resolution, DateTime startDate, DateTime endDate)
             {
                 var timeSeriesMap = new Dictionary<string, TimeSeriesKey>();
                 var pointsByHost = new Dictionary<TimeSeriesKey, List<GraphPoint>>();
+                var program = statement.ToString(host);
                 await foreach (var msg in client.ExecuteAsync(program, resolution, startDate, endDate))
                 {
                     if (msg is MetadataMessage metricMetadata)
@@ -175,9 +181,17 @@ namespace Opserver.Data.Dashboard.Providers
 
                             // map some known plugin tags to consistent
                             // tags for things like network interfaces
-                            if (tag.Key == "plugin_instance" && metricMetadata.Properties.Dimensions.TryGetValue("plugin", out var plugin) && plugin.ToString().Equals("interface"))
+                            if (tag.Key == "plugin_instance" && metricMetadata.Properties.Dimensions.TryGetValue("plugin", out var plugin))
                             {
-                                tagBuilder["interface"] = tag.Value.ToString();
+                                var pluginValue = plugin.ToString();
+                                if (pluginValue == "interface")
+                                {
+                                    tagBuilder["interface"] = tag.Value.ToString();
+                                }
+                                else if (pluginValue == "signalfx-metadata" && statement.Metric == DiskUsageMetric)
+                                {
+                                    tagBuilder["device"] = tag.Value.ToString();
+                                }
                                 continue;
                             }
 

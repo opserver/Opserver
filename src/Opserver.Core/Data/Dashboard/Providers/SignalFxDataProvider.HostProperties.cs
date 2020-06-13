@@ -17,20 +17,28 @@ namespace Opserver.Data.Dashboard.Providers
         private Cache<ImmutableDictionary<string, SignalFxHost>> _hostCache;
 
         private Cache<ImmutableDictionary<string, SignalFxHost>> HostCache
-            => _hostCache ??= ProviderCache(GetHostPropertiesAsync, 5.Minutes(), 60.Minutes());
+            => _hostCache ??= ProviderCache(GetHostsAsync, 5.Minutes(), 60.Minutes());
 
         private readonly struct SignalFxHost
         {
-            public SignalFxHost(string name, DateTime lastUpdated, ImmutableDictionary<string, string> properties, ImmutableArray<string> interfaces)
+            public SignalFxHost(
+                string name,
+                DateTime lastUpdated,
+                ImmutableDictionary<string, string> properties,
+                ImmutableArray<string> interfaces,
+                ImmutableArray<string> volumes
+            )
             {
                 Name = name;
                 Properties = properties;
                 Interfaces = interfaces;
+                Volumes = volumes;
                 LastUpdated = lastUpdated;
             }
 
             public string Name { get; }
             public ImmutableArray<string> Interfaces { get; }
+            public ImmutableArray<string> Volumes { get; }
             public DateTime LastUpdated { get; }
             public ImmutableDictionary<string, string> Properties { get; }
 
@@ -78,10 +86,84 @@ namespace Opserver.Data.Dashboard.Providers
                 }
         };
 
-        private async Task<ImmutableDictionary<string, SignalFxHost>> GetHostPropertiesAsync()
+        private async Task<ImmutableDictionary<string, SignalFxHost>> GetHostsAsync()
+        {
+            var volumeTask = GetVolumesAsync();
+            var interfaceTask = GetInterfacesAsync();
+            var hostTask = GetHostPropertiesAsync();
+
+            await Task.WhenAll(volumeTask, interfaceTask, hostTask);
+
+            var volumes = volumeTask.Result;
+            var interfaces = interfaceTask.Result;
+            var hosts = hostTask.Result;
+            var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>();
+            foreach (var host in hosts)
+            {
+                var hostInterfaces = interfaces.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
+                var hostVolumes = volumes.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
+                if (hostInterfaces.IsEmpty || hostVolumes.IsEmpty)
+                {
+                    // most likely a ghost that hasn't reported in some time, skip it
+                    continue;
+                }
+
+                var properties = host.Value.SelectMany(x => x.CustomProperties).GroupBy(x => x.Key).ToImmutableDictionary(g => g.Key, g => g.Select(x => x.Value).First());
+                var lastUpdated = host.Value.Max(x => x.LastUpdated);
+
+                results[host.Key] = new SignalFxHost(host.Key, lastUpdated, properties, hostInterfaces, hostVolumes);
+            }
+
+            return results.ToImmutable();
+        }
+
+        private async Task<ImmutableDictionary<string, ImmutableArray<SignalFxDimension>>> GetHostPropertiesAsync()
+        {
+            var query = "host:*";
+            var dimensions = await GetDimensionsAsync("dimension", query);
+            return dimensions
+                .Where(x => x.CustomProperties.Count > 0)
+                .GroupBy(x => x.Value)
+                .ToImmutableDictionary(g => g.Key, g => g.ToImmutableArray());
+        }
+
+        private async Task<ImmutableDictionary<string, ImmutableArray<string>>> GetVolumesAsync()
+        {
+            var query = "device:* AND sf_metric:disk.utilization";
+            var dimensions = await GetDimensionsAsync("metrictimeseries", query);
+            return dimensions
+                .Where(x => x.CustomProperties.Count > 0)
+                .GroupBy(x => x.CustomProperties["host"])
+                .Select(
+                    g =>
+                    {
+                        var volumes = g.Select(x => x.Dimensions.GetValueOrDefault("device")).Where(x => x.HasValue());
+                        var pluginInstances = g.Select(x => x.Dimensions.GetValueOrDefault("plugin_instance")).Where(x => x.HasValue());
+                        return (Host: g.Key, Volumes: volumes.Concat(pluginInstances).Distinct());
+                    }
+                ).ToImmutableDictionary(x => x.Host, x => x.Volumes.ToImmutableArray());
+        }
+
+        private async Task<ImmutableDictionary<string, ImmutableArray<string>>> GetInterfacesAsync()
         {
             var query = "interface:* AND sf_metric:if_octets.tx";
-            var url = $"https://api.{Settings.Realm}.signalfx.com/v2/metrictimeseries?query={query.UrlEncode()}&limit=200";
+            var dimensions = await GetDimensionsAsync("metrictimeseries", query);
+            return dimensions
+                .Where(x => x.CustomProperties.Count > 0)
+                .GroupBy(x => x.CustomProperties["host"])
+                .Select(
+                    g =>
+                    {
+                        var interfaces = g.Select(x => x.Dimensions.GetValueOrDefault("interface")).Where(x => x.HasValue());
+                        var pluginInstances = g.Select(x => x.Dimensions.GetValueOrDefault("plugin_instance")).Where(x => x.HasValue());
+                        return (Host: g.Key, Interfaces: interfaces.Concat(pluginInstances).Distinct());
+                    }
+                ).ToImmutableDictionary(x => x.Host, x => x.Interfaces.ToImmutableArray());
+        }
+
+        private async Task<ImmutableList<SignalFxDimension>> GetDimensionsAsync(string api, string query)
+        {
+            var url = $"https://api.{Settings.Realm}.signalfx.com/v2/{api}?query={query.UrlEncode()}&limit=200";
             using (MiniProfiler.Current.Step("SignalFx Host Properties"))
             using (MiniProfiler.Current.CustomTiming("signalFx", url))
             using (var wc = new WebClient())
@@ -93,7 +175,7 @@ namespace Opserver.Data.Dashboard.Providers
                         wc.Headers.Add("X-SF-Token", Settings.AccessToken);
                     }
 
-                    var results = new List<SignalFxDimension>();
+                    var results = ImmutableList.CreateBuilder<SignalFxDimension>();
                     var offset = 0;
                     while (true)
                     {
@@ -109,25 +191,13 @@ namespace Opserver.Data.Dashboard.Providers
                         }
                     }
 
-                    return results
-                        .Where(x => x.CustomProperties.Count > 0)
-                        .GroupBy(x => x.CustomProperties["host"])
-                        .Select(
-                            g =>
-                            {
-                                var interfaces = g.Select(x => x.Dimensions.GetValueOrDefault("interface")).Where(x => x != null).ToImmutableArray();
-                                var properties = g.SelectMany(x => x.CustomProperties).GroupBy(x => x.Key).ToImmutableDictionary(g => g.Key, g => g.Select(x => x.Value).First());
-                                var lastUpdated = g.Max(x => x.LastUpdated);
-
-                                return new SignalFxHost(g.Key, lastUpdated, properties, interfaces);
-                            }
-                        ).ToImmutableDictionary(x => x.Name);
+                    return results.ToImmutable();
                 }
                 catch (Exception e)
                 {
                     e.AddLoggedData("Url", url);
                     e.LogNoContext();
-                    return ImmutableDictionary<string, SignalFxHost>.Empty;
+                    throw;
                 }
             }
         }

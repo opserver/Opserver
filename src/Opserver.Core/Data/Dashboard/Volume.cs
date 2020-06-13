@@ -40,6 +40,7 @@ namespace Opserver.Data.Dashboard
         {
             get
             {
+                if (!Description.HasValue()) return string.Empty;
                 var m = Regex.Match(Description, "([a-zA-Z]):\\\\");
                 return m.Success && m.Groups.Count > 1 ? m.Groups[1].Value : Description;
             }
