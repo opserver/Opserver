@@ -62,7 +62,7 @@ namespace Opserver.Data.Dashboard.Providers
                         Id = host.Name,
                         Name = host.Name,
                         DataProvider = this,
-                        LastSync = host.LastUpdated,
+                        LastSync = DateTime.UtcNow,
                         CPULoad = cpuMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
                         MemoryUsed = memoryMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value).FirstOrDefault(),
                         TotalMemory = host.GetPropertyAsFloat("host_mem_total") * 1024,
@@ -81,32 +81,33 @@ namespace Opserver.Data.Dashboard.Providers
                                 })
                                 .ToList(),
                         },
-                        Interfaces = host.Interfaces.Select(
-                            i =>
-                            {
-                                var tags = new[] {
-                                    ("interface", i)
-                                }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
-                                var rxKey = new TimeSeriesKey(host.Name, InterfaceRxMetric, tags);
-                                var txKey = new TimeSeriesKey(host.Name, InterfaceTxMetric, tags);
-                                var rxMetrics = metrics.GetValueOrDefault(rxKey, new TimeSeries(rxKey, ImmutableArray<GraphPoint>.Empty));
-                                var txMetrics = metrics.GetValueOrDefault(txKey, new TimeSeries(txKey, ImmutableArray<GraphPoint>.Empty));
-                                return new Interface
+                        Interfaces = host.Interfaces
+                            .Select(
+                                i =>
                                 {
-                                    Id = i,
-                                    Name = i,
-                                    IPs = new List<IPNet>(0),
-                                    TeamMembers = new List<string>(0),
-                                    InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
-                                    OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
-                                };
-                            }
+                                    var tags = new[] {
+                                        ("interface", i)
+                                    }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                                    var rxKey = new TimeSeriesKey(host.Name, InterfaceRxMetric, tags);
+                                    var txKey = new TimeSeriesKey(host.Name, InterfaceTxMetric, tags);
+                                    var rxMetrics = metrics.GetValueOrDefault(rxKey, new TimeSeries(rxKey, ImmutableArray<GraphPoint>.Empty));
+                                    var txMetrics = metrics.GetValueOrDefault(txKey, new TimeSeries(txKey, ImmutableArray<GraphPoint>.Empty));
+                                    return new Interface
+                                    {
+                                        Id = i,
+                                        Name = i,
+                                        IPs = new List<IPNet>(0),
+                                        TeamMembers = new List<string>(0),
+                                        InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value).FirstOrDefault(),
+                                        OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value).FirstOrDefault(),
+                                    };
+                                }
                         ).ToList(),
                         Volumes = new List<Volume>(),
                         // TODO: grab incidents from SignalFx
                         Status = NodeStatus.Active,
                     };
-                    node.SetReferences();
+                    node.AfterInitialize();
                     nodes.Add(node);
                 }
 

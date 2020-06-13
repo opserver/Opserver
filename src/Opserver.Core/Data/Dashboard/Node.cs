@@ -311,11 +311,23 @@ namespace Opserver.Data.Dashboard
 
         /// <summary>
         /// Should be called after a node is created to set parent referneces
+        /// and removed ignored interfaces, volumes, etc.
+        /// 
         /// This allows interfaces, volumes, etc. to poll through the provider
         /// </summary>
-        public void SetReferences()
+        public void AfterInitialize()
         {
-            Interfaces?.ForEach(i => i.Node = this);
+            if (Interfaces != null)
+            {
+                var ignoredInterfaceRegex = GetSetting(s => s.IgnoredInterfaceRegEx);
+                if (ignoredInterfaceRegex != null)
+                {
+                    Interfaces.RemoveAll(i => ignoredInterfaceRegex.IsMatch(i.Id));
+                }
+
+                Interfaces.ForEach(i => i.Node = this);
+            }
+
             Volumes?.ForEach(v => v.Node = this);
             Apps?.ForEach(a => a.Node = this);
             Services?.ForEach(s => s.Node = this);
