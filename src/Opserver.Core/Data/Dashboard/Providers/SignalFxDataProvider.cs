@@ -95,6 +95,8 @@ namespace Opserver.Data.Dashboard.Providers
                                 {
                                     Id = i,
                                     Name = i,
+                                    IPs = new List<IPNet>(0),
+                                    TeamMembers = new List<string>(0),
                                     InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
                                     OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
                                 };
