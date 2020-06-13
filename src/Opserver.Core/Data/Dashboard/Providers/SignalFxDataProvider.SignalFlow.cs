@@ -389,14 +389,14 @@ namespace Opserver.Data.Dashboard.Providers
                         throw new SignalFlowException("Invalid value type when parsing data");
                     }
 
-                    var timeSeriesId = reader.GetBase64EncodedString(8).TrimEnd('=').TrimEnd('=');
+                    var timeSeriesId = reader.GetBase64EncodedString(8).TrimEnd('=');
                     switch ((DataMessageValueType)valueType)
                     {
                         case DataMessageValueType.Double:
                             {
                                 if (!reader.TryReadBigEndian(out double value))
                                 {
-                                    throw new SignalFlowException("Invalid value when parsing data");
+                                    throw new SignalFlowException("Invalid value when parsing data (double)");
                                 }
 
                                 values.Add(
@@ -408,7 +408,7 @@ namespace Opserver.Data.Dashboard.Providers
                             {
                                 if (!reader.TryReadBigEndian(out long value))
                                 {
-                                    throw new SignalFlowException("Invalid value when parsing data");
+                                    throw new SignalFlowException("Invalid value when parsing data (int64)");
                                 }
 
                                 values.Add(
@@ -420,7 +420,7 @@ namespace Opserver.Data.Dashboard.Providers
                             {
                                 if (!reader.TryReadBigEndian(out int value))
                                 {
-                                    throw new SignalFlowException("Invalid value when parsing data");
+                                    throw new SignalFlowException("Invalid value when parsing data (int32)");
                                 }
 
                                 values.Add(
@@ -429,7 +429,7 @@ namespace Opserver.Data.Dashboard.Providers
                             }
                             break;
                         default:
-                            throw new SignalFlowException("Invalid value when parsing data");
+                            throw new SignalFlowException("Invalid value when parsing data (type not known)");
 
                     }
                 }
@@ -511,7 +511,7 @@ namespace Opserver.Data.Dashboard.Providers
 
         private class SignalFlowClient : IAsyncDisposable
         {
-            private int _channelId;
+            private long _channelId;
 
             private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
             {
