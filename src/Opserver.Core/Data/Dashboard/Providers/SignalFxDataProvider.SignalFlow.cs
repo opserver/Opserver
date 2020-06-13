@@ -3,7 +3,8 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -20,7 +21,15 @@ namespace Opserver.Data.Dashboard.Providers
 {
     public partial class SignalFxDataProvider
     {
-        private static readonly string[] _cachedMetrics = new[] { CpuMetric, MemoryMetric, InterfaceRxMetric, InterfaceTxMetric };
+        private static readonly ImmutableHashSet<string> _ignoredTags = ImmutableHashSet.Create("dsname", "computationId", "plugin");
+        private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
+            new SignalFlowStatement(CpuMetric),
+            new SignalFlowStatement(MemoryMetric),
+            new SignalFlowStatement(InterfaceRxMetric),
+            new SignalFlowStatement(InterfaceTxMetric),
+            new SignalFlowStatement(InterfaceRxMetric, "sum(by=['host'])"),
+            new SignalFlowStatement(InterfaceTxMetric, "sum(by=['host'])")
+        };
 
         private const string CpuMetric = "cpu.utilization";
         private const string MemoryMetric = "memory.used";
@@ -29,30 +38,52 @@ namespace Opserver.Data.Dashboard.Providers
 
         private readonly struct TimeSeries
         {
-            public TimeSeries(TimeSeriesKey key, ImmutableArray<GraphPoint> values, ImmutableDictionary<string, object> tags)
+            public TimeSeries(TimeSeriesKey key, ImmutableArray<GraphPoint> values)
             {
                 Key = key;
-                Tags = tags;
                 Values = values;
             }
 
+            public bool IsDefault => Values.IsDefault;
             public TimeSeriesKey Key { get; }
-            public ImmutableDictionary<string, object> Tags { get; }
             public ImmutableArray<GraphPoint> Values { get; }
         }
 
         private readonly struct TimeSeriesKey : IEquatable<TimeSeriesKey>
         {
-            public TimeSeriesKey(string host, string metric)
+            public TimeSeriesKey(string host, string metric) : this(host, metric, ImmutableDictionary<string, string>.Empty)
+            {
+            }
+
+            public TimeSeriesKey(string host, string metric, ImmutableDictionary<string, string> tags)
             {
                 Host = host;
                 Metric = metric;
+                Tags = tags;
             }
 
             public string Host { get; }
+            public ImmutableDictionary<string, string> Tags { get; }
             public string Metric { get; }
 
-            public bool Equals(TimeSeriesKey other) => Host == other.Host && Metric == other.Metric;
+            public bool Equals(TimeSeriesKey other)
+            {
+                var result = Host == other.Host && Metric == other.Metric;
+                if (result)
+                {
+                    foreach (var tag in Tags)
+                    {
+                        if (!other.Tags.TryGetValue(tag.Key, out var otherValue) || !other.Tags.ValueComparer.Equals(tag.Value, otherValue))
+                        {
+                            result &= false;
+                            break;
+                        }
+                    }
+                }
+
+                return result;
+            }
+                
             public override bool Equals(object obj)
             {
                 if (!(obj is TimeSeriesKey other))
@@ -63,48 +94,99 @@ namespace Opserver.Data.Dashboard.Providers
                 return Equals(other);
             }
 
-            public override int GetHashCode() => Host.GetHashCode() ^ Metric.GetHashCode();
+            public override int GetHashCode()
+            {
+                var result = Host.GetHashCode() ^ Metric.GetHashCode();
+                foreach (var tag in Tags)
+                {
+                    result ^= tag.Key.GetHashCode() ^ tag.Value.GetHashCode();
+                }
+
+                return result;
+            }
+
+            public override string ToString() => $"{Host}:{Metric}:{string.Join(",", Tags.Select(x => $"{x.Key}:{x.Value}"))}";
         }
 
         private Cache<ImmutableDictionary<TimeSeriesKey, TimeSeries>> _dayCache;
 
         private Cache<ImmutableDictionary<TimeSeriesKey, TimeSeries>> MetricDayCache
             => _dayCache ??= ProviderCache(
-                () =>
+                async () =>
                 {
-                    var resolution = TimeSpan.FromMinutes(5);
+                    _logger.LogInformation("Refreshing day cache...");
+
+                    var sw = Stopwatch.StartNew();
+                    var resolution = TimeSpan.FromMinutes(10);
                     var endDate = DateTime.UtcNow.RoundDown(resolution);
                     var startDate = endDate.AddHours(-24);
-                    return GetMetricsAsync(_cachedMetrics, resolution, startDate, endDate);
-                }, 60.Seconds(), 60.Minutes()
+                    var results = await GetMetricsAsync(_signalFlowStatements, resolution, startDate, endDate);
+                    sw.Stop();
+                    _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
+                    return results.GroupBy(x => x.Key).ToImmutableDictionary(x => x.Key, x => x.First());
+                    //return 
+                }, 5.Minutes(), 60.Minutes()
             );
 
-        private async Task<ImmutableDictionary<TimeSeriesKey, TimeSeries>> GetMetricsAsync(IEnumerable<string> metrics, TimeSpan resolution, DateTime start, DateTime? end = null, string host = "*")
+        private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, TimeSpan resolution, DateTime start, DateTime? end = null, string host = "*")
         {
             var endDate = end ?? DateTime.UtcNow;
             var startDate = start;
-            var program = StringBuilderCache.Get();
-            foreach (var metric in metrics)
-            {
-                program.AppendLine($"data('{metric}', filter('host', '{host}')).sum(by=['host']).publish();");
-            }
-
-            var timeSeriesMap = new Dictionary<string, TimeSeriesKey>();
-            var tagsByHost = new Dictionary<TimeSeriesKey, ImmutableDictionary<string , object>>();
-            var pointsByHost = new Dictionary<TimeSeriesKey, List<GraphPoint>>();
             await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger))
             {
                 await signalFlowClient.ConnectAsync();
-                await foreach (var msg in signalFlowClient.ExecuteAsync(program.ToStringRecycle(), resolution, startDate, endDate))
+
+                var results = await Task.WhenAll(
+                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m.ToString(host), resolution, startDate, endDate))
+                );
+
+                return results.SelectMany(x => x).ToImmutableList();
+            }
+
+            static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, string program, TimeSpan resolution, DateTime startDate, DateTime endDate)
+            {
+                var timeSeriesMap = new Dictionary<string, TimeSeriesKey>();
+                var pointsByHost = new Dictionary<TimeSeriesKey, List<GraphPoint>>();
+                await foreach (var msg in client.ExecuteAsync(program, resolution, startDate, endDate))
                 {
                     if (msg is MetadataMessage metricMetadata)
                     {
-                        var key = new TimeSeriesKey(
-                            metricMetadata.Properties.Host, metricMetadata.Properties.Metric
-                        );
+                        // map tags to consistent values
+                        var tagBuilder = ImmutableDictionary.CreateBuilder<string, string>();
+                        foreach (var tag in metricMetadata.Properties.Dimensions)
+                        {
+                            if (tag.Key.StartsWith("sf_"))
+                            {
+                                // ignore SignalFX built-in dimensions
+                                continue;
+                            }
 
-                        timeSeriesMap[metricMetadata.TimeSeriesId] = key;
-                        tagsByHost[key] = metricMetadata.Properties.Tags.ToImmutableDictionary();
+                            if (_ignoredTags.Contains(tag.Key))
+                            {
+                                // some tags just aren't interesting
+                                continue;
+                            }
+
+                            // map some known plugin tags to consistent
+                            // tags for things like network interfaces
+                            if (tag.Key == "plugin_instance" && metricMetadata.Properties.Dimensions.TryGetValue("plugin", out var plugin) && plugin.ToString().Equals("interface"))
+                            {
+                                metricMetadata.Properties.Dimensions["interface"] = tag.Value;
+                                continue;
+                            }
+
+                            var tagValue = tag.Value?.ToString();
+                            if (tagValue.HasValue())
+                            {
+                                tagBuilder[tag.Key] = tagValue;
+                            }
+                        }
+
+                        timeSeriesMap[metricMetadata.TimeSeriesId] = new TimeSeriesKey(
+                            metricMetadata.Properties.Host,
+                            metricMetadata.Properties.Metric,
+                            tagBuilder.ToImmutable()
+                        );
                     }
                     else if (msg is DataMessage metricData)
                     {
@@ -127,11 +209,11 @@ namespace Opserver.Data.Dashboard.Providers
                         }
                     }
                 }
-            }
 
-            return pointsByHost.ToImmutableDictionary(
-                x => x.Key, x => new TimeSeries(x.Key, x.Value.ToImmutableArray(), tagsByHost.GetValueOrDefault(x.Key, ImmutableDictionary<string, object>.Empty))
-            );
+                return pointsByHost.Select(
+                    x => new TimeSeries(x.Key, x.Value.ToImmutableArray())
+                ).ToImmutableList();
+            }
         }
 
         private abstract class SignalFlowMessage
@@ -195,7 +277,7 @@ namespace Opserver.Data.Dashboard.Providers
             [JsonPropertyName("sf_originatingMetric")]
             public string Metric { get; set; }
             [JsonExtensionData]
-            public Dictionary<string, object> Tags { get; set; }
+            public Dictionary<string, object> Dimensions { get; set; }
 
         }
 
@@ -399,6 +481,34 @@ namespace Opserver.Data.Dashboard.Providers
             }
         }
 
+        private readonly struct SignalFlowStatement
+        {
+            public SignalFlowStatement(string metric) : this(metric, null)
+            {
+            }
+
+            public SignalFlowStatement(string metric, string aggregation)
+            {
+                Metric = metric;
+                Aggregation = aggregation;
+            }
+
+            public string Metric { get; }
+            public string Aggregation { get; }
+
+            public string ToString(string host)
+            {
+                var sb = StringBuilderCache.Get();
+                sb.Append("data('").Append(Metric).Append("', filter('host', '").Append(host).Append("'))");
+                if (Aggregation.HasValue())
+                {
+                    sb.Append(".").Append(Aggregation);
+                }
+                sb.Append(".publish();");
+                return sb.ToStringRecycle();
+            }
+        }
+
         private class SignalFlowClient : IAsyncDisposable
         {
             private int _channelId;
@@ -596,7 +706,6 @@ namespace Opserver.Data.Dashboard.Providers
                 // if we find we need a bigger buffer then keep returning the buffer and grab a larger one
                 var pool = ArrayPool<byte>.Shared;
                 var bufferLength = 4096;
-                var buffers = new List<byte[]>();
                 var buffer = pool.Rent(bufferLength);
                 var offset = 0;
                 var length = 0;

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Data;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
@@ -52,15 +51,13 @@ namespace Opserver.Data.Dashboard.Providers
                 {
                     var cpuMetrics = metrics.GetValueOrDefault(new TimeSeriesKey(host.Name, CpuMetric));
                     var memoryMetrics = metrics.GetValueOrDefault(new TimeSeriesKey(host.Name, MemoryMetric));
-                    var rxMetrics = metrics.GetValueOrDefault(new TimeSeriesKey(host.Name, InterfaceRxMetric));
-                    var txMetrics = metrics.GetValueOrDefault(new TimeSeriesKey(host.Name, InterfaceTxMetric));
-                    if (cpuMetrics.Values.IsDefault || memoryMetrics.Values.IsDefault || rxMetrics.Values.IsDefault || txMetrics.Values.IsDefault)
+                    if (cpuMetrics.Values.IsDefault || memoryMetrics.Values.IsDefault)
                     {
                         continue;
                     }
 
                     var physicalCpus = host.GetPropertyAsInt32("host_physical_cpus") ?? 0;
-                    nodes.Add(new Node
+                    var node = new Node
                     {
                         Id = host.Name,
                         Name = host.Name,
@@ -84,11 +81,31 @@ namespace Opserver.Data.Dashboard.Providers
                                 })
                                 .ToList(),
                         },
-                        Interfaces = new List<Interface>(),
+                        Interfaces = host.Interfaces.Select(
+                            i =>
+                            {
+                                var tags = new[] {
+                                    ("interface", i)
+                                }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                                var rxKey = new TimeSeriesKey(host.Name, InterfaceRxMetric, tags);
+                                var txKey = new TimeSeriesKey(host.Name, InterfaceTxMetric, tags);
+                                var rxMetrics = metrics.GetValueOrDefault(rxKey, new TimeSeries(rxKey, ImmutableArray<GraphPoint>.Empty));
+                                var txMetrics = metrics.GetValueOrDefault(txKey, new TimeSeries(txKey, ImmutableArray<GraphPoint>.Empty));
+                                return new Interface
+                                {
+                                    Id = i,
+                                    Name = i,
+                                    InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
+                                    OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (short)x.Value).FirstOrDefault(),
+                                };
+                            }
+                        ).ToList(),
                         Volumes = new List<Volume>(),
                         // TODO: grab incidents from SignalFx
                         Status = NodeStatus.Active,
-                    }) ; ;
+                    };
+                    node.SetReferences();
+                    nodes.Add(node);
                 }
 
                 return nodes;
@@ -153,7 +170,35 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null)
         {
-            return Task.FromResult(_emptyDoublePoints);
+            var tags = new[]
+            {
+                ("interface", iface.Id)
+            }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+            var rxKey = new TimeSeriesKey(iface.Node.Id, InterfaceRxMetric, tags);
+            var txKey = new TimeSeriesKey(iface.Node.Id, InterfaceTxMetric, tags);
+            var rx = ImmutableArray<GraphPoint>.Empty;
+            var tx = ImmutableArray<GraphPoint>.Empty;
+            if (MetricDayCache.Data.TryGetValue(rxKey, out var timeSeries))
+            {
+                rx = timeSeries.Values;
+            }
+
+            if (MetricDayCache.Data.TryGetValue(txKey, out timeSeries))
+            {
+                tx = timeSeries.Values;
+            }
+
+            var results = rx.Join(tx,
+                i => i.DateEpoch,
+                o => o.DateEpoch,
+                (i, o) => new DoubleGraphPoint
+                {
+                    DateEpoch = i.DateEpoch,
+                    Value = i.Value,
+                    BottomValue = o.Value
+                }).ToList();
+
+            return Task.FromResult(results);
         }
 
         public override Task<List<GraphPoint>> GetUtilizationAsync(Volume volume, DateTime? start, DateTime? end, int? pointCount = null)
