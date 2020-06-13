@@ -602,7 +602,7 @@ namespace Opserver.Data.Dashboard.Providers
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Unexpected error while reading froms web socket.");
+                            _logger.LogError(ex, "Unexpected error while reading from web socket.");
                             ex.LogNoContext();
                         }
                     });
@@ -652,6 +652,7 @@ namespace Opserver.Data.Dashboard.Providers
                                 // we're done, clean-up
                                 responseChannel.Writer.Complete();
                                 _responseChannels.TryRemove(channelId, out _);
+                                yield return msg;
                                 yield break;
                             }
                         }
@@ -684,9 +685,9 @@ namespace Opserver.Data.Dashboard.Providers
 
             private async Task ReadFromSocketAsync()
             {
-                while (true)
+                try
                 {
-                    try
+                    while (true)
                     {
                         var result = await _socket.ReceiveAsync(Memory<byte>.Empty, default);
                         if (result.MessageType == WebSocketMessageType.Close)
@@ -719,13 +720,15 @@ namespace Opserver.Data.Dashboard.Providers
                             await responseChannel.Writer.WriteAsync(response);
                         }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Unexpected error reading from web socket");
-                        ex.LogNoContext();
-                    }
+                }
+                catch (Exception ex)
+                {
+                    // game over we can't continue
+                    _logger.LogError(ex, "Unexpected error reading from web socket");
+                    ex.LogNoContext();
                 }
 
+                // close everything down!
                 foreach (var responseChannel in _responseChannels.Values)
                 {
                     try
@@ -844,6 +847,11 @@ namespace Opserver.Data.Dashboard.Providers
                             using (var utf8Writer = new Utf8JsonWriter(bufferWriter))
                             {
                                 JsonSerializer.Serialize(utf8Writer, msg, msg.GetType(), _serializerOptions);
+                            }
+
+                            if (_logger.IsEnabled(LogLevel.Debug))
+                            {
+                                _logger.LogDebug(Encoding.UTF8.GetString(bufferWriter.WrittenMemory.Span));
                             }
 
                             await _socket.SendAsync(bufferWriter.WrittenMemory, WebSocketMessageType.Text, true, CancellationToken.None);
