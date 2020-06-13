@@ -321,14 +321,14 @@ namespace Opserver.Data.Dashboard.Providers
             public readonly string TimeSeriesId;
 
             [FieldOffset(8)]
-            public readonly uint Int32;
-            [FieldOffset(8)]
-            public readonly ulong Int64;
-            [FieldOffset(8)]
-            public readonly double Double;
-
-            [FieldOffset(16)]
             public readonly DataMessageValueType Type;
+
+            [FieldOffset(9)]
+            public readonly uint Int32;
+            [FieldOffset(9)]
+            public readonly ulong Int64;
+            [FieldOffset(9)]
+            public readonly double Double;
         }
 
         private enum DataMessageValueType : byte
