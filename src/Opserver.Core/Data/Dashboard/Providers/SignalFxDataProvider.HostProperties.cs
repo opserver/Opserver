@@ -95,7 +95,6 @@ namespace Opserver.Data.Dashboard.Providers
             var volumes = volumeTask.Result;
             var interfaces = interfaceTask.Result;
             var hosts = hostTask.Result;
-            var activityThreshold = DateTime.UtcNow.AddMonths(-6);
             var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>();
             foreach (var host in hosts)
             {
@@ -122,7 +121,7 @@ namespace Opserver.Data.Dashboard.Providers
 
         private async Task<ImmutableDictionary<string, ImmutableArray<string>>> GetVolumesAsync()
         {
-            var query = "device:* AND sf_metric:disk.utilization";
+            var query = "sf_metric:disk.utilization";
             var dimensions = await GetDimensionsAsync("metrictimeseries", query);
             return dimensions
                 .Where(x => x.CustomProperties.Count > 0)
