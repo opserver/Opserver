@@ -670,8 +670,14 @@ namespace Opserver.Data.Dashboard.Providers
 
                 _requestChannel.Writer.TryComplete();
 
-                await _receiveTask;
-                await _sendTask;
+                if (_receiveTask != null)
+                {
+                    await _receiveTask;
+                }
+                if (_sendTask != null)
+                {
+                    await _sendTask;
+                }
 
                 _socket.Dispose();
             }
