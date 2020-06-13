@@ -7,6 +7,7 @@ using Opserver.Views.Hub;
 
 namespace Opserver.Controllers
 {
+    [OnlyAllow(Roles.Authenticated)]
     public class HubController : StatusController<DashboardModule>
     {
         public HubController(DashboardModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }

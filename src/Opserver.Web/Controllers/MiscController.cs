@@ -3,9 +3,12 @@ using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Authorization;
+using Opserver.Helpers;
+using Opserver.Models;
 
 namespace Opserver.Controllers
 {
+    [AlsoAllow(Roles.Anonymous)]
     public class MiscController : StatusController
     {
         public MiscController(IOptions<OpserverSettings> _settings) : base(_settings) { }

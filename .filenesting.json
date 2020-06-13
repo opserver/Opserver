@@ -13,7 +13,10 @@
       "fileSuffixToExtension": {
         "add": {
           ".Model.cs": [ ".cshtml" ],
-          ".json.defaults": [ ".json" ]
+          ".json.defaults": [ ".json" ],
+          ".min.css": [ ".css" ],
+          ".min.js": [ ".js" ],
+          ".min.js.map": [ ".min.js" ]
         }
       }
     }

@@ -949,7 +949,7 @@ Status.Redis = (function () {
                 newMaster = $(this).data('new-master');
             e.preventDefault();
             runAction(this, {
-                confirmMessage: 'Are you sure you want make ' + node + ' a slave of ' + newMaster + '?',
+                confirmMessage: 'Are you sure you want make ' + node + ' a replica of ' + newMaster + '?',
                 data: {
                     newMaster: newMaster
                 }
@@ -1663,63 +1663,6 @@ Status.HAProxy = (function () {
                 },
                 yAxis: {
                     tickFormat: function (d) { return Status.helpers.bytesToSize(d, false); }
-                }
-            }, options);
-        },
-        haproxyGraph: function (options) {
-            var comma = d3.format(',');
-            return this.d3graph({
-                type: 'haproxy',
-                subtype: 'traffic',
-                ajaxZoom: false,
-                series: [
-                    { name: 'main_hits', label: 'Total' },
-                    { name: 'main_pages', label: 'Pages' }
-                ],
-                min: 'auto',
-                leftMargin: 80,
-                areaTooltipFormat: function (value, series, name) { return '<span>Hits (<span class="series-' + name + '">' + series + '</span>): </span><b>' + comma(value) + '</b>'; },
-                yAxis: {
-                    tickFormat: comma
-                }
-            }, options);
-        },
-        haproxyRouteGraph: function (route, days, host, options) {
-            return this.d3graph({
-                type: 'haproxy',
-                subtype: 'route-performance',
-                ajaxZoom: false,
-                stacked: true,
-                subtitle: route,
-                interpolation: 'linear',
-                dateRanges: false,
-                params: { route: route, days: days, host: host },
-                autoColors: true,
-                series: [
-                    { name: 'dot_net', label: 'ASP.Net', color: '#0E2A4C' },
-                    { name: 'sql', label: 'SQL', color: '#143D65' },
-                    { name: 'redis', label: 'Redis', color: '#194D79' },
-                    { name: 'http', label: 'HTTP', color: '#1D5989' },
-                    { name: 'tag_engine', label: 'Tag Engine', color: '#206396' },
-                    { name: 'other', label: 'Other', color: '#64B6D0' }
-                ],
-                rightSeries: [
-                    { name: 'hits', label: 'Hits', color: 'rgb(116, 196, 118)', width: 2 }
-                ],
-                rightMargin: 70,
-                min: 'auto',
-                leftMargin: 60,
-                // TODO: Style except for BG color in .less
-                rightAreaTooltipFormat: function (value, series, name, color) {
-                    return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
-                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + '</b>';
-                },
-                areaTooltipFormat: function (value, series, name, color) {
-                    return '<label>' + (color ? '<div style="background-color: ' + color + '; width: 16px; height: 13px; display: inline-block;"></div> ' : '')
-                        + '<span class="series-' + name + '">' + series + '</span>: </label><b>' + Status.helpers.commify(value) + ' <span class="text-muted">ms</span></b>';
-                },
-                yAxis: {
-                    tickFormat: function (d) { return Status.helpers.commify(d) + ' ms'; }
                 }
             }, options);
         },

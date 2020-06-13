@@ -1,6 +1,5 @@
 ﻿@model PagerDutyIncidentModel
 @{
-    Layout = null;
     this.SetPageTitle("PagerDuty Incident Detail");
     var i = Model.Incident;
     var acknowledgedBy = await i.GetAcknowledgedByAsync();

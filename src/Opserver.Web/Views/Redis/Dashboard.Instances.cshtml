@@ -12,14 +12,14 @@
             case RedisInfo.RedisInstanceRole.Master:
                 <strong>Master</strong>
                 break;
-            case RedisInfo.RedisInstanceRole.Slave:
-                if (i.IsSlaving)
+            case RedisInfo.RedisInstanceRole.Replica:
+                if (i.IsReplicating)
                 {
-                    <b class="text-success">Slaving</b>
+                    <b class="text-success">Replicating</b>
                 }
                 else
                 {
-                    <span>Slave</span>
+                    <span>Replica</span>
                 }
                 break;
             default:
@@ -32,7 +32,7 @@
     string CommonVersionHeader() => Model.AllVersionsMatch ? "(Version " + (Model.CommonVersion?.ToString() ?? "Unknown") + ")" : null;
     void SectionHeader(List<RedisInstance> instances, string label, bool defaultHeaders = true, bool countChain = false)
     {
-        var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllSlavesInChain())).ToList() : instances;
+        var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllReplicasInChain())).ToList() : instances;
         <tbody>
             <tr class="category-row page-header">
                 <th colspan="@(Model.AllVersionsMatch ? 8 : 9)">
@@ -51,7 +51,7 @@
                 <th>Name</th>
                 <th>Host <span class="text-muted small">(port - behind)</span></th>
                 <th>Role</th>
-                <th>Slaves</th>
+                <th>Replicas</th>
                 <th title="Operations">Ops <span class="text-muted small">(/sec)</span></th>
                 <th>Memory <span class="text-muted small">(used)</span></th>
                 <th>Clients</th>
@@ -84,9 +84,9 @@
                     (@server.Port.ToString()@if (toSync > 0)
                     {<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})
                 </span>
-                @if (server.IsSlaving)
+                @if (server.IsReplicating)
                 {
-                    var sc = server.Master?.SlaveConnections?.FirstOrDefault(sci => server.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress)));
+                    var sc = server.Master?.ReplicaConnections?.FirstOrDefault(sci => server.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress)));
                     <span class="text-muted small">
                         (@if (sc != null)
                         {<text>@sc.Status - </text>}@(server.Replication?.MasterLinkStatus ?? "Unknown Link"))
@@ -103,8 +103,8 @@
                 <td>@ServerRole(server)</td>
                 var stats = info.Stats;
                 <td>
-                    @server.SlaveCount.ToComma() @if (server.TotalSlaveCount > server.SlaveCount)
-                    {<span class="text-muted small">(@((server.TotalSlaveCount - server.SlaveCount).ToComma()))</span>}
+                    @server.ReplicaCount.ToComma() @if (server.TotalReplicaCount > server.ReplicaCount)
+                    {<span class="text-muted small">(@((server.TotalReplicaCount - server.ReplicaCount).ToComma()))</span>}
                 </td>
                 <td>@stats.TotalCommandsProcessed.ToComma() <span class="text-muted small">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
                 <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="text-muted small">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
@@ -123,9 +123,9 @@
         </tr>
         if (Model.View != RedisViews.Server)
         {
-            foreach (var s in server.SlaveInstances.Concat(Model.Slaving.Where(s => s.Master == server)).Distinct())
+            foreach (var s in server.ReplicaInstances.Concat(Model.Replicating.Where(s => s.Master == server)).Distinct())
             {
-                ServerRow(s, nest + 1, s?.Replication == null ? 0 : s.IsSlaving ? s.Replication.MastSyncLeftBytes : (s.Replication.SlaveReplicationOffset == 1 ? 0 : server.Replication.MasterReplicationOffset - s.Replication.SlaveReplicationOffset));
+                ServerRow(s, nest + 1, s?.Replication == null ? 0 : s.IsReplicating ? s.Replication.MastSyncLeftBytes : (s.Replication.ReplicaReplicationOffset == 1 ? 0 : server.Replication.MasterReplicationOffset - s.Replication.ReplicaReplicationOffset));
             }
         }
         return null;

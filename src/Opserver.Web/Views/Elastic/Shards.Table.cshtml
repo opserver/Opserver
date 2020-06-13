@@ -1,6 +1,5 @@
 ﻿@model DashboardModel
 @{
-    Layout = null;
     var c = Model.CurrentCluster;
     var i = Model.CurrentIndexName;
     var shards = Model.DisplayShards.Where(s => i == null || s.Index == i).ToList();

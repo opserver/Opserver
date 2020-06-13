@@ -1,6 +1,5 @@
 ﻿@model SQLInstance
 @{
-    Layout = null;
     var files = Model.Databases.Data?.SelectMany(db => db.Files).OrderBy(f => f.PhysicalName);
     var volumes = files?.GroupBy(p => p.VolumeMountPoint);
 }

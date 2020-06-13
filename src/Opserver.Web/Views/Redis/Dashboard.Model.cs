@@ -27,7 +27,7 @@ namespace Opserver.Views.Redis
         public Version CommonVersion => AllVersionsMatch ? Instances[0].Version : null;
 
         public List<RedisInstance> Masters { get; private set; }
-        public List<RedisInstance> Slaving { get; private set; }
+        public List<RedisInstance> Replicating { get; private set; }
         public List<RedisInstance> Missing { get; private set; }
         public List<RedisInstance> Heads { get; private set; }
         public List<RedisInstance> StandAloneMasters { get; private set; }
@@ -36,11 +36,11 @@ namespace Opserver.Views.Redis
         {
             Instances = Instances.OrderBy(i => i.Port).ThenBy(i => i.Name).ThenBy(i => i.Host.HostName).ToList();
             Masters = Instances.Where(i => i.IsMaster).ToList();
-            Slaving = Instances.Where(i => i.IsSlaving).ToList();
-            Missing = Instances.Where(i => !Slaving.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();
+            Replicating = Instances.Where(i => i.IsReplicating).ToList();
+            Missing = Instances.Where(i => !Replicating.Contains(i) && (i.Info == null || i.Role == RedisInfo.RedisInstanceRole.Unknown || !i.Info.LastPollSuccessful)).ToList();
             // In the single server view, everything is top level
-            Heads = View == RedisViews.Server ? Instances.ToList() : Masters.Where(m => m.SlaveCount > 0).ToList();
-            StandAloneMasters = View == RedisViews.Server ? new List<RedisInstance>() : Masters.Where(m => m.SlaveCount == 0 && !Missing.Contains(m)).ToList();
+            Heads = View == RedisViews.Server ? Instances.ToList() : Masters.Where(m => m.ReplicaCount > 0).ToList();
+            StandAloneMasters = View == RedisViews.Server ? new List<RedisInstance>() : Masters.Where(m => m.ReplicaCount == 0 && !Missing.Contains(m)).ToList();
         }
     }
 }

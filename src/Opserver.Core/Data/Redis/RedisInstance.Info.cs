@@ -49,9 +49,9 @@ namespace Opserver.Data.Redis
                 var lastRole = Replication?.RedisInstanceRole;
                 // If we think we're a master and the last poll failed - look to other nodes for info
                 if (!Info.LastPollSuccessful && lastRole == RedisInfo.RedisInstanceRole.Master
-                    && Module.Instances.Any(r => r.SlaveInstances.Any(s => s == this)))
+                    && Module.Instances.Any(r => r.ReplicaInstances.Any(s => s == this)))
                 {
-                    return RedisInfo.RedisInstanceRole.Slave;
+                    return RedisInfo.RedisInstanceRole.Replica;
                 }
                 return lastRole ?? RedisInfo.RedisInstanceRole.Unknown;
             }
@@ -61,13 +61,13 @@ namespace Opserver.Data.Redis
             Role switch
             {
                 RedisInfo.RedisInstanceRole.Master => "Master",
-                RedisInfo.RedisInstanceRole.Slave => "Slave",
+                RedisInfo.RedisInstanceRole.Replica => "Replica",
                 _ => "Unknown",
             };
 
         public bool IsMaster => Role == RedisInfo.RedisInstanceRole.Master;
-        public bool IsSlave => Role == RedisInfo.RedisInstanceRole.Slave;
-        public bool IsSlaving => IsSlave && (Replication.MasterLinkStatus != "up" || Info.Data?.Replication?.MastSyncLeftBytes > 0);
+        public bool IsReplica => Role == RedisInfo.RedisInstanceRole.Replica;
+        public bool IsReplicating => IsReplica && (Replication.MasterLinkStatus != "up" || Info.Data?.Replication?.MastSyncLeftBytes > 0);
 
         public RedisInstance TopMaster
         {
@@ -85,31 +85,31 @@ namespace Opserver.Data.Redis
         public RedisInstance Master =>
             Replication?.MasterHost.HasValue() == true
             ? Module.GetInstance(Replication.MasterHost, Replication.MasterPort)
-            : Module.Instances.Find(i => i.SlaveInstances.Contains(this));
+            : Module.Instances.Find(i => i.ReplicaInstances.Contains(this));
 
-        public int SlaveCount => Replication?.ConnectedSlaves ?? 0;
+        public int ReplicaCount => Replication?.ConnectedReplicas ?? 0;
 
-        public int TotalSlaveCount
+        public int TotalReplicaCount
         {
-            get { return SlaveCount + (SlaveCount > 0 && SlaveInstances != null ? SlaveInstances.Sum(s => s?.TotalSlaveCount ?? 0) : 0); }
+            get { return ReplicaCount + (ReplicaCount > 0 && ReplicaInstances != null ? ReplicaInstances.Sum(s => s?.TotalReplicaCount ?? 0) : 0); }
         }
 
-        public List<RedisInfo.RedisSlaveInfo> SlaveConnections => Replication?.SlaveConnections;
+        public List<RedisInfo.RedisReplicaInfo> ReplicaConnections => Replication?.ReplicaConnections;
 
-        public List<RedisInstance> SlaveInstances
+        public List<RedisInstance> ReplicaInstances
         {
             get
             {
-                return Info.LastPollSuccessful ? (Replication?.SlaveConnections.Select(s => Module.GetInstance(s)).Where(s => s != null).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
+                return Info.LastPollSuccessful ? (Replication?.ReplicaConnections.Select(s => Module.GetInstance(s)).Where(s => s != null).ToList() ?? new List<RedisInstance>()) : new List<RedisInstance>();
                 // If we can't poll this server, ONLY trust the other nodes we can poll
                 //return AllInstances.Where(i => i.Master == this).ToList();
             }
         }
 
-        public List<RedisInstance> GetAllSlavesInChain()
+        public List<RedisInstance> GetAllReplicasInChain()
         {
-            var slaves = SlaveInstances;
-            return slaves.Union(slaves.SelectMany(i => i?.GetAllSlavesInChain() ?? Enumerable.Empty<RedisInstance>())).Distinct().ToList();
+            var replicas = ReplicaInstances;
+            return replicas.Union(replicas.SelectMany(i => i?.GetAllReplicasInChain() ?? Enumerable.Empty<RedisInstance>())).Distinct().ToList();
         }
 
         public class RedisInfoSection

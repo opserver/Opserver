@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		global.json = global.json
 		nuget.config = nuget.config
 		readme.md = readme.md
-		WebEssentials-Settings.json = WebEssentials-Settings.json
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opserver.Web", "src\Opserver.Web\Opserver.Web.csproj", "{B3D85A10-C7B4-4254-B387-688EF4C138EB}"
@@ -40,6 +39,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{79E50956
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opserver.Tests", "tests\Opserver.Tests\Opserver.Tests.csproj", "{11819295-F035-4298-AAF3-3D1C76BF1480}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Docs", "docs\Docs.csproj", "{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -58,6 +59,8 @@ Global
 		{11819295-F035-4298-AAF3-3D1C76BF1480}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11819295-F035-4298-AAF3-3D1C76BF1480}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11819295-F035-4298-AAF3-3D1C76BF1480}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

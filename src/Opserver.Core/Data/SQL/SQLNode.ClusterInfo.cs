@@ -85,7 +85,7 @@ Select member_name MemberName,
 
             private IPNet _networkIPNet;
             public IPNet NetworkIPNet =>
-                _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, NetworkSubnetPrefixLength);
+                _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, (byte)NetworkSubnetPrefixLength);
 
             public string GetFetchSQL(Version v) => @"
 Select member_name MemberName,

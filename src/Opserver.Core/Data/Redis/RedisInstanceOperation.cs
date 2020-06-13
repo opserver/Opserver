@@ -16,8 +16,8 @@ namespace Opserver.Data.Redis
                 case InstanceCommandType.MakeMaster:
                     var result = Instance.PromoteToMaster();
                     return Task.FromResult(result);
-                case InstanceCommandType.SlaveTo:
-                    return Instance.SlaveToAsync(NewMaster.HostAndPort);
+                case InstanceCommandType.ReplicateFrom:
+                    return Instance.ReplicateFromAsync(NewMaster.HostAndPort);
                 default:
                     throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));
             }
@@ -33,9 +33,9 @@ namespace Opserver.Data.Redis
                 {
                     case InstanceCommandType.MakeMaster:
                         return MakeMaster(opee);
-                    case InstanceCommandType.SlaveTo:
+                    case InstanceCommandType.ReplicateFrom:
                         var newMaster = module.Instances.Find(i => i.UniqueKey == parts[2]);
-                        return SlaveTo(opee, newMaster);
+                        return ReplicateFrom(opee, newMaster);
                     default:
                         throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));
                 }
@@ -47,7 +47,7 @@ namespace Opserver.Data.Redis
             Command switch
             {
                 InstanceCommandType.MakeMaster => $"{InstanceCommandType.MakeMaster}|{Instance.UniqueKey}",
-                InstanceCommandType.SlaveTo => $"{InstanceCommandType.SlaveTo}|{Instance.UniqueKey}|{NewMaster.UniqueKey}",
+                InstanceCommandType.ReplicateFrom => $"{InstanceCommandType.ReplicateFrom}|{Instance.UniqueKey}|{NewMaster.UniqueKey}",
                 _ => throw new ArgumentOutOfRangeException(nameof(InstanceCommandType)),
             };
 
@@ -58,10 +58,10 @@ namespace Opserver.Data.Redis
                 Instance = instance
             };
 
-        public static RedisInstanceOperation SlaveTo(RedisInstance instance, RedisInstance newMaster) =>
+        public static RedisInstanceOperation ReplicateFrom(RedisInstance instance, RedisInstance newMaster) =>
             new RedisInstanceOperation
             {
-                Command = InstanceCommandType.SlaveTo,
+                Command = InstanceCommandType.ReplicateFrom,
                 Instance = instance,
                 NewMaster = newMaster
             };
@@ -70,6 +70,6 @@ namespace Opserver.Data.Redis
     public enum InstanceCommandType
     {
         MakeMaster,
-        SlaveTo,
+        ReplicateFrom,
     }
 }

@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Opserver.Data;
 using Opserver.Helpers;
 using Opserver.Security;
@@ -38,7 +36,8 @@ namespace Opserver
                         options.LoginPath = "/login";
                         options.LogoutPath = "/logout";
                     });
-            services.AddHttpContextAccessor()
+            services.AddResponseCompression()
+                    .AddHttpContextAccessor()
                     .AddMemoryCache()
                     .AddExceptional(
                 _configuration.GetSection("Exceptional"),
@@ -112,7 +111,17 @@ namespace Opserver
             IEnumerable<StatusModule> modules
         )
         {
-            appBuilder.UseStaticFiles()
+            appBuilder.UseResponseCompression()
+                      .UseStaticFiles(new StaticFileOptions
+                      {
+                          OnPrepareResponse = ctx =>
+                          {
+                              if (ctx.Context.Request.Query.ContainsKey("v")) // If cache-breaker versioned, cache for a year
+                              {
+                                  ctx.Context.Response.Headers[HeaderNames.CacheControl] = "public,max-age=31536000";
+                              }
+                          }
+                      })
                       .UseExceptional()
                       .UseRouting()
                       .UseMiniProfiler()

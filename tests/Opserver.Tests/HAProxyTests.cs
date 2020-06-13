@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Opserver.Data.HAProxy;
-using Opserver.Security;
 using Xunit;
 
 namespace Opserver.Tests

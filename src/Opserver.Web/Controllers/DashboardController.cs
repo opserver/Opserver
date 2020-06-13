@@ -11,6 +11,7 @@ using Opserver.Views.Dashboard;
 
 namespace Opserver.Controllers
 {
+    [OnlyAllow(DashboardRoles.Viewer)]
     public partial class DashboardController : StatusController<DashboardModule>
     {
         public DashboardController(DashboardModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
@@ -25,7 +26,7 @@ namespace Opserver.Controllers
                 Filter = q,
                 IsStartingUp = Module.AnyDoingFirstPoll
             };
-            return View(Request.IsAjax() ? "Dashboard.Table" : "Dashboard", vd);
+            return Request.IsAjax() ? PartialView("Dashboard.Table", vd) : (ActionResult)View("Dashboard.Table", vd);
         }
 
         private List<Node> GetNodes(string search) =>
@@ -101,8 +102,8 @@ namespace Opserver.Controllers
             var n = Module.GetNodeByName(node);
             return type switch
             {
-                "hardware" => View("Node.Hardware", n),
-                "network" => View("Node.Network", n),
+                "hardware" => PartialView("Node.Hardware", n),
+                "network" => PartialView("Node.Network", n),
                 _ => ContentNotFound("Unknown summary view requested"),
             };
         }
@@ -137,7 +138,7 @@ namespace Opserver.Controllers
                 }
             }
 
-            return View("Node.Graph", vd);
+            return PartialView("Node.Graph", vd);
         }
 
         private static async Task PopulateModel(NodeGraphModel vd, string type, string subId)

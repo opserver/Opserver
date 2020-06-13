@@ -32,12 +32,12 @@ namespace Opserver.Controllers
         }
 
         [Route("redis/instance/actions/{node}/make-master"), HttpPost, OnlyAllow(RedisRoles.Admin)]
-        public Task<ActionResult> PromoteToMaster(string node) => Deslave(node, false);
+        public Task<ActionResult> PromoteToMaster(string node) => Dereplicate(node, false);
 
         [Route("redis/instance/actions/{node}/make-master-promote"), HttpPost, OnlyAllow(RedisRoles.Admin)]
-        public Task<ActionResult> PromoteToMasterTiebreaker(string node) => Deslave(node, true);
+        public Task<ActionResult> PromoteToMasterTiebreaker(string node) => Dereplicate(node, true);
 
-        private async Task<ActionResult> Deslave(string node, bool promote)
+        private async Task<ActionResult> Dereplicate(string node, bool promote)
         {
             var i = Module.GetInstance(node);
             if (i == null) return JsonNotFound();
@@ -50,7 +50,7 @@ namespace Opserver.Controllers
                 {
                     await i.SetSERedisTiebreakerAsync();
                     await oldMaster?.ClearSERedisTiebreakerAsync();
-                    await oldMaster?.SlaveToAsync(i.HostAndPort);
+                    await oldMaster?.ReplicateFromAsync(i.HostAndPort);
                 }
                 else
                 {
@@ -84,10 +84,10 @@ namespace Opserver.Controllers
             }
         }
 
-        [Route("redis/instance/actions/{node}/slave-to"), HttpPost, OnlyAllow(RedisRoles.Admin)]
-        public Task<ActionResult> SlaveInstance(string node, string newMaster)
+        [Route("redis/instance/actions/{node}/replicate-from"), HttpPost, OnlyAllow(RedisRoles.Admin)]
+        public Task<ActionResult> ReplicateInstance(string node, string newMaster)
         {
-            return PerformInstanceAction(node, i => i.SlaveToAsync(newMaster), poll: true);
+            return PerformInstanceAction(node, i => i.ReplicateFromAsync(newMaster), poll: true);
         }
 
         [Route("redis/server/actions/preview"), HttpPost, OnlyAllow(RedisRoles.Admin)]

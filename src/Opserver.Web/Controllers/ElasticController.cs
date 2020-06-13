@@ -46,7 +46,7 @@ namespace Opserver.Controllers
             var vd = GetViewData(cluster, node);
             return type switch
             {
-                "settings" => View("Node.Settings", vd),
+                "settings" => PartialView("Node.Settings", vd),
                 _ => ContentNotFound("Unknown modal view requested"),
             };
         }
@@ -57,7 +57,7 @@ namespace Opserver.Controllers
             var vd = GetViewData(cluster, node);
             return type switch
             {
-                "indexes" => View("Cluster.Indexes", vd),
+                "indexes" => PartialView("Cluster.Indexes", vd),
                 _ => ContentNotFound("Unknown modal view requested"),
             };
         }
@@ -68,7 +68,7 @@ namespace Opserver.Controllers
             var vd = GetViewData(cluster, node, index);
             return type switch
             {
-                "shards" => View("Cluster.Shards", vd),
+                "shards" => PartialView("Cluster.Shards", vd),
                 _ => ContentNotFound("Unknown modal view requested"),
             };
         }

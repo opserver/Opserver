@@ -123,7 +123,6 @@ namespace Opserver.Data.HAProxy
     [Flags]
     public enum Action
     {
-        // ReSharper disable InconsistentNaming
         None = 0,
         [Description("ready")] // Set State to READY
         Ready = 1 << 1,
@@ -151,6 +150,5 @@ namespace Opserver.Data.HAProxy
         AgentForceDown = 1 << 12,
         [Description("shutdown")] // Kill Sessions
         KillSessions = 1 << 13,
-        // ReSharper restore InconsistentNaming
     }
 }

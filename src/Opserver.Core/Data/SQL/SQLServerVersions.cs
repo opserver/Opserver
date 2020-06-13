@@ -84,5 +84,10 @@ namespace Opserver.Data.SQL
         {
             public static readonly Version RTM = new Version(14, 0);
         }
+
+        public static class SQL2019
+        {
+            public static readonly Version RTM = new Version(15, 0);
+        }
     }
 }

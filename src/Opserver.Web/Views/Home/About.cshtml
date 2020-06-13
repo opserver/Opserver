@@ -82,6 +82,10 @@
                     Sync: @cacheStats.Item1.ToComma(), Async: @cacheStats.Item2.ToComma(), Errored: @cacheStats.Item3.ToComma()
                     <label>Get-Set Cache</label>
                 </div>
+                <div class="value-block col-xs-12">
+                    @System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription
+                    <label>Framework</label>
+                </div>
             </div>
         </div>
         <div class="panel panel-default">

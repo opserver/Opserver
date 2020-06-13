@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Microsoft.Extensions.Primitives;
@@ -11,6 +13,7 @@ namespace Opserver.Security
     {
         public abstract string ProviderName { get; }
         protected SecuritySettings Settings { get; set; }
+        public virtual bool IsConfigured => true;
         public readonly List<IPNet> InternalNetworks;
 
         protected SecurityProvider(SecuritySettings settings)
@@ -37,10 +40,17 @@ namespace Opserver.Security
         {
             var settings = module.SecuritySettings;
             // User has direct access, global access, or is an admin
-            return settings != null && (InGroups(user, settings.ViewGroups)
-                                        || InGroups(user, Settings.ViewEverythingGroups)
+            return settings != null && (InGroups(user, Parse(settings.ViewGroups))
+                                        || InGroups(user, Parse(Settings.ViewEverythingGroups))
                                         || InAdminGroups(user, module));
         }
+
+        // The theory here is that there won't be that many unqiue combinations here.
+        private readonly ConcurrentDictionary<string, string[]> _parsedGroups = new ConcurrentDictionary<string, string[]>();
+        private string[] Parse(string groups) =>
+            groups.IsNullOrEmpty()
+            ? Array.Empty<string>()
+            : _parsedGroups.GetOrAdd(groups, groups => groups?.Split(StringSplits.Comma_SemiColon) ?? Array.Empty<string>());
 
         /// <summary>
         /// Checks if a request's API key is valid.
@@ -55,13 +65,13 @@ namespace Opserver.Security
         {
             var settings = module.SecuritySettings;
             // User either has direct access or via global
-            return settings != null && (InGroups(user, settings.AdminGroups) || InGroups(user, Settings.AdminEverythingGroups));
+            return settings != null && (InGroups(user, Parse(settings.AdminGroups)) || InGroups(user, Parse(Settings.AdminEverythingGroups)));
         }
 
-        public virtual bool InGroups(User user, string groupNames) => false;
+        public virtual bool InGroups(User user, string[] groupNames) => false;
         public abstract bool ValidateUser(string userName, string password);
 
-        public bool IsGlobalAdmin(User user) => InGroups(user, Settings.AdminEverythingGroups);
+        public bool IsGlobalAdmin(User user) => InGroups(user, Parse(Settings.AdminEverythingGroups));
 
         public virtual void PurgeCache() { }
 

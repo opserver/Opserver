@@ -1,10 +1,11 @@
 [
   {
     "inputFiles": [
-      "Content/js/jquery-1.11.3.min.js",
-      "Content/bootstrap/js/bootstrap.min.js",
-      "Content/js/plugins/*.js"
+      "ContentSource/bootstrap/js/bootstrap.min.js",
+      "ContentSource/js/plugins/*.js",
+      "ContentSource/js/Scripts.js"
     ],
-    "outputFileName": "wwwroot/Content/js/plugins.js"
+    "outputFileName": "wwwroot/Content/js/bundle.js",
+    "sourceMap": true
   }
 ]

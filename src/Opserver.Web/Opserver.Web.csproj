@@ -2,12 +2,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Opserver</RootNamespace>
-    <AssemblyName>Opserver</AssemblyName>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.0" />
+    <PackageReference Include="BuildBundlerMinifier" Version="3.2.435" PrivateAssets="all" />
+    <PackageReference Include="BuildWebCompiler" Condition="'$(OS)' == 'Windows_NT'" Version="1.12.405" PrivateAssets="all" />
     <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.1.0" />
     <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.1.0" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.7.0" />

@@ -7,6 +7,7 @@ namespace Opserver.Security
     public class SecurityManager
     {
         public SecurityProvider CurrentProvider { get; }
+        public bool IsConfigured => CurrentProvider != null && !(CurrentProvider is UnconfiguredProvider);
 
         public SecurityManager(IOptions<SecuritySettings> settings, IMemoryCache cache)
         {
@@ -17,10 +18,11 @@ namespace Opserver.Security
         private SecurityProvider GetProvider(SecuritySettings settings, IMemoryCache cache) =>
             settings.Provider switch
             {
+                "AD" => new ActiveDirectoryProvider(settings, cache),
                 "ActiveDirectory" => new ActiveDirectoryProvider(settings, cache),
                 "EveryonesAnAdmin" => new EveryonesAnAdminProvider(settings),
-                //case "EveryonesReadOnly":
-                _ => new EveryonesReadOnlyProvider(settings),
+                "EveryonesReadOnly" => new EveryonesReadOnlyProvider(settings),
+                _ => new UnconfiguredProvider(settings)
             };
     }
 }

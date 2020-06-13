@@ -9,13 +9,13 @@ namespace Opserver.Data.Redis
     public partial class RedisInstance
     {
         /// <summary>
-        /// Slave this instance to another instance.
+        /// Replicate to this instance from another instance.
         /// </summary>
-        /// <param name="address">The address of the <see cref="RedisInstance"/> to slave to.</param>
-        public async Task<bool> SlaveToAsync(string address)
+        /// <param name="address">The address of the <see cref="RedisInstance"/> to replicate from.</param>
+        public async Task<bool> ReplicateFromAsync(string address)
         {
             var newMaster = EndPointCollection.TryParse(address);
-            await _connection.GetSingleServer().SlaveOfAsync(newMaster);
+            await _connection.GetSingleServer().ReplicaOfAsync(newMaster);
             var newMasterInstance = Module.GetInstance(address);
             if (newMasterInstance != null)
             {
@@ -113,14 +113,14 @@ namespace Opserver.Data.Redis
         }
 
         /// <summary>
-        /// List of targets this instance may be slaved to, does not include:
+        /// List of targets this instance may be replicated from, does not include:
         ///  - Current Master
-        ///  - Any slaves in the chain (circles bad, k?)
+        ///  - Any replicas in the chain (circles bad, k?)
         ///  - Itself
         /// </summary>
         public List<RedisInstance> RecommendedMasterTargets =>
             Module.Instances
-            .Where(s => s.Port == Port && s.Name == Name && s.Host != Host && !GetAllSlavesInChain().Contains(s) && Master != s)
+            .Where(s => s.Port == Port && s.Name == Name && s.Host != Host && !GetAllReplicasInChain().Contains(s) && Master != s)
             .ToList();
     }
 }

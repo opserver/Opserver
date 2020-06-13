@@ -11,18 +11,18 @@
     {
         var sb = StringBuilderCache.Get();
         var masters = instances.Count(i => i.IsMaster);
-        var slaves = instances.Count(i => i.IsSlave);
+        var replicas = instances.Count(i => i.IsReplica);
         if (masters > 0)
         {
             sb.Append(masters.Pluralize("master"));
         }
-        if (slaves >0)
+        if (replicas >0)
         {
             if (sb.Length > 0)
             {
                 sb.Append(", ");
             }
-            sb.Append(slaves.Pluralize("slave"));
+            sb.Append(replicas.Pluralize("replica"));
         }
         return sb.ToStringRecycle();
     }
@@ -34,14 +34,14 @@
             case RedisInfo.RedisInstanceRole.Master:
                 <span class="text-muted">(<span class="text-primary">master</span>)</span>
                 return null;
-            case RedisInfo.RedisInstanceRole.Slave:
-                if (instance.IsSlaving)
+            case RedisInfo.RedisInstanceRole.Replica:
+                if (instance.IsReplicating)
                 {
                     <span class="text-muted">(<b class="text-success">slaving</b> to <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
                 }
                 else
                 {
-                    <span class="text-muted">(slave of <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
+                    <span class="text-muted">(replica of <a href="#/redis/actions/@instance.Master.Host.HostName.UrlEncode()">@instance.Master.Host</a>)</span>
                 }
                 return null;
             default:
@@ -119,7 +119,7 @@
                 <div class="panel-heading">Replication Operations</div>
                 <div class="panel-body js-server-actions-selection" data-preview-url="@Url.Action(nameof(RedisController.ServerActionPreview), "Redis")">
                     <div class="list-group list-group-condensed">
-                        @if (s.Instances.Count(i => i.IsSlave) > 0)
+                        @if (s.Instances.Count(i => i.IsReplica) > 0)
                         {
                             <a class="list-group-item js-redis-host-list">
                                 <span class="text-primary"><i class="fa fa-arrow-up" aria-hidden="true"></i> Make Standalone</span>
@@ -130,7 +130,7 @@
                                     @foreach (var i in s.Instances)
                                     {
                                         var disabled = i.IsMaster;
-                                        var defaultChecked = i.IsSlave;
+                                        var defaultChecked = i.IsReplica;
                                         <div class="checkbox col-md-12">
                                             <label title="@(disabled ? "Already a master" : null)">
                                                 <input type="checkbox" name="operations" value="@InstanceCommandType.MakeMaster|@i.UniqueKey" checked="@defaultChecked" disabled="@disabled"> @i.IconSpan() <span class="text-muted">@i.Port:</span> @i.Name
@@ -143,10 +143,10 @@
                         @foreach (var host in s.ReplicationGroup.Hosts.Where(h => h != s))
                         {
                             var sameRegion = s.InSameRegionAs(host);
-                            if (s.CanSlaveTo(host, out var reason))
+                            if (s.CanReplicateFrom(host, out var reason))
                             {
                                 <a class="list-group-item js-redis-host-list">
-                                    Slave to @host.IconSpan() @host.HostName
+                                    Replicate from @host.IconSpan() @host.HostName
                                     @if (!sameRegion)
                                     {
                                         <span class="text-muted">(cross-region)</span>
@@ -162,11 +162,11 @@
                                             {
                                                 continue;
                                             }
-                                            var disabled = i.SlaveInstances.Any(si => si.Host == Model);
+                                            var disabled = i.ReplicaInstances.Any(si => si.Host == Model);
                                             var defaultChecked = sameRegion || i.ReplicatesCrossRegion;
                                             <div class="checkbox col-md-12">
                                                 <label title="@(disabled ? "Already replicating" : null)">
-                                                    <input type="checkbox" name="operations" value="@InstanceCommandType.SlaveTo|@matching.UniqueKey|@i.UniqueKey" checked="@defaultChecked" disabled="@disabled"> @i.IconSpan() <span class="text-muted">@i.Port:</span> @i.Name
+                                                    <input type="checkbox" name="operations" value="@InstanceCommandType.ReplicateFrom|@matching.UniqueKey|@i.UniqueKey" checked="@defaultChecked" disabled="@disabled"> @i.IconSpan() <span class="text-muted">@i.Port:</span> @i.Name
                                                 </label>
                                             </div>
                                         }

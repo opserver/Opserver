@@ -1,6 +1,5 @@
 ﻿@model ElasticCluster
 @{
-    Layout = null;
     if (Model == null) { return; }
     var indexes = Model.HealthStatus?.Data?.Indexes?.Values;
     var indexStats = Model.IndexStats.Data?.Indexes;

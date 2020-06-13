@@ -138,7 +138,7 @@ namespace Opserver.Controllers
             var errors = await CurrentStore.GetErrorsAsync(search);
             var vd = GetModel(errors);
             vd.SearchParams = search;
-            return View("Exceptions.Table.Rows", vd);
+            return PartialView("Exceptions.Table.Rows", vd);
         }
 
         [Route("exceptions/detail")]
@@ -260,7 +260,7 @@ namespace Opserver.Controllers
         public ActionResult JiraActions(string appName)
         {
             var issues = Module.Settings.Jira.GetActionsForApplication(appName);
-            return View("Exceptions.Jira", issues);
+            return PartialView("Exceptions.Jira", issues);
         }
 
         [Route("exceptions/jiraaction"), HttpGet, OnlyAllow(ExceptionsRoles.Admin)]
