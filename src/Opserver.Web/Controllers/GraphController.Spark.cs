@@ -211,7 +211,7 @@ namespace Opserver.Controllers
                 {
                     lookups.Add(getPoints(node).ContinueWith(t =>
                     {
-                        if (!t.IsFaulted)
+                        if (!t.IsFaulted && !t.IsCanceled)
                         {
                             pointsLookup[node.Id] = t.Result;
                             maxLookup[node.Id] = getMax(node, t.Result);
