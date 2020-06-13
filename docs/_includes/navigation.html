@@ -1,0 +1,9 @@
+<ul class="nav nav-list">
+    <li class="nav-header">Getting Started</li>
+    <li {% if page.url == "/" %}class="active"{% endif %}><a href="{{ site.baseurl }}/">Overview</a></li>
+    <li {% if page.url == "/Configuration.html" %}class="active"{% endif %}><a href="{{ site.baseurl }}/Configuration">Configuration</a></li>
+    <li {% if page.url == "/Releases.html" %}class="active"{% endif %}><a href="{{ site.baseurl }}/Releases">Release Notes</a></li>
+
+    <li class="nav-header">How-To</li>
+    <li {% if page.url == "/HowTo/UpgradeFromV1.html" %}class="active"{% endif %}><a href="{{ site.baseurl }}/HowTo/UpgradeFromV1">Upgrade From V1</a></li>
+</ul>
