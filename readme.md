@@ -7,7 +7,7 @@ Opserver is a monitoring system originally from the team at [Stack Exchange](htt
 * SQL Clusters & Single Instances 
 * Redis 
 * Elasticsearch 
-* Exception Logs (from StackExchange.Exceptional) 
+* Exception Logs (from [StackExchange.Exceptional](https://github.com/NickCraver/StackExchange.Exceptional)) 
 * HAProxy
 * PagerDuty
 * CloudFlare DNS
