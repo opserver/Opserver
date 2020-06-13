@@ -116,6 +116,12 @@ namespace Opserver.Data.Dashboard.Providers
                 {
                     _logger.LogInformation("Refreshing day cache...");
 
+                    // yearp, we're going and fetching the entire day
+                    // every time... we could be smarter here by keeping
+                    // a persistent SignalFlowClient around and streaming in
+                    // results to the cached data to keep it perpetually upto date
+                    // but, for now, simplicity wins. Here we go fetch the 24 hour
+                    // window for all the metrics the dashboard cares about in one hit.
                     var sw = Stopwatch.StartNew();
                     var resolution = TimeSpan.FromMinutes(10);
                     var endDate = DateTime.UtcNow.RoundDown(resolution);
