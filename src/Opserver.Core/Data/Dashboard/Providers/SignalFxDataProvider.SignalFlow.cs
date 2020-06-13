@@ -622,7 +622,11 @@ namespace Opserver.Data.Dashboard.Providers
                     });
 
                 // wait for the "authenticated" message
-                await WaitOneAsync<AuthenticatedMessage>();
+                var response = await WaitOneAsync<AuthenticatedMessage>();
+                if (response == null)
+                {
+                    throw new SignalFlowException("Unable to authenticate to SignalFlow endpoint.");
+                }
             }
 
             public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, TimeSpan resolution, DateTime startDate, DateTime endDate)
@@ -715,6 +719,20 @@ namespace Opserver.Data.Dashboard.Providers
                         ex.LogNoContext();
                     }
                 }
+
+                foreach (var responseChannel in _responseChannels.Values)
+                {
+                    try
+                    {
+                        responseChannel.Writer.Complete();
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.LogNoContext();
+                    }
+                }
+
+                _responseChannels.Clear();
             }
 
             private async ValueTask<T> WaitOneAsync<T>() where T : SignalFlowMessage
