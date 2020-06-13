@@ -177,14 +177,18 @@ namespace Opserver.Data.Dashboard.Providers
                             // tags for things like network interfaces
                             if (tag.Key == "plugin_instance" && metricMetadata.Properties.Dimensions.TryGetValue("plugin", out var plugin) && plugin.ToString().Equals("interface"))
                             {
-                                metricMetadata.Properties.Dimensions["interface"] = tag.Value;
+                                tagBuilder["interface"] = tag.Value.ToString();
                                 continue;
                             }
 
-                            var tagValue = tag.Value?.ToString();
-                            if (tagValue.HasValue())
+                            // overrides from above tag precedence
+                            if (!tagBuilder.ContainsKey(tag.Key))
                             {
-                                tagBuilder[tag.Key] = tagValue;
+                                var tagValue = tag.Value?.ToString();
+                                if (tagValue.HasValue())
+                                {
+                                    tagBuilder[tag.Key] = tagValue;
+                                }
                             }
                         }
 
