@@ -52,8 +52,9 @@
     {
         if (n.Volumes != null)
         {
-            foreach (var vol in n.Volumes)
+            for (var i = 0; i < n.Volumes.Count && i < 10; i++)
             {
+                var vol = n.Volumes[i];
                 <div class="progress vertical" title="@vol.PrettyName: @(vol.PercentUsed?.ToString("n2"))% used (@vol.PrettyUsed/@vol.PrettySize)">
                     <div class="progress-bar @vol.SpaceStatus.ProgressBarClass()" style="height: @(vol.PercentUsed?.ToString("n2",CultureInfo.InvariantCulture))%"></div>
                 </div>

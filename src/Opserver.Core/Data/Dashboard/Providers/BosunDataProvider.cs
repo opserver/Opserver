@@ -178,24 +178,6 @@ namespace Opserver.Data.Dashboard.Providers
             return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
         }
 
-        /// <summary>
-        /// Determines if the passed in dates are approximately the last 24 hours, 
-        /// so that we can share the day cache more efficiently
-        /// </summary>
-        /// <param name="start">Start date of the range</param>
-        /// <param name="end">Optional end date of the range</param>
-        /// <param name="fuzzySeconds">How many seconds to allow on each side of *exactly* 24 hours ago to be a match</param>
-        /// <returns></returns>
-        public static bool IsApproximatelyLast24Hrs(DateTime? start, DateTime? end, int fuzzySeconds = 90)
-        {
-            if (!start.HasValue) return false;
-            if (Math.Abs((DateTime.UtcNow.AddDays(-1) - start.Value).TotalSeconds) <= fuzzySeconds)
-            {
-                return !end.HasValue || Math.Abs((DateTime.UtcNow - end.Value).TotalSeconds) <= fuzzySeconds;
-            }
-            return false;
-        }
-
         private List<DoubleGraphPoint> JoinNetwork(List<PointSeries> allSeries)
         {
             var inData = allSeries?.FirstOrDefault(s => s.Tags[Tags.Direction] == TagValues.In)?.PointData;

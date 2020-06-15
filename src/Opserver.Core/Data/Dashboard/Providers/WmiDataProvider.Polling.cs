@@ -53,7 +53,7 @@ namespace Opserver.Data.Dashboard.Providers
                 {
                     var tasks = new[] { UpdateNodeDataAsync(), GetAllInterfacesAsync(), GetAllVolumesAsync(), GetServicesAsync() };
                     await Task.WhenAll(tasks);
-                    SetReferences();
+                    AfterInitialize();
                     ClearSummaries();
 
                     // first run, do a follow-up poll for all stats on the first pass

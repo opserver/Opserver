@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Opserver.Data.Dashboard.Providers;
 using Opserver.Helpers;
 using System;
@@ -17,7 +18,7 @@ namespace Opserver.Data.Dashboard
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
-        public DashboardModule(IConfiguration config, PollingService poller, AddressCache addressCache) : base(config, poller)
+        public DashboardModule(IConfiguration config, ILoggerFactory loggerFactory, PollingService poller, AddressCache addressCache) : base(config, poller)
         {
             AddressCache = addressCache;
             var providers = Settings.Providers;
@@ -40,6 +41,8 @@ namespace Opserver.Data.Dashboard
                 Providers.Add(new OrionDataProvider(this, providers.Orion));
             if (providers.WMI != null)
                 Providers.Add(new WmiDataProvider(this, providers.WMI));
+            if (providers.SignalFx != null)
+                Providers.Add(new SignalFxDataProvider(this, providers.SignalFx, loggerFactory.CreateLogger<SignalFxDataProvider>()));
 
             Providers.ForEach(p => p.TryAddToGlobalPollers());
 

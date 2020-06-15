@@ -74,6 +74,18 @@ namespace Opserver
             set => _servicesPatternRegEx = value;
         }
 
+        /// <summary>
+        /// The pattern to match ignored interfaces with.
+        /// </summary>
+        public string IgnoredInterfacePattern { get; set; }
+
+        private Regex _ignoredInterfaceRegEx;
+        public Regex IgnoredInterfaceRegEx
+        {
+            get => _ignoredInterfaceRegEx ??= GetPatternMatcher(IgnoredInterfacePattern);
+            set => _ignoredInterfaceRegEx = value;
+        }
+
         protected static Regex GetPatternMatcher(string pattern) =>
             pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -108,6 +120,18 @@ namespace Opserver
             {
                 get => _primaryInterfacePatternRegEx ??= GetPatternMatcher(PrimaryInterfacePattern);
                 set => _primaryInterfacePatternRegEx = value;
+            }
+
+            /// <summary>
+            /// The pattern used to ignore node interfaces.
+            /// </summary>
+            public string IgnoredInterfacePattern { get; set; }
+
+            private Regex _ignoredInterfaceRegEx;
+            public Regex IgnoredInterfaceRegEx
+            {
+                get => _ignoredInterfaceRegEx ??= GetPatternMatcher(IgnoredInterfacePattern);
+                set => _ignoredInterfaceRegEx = value;
             }
 
             protected static Regex GetPatternMatcher(string pattern) =>
@@ -184,6 +208,18 @@ namespace Opserver
                 set => _primaryInterfacePatternRegEx = value;
             }
 
+            /// <summary>
+            /// The pattern used to ignore node interfaces.
+            /// </summary>
+            public string IgnoredInterfacePattern { get; set; }
+
+            private Regex _ignoredInterfaceRegEx;
+            public Regex IgnoredInterfaceRegEx
+            {
+                get => _ignoredInterfaceRegEx ??= GetPatternMatcher(IgnoredInterfacePattern);
+                set => _ignoredInterfaceRegEx = value;
+            }
+
             protected static Regex GetPatternMatcher(string pattern) =>
                 pattern.IsNullOrEmpty() ? null : new Regex(pattern, RegexOptions.IgnoreCase | RegexOptions.Singleline | RegexOptions.Compiled);
 
@@ -237,6 +273,7 @@ namespace Opserver
         decimal? MemoryCriticalPercent { get; set; }
         decimal? DiskWarningPercent { get; set; }
         decimal? DiskCriticalPercent { get; set; }
+        Regex IgnoredInterfaceRegEx { get; set; }
         Regex ServicesPatternRegEx { get; set; }
     }
 }

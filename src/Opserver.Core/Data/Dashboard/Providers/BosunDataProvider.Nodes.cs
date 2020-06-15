@@ -286,7 +286,7 @@ namespace Opserver.Data.Dashboard.Providers
                     {
                         n.LastBoot = DateTime.UtcNow.AddSeconds(-h.UptimeSeconds.Value);
                     }
-                    n.SetReferences();
+                    n.AfterInitialize();
                     nodes.Add(n);
                 }
 
