@@ -42,7 +42,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/cpu/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> CPUSparkSvg(string id)
         {
@@ -56,7 +56,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration)]
+        [ResponseCache(Duration = SparkGraphDuration, Location = ResponseCacheLocation.Client)]
         [Route("graph/cpu/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> CPUSparkSvgAll()
         {
@@ -68,7 +68,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/memory/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> MemorySpark(string id)
         {
@@ -82,7 +82,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration)]
+        [ResponseCache(Duration = SparkGraphDuration, Location = ResponseCacheLocation.Client)]
         [Route("graph/memory/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> MemorySparkSvgAll()
         {
@@ -94,7 +94,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "id" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/network/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> NetworkSpark(string id)
         {
@@ -108,7 +108,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration)]
+        [ResponseCache(Duration = SparkGraphDuration, Location = ResponseCacheLocation.Client)]
         [Route("graph/network/spark/all"), AlsoAllow(Roles.InternalRequest)]
         public Task<ActionResult> NetworkSparkSvgAll()
         {
@@ -120,7 +120,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/interface/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> InterfaceSpark(string direction, string id, string iid)
         {
@@ -137,7 +137,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/volumePerformance/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string id)
         {
@@ -151,7 +151,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/volumePerformance/{direction}/spark"), AlsoAllow(Roles.InternalRequest)]
         public async Task<ActionResult> VolumeSpark(string direction, string id, string iid)
         {
@@ -168,7 +168,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(SQLRoles.Viewer)]
-        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" })]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/sql/cpu/spark")]
         public ActionResult SQLCPUSpark(string node)
         {

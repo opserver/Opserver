@@ -88,7 +88,7 @@ namespace Opserver.Controllers
             };
         }
 
-        [ResponseCache(Duration = 5 * 1, VaryByQueryKeys = new string[] { "node", "sort", "options" })]
+        [ResponseCache(Duration = 5 * 1, VaryByQueryKeys = new string[] { "node", "sort", "options" }, Location = ResponseCacheLocation.Client)]
         [Route("sql/top")]
         public ActionResult Top(string node, SQLInstance.TopSearchOptions options)
         {

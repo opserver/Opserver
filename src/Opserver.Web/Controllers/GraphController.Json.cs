@@ -13,7 +13,7 @@ namespace Opserver.Controllers
         public static DateTime DefaultEnd => DateTime.UtcNow;
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "start", "end", "summary" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/cpu/json")]
         public async Task<ActionResult> CPUJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
@@ -45,7 +45,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "start", "end", "summary" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/memory/json")]
         public async Task<ActionResult> MemoryJson(string id, long? start = null, long? end = null, bool? summary = false)
         {
@@ -78,7 +78,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid", "start", "end", "summary" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/network/json")]
         public async Task<ActionResult> NetworkJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
         {
@@ -155,7 +155,7 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
-        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid", "start", "end", "summary" })]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "iid", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/volumePerformance/json")]
         public async Task<ActionResult> VolumePerformanceJson(string id, string iid, long? start = null, long? end = null, bool? summary = false)
         {
