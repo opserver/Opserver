@@ -95,7 +95,7 @@ namespace Opserver.Data.Dashboard.Providers
             var volumes = volumeTask.Result;
             var interfaces = interfaceTask.Result;
             var hosts = hostTask.Result;
-            var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>();
+            var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>(StringComparer.OrdinalIgnoreCase);
             foreach (var host in hosts)
             {
                 if (Module.Settings.ExcludePatternRegex?.IsMatch(host.Key) ?? false)
