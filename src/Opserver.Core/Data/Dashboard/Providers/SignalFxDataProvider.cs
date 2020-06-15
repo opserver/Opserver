@@ -49,11 +49,6 @@ namespace Opserver.Data.Dashboard.Providers
                 var nodes = new List<Node>(hosts.Count);
                 foreach (var host in hosts.Values)
                 {
-                    if (Module.Settings.ExcludePatternRegex?.IsMatch(host.Name) ?? false)
-                    {
-                        continue;
-                    }
-
                     var cpuKey = new TimeSeriesKey(host.Name, Cpu.Metric);
                     var memoryKey = new TimeSeriesKey(host.Name, Memory.Metric);
                     var cpuMetrics = metrics.GetValueOrDefault(cpuKey, new TimeSeries(cpuKey, ImmutableArray<GraphPoint>.Empty));

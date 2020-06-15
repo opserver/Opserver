@@ -98,6 +98,11 @@ namespace Opserver.Data.Dashboard.Providers
             var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>();
             foreach (var host in hosts)
             {
+                if (Module.Settings.ExcludePatternRegex?.IsMatch(host.Key) ?? false)
+                {
+                    continue;
+                }
+
                 var lastUpdated = host.Value.Max(x => x.LastUpdated);
                 var hostInterfaces = interfaces.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
                 var hostVolumes = volumes.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
