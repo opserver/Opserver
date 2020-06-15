@@ -6,7 +6,7 @@ namespace Opserver.Controllers
 {
     public partial class DashboardController
     {
-        [ResponseCache(Duration = 1, VaryByQueryKeys = new string[] { "id", "node" })]
+        [ResponseCache(Duration = 1, VaryByQueryKeys = new string[] { "id", "node" }, Location = ResponseCacheLocation.Client)]
         [Route("dashboard/node/poll/cpu")]
         public async Task<ActionResult> PollCPU(string id = null, string node = null)
         {
