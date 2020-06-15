@@ -96,9 +96,14 @@ namespace Opserver.Data.Dashboard.Providers
             var interfaces = interfaceTask.Result;
             var hosts = hostTask.Result;
             var results = ImmutableDictionary.CreateBuilder<string, SignalFxHost>(StringComparer.OrdinalIgnoreCase);
-            foreach (var host in hosts)
+            foreach (var host in hosts.OrderByDescending(x => x.Key, StringComparer.Ordinal))
             {
                 if (Module.Settings.ExcludePatternRegex?.IsMatch(host.Key) ?? false)
+                {
+                    continue;
+                }
+
+                if (results.ContainsKey(host.Key))
                 {
                     continue;
                 }
@@ -130,7 +135,7 @@ namespace Opserver.Data.Dashboard.Providers
             var dimensions = await GetDimensionsAsync("metrictimeseries", query);
             return dimensions
                 .Where(x => x.CustomProperties.Count > 0)
-                .GroupBy(x => x.CustomProperties["host"])
+                .GroupBy(x => x.CustomProperties["host"], StringComparer.OrdinalIgnoreCase)
                 .Select(
                     g =>
                     {
@@ -147,7 +152,7 @@ namespace Opserver.Data.Dashboard.Providers
             var dimensions = await GetDimensionsAsync("metrictimeseries", query);
             return dimensions
                 .Where(x => x.CustomProperties.Count > 0)
-                .GroupBy(x => x.CustomProperties["host"])
+                .GroupBy(x => x.CustomProperties["host"], StringComparer.OrdinalIgnoreCase)
                 .Select(
                     g =>
                     {
