@@ -151,7 +151,7 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 startDate = oneYearAgo;
             }
-            
+
             var endDate = end.GetValueOrDefault(utcNow);
             if (endDate > utcNow)
             {
@@ -449,7 +449,7 @@ namespace Opserver.Data.Dashboard.Providers
                         throw new SignalFlowException("Invalid value type when parsing data");
                     }
 
-                    var timeSeriesId = reader.GetBase64EncodedString(8).TrimEnd('=');
+                    var timeSeriesId = reader.GetBase64EncodedString(8).TrimEnd('=').Replace('+', '-');
                     switch ((DataMessageValueType)valueType)
                     {
                         case DataMessageValueType.Double:
