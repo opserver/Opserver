@@ -135,7 +135,8 @@ namespace Opserver.Data.Dashboard.Providers
                     var resolution = TimeSpan.FromMinutes(10);
                     var endDate = DateTime.UtcNow.RoundDown(resolution);
                     var startDate = endDate.AddHours(-24);
-                    var results = await GetMetricsAsync(_signalFlowStatements, startDate, endDate, resolution: resolution);
+                    var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                    var results = await GetMetricsAsync(_signalFlowStatements, startDate, endDate, resolution: resolution, cancellationToken: cts.Token);
                     sw.Stop();
                     _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
                     return results.GroupBy(x => x.Key).ToImmutableDictionary(x => x.Key, x => x.First());
@@ -165,9 +166,9 @@ namespace Opserver.Data.Dashboard.Providers
             return GetMetricsAsync(metrics, startDate, endDate, host: node.Id, resolution: resolution);
         }
 
-        private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, DateTime start, DateTime end, string host = "*", TimeSpan? resolution = null)
+        private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, DateTime start, DateTime end, string host = "*", TimeSpan? resolution = null, CancellationToken cancellationToken = default)
         {
-            await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger))
+            await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cancellationToken))
             {
                 await signalFlowClient.ConnectAsync();
 
@@ -613,6 +614,7 @@ namespace Opserver.Data.Dashboard.Providers
             private readonly ClientWebSocket _socket;
             private readonly Channel<SignalFlowMessage> _requestChannel;
             private readonly ConcurrentDictionary<string, Channel<SignalFlowMessage>> _responseChannels = new ConcurrentDictionary<string, Channel<SignalFlowMessage>>();
+            private readonly CancellationToken _cancellationToken;
 
             private Task _sendTask;
             private Task _receiveTask;
@@ -624,7 +626,7 @@ namespace Opserver.Data.Dashboard.Providers
             /// <remarks>
             /// The client will remain unconnected until <see cref="ConnectAsync"/> is called.
             /// </remarks>
-            public SignalFlowClient(string realm, string accessToken, ILogger logger)
+            public SignalFlowClient(string realm, string accessToken, ILogger logger, CancellationToken cancellationToken = default)
             {
                 _connectUri = new Uri($"wss://stream.{realm}.signalfx.com/v2/signalflow/connect");
                 _accessToken = accessToken;
@@ -632,6 +634,7 @@ namespace Opserver.Data.Dashboard.Providers
                 _requestChannel = Channel.CreateUnbounded<SignalFlowMessage>();
                 _responseChannels[string.Empty] = Channel.CreateUnbounded<SignalFlowMessage>();
                 _logger = logger;
+                _cancellationToken = cancellationToken;
             }
 
             /// <summary>
@@ -639,8 +642,8 @@ namespace Opserver.Data.Dashboard.Providers
             /// </summary>
             public async ValueTask ConnectAsync()
             {
-                await _socket.ConnectAsync(_connectUri, default);
-                await _requestChannel.Writer.WriteAsync(new ConnectMessage(_accessToken));
+                await _socket.ConnectAsync(_connectUri, _cancellationToken);
+                await _requestChannel.Writer.WriteAsync(new ConnectMessage(_accessToken), _cancellationToken);
 
                 // spin up send/receive tasks
                 _receiveTask = Task.Run(
@@ -684,14 +687,13 @@ namespace Opserver.Data.Dashboard.Providers
                 // generate a new channel key
                 var channelId = "channel-" + Interlocked.Increment(ref _channelId).ToString();
                 var responseChannel = _responseChannels.GetOrAdd(channelId, _ => Channel.CreateUnbounded<SignalFlowMessage>());
+                var message = new ExecuteMessage(channelId, program, resolution, startDate, endDate);
 
                 // fire off an execution request
-                await _requestChannel.Writer.WriteAsync(
-                    new ExecuteMessage(channelId, program, resolution, startDate, endDate)
-                );
+                await _requestChannel.Writer.WriteAsync(message, _cancellationToken);
 
                 // and wait for the responses!
-                while (await responseChannel.Reader.WaitToReadAsync())
+                while (await responseChannel.Reader.WaitToReadAsync(_cancellationToken))
                 {
                     if (responseChannel.Reader.TryRead(out var msg))
                     {
@@ -709,6 +711,8 @@ namespace Opserver.Data.Dashboard.Providers
 
                         yield return msg;
                     }
+
+                    _cancellationToken.ThrowIfCancellationRequested();
                 }
             }
 
@@ -716,7 +720,7 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 if (_socket.State == WebSocketState.Open)
                 {
-                    await _socket.CloseAsync(WebSocketCloseStatus.Empty, "", CancellationToken.None);
+                    await _socket.CloseAsync(WebSocketCloseStatus.Empty, "", default);
                 }
 
                 _requestChannel.Writer.TryComplete();
@@ -739,7 +743,7 @@ namespace Opserver.Data.Dashboard.Providers
                 {
                     while (true)
                     {
-                        var result = await _socket.ReceiveAsync(Memory<byte>.Empty, default);
+                        var result = await _socket.ReceiveAsync(Memory<byte>.Empty, _cancellationToken);
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             // end of connection, buh-bye!
@@ -798,7 +802,7 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 if (_responseChannels.TryGetValue(string.Empty, out var responseChannel))
                 {
-                    while (await responseChannel.Reader.WaitToReadAsync())
+                    while (await responseChannel.Reader.WaitToReadAsync(_cancellationToken))
                     {
                         if (responseChannel.Reader.TryRead(out var msg) && msg is T typedMsg)
                         {
@@ -824,7 +828,7 @@ namespace Opserver.Data.Dashboard.Providers
                 {
                     while (true)
                     {
-                        var result = await _socket.ReceiveAsync(buffer.AsMemory(offset), default);
+                        var result = await _socket.ReceiveAsync(buffer.AsMemory(offset), _cancellationToken);
                         if (result.MessageType == WebSocketMessageType.Close)
                         {
                             // see ya, far-side closed the connection
@@ -888,7 +892,7 @@ namespace Opserver.Data.Dashboard.Providers
             private async Task WriteToSocketAsync()
             {
                 var bufferWriter = new ArrayBufferWriter<byte>();
-                while (await _requestChannel.Reader.WaitToReadAsync())
+                while (await _requestChannel.Reader.WaitToReadAsync(_cancellationToken))
                 {
                     if (_requestChannel.Reader.TryRead(out var msg))
                     {
@@ -904,7 +908,7 @@ namespace Opserver.Data.Dashboard.Providers
                                 _logger.LogDebug(Encoding.UTF8.GetString(bufferWriter.WrittenMemory.Span));
                             }
 
-                            await _socket.SendAsync(bufferWriter.WrittenMemory, WebSocketMessageType.Text, true, CancellationToken.None);
+                            await _socket.SendAsync(bufferWriter.WrittenMemory, WebSocketMessageType.Text, true, _cancellationToken);
                         }
                         catch (Exception ex)
                         {
