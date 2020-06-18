@@ -79,6 +79,13 @@ namespace Opserver.Controllers
             return View("NoConfiguration");
         }
 
+        [Route("ping"), HttpGet, HttpHead]
+        [AllowAnonymous]
+        public ActionResult Ping()
+        {
+            return Ok();
+        }
+
         [Route("top-refresh")]
         public ActionResult TopRefresh(string tab)
         {
