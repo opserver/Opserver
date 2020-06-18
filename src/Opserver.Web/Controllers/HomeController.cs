@@ -79,8 +79,7 @@ namespace Opserver.Controllers
             return View("NoConfiguration");
         }
 
-        [Route("ping"), HttpGet, HttpHead]
-        [AllowAnonymous]
+        [Route("ping"), HttpGet, HttpHead, AlsoAllow(Roles.InternalRequest)]
         public ActionResult Ping()
         {
             return Ok();
