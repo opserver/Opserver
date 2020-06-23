@@ -9,6 +9,7 @@ using Microsoft.Extensions.Options;
 using Opserver.Data.Exceptions;
 using Opserver.Data.Jira;
 using Opserver.Helpers;
+using Opserver.Models;
 using Opserver.Views.Exceptions;
 using StackExchange.Exceptional;
 
@@ -160,7 +161,7 @@ namespace Opserver.Controllers
             return PartialView("Exceptions.Preview", vd);
         }
 
-        [AllowAnonymous]
+        [AllowAnonymous, AlsoAllow(Roles.InternalRequest)]
         [Route("exceptions/detail/json")]
         public async Task<ActionResult> DetailJson(Guid id)
         {
