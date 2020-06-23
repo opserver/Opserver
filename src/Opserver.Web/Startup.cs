@@ -135,19 +135,24 @@ namespace Opserver
                     }
 
                     var knownProxies = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownProxies)).Get<List<string>>();
-                    if (knownProxies != null)
+                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks)).Get<List<string>>();
+                    if (knownNetworks != null || knownProxies != null)
                     {
                         options.KnownProxies.Clear();
+                        options.KnownNetworks.Clear();
+                    }
+
+                    if (knownProxies != null)
+                    {
                         foreach (var knownProxy in knownProxies)
                         {
                             options.KnownProxies.Add(IPAddress.Parse(knownProxy));
                         }
                     }
 
-                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks)).Get<List<string>>();
+                    
                     if (knownNetworks != null)
                     {
-                        options.KnownNetworks.Clear();
                         foreach (var knownNetwork in knownNetworks)
                         {
                             var ipNet = IPNet.Parse(knownNetwork);
