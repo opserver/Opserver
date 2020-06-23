@@ -2,9 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -114,6 +116,46 @@ namespace Opserver
                        .IgnorePath("/top-refresh");
             });
             services.Configure<SecuritySettings>(_configuration.GetSection("Security"));
+            services.Configure<ForwardedHeadersOptions>(_configuration.GetSection("ForwardedHeaders"));
+            services.PostConfigure<ForwardedHeadersOptions>(
+                options =>
+                {
+                    // what's all this mess I hear you cry? well ForwardedHeadersOptions
+                    // has a bunch of read-only list props that can't be bound from configuration
+                    // so we need to go populate them ourselves
+                    var forwardedHeaders = _configuration.GetSection("ForwardedHeaders");
+                    var allowedHosts = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.AllowedHosts)).Get<List<string>>();
+                    if (allowedHosts != null)
+                    {
+                        options.AllowedHosts.Clear();
+                        foreach (var allowedHost in allowedHosts)
+                        {
+                            options.AllowedHosts.Add(allowedHost);
+                        }
+                    }
+
+                    var knownProxies = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownProxies)).Get<List<string>>();
+                    if (knownProxies != null)
+                    {
+                        options.KnownProxies.Clear();
+                        foreach (var knownProxy in knownProxies)
+                        {
+                            options.KnownProxies.Add(IPAddress.Parse(knownProxy));
+                        }
+                    }
+
+                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks)).Get<List<string>>();
+                    if (knownNetworks != null)
+                    {
+                        options.KnownNetworks.Clear();
+                        foreach (var knownNetwork in knownNetworks)
+                        {
+                            var ipNet = IPNet.Parse(knownNetwork);
+                            options.KnownNetworks.Add(new IPNetwork(ipNet.IPAddress, ipNet.CIDR));
+                        }
+                    }
+                }
+            );
             services.AddSingleton<SecurityManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
@@ -137,7 +179,9 @@ namespace Opserver
             IEnumerable<StatusModule> modules
         )
         {
-            appBuilder.UseResponseCompression()
+            appBuilder
+                      .UseForwardedHeaders()
+                      .UseResponseCompression()
                       .UseStaticFiles(new StaticFileOptions
                       {
                           OnPrepareResponse = ctx =>
