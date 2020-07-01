@@ -46,8 +46,12 @@ namespace Opserver.Security
 
         public override void PurgeCache()
         {
-            var toClear = GroupNames.ToList();
-            GroupNames.Clear();
+            List<string> toClear;
+            lock (GroupNames)
+            {
+                toClear = GroupNames.ToList();
+                GroupNames.Clear();
+            }
             foreach (var g in toClear)
             {
                 Cache.Remove("ADMembers-" + g);
@@ -56,7 +60,10 @@ namespace Opserver.Security
 
         public List<string> GetGroupMembers(string groupName)
         {
-            GroupNames.Add(groupName);
+            lock (GroupNames)
+            {
+                GroupNames.Add(groupName);
+            }
             return Cache.GetSet<List<string>>("ADMembers-" + groupName,
                 (old, _) =>
                 {
