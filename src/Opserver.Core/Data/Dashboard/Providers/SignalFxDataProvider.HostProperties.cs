@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Net;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Exceptional;
 using StackExchange.Profiling;
@@ -108,25 +109,43 @@ namespace Opserver.Data.Dashboard.Providers
                     continue;
                 }
 
-                var lastUpdated = host.Value.Max(x => x.LastUpdated);
                 var hostInterfaces = interfaces.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
                 var hostVolumes = volumes.GetValueOrDefault(host.Key, ImmutableArray<string>.Empty);
-                var properties = host.Value.SelectMany(x => x.CustomProperties).GroupBy(x => x.Key).ToImmutableDictionary(g => g.Key, g => g.Select(x => x.Value).First());
+                var properties = host.Value;
                 
-                results[host.Key] = new SignalFxHost(host.Key, lastUpdated, properties, hostInterfaces, hostVolumes);
+                results[host.Key] = new SignalFxHost(host.Key, DateTime.UtcNow, properties, hostInterfaces, hostVolumes);
             }
 
             return results.ToImmutable();
         }
 
-        private async Task<ImmutableDictionary<string, ImmutableArray<SignalFxDimension>>> GetHostPropertiesAsync()
+        private async Task<ImmutableDictionary<string, ImmutableDictionary<string, string>>> GetHostPropertiesAsync()
         {
-            var query = "host:*";
-            var dimensions = await GetDimensionsAsync("dimension", query);
-            return dimensions
-                .Where(x => x.CustomProperties.Count > 0)
-                .GroupBy(x => x.Value)
-                .ToImmutableDictionary(g => g.Key, g => g.ToImmutableArray());
+            using (var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5)))
+            {
+                var program = $@"data(""{Cpu.Metric}"", filter=filter('host', '*'), extrapolation=""last_value"", maxExtrapolations=2).mean(by=[""host""]).publish()";
+                var resolution = TimeSpan.FromSeconds(60);
+                var endDate = DateTime.UtcNow.RoundDown(resolution);
+                var startDate = endDate.AddMinutes(-15);
+                var results = ImmutableDictionary.CreateBuilder<string, ImmutableDictionary<string, string>>();
+                await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cts.Token))
+                {
+                    await signalFlowClient.ConnectAsync();
+
+                    await foreach (var msg in signalFlowClient.ExecuteAsync(program, startDate, endDate, resolution, includeMetadata: true))
+                    {
+                        if (msg is MetadataMessage metadataMessage)
+                        {
+                            results[metadataMessage.Properties.Host] = metadataMessage.Properties.Dimensions.ToImmutableDictionary(x => x.Key, x => x.Value.ToString());
+                        }
+                        else if (msg is DataMessage dataMessage)
+                        {
+                        }
+                    }
+                }
+                return results.ToImmutable();
+
+            }
         }
 
         private async Task<ImmutableDictionary<string, ImmutableArray<string>>> GetVolumesAsync()

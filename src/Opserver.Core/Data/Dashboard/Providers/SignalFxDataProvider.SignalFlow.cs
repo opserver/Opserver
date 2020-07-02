@@ -135,7 +135,7 @@ namespace Opserver.Data.Dashboard.Providers
                     var resolution = TimeSpan.FromMinutes(10);
                     var endDate = DateTime.UtcNow.RoundDown(resolution);
                     var startDate = endDate.AddHours(-24);
-                    var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
+                    using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
                     var results = await GetMetricsAsync(_signalFlowStatements, startDate, endDate, resolution: resolution, cancellationToken: cts.Token);
                     sw.Stop();
                     _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
@@ -284,12 +284,13 @@ namespace Opserver.Data.Dashboard.Providers
 
         private class ExecuteMessage : SignalFlowMessage
         {
-            public ExecuteMessage(string channel, string program, TimeSpan? resolution, DateTime start, DateTime stop)
+            public ExecuteMessage(string channel, string program, TimeSpan? resolution, DateTime start, DateTime stop, bool includeMetadata = false)
             {
                 Channel = channel;
                 Program = program;
                 Start = start;
                 Stop = stop;
+                WithDerivedMetadata = includeMetadata;
                 if (resolution.HasValue)
                 {
                     Resolution = (int)resolution.Value.TotalMilliseconds;
@@ -301,6 +302,7 @@ namespace Opserver.Data.Dashboard.Providers
             }
 
             public override string Type => "execute";
+            public bool WithDerivedMetadata { get; }
             public string Channel { get; }
             public string Program { get; }
             public DateTime Start { get; }
@@ -682,12 +684,12 @@ namespace Opserver.Data.Dashboard.Providers
                 }
             }
 
-            public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, DateTime startDate, DateTime endDate, TimeSpan? resolution = null)
+            public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, DateTime startDate, DateTime endDate, TimeSpan? resolution = null, bool includeMetadata = false)
             {
                 // generate a new channel key
                 var channelId = "channel-" + Interlocked.Increment(ref _channelId).ToString();
                 var responseChannel = _responseChannels.GetOrAdd(channelId, _ => Channel.CreateUnbounded<SignalFlowMessage>());
-                var message = new ExecuteMessage(channelId, program, resolution, startDate, endDate);
+                var message = new ExecuteMessage(channelId, program, resolution, startDate, endDate, includeMetadata);
 
                 // fire off an execution request
                 await _requestChannel.Writer.WriteAsync(message, _cancellationToken);

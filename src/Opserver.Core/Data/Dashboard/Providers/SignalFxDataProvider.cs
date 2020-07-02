@@ -30,7 +30,6 @@ namespace Opserver.Data.Dashboard.Providers
             get
             {
                 yield return MetricDayCache;
-                //yield return MetricIntervalCache;
                 yield return HostCache;
             }
         }
