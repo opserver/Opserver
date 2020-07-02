@@ -10,10 +10,11 @@
                           .OrderBy(g => g.Key.Index);
 }
 @section preload {
-    @if (Module.HasData) {
-    <link rel="preload" href="@Url.Content("~/graph/")cpu/spark/all" as="image">
-    <link rel="preload" href="@Url.Content("~/graph/")memory/spark/all" as="image">
-    <link rel="preload" href="@Url.Content("~/graph/")network/spark/all" as="image">
+    @if (Module.HasData && this.SupportsSvgViewport())
+    {
+        <link rel="preload" href="@Url.Content("~/graph/")cpu/spark/all" as="image">
+        <link rel="preload" href="@Url.Content("~/graph/")memory/spark/all" as="image">
+        <link rel="preload" href="@Url.Content("~/graph/")network/spark/all" as="image">
     }
 }
 @functions
@@ -22,13 +23,13 @@
     {
         if (Module.HasData)
         {
-            if (ViewContext.HttpContext.Request.Query.TryGetValue("singleGraph", out _))
+            if (this.SupportsSvgViewport())
             {
-                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark?id=@n.Id" alt="" /></a>
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark/all#@n.Id" alt="" /></a>
             }
             else
             {
-                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark/all#@n.Id" alt="" /></a>
+                <a href="#/dashboard/graph/@(n.Id.UrlEncode())/@type"><img src="@Url.Content("~/graph/")@type/spark?id=@n.Id" alt="" /></a>
             }
         }
         else
@@ -113,7 +114,7 @@
                             <th colspan="2">Network</th>
                             @if (Module.Settings.ShowVolumePerformance)
                             {
-                            <th colspan="2">Disk (Perf)</th>
+                                <th colspan="2">Disk (Perf)</th>
                             }
                             <th colspan="2">Disk</th>
                         </tr>
@@ -140,8 +141,8 @@
                                 <td>@Graph(n, "network")</td>
                                 @if (Module.Settings.ShowVolumePerformance)
                                 {
-                                <td>@n.PrettyTotalVolumePerformance()</td>
-                                <td>@Graph(n, "volumePerformance")</td>
+                                    <td>@n.PrettyTotalVolumePerformance()</td>
+                                    <td>@Graph(n, "volumePerformance")</td>
                                 }
                                 <td>@DiskText(n)</td>
                                 <td>@DiskGraphs(n)</td>

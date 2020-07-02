@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 
 namespace Opserver
 {
@@ -467,6 +468,20 @@ namespace Opserver
 
         public static bool IsAjaxRequest(this RazorPageBase page) =>
             page.ViewContext.HttpContext.Request.IsAjax();
+
+        public static bool SupportsSvgViewport(this RazorPageBase page)
+        {
+            if (page.ViewContext.HttpContext.Request.Query.TryGetValue("singleGraph", out _))
+            {
+                // single graph was explicitly asked for; used for testing on unsupported browsers!
+                return true;
+            }
+
+            // right now Firefox does not handle SVG viewports using fragments correctly
+            // it will make hundreds of HTTP requests instead of re-using a cached resource
+            // See https://bugzilla.mozilla.org/show_bug.cgi?id=1121693
+            return !page.ViewContext.HttpContext.Request.Headers[HeaderNames.UserAgent].ToString().Contains("Firefox");
+        }
     }
 
     public static class ViewsExtensionMethods
