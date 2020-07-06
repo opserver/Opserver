@@ -175,7 +175,7 @@ namespace Opserver.Data.Dashboard.Providers
                 iface.NodeId,
                 TagCombos.AllDirectionsForInterface(iface.Id));
 
-            return JoinNetwork(apiResponse.Series) ?? new List<DoubleGraphPoint>();
+            return JoinNetwork(apiResponse?.Series) ?? new List<DoubleGraphPoint>();
         }
 
         private List<DoubleGraphPoint> JoinNetwork(List<PointSeries> allSeries)
