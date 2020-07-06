@@ -43,6 +43,8 @@ For example, if you just want to clone this repo and run it from the command lin
 dotnet run --project src/Opserver.Web
 ```
 
+Full instructions on [building and running can be found here](HowTo/BuildAndRun).
+
 Note: you'll need to [setup your configuration](Configuration) to do anything useful.
 
 
@@ -60,10 +62,10 @@ JavaScript:
 [isotope](https://isotope.metafizzy.co/) by Metafizzy  
 [jQuery](https://jquery.com/) by The jQuery Foundation  
 [jQuery cookie plugin](https://github.com/js-cookie/js-cookie) by Klaus Hartl  
-[jQuery autocomplete](http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/) by Jörn Zaefferer  
+[jQuery autocomplete](http://bassistance.de/jquery-plugins/jquery-plugin-autocomplete/) by Jï¿½rn Zaefferer  
 [prettify](https://github.com/google/code-prettify) by Google  
 [TableSorter](http://tablesorter.com) by Christian Bach  
-[Toastr](https://github.com/CodeSeven/toastr) by John Papa and Hans Fjällemark  
+[Toastr](https://github.com/CodeSeven/toastr) by John Papa and Hans Fjï¿½llemark  
 
 ### License
 Opserver is licensed under the [MIT License](https://opensource.org/licenses/MIT).
