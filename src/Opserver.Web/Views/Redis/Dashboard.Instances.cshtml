@@ -1,0 +1,235 @@
+﻿@model DashboardModel
+@{
+    Model.Prep();
+    var groups = Model.ReplicationGroups;
+}
+@functions
+{
+    string ServerRole(RedisInstance i)
+    {
+        switch (i.Role)
+        {
+            case RedisInfo.RedisInstanceRole.Master:
+                <strong>Master</strong>
+                break;
+            case RedisInfo.RedisInstanceRole.Replica:
+                if (i.IsReplicating)
+                {
+                    <b class="text-success">Replicating</b>
+                }
+                else
+                {
+                    <span>Replica</span>
+                }
+                break;
+            default:
+                <span class="text-muted">Unknown</span>
+                break;
+        }
+        return null;
+    }
+
+    string CommonVersionHeader() => Model.AllVersionsMatch ? "(Version " + (Model.CommonVersion?.ToString() ?? "Unknown") + ")" : null;
+    void SectionHeader(List<RedisInstance> instances, string label, bool defaultHeaders = true, bool countChain = false)
+    {
+        var total = countChain ? instances.Union(instances.SelectMany(h => h.GetAllReplicasInChain())).ToList() : instances;
+        <tbody>
+            <tr class="category-row page-header">
+                <th colspan="@(Model.AllVersionsMatch ? 8 : 9)">
+                    <h5>
+                        @total.GetWorstStatus().IconSpan()  @total.Count.Pluralize(label)
+                        <span class="small">@CommonVersionHeader()</span>
+                        <span class="pull-right">@ServerControls() @Poll.Now(instances)</span>
+                    </h5>
+                </th>
+            </tr>
+        </tbody>
+        if (defaultHeaders)
+        {
+        <tbody>
+            <tr>
+                <th>Name</th>
+                <th>Host <span class="text-muted small">(port - behind)</span></th>
+                <th>Role</th>
+                <th>Replicas</th>
+                <th title="Operations">Ops <span class="text-muted small">(/sec)</span></th>
+                <th>Memory <span class="text-muted small">(used)</span></th>
+                <th>Clients</th>
+                @if (!Model.AllVersionsMatch)
+                {
+                    <th>Version</th>
+                }
+                <th>As of</th>
+            </tr>
+        </tbody>
+        }
+    }
+
+    string ServerRow(RedisInstance server, int nest = 0, long? toSync = null, string prevMaster = null)
+    {
+        var info = server.Info.SafeData();
+        var isMissing = Model.Missing.Contains(server);
+        <tr class="@(nest == 0 && server.Name != prevMaster && !isMissing ? "first-of-group " : "")@server.RowClass()">
+            <td>
+                @if (Current.User.Is(RedisRoles.Admin))
+                {
+                    <a href="#/redis/actions/@server.HostAndPort" class="hover-spin">@Icon.Cog</a>
+                }
+                @server.ConnectionInfo.Name
+            </td>
+            <td style="padding-left: @((20*nest).ToString())px">
+                @server.IconSpan()
+                <a href="@Url.Content("~/redis/instance")?node=@server.HostAndPort" class="@server.TextClass()">@server.Host</a>
+                <span class="text-muted small">
+                    (@server.Port.ToString()@if (toSync > 0)
+                    {<span title="@toSync.Value.Pluralize("byte") behind master"> - @(toSync.Value.ToSize())</span>})
+                </span>
+                @if (server.IsReplicating)
+                {
+                    var sc = server.Master?.ReplicaConnections?.FirstOrDefault(sci => server.ConnectionInfo.IPAddresses.Any(ip => Equals(ip, sci.IPAddress)));
+                    <span class="text-muted small">
+                        (@if (sc != null)
+                        {<text>@sc.Status - </text>}@(server.Replication?.MasterLinkStatus ?? "Unknown Link"))
+                    </span>
+                }
+            </td>
+            @if (isMissing)
+            {
+                <td class="text-muted">Missing</td>
+                <td colspan="4" title="@server.Info.ErrorMessage" class="text-muted">@server.Info.ErrorMessage.TruncateWithEllipsis(100)</td>
+            }
+            else if (info != null)
+            {
+                <td>@ServerRole(server)</td>
+                var stats = info.Stats;
+                <td>
+                    @server.ReplicaCount.ToComma() @if (server.TotalReplicaCount > server.ReplicaCount)
+                    {<span class="text-muted small">(@((server.TotalReplicaCount - server.ReplicaCount).ToComma()))</span>}
+                </td>
+                <td>@stats.TotalCommandsProcessed.ToComma() <span class="text-muted small">(@stats.InstantaneousOpsPerSec.ToComma())</span></td>
+                <td>@info.Memory.UsedMemoryRSS.ToHumanReadableSize() <span class="text-muted small">(@info.Memory.UsedMemory.ToHumanReadableSize())</span></td>
+                <td>@info.Clients.Connected.ToComma()</td>
+            }
+            else
+            {
+                <td>@ServerRole(server)</td>
+                <td colspan="4" class="text-muted">No data available</td>
+            }
+            @if (!Model.AllVersionsMatch)
+            {
+                <td>@server.Version</td>
+            }
+            <td>@server.Info.ToPollSpan()</td>
+        </tr>
+        if (Model.View != RedisViews.Server)
+        {
+            foreach (var s in server.ReplicaInstances.Concat(Model.Replicating.Where(s => s.Master == server)).Distinct())
+            {
+                ServerRow(s, nest + 1, s?.Replication == null ? 0 : s.IsReplicating ? s.Replication.MastSyncLeftBytes : (s.Replication.ReplicaReplicationOffset == 1 ? 0 : server.Replication.MasterReplicationOffset - s.Replication.ReplicaReplicationOffset));
+            }
+        }
+        return null;
+    }
+    string ServerControls()
+    {
+        var groups = Model.ReplicationGroups;
+        if (!Current.User.Is(RedisRoles.Admin) || groups.Count == 0)
+        {
+            return null;
+        }
+        <div class="btn-group dropdown">
+            <a href="#" class="dropdown-toggle hover-pulsate" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                @Icon.Cog Server Controls <i class="fa fa-caret-down" aria-hidden="true"></i>
+            </a>
+            <ul class="dropdown-menu pull-right">
+                @for (var i = 0; i < groups.Count; i++)
+                {
+                    var g = groups[i];
+                    <li class="well well-sm well-condensed">
+                        <span class="">@g.Name</span>
+                    </li>
+                    foreach (var host in g.Hosts)
+                    {
+                        //#/redis/server-actions/@host.HostName.UrlEncode()
+                        var instances = host.Instances;
+                        <li>
+                            <a href="#/redis/actions/@host.HostName.UrlEncode()" class="hover-spin">
+                                <span class="text-primary">@Icon.Cog</span> @host.Instances.GetWorstStatus().IconSpan() @host.HostName
+                            </a>
+                        </li>
+                    }
+                }
+            </ul>
+        </div>
+        return null;
+    }
+}
+    <div class="js-refresh" data-name="redis-overview">
+        @if (Model.Instances.Any())
+        {
+            <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+                @if (Model.Missing.Any())
+                {
+                    SectionHeader(Model.Missing, "Missing Instance", defaultHeaders: false);
+                    <tbody>
+                        <tr>
+                            <th>Name</th>
+                            <th>Host <span class="text-muted small">(port - behind)</span></th>
+                            <th>Role</th>
+                            <th colspan="4">Error</th>
+                            @if (!Model.AllVersionsMatch)
+                            {
+                                <th>Version</th>
+                            }
+                            <th>As of</th>
+                        </tr>
+                    </tbody>
+                    <tbody>
+                        @foreach (var m in Model.Missing.OrderBy(m => m.Port).ThenBy(m => m.Name))
+                        {
+                            ServerRow(m);
+                        }
+                    </tbody>
+                }
+                @if (Model.Heads.Any())
+                {
+                    SectionHeader(Model.Heads, "Chained Instance", countChain: true);
+                    <tbody>
+                        @{ var prevMaster = ""; }
+                        @foreach (var m in Model.Heads)
+                        {
+                            ServerRow(m, prevMaster: prevMaster);
+                            prevMaster = m.Name;
+                        }
+                    </tbody>
+                }
+                @if (Model.StandAloneMasters.Any())
+                {
+                    SectionHeader(Model.StandAloneMasters, "Standalone Instance");
+                    <tbody>
+                        @foreach (var m in Model.StandAloneMasters.OrderBy(m => m.Port).ThenBy(m => m.Name))
+                        {
+                            ServerRow(m);
+                        }
+                    </tbody>
+                }
+                <tfoot>
+                    @{ var all = Model.Instances; }
+                    <tr class="total-row">
+                        <td><strong>Total</strong> <span class="text-muted">(@all.Count.Pluralize("instance"))</span></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>@all.Sum(i => i.Info?.Data?.Stats?.TotalCommandsProcessed ?? 0).ToComma() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Stats?.InstantaneousOpsPerSec ?? 0).ToComma())</span></td>
+                        <td>@all.Sum(i => i.Info?.Data?.Memory?.UsedMemoryRSS ?? 0).ToHumanReadableSize() <span class="text-muted small">(@all.Sum(i => i.Info?.Data?.Memory?.UsedMemory ?? 0).ToHumanReadableSize())</span></td>
+                        <td>@all.Sum(i => i.Info?.Data?.Clients.Connected ?? 0).ToComma()</td>
+                        @if (!Model.AllVersionsMatch)
+                        {
+                            <td></td>
+                        }
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        }
+    </div>

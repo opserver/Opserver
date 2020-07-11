@@ -1,0 +1,32 @@
+﻿@using Jil
+@model DashboardModel
+@{
+    var settings = Model.CurrentNode?.Settings ?? new Dictionary<string, dynamic>();
+}
+<h4 class="modal-title">
+    Node Settings
+</h4>
+@if (settings.Any())
+{
+    <table class="table table-striped table-responsive table-super-condensed">
+        <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Value</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var s in settings.OrderBy(s => s.Key))
+        {
+            <tr>
+                <td>@s.Key</td>
+                <td class="json-pretty">@JSON.Serialize(s.Value, Options.ISO8601PrettyPrint)</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">No settings found</div>
+}

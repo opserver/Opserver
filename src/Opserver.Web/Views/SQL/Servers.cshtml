@@ -1,0 +1,133 @@
+﻿@model ServersModel
+@{
+    var standalone = Model.StandaloneInstances;
+}
+@functions
+{
+    string ConnectionsCell(SQLInstance i) 
+    {
+        var props = i.ServerProperties.SafeData(true);
+        <td>
+            <a href="@Url.Action(nameof(SQLController.Connections), new {node = i.Name})">@props.ConnectionCount.ToComma()</a> <span class="text-muted">/ @props.SessionCount.ToComma()</span>
+        </td>
+        return null;
+    }
+}
+<div class="js-refresh" data-name="sql">
+    @if (Model.Clusters.Any())
+    {
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            @foreach (var c in Model.Clusters.Where(clu => clu.Nodes.Any()))
+            {
+                <tbody>
+                    <tr class="category-row">
+                        <th colspan="12">
+                            <h5>
+                                <a href="~/sql/servers#/cluster/@c.Name" data-refresh="5">@c.IconSpan() @c.Name</a> <span class="text-muted small">(@c.QuorumType.AsString(EnumFormat.Description) - @c.QuorumState.AsString(EnumFormat.Description))</span>
+                                @if (c.Description.HasValue()) { <span class="text-muted small">(@c.Description)</span> }
+                                <span class="pull-right small"> @Poll.Now(c.Nodes)</span>
+                            </h5>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Node</th>
+                        <th>State</th>
+                        <th>CPU</th>
+                        <th class="text-muted">(Last Hour)</th>
+                        <th>Memory</th>
+                        <th>Availability</th>
+                        <th>Databases</th>
+                        <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
+                        <th>Batches<span class="text-muted">/sec</span></th>
+                        <th>Last Commit</th>
+                        <th title="Quorum Votes in the Cluster">Votes</th>
+                        <th>As of</th>
+                    </tr>
+                </tbody>
+                <tbody>
+                    @foreach (var n in c.Nodes)
+                    {
+                        var cAgs = n.AvailabilityGroups.SafeData(true);
+                        <tr class="@n.RowClass()@(n.IsAllAGsPrimary ? " info" : null)">
+                            <td>@n.IconSpan() <a href="~/sql/instance?node=@n.Name.UrlEncode()">@n.Name</a></td>
+                            <td title="Votes: @n.ClusterVotes.ToString()">@n.AGClusterMember.State.AsString(EnumFormat.Description)</td>
+                            <td><a href="~/sql/active?node=@n.Name.UrlEncode()">@(n.CurrentCPUPercent.HasValue ? n.CurrentCPUPercent.ToString() + "%" : "")</a></td>
+                            <td><img src="~/graph/sql/cpu/spark?node=@n.Name" width="100" height="16" /></td>
+                            <partial Name="Partials.MemoryCell" Model="new PartialsMemoryCellModel(n, 2)" />
+                            <td>@Health.OfAGs(cAgs)</td>
+                            <td><a href="@Url.Action(nameof(SQLController.Databases), "SQL", new { node = n.Name })">@Health.Description(cAgs.Where(ag => ag.LocalReplica != null).SelectMany(ag => ag.LocalReplica.Databases))</a></td>
+                            @ConnectionsCell(n)
+                            <td>@(n.BatchesPerSec?.ToComma())</td>
+                            <td>@(cAgs.Where(ag => ag.LocalReplica != null).Max(ag => ag.LocalReplica.Databases.Max(db => db.LastCommitTime))?.ToRelativeTimeSpan())</td>
+                            <td>@n.ClusterVotes.ToComma()</td>
+                            <td>@n.LastFetch.ToPollSpan()</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    }
+    @if (standalone.Any())
+    {
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            <tbody>
+                <tr class="category-row">
+                    <th colspan="8">
+                        <h5>
+                            @standalone.GetWorstStatus().IconSpan() @standalone.Count.ToComma() Standalone
+                            <span class="pull-right small"> @Poll.Now(standalone)</span>
+                        </h5>
+                    </th>
+                </tr>
+                <tr>
+                    <th>Node</th>
+                    <th>CPU</th>
+                    <th class="text-muted">(Last Hour)</th>
+                    <th>Memory</th>
+                    <th>Databases</th>
+                    <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
+                    <th>Batches<span class="text-muted">/sec</span></th>
+                    <th>As of</th>
+                </tr>
+            </tbody>
+            <tbody>
+                @foreach (var i in standalone)
+                {
+                    var dbs = i.Databases.SafeData(true);
+                    <tr class="@i.RowClass()">
+                        <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
+                        <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
+                        <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" alt="SQL CPU for @i.Name Last Hour" /></td>
+                        <partial Name="Partials.MemoryCell" Model="@new PartialsMemoryCellModel(i, 2)" />
+                        <td title="@dbs.Count.Pluralize("Database"):
+@string.Concat(dbs.GroupBy(db => db.OverallStateDescription).Select(g => $"  {g.Key}: {g.Count().Pluralize("Database")}\n"))">
+                            @Health.Description(dbs)
+                        </td>
+                        @ConnectionsCell(i)
+                        <td>@(i.BatchesPerSec?.ToComma())</td>
+                        <td>@i.LastFetch.ToPollSpan(mini: false)</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    <div class="ag-container refresh-group row small" data-name="ag-summary">
+        @foreach (var c in Model.Clusters)
+        {
+            foreach (var ag in c.AvailabilityGroups)
+            {
+                <partial name="Servers.AvailabilityGroup" model="ag" />
+            }
+        }
+    </div>
+
+    @if (Model.CurrentCluster != null)
+    {
+        <div class="hidden">
+            <div class="js-refresh" data-name="sql-@Model.CurrentCluster.Name">
+                <partial name="Servers.ClusterDetail" model="Model" />
+            </div>
+        </div>
+    }
+</div>

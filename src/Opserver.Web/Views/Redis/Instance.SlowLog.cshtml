@@ -1,0 +1,44 @@
+﻿@model RedisInstance
+@{
+    var log = Model.SlowLog.SafeData(true);
+}
+<h4 class="modal-title">
+    Slow Command Log
+</h4>
+@if (log.Any())
+{
+    <table class="table table-striped table-hover table-super-condensed table-responsive js-slow-log-table">
+        <thead>
+            <tr>
+                <th>Command</th>
+                <th>Duration</th>
+                <th>When</th>
+                <th>Ref</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var entry in log)
+            {
+                <tr data-id="@entry.UniqueId.ToString()">
+                    <td>@string.Join(" ", entry.Arguments)</td>
+                    <td class="text-nowrap">@entry.Duration.ToTimeStringMini(3)</td>
+                    <td class="text-nowrap">@entry.Time.ToRelativeTimeSpanMini()</td>
+                    <td class="text-nowrap"><a href="@entry.GetHelpUrl()" target="_blank">docs</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <div class="no-content">
+        @if (!Model.IsSlowLogEnabled)
+        {
+            @:Slow log is not enabled
+        }
+        else
+        {
+            @:No slow commands in the log
+        }
+    </div>
+}

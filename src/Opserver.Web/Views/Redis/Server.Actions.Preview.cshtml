@@ -1,0 +1,82 @@
+﻿@model List<RedisInstanceOperation>
+@{ 
+    var operations = Model;
+}
+@functions
+{
+    string RenderTolopogy(RedisInstance top, RedisInstance newMaster, InstanceCommandType command, RedisInstance controlling = null)
+    {
+        if (top != null)
+        {
+        <li>
+            @if (top == newMaster && command == InstanceCommandType.MakeMaster)
+            {
+                <strong class="text-primary">@top.IconSpan() @top.HostAndPort</strong>
+            }
+            else if (controlling != null && top.HostAndPort == controlling.HostAndPort)
+            {
+                <span class="text-primary">@top.IconSpan() @top.HostAndPort</span>
+            }
+            else if (top.IsMaster)
+            {
+                <strong>@top.IconSpan() @top.HostAndPort</strong>
+            }
+            else
+            {
+                @:@top.IconSpan() @top.HostAndPort
+            }
+            <span class="text-muted">(@top.Name)</span>
+            @if (controlling != null && top == newMaster)
+            {
+                <ul class="proposed">@RenderTolopogy(controlling, newMaster, command, controlling)</ul>
+            }
+            @if (top.ReplicaConnections?.Any() ?? false)
+            {
+                <ul>
+                    @foreach (var sc in top.ReplicaConnections)
+                    {
+                        var replica = Module.GetInstance(sc);
+                        if (controlling != null && replica.HostAndPort == controlling.HostAndPort) { continue; }
+                        @RenderTolopogy(replica, newMaster, command, controlling)
+                    }
+                </ul>
+            }
+        </li>
+        }
+        return null;
+    }
+}
+<div class="list-group list-group-condensed js-redis-server-actions-preview">
+    <div class="row">
+        @if (operations.Count == 0)
+        {
+            <span class="col-md-12 text-muted">No operations selected.</span>
+        }
+        @foreach (var op in operations)
+        {
+            <input type="hidden" name="operations" value="@op.ToString()" />
+            var i = op.Instance;
+            if (op.Command == InstanceCommandType.MakeMaster)
+            {
+                <div class="col-md-12">
+                    <div class="well well-sm well-condensed">
+                        <ul class="ul-tree">
+                            @RenderTolopogy(op.Instance, op.Instance, op.Command)
+                        </ul>
+                    </div>
+                </div>
+            }
+            else if (op.Command == InstanceCommandType.ReplicateFrom)
+            {
+                var newMaster = op.NewMaster;
+                <div class="col-md-12">
+                    <div class="well well-sm well-condensed">
+                        <ul class="ul-tree">
+                            @RenderTolopogy(op.NewMaster.TopMaster, op.NewMaster, op.Command, op.Instance)
+                        </ul>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

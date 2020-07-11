@@ -1,0 +1,50 @@
+﻿@model Node
+@{
+    bool showServiceActions = (Current.User.Is(DashboardRoles.Admin) && Model.HasServiceControl());
+}
+
+<h5 class="page-header">@Model.Services.Count.Pluralize("Service")</h5>
+<table class="table table-striped table-middle table-super-condensed table-responsive table-dashboard text-nowrap">
+    <thead>
+        <tr>
+            <th>Service</th>
+            <th>Description</th>
+            <th>State</th>
+            @if (showServiceActions)
+            {
+            <th>Action</th>
+            }
+            <th>Startup Type</th>
+            <th>Log On As</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var i in Model.Services.OrderBy(i => i.DisplayName))
+        {
+            <tr class="@i.RowClass()">
+                <td title="@i.Caption
+Last Updated @(i.LastSync?.ToRelativeTime() ?? "Unknown")" data-val="@(i.Id)">
+                    @i.IconSpan()
+                    @i.DisplayName
+                </td>
+                <td class="text-wrap">@i.Description</td>
+                <td>@i.State</td>
+                @if (showServiceActions)
+                {
+                    <td class="actions">
+                        @if (!i.Running)
+                        {
+                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="@NodeService.Action.Start" data-name="@i.Name.ToString()">@NodeService.Action.Start</a>
+                    }
+                        else
+                        {
+                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="@NodeService.Action.Stop" data-name="@i.Name.ToString()">@NodeService.Action.Stop</a>
+                }
+                    </td>
+                }
+                <td>@i.StartMode</td>
+                <td>@i.StartName</td>
+            </tr>
+        }
+    </tbody>
+</table>

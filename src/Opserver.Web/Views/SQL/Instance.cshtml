@@ -1,0 +1,426 @@
+﻿@model InstanceModel
+@{
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
+    var enabledTraceFlags = i.TraceFlags.Data?.Where(tf => tf.Enabled).ToList();
+    var counters = Model.PerfCounters = i.PerfCounters.SafeData(true);
+}
+@functions
+{
+    string RenderSizeCounter(string label, string category, string name, string instance, string url = null)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
+        {
+            return null;
+        }
+        <div class="value-block col-md-3 col-sm-6">
+            @if (url.HasValue())
+            {
+                <a href="@url">
+                    @(((long)counter.CalculatedValue * 1024).ToSize())
+                </a>
+            }
+            else
+            {
+                @(((long)counter.CalculatedValue * 1024).ToSize())
+            }
+            <label>@label</label>
+        </div>
+        return null;
+    }
+    string RenderCacheCounter(string label, string category, string name, string instance, string suffix = null, int cols = 4)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
+        {
+            return null;
+        }
+        <div class="value-block col-md-@cols.ToString() col-sm-6">
+            @counter.CalculatedValue.ToString("#,##0.###") @suffix
+            <label>@label</label>
+        </div>
+        return null;
+    }
+    string RenderPerSecCounter(string label, string category, string name, string instance, string url = null, string suffix = null, int cols = 3, bool showTotal = true)
+    {
+        var counter = Model.CurrentInstance.GetPerfCounter(category, name, instance);
+        if (counter == null)
+        {
+            return null;
+       }
+        <div class="value-block col-md-@cols.ToString() col-sm-6">
+            @counter.CalculatedValue.ToString("#,##0.###")
+            <span class="text-muted">/sec</span>
+            @suffix
+            @if (showTotal)
+            {
+                <div class="small">@counter.CurrentValue.ToString("#,##0.###") <span class="text-muted">(total)</span></div>
+            }
+            <label>
+                @label
+                @if (url.HasValue())
+                {
+                    <span class="text-muted">(<a href="@url">view</a>)</span>
+                }
+            </label>
+        </div>
+        return null;
+    }
+}
+<div class="js-refresh" data-name="instance-summary">
+    <h5 class="page-header">
+        @i.IconSpan() @i.Name
+        @if (i.Description.HasValue())
+        {
+            <span class="text-muted">(@i.Description)</span>
+        }
+        @Poll.Now(i)
+    </h5>
+    <partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Node = i, Name = i.Name })" />
+    <div class="row small">
+        <div class="col-md-6">
+            @{
+                var pd = i.ServerProperties.Data;
+                if (pd != null)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">@Icon.Server Summary <span class="text-muted">(<a href="#/sql/summary/configuration">view config</a>)</span></div>
+                        <div class="panel-body small">
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.MachineName
+                                <label>
+                                    Server @if (pd.IsVM)
+                                    {<text>(VM)</text>}
+                                </label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @(pd.InstanceName ?? SQLInstance.DefaultInstanceName)
+                                <label>Instance</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.FullVersion">
+                                @pd.MajorVersion @pd.Level
+                                <label>Release</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.FullVersion">
+                                <a href="http://sqlserverbuilds.blogspot.com/" target="_blank">@pd.Version</a>
+                                <label>Version</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.Edition">
+                                @pd.ShortEdition
+                                <label>Edition</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="Started @pd.SQLServerStartTime.ToRelativeTime() (@pd.SQLServerStartTime)">
+                                @((DateTime.UtcNow - pd.SQLServerStartTime).ToTimeStringMini())
+                                <label>Uptime</label>
+                            </div>
+                            @if (i.Databases.Data != null)
+                            {
+                                var dbs = i.Databases.Data;
+                                var dbStatus = dbs.GetWorstStatus();
+                                <div class="value-block col-md-3 col-sm-6 @dbStatus.BackgroundClass()">
+                                    @Health.Description(dbs)
+                                    <label>
+                                        @dbs.Count.Pluralize("Database", includeNumber: false)
+                                    </label>
+                                </div>
+                            }
+                            @if (i.JobSummary.Data?.Any() ?? false)
+                            {
+                                var jobs = i.JobSummary.Data;
+                                var running = jobs.Count(j => j.IsRunning);
+                                var jobStatus = jobs.GetWorstStatus();
+                                <div class="value-block col-md-3 col-sm-6 @jobStatus.BackgroundClass()">
+                                    @Health.Description(jobs, unknownIsHealthy: true)
+                                    <label>
+                                        @jobs.Count.Pluralize("Job", includeNumber: false)
+                                        @if (running > 0)
+                                        {
+                                            @:- <span class="text-success">@running.ToComma() running</span>
+                                        }
+                                        <span class="text-muted">(<a href="#/sql/summary/jobs">view</a>)</span>
+                                    </label>
+                                </div>
+                            }
+                            @if (enabledTraceFlags?.Any() ?? false)
+                            {
+                                <div class="value-block col-md-12">
+                                    @string.Join(", ", enabledTraceFlags.OrderBy(tf => tf.TraceFlag).Select(tf => tf.TraceFlag))
+                                    <label>Trace Flags <span class="text-muted">(<a href="http://msdn.microsoft.com/en-us/library/ms188396.aspx" target="_blank">more info</a>)</span></label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">@Icon.Stats Stats</div>
+                        <div class="panel-body small">
+                            <div class="value-block col-md-3">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @(i.CurrentCPUPercent?.ToString(CultureInfo.InvariantCulture))%;"></div>
+                                    <span>@i.CurrentCPUPercent.ToString()%</span>
+                                </div>
+                                <label>CPU</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6" title="@pd.CPUCount.Pluralize("Core") (including hyperthreading) across @pd.CPUSocketCount.Pluralize("Socket")">
+                                @pd.CPUCount.ToString()
+                                <label>@pd.CPUCount.Pluralize("Core", includeNumber: false)</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.CurrentWorkerCount.ToComma() / @pd.MaxWorkersCount.ToComma()
+                                <label>Workers</label>
+                            </div>
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.SessionCount.ToComma()
+                                <label>Sessions</label>
+                            </div>
+                            @if (pd.PhysicalMemoryBytes > 0)
+                            {
+                                var clerks = i.MemoryClerkSummary.SafeData(true);
+                            <div class="value-block col-md-3" title="Memory (Total): @pd.PhysicalMemoryBytes.ToComma() (@pd.PhysicalMemoryBytes.ToSize())
+Virtual: @pd.VirtualMemoryBytes.ToComma() (@pd.VirtualMemoryBytes.ToSize())
+SQL Server Used: @pd.CommittedBytes.ToComma() (@pd.CommittedBytes.ToSize())
+SQL Server Max: @pd.CommittedTargetBytes.ToComma() (@pd.CommittedTargetBytes.ToSize())
+
+Top Users:
+@foreach (var mc in clerks.OrderByDescending(mc => mc.UsedBytes).Take(5))
+{
+    <text>  @mc.Name: @mc.UsedBytes.ToSize() (@(mc.UsedPercent.ToString("#0.##"))%)</text>
+}">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: @(i.CurrentMemoryPercent?.ToString(CultureInfo.InvariantCulture))%;"></div>
+                                    <span>
+                                        @decimal.Round(i.CurrentMemoryPercent.Value, 2).ToString(CultureInfo.InvariantCulture)%
+                                        <span class="smaller">(@pd.CommittedBytes.ToSize() / @pd.PhysicalMemoryBytes.ToSize())</span>
+                                    </span>
+                                </div>
+                                <label>
+                                    Memory
+                                    <span class="text-muted">(<a href="#/sql/summary/memory">view</a>)</span>
+                                </label>
+                            </div>
+                                if (clerks.Any())
+                                {
+                                    var buffer = clerks.FirstOrDefault(c => c.IsBufferPool);
+                                    var plans = clerks.FirstOrDefault(c => c.IsPlanCache);
+                                    if (buffer != null)
+                                    {
+                            <div class="value-block col-md-3">
+                                @buffer.UsedBytes.ToSize()
+                                <label>Buffer Pool</label>
+                            </div>
+                                    }
+                                    if (plans != null)
+                                    {
+                            <div class="value-block col-md-3">
+                                @plans.UsedBytes.ToSize()
+                                <label>Plan Cache</label>
+                            </div>
+                                    }
+                                }
+                            }
+                            <div class="value-block col-md-3 col-sm-6">
+                                @pd.ConnectionCount.ToComma()
+                                <label>
+                                    Connections
+                                    <span class="text-muted">(<a href="#/sql/summary/connections">view</a>)</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    var services = i.Services.Data;
+                    if (services?.Any() ?? false)
+                    {
+                        var cols = services?.Count % 3 == 0 ? "4" : "3";
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Services</div>
+                            <div class="panel-body small">
+                                @foreach (var s in services)
+                                {
+                                <div class="value-block col-md-@cols @s.MonitorStatus.BackgroundClass()" title="Name: @s.ServiceName
+            Status: @s.Status.Value.AsString(EnumFormat.Description)
+            Account: @s.ServiceAccount
+            Clustered: @(s.IsClusteredBool ? "Yes" : "No")">
+                                    @s.Status.Value.AsString(EnumFormat.Description) <span class="small">(@s.StartupType.Value.AsString(EnumFormat.Description))</span>
+                                    <label>@s.ServiceName.Replace(" (MSSQLSERVER)", "").Replace(" Filter Daemon Launcher", "")</label>
+                                </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    var volumes = i.Volumes.Data;
+                    if (volumes?.Any() ?? false)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">@Icon.Disk Volumes <span class="text-muted small">(<a href="#/sql/summary/db-files">view files</a>)</span></div>
+                            <div class="panel-body small">
+                                @foreach (var v in volumes.OrderBy(v => v.VolumeId))
+                                {
+                                    var percentUsed = 100 * (v.TotalBytes - v.AvailableBytes) / (float)v.TotalBytes;
+                                    <div class="value-block col-md-@(volumes.Count == 1 ? "12" : "6") col-sm-6" title="@v.VolumeMountPoint.ToUpper() - @v.LogicalVolumeName
+Total: @v.TotalBytes.ToComma() bytes (@v.TotalBytes.ToSize())
+Used: @v.UsedBytes.ToComma() bytes (@v.UsedBytes.ToSize())
+Free: @v.AvailableBytes.ToComma() bytes (@v.AvailableBytes.ToSize())
+Average Read Stall: @v.AvgReadStallMs.ToString(CultureInfo.CurrentCulture) ms
+Average Write Stall: @v.AvgWriteStallMs.ToString(CultureInfo.CurrentCulture) ms">
+                                        <div class="progress">
+                                            <div class="progress-bar" style="width: @percentUsed.ToString(CultureInfo.InvariantCulture)%;"></div>
+                                            <span>@((v.TotalBytes - v.AvailableBytes).ToSize()) / @v.TotalBytes.ToSize() <span class="smaller">(@v.AvailableBytes.ToSize() free)</span></span>
+                                        </div>
+                                        <label>@v.VolumeMountPoint.ToUpper() @v.LogicalVolumeName</label>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+                var ci = i as SQLNode;
+                if (ci != null && i.HasPolledCacheSuccessfully)
+                {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">@Icon.Cluster Cluster Members</div>
+                        <div class="panel-body small">
+                            @foreach (var cn in ci.Cluster.Nodes)
+                            {
+                                <div class="value-block col-md-4 col-sm-6 @cn.BackgroundClass()" title="@cn.Cluster.ClusterStatus">
+                                    <a href="@Url.Action(nameof(SQLController.Instance), new { node = cn.Name })">@cn.Name</a>
+                                    <label>Replica</label>
+                                </div>
+                            }
+                        </div>
+                    </div>
+
+                    var ags = ci.AvailabilityGroups.Data;
+                    var localNetworks = ci.AGClusterInfo.Data?.Networks?.Where(n => n.IsLocal);
+                    if (ags?.Any() ?? false)
+                    {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">@Icon.Cluster Availability Groups</div>
+                            <div class="panel-body small">
+                                @foreach (var ag in ags)
+                                {
+                                    <h6 class="page-header row">
+                                        @ag.IconSpan()
+                                        <a href="@Url.Action(nameof(SQLController.Servers))#/cluster/@ci.Cluster.Name/@ag.Name">@ag.Name</a>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.LocalReplica?.Role.ToSpan())
+                                            <label>Role</label>
+                                        </div>
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.Replicas?.Count.ToComma())
+                                            <label>Replicas</label>
+                                        </div>
+                                        <div class="value-block col-md-3 col-sm-6">
+                                            @(ag.LocalReplica?.Databases?.Count.ToComma())
+                                            <label>Databases</label>
+                                        </div>
+                                        @foreach (var l in ag.Listeners)
+                                        {
+                                            foreach (var a in l.Addresses.Where(a => localNetworks?.Any(n => n.NetworkIPNet.Contains(a.IPNet)) ?? true))
+                                            {
+                                                <div class="value-block col-md-3 col-sm-6 @a.BackgroundClass()" title="Subnet: @a.NetworkSubnetIP/@a.NetworkSubnetPrefixLength.ToString()">
+                                                    @a.IPAddress - @a.State
+                                                    <label>@l.DnsName</label>
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                }
+                                <h6 class="page-header">Replication</h6>
+                                <div class="row">
+                                    @RenderPerSecCounter("Bytes from Replica", "Availability Replica", "Bytes Received from Replica/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Bytes to Replica", "Availability Replica", "Bytes Sent to Replica/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Bytes to Transport", "Availability Replica", "Bytes Sent to Transport/sec", "_Total", cols: 4)
+                                </div>
+                                <div class="row">
+                                    @RenderPerSecCounter("Flow Controls", "Availability Replica", "Flow Control/sec", "_Total", cols: 4)
+                                    @RenderPerSecCounter("Flow Control Time (ms)", "Availability Replica", "Flow Control Time (ms/sec)", "_Total", cols: 4)
+                                    @RenderPerSecCounter("DB Flow Controls", "Database Replica", "Database Flow Controls/sec", "_Total", cols: 4)
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            }
+        </div>
+        <div class="col-md-6">
+            @if (counters.Any())
+            {
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Performance Performance</div>
+                <div class="panel-body small">
+                    @{
+                        var batchCounter = i.GetPerfCounter("SQL Statistics", "Batch Requests/sec", "");
+                        var compCounter = i.GetPerfCounter("SQL Statistics", "SQL Compilations/sec", "");
+                        var compPercent = compCounter != null && batchCounter != null && batchCounter.CalculatedValue > 0 ? (compCounter.CalculatedValue / batchCounter.CalculatedValue) : (decimal?)null;
+                    }
+                    @RenderPerSecCounter("Batches", "SQL Statistics", "Batch Requests/sec", "", url: Url.Action(nameof(SQLController.Top), new { node = i.Name, sort = "ExecutionsPerMinute", LastRunSeconds = 300 }))
+                    @RenderPerSecCounter("Compilations", "SQL Statistics", "SQL Compilations/sec", "", suffix: compPercent.HasValue ? $"({compPercent.Value.ToString("##0.##")}%)" : null)
+                    @RenderPerSecCounter("Re-Compilations", "SQL Statistics", "SQL Re-Compilations/sec", "")
+                    @RenderPerSecCounter("Guided Plans", "SQL Statistics", "Guided plan executions/sec", "")
+
+                    @RenderPerSecCounter("Transactions", "Databases", "Transactions/sec", "_Total")
+
+                    @RenderPerSecCounter("Index Searches", "Access Methods", "Index Searches/sec", "")
+                    @RenderPerSecCounter("Lock Requests", "Locks", "Lock Requests/sec", "_Total")
+                    @RenderPerSecCounter("Errors", "SQL Errors", "Errors/sec", "_Total", url: "#/sql/summary/errors")
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Memory Memory & Storage</div>
+                <div class="panel-body small">
+                    @RenderSizeCounter("Current Memory", "Memory Manager", "Total Server Memory (KB)", "")
+                    @RenderSizeCounter("Target Memory", "Memory Manager", "Target Server Memory (KB)", "")
+                    @RenderSizeCounter("Database Cache", "Memory Manager", "Database Cache Memory (KB)", "")
+                    @RenderSizeCounter("Free", "Memory Manager", "Free Memory (KB)", "")
+
+                    @RenderSizeCounter("Data Files", "Databases", "Data File(s) Size (KB)", "_Total")
+                    @RenderSizeCounter("Log Files", "Databases", "Log File(s) Size (KB)", "_Total")
+                    @RenderSizeCounter("Log Files Used", "Databases", "Log File(s) Used Size (KB)", "_Total")
+                    @RenderSizeCounter("TempDB Free", "Transactions", "Free Space in tempdb (KB)", "")
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Cache Cache</div>
+                <div class="panel-body small">
+                    @{
+                        Func<string, string, string, string> getCacheSize = (o, c, j) =>
+                        {
+                            var bytes = i.GetPerfCounter(o, c, j)?.CurrentValue * 8 * 1024;
+                            return bytes.HasValue ? $"({bytes.Value.ToSize()})" : null;
+                        };
+                        var dbCacheBytes = getCacheSize("Buffer Manager", "Database pages", "");
+                        var planCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "SQL Plans");
+                        var objectCacheBytes = getCacheSize("Plan Cache", "Cache Pages", "_Total");
+                    }
+                    @RenderCacheCounter("Page Life (Seconds)", "Buffer Manager", "Page life expectancy", "")
+                    @RenderCacheCounter("Page Lookups", "Buffer Manager", "Page lookups/sec", "")
+                    @RenderCacheCounter("Database Pages", "Buffer Manager", "Database pages", "", suffix: dbCacheBytes)
+
+                    @RenderCacheCounter("Objects in Cache", "Plan Cache", "Cache Object Counts", "_Total", suffix: objectCacheBytes)
+                    @RenderCacheCounter("Plans in Cache", "Plan Cache", "Cache Object Counts", "SQL Plans", suffix: planCacheBytes)
+                    @RenderCacheCounter("Plan Cache Hit Ratio", "Plan Cache", "Cache Hit Ratio", "_Total")
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Time Waits</div>
+                <div class="panel-body small">
+                    @RenderPerSecCounter("Lock", "Wait Statistics", "Lock waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Log Buffer", "Wait Statistics", "Log buffer waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Log Write", "Wait Statistics", "Log write waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Network IO", "Wait Statistics", "Network IO waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Non-Page Latch", "Wait Statistics", "Non-Page latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Page IO Latch", "Wait Statistics", "Page IO latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Page Latch", "Wait Statistics", "Page latch waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Thread-safe Memory", "Wait Statistics", "Thread-safe memory objects waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Transaction Ownership", "Wait Statistics", "Transaction ownership waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Worker", "Wait Statistics", "Wait for the worker", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Workspace Sync", "Wait Statistics", "Workspace synchronization waits", "Waits started per second", showTotal: false)
+                    @RenderPerSecCounter("Memory Grant", "Wait Statistics", "Memory grant queue waits", "Cumulative wait time (ms) per second", showTotal: false)
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>

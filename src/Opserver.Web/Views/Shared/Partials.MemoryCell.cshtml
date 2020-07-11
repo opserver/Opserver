@@ -1,0 +1,22 @@
+﻿@inject Opserver.Data.Dashboard.DashboardModule Dashboard
+@model PartialsMemoryCellModel
+@{ 
+    var i = Model.Instance;
+    var serverInfo = Dashboard.GetNodeByName(i.Name);
+}
+@if (serverInfo != null)
+{
+    <td>@(serverInfo?.MemoryPercentStatusSpan())</td>
+}
+else
+{
+    var props = i.ServerProperties.SafeData();
+    if (props != null && props.PhysicalMemoryBytes > 0)
+    {
+        <td title="@props.CommittedBytes.ToSize() / @props.PhysicalMemoryBytes.ToSize()">@(decimal.Round(i.CurrentMemoryPercent.Value, Model.DecimalPlaces) + "%")</td>
+    }
+    else
+    {
+        <td class="text-muted">?</td>
+    }
+}

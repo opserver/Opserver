@@ -1,0 +1,36 @@
+@using Opserver.Data.Dashboard
+@using Opserver.Models
+@inject DashboardModule Dashboard
+@{
+    var nodes = Dashboard.AllNodes;
+    var groups = nodes.GroupBy(n => n.Category).OrderBy(g => g.Key.Index).ToList();
+}
+<div class="panel panel-default">
+    <div class="panel-heading">@nodes.GetWorstStatus().IconSpan() @nodes.Count.Pluralize("Node")</div>
+    <div class="panel-body">
+        <table class="table table-super-condensed table-striped col-md-12">
+            <tbody>
+                <tr>
+                    <th>Group</th>
+                    <th>Nodes</th>
+                    <th>Network</th>
+                </tr>
+                @foreach (var g in groups)
+                {
+                    <tr>
+                        <td>@g.Key.Name</td>
+                        <td>@Health.Description(g)</td>
+                        <td>@g.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr class="total-row">
+                    <td><strong>Total</strong></td>
+                    <td>@Health.Description(nodes)</td>
+                    <td>@nodes.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>

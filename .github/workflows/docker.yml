@@ -1,0 +1,16 @@
+name: Docker Image CI
+
+on:
+  push:
+    paths:
+    - 'Dockerfile'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: Build Opserver Docker Image
+      run: |
+        VERSION=$(sed -n 's/.*opserver:\([^ ]*\).*/\1/p' Dockerfile)
+        docker build --tag opserver/opserver-ci:$VERSION --target web .
