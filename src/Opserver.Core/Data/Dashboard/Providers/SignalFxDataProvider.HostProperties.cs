@@ -184,7 +184,7 @@ namespace Opserver.Data.Dashboard.Providers
 
         private async Task<ImmutableList<SignalFxDimension>> GetDimensionsAsync(string api, string query)
         {
-            var url = $"https://api.{Settings.Realm}.signalfx.com/v2/{api}?query={query.UrlEncode()}&limit=200";
+            var url = $"https://api.{Settings.Realm}.signalfx.com/v2/{api}?query={query.UrlEncode()}&limit=5000";
             using (MiniProfiler.Current.Step("SignalFx Host Properties"))
             using (MiniProfiler.Current.CustomTiming("signalFx", url))
             using (var wc = new WebClient())
