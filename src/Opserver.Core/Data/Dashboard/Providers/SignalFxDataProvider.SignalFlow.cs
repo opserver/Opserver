@@ -29,10 +29,10 @@ namespace Opserver.Data.Dashboard.Providers
         private static readonly SignalFlowStatement Memory = new SignalFlowStatement("memory.used");
         private static readonly SignalFlowStatement DiskUsage = new SignalFlowStatement("disk.utilization");
         private static readonly SignalFlowStatement DiskUsageByHost = new SignalFlowStatement("disk.utilization", "sum(by=['host'])");
-        private static readonly SignalFlowStatement InterfaceRx = new SignalFlowStatement("if_octets.rx");
-        private static readonly SignalFlowStatement InterfaceRxByHost = new SignalFlowStatement("if_octets.rx", "sum(by=['host'])");
-        private static readonly SignalFlowStatement InterfaceTx = new SignalFlowStatement("if_octets.tx");
-        private static readonly SignalFlowStatement InterfaceTxByHost = new SignalFlowStatement("if_octets.tx", "sum(by=['host'])");
+        private static readonly SignalFlowStatement InterfaceRx = new SignalFlowStatement("if_octets.rx", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceRxByHost = new SignalFlowStatement("if_octets.rx", aggregation: "sum(by=['host'])", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceTx = new SignalFlowStatement("if_octets.tx", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceTxByHost = new SignalFlowStatement("if_octets.tx", aggregation: "sum(by=['host'])", rollup: "rate");
 
         private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
             Cpu,
@@ -546,23 +546,26 @@ namespace Opserver.Data.Dashboard.Providers
 
         private readonly struct SignalFlowStatement
         {
-            public SignalFlowStatement(string metric) : this(metric, null)
-            {
-            }
-
-            public SignalFlowStatement(string metric, string aggregation)
+            public SignalFlowStatement(string metric, string aggregation = null, string rollup = null)
             {
                 Metric = metric;
                 Aggregation = aggregation;
+                Rollup = rollup;
             }
 
             public string Metric { get; }
             public string Aggregation { get; }
+            public string Rollup { get; }
 
             public string ToString(string host)
             {
                 var sb = StringBuilderCache.Get();
-                sb.Append("data('").Append(Metric).Append("', filter('host', '").Append(host).Append("'))");
+                sb.Append("data('").Append(Metric).Append("', filter('host', '").Append(host).Append("')");
+                if (Rollup.HasValue())
+                {
+                    sb.Append(", rollup='").Append(Rollup).Append("'");
+                }
+                sb.Append(")");
                 if (Aggregation.HasValue())
                 {
                     sb.Append(".").Append(Aggregation);

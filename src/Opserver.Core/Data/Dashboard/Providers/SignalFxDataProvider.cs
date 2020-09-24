@@ -94,8 +94,9 @@ namespace Opserver.Data.Dashboard.Providers
                                         Name = i,
                                         IPs = new List<IPNet>(0),
                                         TeamMembers = new List<string>(0),
-                                        InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value).FirstOrDefault(),
-                                        OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value).FirstOrDefault(),
+                                        // signalfx is returning octets / bits so need to * 8 to get bytes
+                                        InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
+                                        OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
                                     };
                                 }
                         ).ToList(),
@@ -198,8 +199,9 @@ namespace Opserver.Data.Dashboard.Providers
                 (i, o) => new DoubleGraphPoint
                 {
                     DateEpoch = i.DateEpoch,
-                    Value = i.Value,
-                    BottomValue = o.Value
+                    // signalfx is returning octets / bits so need to * 8 to get bytes
+                    Value = i.Value * 8,
+                    BottomValue = o.Value * 8
                 }).ToList();
         }
 
@@ -248,8 +250,9 @@ namespace Opserver.Data.Dashboard.Providers
                 (i, o) => new DoubleGraphPoint
                 {
                     DateEpoch = i.DateEpoch,
-                    Value = i.Value,
-                    BottomValue = o.Value
+                    // signalfx is returning octets / bits so need to * 8 to get bytes
+                    Value = i.Value * 8,
+                    BottomValue = o.Value * 8
                 }).ToList();
         }
 
