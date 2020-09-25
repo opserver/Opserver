@@ -16,16 +16,11 @@ namespace Opserver.Controllers
 
         public ApiController(IOptions<OpserverSettings> _settings, PollingService poller) : base(_settings) => Poller = poller;
 
-        private Jil.Options JilOptions =>
-            Request.Query.ContainsKey("pretty")
-            ? Jil.Options.PrettyPrintExcludeNulls
-            : Jil.Options.ExcludeNulls;
-
         [Route("api/node/roles")]
         public ActionResult NodeRoles(string node)
         {
             var roles = Poller.GetNodeRoles(node).ToList();
-            return Json(new NodeResults(roles), JilOptions);
+            return Json(new NodeResults(roles));
         }
 
         [Route("api/node/enable"), HttpPost]

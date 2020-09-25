@@ -62,7 +62,7 @@ namespace Opserver.Controllers
                     MemPercent = n.PercentMemoryUsed > 0 ? n.PercentMemoryUsed : null,
                     MemText = $"{n.PrettyMemoryUsed()} / {n.PrettyTotalMemory()}({n.PercentMemoryUsed?.ToString("n2")}%)",
                     NetPretty = n.PrettyTotalNetwork(),
-                    DiskPercent = n.Volumes?.Where(v => v.PercentUsed.HasValue).Max(v => v.PercentUsed.Value),
+                    DiskPercent = n.Volumes?.Select(v => v.PercentUsed).Where(p => p.HasValue).DefaultIfEmpty(0).Max(),
                     Disks = n.Volumes?.Select(v => new
                     {
                         Name = v.PrettyName,
@@ -81,7 +81,7 @@ namespace Opserver.Controllers
             {
                 Module.HasData,
                 Categories = resultCategories
-            }, Jil.Options.ExcludeNulls);
+            });
         }
 
         [Route("dashboard/node")]
