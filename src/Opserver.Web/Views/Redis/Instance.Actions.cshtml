@@ -88,11 +88,11 @@
                         }
                         @if (replicaOptions.Any())
                         {
-                            var optimalReplica = replicaOptions.Where(s => s.Key == i.Name)
-                                                           .SelectMany(s => s)
-                                                           .OrderByDescending(s => s.ReplicaCount == 0)
-                                                           .ThenByDescending(s => s.IsReplica)
-                                                           .FirstOrDefault();
+                            // var optimalReplica = replicaOptions.Where(s => s.Key == i.Name)
+                            //                                .SelectMany(s => s)
+                            //                                .OrderByDescending(s => s.ReplicaCount == 0)
+                            //                                .ThenByDescending(s => s.IsReplica)
+                            //                                .FirstOrDefault();
                             <div class="form-group form-group-sm">
                                 <label class="control-label">Set Replication Topology</label>
                                 <div class="list-group-sm">

@@ -55,7 +55,6 @@
         @foreach (var op in operations)
         {
             <input type="hidden" name="operations" value="@op.ToString()" />
-            var i = op.Instance;
             if (op.Command == InstanceCommandType.MakeMaster)
             {
                 <div class="col-md-12">
@@ -68,7 +67,6 @@
             }
             else if (op.Command == InstanceCommandType.ReplicateFrom)
             {
-                var newMaster = op.NewMaster;
                 <div class="col-md-12">
                     <div class="well well-sm well-condensed">
                         <ul class="ul-tree">

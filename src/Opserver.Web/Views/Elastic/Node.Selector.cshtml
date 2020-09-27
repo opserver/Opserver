@@ -17,7 +17,7 @@
                                 var info = nodes.FirstOrDefault(ni => n.Name == ni.Name);
                                 <a class="list-group-item" href="?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">
                                     @n.IconSpan() @n.ShortName
-                                    <span class="badge">@(info?.Version.ToString() ?? "")</span>
+                                    <span class="badge">@(info?.Version ?? "")</span>
                                 </a>
                             }
                     </div>

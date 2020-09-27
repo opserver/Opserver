@@ -51,7 +51,7 @@ namespace Opserver.Tests
             {
                 var firstIp = IPAddress.Parse(firstIpString);
                 var lastIp = IPAddress.Parse(lastIpString);
-                log.WriteLine("Subnet: " + ipNet.Subnet?.ToString());
+                log.WriteLine("Subnet: " + ipNet.Subnet);
                 Assert.Equal(firstIp, ipNet.FirstAddressInSubnet);
                 Assert.Equal(lastIp, ipNet.LastAddressInSubnet);
                 Assert.Equal(isPrivate, ipNet.IsPrivate);

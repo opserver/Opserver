@@ -1,7 +1,6 @@
 ﻿@model DashboardModel
 @{
     Model.Prep();
-    var groups = Model.ReplicationGroups;
 }
 @functions
 {
@@ -142,16 +141,14 @@
                 @Icon.Cog Server Controls <i class="fa fa-caret-down" aria-hidden="true"></i>
             </a>
             <ul class="dropdown-menu pull-right">
-                @for (var i = 0; i < groups.Count; i++)
+                @foreach (var g in groups)
                 {
-                    var g = groups[i];
                     <li class="well well-sm well-condensed">
                         <span class="">@g.Name</span>
                     </li>
                     foreach (var host in g.Hosts)
                     {
                         //#/redis/server-actions/@host.HostName.UrlEncode()
-                        var instances = host.Instances;
                         <li>
                             <a href="#/redis/actions/@host.HostName.UrlEncode()" class="hover-spin">
                                 <span class="text-primary">@Icon.Cog</span> @host.Instances.GetWorstStatus().IconSpan() @host.HostName

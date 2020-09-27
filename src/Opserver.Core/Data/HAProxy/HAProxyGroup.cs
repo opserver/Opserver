@@ -31,6 +31,7 @@ namespace Opserver.Data.HAProxy
         /// <summary>
         /// Creates a single instance group for consistent management at a higher level.
         /// </summary>
+        /// <param name="module">The overall <see cref="HAProxyModule"/> this group belongs to.</param>
         /// <param name="instance">The <see cref="HAProxyInstance"/> to create a single-item group for.</param>
         public HAProxyGroup(HAProxyModule module, HAProxySettings.Instance instance)
         {

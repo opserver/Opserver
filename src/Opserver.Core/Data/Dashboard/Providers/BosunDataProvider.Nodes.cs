@@ -319,6 +319,8 @@ namespace Opserver.Data.Dashboard.Providers
             return NodeStatus.Active;
         }
 
+
+        // ReSharper disable UnusedMember.Local
         // ReSharper disable ClassNeverInstantiated.Local
         // ReSharper disable CollectionNeverUpdated.Local
         // ReSharper disable UnusedAutoPropertyAccessor.Local
@@ -497,8 +499,5 @@ namespace Opserver.Data.Dashboard.Providers
                 public int Count { get; set; }
             }
         }
-        // ReSharper restore CollectionNeverUpdated.Local
-        // ReSharper restore ClassNeverInstantiated.Local
-        // ReSharper restore UnusedAutoPropertyAccessor.Local
     }
 }

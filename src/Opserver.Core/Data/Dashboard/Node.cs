@@ -54,7 +54,7 @@ namespace Opserver.Data.Dashboard
         public string MonitorStatusReason => null;
 
         public bool IsVM => VMHostID.HasValue() || (Manufacturer?.Contains("VMware") ?? false);
-        public bool HasValidMemoryReading => MemoryUsed.HasValue && MemoryUsed >= 0;
+        public bool HasValidMemoryReading => MemoryUsed >= 0;
 
         public Node VMHost { get; internal set; }
 

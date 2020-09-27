@@ -115,6 +115,7 @@ namespace Opserver.Data
 
         private string MiniProfilerDescription { get; }
 
+        // ReSharper disable once StaticMemberInGenericType
         private static readonly MiniProfilerBaseOptions _profilerOptions = new MiniProfilerBaseOptions
         {
             Storage = new NullStorage(),

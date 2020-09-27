@@ -1,5 +1,4 @@
-﻿@using Roles = Opserver.Models.Roles
-@model ServersModel
+﻿@model ServersModel
 @{
     var source = Model.Clusters
                   .SelectMany(c => c.Nodes.SelectMany(n => n.JobSummary.SafeData(true).Select(j => new { ServerName = n.Name, Job = j })))

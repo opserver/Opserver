@@ -14,7 +14,6 @@ using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Opserver;
 using StackExchange.Exceptional;
 
 namespace Opserver.Data.Dashboard.Providers
@@ -92,7 +91,7 @@ namespace Opserver.Data.Dashboard.Providers
 
                 return result;
             }
-                
+
             public override bool Equals(object obj)
             {
                 if (!(obj is TimeSeriesKey other))
@@ -584,9 +583,9 @@ namespace Opserver.Data.Dashboard.Providers
         ///
         /// The result of a SignalFlow program is exposed as an <see cref="IAsyncEnumerable{T}"/> that a
         /// consumer can enumerate at their own pace.
-        /// 
+        ///
         /// TODOs
-        ///  - handle compression of a binary payload 
+        ///  - handle compression of a binary payload
         /// </summary>
         private class SignalFlowClient : IAsyncDisposable
         {
@@ -1028,7 +1027,7 @@ namespace Opserver.Data.Dashboard.Providers
                     static SignalFlowMessage Skip(ref Utf8JsonReader reader)
                     {
                         while (reader.Read()) ;
-                        return null; 
+                        return null;
                     }
                 }
 

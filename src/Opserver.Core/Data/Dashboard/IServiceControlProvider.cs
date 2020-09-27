@@ -4,7 +4,7 @@ namespace Opserver.Data.Dashboard
 {
     public interface IServiceControlProvider
     {
-        Task<ServiceActionResult> UpdateServiceAsync(Node node, string serviceName, Data.Dashboard.NodeService.Action action);
+        Task<ServiceActionResult> UpdateServiceAsync(Node node, string serviceName, NodeService.Action action);
     }
 
     public static class ServiceControlProviderExtensions

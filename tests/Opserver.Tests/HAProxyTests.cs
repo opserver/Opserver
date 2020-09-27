@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
-using Opserver.Data.HAProxy;
-using Xunit;
+﻿using Xunit;
 
 namespace Opserver.Tests
 {

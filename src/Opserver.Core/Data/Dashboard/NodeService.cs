@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 namespace Opserver.Data.Dashboard
 {
     /// <summary>
-    /// Service class 
+    /// Service class
     /// </summary>
-    public partial class NodeService : IMonitorStatus
+    public class NodeService : IMonitorStatus
     {
         public Node Node { get; set; }
 

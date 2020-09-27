@@ -104,7 +104,7 @@ SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
         TotalReturnedRows,
         LastReturnedRows,
         DB_NAME(DatabaseId) AS CompiledOnDatabase
-FROM (SELECT TOP (@MaxResultCount) 
+FROM (SELECT TOP (@MaxResultCount)
              total_worker_time / execution_count AS AvgCPU,
              total_elapsed_time / execution_count AS AvgDuration,
              total_logical_reads / execution_count AS AvgReads,
@@ -132,10 +132,10 @@ FROM (SELECT TOP (@MaxResultCount)
              qs.last_rows AS LastReturnedRows,
              qs.sql_handle AS SqlHandle,
 			 Cast(pa.value as Int) DatabaseId
-        FROM (SELECT *, 
+        FROM (SELECT *,
                      CAST((CASE WHEN DATEDIFF(second, creation_time, GETDATE()) > 0 And execution_count > 1
                                 THEN DATEDIFF(second, creation_time, GETDATE()) / 60.0
-                                ELSE Null END) as MONEY) as age_minutes, 
+                                ELSE Null END) as MONEY) as age_minutes,
                      CAST((CASE WHEN DATEDIFF(second, creation_time, last_execution_time) > 0 And execution_count > 1
                                 THEN DATEDIFF(second, creation_time, last_execution_time) / 60.0
                                 ELSE Null END) as MONEY) as age_minutes_lifetime

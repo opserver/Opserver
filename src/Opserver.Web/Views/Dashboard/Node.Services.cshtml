@@ -34,11 +34,11 @@ Last Updated @(i.LastSync?.ToRelativeTime() ?? "Unknown")" data-val="@(i.Id)">
                     <td class="actions">
                         @if (!i.Running)
                         {
-                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="@NodeService.Action.Start" data-name="@i.Name.ToString()">@NodeService.Action.Start</a>
+                            <a href="#" class="js-service-action btn btn-xs btn-primary" data-action="@NodeService.Action.Start" data-name="@i.Name">@NodeService.Action.Start</a>
                     }
                         else
                         {
-                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="@NodeService.Action.Stop" data-name="@i.Name.ToString()">@NodeService.Action.Stop</a>
+                            <a href="#" class="js-service-action btn btn-xs btn-danger" data-action="@NodeService.Action.Stop" data-name="@i.Name">@NodeService.Action.Stop</a>
                 }
                     </td>
                 }
