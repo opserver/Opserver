@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Data;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -94,9 +93,9 @@ namespace Opserver.Data.Dashboard.Providers
                                         Name = i,
                                         IPs = new List<IPNet>(0),
                                         TeamMembers = new List<string>(0),
-                                        // signalfx is returning octets / bits so need to * 8 to get bytes
-                                        InBps = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
-                                        OutBps = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
+                                        // SignalFX is returning octets / bytes so need to * 8 to get bits
+                                        InBitsPerSecond = rxMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
+                                        OutBitsPerSecond = txMetrics.Values.OrderByDescending(x => x.DateEpoch).Select(x => (float)x.Value * 8).FirstOrDefault(),
                                     };
                                 }
                         ).ToList(),
@@ -199,7 +198,7 @@ namespace Opserver.Data.Dashboard.Providers
                 (i, o) => new DoubleGraphPoint
                 {
                     DateEpoch = i.DateEpoch,
-                    // signalfx is returning octets / bits so need to * 8 to get bytes
+                    // SignalFX is returning octets / bits so need to * 8 to get bytes
                     Value = i.Value * 8,
                     BottomValue = o.Value * 8
                 }).ToList();

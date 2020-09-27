@@ -8,24 +8,24 @@ namespace Opserver.Helpers
 {
     public static class ExtensionMethods
     {
-        public static string ToSpeed(this float bps, string unit = "b") =>
-            bps < 1 ? "0 b/s" : $"{bps.ToSize(unit)}/s";
+        public static string ToSpeed(this float unitsPerSecond, string unit = "b") =>
+            unitsPerSecond < 1 ? "0 b/s" : $"{unitsPerSecond.ToSize(unit)}/s";
     }
 
     public static class VolumeExtensionMethods
     {
         public static string PercentFreeSpace(this Volume vol) => (100 - vol.PercentUsed)?.ToString("n0") + "% Free";
 
-        public static string PrettyRead(this Volume i) => i.ReadBps?.ToSpeed();
+        public static string PrettyRead(this Volume i) => i.ReadBytesPerSecond?.ToSpeed();
 
-        public static string PrettyWrite(this Volume i) => i.WriteBps?.ToSpeed();
+        public static string PrettyWrite(this Volume i) => i.WriteBytesPerSecond?.ToSpeed();
     }
 
     public static class InterfaceExtensionMethods
     {
-        public static string PrettyIn(this Interface i) => i.InBps?.ToSpeed();
+        public static string PrettyIn(this Interface i) => i.InBitsPerSecond?.ToSpeed();
 
-        public static string PrettyOut(this Interface i) => i.OutBps?.ToSpeed();
+        public static string PrettyOut(this Interface i) => i.OutBitsPerSecond?.ToSpeed();
     }
 
     public static class NodeExtensionMethods
@@ -87,13 +87,13 @@ namespace Opserver.Helpers
         }
 
         public static string PrettyTotalNetwork(this Node info) =>
-            info.TotalPrimaryNetworkbps < 0
+            info.TotalPrimaryNetworkBitsPerSecond < 0
                 ? null
-                : info.TotalPrimaryNetworkbps.ToSpeed();
+                : info.TotalPrimaryNetworkBitsPerSecond.ToSpeed();
 
         public static string PrettyTotalVolumePerformance(this Node info) =>
-            info.TotalVolumePerformancebps < 0
+            info.TotalVolumePerformanceBytesPerSecond < 0
                 ? null
-                : info.TotalVolumePerformancebps.ToSpeed();
+                : info.TotalVolumePerformanceBytesPerSecond.ToSpeed();
     }
 }

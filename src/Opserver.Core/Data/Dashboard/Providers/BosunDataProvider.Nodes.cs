@@ -40,7 +40,7 @@ namespace Opserver.Data.Dashboard.Providers
                     if (h.Name == "unspecified")
                         continue;
 
-                    // Note: we can't follow this pattern, we'll need to refresh existing nodes 
+                    // Note: we can't follow this pattern, we'll need to refresh existing nodes
                     // not wholesale replace on poll
                     var n = new Node
                     {
@@ -72,8 +72,8 @@ namespace Opserver.Data.Dashboard.Providers
                             PhysicalAddress = hi.Value.MAC,
                             IPs = hi.Value?.IPAddresses?.Select(ip => IPNet.TryParse(ip, out var result) ? result : null).Where(ip => ip != null).ToList() ?? new List<IPNet>(),
                             LastSync = hi.Value.StatsLastUpdated,
-                            InBps = hi.Value.Inbps,
-                            OutBps = hi.Value.Outbps,
+                            InBitsPerSecond = hi.Value.Inbps,
+                            OutBitsPerSecond = hi.Value.Outbps,
                             Speed = hi.Value.LinkSpeed * 1000000,
                             Status = NodeStatus.Active, // TODO: Implement
                             TeamMembers =

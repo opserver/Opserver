@@ -44,7 +44,7 @@ Select Cast(n.NodeID as varchar(50)) as Id,
        Cast(Status as int) Status,
        Cast(ChildStatus as int) ChildStatus,
        StatusDescription,
-       LastBoot, 
+       LastBoot,
        Coalesce(Cast(vm.CPULoad as smallint), n.CPULoad) as CPULoad,
        TotalMemory,
        MemoryUsed,
@@ -76,10 +76,10 @@ Select Cast(InterfaceID as varchar(50)) as Id,
        InterfaceTypeDescription TypeDescription,
        PhysicalAddress,
        Cast(Status as int) Status,
-       InBps,
-       OutBps,
-       InPps,
-       OutPps,
+       InBps InBitsPerSecond,
+       OutBps OutBitsPerSecond,
+       InPps InPacketsPerSecond,
+       OutPps OutPacketsPerSecond,
        InterfaceMTU as MTU,
        InterfaceSpeed as Speed
 From Interfaces", commandTimeout: QueryTimeoutMs);
@@ -101,22 +101,22 @@ Select Cast(VolumeID as varchar(50)) as Id,
  Where VolumeType = 'Fixed Disk'", commandTimeout: QueryTimeoutMs);
 
                 var apps = await conn.QueryAsync<Application>(@"
-Select Cast(com.ApplicationID as varchar(50)) as Id, 
-       Cast(NodeID as varchar(50)) as NodeId, 
-       app.Name as AppName, 
+Select Cast(com.ApplicationID as varchar(50)) as Id,
+       Cast(NodeID as varchar(50)) as NodeId,
+       app.Name as AppName,
        IsNull(app.Unmanaged, 0) as IsUnwatched,
-       com.Name as ComponentName, 
+       com.Name as ComponentName,
        ccs.TimeStamp as LastUpdated,
-       --pe.PID as ProcessID, 
+       --pe.PID as ProcessID,
        ccs.ProcessName,
-       ccs.LastTimeUp, 
+       ccs.LastTimeUp,
        ccs.PercentCPU as CurrentPercentCPU,
        ccs.PercentMemory as CurrentPercentMemory,
        ccs.MemoryUsed as CurrentMemoryUsed,
        ccs.VirtualMemoryUsed as CurrentVirtualMemoryUsed,
-       pe.AvgPercentCPU as PercentCPU, 
-       pe.AvgPercentMemory as PercentMemory, 
-       pe.AvgMemoryUsed as MemoryUsed, 
+       pe.AvgPercentCPU as PercentCPU,
+       pe.AvgPercentMemory as PercentMemory,
+       pe.AvgMemoryUsed as MemoryUsed,
        pe.AvgVirtualMemoryUsed as VirtualMemoryUsed,
        pe.ErrorMessage
 From APM_Application app
@@ -197,7 +197,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
             var result = await conn.QueryAsync<OrionIPMap>(@"
 Select Cast(i.InterfaceID as varchar(50)) as InterfaceID, ipa.IPAddress, ipa.SubnetMask
   From NodeIPAddresses ipa
-       Join Interfaces i 
+       Join Interfaces i
          On ipa.NodeID = i.NodeID
          And ipa.InterfaceIndex = i.InterfaceIndex",
                 commandTimeout: QueryTimeoutMs);
@@ -277,8 +277,8 @@ Order By c.DateTime";
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
-       Sum(itd.In_Averagebps) InAvgBps,
-       Sum(itd.Out_Averagebps) OutAvgBps
+       Sum(itd.In_Averagebps) InAvgBitsPerSecond,
+       Sum(itd.Out_Averagebps) OutAvgBitsPerSecond
   From InterfaceTraffic itd
  Where itd.InterfaceID In @Ids
    And {dateRange}
@@ -288,11 +288,11 @@ Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01', itd.DateTime) as DateEpoch,
-       Sum(itd.InAvgBps) InAvgBps,
-       Sum(itd.OutAvgBps) OutAvgBps
+       Sum(itd.InAvgBitsPerSecond) InAvgBitsPerSecond,
+       Sum(itd.OutAvgBitsPerSecond) OutAvgBitsPerSecond
   From (Select itd.DateTime,
-		       itd.In_Averagebps InAvgBps,
-		       itd.Out_Averagebps OutAvgBps,
+		       itd.In_Averagebps InAvgBitsPerSecond,
+		       itd.Out_Averagebps OutAvgBitsPerSecond,
 		       Row_Number() Over(Order By itd.DateTime) RowNumber
           From InterfaceTraffic itd
          Where itd.InterfaceID In @Ids
@@ -318,8 +318,8 @@ new { Ids = node.PrimaryInterfaces.Select(i => int.Parse(i.Id)), start, end, int
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
-       Sum(vp.AvgDiskWrites) WriteAvgBps,
-       Sum(vp.AvgDiskReads) ReadAvgBps
+       Sum(vp.AvgDiskWrites) WriteAvgBytesPerSecond,
+       Sum(vp.AvgDiskReads) ReadAvgBytesPerSecond
   From VolumePerformance vp
  Where vp.VolumeID In @Ids
    And {dateRange}
@@ -329,11 +329,11 @@ Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
-       Sum(vp.WriteAvgBps) WriteAvgBps,
-       Sum(vp.ReadAvgBps) ReadAvgBps
+       Sum(vp.WriteAvgBytesPerSecond) WriteAvgBytesPerSecond,
+       Sum(vp.ReadAvgBytesPerSecond) ReadAvgBytesPerSecond
   From (Select vp.DateTime,
-		       vp.AvgDiskWrites WriteAvgBps,
-		       vp.AvgDiskReads ReadAvgBps,
+		       vp.AvgDiskWrites WriteAvgBytesPerSecond,
+		       vp.AvgDiskReads ReadAvgBytesPerSecond,
 		       Row_Number() Over(Order By vp.DateTime) RowNumber
           From VolumePerformance vp
          Where vp.VolumeID In @Ids
@@ -357,8 +357,8 @@ new { Ids = node.Volumes.Select(v => int.Parse(v.Id)), start, end, intervals = p
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
-       Sum(vp.AvgDiskWrites) WriteAvgBps,
-       Sum(vp.AvgDiskReads) ReadAvgBps
+       Sum(vp.AvgDiskWrites) WriteAvgBytesPerSecond,
+       Sum(vp.AvgDiskReads) ReadAvgBytesPerSecond
   From VolumePerformance vp
  Where vp.VolumeID = @Id
    And {dateRange}
@@ -368,11 +368,11 @@ Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01', vp.DateTime) as DateEpoch,
-       Sum(vp.WriteAvgBps) WriteAvgBps,
-       Sum(vp.ReadAvgBps) ReadAvgBps
+       Sum(vp.WriteAvgBytesPerSecond) WriteAvgBytesPerSecond,
+       Sum(vp.ReadAvgBytesPerSecond) ReadAvgBytesPerSecond
   From (Select vp.DateTime,
-		       vp.AvgDiskWrites WriteAvgBps,
-		       vp.AvgDiskReads ReadAvgBps,
+		       vp.AvgDiskWrites WriteAvgBytesPerSecond,
+		       vp.AvgDiskReads ReadAvgBytesPerSecond,
 		       Row_Number() Over(Order By vp.DateTime) RowNumber
           From VolumePerformance vp
          Where vp.VolumeID = @Id
@@ -419,8 +419,8 @@ Select DateDiff(s, '1970-01-01 00:00:00', v.DateTime) as DateEpoch,
         {
             const string allSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
-       itd.In_Averagebps InAvgBps,
-       itd.Out_Averagebps OutAvgBps
+       itd.In_Averagebps InAvgBitsPerSecond,
+       itd.Out_Averagebps OutAvgBitsPerSecond
   From InterfaceTraffic itd
  Where itd.InterfaceID = @Id
    And {dateRange}
@@ -429,11 +429,11 @@ Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
 
             const string sampledSql = @"
 Select DateDiff(s, '1970-01-01 00:00:00', itd.DateTime) as DateEpoch,
-       itd.InAvgBps,
-       itd.OutAvgBps
+       itd.InAvgBitsPerSecond InAvgBitsPerSecond,
+       itd.OutAvgBitsPerSecond OutAvgBitsPerSecond
   From (Select itd.DateTime,
-		       itd.In_Averagebps InAvgBps,
-		       itd.Out_Averagebps OutAvgBps,
+		       itd.In_Averagebps InAvgBitsPerSecond,
+		       itd.Out_Averagebps OutAvgBitsPerSecond,
 		       Row_Number() Over(Order By itd.DateTime) RowNumber
           From InterfaceTraffic itd
          Where itd.InterfaceID = @Id

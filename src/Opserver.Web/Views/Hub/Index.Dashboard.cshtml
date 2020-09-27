@@ -1,5 +1,4 @@
 @using Opserver.Data.Dashboard
-@using Opserver.Models
 @inject DashboardModule Dashboard
 @{
     var nodes = Dashboard.AllNodes;
@@ -20,7 +19,7 @@
                     <tr>
                         <td>@g.Key.Name</td>
                         <td>@Health.Description(g)</td>
-                        <td>@g.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                        <td>@g.Sum(n => n.TotalPrimaryNetworkBitsPerSecond < 0 ? 0 : n.TotalPrimaryNetworkBitsPerSecond).ToSpeed()</td>
                     </tr>
                 }
             </tbody>
@@ -28,7 +27,7 @@
                 <tr class="total-row">
                     <td><strong>Total</strong></td>
                     <td>@Health.Description(nodes)</td>
-                    <td>@nodes.Sum(n => n.TotalPrimaryNetworkbps < 0 ? 0 : n.TotalPrimaryNetworkbps).ToSpeed()</td>
+                    <td>@nodes.Sum(n => n.TotalPrimaryNetworkBitsPerSecond < 0 ? 0 : n.TotalPrimaryNetworkBitsPerSecond).ToSpeed()</td>
                 </tr>
             </tfoot>
         </table>

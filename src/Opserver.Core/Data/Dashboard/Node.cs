@@ -175,13 +175,13 @@ namespace Opserver.Data.Dashboard
                 if (_networkTextSummary != null) return _networkTextSummary;
 
                 var sb = StringBuilderCache.Get();
-                sb.Append("Total Traffic: ").Append(TotalPrimaryNetworkbps.ToSize("b")).AppendLine("/s");
+                sb.Append("Total Traffic: ").Append(TotalPrimaryNetworkBitsPerSecond.ToSize("b")).AppendLine("/s");
                 sb.AppendFormat("Interfaces ({0} total):", Interfaces.Count.ToString()).AppendLine();
-                foreach (var i in PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBps + i.OutBps))
+                foreach (var i in PrimaryInterfaces.Take(5).OrderByDescending(i => i.InBitsPerSecond + i.OutBitsPerSecond))
                 {
                     sb.AppendFormat("{0}: {1}/s\n(In: {2}/s, Out: {3}/s)\n", i.PrettyName,
-                        (i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)).ToSize("b"),
-                        i.InBps.GetValueOrDefault(0).ToSize("b"), i.OutBps.GetValueOrDefault(0).ToSize("b"));
+                        (i.InBitsPerSecond.GetValueOrDefault(0) + i.OutBitsPerSecond.GetValueOrDefault(0)).ToSize("b"),
+                        i.InBitsPerSecond.GetValueOrDefault(0).ToSize("b"), i.OutBitsPerSecond.GetValueOrDefault(0).ToSize("b"));
                 }
                 return _networkTextSummary = sb.ToStringRecycle();
             }
@@ -275,9 +275,9 @@ namespace Opserver.Data.Dashboard
 
         public float? PercentMemoryUsed => MemoryUsed * 100 / TotalMemory;
 
-        public float TotalNetworkbps => Interfaces?.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0)) ?? 0;
-        public float TotalPrimaryNetworkbps => PrimaryInterfaces.Sum(i => i.InBps.GetValueOrDefault(0) + i.OutBps.GetValueOrDefault(0));
-        public float TotalVolumePerformancebps => Volumes?.Sum(i => i.ReadBps.GetValueOrDefault(0) + i.WriteBps.GetValueOrDefault(0)) ?? 0;
+        public float TotalNetworkBitsPerSecond => Interfaces?.Sum(i => i.InBitsPerSecond.GetValueOrDefault(0) + i.OutBitsPerSecond.GetValueOrDefault(0)) ?? 0;
+        public float TotalPrimaryNetworkBitsPerSecond => PrimaryInterfaces.Sum(i => i.InBitsPerSecond.GetValueOrDefault(0) + i.OutBitsPerSecond.GetValueOrDefault(0));
+        public float TotalVolumePerformanceBytesPerSecond => Volumes?.Sum(i => i.ReadBytesPerSecond.GetValueOrDefault(0) + i.WriteBytesPerSecond.GetValueOrDefault(0)) ?? 0;
 
         private DashboardSettings.NodeSettings _settings;
         public DashboardSettings.NodeSettings Settings => _settings ??= DataProvider.Module.Settings.GetNodeSettings(PrettyName);
@@ -303,7 +303,7 @@ namespace Opserver.Data.Dashboard
                     var dbInterfaces = Interfaces.Where(i => i.IsLikelyPrimary(pattern)).ToList();
                     _primaryInterfaces = (dbInterfaces.Count > 0
                         ? dbInterfaces.OrderBy(i => i.Name)
-                        : Interfaces.OrderByDescending(i => i.InBps + i.OutBps)).ToList();
+                        : Interfaces.OrderByDescending(i => i.InBitsPerSecond + i.OutBitsPerSecond)).ToList();
                 }
                 return _primaryInterfaces;
             }
@@ -312,7 +312,7 @@ namespace Opserver.Data.Dashboard
         /// <summary>
         /// Should be called after a node is created to set parent referneces
         /// and removed ignored interfaces, volumes, etc.
-        /// 
+        ///
         /// This allows interfaces, volumes, etc. to poll through the provider
         /// </summary>
         public void AfterInitialize()

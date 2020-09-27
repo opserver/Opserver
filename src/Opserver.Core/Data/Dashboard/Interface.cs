@@ -24,10 +24,10 @@ namespace Opserver.Data.Dashboard
 
         public NodeStatus Status { get; internal set; }
 
-        public float? InBps { get; internal set; }
-        public float? OutBps { get; internal set; }
-        public float? InPps { get; internal set; }
-        public float? OutPps { get; internal set; }
+        public float? InBitsPerSecond { get; internal set; }
+        public float? OutBitsPerSecond { get; internal set; }
+        public float? InPacketsPerSecond { get; internal set; }
+        public float? OutPacketsPerSecond { get; internal set; }
         public int? MTU { get; internal set; }
         public double? Speed { get; internal set; }
         public bool IsTeamMember => Node.Interfaces.Any(i => i.TeamMembers?.Contains(Id) ?? false);

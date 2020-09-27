@@ -17,8 +17,8 @@ namespace Opserver.Data.Dashboard
         public string Type { get; internal set; }
         public NodeStatus Status { get; internal set; }
 
-        public float? ReadBps { get; internal set; }
-        public float? WriteBps { get; internal set; }
+        public float? ReadBytesPerSecond { get; internal set; }
+        public float? WriteBytesPerSecond { get; internal set; }
 
         public decimal? Size { get; internal set; }
         public decimal? Used { get; internal set; }

@@ -106,7 +106,7 @@ namespace Opserver.Data.Dashboard.Providers
 
             private async Task UpdateNodeDataAsync()
             {
-                const string machineQuery = @"SELECT 
+                const string machineQuery = @"SELECT
                 DNSHostName,
                 Domain,
                 Manufacturer,
@@ -128,7 +128,7 @@ namespace Opserver.Data.Dashboard.Providers
                     }
                 }
 
-                const string query = @"SELECT 
+                const string query = @"SELECT
                 Caption,
                 LastBootUpTime,
                 Version,
@@ -150,7 +150,7 @@ namespace Opserver.Data.Dashboard.Providers
                     }
                 }
 
-                const string servicetagquery = @"SELECT 
+                const string servicetagquery = @"SELECT
                     SerialNumber
                     FROM Win32_BIOS";
 
@@ -177,7 +177,7 @@ namespace Opserver.Data.Dashboard.Providers
                 const string query = @"
 SELECT Name,
        PNPDeviceID,
-       DeviceID,       
+       DeviceID,
        NetConnectionID,
        Description,
        MACAddress,
@@ -263,7 +263,7 @@ SELECT Name,
 
                 const string ipQuery = @"
 SELECT InterfaceIndex, IPAddress, IPSubnet, DHCPEnabled
-  FROM WIn32_NetworkAdapterConfiguration 
+  FROM WIn32_NetworkAdapterConfiguration
  WHERE IPEnabled = 'True'";
 
                 using (var q = Query(ipQuery))
@@ -474,8 +474,8 @@ SELECT Caption,
                 var combinedUtil = new Interface.InterfaceUtilization
                 {
                     DateEpoch = queryTime,
-                    InAvgBps = 0,
-                    OutAvgBps = 0
+                    InAvgBitsPerSecond = 0,
+                    OutAvgBitsPerSecond = 0
                 };
 
                 using (var q = Query(query))
@@ -487,16 +487,16 @@ SELECT Caption,
                         var iface = Interfaces.Find(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
-                        iface.InBps = (float)perfData.GetCalculatedValue("BytesReceivedPersec", 10000000);
-                        iface.OutBps = (float)perfData.GetCalculatedValue("BytesSentPersec", 10000000);
-                        iface.InPps = (float)perfData.GetCalculatedValue("PacketsReceivedPersec", 10000000);
-                        iface.OutPps = (float)perfData.GetCalculatedValue("PacketsSentPersec", 10000000);
+                        iface.InBitsPerSecond = (float)perfData.GetCalculatedValue("BytesReceivedPersec", 10000000) * 8;
+                        iface.OutBitsPerSecond = (float)perfData.GetCalculatedValue("BytesSentPersec", 10000000) * 8;
+                        iface.InPacketsPerSecond = (float)perfData.GetCalculatedValue("PacketsReceivedPersec", 10000000);
+                        iface.OutPacketsPerSecond = (float)perfData.GetCalculatedValue("PacketsSentPersec", 10000000);
 
                         var util = new Interface.InterfaceUtilization
                         {
                             DateEpoch = queryTime,
-                            InAvgBps = iface.InBps,
-                            OutAvgBps = iface.OutBps
+                            InAvgBitsPerSecond = iface.InBitsPerSecond,
+                            OutAvgBitsPerSecond = iface.OutBitsPerSecond
                         };
 
                         var netData = NetHistory.GetOrAdd(iface.Name, _ => new List<Interface.InterfaceUtilization>(1024));
@@ -504,8 +504,8 @@ SELECT Caption,
 
                         if (PrimaryInterfaces.Contains(iface))
                         {
-                            combinedUtil.InAvgBps += util.InAvgBps;
-                            combinedUtil.OutAvgBps += util.OutAvgBps;
+                            combinedUtil.InAvgBitsPerSecond += util.InAvgBitsPerSecond;
+                            combinedUtil.OutAvgBitsPerSecond += util.OutAvgBitsPerSecond;
                         }
                     }
                 }
@@ -526,8 +526,8 @@ SELECT Caption,
                 var combinedUtil = new Volume.VolumePerformanceUtilization
                 {
                     DateEpoch = queryTime,
-                    ReadAvgBps = 0,
-                    WriteAvgBps = 0
+                    ReadAvgBytesPerSecond = 0,
+                    WriteAvgBytesPerSecond = 0
                 };
 
                 using (var q = Query(query))
@@ -540,14 +540,14 @@ SELECT Caption,
                         var iface = Volumes.Find(i => name == GetCounterName(i.Name));
                         if (iface == null) continue;
 
-                        iface.ReadBps = (float)perfData.GetCalculatedValue("DiskReadBytesPersec", 10000000);
-                        iface.WriteBps = (float)perfData.GetCalculatedValue("DiskWriteBytesPersec", 10000000);
+                        iface.ReadBytesPerSecond = (float)perfData.GetCalculatedValue("DiskReadBytesPersec", 10000000);
+                        iface.WriteBytesPerSecond = (float)perfData.GetCalculatedValue("DiskWriteBytesPersec", 10000000);
 
                         var util = new Volume.VolumePerformanceUtilization
                         {
                             DateEpoch = queryTime,
-                            ReadAvgBps = iface.ReadBps,
-                            WriteAvgBps = iface.WriteBps
+                            ReadAvgBytesPerSecond = iface.ReadBytesPerSecond,
+                            WriteAvgBytesPerSecond = iface.WriteBytesPerSecond
                         };
 
                         var netData = VolumePerformanceHistory.GetOrAdd(iface.Name, _ => new List<Volume.VolumePerformanceUtilization>(1024));
@@ -555,8 +555,8 @@ SELECT Caption,
 
                         //if (PrimaryInterfaces.Contains(iface))
                         {
-                            combinedUtil.ReadAvgBps += util.ReadAvgBps;
-                            combinedUtil.WriteAvgBps += util.WriteAvgBps;
+                            combinedUtil.ReadAvgBytesPerSecond += util.ReadAvgBytesPerSecond;
+                            combinedUtil.WriteAvgBytesPerSecond += util.WriteAvgBytesPerSecond;
                         }
                     }
                 }
