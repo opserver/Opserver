@@ -1,3 +1,7 @@
+---
+title: "Configuration"
+layout: "default"
+---
 # Opserver Configuration
 
 ### Basics
@@ -134,12 +138,16 @@ The dashboard can currently monitor via Bosun, Orion or limited amounts through 
   /* Which provider to use for dashboard data 
      Multiple providers can be used...but things may get crazy when a node is monitored by more than 1 */
   "providers": {
-    /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
-    "bosun": {
-      "host": "https://bosun.mydomain.com",
-      "apiKey": "<API Key>"
-
+    /* If using SignalFX */
+    "signalfx": {
+      "realm": "<realm>", // Realm for SignalFx, e.g. "us1", "eu0"
+      "accessToken": "<Access Token>"
     }
+    /* If using bosun, an API and a key (in recent bosun versions) needs to be provided */
+    // "bosun": {
+    //   "host": "https://bosun.mydomain.com",
+    //   "apiKey": "<API Key>"
+    // }
     /* If using WMI, a list of nodes to monitor needs to be provided */
     //"wmi": {
     //  "nodes": [ "ny-web01" ], // List of nodes to monitor
