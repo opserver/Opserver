@@ -108,3 +108,5 @@ src/Opserver.Web/wwwroot/Content/js/plugins.js
 src/Opserver.Web/wwwroot/Content/js/plugins.min.js
 src/Opserver.Web/wwwroot/Content/js/bundle*
 #src/Opserver.Web/wwwroot/Content/themes/*.css
+docs/_site/*
+docs/Gemfile.lock

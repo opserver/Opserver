@@ -1,6 +1,6 @@
 # Opserver Configuration
 
-## Basics
+### Basics
 Configuration is accepted in several paths.
 1. All modules are optional. Just configure what you intend to montior and ignore the rest.
 2. The following paths are searched:
