@@ -27,13 +27,21 @@ It can run under:
 - Linux
 - ...and probably any platform [supported by .NET Core](https://docs.microsoft.com/en-us/dotnet/core/introduction)
 
-#### Building Opserver
+#### Building Opserver (.NET App)
 
 To build, you'll need the .NET Core 3.1 or higher SDK ([available here](https://dotnet.microsoft.com/download)), or a current version of Visual Studio.
 
 Build instructions are:
 1. Clone the repo.
 2. `dotnet build`
+
+#### Building Opserver (Docker)
+
+This also requires the .NET Core 3.1 or higher SDK ([available here](https://dotnet.microsoft.com/download)), or a current version of Visual Studio.
+
+Build instructions are:
+1. Clone the repo.
+2. `docker build --target web .`
 
 The goal is to also update [Docker Hub](https://hub.docker.com/repository/docker/opserver/opserver) from GitHub actions so that you can spin up and image and simply provide your config.
 
