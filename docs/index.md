@@ -35,7 +35,7 @@ Build instructions are:
 1. Clone the repo.
 2. `dotnet build`
 
-The goal is to also publish to docker hub from GitHub actions so that you can spin up and image and simply provide your config.
+The goal is to also update [Docker Hub](https://hub.docker.com/repository/docker/opserver/opserver) from GitHub actions so that you can spin up and image and simply provide your config.
 
 #### Running Opsever
 
