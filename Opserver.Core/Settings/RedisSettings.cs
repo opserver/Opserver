@@ -84,6 +84,12 @@ namespace StackExchange.Opserver
             public bool UseSSL { get; set; } = false;
 
             /// <summary>
+            /// Specify the ssl protocols that should be used.
+            /// You can specifiy multiple protocols separated by a comma.
+            /// </summary>
+            public string SslProtocols{ get; set; }
+
+            /// <summary>
             /// Regular expressions collection to crawl keys against, to break out Redis DB usage
             /// </summary>
             public Dictionary<string, string> AnalysisRegexes { get; set; } = new Dictionary<string, string>();
