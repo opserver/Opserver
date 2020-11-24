@@ -42,7 +42,7 @@ namespace StackExchange.Opserver.Data.Redis
             for (int i = 0; i < protocols.Length; i++)
             {
                 SslProtocols protocol;
-                if (Enum.TryParse(protocols[i].Trim(), ignoreCase: true, out protocol))
+                if (Enum.TryParse(protocols[i].Trim(), true, out protocol))
                 {
                     result |= protocol;
                 }
