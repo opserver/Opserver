@@ -8,9 +8,10 @@ namespace Opserver.Security
     public class EveryonesAnAdminProvider : SecurityProvider
     {
         public override string ProviderName => "Everyone's an Admin!";
+        public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.None;
         public EveryonesAnAdminProvider(SecuritySettings settings) : base(settings) { }
 
         public override bool InGroups(User user, string[] groupNames) => true;
-        public override bool ValidateUser(string userName, string password) => true;
+        public override bool ValidateToken(ISecurityProviderToken token) => true;
     }
 }

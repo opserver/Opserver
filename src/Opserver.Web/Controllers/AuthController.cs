@@ -5,17 +5,18 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Opserver.Security;
 using Opserver.Views.Login;
 
 namespace Opserver.Controllers
 {
-    public class AuthController : StatusController
+    public partial class AuthController : StatusController
     {
-        public AuthController(IOptions<OpserverSettings> _settings) : base(_settings) { }
+        public AuthController(IOptions<OpserverSettings> settings) : base(settings) { }
 
         [AllowAnonymous]
         [Route("login"), HttpGet]
-        public ActionResult Login(string returnUrl)
+        public async Task<ActionResult> Login(string returnUrl)
         {
             if (!Current.Security.IsConfigured)
             {
@@ -27,24 +28,30 @@ namespace Opserver.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            var vd = new LoginModel();
-            return View(vd);
+            switch (Current.Security.FlowType)
+            {
+                case SecurityProviderFlowType.None:
+                case SecurityProviderFlowType.UsernamePassword:
+                    return View(new LoginModel());
+                case SecurityProviderFlowType.OAuth:
+                    // TODO: redirect to OAuth URL
+                    return new NotFoundResult();
+            }
         }
 
         [AllowAnonymous]
         [Route("login"), HttpPost]
         public async Task<ActionResult> Login(string user, string pass, string url)
         {
-            var vd = new LoginModel();
-            if (Current.Security.ValidateUser(user, pass))
+            if (Current.Security.FlowType == SecurityProviderFlowType.OAuth)
             {
-                var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, user)
-                    };
-                var userIdentity = new ClaimsIdentity(claims, "login");
-                var principal = new ClaimsPrincipal(userIdentity);
-                await HttpContext.SignInAsync(principal);
+                return new NotFoundResult();
+            }
+
+            var vd = new LoginModel();
+            if (Current.Security.ValidateToken(new UserNamePasswordToken(user, pass)))
+            {
+                await SignInAsync(user);
                 return Redirect(url.HasValue() ? url : "~/");
             }
             vd.ErrorMessage = "Login failed";
@@ -57,6 +64,17 @@ namespace Opserver.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction(nameof(Login));
+        }
+
+        private Task SignInAsync(string user)
+        {
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, user)
+            };
+            var identity = new ClaimsIdentity(claims, "login");
+            var principal = new ClaimsPrincipal(identity);
+            return HttpContext.SignInAsync(principal);
         }
     }
 }

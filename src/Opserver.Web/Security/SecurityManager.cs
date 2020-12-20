@@ -22,6 +22,7 @@ namespace Opserver.Security
                 "ActiveDirectory" => new ActiveDirectoryProvider(settings, cache),
                 "EveryonesAnAdmin" => new EveryonesAnAdminProvider(settings),
                 "EveryonesReadOnly" => new EveryonesReadOnlyProvider(settings),
+                "OAuth" => new OAuthProvider(settings),
                 _ => new UnconfiguredProvider(settings)
             };
     }

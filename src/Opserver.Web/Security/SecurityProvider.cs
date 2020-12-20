@@ -12,6 +12,7 @@ namespace Opserver.Security
     public abstract class SecurityProvider
     {
         public abstract string ProviderName { get; }
+        public abstract SecurityProviderFlowType FlowType { get; }
         protected SecuritySettings Settings { get; set; }
         public virtual bool IsConfigured => true;
         public readonly List<IPNet> InternalNetworks;
@@ -70,6 +71,8 @@ namespace Opserver.Security
 
         public virtual bool InGroups(User user, string[] groupNames) => false;
         public abstract bool ValidateUser(string userName, string password);
+
+        public abstract bool ValidateToken(ISecurityProviderToken token);
 
         public bool IsGlobalAdmin(User user) => InGroups(user, Parse(Settings.AdminEverythingGroups));
 

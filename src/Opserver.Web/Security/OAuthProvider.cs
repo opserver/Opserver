@@ -10,35 +10,20 @@ using StackExchange.Profiling;
 
 namespace Opserver.Security
 {
-    public class ActiveDirectoryProvider : SecurityProvider
+    /// <summary>
+    /// <see cref="SecurityProvider"/> that delegates login to an OIDC login flow.
+    /// </summary>
+    public class OAuthProvider : SecurityProvider
     {
-        private IMemoryCache Cache { get; }
-        public override string ProviderName => "Active Directory";
-        public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.UsernamePassword;
+        public override string ProviderName => "OAuth";
+        public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.None;
         private HashSet<string> GroupNames { get; } = new HashSet<string>();
-        private List<string> Servers { get; }
-        private string AuthUser { get; }
-        private string AuthPassword { get; }
 
-        public ActiveDirectoryProvider(SecuritySettings settings, IMemoryCache cache) : base(settings)
+        public OAuthProvider(SecuritySettings settings) : base(settings)
         {
-            Cache = cache;
-            if (settings.Server.HasValue()) Servers = settings.Server.Split(StringSplits.Comma_SemiColon).ToList();
-            AuthUser = settings.AuthUser;
-            AuthPassword = settings.AuthPassword;
         }
 
-        private bool UserAuth => AuthUser.HasValue() && AuthPassword.HasValue();
-
-        public override bool ValidateToken(ISecurityProviderToken token)
-        {
-            if (token is UserNamePasswordToken typedToken)
-            {
-                return RunCommand(pc => pc.ValidateCredentials(typedToken.UserName, typedToken.Password));
-            }
-
-            return false;
-        }
+        public override bool ValidateUser(string userName, string password) => throw new NotSupportedException();
 
         public override bool InGroups(User user, string[] groupNames)
         {

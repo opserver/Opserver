@@ -16,10 +16,10 @@ namespace Opserver.Models
         /// </summary>
         public ImmutableHashSet<string> Roles { get; }
 
-        public User(SecurityProvider provider, ClaimsPrincipal principle, List<string> baseRoles, IEnumerable<StatusModule> modules)
+        public User(SecurityProvider provider, ClaimsPrincipal principal, List<string> baseRoles, IEnumerable<StatusModule> modules)
         {
             Provider = provider;
-            var identity = principle?.Identity;
+            var identity = principal?.Identity;
             if (identity == null)
             {
                 IsAnonymous = true;
