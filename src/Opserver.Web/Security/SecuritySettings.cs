@@ -2,16 +2,24 @@
 
 namespace Opserver.Security
 {
+    /// <summary>
+    /// Default security settings for configuring a security provider that doesn't
+    /// need any additional settings.
+    /// </summary>
     public class SecuritySettings
     {
         /// <summary>
-        /// Security Provider to use, e.g. "ActiveDirectory"
+        /// Gets or sets the Security Provider to use, e.g. "ActiveDirectory", "OIDC", etc.
         /// </summary>
         public string Provider { get; set; }
-        public string Server { get; set; }
-        public string AuthUser { get; set; }
-        public string AuthPassword { get; set; }
+        /// <summary>
+        /// Gets or sets an API key used to allow access to the Opserver API.
+        /// </summary>
         public string ApiKey { get; set; }
+        /// <summary>
+        /// Gets or sets a list of <see cref="Network"/> objects representing the internal
+        /// subnets that Opserver is monitoring.
+        /// </summary>
         public List<Network> InternalNetworks { get; set; }
 
         /// <summary>

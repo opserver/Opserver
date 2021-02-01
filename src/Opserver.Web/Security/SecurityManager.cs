@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 namespace Opserver.Security
@@ -9,21 +10,38 @@ namespace Opserver.Security
         public SecurityProvider CurrentProvider { get; }
         public bool IsConfigured => CurrentProvider != null && !(CurrentProvider is UnconfiguredProvider);
 
-        public SecurityManager(IOptions<SecuritySettings> settings, IMemoryCache cache)
+        /// <summary>
+        /// Instantiates a new instane of <see cref="SecurityManager"/>.
+        /// </summary>
+        /// <remarks>
+        /// Yes, requiring a <see cref="IServiceProvider"/> here is an anti-pattern, but
+        /// the options / configuration framework does not support polymorphic binding,
+        /// so we're stuck with this less than optimal approach. We've registered our
+        /// various implementations of <see cref="SecuritySettings"/> with the options
+        /// framework so we can resolve the concrete types in <see cref="GetProvider"/>
+        /// </remarks>
+        public SecurityManager(IServiceProvider serviceProvider, IMemoryCache cache)
         {
-            _ = settings?.Value ?? throw new ArgumentNullException(nameof(settings), "SecuritySettings must be provided");
-            CurrentProvider = GetProvider(settings.Value, cache);
+            _ = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+            _ = cache ?? throw new ArgumentNullException(nameof(cache));
+            CurrentProvider = GetProvider(serviceProvider, cache);
         }
 
-        private SecurityProvider GetProvider(SecuritySettings settings, IMemoryCache cache) =>
-            settings.Provider switch
+        private static SecurityProvider GetProvider(IServiceProvider serviceProvider, IMemoryCache cache)
+        {
+            TSettings GetSettings<TSettings>() where TSettings : SecuritySettings, new()
+                => serviceProvider.GetRequiredService<IOptions<TSettings>>().Value;
+
+            var baseSettings = GetSettings<SecuritySettings>();
+            return baseSettings.Provider switch
             {
-                "AD" => new ActiveDirectoryProvider(settings, cache),
-                "ActiveDirectory" => new ActiveDirectoryProvider(settings, cache),
-                "EveryonesAnAdmin" => new EveryonesAnAdminProvider(settings),
-                "EveryonesReadOnly" => new EveryonesReadOnlyProvider(settings),
-                "OAuth" => new OAuthProvider(settings),
-                _ => new UnconfiguredProvider(settings)
+                "AD" => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
+                "ActiveDirectory" => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
+                "EveryonesAnAdmin" => new EveryonesAnAdminProvider(baseSettings),
+                "EveryonesReadOnly" => new EveryonesReadOnlyProvider(baseSettings),
+                "OIDC" => new OIDCProvider(GetSettings<OIDCSecuritySettings>()),
+                _ => new UnconfiguredProvider(baseSettings)
             };
+        }
     }
 }

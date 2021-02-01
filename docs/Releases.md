@@ -12,4 +12,5 @@ This page tracks major changes included in any update starting with version 2.0
     - Windows: Doesn't require IIS - can spin up via `dotnet run`, or via a publish and copy
   - Supports running in a container (via Docker)
   - Adds SignalFX as a dashboard provider
+  - Adds OpenId Connect as a login provider
   - Overhauled configuration system (though most old formats are supported for a smooth transition)

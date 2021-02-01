@@ -6,7 +6,8 @@
     public enum SecurityProviderFlowType
     {
         None,
+        Username,
         UsernamePassword,
-        OAuth,
+        OIDC,
     }
 }

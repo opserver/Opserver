@@ -1,4 +1,4 @@
-﻿using Opserver.Models;
+﻿using System.Security.Claims;
 
 namespace Opserver.Security
 {
@@ -9,10 +9,15 @@ namespace Opserver.Security
     public class UnconfiguredProvider : SecurityProvider
     {
         public override string ProviderName => "Unconfigured";
+        public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.None;
         public override bool IsConfigured => false;
+
         public UnconfiguredProvider(SecuritySettings settings) : base(settings) { }
 
-        public override bool InGroups(User user, string[] groupNames) => false;
-        public override bool ValidateUser(string userName, string password) => false;
+        public override bool TryValidateToken(ISecurityProviderToken token, out ClaimsPrincipal claimsPrincipal)
+        {
+            claimsPrincipal = CreateAnonymousPrincipal();
+            return false;
+        }
     }
 }

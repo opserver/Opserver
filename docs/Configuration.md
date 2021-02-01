@@ -58,8 +58,10 @@ Even if you have correctly configured your monitors, you still may not see any d
 ### Security Configuration
 The `Security` section of the config determines the security of Opserver itself, built-in providers:
 * Active Directory (`"ActiveDirectory"`)
+* OpenId Connect (`"OIDC"`)
 * "Everyone's an admin" (`"EveryonesAnAdmin"`)
 * "View All" (`"EveryonesReadOnly"`)
+
 
 Here's a full example for Active Directory:
 ```json
@@ -74,6 +76,41 @@ Here's a full example for Active Directory:
     ],
     "viewEverythingGroups": "Opserver-View",
     "adminEverythingGroups": "Opserver-Admins;Opserver-MoreAdmins"
+}
+```
+If you'd prefer to use an OpenId Connect provider you can use the following JSON. This example assumes...
+* You've configured your IdP to return the following in its ID token:
+    * a `nameIdentifier` claim containing the logged-in username
+    * a `groups` claim containing the list of groups the user is a member of
+
+Not that Okta, OneLogin and Azure all support returning groups in the ID token, but Google _does not_!
+```json
+{
+    "provider": "OIDC",
+    // API key used to allow access to the Opserver API
+    "apiKey": "<Global API Key>",
+    // subnet(s) of your own networks
+    "internalNetworks": [
+        { "name": "My Internal", "cidr": "10.0.0.0/8" }
+    ],
+    // groups whose members are allowed to view anything
+    "viewEverythingGroups": "Opserver-View",
+    // groups whose members are allowed to admin anything
+    "adminEverythingGroups": "Opserver-Admins;Opserver-MoreAdmins",
+    // scopes passed to the IdP - if not specified this defaults to just "openid"
+    "scopes": ["openid", "email"],
+    // client identifier from your IdP
+    "clientId": "<Client ID>",
+    // client secret from your IdP
+    "clientSecret": "<Client Secret>",
+    // URL used to retrieve an authorization code
+    "authorizationUrl": "https://example.org/oauth2/authorize",
+    // URL used to retrieve an 
+    "accessTokenUrl": "https://example.org/oauth2/token",
+    // type of claim used to identify the username of the user
+    "nameClaim": "nameIdentifier",
+    // type of claim used to identify the groups the user is a member of 
+    "groupsClaim": "groups",
 }
 ```
 If you just trust everyone because that's the kind of person you are and you've never been burned by love hey, who am I to judge? We've got a config for that:
@@ -131,7 +168,7 @@ You can see what you were authenticated as, and what roles you were granted by b
 ```
 
 #### Dashboard Settings
-The dashboard can currently monitor via Bosun, Orion or limited amounts through direct WMI.
+The dashboard can currently monitor via SignalFx, Bosun, Orion or limited amounts through direct WMI.
 ```json
 /* Configuration for the main dashboard */
 {

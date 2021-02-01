@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,9 +14,9 @@ namespace Opserver.Controllers
 
         [AllowAnonymous]
         [Route("login"), HttpGet]
-        public async Task<ActionResult> Login(string returnUrl)
+        public IActionResult Login(string returnUrl)
         {
-            if (!Current.Security.IsConfigured)
+            if (!Current.Security.IsConfigured || Current.Security.FlowType == SecurityProviderFlowType.None)
             {
                 return View("NoConfiguration");
             }
@@ -28,35 +26,34 @@ namespace Opserver.Controllers
                 return RedirectToAction(nameof(Login));
             }
 
-            switch (Current.Security.FlowType)
-            {
-                case SecurityProviderFlowType.None:
-                case SecurityProviderFlowType.UsernamePassword:
-                    return View(new LoginModel());
-                case SecurityProviderFlowType.OAuth:
-                    // TODO: redirect to OAuth URL
-                    return new NotFoundResult();
-            }
+            return View(new LoginModel());
         }
 
         [AllowAnonymous]
         [Route("login"), HttpPost]
-        public async Task<ActionResult> Login(string user, string pass, string url)
+        public async Task<IActionResult> Login(string user, string pass, string url)
         {
-            if (Current.Security.FlowType == SecurityProviderFlowType.OAuth)
+            var returnUrl = url.HasValue() ? url : "~/";
+            if (Current.Security.FlowType == SecurityProviderFlowType.OIDC)
             {
-                return new NotFoundResult();
+                // OpenId Connect needs to go through an authorization flow
+                // before we can login successfully...
+                return RedirectToProvider(returnUrl);
             }
 
-            var vd = new LoginModel();
-            if (Current.Security.ValidateToken(new UserNamePasswordToken(user, pass)))
+            if (!Current.Security.TryValidateToken(new UserNamePasswordToken(user, pass), out var claimsPrincipal))
             {
-                await SignInAsync(user);
-                return Redirect(url.HasValue() ? url : "~/");
+                return View(
+                    "Login",
+                    new LoginModel
+                    {
+                        ErrorMessage = "Login failed"
+                    }
+                );
             }
-            vd.ErrorMessage = "Login failed";
 
-            return View("Login", vd);
+            await HttpContext.SignInAsync(claimsPrincipal);
+            return Redirect(returnUrl);
         }
 
         [Route("logout")]
@@ -64,17 +61,6 @@ namespace Opserver.Controllers
         {
             await HttpContext.SignOutAsync();
             return RedirectToAction(nameof(Login));
-        }
-
-        private Task SignInAsync(string user)
-        {
-            var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, user)
-            };
-            var identity = new ClaimsIdentity(claims, "login");
-            var principal = new ClaimsPrincipal(identity);
-            return HttpContext.SignInAsync(principal);
         }
     }
 }

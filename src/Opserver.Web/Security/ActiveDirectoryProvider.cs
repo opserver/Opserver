@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Security;
+using System.Security.Claims;
 using System.Threading;
 using Microsoft.Extensions.Caching.Memory;
 using Opserver.Models;
@@ -10,7 +11,7 @@ using StackExchange.Profiling;
 
 namespace Opserver.Security
 {
-    public class ActiveDirectoryProvider : SecurityProvider
+    public class ActiveDirectoryProvider : SecurityProvider<ActiveDirectorySecuritySettings, UserNamePasswordToken>
     {
         private IMemoryCache Cache { get; }
         public override string ProviderName => "Active Directory";
@@ -20,7 +21,7 @@ namespace Opserver.Security
         private string AuthUser { get; }
         private string AuthPassword { get; }
 
-        public ActiveDirectoryProvider(SecuritySettings settings, IMemoryCache cache) : base(settings)
+        public ActiveDirectoryProvider(ActiveDirectorySecuritySettings settings, IMemoryCache cache) : base(settings)
         {
             Cache = cache;
             if (settings.Server.HasValue()) Servers = settings.Server.Split(StringSplits.Comma_SemiColon).ToList();
@@ -30,23 +31,25 @@ namespace Opserver.Security
 
         private bool UserAuth => AuthUser.HasValue() && AuthPassword.HasValue();
 
-        public override bool ValidateToken(ISecurityProviderToken token)
+        protected override bool TryValidateToken(UserNamePasswordToken token, out ClaimsPrincipal claimsPrincipal)
         {
-            if (token is UserNamePasswordToken typedToken)
-            {
-                return RunCommand(pc => pc.ValidateCredentials(typedToken.UserName, typedToken.Password));
-            }
+            var isValid = false;
+            (isValid, claimsPrincipal) = RunCommand(
+                pc =>
+                {
+                    if (pc.ValidateCredentials(token.UserName, token.Password))
+                    {
+                        return (true, CreateNamedPrincipal(token.UserName));
+                    }
 
-            return false;
+                    return (false, CreateAnonymousPrincipal());
+                });
+
+            return isValid;
         }
 
-        public override bool InGroups(User user, string[] groupNames)
+        protected override bool InGroupsCore(User user, string[] groupNames)
         {
-            if (groupNames.Length == 0) return false;
-
-            // TODO: Move this elsewhere
-            if (groupNames.Any(g => g == "*")) return true;
-
             return groupNames.Any(g => GetGroupMembers(g)?.Contains(user.AccountName, StringComparer.InvariantCultureIgnoreCase) == true);
         }
 
