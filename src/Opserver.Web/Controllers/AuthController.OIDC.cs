@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Runtime.Serialization;
+using System.Security.Claims;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Jil;
 using Microsoft.AspNetCore.Authentication;
@@ -117,26 +120,75 @@ namespace Opserver.Controllers
             }
 
 
-            var url = "https://stackoverflow.okta.com/oauth2/v1/userinfo";
-            var userinfoResponse = await Http.Request(url).AddHeader(HeaderNames.Authorization, "Bearer " + responsePayload.AccessToken)
+            response = await Http.Request(oidcSettings.UserInfoUrl)
+                .AddHeader(HeaderNames.Authorization, "Bearer " + responsePayload.AccessToken)
                 .ExpectString()
                 .PostAsync();
 
-            return Content(userinfoResponse.Data);
-                
-            //if (!Current.Security.TryValidateToken(new OIDCToken(responsePayload.IdToken), out var claimsPrincipal))
-            //{
-            //    return Error("could not validate ID token" + responsePayload.IdToken);
-            //}
+            if (!response.Success)
+            {
+                return Error(
+                    $"failed to retrieve user info. {response.StatusCode} - {response.Data}"
+                );
+            }
 
-            //await HttpContext.SignInAsync(claimsPrincipal);
 
-            //if (!decodedState.TryGetValue(OidcReturnUrlKey, out var returnUrl))
-            //{
-            //    returnUrl = "~/";
-            //}
+            JsonElement userInfo;
+            try
+            {
+                userInfo = JsonSerializer.Deserialize<JsonElement>(response.Data);
+            }
+            catch (Exception ex)
+            {
+                ex.Log();
+                return Error(
+                    $"could not deserialize user info. {ex.Message}"
+                );
+            }
 
-            //return Redirect(returnUrl);
+            // convert the user info into claims
+            static IEnumerable<Claim> ConvertToClaims(string name, JsonElement jsonElement)
+            {
+                if (jsonElement.ValueKind == JsonValueKind.Object)
+                {
+                    foreach (var property in jsonElement.EnumerateObject())
+                    {
+                        foreach (var claim in ConvertToClaims(property.Name, property.Value))
+                        {
+                            yield return claim;
+                        }
+                    }
+                }
+                else if (jsonElement.ValueKind == JsonValueKind.Array)
+                {
+                    foreach (var childElement in jsonElement.EnumerateArray())
+                    {
+                        foreach (var claim in ConvertToClaims(name, childElement)) ;
+                    }
+                }
+                else if (jsonElement.ValueKind == JsonValueKind.String)
+                {
+                    yield return new Claim(name, jsonElement.GetString());
+                }
+
+                // TODO: if we need more than just strings / arrays / objects
+                // then add support here!
+            }
+
+            var claims = ConvertToClaims(null, userInfo);
+            if (!Current.Security.TryValidateToken(new OIDCToken(claims), out var claimsPrincipal))
+            {
+                return Error("could not validate ID token" + responsePayload.IdToken);
+            }
+
+            await HttpContext.SignInAsync(claimsPrincipal);
+
+            if (!decodedState.TryGetValue(OidcReturnUrlKey, out var returnUrl))
+            {
+                returnUrl = "~/";
+            }
+
+            return Redirect(returnUrl);
         }
 
         private IActionResult RedirectToProvider(string returnUrl)
@@ -170,7 +222,6 @@ namespace Opserver.Controllers
             );
 
             // construct the URL to the authorization endpoint
-
             var authorizationUrl = new UriBuilder(oidcSettings.AuthorizationUrl);
             var scopes = oidcSettings.Scopes ?? OIDCSecuritySettings.DefaultScopes;
             var queryString = new QueryString(authorizationUrl.Query)

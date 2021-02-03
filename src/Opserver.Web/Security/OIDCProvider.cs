@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
 using Opserver.Models;
 
 namespace Opserver.Security
@@ -18,7 +16,6 @@ namespace Opserver.Security
         public override string ProviderName => "OpenId Connect" +
                                                "";
         public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.OIDC;
-        private HashSet<string> GroupNames { get; } = new HashSet<string>();
 
         public OIDCProvider(OIDCSecuritySettings settings) : base(settings)
         {
@@ -26,49 +23,21 @@ namespace Opserver.Security
 
         protected override bool TryValidateToken(OIDCToken token, out ClaimsPrincipal claimsPrincipal)
         {
-            try
+            // extract the claims we care about
+            var claimsToAdd = new List<Claim>();
+            foreach (var claim in token.Claims)
             {
-                // NOTE: we do not need to validate here - we get this
-                // JWT as part of an authorization token exchange from the provider
-                // which is contacted over a TLS transport so it is from a trusted source.
-                // here we just parse the JWT and generate a ClaimsPrincipal to return
-                // to the caller
-                var jwtHandler = new JwtSecurityTokenHandler();
-                JwtSecurityToken jwt;
-                try
+                if (string.Equals(claim.Type, Settings.NameClaim, StringComparison.OrdinalIgnoreCase))
                 {
-                    jwt = jwtHandler.ReadJwtToken(token.IdToken);
+                    claimsToAdd.Add(new Claim(ClaimTypes.Name, claim.Value));
                 }
-                catch (Exception ex)
+                else if (string.Equals(claim.Type, Settings.GroupsClaim, StringComparison.OrdinalIgnoreCase))
                 {
-                    ex.Log();
-                    claimsPrincipal = CreateAnonymousPrincipal();
-                    return false;
+                    claimsToAdd.Add(new Claim(GroupsClaimType, claim.Value));
                 }
-
-                // extract the claims we care about
-                var claimsToAdd = new List<Claim>();
-                foreach (var claim in jwt.Claims)
-                {
-                    if (string.Equals(claim.Type, Settings.NameClaim, StringComparison.OrdinalIgnoreCase))
-                    {
-                        claimsToAdd.Add(new Claim(ClaimTypes.Name, claim.Value));
-                    }
-                    else if (string.Equals(claim.Type, Settings.GroupsClaim, StringComparison.OrdinalIgnoreCase))
-                    {
-                        claimsToAdd.Add(new Claim(GroupsClaimType, claim.Value));
-                    }
-                }
-                claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claimsToAdd, "login"));
-                return true;
             }
-            catch (SecurityTokenException ex)
-            {
-                ex.Log();
-                claimsPrincipal = CreateAnonymousPrincipal();
-                throw;
-                //return false;
-            }
+            claimsPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claimsToAdd, "login"));
+            return true;
         }
 
         protected override bool InGroupsCore(User user, string[] groupNames)

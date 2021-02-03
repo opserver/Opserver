@@ -1,20 +1,22 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Opserver.Security
 {
     /// <summary>
-    /// <see cref="ISecurityProviderToken"/> that wraps the ID token that resulted from a successful OpenId Connect login flow.
+    /// <see cref="ISecurityProviderToken"/> that wraps the claims retrieved from an OpenId Connect login flow.
     /// </summary>
     public class OIDCToken : ISecurityProviderToken
     {
-        public OIDCToken(string idToken)
+        public OIDCToken(IEnumerable<Claim> claims)
         {
-            IdToken = idToken ?? throw new ArgumentNullException(nameof(idToken));
+            Claims = claims ?? throw new ArgumentNullException(nameof(claims));
         }
 
         /// <summary>
-        /// Gets the ID token retrieved as a result of an OpenId Connect login flow.
+        /// Gets the claims retrieved as a result of an OpenId Connect login flow.
         /// </summary>
-        public string IdToken { get;  }
+        public IEnumerable<Claim> Claims { get;  }
     }
 }

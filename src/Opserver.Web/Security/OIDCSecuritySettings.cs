@@ -1,6 +1,4 @@
-﻿using System.Collections.Immutable;
-
-namespace Opserver.Security
+﻿namespace Opserver.Security
 {
     /// <summary>
     /// Security settings specific to the OIDC provider.
@@ -13,18 +11,26 @@ namespace Opserver.Security
         /// Gets or sets the client id for the OIDC provider.
         /// </summary>
         public string ClientId { get; set; }
+
         /// <summary>
         /// Gets or sets the client secret for the OIDC provider.
         /// </summary>
         public string ClientSecret { get; set; }
+
         /// <summary>
         /// Gets or sets the URL used to obtain an authorization code from the OIDC provider.
         /// </summary>
         public string AuthorizationUrl { get; set; }
+
         /// <summary>
         /// Gets or sets the URL used to obtain an access token / ID token from the OIDC provider.
         /// </summary>
         public string AccessTokenUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets the URL used to obtain user info from the OIDC provider.
+        /// </summary>
+        public string UserInfoUrl { get; set; }
 
         /// <summary>
         /// Gets or sets a list of scopes to request from the OIDC provider.

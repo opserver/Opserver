@@ -105,8 +105,10 @@ Not that Okta, OneLogin and Azure all support returning groups in the ID token, 
     "clientSecret": "<Client Secret>",
     // URL used to retrieve an authorization code
     "authorizationUrl": "https://example.org/oauth2/authorize",
-    // URL used to retrieve an 
+    // URL used to retrieve exchange an authorization code for an access token
     "accessTokenUrl": "https://example.org/oauth2/token",
+    // URL used to retrieve information about the logged in user
+    "userInfoUrl": "https://example.org/oauth2/token",
     // type of claim used to identify the username of the user
     "nameClaim": "nameIdentifier",
     // type of claim used to identify the groups the user is a member of 

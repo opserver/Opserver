@@ -102,29 +102,19 @@ namespace Opserver.Tests
         }
 
         [Fact]
-        public void OIDCProvider_TryValidateToken_InvalidJwt()
-        {
-            var oidcSettings = new OIDCSecuritySettings();
-            var oidcProvider = new OIDCProvider(oidcSettings);
-            Assert.False(oidcProvider.TryValidateToken(new OIDCToken("invalid"), out _));
-        }
-
-        [Fact]
-        public void OIDCProvider_TryValidateToken_ValidJwt()
-        {
-            var oidcSettings = new OIDCSecuritySettings();
-            var oidcProvider = new OIDCProvider(oidcSettings);
-            var validJwt = "eyJraWQiOiJLNW4zeHplQ3M4MWRIRVJpd0xSV0hDRmh4UHlZZmdNdUswT2VYNlVZZmFrIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIwMHVybnM3YzNkeHpkT0t6UjR4NiIsInZlciI6MSwiaXNzIjoiaHR0cHM6Ly9kZXYtNjQ0ODgxLm9rdGEuY29tL29hdXRoMi9hdXMyMHpocHB4YU9qRDZiZjR4NyIsImF1ZCI6IjBvYTIwejB1a2s4dU1YNG1HNHg3IiwiaWF0IjoxNjEyMjE5MzQ2LCJleHAiOjE2MTIyMjI5NDYsImp0aSI6IklELkVIOF83QVFKSXJBV0htOXZyRE1kOUhabFVlVzVJOHozNVlKRUlBcEFrTnciLCJhbXIiOlsicHdkIl0sImlkcCI6IjAwb3Juczc4cUtQV1NKV1ZDNHg2Iiwibm9uY2UiOiJhZmJjZTc2M2QyNjc0Mjc5ODZmMjgxYzQwN2I4Njg3MyIsImF1dGhfdGltZSI6MTYxMjIxNjEyMiwiYXRfaGFzaCI6ImQ0NVo1LWZYSW9ZdnRGODNBVUpjaHciLCJncm91cHMiOlsiRXZlcnlvbmUiLCJPcHNlcnZlci1BZG1pbnMiLCJPcHNlcnZlci1WaWV3Il0sIm5hbWVpZGVudGlmaWVyIjoiZHdhcmQifQ.hTdXfqKkXOqxhuTHkbM3kEG-bbuNv9kBX8_WRZ9Xq-MpTspMTlWAVbLaqpX4uLUpli5XaUGPFv1bEuwMBOP4LU2tphpPgkn1-Y9yTCjEDQG7IdInmkPmRlZq6z1INErUHlJTTT3TmHluNKv_ToI9NMfEcMD_AhGB0H2-WmTcOz6YNcY01coKQwcEBHrHpqhU-jyih8g_GtP6hTyqSsdN1RoSvQabiFM3XG0a6jCeRAo-QMNKqtiYLE7LRmWF2gwKYEuT9m4nHqtoUGzb5G5Roeuzjont610SZHt5dYe4GM1behIIWcnslHjWkwaAyGeEmZVFQRA52R87-68Kt1Kvkg";
-            Assert.True(oidcProvider.TryValidateToken(new OIDCToken(validJwt), out _));
-        }
-
-        [Fact]
         public void OIDCProvider_TryValidateToken_ExtractsClaims()
         {
             var oidcSettings = new OIDCSecuritySettings();
             var oidcProvider = new OIDCProvider(oidcSettings);
-            var validJwt = "eyJraWQiOiJLNW4zeHplQ3M4MWRIRVJpd0xSV0hDRmh4UHlZZmdNdUswT2VYNlVZZmFrIiwiYWxnIjoiUlMyNTYifQ.eyJzdWIiOiIwMHVybnM3YzNkeHpkT0t6UjR4NiIsInZlciI6MSwiaXNzIjoiaHR0cHM6Ly9kZXYtNjQ0ODgxLm9rdGEuY29tL29hdXRoMi9hdXMyMHpocHB4YU9qRDZiZjR4NyIsImF1ZCI6IjBvYTIwejB1a2s4dU1YNG1HNHg3IiwiaWF0IjoxNjEyMjE5MzQ2LCJleHAiOjE2MTIyMjI5NDYsImp0aSI6IklELkVIOF83QVFKSXJBV0htOXZyRE1kOUhabFVlVzVJOHozNVlKRUlBcEFrTnciLCJhbXIiOlsicHdkIl0sImlkcCI6IjAwb3Juczc4cUtQV1NKV1ZDNHg2Iiwibm9uY2UiOiJhZmJjZTc2M2QyNjc0Mjc5ODZmMjgxYzQwN2I4Njg3MyIsImF1dGhfdGltZSI6MTYxMjIxNjEyMiwiYXRfaGFzaCI6ImQ0NVo1LWZYSW9ZdnRGODNBVUpjaHciLCJncm91cHMiOlsiRXZlcnlvbmUiLCJPcHNlcnZlci1BZG1pbnMiLCJPcHNlcnZlci1WaWV3Il0sIm5hbWVpZGVudGlmaWVyIjoiZHdhcmQifQ.hTdXfqKkXOqxhuTHkbM3kEG-bbuNv9kBX8_WRZ9Xq-MpTspMTlWAVbLaqpX4uLUpli5XaUGPFv1bEuwMBOP4LU2tphpPgkn1-Y9yTCjEDQG7IdInmkPmRlZq6z1INErUHlJTTT3TmHluNKv_ToI9NMfEcMD_AhGB0H2-WmTcOz6YNcY01coKQwcEBHrHpqhU-jyih8g_GtP6hTyqSsdN1RoSvQabiFM3XG0a6jCeRAo-QMNKqtiYLE7LRmWF2gwKYEuT9m4nHqtoUGzb5G5Roeuzjont610SZHt5dYe4GM1behIIWcnslHjWkwaAyGeEmZVFQRA52R87-68Kt1Kvkg";
-            Assert.True(oidcProvider.TryValidateToken(new OIDCToken(validJwt), out var claimsPrincipal));
+            var claims = new[]
+            {
+                new Claim(oidcSettings.GroupsClaim, "Everyone"),
+                new Claim(oidcSettings.GroupsClaim, "Opserver-Admins"),
+                new Claim(oidcSettings.GroupsClaim, "Opserver-View"),
+                new Claim(oidcSettings.NameClaim, "dward"),
+            };
+
+            Assert.True(oidcProvider.TryValidateToken(new OIDCToken(claims), out var claimsPrincipal));
             Assert.NotNull(claimsPrincipal);
             Assert.True(claimsPrincipal.HasClaim(c => c.Type == ClaimTypes.Name));
             Assert.True(claimsPrincipal.HasClaim(c => c.Type == Security.OIDCProvider.GroupsClaimType));
