@@ -50,7 +50,7 @@ namespace Opserver.Controllers
             }
             // decode the state and ensure the passed identifier matches
             // what we have in the cookies passed from the user agent
-            var decodedState = QueryHelpers.ParseNullableQuery(state);
+            var decodedState = QueryHelpers.ParseQuery(state);
             if (!decodedState.TryGetValue(OidcIdentifierKey, out var actualIdentifier))
             {
                 return Error("invalid state - id not found on querystring");
