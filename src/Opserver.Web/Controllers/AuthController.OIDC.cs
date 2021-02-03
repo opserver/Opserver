@@ -102,32 +102,34 @@ namespace Opserver.Controllers
                 );
             }
 
-            AccessTokenResponse responsePayload;
-            try
-            {
-                responsePayload = JSON.Deserialize<AccessTokenResponse>(response.Data);
-            }
-            catch (Exception ex)
-            {
-                ex.Log();
-                return Error(
-                    $"could not deserialize access token. {ex.Message}"
-                );
-            }
+            return Content(response.Data);
 
-            if (!Current.Security.TryValidateToken(new OIDCToken(responsePayload.IdToken), out var claimsPrincipal))
-            {
-                return Error("could not validate ID token" + responsePayload.IdToken);
-            }
+            //AccessTokenResponse responsePayload;
+            //try
+            //{
+            //    responsePayload = JSON.Deserialize<AccessTokenResponse>(response.Data);
+            //}
+            //catch (Exception ex)
+            //{
+            //    ex.Log();
+            //    return Error(
+            //        $"could not deserialize access token. {ex.Message}"
+            //    );
+            //}
 
-            await HttpContext.SignInAsync(claimsPrincipal);
+            //if (!Current.Security.TryValidateToken(new OIDCToken(responsePayload.IdToken), out var claimsPrincipal))
+            //{
+            //    return Error("could not validate ID token" + responsePayload.IdToken);
+            //}
 
-            if (!decodedState.TryGetValue(OidcReturnUrlKey, out var returnUrl))
-            {
-                returnUrl = "~/";
-            }
+            //await HttpContext.SignInAsync(claimsPrincipal);
 
-            return Redirect(returnUrl);
+            //if (!decodedState.TryGetValue(OidcReturnUrlKey, out var returnUrl))
+            //{
+            //    returnUrl = "~/";
+            //}
+
+            //return Redirect(returnUrl);
         }
 
         private IActionResult RedirectToProvider(string returnUrl)
