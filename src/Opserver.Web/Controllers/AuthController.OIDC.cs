@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
 using Opserver.Helpers;
 using Opserver.Security;
 using Opserver.Views.Login;
@@ -102,21 +103,27 @@ namespace Opserver.Controllers
                 );
             }
 
-            return Content(response.Data);
+            AccessTokenResponse responsePayload;
+            try
+            {
+                responsePayload = JSON.Deserialize<AccessTokenResponse>(response.Data);
+            }
+            catch (Exception ex)
+            {
+                ex.Log();
+                return Error(
+                    $"could not deserialize access token. {ex.Message}"
+                );
+            }
 
-            //AccessTokenResponse responsePayload;
-            //try
-            //{
-            //    responsePayload = JSON.Deserialize<AccessTokenResponse>(response.Data);
-            //}
-            //catch (Exception ex)
-            //{
-            //    ex.Log();
-            //    return Error(
-            //        $"could not deserialize access token. {ex.Message}"
-            //    );
-            //}
 
+            var url = "https://stackoverflow.okta.com/oauth2/v1/userinfo";
+            var userinfoResponse = await Http.Request(url).AddHeader(HeaderNames.Authorization, "Bearer " + responsePayload.AccessToken)
+                .ExpectString()
+                .PostAsync();
+
+            return Content(userinfoResponse.Data);
+                
             //if (!Current.Security.TryValidateToken(new OIDCToken(responsePayload.IdToken), out var claimsPrincipal))
             //{
             //    return Error("could not validate ID token" + responsePayload.IdToken);
