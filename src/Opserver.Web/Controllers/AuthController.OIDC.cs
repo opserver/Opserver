@@ -163,7 +163,10 @@ namespace Opserver.Controllers
                 {
                     foreach (var childElement in jsonElement.EnumerateArray())
                     {
-                        foreach (var claim in ConvertToClaims(name, childElement)) ;
+                        foreach (var claim in ConvertToClaims(name, childElement))
+                        {
+                            yield return claim;
+                        }
                     }
                 }
                 else if (jsonElement.ValueKind == JsonValueKind.String)
