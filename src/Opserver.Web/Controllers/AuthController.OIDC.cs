@@ -211,6 +211,7 @@ namespace Opserver.Controllers
                     Expires = DateTimeOffset.UtcNow.AddMinutes(5),
                     HttpOnly = true,
                     SameSite = SameSiteMode.None,
+                    Secure = true,
                     IsEssential = true
                 });
 
