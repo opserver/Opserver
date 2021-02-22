@@ -39,6 +39,15 @@ namespace Opserver.Helpers
                 return; // Authorized via AlsoAllow
             }
 
+            if (!context.HttpContext.User.Identity.IsAuthenticated)
+            {
+                // it isn't needed to set unauthorized result 
+                // as the base class already requires the user to be authenticated
+                // this also makes redirect to a login page work properly
+                // context.Result = new UnauthorizedResult();
+                return;
+            }
+
             // TODO: Sanity check
             context.Result = new RedirectToActionResult(nameof(MiscController.AccessDenied), "Misc", null);
         }
