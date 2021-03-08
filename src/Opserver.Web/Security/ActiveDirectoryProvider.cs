@@ -15,6 +15,7 @@ namespace Opserver.Security
     {
         private IMemoryCache Cache { get; }
         public override string ProviderName => "Active Directory";
+        public override string LoginDescription => "Log in with Active Directory";
         public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.UsernamePassword;
         private HashSet<string> GroupNames { get; } = new HashSet<string>();
         private List<string> Servers { get; }

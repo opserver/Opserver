@@ -25,6 +25,10 @@ namespace Opserver.Security
         /// </summary>
         public abstract SecurityProviderFlowType FlowType { get; }
         /// <summary>
+        /// Gets the description for the login button for this provider.
+        /// </summary>
+        public virtual string LoginDescription => "Log in";
+        /// <summary>
         /// Gets a <see cref="List{T}"/> of <see cref="IPNet"/> objects representing
         /// the networks that are allowed to access this instance.
         /// </summary>

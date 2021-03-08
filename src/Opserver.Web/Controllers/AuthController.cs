@@ -36,7 +36,7 @@ namespace Opserver.Controllers
             var returnUrl = url.HasValue() ? url : "~/";
             if (Current.Security.FlowType == SecurityProviderFlowType.OIDC)
             {
-                // OpenId Connect needs to go through an authorization flow
+                // OpenID Connect needs to go through an authorization flow
                 // before we can login successfully...
                 return RedirectToProvider(returnUrl);
             }
