@@ -9,6 +9,10 @@ namespace Opserver.Security
     public class SecuritySettings
     {
         /// <summary>
+        /// Gets or sets the name of the Security Provider in the UI.
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// Gets or sets the Security Provider to use, e.g. "ActiveDirectory", "OIDC", etc.
         /// </summary>
         public string Provider { get; set; }

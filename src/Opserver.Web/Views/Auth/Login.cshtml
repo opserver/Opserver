@@ -33,7 +33,7 @@
                             <input type="password" class="form-control" name="pass" placeholder="Password"/> <br/>
                         }
                     }
-                    <input type="submit" value="@Current.Security.LoginDescription" class="btn btn-primary btn-sm"/>
+                    <input type="submit" value="Log in@(Current.Security.Settings.Name.HasValue() ? " with " + Current.Security.Settings.Name : "")" class="btn btn-primary btn-sm"/>
                 </div>
             </form>
             @if (Model.ErrorMessage.HasValue())

@@ -13,7 +13,6 @@ namespace Opserver.Security
     {
         public const string GroupsClaimType = "groups";
         public override string ProviderName => "OpenID Connect";
-        public override string LoginDescription => "Log in with OpenID Connect";
         public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.OIDC;
 
         public OIDCProvider(OIDCSecuritySettings settings) : base(settings)
