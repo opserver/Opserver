@@ -1,16 +1,24 @@
-﻿using Opserver.Models;
+﻿using System.Collections.Generic;
+using System.Security.Claims;
+using Opserver.Models;
 
 namespace Opserver.Security
 {
     /// <summary>
     /// Does this REALLY need an explanation?
     /// </summary>
-    public class EveryonesAnAdminProvider : SecurityProvider
+    public class EveryonesAnAdminProvider : SecurityProvider<SecuritySettings, UserNamePasswordToken>
     {
         public override string ProviderName => "Everyone's an Admin!";
+        public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.Username;
         public EveryonesAnAdminProvider(SecuritySettings settings) : base(settings) { }
 
-        public override bool InGroups(User user, string[] groupNames) => true;
-        public override bool ValidateUser(string userName, string password) => true;
+        protected override bool InGroupsCore(User user, string[] groupNames) => true;
+
+        protected override bool TryValidateToken(UserNamePasswordToken token, out ClaimsPrincipal claimsPrincipal)
+        {
+            claimsPrincipal = CreateNamedPrincipal(token.UserName);
+            return true;
+        }
     }
 }

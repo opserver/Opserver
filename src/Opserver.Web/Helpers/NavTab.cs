@@ -41,7 +41,7 @@ namespace Opserver.Helpers
             var allTabs = new List<NavTab>();
             var mappings = new Dictionary<Type, NavTab>();
             var moduleControllerTypes = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.BaseType.IsGenericType);
+                .Where(t => t.BaseType != null && t.BaseType.IsGenericType);
 
             foreach (var controllerType in moduleControllerTypes)
             {

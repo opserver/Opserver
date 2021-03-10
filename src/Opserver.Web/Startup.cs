@@ -116,6 +116,8 @@ namespace Opserver
                        .IgnorePath("/top-refresh");
             });
             services.Configure<SecuritySettings>(_configuration.GetSection("Security"));
+            services.Configure<ActiveDirectorySecuritySettings>(_configuration.GetSection("Security"));
+            services.Configure<OIDCSecuritySettings>(_configuration.GetSection("Security"));
             services.Configure<ForwardedHeadersOptions>(_configuration.GetSection("ForwardedHeaders"));
             services.PostConfigure<ForwardedHeadersOptions>(
                 options =>
@@ -150,7 +152,7 @@ namespace Opserver
                         }
                     }
 
-                    
+
                     if (knownNetworks != null)
                     {
                         foreach (var knownNetwork in knownNetworks)

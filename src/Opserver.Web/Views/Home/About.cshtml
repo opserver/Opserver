@@ -166,7 +166,14 @@
             <div class="panel-heading">Security</div>
             <div class="panel-body small">
                 <div class="value-block col-xs-4">
-                    @Current.Security.ProviderName
+                    @if (Current.Security.Settings.Name.HasValue())
+                    {
+                        @:@Current.Security.Settings.Name (@Current.Security.ProviderName)
+                    }
+                    else
+                    {
+                        @Current.Security.ProviderName
+                    }
                     <label>Security</label>
                 </div>
                 <div class="value-block col-xs-4">
