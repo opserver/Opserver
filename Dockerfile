@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
 WORKDIR /app
 
 # Global
@@ -22,7 +22,7 @@ WORKDIR /app/src/Opserver.Web
 RUN dotnet publish -c Release -o publish
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS web
+FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS web
 WORKDIR /app
 COPY --from=web-publish /app/src/Opserver.Web/publish ./
 ENTRYPOINT ["dotnet", "Opserver.Web.dll"]
