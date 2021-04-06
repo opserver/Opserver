@@ -30,6 +30,11 @@ namespace Opserver
             public string Description { get; set; }
 
             /// <summary>
+            /// The authorization header, if any, to send on requests.
+            /// </summary>
+            public string AuthorizationHeader { get; set; }
+
+            /// <summary>
             /// How many seconds before polling this cluster for status again
             /// </summary>
             public int RefreshIntervalSeconds { get; set; } = 120;

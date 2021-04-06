@@ -252,6 +252,9 @@ In elastic, it's not a good idea to trust any specific node to be up. It's sugge
         "ny-search02",
         "ny-search03"
       ]
+      // The exact value of the authorization header, if any, to send on cluster requests
+      // Here's an example for hosted Elastic:
+      // "authorizationHeader": "ApiKey <your key>"
     },
     {
       "name": "NY Development",
