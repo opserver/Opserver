@@ -13,6 +13,7 @@ namespace Opserver.Security
         public override SecurityProviderFlowType FlowType => SecurityProviderFlowType.Username;
         public EveryonesAnAdminProvider(SecuritySettings settings) : base(settings) { }
 
+        internal override bool InAdminGroups(User user, StatusModule module) => true;
         protected override bool InGroupsCore(User user, string[] groupNames) => true;
 
         protected override bool TryValidateToken(UserNamePasswordToken token, out ClaimsPrincipal claimsPrincipal)

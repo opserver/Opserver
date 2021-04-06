@@ -22,13 +22,15 @@ namespace Opserver.Data.Elastic
             public string Name => LastStatus?.Name;
             public string ClusterName => LastStatus?.ClusterName;
             public NodeHomeInfo.VersionInfo Version => LastStatus?.Version;
+            public ElasticSettings.Cluster ClusterSettings { get; }
 
             public DateTime? LastSeen { get; private set; }
             public Exception LastException { get; private set; }
             public NodeHomeInfo LastStatus { get; set; }
 
-            public ElasticNode(string hostAndPort)
+            public ElasticNode(string hostAndPort, ElasticSettings.Cluster clusterSettings)
             {
+                ClusterSettings = clusterSettings;
                 if (Uri.TryCreate(hostAndPort, UriKind.Absolute, out var uri))
                 {
                     Url = uri.ToString();
@@ -65,9 +67,16 @@ namespace Opserver.Data.Elastic
 
             public async Task<T> GetAsync<T>(string path) where T : class
             {
-                var result = await Http.Request(Url + path)
-                                       .ExpectJson<T>()
-                                       .GetAsync();
+                var request = Http.Request(Url + path);
+                if (ClusterSettings?.AuthorizationHeader.HasValue() == true)
+                {
+                    request.AddHeader("Authorization", ClusterSettings.AuthorizationHeader);
+                }
+
+                var result = await request
+                                   .ExpectJson<T>()
+                                   .GetAsync();
+
                 if (result.Success)
                 {
                     LastSeen = DateTime.UtcNow;

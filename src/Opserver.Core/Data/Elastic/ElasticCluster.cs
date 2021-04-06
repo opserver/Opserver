@@ -20,7 +20,7 @@ namespace Opserver.Data.Elastic
         public ElasticCluster(ElasticModule module, ElasticSettings.Cluster cluster) : base(module, cluster.Name)
         {
             Settings = cluster;
-            KnownNodes = cluster.Nodes.Select(n => new ElasticNode(n)).ToList();
+            KnownNodes = cluster.Nodes.Select(n => new ElasticNode(n, Settings)).ToList();
         }
 
         public override string NodeType => "elastic";
