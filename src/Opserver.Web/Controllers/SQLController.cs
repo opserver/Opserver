@@ -25,10 +25,12 @@ namespace Opserver.Controllers
         {
             var vd = new ServersModel
                 {
+                    AzureServers = Module.AzureServers,
                     StandaloneInstances = Module.StandaloneInstances,
                     Clusters = Module.Clusters,
                     Refresh = node.HasValue() ? 10 : 5
                 };
+
 
             if (cluster.HasValue())
                 vd.CurrentCluster = vd.Clusters.Find(c => string.Equals(c.Name, cluster, StringComparison.OrdinalIgnoreCase));
@@ -47,6 +49,7 @@ namespace Opserver.Controllers
             var vd = new ServersModel
             {
                 View = SQLViews.Jobs,
+                AzureServers = Module.AzureServers,
                 StandaloneInstances = Module.StandaloneInstances,
                 Clusters = Module.Clusters,
                 Refresh = 30,

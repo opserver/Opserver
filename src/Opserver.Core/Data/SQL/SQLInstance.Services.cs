@@ -12,6 +12,7 @@ namespace Opserver.Data.SQL
         public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008R2.SP1;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public MonitorStatus MonitorStatus
             {
@@ -61,7 +62,7 @@ namespace Opserver.Data.SQL
             public string IsClustered { get; internal set; }
             public bool IsClusteredBool => IsClustered == "Y";
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select servicename ServiceName,
        service_account ServiceAccount, 
        process_id ProcessId, 

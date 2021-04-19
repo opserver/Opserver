@@ -12,9 +12,10 @@ namespace Opserver.Data.SQL
         /// sys.availability_groups: http://msdn.microsoft.com/en-us/library/ff878538.aspx
         /// sys.dm_hadr_availability_group_states: http://msdn.microsoft.com/en-us/library/ff878491.aspx
         /// </summary>
-        public class AGInfo : ISQLVersioned, IMonitedService
+        public class AGInfo : ISQLVersioned, IMonitoredService
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             [IgnoreDataMember]
             public SQLNode Node { get; internal set; }
@@ -51,7 +52,7 @@ namespace Opserver.Data.SQL
 
             public string MonitorStatusReason => Replicas.GetReasonSummary();
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select ag.name Name,
        c.cluster_name ClusterName,
        ag.group_id GroupId,

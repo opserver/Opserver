@@ -39,6 +39,7 @@ namespace Opserver.Data.SQL
         public class TopOperation : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public long AvgCPU { get; internal set; }
             public long TotalCPU { get; internal set; }
@@ -152,10 +153,10 @@ FROM (SELECT TOP (@MaxResultCount)
     CROSS APPLY sys.dm_exec_query_plan(PlanHandle) AS qp
 {1}
 ";
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
                 // Row info added in 2008 R2 SP2
-                if (v < SQLServerVersions.SQL2008R2.SP2)
+                if (e.Version < SQLServerVersions.SQL2008R2.SP2)
                 {
                     return FetchSQL.Replace("qs.min_rows", "0")
                                    .Replace("qs.max_rows","0")

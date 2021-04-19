@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using EnumsNET;
 
 namespace Opserver.Data.SQL
@@ -11,6 +12,7 @@ namespace Opserver.Data.SQL
         public class AGDatabaseReplica : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public int DatabaseId { get; internal set; }
             public Guid GroupId { get; internal set; }
@@ -107,7 +109,7 @@ namespace Opserver.Data.SQL
 
             public string SuspendReasonDescription => SuspendReason.HasValue ? "Suspended by " + SuspendReason.Value.AsString(EnumFormat.Description) : string.Empty;
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select dbrs.database_id DatabaseId,
        dbrs.group_id GroupId,
        dbrs.replica_id ReplicaId,

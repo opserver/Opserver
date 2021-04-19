@@ -15,6 +15,7 @@ namespace Opserver.Data.SQL
         public class SQLConnectionSummaryInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.SP2;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string LoginName { get; internal set; }
             public string HostName { get; internal set; }
@@ -24,7 +25,7 @@ namespace Opserver.Data.SQL
             public long TotalReads { get; internal set; }
             public long TotalWrites { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select s.login_name LoginName,
        s.host_name HostName,
        s.transaction_isolation_level TransactionIsolationLevel,
@@ -41,6 +42,7 @@ Select s.login_name LoginName,
         public class SQLConnectionInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public Guid Id { get; internal set; }
             public DateTime ConnectTime { get; internal set; }
@@ -89,9 +91,9 @@ Select c.connection_id Id,
        Cross Apply sys.dm_exec_sql_text(c.most_recent_sql_handle) st
 Order By c.num_writes + c.num_reads Desc";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v >= SQLServerVersions.SQL2005.SP2)
+                if (e.Version >= SQLServerVersions.SQL2005.SP2)
                     return string.Format(FetchSQL, FetchSQL2005SP2Colums);
                 return string.Format(FetchSQL, "");
             }

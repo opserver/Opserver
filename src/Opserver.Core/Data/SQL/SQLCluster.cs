@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Opserver.Data.SQL
 {
-    public partial class SQLCluster : IEquatable<SQLCluster>, IMonitedService
+    public partial class SQLCluster : IEquatable<SQLCluster>, IMonitoredService
     {
         private SQLModule Module { get; }
         public string Name => Settings.Name;

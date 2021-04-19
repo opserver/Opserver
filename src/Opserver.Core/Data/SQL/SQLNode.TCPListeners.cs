@@ -17,6 +17,7 @@ namespace Opserver.Data.SQL
         public class TCPListenerState : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public MonitorStatus MonitorStatus =>
                 State switch
@@ -36,7 +37,7 @@ namespace Opserver.Data.SQL
             public TCPListenerStates State { get; internal set; }
             public DateTime StartTime { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 select listener_id ListenerId,
        ip_address IPAddress,
        is_ipv4 IsIPV4,

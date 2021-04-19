@@ -17,6 +17,7 @@ namespace Opserver.Data.SQL
         public class WaitStatRecord : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string WaitType { get; internal set; }
             public int SecondsBetween { get; internal set; }
@@ -70,7 +71,7 @@ namespace Opserver.Data.SQL
 
             public double AverageTaskCount => (double)WaitTaskCount / SecondsBetween;
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Declare @delayInterval char(8) = Convert(Char(8), DateAdd(Second, @secondsBetween, '00:00:00'), 108);
 
 If Object_Id('tempdb..#PWaitStats') Is Not Null

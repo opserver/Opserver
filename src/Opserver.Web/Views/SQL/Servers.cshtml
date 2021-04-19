@@ -67,6 +67,57 @@
             }
         </table>
     }
+    @if (Model.AzureServers.Any())
+    {
+        <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">
+            @foreach (var s in Model.AzureServers)
+            {
+                <thead>
+                    <tr class="category-row">
+                        <th colspan="12">
+                            <h5>
+                                @s.IconSpan() @s.Name
+                                @if (s.Description.HasValue())
+                                {<span class="text-muted small">(@s.Description)</span>}
+                                <span class="pull-right small"> @Poll.Now(s)</span>
+                            </h5>
+                        </th>
+                    </tr>
+                    <tr>
+                        <th>Database</th>
+                        <th>CPU</th>
+                        <th class="text-muted">(Last Hour)</th>
+                        <th>Memory</th>
+                        <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
+                        <th>Batches<span class="text-muted">/sec</span></th>
+                        <th>As of</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!s.Instances.ContainsData)
+                    {
+                        <tr>
+                            <td colspan="7">
+
+                            </td>
+                        </tr>
+                    }
+                    @foreach (var i in s.Instances.SafeData(true))
+                    {
+                        <tr class="@i.RowClass()">
+                            <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
+                            <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
+                            <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" alt="SQL CPU for @i.Name Last Hour" /></td>
+                            <partial Name="Partials.MemoryCell" Model="@new PartialsMemoryCellModel(i, 2)" />
+                            @ConnectionsCell(i)
+                            <td>@(i.BatchesPerSec?.ToComma())</td>
+                            <td>@i.LastFetch.ToPollSpan(mini: false)</td>
+                        </tr>
+                    }
+                </tbody>
+            }
+        </table>
+    }
     @if (standalone.Any())
     {
         <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive">

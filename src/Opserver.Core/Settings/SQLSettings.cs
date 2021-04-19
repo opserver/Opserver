@@ -70,6 +70,19 @@ namespace Opserver
             /// How many seconds before polling this node for status again.
             /// </summary>
             public int? RefreshIntervalSeconds { get; set; }
+
+            /// <summary>
+            /// Gets or sets the <see cref="InstanceType"/>. When this is <see cref="InstanceType.Azure"/>
+            /// the list of databases is looked up at runtime and used to generate a list of <see cref="SQLInstance"/>
+            /// objects representing each database.
+            /// </summary>
+            public InstanceType Type { get; set; } = InstanceType.Default;
+        }
+
+        public enum InstanceType
+        {
+            Default = 0,
+            Azure = 1,
         }
     }
 }

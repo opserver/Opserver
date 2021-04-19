@@ -5,6 +5,7 @@ namespace Opserver.Views.SQL
 {
     public class ServersModel : DashboardModel
     {
+        public List<SQLAzureServer> AzureServers { get; set; }
         public List<SQLCluster> Clusters { get; set; }
         public List<SQLInstance> StandaloneInstances { get; set; }
         public List<SQLNode.AGInfo> AvailabilityGroups { get; set; }

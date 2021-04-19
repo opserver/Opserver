@@ -1,9 +1,40 @@
 ﻿using System;
+using System.Collections.Immutable;
 
 namespace Opserver.Data.SQL
 {
+    public enum SQLServerEdition
+    {
+        Personal = 1,
+        Standard = 2,
+        Enterprise = 3,
+        Express = 4,
+        Azure = 5,
+    }
+
+    public readonly struct SQLServerEngine
+    {
+        public SQLServerEngine(Version version, SQLServerEdition edition)
+        {
+            Version = version;
+            Edition = edition;
+        }
+
+        public Version Version { get; }
+        public SQLServerEdition Edition { get; }
+    }
+
     public static class SQLServerVersions
     {
+        public static class Editions
+        {
+            public static readonly ImmutableHashSet<SQLServerEdition> All = ImmutableHashSet.Create(
+                (SQLServerEdition[])Enum.GetValues(typeof(SQLServerEdition))
+            );
+
+            public static readonly ImmutableHashSet<SQLServerEdition> AllExceptAzure = All.Remove(SQLServerEdition.Azure);
+        }
+        
         /// <summary>
         /// Sphinx
         /// </summary>

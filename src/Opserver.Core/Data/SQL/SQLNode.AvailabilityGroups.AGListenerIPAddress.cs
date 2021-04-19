@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Opserver.Data.SQL
 {
@@ -7,9 +8,10 @@ namespace Opserver.Data.SQL
         /// <summary>
         /// http://msdn.microsoft.com/en-us/library/hh213575.aspx
         /// </summary>
-        public class AGLisenerIPAddress : ISQLVersioned, IMonitorStatus
+        public class AGListenerIPAddress : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string ListenerId { get; internal set; }
             public string IPAddress { get; internal set; }
@@ -40,7 +42,7 @@ namespace Opserver.Data.SQL
 
             public string MonitorStatusReason => State.ToString();
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select listener_id ListenerId,
        ip_address IPAddress,
        ip_subnet_mask IPSubnetMask,

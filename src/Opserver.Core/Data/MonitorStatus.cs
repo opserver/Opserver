@@ -16,7 +16,7 @@ namespace Opserver.Data
         Critical = 4
     }
 
-    public interface IMonitedService : IMonitorStatus { }
+    public interface IMonitoredService : IMonitorStatus { }
 
     public interface IMonitorStatus
     {

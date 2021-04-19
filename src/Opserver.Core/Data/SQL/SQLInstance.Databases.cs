@@ -15,7 +15,9 @@ namespace Opserver.Data.SQL
             _databases ??= GetSqlCache(nameof(Databases),
                 async conn =>
                 {
-                    var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(Databases), Version), k =>
+                    var sql = QueryLookup.GetOrAdd(
+                        Tuple.Create(nameof(Databases), Engine),
+                        k =>
                             GetFetchSQL<Database>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseLastBackup>(k.Item2) + "\n" +
                             GetFetchSQL<DatabaseFile>(k.Item2) + "\n" +
@@ -90,7 +92,10 @@ namespace Opserver.Data.SQL
             return TimedCache(typeof(T).Name + "Info-" + databaseName,
                 conn =>
                 {
-                    conn.ChangeDatabase(databaseName);
+                    if (Engine.Edition != SQLServerEdition.Azure)
+                    {
+                        conn.ChangeDatabase(databaseName);
+                    }
                     return conn.Query<T>(GetFetchSQL<T>(), new { databaseName }).AsList();
                 },
                 duration ?? 5.Minutes(),
@@ -108,6 +113,7 @@ namespace Opserver.Data.SQL
         public class Database : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string OverallStateDescription
             {
@@ -242,10 +248,43 @@ From sys.databases db
                  Where type = 4
               Group By database_id) sti On db.database_id = sti.database_id {1};";
 
-            public string GetFetchSQL(Version v)
+            internal const string AzureFetchSQL = @"
+Select db.database_id Id,
+       db.name Name,
+       db.state State,
+       db.compatibility_level CompatibilityLevel,
+       db.recovery_model RecoveryModel,
+       db.page_verify_option PageVerifyOption,
+       db.log_reuse_wait LogReuseWait,
+       db.user_access UserAccess,
+       db.is_fulltext_enabled IsFullTextEnabled,
+       db.is_read_only IsReadOnly,
+       db.is_read_committed_snapshot_on IsReadCommittedSnapshotOn,
+       db.snapshot_isolation_state SnapshotIsolationState,
+	   (Select Top 1 Cast(DatabasePropertyEx(DB_NAME(), 'MaxSizeInBytes') As bigint)/1024/1024) TotalSizeMB,
+	   (Select (Cast(size As Bigint)*8)/1024 From sys.database_files Where type = 0) RowSizeMB,
+	   (Select (Cast(size As Bigint)*8)/1024 From sys.database_files Where type = 2) StreamSizeMB,
+	   (Select (Cast(size As Bigint)*8)/1024 From sys.database_files Where type = 4) TextIndexSize,
+       Cast(logs.cntr_value as Float)/1024 LogSizeMB,
+       Cast(logu.cntr_value as Float)/1024 LogSizeUsedMB
+From sys.databases db
+     Left Join sys.dm_os_performance_counters logu
+       On db.physical_database_name = logu.instance_name And logu.counter_name LIKE N'Log File(s) Used Size (KB)%' 
+     Left Join sys.dm_os_performance_counters logs
+       On db.physical_database_name = logs.instance_name And logs.counter_name LIKE N'Log File(s) Size (KB)%'
+Where db.database_id = DB_ID()";
+
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v >= SQLServerVersions.SQL2012.RTM)
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return AzureFetchSQL;
+                }
+
+                if (e.Version >= SQLServerVersions.SQL2012.RTM)
+                {
                     return string.Format(FetchSQL, FetchSQL2012Columns, FetchSQL2012Joins);
+                }
 
                 return string.Format(FetchSQL, "", "");
             }
@@ -254,6 +293,7 @@ From sys.databases db
         public class DatabaseLastBackup : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
 
             public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
@@ -327,10 +367,15 @@ Select db.database_id DatabaseId,
        Left Outer Join msdb.dbo.backupmediafamily fbmf
          On fb.media_set_id = fbmf.media_set_id And fbmf.media_count = 1";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return EmptyRecordsetSQL;
+                }
+
                 // Compressed backup info added in 2008
-                if (v < SQLServerVersions.SQL2008.RTM)
+                if (e.Version < SQLServerVersions.SQL2008.RTM)
                 {
                     return FetchSQL.Replace("compressed_backup_size,", "null compressed_backup_size,");
                 }
@@ -340,6 +385,9 @@ Select db.database_id DatabaseId,
 
         public class MissingIndex : ISQLVersioned
         {
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
             public decimal AvgTotalUserCost { get; internal set; }
@@ -351,11 +399,8 @@ Select db.database_id DatabaseId,
             public string InEqualityColumns { get; internal set; }
             public string IncludedColumns { get; internal set; }
             public decimal EstimatedImprovement { get; internal set; }
-            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
 
-            public string GetFetchSQL(Version v)
-            {
-                return @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
  Select s.name SchemaName,
         o.name TableName,
         avg_total_user_cost AvgTotalUserCost,
@@ -376,11 +421,13 @@ Select db.database_id DatabaseId,
   Where d.name = @databaseName
     And avg_total_user_cost * avg_user_impact * (user_seeks + user_scans) > 0
   Order By EstimatedImprovement Desc";
-            }
         }
 
         public class TableIndex : ISQLVersioned
         {
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
             public string IndexName { get; internal set; }
@@ -392,9 +439,8 @@ Select db.database_id DatabaseId,
             public string IncludedColumnNames { get; internal set; }
             public bool HasFilter { get; internal set; }
             public string FilterDefinition { get; internal set; }
-            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
  Select sc.name SchemaName,
         t.name TableName,
 		i.name IndexName, 
@@ -440,6 +486,8 @@ Order By t.name, i.index_id";
         public class StoredProcedure : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+
             public string SchemaName { get; internal set; }
             public string ProcedureName { get; internal set; }
             public DateTime CreationDate { get; internal set; }
@@ -450,7 +498,7 @@ Order By t.name, i.index_id";
             public int? MaxElapsedTime { get; internal set; }
             public int? MinElapsedTime { get; internal set; }
             public string Definition { get; internal set; }
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select p.object_id,
        s.name as SchemaName,
        p.name ProcedureName,
@@ -475,8 +523,11 @@ Select p.object_id,
 
         public class RestoreHistory : ISQLVersioned
         {
+            Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
+
             public DateTime RestoreFinishDate { get; internal set; }
-            public string  UserName { get; internal set; }
+            public string UserName { get; internal set; }
             public string BackupMedia { get; internal set; }
             public DateTime BackupStartDate { get; internal set; }
             public DateTime BackupFinishDate { get; internal set; }
@@ -496,9 +547,13 @@ Select p.object_id,
                     _ => "Unknown",
                 };
 
-            Version IMinVersioned.MinVersion =>  SQLServerVersions.SQL2008.SP1;
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return EmptyRecordsetSQL;
+                }
+
                 return @"
 Select r.restore_date RestoreFinishDate, 
        r.user_name UserName, 
@@ -518,6 +573,7 @@ Select r.restore_date RestoreFinishDate,
         public class DatabaseBackup : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
 
             public char? Type { get; internal set; }
             public string TypeDescription => GetTypeDescription(Type);
@@ -559,10 +615,15 @@ Select Top 100
   Where b.database_name = @databaseName
   Order By FinishDate Desc";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return EmptyRecordsetSQL;
+                }
+
                 // Compressed backup info added in 2008
-                if (v < SQLServerVersions.SQL2008.RTM)
+                if (e.Version < SQLServerVersions.SQL2008.RTM)
                 {
                     return FetchSQL.Replace("b.compressed_backup_size", "null");
                 }
@@ -573,6 +634,7 @@ Select Top 100
         public class DatabaseFile : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             private string _volumeMountPoint;
             public string VolumeMountPoint => _volumeMountPoint ??= PhysicalName?.Split(StringSplits.Colon)[0];
@@ -626,7 +688,7 @@ Select Top 100
                     _ => (FileMaxSizePages * 8 * 1024).ToHumanReadableSize(),
                 };
 
-            public string GetFetchSQL(Version v) => @"
+            private const string NonAzureSQL = @"
 Select mf.database_id DatabaseId,
        DB_Name(mf.database_id) DatabaseName,
        mf.file_id FileId,
@@ -650,12 +712,51 @@ Select mf.database_id DatabaseId,
        Join sys.master_files mf 
          On fs.database_id = mf.database_id
          And fs.file_id = mf.file_id
- Where (FileProperty(mf.name, 'SpaceUsed') Is Not Null Or DB_Name() = 'master')";
+ Where (FileProperty(mf.name, 'SpaceUsed') Is Not Null Or DB_Name() = 'master')
+";
+
+            private const string AzureSQL = @"
+Select DB_ID() DatabaseId,
+       DB_Name() DatabaseName,
+       mf.file_id FileId,
+       mf.name FileName,
+       mf.physical_name PhysicalName,
+       mf.data_space_id DataSpaceId,
+       mf.type FileType,
+       mf.state FileState,
+       mf.size FileSizePages,
+       mf.max_size FileMaxSizePages,
+       mf.growth FileGrowthRaw,
+       mf.is_percent_growth FileIsPercentGrowth,
+       mf.is_read_only FileIsReadOnly,
+       fs.io_stall_read_ms StallReadMs,
+       fs.num_of_reads NumReads,
+       fs.io_stall_write_ms StallWriteMs,
+       fs.num_of_writes NumWrites,
+       Cast(FileProperty(mf.name, 'SpaceUsed') As BigInt)*8*1024 UsedSizeBytes,
+       Cast(mf.size as BigInt)*8*1024 TotalSizeBytes
+  From sys.dm_io_virtual_file_stats(null, null) fs
+       Join sys.database_files mf 
+         On fs.database_id = DB_ID()
+         And fs.file_id = mf.file_id
+ Where (FileProperty(mf.name, 'SpaceUsed') Is Not Null Or DB_Name() = 'master')
+";
+
+            public string GetFetchSQL(in SQLServerEngine e)
+            {
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return AzureSQL;
+                }
+
+                return NonAzureSQL;
+            }
         }
 
         public class DatabaseDataSpace : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public int Id { get; internal set; }
             public string Name { get; internal set; }
@@ -674,7 +775,7 @@ Select mf.database_id DatabaseId,
                     _ => "Unknown",
                 };
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select data_space_id Id,
        name Name,
        type Type,
@@ -686,6 +787,7 @@ Select data_space_id Id,
         public class DatabaseVLF : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
 
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
@@ -733,10 +835,18 @@ Select * From #VLFCounts;
 Drop Table #VLFCounts;
 Drop Table #vlfTemp;";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v < SQLServerVersions.SQL2012.RTM)
+                if (e.Edition == SQLServerEdition.Azure)
+                {
+                    return EmptyRecordsetSQL;
+                }
+
+                if (e.Version < SQLServerVersions.SQL2012.RTM)
+                {
                     return FetchSQL.Replace("RecoveryUnitId int,", "");
+                }
+
                 return FetchSQL;
             }
         }
@@ -744,6 +854,7 @@ Drop Table #vlfTemp;";
         public class DatabaseTable : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -760,7 +871,7 @@ Drop Table #vlfTemp;";
             public long FreeSpaceKB => TotalSpaceKB - UsedSpaceKB;
             public TableTypes TableType { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select object_id, index_id, type Into #indexes From sys.indexes;
 Select object_id, index_id, partition_id Into #parts From sys.partitions;
 Select object_id, index_id, row_count, partition_id Into #partStats From sys.dm_db_partition_stats;
@@ -809,6 +920,7 @@ Drop Table #partStats;";
         public class DatabaseView : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -818,7 +930,7 @@ Drop Table #partStats;";
             public bool IsReplicated { get; internal set; }
             public string Definition { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select v.object_id Id,
        s.name SchemaName,
        v.name ViewName,
@@ -837,6 +949,7 @@ Select v.object_id Id,
         public class DatabaseColumn : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string Id => SchemaName + "." + TableName + "." + ColumnName;
 
@@ -978,9 +1091,9 @@ Select s.name SchemaName,
        Left Join sys.columns fc On fkc.referenced_object_id = fc.object_id And fkc.referenced_column_id = fc.column_id
 Order By 1, 2, 3";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v >= SQLServerVersions.SQL2008.RTM)
+                if (e.Version >= SQLServerVersions.SQL2008.RTM)
                     return string.Format(FetchSQL, FetchSQL2008Columns);
 
                 return string.Format(FetchSQL, "");
@@ -990,6 +1103,7 @@ Order By 1, 2, 3";
         public class DatabasePartition : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -1015,7 +1129,7 @@ Order By 1, 2, 3";
                     _ => RangeValue.ToString(),
                 };
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
   Select s.name SchemaName,
          t.name TableName,
          i.name IndexName,
@@ -1071,6 +1185,7 @@ Group By t.name,
         public class DatabaseIndex : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -1108,7 +1223,7 @@ Group By t.name,
             // A slightly tweaked version of the awesome index creation query by Kendra Little
             // Blog link: https://littlekendra.com/2016/05/05/how-to-script-out-indexes-from-sql-server/
             // Licensed under MIT: https://gist.github.com/LitKnd/2668396699c82220384d2ca2c19bbc32
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select sc.name SchemaName,
        t.name AS TableName,
        si.name IndexName,
