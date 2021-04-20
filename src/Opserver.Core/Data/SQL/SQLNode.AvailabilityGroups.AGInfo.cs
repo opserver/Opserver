@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
         /// sys.availability_groups: http://msdn.microsoft.com/en-us/library/ff878538.aspx
         /// sys.dm_hadr_availability_group_states: http://msdn.microsoft.com/en-us/library/ff878491.aspx
         /// </summary>
-        public class AGInfo : ISQLVersioned, IMonitedService
+        public class AGInfo : ISQLVersioned, IMonitoredService
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
 

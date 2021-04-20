@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Opserver.Data.HAProxy
 {
-    public partial class HAProxyGroup : IMonitedService, ISearchableNode
+    public partial class HAProxyGroup : IMonitoredService, ISearchableNode
     {
         private HAProxyModule Module { get; }
 
