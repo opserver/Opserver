@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
         {
             // This likely works fine on 6+, need to test
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int TraceFlag { get; internal set; }
             public bool Enabled { get; internal set; }

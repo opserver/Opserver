@@ -17,7 +17,7 @@ namespace Opserver.Data.SQL
         public class AGReplica : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string AvailabilityGroupName { get; internal set; }
             public Guid? GroupId { get; internal set; }

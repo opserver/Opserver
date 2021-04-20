@@ -26,7 +26,7 @@ namespace Opserver.Data.SQL
         public class SQLConfigurationOption : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int ConfigurationId { get; set; }
             public string Name { get; set; }

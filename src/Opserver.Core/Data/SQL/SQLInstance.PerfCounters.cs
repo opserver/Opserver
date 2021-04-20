@@ -26,7 +26,7 @@ namespace Opserver.Data.SQL
         public class PerfCounterRecord : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string ObjectName { get; internal set; }
             public string CounterName { get; internal set; }

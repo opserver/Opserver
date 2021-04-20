@@ -15,7 +15,7 @@ namespace Opserver.Data.SQL
         public class AGInfo : ISQLVersioned, IMonitoredService
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             [IgnoreDataMember]
             public SQLNode Node { get; internal set; }

@@ -21,7 +21,7 @@ namespace Opserver.Data.SQL
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
         protected string ConnectionString { get; set; }
-        public SQLServerEngine Engine { get; internal set; } = new SQLServerEngine(new Version(), SQLServerEdition.Standard); // default to 0.0
+        public SQLServerEngine Engine { get; internal set; } = new SQLServerEngine(new Version(), SQLServerEditions.Standard); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
 
         protected static readonly ConcurrentDictionary<Tuple<string, SQLServerEngine>, string> QueryLookup =
@@ -80,7 +80,9 @@ namespace Opserver.Data.SQL
             }
         }
 
-        public bool Supports<T>() where T : ISQLVersioned, new() => Engine.Version >= Singleton<T>.Instance.MinVersion && Singleton<T>.Instance.SupportedEditions.Contains(Engine.Edition);
+        public bool Supports<T>() where T : ISQLVersioned, new() => 
+            Engine.Version >= Singleton<T>.Instance.MinVersion 
+            && (Singleton<T>.Instance.SupportedEditions & Engine.Edition) == Engine.Edition;
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {

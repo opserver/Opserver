@@ -31,7 +31,7 @@ namespace Opserver.Data.SQL
             public string FullVersion { get; internal set; }
             public string Level { get; internal set; }
             public string Edition { get; internal set; }
-            public SQLServerEdition EngineEdition { get; internal set; }
+            public SQLServerEditions EngineEdition { get; internal set; }
             public string Collation { get; internal set; }
             public string BuildClrVersion { get; internal set; }
             public string InstanceName { get; internal set; }
@@ -81,7 +81,7 @@ namespace Opserver.Data.SQL
             {
                 get
                 {
-                    if (EngineEdition == SQLServerEdition.Azure)
+                    if (EngineEdition == SQLServerEditions.Azure)
                     {
                         return "SQL Azure";
                     }

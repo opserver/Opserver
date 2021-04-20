@@ -23,7 +23,7 @@ namespace Opserver.Data.SQL
         public class ResourceEvent : ISQLVersioned, IGraphPoint
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             private long? _dateEpoch;
             public long DateEpoch => _dateEpoch ??= EventTime.ToEpochTime();
