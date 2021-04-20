@@ -15,7 +15,7 @@ namespace Opserver.Data.SQL
         public class SQLConnectionSummaryInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.SP2;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string LoginName { get; internal set; }
             public string HostName { get; internal set; }
@@ -42,7 +42,7 @@ Select s.login_name LoginName,
         public class SQLConnectionInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public Guid Id { get; internal set; }
             public DateTime ConnectTime { get; internal set; }

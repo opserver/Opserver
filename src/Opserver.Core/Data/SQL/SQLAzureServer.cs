@@ -16,7 +16,7 @@ namespace Opserver.Data.SQL
                     var instances = new List<SQLInstance>();
                     // grab the list of databases in the SQL Azure instance
                     // and generate a SQLInstance for each one
-                    var databases = await conn.QueryAsync<string>("Select name from sys.databases");
+                    var databases = await conn.QueryAsync<string>("Select name From sys.databases");
                     foreach (var database in databases)
                     {
                         // is there an existing instance?

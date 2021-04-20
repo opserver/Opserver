@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
         public class VolumeInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008R2.SP1;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public string VolumeId { get; internal set; }
             public string VolumeMountPoint { get; internal set; }

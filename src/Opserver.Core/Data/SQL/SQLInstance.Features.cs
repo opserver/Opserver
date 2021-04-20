@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
         public class SQLServerFeatures : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.All;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public bool HasSPWhoIsActive { get; internal set; }
             public bool HasSPBlitz { get; internal set; }

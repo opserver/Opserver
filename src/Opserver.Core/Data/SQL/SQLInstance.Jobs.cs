@@ -61,7 +61,7 @@ namespace Opserver.Data.SQL
         public class SQLJobInfo : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerVersions.Editions.AllExceptAzure;
+            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public MonitorStatus MonitorStatus => !IsEnabled
                 ? MonitorStatus.Unknown
