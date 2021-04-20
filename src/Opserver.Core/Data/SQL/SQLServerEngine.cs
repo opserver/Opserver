@@ -16,7 +16,7 @@ namespace Opserver.Data.SQL
     }
 
     [Flags]
-    public enum SQLServerEditionss : int
+    public enum SQLServerEditions : int
     {
         None          = 0,
         Personal      = 1 << 0,
