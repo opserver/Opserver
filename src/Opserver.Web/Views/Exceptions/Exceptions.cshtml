@@ -33,7 +33,7 @@
     @if (Module.Stores.Count > 1)
     {
     <ul class="nav nav-tabs nav-tabs-right">
-        @foreach (var s in Module.Stores)
+        @foreach (var s in Module.Stores.OrderBy(i => i.Name))
         {
             <li class="@(Model.Store == s ? "active" : null)">
                 <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
