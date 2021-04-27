@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Immutable;
 
 namespace Opserver.Data.SQL
 {
@@ -18,7 +17,7 @@ namespace Opserver.Data.SQL
     [Flags]
     public enum SQLServerEditions : int
     {
-        None          = 0,
+        Unknown          = 0,
         Personal      = 1 << 0,
         Standard      = 1 << 1,
         Enterprise    = 1 << 2,

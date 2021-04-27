@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Opserver.Data.SQL
+﻿namespace Opserver.Data.SQL
 {
     public interface ISQLVersioned : IMinVersioned
     {
