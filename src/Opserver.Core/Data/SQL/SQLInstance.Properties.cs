@@ -31,7 +31,21 @@ namespace Opserver.Data.SQL
             public string FullVersion { get; internal set; }
             public string Level { get; internal set; }
             public string Edition { get; internal set; }
-            public SQLServerEdition EngineEdition { get; internal set; }
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used by Dapper")]
+            private byte EngineEditionRaw
+            {
+                set => EngineEdition = value switch
+                {
+                    1 => SQLServerEditions.Personal,
+                    2 => SQLServerEditions.Standard,
+                    3 => SQLServerEditions.Enterprise,
+                    4 => SQLServerEditions.Express,
+                    5 => SQLServerEditions.Azure,
+                    _ => SQLServerEditions.Unknown
+                };
+            }
+            public SQLServerEditions EngineEdition { get; internal set; }
             public string Collation { get; internal set; }
             public string BuildClrVersion { get; internal set; }
             public string InstanceName { get; internal set; }
@@ -81,7 +95,7 @@ namespace Opserver.Data.SQL
             {
                 get
                 {
-                    if (EngineEdition == SQLServerEdition.Azure)
+                    if (EngineEdition == SQLServerEditions.Azure)
                     {
                         return "SQL Azure";
                     }
@@ -109,7 +123,7 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        @@VERSION FullVersion,
        Cast(SERVERPROPERTY(''ProductLevel'') as nvarchar(128)) Level,
        Cast(SERVERPROPERTY(''Edition'') as nvarchar(128)) Edition,
-       Cast(SERVERPROPERTY(''EngineEdition'') as tinyint) EngineEdition,
+       Cast(SERVERPROPERTY(''EngineEdition'') as tinyint) EngineEditionRaw,
        Cast(SERVERPROPERTY(''Collation'') as nvarchar(128)) Collation,
        Cast(SERVERPROPERTY(''BuildClrVersion'') as nvarchar(128)) BuildClrVersion,
        Cast(SERVERPROPERTY(''InstanceName'') as nvarchar(128)) InstanceName,

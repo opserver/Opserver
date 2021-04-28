@@ -92,7 +92,7 @@ namespace Opserver.Data.SQL
             return TimedCache(typeof(T).Name + "Info-" + databaseName,
                 conn =>
                 {
-                    if (Engine.Edition != SQLServerEdition.Azure)
+                    if (Engine.Edition != SQLServerEditions.Azure)
                     {
                         conn.ChangeDatabase(databaseName);
                     }
@@ -113,7 +113,7 @@ namespace Opserver.Data.SQL
         public class Database : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string OverallStateDescription
             {
@@ -276,7 +276,7 @@ Where db.database_id = DB_ID()";
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return AzureFetchSQL;
                 }
@@ -293,7 +293,7 @@ Where db.database_id = DB_ID()";
         public class DatabaseLastBackup : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public int DatabaseId { get; internal set; }
             public string Name { get; internal set; }
@@ -369,7 +369,7 @@ Select db.database_id DatabaseId,
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return EmptyRecordsetSQL;
                 }
@@ -386,7 +386,7 @@ Select db.database_id DatabaseId,
         public class MissingIndex : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -426,7 +426,7 @@ Select db.database_id DatabaseId,
         public class TableIndex : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -486,7 +486,7 @@ Order By t.name, i.index_id";
         public class StoredProcedure : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string SchemaName { get; internal set; }
             public string ProcedureName { get; internal set; }
@@ -524,7 +524,7 @@ Select p.object_id,
         public class RestoreHistory : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008.SP1;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public DateTime RestoreFinishDate { get; internal set; }
             public string UserName { get; internal set; }
@@ -549,7 +549,7 @@ Select p.object_id,
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return EmptyRecordsetSQL;
                 }
@@ -573,7 +573,7 @@ Select r.restore_date RestoreFinishDate,
         public class DatabaseBackup : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public char? Type { get; internal set; }
             public string TypeDescription => GetTypeDescription(Type);
@@ -617,7 +617,7 @@ Select Top 100
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return EmptyRecordsetSQL;
                 }
@@ -634,7 +634,7 @@ Select Top 100
         public class DatabaseFile : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             private string _volumeMountPoint;
             public string VolumeMountPoint => _volumeMountPoint ??= PhysicalName?.Split(StringSplits.Colon)[0];
@@ -744,7 +744,7 @@ Select DB_ID() DatabaseId,
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return AzureSQL;
                 }
@@ -756,7 +756,7 @@ Select DB_ID() DatabaseId,
         public class DatabaseDataSpace : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int Id { get; internal set; }
             public string Name { get; internal set; }
@@ -787,7 +787,7 @@ Select data_space_id Id,
         public class DatabaseVLF : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public int DatabaseId { get; internal set; }
             public string DatabaseName { get; internal set; }
@@ -837,7 +837,7 @@ Drop Table #vlfTemp;";
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (e.Edition == SQLServerEdition.Azure)
+                if (e.Edition == SQLServerEditions.Azure)
                 {
                     return EmptyRecordsetSQL;
                 }
@@ -854,7 +854,7 @@ Drop Table #vlfTemp;";
         public class DatabaseTable : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -920,7 +920,7 @@ Drop Table #partStats;";
         public class DatabaseView : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int Id { get; internal set; }
             public string SchemaName { get; internal set; }
@@ -949,7 +949,7 @@ Select v.object_id Id,
         public class DatabaseColumn : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string Id => SchemaName + "." + TableName + "." + ColumnName;
 
@@ -1103,7 +1103,7 @@ Order By 1, 2, 3";
         public class DatabasePartition : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }
@@ -1185,7 +1185,7 @@ Group By t.name,
         public class DatabaseIndex : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string SchemaName { get; internal set; }
             public string TableName { get; internal set; }

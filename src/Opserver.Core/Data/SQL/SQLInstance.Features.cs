@@ -11,7 +11,7 @@ namespace Opserver.Data.SQL
         public class SQLServerFeatures : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public bool HasSPWhoIsActive { get; internal set; }
             public bool HasSPBlitz { get; internal set; }
@@ -32,7 +32,7 @@ Select (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_whoIsActive') a
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_BlitzIndex') as HasSPBlitzIndex,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_AskBrent') as HasSPAskBrent";
 
-                if (e.Edition != SQLServerEdition.Azure)
+                if (e.Edition != SQLServerEditions.Azure)
                 {
                     return sql.Replace("--", "");
                 }

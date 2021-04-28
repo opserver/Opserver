@@ -1,36 +1,31 @@
 ﻿using System;
-using System.Collections.Immutable;
 
 namespace Opserver.Data.SQL
 {
     public readonly struct SQLServerEngine
     {
-        public SQLServerEngine(Version version, SQLServerEdition edition)
+        public SQLServerEngine(Version version, SQLServerEditions edition)
         {
             Version = version;
             Edition = edition;
         }
 
         public Version Version { get; }
-        public SQLServerEdition Edition { get; }
-    }
-    
-    public enum SQLServerEdition
-    {
-        Personal = 1,
-        Standard = 2,
-        Enterprise = 3,
-        Express = 4,
-        Azure = 5,
+        public SQLServerEditions Edition { get; }
     }
 
-    public static class SQLServerEditions
+    [Flags]
+    public enum SQLServerEditions : int
     {
-        public static readonly ImmutableHashSet<SQLServerEdition> All = ImmutableHashSet.Create(
-            (SQLServerEdition[])Enum.GetValues(typeof(SQLServerEdition))
-        );
+        Unknown          = 0,
+        Personal      = 1 << 0,
+        Standard      = 1 << 1,
+        Enterprise    = 1 << 2,
+        Express       = 1 << 3,
+        Azure         = 1 << 4,
 
-        public static readonly ImmutableHashSet<SQLServerEdition> AllExceptAzure = All.Remove(SQLServerEdition.Azure);
+        All            = int.MaxValue,
+        AllExceptAzure = All & ~Azure
     }
 
     public static class SQLServerVersions

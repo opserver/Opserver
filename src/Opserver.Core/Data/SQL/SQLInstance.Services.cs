@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
         public class SQLServiceInfo : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2008R2.SP1;
-            ISet<SQLServerEdition> ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public MonitorStatus MonitorStatus
             {
