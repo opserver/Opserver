@@ -15,6 +15,7 @@ namespace Opserver.Data.SQL
         public class AGInfo : ISQLVersioned, IMonitoredService
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             [IgnoreDataMember]
             public SQLNode Node { get; internal set; }
@@ -51,7 +52,7 @@ namespace Opserver.Data.SQL
 
             public string MonitorStatusReason => Replicas.GetReasonSummary();
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select ag.name Name,
        c.cluster_name ClusterName,
        ag.group_id GroupId,

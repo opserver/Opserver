@@ -2,8 +2,34 @@
 
 namespace Opserver.Data.SQL
 {
-    public static class SQLServerVersions
+    public readonly struct SQLServerEngine
     {
+        public SQLServerEngine(Version version, SQLServerEditions edition)
+        {
+            Version = version;
+            Edition = edition;
+        }
+
+        public Version Version { get; }
+        public SQLServerEditions Edition { get; }
+    }
+
+    [Flags]
+    public enum SQLServerEditions : int
+    {
+        Unknown          = 0,
+        Personal      = 1 << 0,
+        Standard      = 1 << 1,
+        Enterprise    = 1 << 2,
+        Express       = 1 << 3,
+        Azure         = 1 << 4,
+
+        All            = int.MaxValue,
+        AllExceptAzure = All & ~Azure
+    }
+
+    public static class SQLServerVersions
+    {        
         /// <summary>
         /// Sphinx
         /// </summary>

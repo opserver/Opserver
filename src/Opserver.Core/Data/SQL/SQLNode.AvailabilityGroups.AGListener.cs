@@ -11,6 +11,7 @@ namespace Opserver.Data.SQL
         public class AGListener : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public Guid GroupId { get; internal set; }
             public string ListenerId { get; internal set; }
@@ -19,10 +20,10 @@ namespace Opserver.Data.SQL
             public bool IsConformant { get; internal set; }
             public string IPConfigurationString { get; internal set; }
 
-            public List<AGLisenerIPAddress> Addresses { get; internal set; }
-            public List<AGLisenerIPAddress> LocalAddresses { get; internal set; }
+            public List<AGListenerIPAddress> Addresses { get; internal set; }
+            public List<AGListenerIPAddress> LocalAddresses { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select group_id GroupId,
        listener_id ListenerId,
        dns_name DNSName,

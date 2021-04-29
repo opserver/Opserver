@@ -23,6 +23,7 @@ namespace Opserver.Data.SQL
         public class ResourceEvent : ISQLVersioned, IGraphPoint
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             private long? _dateEpoch;
             public long DateEpoch => _dateEpoch ??= EventTime.ToEpochTime();
@@ -32,7 +33,7 @@ namespace Opserver.Data.SQL
             public int SystemIdle { get; internal set; }
             public int ExternalProcessUtilization => 100 - SystemIdle - ProcessUtilization;
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select DateAdd(s, (timestamp - (osi.cpu_ticks / Convert(Float, (osi.cpu_ticks / osi.ms_ticks)))) / 1000, GETDATE()) AS EventTime,
 	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/SystemIdle)[1]', 'int') as SystemIdle,
 	   Record.value('(./Record/SchedulerMonitorEvent/SystemHealth/ProcessUtilization)[1]', 'int') as ProcessUtilization,

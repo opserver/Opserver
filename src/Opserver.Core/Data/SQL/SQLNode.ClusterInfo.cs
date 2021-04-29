@@ -10,7 +10,7 @@ namespace Opserver.Data.SQL
         public Cache<AGClusterState> AGClusterInfo =>
             _agClusterInfo ??= GetSqlCache(nameof(AGClusterInfo), async conn =>
             {
-                var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Version), k =>
+                var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AGClusterInfo), Engine), k =>
                         GetFetchSQL<AGClusterState>(k.Item2) + "\n" +
                         GetFetchSQL<AGClusterMemberInfo>(k.Item2) + "\n" +
                         GetFetchSQL<AGClusterNetworkInfo>(k.Item2)
@@ -39,6 +39,7 @@ namespace Opserver.Data.SQL
         public class AGClusterState : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string ClusterName { get; internal set; }
             public QuorumTypes QuorumType { get; internal set; }
@@ -48,7 +49,7 @@ namespace Opserver.Data.SQL
             public List<AGClusterMemberInfo> Members { get; internal set; }
             public List<AGClusterNetworkInfo> Networks { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select cluster_name ClusterName,
        quorum_type QuorumType,
        quorum_state QuorumState
@@ -58,13 +59,15 @@ Select cluster_name ClusterName,
         public class AGClusterMemberInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+
             public string MemberName { get; internal set; }
             public ClusterMemberTypes Type { get; internal set; }
             public ClusterMemberStates State { get; internal set; }
             public int? Votes { get; internal set; }
             public bool IsLocal { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select member_name MemberName,
        member_type Type,
        member_state State,
@@ -75,6 +78,8 @@ Select member_name MemberName,
         public class AGClusterNetworkInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
+
             public string MemberName { get; internal set; }
             public string NetworkSubnetIP { get; internal set; }
             public string NetworkSubnetIPMask { get; internal set; }
@@ -87,7 +92,7 @@ Select member_name MemberName,
             public IPNet NetworkIPNet =>
                 _networkIPNet ??= IPNet.Parse(NetworkSubnetIP, (byte)NetworkSubnetPrefixLength);
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select member_name MemberName,
        network_subnet_ip NetworkSubnetIP,
        network_subnet_ipv4_mask NetworkSubnetIPMask,

@@ -26,6 +26,7 @@ namespace Opserver.Data.SQL
         public class SQLConfigurationOption : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public int ConfigurationId { get; set; }
             public string Name { get; set; }
@@ -40,7 +41,7 @@ namespace Opserver.Data.SQL
 
             public bool IsDefault => ValueInUse == Default || (Name == "min server memory (MB)" && ValueInUse == 16);
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
  Select configuration_id ConfigurationId,
 		name Name,
 		description Description,
@@ -129,7 +130,7 @@ Order By is_advanced, name";
                 };
 
                 // some defaults were different before 2012
-                if (i.Version < SQLServerVersions.SQL2012.RTM)
+                if (i.Engine.Version < SQLServerVersions.SQL2012.RTM)
                 {
                     dict["remote login timeout (s)"] = 20;
                 }

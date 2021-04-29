@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
                     var result = await conn.QueryFirstOrDefaultAsync<SQLServerProperties>(SQLServerProperties.FetchSQL);
                     if (result != null)
                     {
-                        Version = result.ParsedVersion;
+                        Engine = new SQLServerEngine(result.ParsedVersion, result.EngineEdition);
                         if (result.PhysicalMemoryBytes > 0)
                         {
                             CurrentMemoryPercent = result.CommittedBytes/(decimal) result.PhysicalMemoryBytes*100;
@@ -31,6 +31,21 @@ namespace Opserver.Data.SQL
             public string FullVersion { get; internal set; }
             public string Level { get; internal set; }
             public string Edition { get; internal set; }
+
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members", Justification = "Used by Dapper")]
+            private byte EngineEditionRaw
+            {
+                set => EngineEdition = value switch
+                {
+                    1 => SQLServerEditions.Personal,
+                    2 => SQLServerEditions.Standard,
+                    3 => SQLServerEditions.Enterprise,
+                    4 => SQLServerEditions.Express,
+                    5 => SQLServerEditions.Azure,
+                    _ => SQLServerEditions.Unknown
+                };
+            }
+            public SQLServerEditions EngineEdition { get; internal set; }
             public string Collation { get; internal set; }
             public string BuildClrVersion { get; internal set; }
             public string InstanceName { get; internal set; }
@@ -80,6 +95,11 @@ namespace Opserver.Data.SQL
             {
                 get
                 {
+                    if (EngineEdition == SQLServerEditions.Azure)
+                    {
+                        return "SQL Azure";
+                    }
+
                     if (Version.HasValue())
                     {
                         if (Version.StartsWith("15.")) return "SQL 2019";
@@ -103,6 +123,7 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        @@VERSION FullVersion,
        Cast(SERVERPROPERTY(''ProductLevel'') as nvarchar(128)) Level,
        Cast(SERVERPROPERTY(''Edition'') as nvarchar(128)) Edition,
+       Cast(SERVERPROPERTY(''EngineEdition'') as tinyint) EngineEditionRaw,
        Cast(SERVERPROPERTY(''Collation'') as nvarchar(128)) Collation,
        Cast(SERVERPROPERTY(''BuildClrVersion'') as nvarchar(128)) BuildClrVersion,
        Cast(SERVERPROPERTY(''InstanceName'') as nvarchar(128)) InstanceName,
@@ -115,14 +136,17 @@ Select Cast(SERVERPROPERTY(''ProductVersion'') as nvarchar(128)) Version,
        (Select Count(*) From sys.dm_exec_sessions) SessionCount,
        (Select Count(*) From sys.dm_exec_connections) ConnectionCount,
        (Select Sum(active_workers_count)  From sys.dm_os_schedulers Where status = ''VISIBLE ONLINE'') CurrentWorkerCount,
-       (Select Count(*) From msdb.dbo.sysjobs) JobCount,
        cpu_count CPUCount,
        hyperthread_ratio HyperthreadRatio,
        stack_size_in_bytes StackSizeBytes,
        max_workers_count MaxWorkersCount,
        scheduler_count SchedulerCount,
        scheduler_total_count SchedulerTotalCount,'
-       
+
+IF (SELECT SERVERPROPERTY('EngineEdition')) != 5
+    Set @sql = @sql + '
+        (Select Count(*) From msdb.dbo.sysjobs) JobCount,';
+
 If (SELECT @@MICROSOFTVERSION / 0x01000000) >= 10
 	Set @sql = @sql + '
        sqlserver_start_time SQLServerStartTime,';

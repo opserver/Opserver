@@ -26,6 +26,7 @@ namespace Opserver.Data.SQL
         public class PerfCounterRecord : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string ObjectName { get; internal set; }
             public string CounterName { get; internal set; }
@@ -107,9 +108,9 @@ Select cc.object_name ObjectName,
         And pc.cntr_type In (537003264, 1073874176)
         And pbc.cntr_type = 1073939712";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v < SQLServerVersions.SQL2005.RTM)
+                if (e.Version < SQLServerVersions.SQL2005.RTM)
                 {
                     return FetchSQL.Replace("dm_os_performance_counters", "sysperfinfo");
                 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -60,6 +61,7 @@ namespace Opserver.Data.SQL
         public class SQLJobInfo : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.AllExceptAzure;
 
             public MonitorStatus MonitorStatus => !IsEnabled
                 ? MonitorStatus.Unknown
@@ -121,7 +123,7 @@ namespace Opserver.Data.SQL
 
             public TimeSpan? LastRunDuration => LastRunDurationSeconds.HasValue ? TimeSpan.FromSeconds(LastRunDurationSeconds.Value) : (TimeSpan?)null;
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select j.job_id JobId,
        j.name Name,
        j.description Description,

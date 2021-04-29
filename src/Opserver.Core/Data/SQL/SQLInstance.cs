@@ -11,6 +11,8 @@ namespace Opserver.Data.SQL
 {
     public partial class SQLInstance : PollNode<SQLModule>, ISearchableNode
     {
+        protected const string EmptyRecordsetSQL = "Select 1 Where 1 = 0";
+
         public string Name => Settings.Name;
         public virtual string Description => Settings.Description;
         private TimeSpan? _refreshInterval;
@@ -19,14 +21,14 @@ namespace Opserver.Data.SQL
         public string CategoryName => "SQL";
         string ISearchableNode.DisplayName => Name;
         protected string ConnectionString { get; set; }
-        public Version Version { get; internal set; } = new Version(); // default to 0.0
+        public SQLServerEngine Engine { get; internal set; } = new SQLServerEngine(new Version(), SQLServerEditions.Standard); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
 
-        protected static readonly ConcurrentDictionary<Tuple<string, Version>, string> QueryLookup =
-            new ConcurrentDictionary<Tuple<string, Version>, string>();
+        protected static readonly ConcurrentDictionary<Tuple<string, SQLServerEngine>, string> QueryLookup =
+            new ConcurrentDictionary<Tuple<string, SQLServerEngine>, string>();
 
-        public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Version);
-        public static string GetFetchSQL<T>(Version v) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(v);
+        public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Engine);
+        public static string GetFetchSQL<T>(in SQLServerEngine e) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(e);
 
         public SQLInstance(SQLModule module, SQLSettings.Instance settings) : base(module, settings.Name)
         {
@@ -78,7 +80,9 @@ namespace Opserver.Data.SQL
             }
         }
 
-        public bool Supports<T>() where T : ISQLVersioned, new() => Version >= Singleton<T>.Instance.MinVersion;
+        public bool Supports<T>() where T : ISQLVersioned, new() => 
+            Engine.Version >= Singleton<T>.Instance.MinVersion 
+            && (Singleton<T>.Instance.SupportedEditions & Engine.Edition) == Engine.Edition;
 
         protected override IEnumerable<MonitorStatus> GetMonitorStatus()
         {

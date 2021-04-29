@@ -19,12 +19,13 @@ namespace Opserver.Data.SQL
         public class SQLErrorLogInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public DateTime LogDate { get; internal set; }
             public string ProcessInfo { get; internal set; }
             public string Text { get; internal set; }
 
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Declare @Time_Start varchar(30);
 Set @Time_Start = DATEADD(mi, -@minutesAgo, GETDATE());
 Declare @ErrorLog Table (LogDate datetime, ProcessInfo varchar(255), Text varchar(max));

@@ -11,12 +11,12 @@ namespace Opserver.Data.SQL
             _availabilityGroups ??= GetSqlCache(nameof(AvailabilityGroups), async conn =>
             {
                 PerfCounterRecord getCounter(string cn, string n) => GetPerfCounter("Availability Replica", cn, n);
-                var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AvailabilityGroups), Version), k =>
+                var sql = QueryLookup.GetOrAdd(Tuple.Create(nameof(AvailabilityGroups), Engine), k =>
                         GetFetchSQL<AGInfo>(k.Item2) + "\n" +
                         GetFetchSQL<AGReplica>(k.Item2) + "\n" +
                         GetFetchSQL<AGDatabaseReplica>(k.Item2) + "\n" +
                         GetFetchSQL<AGListener>(k.Item2) + "\n" +
-                        GetFetchSQL<AGLisenerIPAddress>(k.Item2)
+                        GetFetchSQL<AGListenerIPAddress>(k.Item2)
                 );
 
                 List<AGInfo> ags;
@@ -26,7 +26,7 @@ namespace Opserver.Data.SQL
                     var replicas = await multi.ReadAsync<AGReplica>().AsList();
                     var databases = await multi.ReadAsync<AGDatabaseReplica>().AsList();
                     var listeners = await multi.ReadAsync<AGListener>().AsList();
-                    var listenerIPs = await multi.ReadAsync<AGLisenerIPAddress>().AsList();
+                    var listenerIPs = await multi.ReadAsync<AGListenerIPAddress>().AsList();
 
                     // Databases to replicas...
                     foreach (var r in replicas)

@@ -16,7 +16,7 @@
                     @props.MajorVersion
                     @if (showVersion)
                     {
-                        <span class="small"> (@i.Version.ToString())</span>
+                        <span class="small"> (@i.Engine.Version.ToString())</span>
                     }
                 </span>
             </a>
@@ -25,7 +25,7 @@
     }
     void RenderList(IEnumerable<SQLInstance> instances, string title)
     {
-        var versions = instances.Select(n => n.Version).Distinct().ToList();
+        var versions = instances.Select(n => n.Engine.Version).Distinct().ToList();
         <div class="col-md-3">
             <div class="panel panel-default">
                 <div class="panel-heading">

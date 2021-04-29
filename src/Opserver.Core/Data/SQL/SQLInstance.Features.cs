@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Opserver.Data.SQL
 {
@@ -10,49 +11,34 @@ namespace Opserver.Data.SQL
         public class SQLServerFeatures : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2000.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public bool HasSPWhoIsActive { get; internal set; }
             public bool HasSPBlitz { get; internal set; }
             public bool HasSPBlitzIndex { get; internal set; }
             public bool HasSPAskBrent { get; internal set; }
 
-            internal const string BatchFetchSQL = @"
-Declare @Supported Table (name sysname, header varchar(200));
-Insert Into @Supported
-Select 'sp_whoIsActive', 'Who is Active?' 
-Union
-Select 'sp_Blitz', 'sp_Blitz (TM)' 
-Union
-Select 'sp_BlitzIndex', 'sp_BlitzIndex (TM)';
-
-Select  o.name Collate Latin1_General_CI_AS as Name, 
-       SubString(sm.definition, 
-                 CharIndex(s.header, sm.definition), 
-                 CharIndex(char(13), sm.definition, CharIndex(s.header, sm.definition)) - CharIndex(s.header, sm.definition)) Header
-  From sys.objects o 
-       Join sys.sql_modules sm On o.object_id = sm.object_id 
-       Join @Supported s On o.name = s.name
- Where type = 'P'
-Union 
-Select o.name Collate Latin1_General_CI_AS, 
-       SubString(sm.definition, 
-                 CharIndex(s.header, sm.definition), 
-                 CharIndex(char(13), sm.definition, CharIndex(s.header, sm.definition)) - CharIndex(s.header, sm.definition))
-  From master.sys.objects o 
-       Join master.sys.sql_modules sm On o.object_id = sm.object_id 
-       Join @Supported s On o.name = s.name
- Where type = 'P'";
-
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e)
+            {
+                const string sql = @"
 With Procs (name) as (
 Select name COLLATE Latin1_General_CI_AS From sys.objects Where type = 'P'
-Union 
-Select name COLLATE Latin1_General_CI_AS From master.sys.objects Where type = 'P')
+--Union 
+--Select name COLLATE Latin1_General_CI_AS From master.sys.objects Where type = 'P'
+)
 
 Select (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_whoIsActive') as HasSPWhoIsActive,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_Blitz') as HasSPBlitz,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_BlitzIndex') as HasSPBlitzIndex,
        (Select Cast(Count(*) As BIT) From Procs Where name = 'sp_AskBrent') as HasSPAskBrent";
+
+                if (e.Edition != SQLServerEditions.Azure)
+                {
+                    return sql.Replace("--", "");
+                }
+
+                return sql;
+            }
         }
     }
 }

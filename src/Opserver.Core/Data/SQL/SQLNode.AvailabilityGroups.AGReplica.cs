@@ -17,6 +17,7 @@ namespace Opserver.Data.SQL
         public class AGReplica : ISQLVersioned, IMonitorStatus
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2012.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string AvailabilityGroupName { get; internal set; }
             public Guid? GroupId { get; internal set; }
@@ -101,7 +102,7 @@ namespace Opserver.Data.SQL
 
             // Why? Because MS doesn't consider DMV perf important, and it's 3-4x faster to temp table 
             // the results then join when many DBs are in an availability group
-            public string GetFetchSQL(Version v) => @"
+            public string GetFetchSQL(in SQLServerEngine e) => @"
 Select * Into #ar From sys.availability_replicas;
 Select * Into #ars From sys.dm_hadr_availability_replica_states;
 Select * Into #arcs From sys.dm_hadr_availability_replica_cluster_states;

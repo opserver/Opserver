@@ -11,6 +11,7 @@ namespace Opserver.Data.SQL
         public class SQLMemoryClerkSummaryInfo : ISQLVersioned
         {
             Version IMinVersioned.MinVersion => SQLServerVersions.SQL2005.RTM;
+            SQLServerEditions ISQLVersioned.SupportedEditions => SQLServerEditions.All;
 
             public string ClerkType { get; internal set; }
             public long UsedBytes { get; internal set; }
@@ -111,9 +112,9 @@ namespace Opserver.Data.SQL
  Group By [type]
  Order By Sum(pages_kb) Desc";
 
-            public string GetFetchSQL(Version v)
+            public string GetFetchSQL(in SQLServerEngine e)
             {
-                if (v < SQLServerVersions.SQL2012.RTM)
+                if (e.Version < SQLServerVersions.SQL2012.RTM)
                     return FetchSQL.Replace("pages_kb", "(single_pages_kb + multi_pages_kb)");
 
                 return FetchSQL;
