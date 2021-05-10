@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -83,6 +84,25 @@ namespace Opserver.Controllers
             {
                 result.IncludeDeleted = includeDeleted;
             }
+
+            DateTime? GetDate(string paramName)
+            {
+                if (GetParam(paramName) is string dateStr && DateTime.TryParse(dateStr, CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal, out var date))
+                {
+                    return date;
+                }
+                return null;
+            }
+
+            if (GetDate("start") is DateTime startDate)
+            {
+                result.StartDate = startDate;
+            }
+            if (GetDate("end") is DateTime endDate)
+            {
+                result.EndDate = endDate;
+            }
+
 
             if (CurrentSimilarId.HasValue)
             {
