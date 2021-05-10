@@ -1,0 +1,31 @@
+﻿@{
+    this.SetPageTitle("No configuration");
+}
+<div class="row">
+    <div class="col-xs-10 col-xs-offset-1" style="margin-top: 100px">
+        <h2 class="text-center">
+            <i class="fa fa-exclamation-triangle text-warning" aria-hidden="true"></i> Uh no! Configuration Problem!
+        </h2>
+        @if (!Current.Security.IsConfigured)
+        {
+            <p>
+                No security provider was found! This means the security section in your config is either missing or has an invalid provider.
+            </p>
+            <p>See the configuration docs here: <a href="#">TODO: Fix after merge</a></p>
+        }
+        else
+        {
+            <p>
+                No configuration data was found. This means no Opserver sections are configured/enabled or you have no roles assigned to you.
+            </p>
+            <p>
+                See the <code>Readme.txt</code> in /Config and <code>*.example.json</code> files for examples of a basic JSON configuration...or you can implement your own provider to get settings from anywhere.
+            </p>
+            <p>
+                You can browse to <a href="~/about">/about</a> to see how you have been authenticated and what monitors have been enabled.
+            </p>    
+        }
+    </div>
+</div>
+
+

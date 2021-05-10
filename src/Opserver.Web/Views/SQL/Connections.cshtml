@@ -1,0 +1,84 @@
+﻿@using Opserver.Data.Dashboard
+@inject DashboardModule Dashboard
+@model DashboardModel
+@{
+    var i = Model.CurrentInstance;
+    if (i == null) { return; }
+    var connections = Model.Connections;
+    var enableDashboardLinks = Dashboard.Settings.Enabled;
+    var monitoredList = new HashSet<string>(Dashboard.AllNodes.Select(si => si.Name.ToLower()));
+}
+<h5 class="page-header">
+    @(connections?.Count.Pluralize("Active connection") ?? "Unknown connections") on @i.Name:
+    @Poll.Now(i)
+</h5>
+@if (!Model.Cache.LastPollSuccessful)
+{
+    <div class="alert alert-danger">
+        <h5>There was an error fetching server status from @i.Name:</h5>
+        <p class="error-stack">@Model.Cache.ErrorMessage</p>
+    </div>
+} else {
+    <table class="table table-striped table-hover text-nowrap table-super-condensed table-responsive js-table-connections">
+        <thead>
+            <tr>
+                <th>Login</th>
+                <th>Host</th>
+                <th>Connected</th>
+                <th>Login</th>
+                <th>Reads</th>
+                <th>Writes</th>
+                <th>Status</th>
+                <th>Isolation</th>
+                <th>Query</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var c in connections)
+            {
+                <tr class="plan-row" data-plan-handle="@WebEncoders.Base64UrlEncode(c.PlanHandle)">
+                    <td>@c.LoginName</td>
+                    <td title="Program: @c.ProgramName (@c.HostProcessId)">
+                        @if (enableDashboardLinks && monitoredList.Contains(c.HostName.IsNullOrEmptyReturn("").ToLower()))
+                        {
+                            <a href="@Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = c.HostName })">@c.HostName</a>
+                        }
+                        else
+                        {
+                            @c.HostName
+                        }
+                    </td>
+                    <td data-val="@c.ConnectTime.ToEpochTime()">@c.ConnectTime.ToRelativeTimeSpan()</td>
+                    <td data-val="@c.LoginTime.ToEpochTime()">@c.LoginTime.ToRelativeTimeSpan()</td>
+                    <td>@c.NumReads.ToComma()</td>
+                    <td>@c.NumWrites.ToComma()</td>
+                    <td>@c.SessionStatus</td>
+                    <td>@c.TransactionIsolationLevel.AsString(EnumFormat.Description)</td>
+                    <td class="query-col">@c.QueryText.TruncateWithEllipsis(80)</td>
+                </tr>
+            }
+            @if (!connections.Any())
+            {
+                <tr>
+                    <td colspan="11"><div class="no-content">There are no active connections at the moment.</div></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    if (connections.Count <= 2500)
+    {
+    <script>
+        $(function() {
+            $('.js-table-connections').tablesorter({
+                headers: {
+                    1: { sorter: 'cellText' },
+                    2: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    3: { sorter: 'dataVal', sortInitialOrder: 'desc' },
+                    4: { sorter: 'commas', sortInitialOrder: 'desc' },
+                    5: { sorter: 'commas', sortInitialOrder: 'desc' },
+                }
+            });
+        });
+    </script>
+    }
+}

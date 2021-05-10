@@ -1,0 +1,32 @@
+﻿@using StackExchange.Profiling
+@functions
+{
+    void RenderTab(NavTab tab)
+    {
+        if (tab.IsEnabled)
+        {
+            // Optimism!
+            using (MiniProfiler.Current.Step("Render Tab: " + tab.Name))
+            {
+                <li class="@(tab == Current.NavTab ? "active" : null)">
+                    <a href="@Url.Content(tab.Route)" title="@tab.Tooltip">
+                        <span class="@(tab.Module.MonitorStatus.TextClass())">@tab.Name</span>
+                        @if (tab.BadgeCount > 0)
+                        {
+                            <span class="badge" data-name="@tab.Name">@tab.BadgeCount.ToComma()</span>
+                        }
+                    </a>
+                </li>
+            }
+        }
+    }
+}
+@using (MiniProfiler.Current.Step("TopTabs"))
+{
+    <ul class="nav navbar-nav navbar-right js-top-tabs">
+        @foreach (var tab in NavTab.AllTabs)
+        {
+            RenderTab(tab);
+        }
+    </ul>
+}

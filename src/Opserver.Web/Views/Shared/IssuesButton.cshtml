@@ -1,0 +1,12 @@
+﻿@inject PollingService Poller
+@{
+    var issues = Poller.GetIssues();
+}
+@if (issues.Any())
+{
+    <ul class="nav navbar-nav">
+        <li>
+            <a href="#/issues" class="js-issues-botton" data-count="@issues.Count.ToString()"><span class="badge alert-@issues.GetWorstStatus().RawClass()">@issues.Count.ToComma()</span></a>
+        </li>
+    </ul>
+}

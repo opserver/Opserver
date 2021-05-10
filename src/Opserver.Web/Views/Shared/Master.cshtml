@@ -1,0 +1,85 @@
+﻿@using Opserver.Views.Shared
+@using StackExchange.Profiling
+@inject IJsonHelper Json
+@{
+    var topNodes = ViewData[ViewDataKeys.TopBoxOptions] as TopBoxOptions;
+    var baseTitle = ViewData[ViewDataKeys.PageTitle] as string;
+    var title = baseTitle.HasValue() ? Settings.Global.SiteName + " - " + baseTitle : Settings.Global.SiteName;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>@title</title>
+    <meta name="viewport" content="width=device-width">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="google" value="notranslate" />
+    @RenderSection("preload", false)
+    <link href="~/Content/themes/@(Current.Theme).min.css" asp-append-version="true" rel="stylesheet" />
+    <link href="~/Content/img/apple-touch-icon.png" asp-append-version="true" rel="apple-touch-icon" />
+    <script src="~/Content/js/jquery-2.2.4.min.js" asp-append-version="true"></script>
+    <script src="~/Content/js/bundle.min.js" asp-append-version="true"></script>
+    <script>
+        $(function() {
+            Status.init({ SiteName: '@Settings.Global.SiteName', Tab:'@Current.NavTab?.Name', rootPath: '@Url.Content("~/")', HeaderRefresh: 15 });
+            @if (topNodes?.AllNodes?.Any() ?? false)
+            {
+                var serverJson = topNodes.AllNodes.Select(n => new
+                    {
+                        label = n.DisplayName,
+                        value = n.Name,
+                        icon = n.MonitorStatus.TextClass(showGood: true),
+                        category = n.CategoryName
+                    }).OrderBy(n => n.category).ThenBy(n => n.label);
+                @:Status.NodeSearch.init({ nodes: @Json.Serialize(serverJson) });
+            }
+        });
+    </script>    @RenderSection("head", false)    @MiniProfiler.Current.RenderIncludes(Context)
+</head>
+<body>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#topbar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="~/hub" aria-label="Status Hub"></a>
+            </div>
+
+            <div class="collapse navbar-collapse" id="topbar-collapse">
+                <partial name="IssuesButton" />
+                @if (topNodes?.SearchOnly ?? false)
+                {
+                    <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">
+                        <div class="form-group-sm">
+                            <input type="text" class="form-control js-filter" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@topNodes.SearchValue" name="@topNodes.QueryParam" />
+                        </div>
+                        @if (topNodes.SearchParams != null)
+                        {
+                            foreach (var p in topNodes.SearchParams)
+                            {
+                                <input type="hidden" name="@p.Key" value="@p.Value" />
+                            }
+                        }
+                    </form>
+                }
+                else if (topNodes?.AllNodes?.Any() ?? false)
+                {
+                    var s = topNodes.CurrentNode;
+                    <form action="@topNodes.Url" method="GET" class="navbar-form navbar-left" role="search">
+                        <div class="form-group-sm">
+                            <input type="text" class="form-control js-filter@(s != null ? " left-icon " + s.MonitorStatus.TextClass() : "")" placeholder="Search@(topNodes.SearchText.HasValue() ? " " + topNodes.SearchText : "")..." value="@(s?.DisplayName)" name="node" />
+                        </div>
+                    </form>
+                }
+                <partial name="TopTabs" />
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid js-content">
+        @RenderBody()
+    </div>
+</body>
+</html>

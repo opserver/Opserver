@@ -1,0 +1,55 @@
+﻿@inject SQLModule Sql
+@{
+    var clusters = Sql.Clusters;
+    var standalone = Sql.StandaloneInstances;
+}
+@functions
+{
+    string RenderInstances(IEnumerable<SQLInstance> instances, bool showVersion)
+    {
+        foreach (var i in instances)
+        {
+            var props = i.ServerProperties.SafeData(true);
+            <a class="list-group-item" href="?node=@i.Name.UrlEncode()">
+                @i.IconSpan() @i.Name
+                <span class="badge" title="@props.FullVersion">
+                    @props.MajorVersion
+                    @if (showVersion)
+                    {
+                        <span class="small"> (@i.Engine.Version.ToString())</span>
+                    }
+                </span>
+            </a>
+        }
+        return null;
+    }
+    void RenderList(IEnumerable<SQLInstance> instances, string title)
+    {
+        var versions = instances.Select(n => n.Engine.Version).Distinct().ToList();
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @title
+                    @if (versions.Count == 1)
+                    {
+                        <span class="small text-muted">(Version @versions[0].ToString())</span>
+                    }
+                </div>
+                <div class="panel-body small list-group">
+                    @RenderInstances(instances, versions.Count > 1)
+                </div>
+            </div>
+        </div>
+    }
+}
+<h5 class="page-header">Please select a SQL instance.</h5>
+<div class="row">
+    @foreach (var c in clusters)
+    {
+        RenderList(c.Nodes, c.Name);
+    }
+    @if (standalone.Any())
+    {
+        RenderList(standalone, "Standalone");
+    }
+</div>

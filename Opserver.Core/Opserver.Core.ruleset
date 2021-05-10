@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="Rules for Opserver.Core" Description="Code analysis rules for Opserver.Core.csproj." ToolsVersion="15.0">
-  <Rules AnalyzerId="Roslynator.CSharp.Analyzers" RuleNamespace="Roslynator.CSharp.Analyzers">
-    <Rule Id="RCS1023" Action="None" />
-    <Rule Id="RCS1076" Action="None" />
-  </Rules>
-</RuleSet>

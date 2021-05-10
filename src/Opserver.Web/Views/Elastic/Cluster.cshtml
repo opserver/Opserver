@@ -1,0 +1,117 @@
+﻿@model DashboardModel
+@{
+    var c = Model.CurrentCluster;
+    if (c == null) { return; }
+    var nodes = c.Nodes.Data?.Nodes ?? new List<ElasticCluster.NodeInfo>();
+}
+<div>
+    <h5 class="page-header">
+        @c.IconSpan() @c.Name
+        @Poll.Now(c)
+    </h5>
+    <div class="row small js-refresh" data-name="node-summary">
+        <div class="col-md-6">
+            <partial name="Cluster.Panel.Stats" model="c" />
+            <div class="panel panel-default">
+                <div class="panel-heading">@Icon.Server @(c.Nodes?.Data?.Nodes?.Count.Pluralize("Node"))</div>
+                <div class="panel-body small">
+                    @foreach (var n in nodes)
+                    {
+                        var jvm = n.Stats?.JVM;
+                        var os = n.Stats?.OS;
+                        var proc = n.Stats?.Process;
+                        var fs = n.Stats?.FileSystem;
+                        var isMaster = c.State?.Data?.MasterNode == n.GUID;
+                        var shards = c.AllShards.Where(sh => sh.Node == n.GUID).ToList();
+                        <div class="row">
+                            <h6 class="col-xs-12 page-header">
+                                @n.IconSpan()
+                                <a href="@Url.Action(nameof(ElasticController.Node), new { cluster = c.Name, node = n.Name })">
+                                    @n.ShortName
+                                </a>
+                                @if (isMaster)
+                                {
+                                    <strong>(Master)</strong>
+                                }
+                                <span class="small text-muted">(@n.Version - @n.GUID)</span>
+                            </h6>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @if (jvm?.UptimeInMilliseconds > 0)
+                                {
+                                    var upTime = TimeSpan.FromMilliseconds(jvm.UptimeInMilliseconds);
+                                    <span title="@upTime.ToReadableString()">
+                                        @upTime.ToTimeStringMini(3)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-warning">Unknown</span>
+                                }
+                                <label>Uptime</label>
+                            </div>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @if (proc?.CPU != null)
+                                {
+                                    var percentCpu = proc.CPU.Percent.ToString();
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @percentCpu%;"></div>
+                                        <span>@percentCpu%</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-warning">Unknown</span>
+                                }
+                                <label>CPU</label>
+                            </div>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @if (os?.Memory != null)
+                                {
+                                    var percentMemoryUsed = os.Memory.UsedPercent;
+                                    var percentUsed = decimal.Round(percentMemoryUsed, 2).ToString(CultureInfo.InvariantCulture);
+                                    <div class="progress" title="">
+                                        <div class="progress-bar" style="width: @percentUsed%;"></div>
+                                        <span>@percentUsed%</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-warning">Unknown</span>
+                                }
+                                <label title="Memory Used">Memory</label>
+                            </div>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @if (fs != null)
+                                {
+                                    var total = fs.Data.Sum(d => d.TotalInBytes);
+                                    var free = fs.Data.Sum(d => d.FreeInBytes);
+                                    var percentUsed = decimal.Round(100 * (decimal)(total - free) / total, 2).ToString(CultureInfo.InvariantCulture);
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: @percentUsed%;"></div>
+                                        <span>@percentUsed%</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <span class="text-warning">Unknown</span>
+                                }
+                                <label title="Space Used">Space</label>
+                            </div>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @shards.Count.ToComma() (@shards.Count(s => s.Primary).ToComma())
+                                <label>Shards</label>
+                            </div>
+                            <div class="value-block col-md-2 col-sm-4 col-xs-6">
+                                @(n?.HTTP?.PublishAddressPretty)
+                                <label>Listener</label>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <partial name="Cluster.Panel.Indexes" model="c" />
+        </div>
+    </div>
+</div>

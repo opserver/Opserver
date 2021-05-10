@@ -1,0 +1,586 @@
+/* SQL Server Query Plans */
+@qp-image-path: "/Content/img/query-plan/icons.png";
+/*.qp-tt {
+    top: 4em;
+    left: 2em;
+    border: 1px solid black;
+    background-color: #FFFFEE;
+    padding: 2px;
+    position: absolute;
+    display: none;
+    z-index: 1;
+    white-space: normal;
+    font-size: 11px;
+
+    &.sql-query-tooltip {
+        z-index: 1100;
+    }
+
+    div, table {
+        font-family: Sans-Serif;
+        text-align: left;
+    }
+
+    table {
+        border-width: 0;
+        border-spacing: 0;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+        white-space: nowrap;
+    }
+
+    td, th {
+        font-size: 11px;
+        border-bottom: solid 1px Black;
+        padding: 1px;
+    }
+
+    td {
+        text-align: right;
+        padding-left: 10px;
+    }
+
+    th {
+        text-align: left;
+    }
+
+    .qp-bold {
+        font-weight: bold;
+    }
+
+    .qp-tt-header {
+        text-align: center;
+        font-weight: bold;
+    }
+}*/
+.sql-query-section {
+    font-size: 13px;
+}
+
+.sql-query-plan {
+    color: @label-color;
+    max-height: ~"calc(100vh - 100px)";
+
+    div.qp-node {
+        background-color: #FFFFCC;
+        color: #444;
+        margin: 2px;
+        padding: 2px;
+        border: 1px solid #444;
+        border-radius: 4px;
+    }
+
+    div.qp-node,
+    div.qp-tt {
+        font-size: 11px;
+        line-height: normal;
+    }
+
+    .qp-statement-header {
+        display: none;
+    }
+
+    .missing-index {
+        color: green;
+    }
+
+    .qp-statement-header,
+    .qp-node > div {
+        font-family: Monospace;
+    }
+
+    .qp-node > div {
+        text-align: center;
+    }
+
+    div[class|='qp-icon'] {
+        height: 32px;
+        width: 32px;
+        margin-left: auto;
+        margin-right: auto;
+        background-repeat: no-repeat;
+        position: relative;
+    }
+
+    .qp-tt {
+        top: 4em;
+        left: 2em;
+        border: 1px solid black;
+        background-color: #FFFFEE;
+        padding: 2px;
+        width: 30em;
+    }
+
+    .qp-tt div,
+    .qp-tt table {
+        font-family: Sans-Serif;
+        text-align: left;
+    }
+
+    .qp-tt table {
+        border-width: 0px;
+        border-spacing: 0px;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        width: 100%;
+    }
+
+    .qp-tt td,
+    .qp-tt th {
+        font-size: 11px;
+        border-bottom: solid 1px Black;
+        padding: 1px;
+    }
+
+    .qp-tt td {
+        text-align: right;
+        padding-left: 10px;
+    }
+
+    .qp-tt th {
+        text-align: left;
+    }
+
+    .qp-bold,
+    .qp-tt-header {
+        font-weight: bold;
+    }
+
+    .qp-tt-header {
+        text-align: center;
+    }
+    /* Icons */
+    .qp-icon-Catchall {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-ArithmeticExpression {
+        background: url('@{qp-image-path}') -0px -0px
+    }
+
+    .qp-icon-Assert {
+        background: url('@{qp-image-path}') -32px -0px
+    }
+
+    .qp-icon-Assign {
+        background: url('@{qp-image-path}') -64px -0px
+    }
+
+    .qp-icon-Bitmap {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-BookmarkLookup {
+        background: url('@{qp-image-path}') -128px -0px
+    }
+
+    .qp-icon-ClusteredIndexDelete {
+        background: url('@{qp-image-path}') -160px -0px
+    }
+
+    .qp-icon-ClusteredIndexInsert {
+        background: url('@{qp-image-path}') -192px -0px
+    }
+
+    .qp-icon-ClusteredIndexScan {
+        background: url('@{qp-image-path}') -224px -0px
+    }
+
+    .qp-icon-ClusteredIndexSeek {
+        background: url('@{qp-image-path}') -256px -0px
+    }
+
+    .qp-icon-KeyLookup {
+        background: url('@{qp-image-path}') -256px -0px
+    }
+
+    .qp-icon-ClusteredIndexUpdate {
+        background: url('@{qp-image-path}') -288px -0px
+    }
+
+    .qp-icon-Collapse {
+        background: url('@{qp-image-path}') -0px -32px
+    }
+
+    .qp-icon-ComputeScalar {
+        background: url('@{qp-image-path}') -32px -32px
+    }
+
+    .qp-icon-Concatenation {
+        background: url('@{qp-image-path}') -64px -32px
+    }
+
+    .qp-icon-ConstantScan {
+        background: url('@{qp-image-path}') -96px -32px
+    }
+
+    .qp-icon-Convert {
+        background: url('@{qp-image-path}') -128px -32px
+    }
+
+    .qp-icon-CursorCatchall {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-Declare {
+        background: url('@{qp-image-path}') -160px -32px
+    }
+
+    .qp-icon-Delete {
+        background: url('@{qp-image-path}') -288px -160px
+    }
+
+    .qp-icon-DistributeStreams {
+        background: url('@{qp-image-path}') -224px -32px
+    }
+
+    .qp-icon-Dynamic {
+        background: url('@{qp-image-path}') -256px -32px
+    }
+
+    .qp-icon-EagerSpool {
+        background: url('@{qp-image-path}') -192px -160px
+    }
+
+    .qp-icon-FetchQuery {
+        background: url('@{qp-image-path}') -288px -32px
+    }
+
+    .qp-icon-Filter {
+        background: url('@{qp-image-path}') -0px -64px
+    }
+
+    .qp-icon-GatherStreams {
+        background: url('@{qp-image-path}') -32px -64px
+    }
+
+    .qp-icon-HashMatch {
+        background: url('@{qp-image-path}') -64px -64px
+    }
+
+    .qp-icon-HashMatchRoot {
+        background: url('@{qp-image-path}') -64px -64px
+    }
+
+    .qp-icon-HashMatchTeam {
+        background: url('@{qp-image-path}') -64px -64px
+    }
+
+    .qp-icon-If {
+        background: url('@{qp-image-path}') -96px -64px
+    }
+
+    .qp-icon-Insert {
+        background: url('@{qp-image-path}') -0px -192px
+    }
+
+    .qp-icon-InsertedScan {
+        background: url('@{qp-image-path}') -128px -64px
+    }
+
+    .qp-icon-Intrinsic {
+        background: url('@{qp-image-path}') -160px -64px
+    }
+
+    .qp-icon-IteratorCatchall {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-Keyset {
+        background: url('@{qp-image-path}') -192px -64px
+    }
+
+    .qp-icon-LanguageElementCatchall {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-LazySpool {
+        background: url('@{qp-image-path}') -192px -160px
+    }
+
+    .qp-icon-LogRowScan {
+        background: url('@{qp-image-path}') -224px -64px
+    }
+
+    .qp-icon-MergeInterval {
+        background: url('@{qp-image-path}') -256px -64px
+    }
+
+    .qp-icon-MergeJoin {
+        background: url('@{qp-image-path}') -288px -64px
+    }
+
+    .qp-icon-NestedLoops {
+        background: url('@{qp-image-path}') -0px -96px
+    }
+
+    .qp-icon-NonclusteredIndexDelete {
+        background: url('@{qp-image-path}') -32px -96px
+    }
+
+    .qp-icon-NonclusteredIndexInsert {
+        background: url('@{qp-image-path}') -64px -96px
+    }
+
+    .qp-icon-IndexScan {
+        background: url('@{qp-image-path}') -96px -96px
+    }
+
+    .qp-icon-IndexSeek {
+        background: url('@{qp-image-path}') -128px -96px
+    }
+
+    .qp-icon-NonclusteredIndexSpool {
+        background: url('@{qp-image-path}') -160px -96px
+    }
+
+    .qp-icon-NonclusteredIndexUpdate {
+        background: url('@{qp-image-path}') -192px -96px
+    }
+
+    .qp-icon-OnlineIndexInsert {
+        background: url('@{qp-image-path}') -224px -96px
+    }
+
+    .qp-icon-ParameterTableScan {
+        background: url('@{qp-image-path}') -256px -96px
+    }
+
+    .qp-icon-PopulationQuery {
+        background: url('@{qp-image-path}') -288px -96px
+    }
+
+    .qp-icon-RdiLookup {
+        background: url('@{qp-image-path}') -0px -128px
+    }
+
+    .qp-icon-RefreshQuery {
+        background: url('@{qp-image-path}') -32px -128px
+    }
+
+    .qp-icon-RemoteDelete {
+        background: url('@{qp-image-path}') -64px -128px
+    }
+
+    .qp-icon-RemoteInsert {
+        background: url('@{qp-image-path}') -96px -128px
+    }
+
+    .qp-icon-RemoteQuery {
+        background: url('@{qp-image-path}') -128px -128px
+    }
+
+    .qp-icon-RemoteScan {
+        background: url('@{qp-image-path}') -160px -128px
+    }
+
+    .qp-icon-RemoteUpdate {
+        background: url('@{qp-image-path}') -192px -128px
+    }
+
+    .qp-icon-RepartitionStreams {
+        background: url('@{qp-image-path}') -224px -128px
+    }
+
+    .qp-icon-Result {
+        background: url('@{qp-image-path}') -256px -128px
+    }
+
+    .qp-icon-RowCountSpool {
+        background: url('@{qp-image-path}') -288px -128px
+    }
+
+    .qp-icon-Segment {
+        background: url('@{qp-image-path}') -0px -160px
+    }
+
+    .qp-icon-Sequence {
+        background: url('@{qp-image-path}') -32px -160px
+    }
+
+    .qp-icon-Sequenceproject {
+        background: url('@{qp-image-path}') -64px -160px
+    }
+
+    .qp-icon-Snapshot {
+        background: url('@{qp-image-path}') -96px -160px
+    }
+
+    .qp-icon-Sort {
+        background: url('@{qp-image-path}') -128px -160px
+    }
+
+    .qp-icon-Split {
+        background: url('@{qp-image-path}') -160px -160px
+    }
+
+    .qp-icon-Spool {
+        background: url('@{qp-image-path}') -192px -160px
+    }
+
+    .qp-icon-Statement {
+        background: url('@{qp-image-path}') -256px -128px
+    }
+
+    .qp-icon-StreamAggregate {
+        background: url('@{qp-image-path}') -224px -160px
+    }
+
+    .qp-icon-Switch {
+        background: url('@{qp-image-path}') -256px -160px
+    }
+
+    .qp-icon-TableDelete {
+        background: url('@{qp-image-path}') -288px -160px
+    }
+
+    .qp-icon-TableInsert {
+        background: url('@{qp-image-path}') -0px -192px
+    }
+
+    .qp-icon-TableScan {
+        background: url('@{qp-image-path}') -32px -192px
+    }
+
+    .qp-icon-TableSpool {
+        background: url('@{qp-image-path}') -64px -192px
+    }
+
+    .qp-icon-TableUpdate {
+        background: url('@{qp-image-path}') -96px -192px
+    }
+
+    .qp-icon-TableValuedFunction {
+        background: url('@{qp-image-path}') -128px -192px
+    }
+
+    .qp-icon-Top {
+        background: url('@{qp-image-path}') -160px -192px
+    }
+
+    .qp-icon-Udx {
+        background: url('@{qp-image-path}') -192px -192px
+    }
+
+    .qp-icon-Update {
+        background: url('@{qp-image-path}') -96px -192px
+    }
+
+    .qp-icon-While {
+        background: url('@{qp-image-path}') -224px -192px
+    }
+
+    .qp-icon-PopulateQuery {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-StmtCursor {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-SequenceProject {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-FastForward {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-SnapShot {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-WindowAggregate {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-AdaptiveJoin {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-IndexSpool {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-icon-IndexInsert {
+        background: url('@{qp-image-path}') -96px -0px
+    }
+
+    .qp-iconwarn {
+        background: url('@{qp-image-path}') -304px -209px;
+        height: 16px;
+        width: 16px;
+        position: absolute;
+        top: 16px;
+    }
+
+    .qp-iconpar {
+        background: url('@{qp-image-path}') -304px -193px;
+        height: 16px;
+        width: 16px;
+        position: absolute;
+        top: 16px;
+        left: 16px;
+    }
+    /* Layout - can't touch this */
+    .qp-tt {
+        position: absolute;
+        z-index: 1;
+        white-space: normal;
+        -webkit-transition-delay: 0.5s;
+        transition-delay: 0.5s;
+    }
+
+    div.qp-node .qp-tt,
+    .qp-noCssTooltip div.qp-node:hover .qp-tt {
+        visibility: collapse;
+    }
+
+    div.qp-node:hover .qp-tt {
+        visibility: visible;
+    }
+
+    .qp-tt table {
+        white-space: nowrap;
+    }
+
+    .qp-node {
+        position: relative;
+        white-space: nowrap;
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .qp-node-outer {
+        height: 76.4px;
+        display: table-cell;
+    }
+
+    .qp-tr {
+        display: table;
+    }
+
+    .qp-tr > div {
+        display: table-cell;
+        padding-left: 20px;
+    }
+
+    .qp-root {
+        position: relative;
+        display: inline-block;
+    }
+
+    .qp-root svg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        pointer-events: none;
+    }
+
+    .qp-root polyline {
+        pointer-events: auto;
+    }
+}

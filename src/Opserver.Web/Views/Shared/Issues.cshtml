@@ -1,0 +1,68 @@
+﻿@inject PollingService Poller
+@using Opserver.Data.Dashboard
+@using Opserver.Data.Elastic
+@using Opserver.Data.HAProxy
+@using Opserver.Data.Redis
+@using Opserver.Data.SQL
+@{
+    var issues = Poller.GetIssues();
+}
+@functions
+{
+    public string GetLink(Issue i)
+    {
+        var node = i as Issue<Node>;
+        if (node?.Item != null)
+        {
+            return Url.Action(nameof(DashboardController.Node), "Dashboard", new { node = node.Item.PrettyName });
+        }
+        var agIssue = i as Issue<SQLNode.AGInfo>;
+        if (agIssue?.Item != null)
+        {
+            return $"/sql/servers#/cluster/{agIssue.Item.ClusterName.UrlEncode()}/{agIssue.Item.Name.UrlEncode()}";
+        }
+        var sqlInstance = i as Issue<SQLInstance>;
+        if (sqlInstance?.Item != null)
+        {
+            return Url.Action(nameof(SQLController.Instance), "SQL", new { node = sqlInstance.Item.Name });
+        }
+        var redisInstance = i as Issue<RedisInstance>;
+        if (redisInstance?.Item != null)
+        {
+            return Url.Action(nameof(RedisController.Instance), "Redis", new { node = redisInstance.Item.HostAndPort });
+        }
+        var elasticCluster = i as Issue<ElasticCluster>;
+        if (elasticCluster?.Item != null)
+        {
+            return Url.Action(nameof(ElasticController.Cluster), "Elastic", new { cluster = elasticCluster.Item.Name });
+        }
+        var haproxyGroup = i as Issue<HAProxyGroup>;
+        if (haproxyGroup?.Item != null)
+        {
+            return Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { group = haproxyGroup.Item.Name });
+        }
+        return string.Empty;
+    }
+}
+<h4 class="modal-title">
+    @issues.Count.Pluralize("Active Issue")
+</h4>
+@if (issues.Any())
+{
+    <div class="list-group list-group-sm">
+        @foreach (var i in issues)
+        {
+            <a href="@GetLink(i)" class="list-group-item @i.MonitorStatus.BackgroundClass()">
+                <h6 class="list-group-item-heading">
+                    @i.MonitorStatus.IconSpan() @i.Title <span class="text-muted">(@(i.Type ?? "Unknown Type"))</span>
+                    <span class="pull-right small">@i.Date.ToRelativeTimeSpan()</span>
+                </h6>
+                <p class="list-group-item-text">@i.Description</p>
+            </a>
+        }
+    </div>
+}
+else
+{
+    <div class="text-muted">No current issues found.</div>
+}

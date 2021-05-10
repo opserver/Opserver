@@ -1,0 +1,15 @@
+[Oo]bj/
+[Bb]in/
+.vs/
+TestResults/
+artifacts/
+_ReSharper.*/
+_ReSharper.*
+*.user
+*.suo
+*.cache
+*.psess
+*.vsp
+*.pidb
+*.userprefs
+*DS_Store
