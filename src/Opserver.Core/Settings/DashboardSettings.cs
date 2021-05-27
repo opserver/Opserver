@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Text.RegularExpressions;
 using Opserver.Data.Dashboard;
-using StackExchange.Exceptional;
 
 namespace Opserver
 {
@@ -22,8 +21,6 @@ namespace Opserver
 
         public NodeSettings GetNodeSettings(string node) =>
             PerNodeSettings?.FirstOrDefault(n => n.PatternRegex.IsMatch(node)) ?? NodeSettings.Empty;
-
-        public EmailSettings EmailSettings { get; set; } = new EmailSettings();
 
         /// <summary>
         /// The Pattern to match on server names for hiding from the dashboard

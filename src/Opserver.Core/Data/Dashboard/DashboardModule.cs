@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using Opserver.Data.Dashboard.Providers;
 using Opserver.Helpers;
-using StackExchange.Exceptional;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,12 +18,8 @@ namespace Opserver.Data.Dashboard
         public List<DashboardDataProvider> Providers { get; } = new List<DashboardDataProvider>();
         public List<DashboardCategory> AllCategories { get; }
 
-        public EmailSettings Emailsettings { get; }
-
         public DashboardModule(IConfiguration config, ILoggerFactory loggerFactory, PollingService poller, AddressCache addressCache) : base(config, poller)
         {
-            Emailsettings = Settings.EmailSettings;
-
             AddressCache = addressCache;
             var providers = Settings.Providers;
             if (providers?.Any() != true)
