@@ -7,6 +7,7 @@ namespace Opserver
 {
     public class ExceptionsSettings : ModuleSettings
     {
+        public EmailSettings EmailSettings { get; set; } = new EmailSettings();
         public override bool Enabled => Stores.Count > 0;
         public override string AdminRole => ExceptionsRoles.Admin;
         public override string ViewRole => ExceptionsRoles.Viewer;

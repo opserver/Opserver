@@ -45,6 +45,71 @@ namespace Opserver.Controllers
         }
 
         [OnlyAllow(DashboardRoles.Viewer)]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "name", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
+        [Route("graph/cpu/process/json")]
+        public async Task<ActionResult> CPUProcessJson(string id, string name, long? start = null, long? end = null, bool? summary = false)
+        {
+            var node = Dashboard.GetNodeById(id);
+            if (node == null) return JsonNotFound();
+            var data = await CPUProcessData(name, node, start, end, summary);
+            if (data == null) return JsonNotFound();
+
+            return Json(data);
+        }
+
+        public static async Task<object> CPUProcessData(string name, Node node, long? start = null, long? end = null, bool? summary = false)
+        {
+            var points = await node.GetCPUProcessUtilization(name, start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (points == null) return null;
+            return new
+            {
+                points = points.Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = p.Value ?? 0
+                }),
+                summary = summary.GetValueOrDefault(false) ? (await node.GetCPUProcessUtilization(name, null, null, 2000)).Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = p.Value ?? 0
+                }) : null
+            };
+        }
+
+        [OnlyAllow(DashboardRoles.Viewer)]
+        [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "name", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
+        [Route("graph/memory/process/json")]
+        public async Task<ActionResult> ProcessMemoryJson(string id, string name, long? start = null, long? end = null, bool? summary = false)
+        {
+            var node = Dashboard.GetNodeById(id);
+            if (node == null) return JsonNotFound();
+            var data = await ProcessMemoryData(name, node, start, end, summary);
+            if (data == null) return JsonNotFound();
+
+            return Json(data);
+        }
+
+        public static async Task<object> ProcessMemoryData(string name, Node node, long? start = null, long? end = null, bool? summary = false)
+        {
+            var points = await node.GetProcessMemoryUtilization(name, start?.ToDateTime() ?? DefaultStart, end?.ToDateTime() ?? DefaultEnd, 1000);
+            if (points == null) return null;
+
+            return new
+            {
+                points = points.Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = (int)(p.Value / 1024 / 1024 ?? 0)
+                }),
+                summary = summary.GetValueOrDefault(false) ? (await node.GetProcessMemoryUtilization(name, null, null, 1000)).Select(p => new
+                {
+                    date = p.DateEpoch,
+                    value = (int)(p.Value / 1024 / 1024 ?? 0)
+                }) : null
+            };
+        }
+
+        [OnlyAllow(DashboardRoles.Viewer)]
         [ResponseCache(Duration = 120, VaryByQueryKeys = new string[] { "id", "start", "end", "summary" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/memory/json")]
         public async Task<ActionResult> MemoryJson(string id, long? start = null, long? end = null, bool? summary = false)

@@ -18,6 +18,48 @@
             </div>
         </div>
     </div>
+    @foreach (var name in Model.DataProvider.Module.Settings.Providers.WMI.processMonitor)
+    {
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    @name Process Utilization
+                </div>
+                <div class="panel-body">
+                    <div class="history-graph" id="@name-process-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">@name Process Memory Utilization <span cass="text-muted">(@(Model.TotalMemory.GetValueOrDefault(0).ToSize()))</span></div>
+                <div class="panel-body">
+                    <div class="history-graph" id="@name-process-memory-container" data-max="@((Model.TotalMemory/1024/1024)?.ToString(CultureInfo.InvariantCulture))"></div>
+                </div>
+            </div>
+        </div>
+        <script>
+            $(function () {
+                $('#@name-process-container').cpuGraph({
+                    id: '@Model.Id',
+                    realtime: true,
+                    subtype: "process",
+                    params: {
+                        name: '@name'
+                    }
+                });
+
+                $('#@name-process-memory-container').memoryGraph({
+                    id: '@Model.Id',
+                    subtype: "process",
+                    params: {
+                        name: '@name'
+                    }
+                });
+            });
+        </script>
+    }
+
 </div>
 <script>
     $(function () {

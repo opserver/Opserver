@@ -6,6 +6,9 @@ using System.Management;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Opserver.Helpers;
+using StackExchange.Exceptional;
+using StackExchange.Exceptional.Internal;
+using StackExchange.Exceptional.Notifiers;
 
 namespace Opserver.Data.Dashboard.Providers
 {
@@ -86,7 +89,9 @@ namespace Opserver.Data.Dashboard.Providers
 
                 try
                 {
-                    var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(), PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync() };
+                    var tasks = new[] { PollCpuUtilizationAsync(), PollMemoryUtilizationAsync(),
+                        PollNetworkUtilizationAsync(), PollVolumePerformanceUtilizationAsync(),
+                        PollProcessUtilizationAsync() };
                     await Task.WhenAll(tasks);
                     ClearSummaries();
                 }
@@ -419,6 +424,78 @@ SELECT Caption,
                     AvgLoad = CPULoad
                 };
                 UpdateHistoryStorage(CPUHistory, cpuUtilization);
+
+                // KHK 처음에 이상하게 100으로 팍 튄다
+                if (CPUHistory.Count == 1 && CPULoad == 100)
+                {
+                    CPUHistory.RemoveAt(0);
+                    CPULoad = 0;
+                    return;
+                }
+
+                if (CPULoad.GetValueOrDefault() > WmiProvider.Module.Settings.CPUCriticalPercent)
+                {
+                    var emailer = new EmailNotifier(WmiProvider.Module.Emailsettings);
+                    emailer.Notify(new Error(new Exception("이건 CPU 테스트"), Statics.Settings));
+                }
+            }
+
+            private async Task PollProcessUtilizationAsync()
+            {
+                foreach(var name in Config.processMonitor)
+                {
+                    var query = $"SELECT * FROM Win32_PerfFormattedData_PerfProc_Process WHERE Name = '{name}'";
+
+                    var property = "PercentProcessorTime";
+
+                    using var q = Query(query);
+                    var data = await q.GetFirstResultAsync();
+
+                    if (data == null)
+                    {
+                        var emailer = new EmailNotifier(WmiProvider.Module.Emailsettings);
+                        emailer.Notify(new Error(new Exception("이건 CPU Process 테스트"), Statics.Settings));
+
+                        continue;
+                    }
+
+                    var perfData = new PerfRawData(this, data);
+                    // https://medium.com/oldbeedev/c-how-to-monitor-cpu-memory-disk-usage-in-windows-a06fc2f05ad5
+                    short? CPUProcessLoad = (short)(perfData.GetCalculatedValue(property) / NumberOfLogicalProcessors);
+
+                    var cpuUtilization = new CPUUtilization
+                    {
+                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                        AvgLoad = CPUProcessLoad
+                    };
+
+                    var processData = ProcessCPUHistory.GetOrAdd(name, _ => new List<CPUUtilization>());
+                    UpdateHistoryStorage(processData, cpuUtilization);
+
+                    // KHK
+                    if (ProcessCPUHistory[name].Count == 1 && CPUProcessLoad == 100)
+                    {
+                        ProcessCPUHistory[name].RemoveAt(0);
+                        continue;
+                    }
+
+                    var obj = (ManagementObject)data; 
+                    var identifier = obj["IDProcess"];
+                    var process = System.Diagnostics.Process.GetProcessById(Convert.ToInt32(identifier));
+
+                    var cpuProcessMemoryUtilization = new MemoryUtilization
+                    {
+                        DateEpoch = DateTime.UtcNow.ToEpochTime(),
+                        AvgMemoryUsed = Convert.ToSingle(process.PrivateMemorySize64)
+                    };
+
+                    var processMemoryData = ProcessMemoryHistory.GetOrAdd(name, _ => new List<MemoryUtilization>());
+                    UpdateHistoryStorage(processMemoryData, cpuProcessMemoryUtilization);
+
+                    //var procHandleCount = process.HandleCount;
+                    //var procThreadCount = process.Threads.Count;
+                }
+               
             }
 
             private async Task PollMemoryUtilizationAsync()
@@ -438,6 +515,13 @@ SELECT Caption,
                     AvgMemoryUsed = MemoryUsed
                 };
                 UpdateHistoryStorage(MemoryHistory, utilization);
+
+                // KHK
+                if (PercentMemoryUsed.GetValueOrDefault() > Convert.ToDouble(WmiProvider.Module.Settings.MemoryCriticalPercent))
+                {
+                    var emailer = new EmailNotifier(WmiProvider.Module.Emailsettings);
+                    emailer.Notify(new Error(new Exception("이건 메모리 테스트"), Statics.Settings));
+                }
             }
 
             private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();
@@ -549,7 +633,7 @@ SELECT Caption,
                             ReadAvgBytesPerSecond = iface.ReadBytesPerSecond,
                             WriteAvgBytesPerSecond = iface.WriteBytesPerSecond
                         };
-
+                        
                         var netData = VolumePerformanceHistory.GetOrAdd(iface.Name, _ => new List<Volume.VolumePerformanceUtilization>(1024));
                         UpdateHistoryStorage(netData, util);
 
@@ -557,6 +641,12 @@ SELECT Caption,
                         {
                             combinedUtil.ReadAvgBytesPerSecond += util.ReadAvgBytesPerSecond;
                             combinedUtil.WriteAvgBytesPerSecond += util.WriteAvgBytesPerSecond;
+                        }
+
+                        if(iface.PercentUsed > WmiProvider.Module.Settings.DiskCriticalPercent)
+                        {
+                            var emailer = new EmailNotifier(WmiProvider.Module.Emailsettings);
+                            emailer.Notify(new Error(new Exception("이건 디스크 테스트"), Statics.Settings));
                         }
                     }
                 }

@@ -2267,7 +2267,15 @@ Status.HAProxy = (function () {
                         if (curDataRequest) {
                             curDataRequest.abort();
                         }
-                        curDataRequest = $.getJSON(urlPath, { id: options.id, start: start, end: end }, function (newData) {
+                        let args = {
+                            id: options.id,
+                            start: start,
+                            end: end
+                        };
+                        if (options.params !== undefined) {
+                            args.name = options.params['name'];
+                        };                        
+                        curDataRequest = $.getJSON(urlPath, args, function (newData) {
                             postProcess(newData);
                             rescaleYAxis(newData, true);
                             series.forEach(function (s) {

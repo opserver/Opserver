@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
+using StackExchange.Exceptional;
 
 namespace Opserver.Data.Exceptions
 {
@@ -11,12 +12,16 @@ namespace Opserver.Data.Exceptions
 
         public List<ExceptionStore> Stores { get; }
 
+        public EmailSettings EmailSettings { get; }
+
         public ExceptionsModule(IConfiguration config, PollingService poller) : base(config, poller)
         {
             Stores = Settings.Stores
                 .Select(s => new ExceptionStore(this, s))
                 .Where(s => s.TryAddToGlobalPollers())
                 .ToList();
+
+            EmailSettings = Settings.EmailSettings;
         }
 
         public override bool IsMember(string node) => false;
