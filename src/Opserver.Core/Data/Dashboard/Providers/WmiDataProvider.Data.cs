@@ -19,6 +19,8 @@ namespace Opserver.Data.Dashboard.Providers
             internal readonly List<CPUUtilization> CPUHistory;
             internal readonly List<Interface.InterfaceUtilization> CombinedNetHistory;
             internal readonly List<Volume.VolumePerformanceUtilization> CombinedVolumePerformanceHistory;
+            private readonly ConcurrentDictionary<string, List<CPUUtilization>> ProcessCPUHistory;
+            private readonly ConcurrentDictionary<string, List<MemoryUtilization>> ProcessMemoryHistory;
             private readonly ConcurrentDictionary<string, List<Interface.InterfaceUtilization>> NetHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>> VolumePerformanceHistory;
@@ -65,6 +67,8 @@ namespace Opserver.Data.Dashboard.Providers
                 // TODO: Size for retention / interval and convert to limited list
                 MemoryHistory = new List<MemoryUtilization>(1024);
                 CPUHistory = new List<CPUUtilization>(1024);
+                ProcessCPUHistory = new ConcurrentDictionary<string, List<CPUUtilization>>();
+                ProcessMemoryHistory = new ConcurrentDictionary<string, List<MemoryUtilization>>();
                 CombinedNetHistory = new List<Interface.InterfaceUtilization>(1024);
                 NetHistory = new ConcurrentDictionary<string, List<Interface.InterfaceUtilization>>();
                 VolumeHistory = new ConcurrentDictionary<string, List<Volume.VolumeUtilization>>();
@@ -97,6 +101,32 @@ namespace Opserver.Data.Dashboard.Providers
                 else
                 {
                     return new List<Volume.VolumePerformanceUtilization>(0);
+                }
+            }
+
+            internal List<CPUUtilization> GetCPUProcessUtilizationHistory(string processName)
+            {
+                if(processName != null
+                    && ProcessCPUHistory.ContainsKey(processName))
+                {
+                    return ProcessCPUHistory[processName];
+                }
+                else
+                {
+                    return new List<CPUUtilization>(0);
+                }
+            }
+
+            internal List<MemoryUtilization> GetProcessMemoryUtilizationHistory(string processName)
+            {
+                if (processName != null
+                    && ProcessMemoryHistory.ContainsKey(processName))
+                {
+                    return ProcessMemoryHistory[processName];
+                }
+                else
+                {
+                    return new List<MemoryUtilization>(0);
                 }
             }
 
@@ -147,6 +177,12 @@ namespace Opserver.Data.Dashboard.Providers
 
         public override Task<List<DoubleGraphPoint>> GetUtilizationAsync(Interface iface, DateTime? start, DateTime? end, int? pointCount = null) =>
             Task.FromResult(FilterHistory<Interface.InterfaceUtilization, DoubleGraphPoint>(GetWmiNodeById(iface.NodeId)?.GetInterfaceUtilizationHistory(iface), start, end).ToList());
+
+        public Task<List<GraphPoint>> GetCPUProcessUtilizationAsync(string processName, Node node, DateTime? start, DateTime? end, int? pointCount = null) =>
+            Task.FromResult(FilterHistory<Node.CPUUtilization, GraphPoint>(GetWmiNodeById(node.Id)?.GetCPUProcessUtilizationHistory(processName), start, end).ToList());
+
+        public Task<List<GraphPoint>> GetProcessMemoryUtilizationAsync(string processName, Node node, DateTime? start, DateTime? end, int? pointCount = null) =>
+            Task.FromResult(FilterHistory<Node.MemoryUtilization, GraphPoint>(GetWmiNodeById(node.Id)?.GetProcessMemoryUtilizationHistory(processName), start, end).ToList());
 
         private static IEnumerable<TResult> FilterHistory<T, TResult>(List<T> list, DateTime? start, DateTime? end) where T : GraphPoint, TResult, new()
         {

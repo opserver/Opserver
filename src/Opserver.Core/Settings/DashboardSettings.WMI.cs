@@ -12,6 +12,8 @@ namespace Opserver
         /// </summary>
         public List<string> Nodes { get; set; } = new List<string>();
 
+        public List<string> processMonitor { get; set; } = new List<string>();
+
         /// <summary>
         /// Timeout in seconds for cache with more or less static data, like node name or volume size.
         /// </summary>

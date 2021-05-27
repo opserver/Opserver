@@ -30,6 +30,28 @@ namespace Opserver.Data.Dashboard
             return DataProvider.GetCPUUtilizationAsync(this, start, end, pointCount);
         }
 
+        public Task<List<GraphPoint>> GetCPUProcessUtilization(string processName, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            if (DataProvider is Providers.WmiDataProvider provider)
+            {
+                return provider.GetCPUProcessUtilizationAsync(processName, this, start, end, pointCount);
+            }
+            else
+                return Task.FromResult(new List<GraphPoint>());
+
+        }
+
+        public Task<List<GraphPoint>> GetProcessMemoryUtilization(string processName, DateTime? start, DateTime? end, int? pointCount = null)
+        {
+            if (DataProvider is Providers.WmiDataProvider provider)
+            {
+                return provider.GetProcessMemoryUtilizationAsync(processName, this, start, end, pointCount);
+            }
+            else
+                return Task.FromResult(new List<GraphPoint>());
+
+        }
+
         /// <summary>
         /// Gets memory usage for this node (optionally) for the given time period, optionally sampled if pointCount is specified
         /// </summary>
