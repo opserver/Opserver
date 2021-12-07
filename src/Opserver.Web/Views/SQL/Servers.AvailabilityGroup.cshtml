@@ -79,7 +79,7 @@ Health (@Model.Node.Name): @(db.SynchronizationHealth.HasValue ? db.Synchronizat
                     <i class="fa fa-database @(ag.LocalReplica.Databases.GetWorstStatus().TextClass(showGood: true))" aria-hidden="true"></i> @Health.OfAGs(ag.LocalReplica.Databases, minimal: true)
                 </div>
                 <div>
-                    @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.Node.Name</a> <span class="text-success">(Master)</span>
+                    @ag.LocalReplica.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@ag.Node.Name.UrlEncode()">@ag.Node.Name</a> <span class="text-success">(Primary)</span>
                 </div>
 
                 @RenderDBIssues(ag.LocalReplica)
