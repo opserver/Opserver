@@ -53,22 +53,22 @@ namespace Opserver
         public static string TrimEnd(this string s, string toTrim) =>
             s == null || toTrim == null || !s.EndsWith(toTrim)
                 ? s
-                : s.Substring(0, s.Length - toTrim.Length);
+                : s[..^toTrim.Length];
 
         /// <summary>
-        /// returns Url Encoded string
+        /// Returns a URL Encoded string.
         /// </summary>
         /// <param name="s">The string to encode, to put in URLs</param>
         public static string UrlEncode(this string s) => s.HasValue() ? WebUtility.UrlEncode(s) : s;
 
         /// <summary>
-        /// returns Url Encoded string
+        /// Returns a URL Encoded string.
         /// </summary>
         /// <param name="s">The string to encode, to put in URLs</param>
-        public static string UrlPathEncode(this string s) => s.HasValue() ? Uri.EscapeUriString(s) : s;
+        public static string UrlPathEncode(this string s) => s.HasValue() ? Uri.EscapeDataString(s) : s;
 
         /// <summary>
-        /// returns Html Encoded string
+        /// Returns an HTML Encoded string.
         /// </summary>
         /// <param name="s">The string to encode, to put in HTML</param>
         public static string HtmlEncode(this string s) => s.HasValue() ? WebUtility.HtmlEncode(s) : s;
@@ -344,7 +344,7 @@ namespace Opserver
             add("s", span.Seconds);
             add("ms", span.Milliseconds);
 
-            if (sb.Length == 0) sb.Append("0");
+            if (sb.Length == 0) sb.Append('0');
 
             return sb.ToStringRecycle().Trim();
         }
@@ -451,6 +451,6 @@ namespace Opserver
             return value.ToString(pow == 0 ? "F0" : "F" + precision.ToString()) + " " + Units[(int)pow] + unit;
         }
 
-        internal static StringBuilder Pipend(this StringBuilder sb, string value) => sb.Append("|").Append(value);
+        internal static StringBuilder Pipend(this StringBuilder sb, string value) => sb.Append('|').Append(value);
     }
 }

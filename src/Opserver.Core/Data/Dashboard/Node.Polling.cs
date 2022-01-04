@@ -8,7 +8,7 @@ namespace Opserver.Data.Dashboard
     {
         public async Task<PerfCounters.QueryResult<PerfCounters.CPUUtilization>> GetCPUUtilization()
         {
-            if (MachineType.Contains("Windows"))
+            if (OperatingSystem.IsWindows())
             {
                 return await PerfCounters.Windows.GetCPUUtilization(Ip);
             }

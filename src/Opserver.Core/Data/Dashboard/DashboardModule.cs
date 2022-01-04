@@ -39,7 +39,7 @@ namespace Opserver.Data.Dashboard
                 Providers.Add(new BosunDataProvider(this, providers.Bosun));
             if (providers.Orion != null)
                 Providers.Add(new OrionDataProvider(this, providers.Orion));
-            if (providers.WMI != null)
+            if (providers.WMI != null && OperatingSystem.IsWindows())
                 Providers.Add(new WmiDataProvider(this, providers.WMI));
             if (providers.SignalFx != null)
                 Providers.Add(new SignalFxDataProvider(this, providers.SignalFx, loggerFactory.CreateLogger<SignalFxDataProvider>()));
@@ -77,7 +77,7 @@ namespace Opserver.Data.Dashboard
         {
             if (!Settings.Enabled || hostName.IsNullOrEmpty()) return null;
             return AllNodes.Find(s => s.Name.Equals(hostName, StringComparison.InvariantCultureIgnoreCase)) ??
-				AllNodes.Find(s => s.Name.IndexOf(hostName, StringComparison.InvariantCultureIgnoreCase) >= 0);
+				AllNodes.Find(s => s.Name.Contains(hostName, StringComparison.InvariantCultureIgnoreCase));
         }
 
         public string GetServerName(string hostOrIp)

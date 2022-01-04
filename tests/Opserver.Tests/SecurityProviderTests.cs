@@ -1,4 +1,5 @@
-﻿using System.Security.Claims;
+﻿using System;
+using System.Security.Claims;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
 using Opserver.Security;
@@ -54,7 +55,10 @@ namespace Opserver.Tests
                 .BuildServiceProvider();
 
             var sm = new SecurityManager(serviceProvider, memCache);
-            Assert.IsType<ActiveDirectoryProvider>(sm.CurrentProvider);
+            if (OperatingSystem.IsWindows())
+            {
+                Assert.IsType<ActiveDirectoryProvider>(sm.CurrentProvider);
+            }
         }
 
         [Fact]

@@ -82,7 +82,7 @@ namespace Opserver.Data.Dashboard.Providers
                                 {
                                     var tags = new[] {
                                         ("interface", i)
-                                    }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                                    }.ToImmutableDictionary(x => x.Item1, x => x.i);
                                     var rxKey = new TimeSeriesKey(host.Name, InterfaceRx.Metric, tags);
                                     var txKey = new TimeSeriesKey(host.Name, InterfaceTx.Metric, tags);
                                     var rxMetrics = metrics.GetValueOrDefault(rxKey, new TimeSeries(rxKey, ImmutableArray<GraphPoint>.Empty));
@@ -105,7 +105,7 @@ namespace Opserver.Data.Dashboard.Providers
                                 {
                                     var tags = new[] {
                                         ("device", v)
-                                    }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+                                    }.ToImmutableDictionary(x => x.Item1, x => x.v);
                                     var usageKey = new TimeSeriesKey(host.Name, DiskUsage.Metric, tags);
                                     var usageMetrics = metrics.GetValueOrDefault(usageKey, new TimeSeries(usageKey, ImmutableArray<GraphPoint>.Empty));
                                     return new Volume
@@ -214,7 +214,7 @@ namespace Opserver.Data.Dashboard.Providers
             var tags = new[]
             {
                 ("interface", iface.Id)
-            }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+            }.ToImmutableDictionary(x => x.Item1, x => x.Id);
             var rxKey = new TimeSeriesKey(iface.Node.Id, InterfaceRx.Metric, tags);
             var txKey = new TimeSeriesKey(iface.Node.Id, InterfaceTx.Metric, tags);
             var metricsByKey = ImmutableDictionary<TimeSeriesKey, TimeSeries>.Empty;
@@ -260,7 +260,7 @@ namespace Opserver.Data.Dashboard.Providers
             var tags = new[]
             {
                 ("device", volume.Id)
-            }.ToImmutableDictionary(x => x.Item1, x => x.Item2);
+            }.ToImmutableDictionary(x => x.Item1, x => x.Id);
             var usageKey = new TimeSeriesKey(volume.Node.Id, DiskUsage.Metric, tags);
             var metricsByKey = ImmutableDictionary<TimeSeriesKey, TimeSeries>.Empty;
             if (IsApproximatelyLast24Hrs(start, end))

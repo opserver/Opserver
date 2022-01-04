@@ -35,8 +35,8 @@ namespace Opserver.Security
             var baseSettings = GetSettings<SecuritySettings>();
             return baseSettings.Provider switch
             {
-                "AD" => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
-                "ActiveDirectory" => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
+                "AD" when OperatingSystem.IsWindows() => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
+                "ActiveDirectory" when OperatingSystem.IsWindows() => new ActiveDirectoryProvider(GetSettings<ActiveDirectorySecuritySettings>(), cache),
                 "EveryonesAnAdmin" => new EveryonesAnAdminProvider(baseSettings),
                 "EveryonesReadOnly" => new EveryonesReadOnlyProvider(baseSettings),
                 "OIDC" => new OIDCProvider(GetSettings<OIDCSecuritySettings>()),

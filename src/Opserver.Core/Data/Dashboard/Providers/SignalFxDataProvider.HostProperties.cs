@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Exceptional;
 using StackExchange.Profiling;
+using StackExchange.Utils;
 
 namespace Opserver.Data.Dashboard.Providers
 {
@@ -76,15 +77,6 @@ namespace Opserver.Data.Dashboard.Providers
             public Dictionary<string, string> Dimensions { get; set; }
         }
 
-        private static readonly JsonSerializerOptions _deserializerOptions = new JsonSerializerOptions
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            Converters =
-                {
-                    new JsonEpochConverter(),
-                }
-        };
-
         private async Task<ImmutableDictionary<string, SignalFxHost>> GetHostsAsync()
         {
             var volumeTask = GetVolumesAsync();
@@ -121,31 +113,29 @@ namespace Opserver.Data.Dashboard.Providers
 
         private async Task<ImmutableDictionary<string, ImmutableDictionary<string, string>>> GetHostPropertiesAsync()
         {
-            using (var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5)))
-            {
-                var program = $@"data(""{Cpu.Metric}"", filter=filter('host', '*'), extrapolation=""last_value"", maxExtrapolations=2).mean(by=[""host""]).publish()";
-                var resolution = TimeSpan.FromSeconds(60);
-                var endDate = DateTime.UtcNow.RoundDown(resolution);
-                var startDate = endDate.AddMinutes(-15);
-                var results = ImmutableDictionary.CreateBuilder<string, ImmutableDictionary<string, string>>();
-                await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cts.Token))
-                {
-                    await signalFlowClient.ConnectAsync();
+            using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
 
-                    await foreach (var msg in signalFlowClient.ExecuteAsync(program, startDate, endDate, resolution, includeMetadata: true))
+            var program = $@"data(""{Cpu.Metric}"", filter=filter('host', '*'), extrapolation=""last_value"", maxExtrapolations=2).mean(by=[""host""]).publish()";
+            var resolution = TimeSpan.FromSeconds(60);
+            var endDate = DateTime.UtcNow.RoundDown(resolution);
+            var startDate = endDate.AddMinutes(-15);
+            var results = ImmutableDictionary.CreateBuilder<string, ImmutableDictionary<string, string>>();
+            await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cts.Token))
+            {
+                await signalFlowClient.ConnectAsync();
+
+                await foreach (var msg in signalFlowClient.ExecuteAsync(program, startDate, endDate, resolution, includeMetadata: true))
+                {
+                    if (msg is MetadataMessage metadataMessage)
                     {
-                        if (msg is MetadataMessage metadataMessage)
-                        {
-                            results[metadataMessage.Properties.Host] = metadataMessage.Properties.Dimensions.ToImmutableDictionary(x => x.Key, x => x.Value.ToString());
-                        }
-                        else if (msg is DataMessage dataMessage)
-                        {
-                        }
+                        results[metadataMessage.Properties.Host] = metadataMessage.Properties.Dimensions.ToImmutableDictionary(x => x.Key, x => x.Value.ToString());
+                    }
+                    else if (msg is DataMessage dataMessage)
+                    {
                     }
                 }
-                return results.ToImmutable();
-
             }
+            return results.ToImmutable();
         }
 
         private async Task<ImmutableDictionary<string, ImmutableArray<string>>> GetVolumesAsync()
@@ -187,26 +177,26 @@ namespace Opserver.Data.Dashboard.Providers
             var url = $"https://api.{Settings.Realm}.signalfx.com/v2/{api}?query={query.UrlEncode()}&limit=5000";
             using (MiniProfiler.Current.Step("SignalFx Host Properties"))
             using (MiniProfiler.Current.CustomTiming("signalFx", url))
-            using (var wc = new WebClient())
             {
                 try
                 {
-                    if (Settings.AccessToken.HasValue())
-                    {
-                        wc.Headers.Add("X-SF-Token", Settings.AccessToken);
-                    }
-
                     var results = ImmutableList.CreateBuilder<SignalFxDimension>();
                     var offset = 0;
                     while (true)
                     {
                         var urlWithOffset = url + "&offset=" + offset.ToString();
-                        using var s = await wc.OpenReadTaskAsync(urlWithOffset);
-                        var response = await JsonSerializer.DeserializeAsync<SignalFxDimensionEnvelope>(s, _deserializerOptions);
-                        results.AddRange(response.Results);
-                        offset += response.Results.Count;
+                        var request = Http.Request(urlWithOffset);
 
-                        if (offset >= response.Count)
+                        if (Settings.AccessToken.HasValue())
+                        {
+                            request.AddHeader("X-SF-Token", Settings.AccessToken);
+                        }
+
+                        var response = await request.ExpectJson<SignalFxDimensionEnvelope>(Jil.Options.MillisecondsSinceUnixEpochCamelCase).GetAsync();
+                        results.AddRange(response.Data.Results);
+                        offset += response.Data.Results.Count;
+
+                        if (offset >= response.Data.Count)
                         {
                             break;
                         }
