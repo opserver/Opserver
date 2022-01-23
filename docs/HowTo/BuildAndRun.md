@@ -5,9 +5,9 @@ layout: "default"
 
 Since Opserver v2 is based on .NET Core, it has several deployment options. Once you've setup basic configuration (the app will run and prompt you alerting to zero configuration if you skip this step), you can run it via:
 
-- `donet run` via the command line (requires [the .NET 3.1+ runtime](https://dotnet.microsoft.com/download) to be installed - works on any OS)
+- `donet run` via the command line (requires [the .NET 6.0+ runtime](https://dotnet.microsoft.com/download) to be installed - works on any OS)
 - Building via `dotnet publish`, and running elsewhere.
-- Using IIS on Windows (requires the [ASP.NET Core Runtime](https://dotnet.microsoft.com/download/dotnet-core/3.1), which includes the IIS module for .NET Core) - this is like Opserver v1.
+- Using IIS on Windows (requires the [ASP.NET Core Runtime](https://dotnet.microsoft.com/download/dotnet-core/6.0), which includes the IIS module for .NET Core) - this is like Opserver v1.
 - Via Docker - there's a `Dockerfile` in the root of this repo, you'd just want to mount your `/Config` folder as a volume. The hope is to publish this to DokerHub soon.
 
 #### Via `dotnet run`
