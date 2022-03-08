@@ -1,0 +1,54 @@
+﻿@model ExceptionsModel
+
+<h4 class="modal-title">
+    Exceptions Filters
+</h4>
+
+<form id="exceptionFiltersForm" class="form-horizontal" action="@Url.Action(nameof(ExceptionsController.Exceptions))" method="GET">
+    <input type="hidden" name="store" value="@Model.Store?.Name"/>
+    <input type="hidden" name="group" value="@Model.Group?.Name"/>
+    <input type="hidden" name="log" value="@Model.Log?.Name"/>
+    <input type="hidden" name="sort" value="@Model.Sort"/>
+    @{
+        string tooltipMessage = "This filter supports wildcards by using '*'. They may slow down queries, leading wildcards are usually slower than trailing ones.";
+    }
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label" for="url">
+            <i class="fa fa-question-circle" aria-hidden="true" data-toggle="tooltip" title="@tooltipMessage"></i>
+            Url
+        </label>
+        <div class="col-md-9">
+            <input class="form-control" type="text" value="@Model.SearchParams.Url" name="url" placeholder="url"/>
+        </div>
+    </div>
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label" for="host">
+            <i class="fa fa-question-circle" aria-hidden="true" data-toggle="tooltip" title="@tooltipMessage"></i>
+            Host
+        </label>
+        <div class="col-md-9">
+            <input class="form-control" type="text" value="@Model.SearchParams.Host" name="host" placeholder="host"/>
+        </div>
+    </div>
+    @{
+        // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
+        // The following format is what the input value expects as it's always normalized the same way. The format the user sees will always depend on the user's browser preferences.
+        string dateTimeFormat = "yyyy'-'MM'-'dd'T'HH':'mm";
+    }
+    <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label" for="startDate">
+            Start Date
+        </label>
+        <div class="col-md-9">
+            <input type="datetime-local" name="startDate" value="@Model.SearchParams.StartDate?.ToString(dateTimeFormat, CultureInfo.InvariantCulture)">
+        </div>
+    </div>
+        <div class="form-group form-group-sm">
+        <label class="col-md-3 control-label" for="endDate">
+            End Date
+        </label>
+        <div class="col-md-9">
+            <input type="datetime-local" name="endDate" value="@Model.SearchParams.EndDate?.ToString(dateTimeFormat, CultureInfo.InvariantCulture)">
+        </div>
+    </div>
+</form>

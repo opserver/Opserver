@@ -171,6 +171,20 @@ Select ApplicationName as Name,
             public Guid? StartAt { get; set; }
             public ExceptionSorts Sort { get; set; }
             public Guid? Id { get; set; }
+            public string Url { get; set; }
+            public string Host { get; set; }
+
+            public bool IsNonDefault
+            {
+                get
+                {
+                    if (Host.HasValue()) return true;
+                    if (Url.HasValue()) return true;
+                    if (StartDate != null) return true;
+                    if (EndDate != null) return true;
+                    return false;
+                }
+            }
 
             public override int GetHashCode()
             {
@@ -185,6 +199,8 @@ Select ApplicationName as Name,
                 hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(EndDate);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(StartAt);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(Id);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Url);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Host);
                 return (hashCode * -1521134295) + Sort.GetHashCode();
             }
         }
@@ -258,6 +274,14 @@ Select e.Id,
             {
                 AddClause("Id = @Id");
             }
+            if (search.Url.HasValue())
+            {
+                AddClause("Url Like @Url");
+            }
+            if (search.Host.HasValue())
+            {
+                AddClause("Host Like @Host");
+            }
             if (mode == QueryMode.Delete)
             {
                 AddClause("IsProtected = 0");
@@ -293,7 +317,9 @@ Select e.Id,
                 query = "%" + search.SearchQuery + "%",
                 search.StartAt,
                 search.Count,
-                search.Id
+                search.Id,
+                Url = search.Url?.Replace('*', '%'),
+                Host = search.Host?.Replace('*', '%')
             });
         }
 
