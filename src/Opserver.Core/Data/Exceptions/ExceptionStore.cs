@@ -91,7 +91,7 @@ namespace Opserver.Data.Exceptions
                 async () =>
                 {
                     var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
-Select ApplicationName as Name, 
+Select ApplicationName as Name,
        Sum(DuplicateCount) as ExceptionCount,
 	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentExceptionCount,
 	   MAX(CreationDate) as MostRecent
@@ -175,7 +175,7 @@ Select ApplicationName as Name,
             public string Url { get; set; }
             public string Host { get; set; }
 
-            public bool IsNonDefault =>
+            public bool HasFilterOptions =>
               Host.HasValue() || Url.HasValue() || StartDate.HasValue || EndDate.HasValue;
 
             public string NormalizedStartDate => NormalizeDateTime(StartDate);
@@ -382,10 +382,10 @@ Select e.Id,
         public Task<int> DeleteErrorsAsync(List<Guid> ids)
         {
             return ExecTaskAsync($"{nameof(DeleteErrorsAsync)}({ids.Count} Guids) for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where DeletionDate Is Null 
-   And IsProtected = 0 
+Update Exceptions
+   Set DeletionDate = GETUTCDATE()
+ Where DeletionDate Is Null
+   And IsProtected = 0
    And GUID In @ids", new { ids });
         }
 
@@ -398,8 +398,8 @@ Update Exceptions
                 using (var c = await GetConnectionAsync())
                 {
                     sqlError = await c.QueryFirstOrDefaultAsync<Error>(@"
-    Select Top 1 * 
-      From Exceptions 
+    Select Top 1 *
+      From Exceptions
      Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout);
                 }
                 if (sqlError == null) return null;
@@ -423,7 +423,7 @@ Update Exceptions
         public async Task<bool> ProtectErrorAsync(Guid guid)
         {
               return await ExecTaskAsync($"{nameof(ProtectErrorAsync)}() (guid: {guid}) for {Name}", @"
-Update Exceptions 
+Update Exceptions
    Set IsProtected = 1, DeletionDate = Null
  Where GUID = @guid", new {guid}) > 0;
         }
@@ -431,9 +431,9 @@ Update Exceptions
         public async Task<bool> DeleteErrorAsync(Guid guid)
         {
             return await ExecTaskAsync($"{nameof(DeleteErrorAsync)}() (guid: {guid}) for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where GUID = @guid 
+Update Exceptions
+   Set DeletionDate = GETUTCDATE()
+ Where GUID = @guid
    And DeletionDate Is Null", new { guid }) > 0;
         }
 
