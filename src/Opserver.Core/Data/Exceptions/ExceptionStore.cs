@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
 using Opserver.Helpers;
+using System.Globalization;
 
 namespace Opserver.Data.Exceptions
 {
@@ -171,6 +172,36 @@ Select ApplicationName as Name,
             public Guid? StartAt { get; set; }
             public ExceptionSorts Sort { get; set; }
             public Guid? Id { get; set; }
+            public string Url { get; set; }
+            public string Host { get; set; }
+
+            public bool IsNonDefault
+            {
+                get
+                {
+                    if (Host.HasValue()) return true;
+                    if (Url.HasValue()) return true;
+                    if (StartDate != null) return true;
+                    if (EndDate != null) return true;
+                    return false;
+                }
+            }
+
+            public string NormalizedStartDate
+            {
+                get
+                {
+                    return NormalizeDateTime(StartDate);
+                }
+            }
+
+            public string NormalizedEndDate
+            {
+                get
+                {
+                    return NormalizeDateTime(EndDate);
+                }
+            }
 
             public override int GetHashCode()
             {
@@ -185,7 +216,18 @@ Select ApplicationName as Name,
                 hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(EndDate);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(StartAt);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(Id);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Url);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Host);
                 return (hashCode * -1521134295) + Sort.GetHashCode();
+            }
+
+            private string NormalizeDateTime(DateTime? dateTime)
+            {
+                // To keep things consistent we normalize the string representation of datetimes to a single format. The controller will receive the same date format through GET, POST and ajax calls, no matter what the user types in.
+                // The chosen format is the same as the html datetime picker uses to format the value the user enters, we use the same one to avoid unnecessary conversions.
+                // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
+                // The format the user sees will always depend on the user's browser preferences, but the datepicker will convert it automatically.
+                return dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm", CultureInfo.InvariantCulture);
             }
         }
 
@@ -258,6 +300,14 @@ Select e.Id,
             {
                 AddClause("Id = @Id");
             }
+            if (search.Url.HasValue())
+            {
+                AddClause("Url Like @Url");
+            }
+            if (search.Host.HasValue())
+            {
+                AddClause("Host Like @Host");
+            }
             if (mode == QueryMode.Delete)
             {
                 AddClause("IsProtected = 0");
@@ -293,7 +343,9 @@ Select e.Id,
                 query = "%" + search.SearchQuery + "%",
                 search.StartAt,
                 search.Count,
-                search.Id
+                search.Id,
+                Url = search.Url?.Replace('*', '%'),
+                Host = search.Host?.Replace('*', '%')
             });
         }
 

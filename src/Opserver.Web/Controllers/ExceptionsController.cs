@@ -28,6 +28,10 @@ namespace Opserver.Controllers
         private Guid? CurrentId;
         private Guid? CurrentSimilarId;
         private ExceptionSorts CurrentSort;
+        private string CurrentUrl;
+        private string CurrentHost;
+        private DateTime? CurrentStartDate;
+        private DateTime? CurrentEndDate;
 
         public ExceptionsController(ExceptionsModule module, IOptions<OpserverSettings> settings) : base(module, settings) { }
 
@@ -39,6 +43,16 @@ namespace Opserver.Controllers
             CurrentId = GetParam("id").HasValue() && Guid.TryParse(GetParam("id"), out var guid) ? guid : (Guid?)null;
             CurrentSimilarId = GetParam("similar").HasValue() && Guid.TryParse(GetParam("similar"), out var similarGuid) ? similarGuid : (Guid?)null;
             Enum.TryParse(GetParam("sort"), out CurrentSort);
+            CurrentUrl = GetParam("url")?.Trim();
+            CurrentHost = GetParam("host")?.Trim();
+            if (GetDate("startDate") is DateTime startDate)
+            {
+                CurrentStartDate = startDate;
+            }
+            if (GetDate("endDate") is DateTime endDate)
+            {
+                CurrentEndDate = endDate;
+            }
 
             if (CurrentLog.HasValue())
             {
@@ -73,7 +87,11 @@ namespace Opserver.Controllers
                 Group = CurrentGroup,
                 Log = CurrentLog,
                 Sort = CurrentSort,
-                Id = CurrentId
+                Id = CurrentId,
+                Url = CurrentUrl,
+                Host = CurrentHost,
+                StartDate = CurrentStartDate,
+                EndDate = CurrentEndDate
             };
 
             if (GetParam("q").HasValue())
@@ -85,25 +103,6 @@ namespace Opserver.Controllers
                 result.IncludeDeleted = includeDeleted;
             }
 
-            DateTime? GetDate(string paramName)
-            {
-                if (GetParam(paramName) is string dateStr && DateTime.TryParse(dateStr, CultureInfo.CurrentCulture, DateTimeStyles.AssumeUniversal, out var date))
-                {
-                    return date;
-                }
-                return null;
-            }
-
-            if (GetDate("start") is DateTime startDate)
-            {
-                result.StartDate = startDate;
-            }
-            if (GetDate("end") is DateTime endDate)
-            {
-                result.EndDate = endDate;
-            }
-
-
             if (CurrentSimilarId.HasValue)
             {
                 var error = await CurrentStore.GetErrorAsync(CurrentLog, CurrentSimilarId.Value);
@@ -114,6 +113,15 @@ namespace Opserver.Controllers
             }
 
             return result;
+        }
+
+        private DateTime? GetDate(string paramName)
+        {
+            if (GetParam(paramName) is string dateStr && DateTime.TryParse(dateStr, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var date))
+            {
+                return date;
+            }
+            return null;
         }
 
         private ExceptionsModel GetModel(List<Error> errors)
@@ -308,6 +316,13 @@ namespace Opserver.Controllers
                 issueKey = result.Key,
                 browseUrl = result.BrowseUrl
             });
+        }
+
+        [Route("exceptions/filters")]
+        public async Task<ActionResult> Filters() {
+            var model = GetModel(null);
+            model.SearchParams = await GetSearchAsync();
+            return PartialView("Exceptions.Filters", model);
         }
     }
 }
