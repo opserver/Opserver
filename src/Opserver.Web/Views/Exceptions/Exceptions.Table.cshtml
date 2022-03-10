@@ -23,6 +23,7 @@
     <h5 class="page-header">
         <span class="js-exception-title">@Model.Title</span>
         <span class="pull-right">
+            <a href="#/exceptions/filters" class="hover-pulsate@(Model.SearchParams.HasFilterOptions ? " text-warning" : "")"><i class="fa fa-filter" aria-hidden="true"></i></a>
             @if (Model.ShowClearLink)
             {
                 <a class="text-danger hover-pulsate js-clear-all" href="#" data-url="@Url.Action(nameof(ExceptionsController.Delete), Context.Request.Query.ToRouteValues())">@Icon.X Clear all non-protected errors</a>

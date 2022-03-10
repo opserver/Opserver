@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using StackExchange.Profiling;
 using StackExchange.Exceptional;
 using Opserver.Helpers;
+using System.Globalization;
 
 namespace Opserver.Data.Exceptions
 {
@@ -90,7 +91,7 @@ namespace Opserver.Data.Exceptions
                 async () =>
                 {
                     var result = await QueryListAsync<Application>($"Applications Fetch: {Name}", @"
-Select ApplicationName as Name, 
+Select ApplicationName as Name,
        Sum(DuplicateCount) as ExceptionCount,
 	   Sum(Case When CreationDate > DateAdd(Second, -@RecentSeconds, GETUTCDATE()) Then DuplicateCount Else 0 End) as RecentExceptionCount,
 	   MAX(CreationDate) as MostRecent
@@ -171,6 +172,15 @@ Select ApplicationName as Name,
             public Guid? StartAt { get; set; }
             public ExceptionSorts Sort { get; set; }
             public Guid? Id { get; set; }
+            public string Url { get; set; }
+            public string Host { get; set; }
+
+            public bool HasFilterOptions =>
+              Host.HasValue() || Url.HasValue() || StartDate.HasValue || EndDate.HasValue;
+
+            public string NormalizedStartDate => NormalizeDateTime(StartDate);
+
+            public string NormalizedEndDate => NormalizeDateTime(EndDate);
 
             public override int GetHashCode()
             {
@@ -185,7 +195,18 @@ Select ApplicationName as Name,
                 hashCode = (hashCode * -1521134295) + EqualityComparer<DateTime?>.Default.GetHashCode(EndDate);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(StartAt);
                 hashCode = (hashCode * -1521134295) + EqualityComparer<Guid?>.Default.GetHashCode(Id);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Url);
+                hashCode = (hashCode * -1521134295) + EqualityComparer<string>.Default.GetHashCode(Host);
                 return (hashCode * -1521134295) + Sort.GetHashCode();
+            }
+
+            private string NormalizeDateTime(DateTime? dateTime)
+            {
+                // To keep things consistent we normalize the string representation of datetimes to a single format. The controller will receive the same date format through GET, POST and ajax calls, no matter what the user types in.
+                // The chosen format is the same as the html datetime picker uses to format the value the user enters, we use the same one to avoid unnecessary conversions.
+                // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/datetime-local
+                // The format the user sees will always depend on the user's browser preferences, but the datepicker will convert it automatically.
+                return dateTime?.ToString("yyyy'-'MM'-'dd'T'HH':'mm", CultureInfo.InvariantCulture);
             }
         }
 
@@ -258,6 +279,14 @@ Select e.Id,
             {
                 AddClause("Id = @Id");
             }
+            if (search.Url.HasValue())
+            {
+                AddClause("Url Like @Url");
+            }
+            if (search.Host.HasValue())
+            {
+                AddClause("Host Like @Host");
+            }
             if (mode == QueryMode.Delete)
             {
                 AddClause("IsProtected = 0");
@@ -293,7 +322,9 @@ Select e.Id,
                 query = "%" + search.SearchQuery + "%",
                 search.StartAt,
                 search.Count,
-                search.Id
+                search.Id,
+                Url = search.Url?.Replace('*', '%'),
+                Host = search.Host?.Replace('*', '%')
             });
         }
 
@@ -351,10 +382,10 @@ Select e.Id,
         public Task<int> DeleteErrorsAsync(List<Guid> ids)
         {
             return ExecTaskAsync($"{nameof(DeleteErrorsAsync)}({ids.Count} Guids) for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where DeletionDate Is Null 
-   And IsProtected = 0 
+Update Exceptions
+   Set DeletionDate = GETUTCDATE()
+ Where DeletionDate Is Null
+   And IsProtected = 0
    And GUID In @ids", new { ids });
         }
 
@@ -367,8 +398,8 @@ Update Exceptions
                 using (var c = await GetConnectionAsync())
                 {
                     sqlError = await c.QueryFirstOrDefaultAsync<Error>(@"
-    Select Top 1 * 
-      From Exceptions 
+    Select Top 1 *
+      From Exceptions
      Where GUID = @guid", new { guid }, commandTimeout: QueryTimeout);
                 }
                 if (sqlError == null) return null;
@@ -392,7 +423,7 @@ Update Exceptions
         public async Task<bool> ProtectErrorAsync(Guid guid)
         {
               return await ExecTaskAsync($"{nameof(ProtectErrorAsync)}() (guid: {guid}) for {Name}", @"
-Update Exceptions 
+Update Exceptions
    Set IsProtected = 1, DeletionDate = Null
  Where GUID = @guid", new {guid}) > 0;
         }
@@ -400,9 +431,9 @@ Update Exceptions
         public async Task<bool> DeleteErrorAsync(Guid guid)
         {
             return await ExecTaskAsync($"{nameof(DeleteErrorAsync)}() (guid: {guid}) for {Name}", @"
-Update Exceptions 
-   Set DeletionDate = GETUTCDATE() 
- Where GUID = @guid 
+Update Exceptions
+   Set DeletionDate = GETUTCDATE()
+ Where GUID = @guid
    And DeletionDate Is Null", new { guid }) > 0;
         }
 

@@ -3,6 +3,10 @@
     var store = Model.Store?.Name;
     var group = Model.Group?.Name;
     var log = Model.Log?.Name;
+    var url = Model.SearchParams.Url;
+    var host = Model.SearchParams.Host;
+    var normalizedStartDate = Model.SearchParams.NormalizedStartDate;
+    var normalizedEndDate = Model.SearchParams.NormalizedEndDate;
     var exceptions = Model.Errors;
 
     this.SetPageTitle(Model.Title);
@@ -24,7 +28,11 @@
                 loadMore: @(Model.LoadAsyncSize),
                 enablePreviews: @Module.Settings.EnablePreviews.ToJson(),
                 showDeleted: @Model.ShowDeleted.ToJson(),
-                search: @Model.Search.ToJson()
+                search: @Model.Search.ToJson(),
+                url: @url.ToJson(),
+                host: @host.ToJson(),
+                startDate: @normalizedStartDate.ToJson(),
+                endDate: @normalizedEndDate.ToJson()
             });
         });
     </script>
@@ -32,21 +40,21 @@
 <div class="js-refresh" data-name="exceptions-header">
     @if (Module.Stores.Count > 1)
     {
-    <ul class="nav nav-tabs nav-tabs-right">
-        @foreach (var s in Module.Stores)
-        {
-            <li class="@(Model.Store == s ? "active" : null)">
-                <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
-            </li>
-        }
-    </ul>
+        <ul class="nav nav-tabs nav-tabs-right">
+            @foreach (var s in Module.Stores)
+            {
+                <li class="@(Model.Store == s ? "active" : null)">
+                    <a href="?store=@s.Name" title="@s.Description">@s.Name <span class="badge"><span class="js-exception-total js-exception-store" data-name="@s.Name">@s.TotalExceptionCount.ToComma()</span></span></a>
+                </li>
+            }
+        </ul>
     }
     <partial name="PollInfo" model="@(new Opserver.Views.PollInfoModel { Nodes = Module.Stores, Name = "exceptions" })" />
     @if (anyLoaded)
     {
-    <div class="js-exception-counts">
-        <partial name="Exceptions.Navigation" model="Model" />
-    </div>
+        <div class="js-exception-counts">
+            <partial name="Exceptions.Navigation" model="Model" />
+        </div>
     }
 </div>
 @if (anyLoaded)

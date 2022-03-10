@@ -784,7 +784,7 @@ Status.SQL = (function () {
                 }
             }
         }
-        
+
         Status.loaders.register({
             '#/cluster/': loadCluster,
             '#/plan/': loadPlan,
@@ -1053,8 +1053,28 @@ Status.Exceptions = (function () {
             store: options.store,
             group: options.group,
             log: options.log,
-            sort: options.sort
+            sort: options.sort,
+            url: options.url,
+            host: options.host,
+            startDate: options.startDate,
+            endDate: options.endDate
         };
+
+        var filterOptions = {
+            modalClass: 'modal-md',
+            buttons: {
+                "Apply Filters": function (e) {
+                    $(this).find('form').submit();
+                    return false;
+                }
+            }
+        }
+
+        Status.loaders.register({
+            '#/exceptions/filters': function () {
+                Status.popup('exceptions/filters' + window.location.search, null, filterOptions);
+            }
+        });
 
         // TODO: Set refresh params
         function getLoadCount() {
@@ -1437,6 +1457,10 @@ Status.Exceptions = (function () {
         });
 
     }
+
+    $(document).ready(function () {
+        $('[data-toggle="tooltip"]').tooltip();
+    });
 
     return {
         init: init
