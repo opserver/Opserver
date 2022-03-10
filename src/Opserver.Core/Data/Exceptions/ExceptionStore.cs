@@ -175,17 +175,8 @@ Select ApplicationName as Name,
             public string Url { get; set; }
             public string Host { get; set; }
 
-            public bool IsNonDefault
-            {
-                get
-                {
-                    if (Host.HasValue()) return true;
-                    if (Url.HasValue()) return true;
-                    if (StartDate != null) return true;
-                    if (EndDate != null) return true;
-                    return false;
-                }
-            }
+            public bool IsNonDefault =>
+              Host.HasValue() || Url.HasValue() || StartDate.HasValue || EndDate.HasValue;
 
             public string NormalizedStartDate => NormalizeDateTime(StartDate);
 
