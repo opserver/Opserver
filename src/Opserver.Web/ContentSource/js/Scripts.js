@@ -1064,7 +1064,7 @@ Status.Exceptions = (function () {
             modalClass: 'modal-md',
             buttons: {
                 "Apply Filters": function (e) {
-                    $(this).find('#exceptionFiltersForm').submit();
+                    $(this).find('form').submit();
                     return false;
                 }
             }

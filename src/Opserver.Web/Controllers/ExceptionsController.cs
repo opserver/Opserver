@@ -91,7 +91,7 @@ namespace Opserver.Controllers
                 Url = CurrentUrl,
                 Host = CurrentHost,
                 StartDate = CurrentStartDate,
-                EndDate = CurrentEndDate
+                EndDate = CurrentEndDate,
             };
 
             if (GetParam("q").HasValue())
@@ -319,7 +319,8 @@ namespace Opserver.Controllers
         }
 
         [Route("exceptions/filters")]
-        public async Task<ActionResult> Filters() {
+        public async Task<ActionResult> Filters()
+        {
             var model = GetModel(null);
             model.SearchParams = await GetSearchAsync();
             return PartialView("Exceptions.Filters", model);

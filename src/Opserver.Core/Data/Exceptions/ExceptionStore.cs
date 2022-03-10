@@ -187,21 +187,9 @@ Select ApplicationName as Name,
                 }
             }
 
-            public string NormalizedStartDate
-            {
-                get
-                {
-                    return NormalizeDateTime(StartDate);
-                }
-            }
+            public string NormalizedStartDate => NormalizeDateTime(StartDate);
 
-            public string NormalizedEndDate
-            {
-                get
-                {
-                    return NormalizeDateTime(EndDate);
-                }
-            }
+            public string NormalizedEndDate => NormalizeDateTime(EndDate);
 
             public override int GetHashCode()
             {

@@ -4,7 +4,7 @@
     Exceptions Filters
 </h4>
 
-<form id="exceptionFiltersForm" class="form-horizontal" action="@Url.Action(nameof(ExceptionsController.Exceptions))" method="GET">
+<form class="form-horizontal" action="@Url.Action(nameof(ExceptionsController.Exceptions))" method="GET">
     <input type="hidden" name="store" value="@Model.Store?.Name"/>
     <input type="hidden" name="group" value="@Model.Group?.Name"/>
     <input type="hidden" name="log" value="@Model.Log?.Name"/>
