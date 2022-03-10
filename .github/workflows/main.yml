@@ -6,6 +6,10 @@ jobs:
   build:
     runs-on: windows-2019
     steps:
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
     - uses: actions/checkout@v1
     - name: Build with dotnet
       run: dotnet build

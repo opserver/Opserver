@@ -2,16 +2,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Opserver</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
-    <PackageReference Include="BuildBundlerMinifier" Version="3.2.435" PrivateAssets="all" />
+    <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="all" />
     <PackageReference Include="BuildWebCompiler" Condition="'$(OS)' == 'Windows_NT'" Version="1.12.405" PrivateAssets="all" />
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.1.0" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.8.0" />
-    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.1.0" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="4.7.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.15.0" />
+    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.2.17" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>

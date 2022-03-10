@@ -4,11 +4,13 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 
 namespace Opserver.Helpers
 {
+    [SupportedOSPlatform("windows")]
     internal static class Wmi
     {
         public const string DefaultWmiNamespace = @"root\cimv2";

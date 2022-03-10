@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Security;
 using System.Security.Claims;
 using System.Threading;
@@ -11,6 +12,7 @@ using StackExchange.Profiling;
 
 namespace Opserver.Security
 {
+    [SupportedOSPlatform("windows")]
     public class ActiveDirectoryProvider : SecurityProvider<ActiveDirectorySecuritySettings, UserNamePasswordToken>
     {
         private IMemoryCache Cache { get; }

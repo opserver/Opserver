@@ -137,7 +137,7 @@ namespace Opserver.Data.Dashboard.Providers
                     using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(5));
                     var results = await GetMetricsAsync(_signalFlowStatements, startDate, endDate, resolution: resolution, cancellationToken: cts.Token);
                     sw.Stop();
-                    _logger.LogInformation("Took {0}ms to refresh day cache...", sw.ElapsedMilliseconds);
+                    _logger.LogInformation("Took {ElapsedMilliseconds}ms to refresh day cache...", sw.ElapsedMilliseconds);
                     return results.GroupBy(x => x.Key).ToImmutableDictionary(x => x.Key, x => x.First());
                 }, 5.Minutes(), 60.Minutes()
             );
@@ -562,12 +562,12 @@ namespace Opserver.Data.Dashboard.Providers
                 sb.Append("data('").Append(Metric).Append("', filter('host', '").Append(host).Append("')");
                 if (Rollup.HasValue())
                 {
-                    sb.Append(", rollup='").Append(Rollup).Append("'");
+                    sb.Append(", rollup='").Append(Rollup).Append('\'');
                 }
-                sb.Append(")");
+                sb.Append(')');
                 if (Aggregation.HasValue())
                 {
-                    sb.Append(".").Append(Aggregation);
+                    sb.Append('.').Append(Aggregation);
                 }
                 sb.Append(".publish();");
                 return sb.ToStringRecycle();
@@ -594,7 +594,7 @@ namespace Opserver.Data.Dashboard.Providers
             private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                IgnoreNullValues = true,
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
                 Converters =
                 {
                     new JsonEpochConverter()
@@ -827,9 +827,9 @@ namespace Opserver.Data.Dashboard.Providers
                 var buffer = pool.Rent(bufferLength);
                 var offset = 0;
                 var length = 0;
-                var resultType = (WebSocketMessageType)0;
                 try
                 {
+                    WebSocketMessageType resultType;
                     while (true)
                     {
                         var result = await _socket.ReceiveAsync(buffer.AsMemory(offset), _cancellationToken);
@@ -874,11 +874,11 @@ namespace Opserver.Data.Dashboard.Providers
                     {
                         if (_logger.IsEnabled(LogLevel.Debug))
                         {
-                            _logger.LogDebug(Encoding.UTF8.GetString(buffer.AsSpan().Slice(0, length)));
+                            _logger.LogDebug("Websocket message received: {message}", Encoding.UTF8.GetString(buffer.AsSpan()[..length]));
                         }
 
                         // JSON payload, deserialize it
-                        return JsonSerializer.Deserialize<SignalFlowMessage>(buffer.AsSpan().Slice(0, length), _deserializerOptions);
+                        return JsonSerializer.Deserialize<SignalFlowMessage>(buffer.AsSpan()[..length], _deserializerOptions);
                     }
                     else if (resultType == WebSocketMessageType.Binary)
                     {
@@ -909,7 +909,7 @@ namespace Opserver.Data.Dashboard.Providers
 
                             if (_logger.IsEnabled(LogLevel.Debug))
                             {
-                                _logger.LogDebug(Encoding.UTF8.GetString(bufferWriter.WrittenMemory.Span));
+                                _logger.LogDebug("Websocket message written: {message}", Encoding.UTF8.GetString(bufferWriter.WrittenMemory.Span));
                             }
 
                             await _socket.SendAsync(bufferWriter.WrittenMemory, WebSocketMessageType.Text, true, _cancellationToken);

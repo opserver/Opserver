@@ -9,6 +9,8 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Jil;
+using StackExchange.Utils;
+using Microsoft.Net.Http.Headers;
 
 namespace Opserver.Data.Jira
 {
@@ -227,8 +229,6 @@ namespace Opserver.Data.Jira
 
     public class JsonRestClient
     {
-        private WebClient client;
-
         public string Username { get; set; }
         public string Password { get; set; }
 
@@ -241,21 +241,21 @@ namespace Opserver.Data.Jira
             BaseUrl = baseUrl.Trim().TrimEnd(StringSplits.ForwardSlash) + "/";
         }
 
-        private Uri GetUriForResource(string resource)
+        private string GetUriForResource(string resource)
         {
             if (BaseUrl.IsNullOrEmpty())
                 throw new ApplicationException("Base url is null or empty");
 
             if (string.IsNullOrWhiteSpace(resource))
-                return new Uri(BaseUrl);
+                return BaseUrl;
 
-            return new Uri(BaseUrl + resource.Trim().TrimStart(StringSplits.ForwardSlash));
+            return BaseUrl + resource.Trim().TrimStart(StringSplits.ForwardSlash);
         }
 
         private string GetBasicAuthzValue()
         {
             if (Username.IsNullOrEmpty())
-                return string.Empty;
+                return null;
 
             var enc = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{Username}:{Password}"));
             return $"Basic {enc}";
@@ -263,40 +263,33 @@ namespace Opserver.Data.Jira
 
         public async Task<TResponse> GetAsync<TResponse>(string resource)
         {
-            client ??= new WebClient();
-            client.Headers.Add(HttpRequestHeader.Accept, "application/json");
-            client.Encoding = Encoding.UTF8;
-            var authz = GetBasicAuthzValue();
-            if (authz.HasValue())
-                client.Headers.Add(HttpRequestHeader.Authorization, authz);
-
             var uri = GetUriForResource(resource);
-            var responseBytes = await client.DownloadDataTaskAsync(uri);
+            var request = Http.Request(uri)
+                              .AddHeader(HeaderNames.Accept, "application/json");
 
-            string response = Encoding.UTF8.GetString(responseBytes);
-            return JSON.Deserialize<TResponse>(response);
+            if (GetBasicAuthzValue() is string authz)
+                request.AddHeader(HeaderNames.Authorization, authz);
+
+            var result = await request.ExpectJson<TResponse>()
+                                      .GetAsync();
+            return result.Data;
         }
 
         public async Task<TResponse> PostAsync<TResponse, TData>(string resource, TData data) where TResponse : class
         {
-            client ??= new WebClient();
-            client.Headers.Add(HttpRequestHeader.ContentType, "application/json");
-            client.Encoding = Encoding.UTF8;
-            var authz = GetBasicAuthzValue();
-            if (authz.HasValue())
-                client.Headers.Add(HttpRequestHeader.Authorization, authz);
-
-            var json = JSON.Serialize(data);
-            byte[] dataBytes = Encoding.UTF8.GetBytes(json);
             var uri = GetUriForResource(resource);
-            var responseBytes = Array.Empty<byte>();
-            await client.UploadDataTaskAsync(uri, "POST", dataBytes);
+            var request = Http.Request(uri)
+                              .AddHeader(HeaderNames.ContentType, "application/json");
 
-            string response = Encoding.UTF8.GetString(responseBytes);
+            if (GetBasicAuthzValue() is string authz)
+                request.AddHeader(HeaderNames.Authorization, authz);
+
+            request.SendJson(data);
+
             if (typeof(TResponse) == typeof(string))
-                return response as TResponse;
+                return await request.ExpectString().PostAsync() as TResponse;
 
-            return JSON.Deserialize<TResponse>(response);
+            return (await request.ExpectJson<TResponse>().PostAsync()).Data;
         }
     }
 }

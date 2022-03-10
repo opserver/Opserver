@@ -3,15 +3,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace Opserver.Data.Dashboard.Providers
 {
+    [SupportedOSPlatform("windows")]
     internal partial class WmiDataProvider
     {
         /// <summary>
-        /// Contains node's data and stores utilizastion history
-        /// (as soon as WMI provider doens't has orion storage...)
+        /// Contains node's data and stores utilization history
+        /// (as WMI provider doesn't have database storage...)
         /// </summary>
         private partial class WmiNode : Node
         {

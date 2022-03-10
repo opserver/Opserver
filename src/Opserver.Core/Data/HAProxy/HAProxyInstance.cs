@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Net.Http.Headers;
 using StackExchange.Profiling;
+using StackExchange.Utils;
 
 namespace Opserver.Data.HAProxy
 {
@@ -78,21 +82,24 @@ namespace Opserver.Data.HAProxy
             var fetchUrl = Url + ";csv";
             using (MiniProfiler.Current.CustomTiming("http", fetchUrl, "GET"))
             {
-                var req = (HttpWebRequest) WebRequest.Create(fetchUrl);
-                req.Credentials = new NetworkCredential(User, Password);
+                string credsBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{User}:{Password}"));
+                var request = Http.Request(fetchUrl)
+                                  .AddHeader(HeaderNames.Authorization, "Basic " + credsBase64);
+
                 if (QueryTimeoutMs.HasValue)
-                    req.Timeout = QueryTimeoutMs.Value;
-                using var resp = await req.GetResponseAsync();
-                using var rs = resp.GetResponseStream();
-                if (rs == null) return null;
-                return await ParseHAProxyStats(rs);
+                {
+                    request.WithTimeout(TimeSpan.FromMilliseconds(QueryTimeoutMs.Value));
+                }
+
+                var responseString = (await request.ExpectString().GetAsync()).Data;
+                return await ParseHAProxyStatsAsync(responseString);
             }
         }
 
-        private async Task<List<Proxy>> ParseHAProxyStats(Stream stream)
+        private async Task<List<Proxy>> ParseHAProxyStatsAsync(string csv)
         {
             var stats = new List<Item>();
-            using (var sr = new StreamReader(stream))
+            using (var sr = new StringReader(csv))
             {
                 string line;
                 while ((line = await sr.ReadLineAsync()) != null)

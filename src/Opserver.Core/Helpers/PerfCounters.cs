@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Management;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 
 namespace Opserver.Helpers
 {
     public static class PerfCounters
     {
+        [SupportedOSPlatform("windows")]
         public static class Windows
         {
             public static Task<QueryResult<CPUUtilization>> GetCPUUtilization(string machineName)
@@ -26,7 +28,7 @@ namespace Opserver.Helpers
             {
                 var timer = Stopwatch.StartNew();
 
-                // TODO: Poll creds
+                // TODO: Poll credentials
                 using var q = new Wmi.WmiQuery(machineName, query);
                 var queryResults = (await q.Result).Cast<ManagementObject>();
                 timer.Stop();

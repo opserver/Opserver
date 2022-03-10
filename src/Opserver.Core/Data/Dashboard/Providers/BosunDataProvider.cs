@@ -6,6 +6,7 @@ using System.Net;
 using System.Threading.Tasks;
 using Jil;
 using StackExchange.Profiling;
+using StackExchange.Utils;
 using static Opserver.Data.Dashboard.Providers.BosunMetric;
 
 namespace Opserver.Data.Dashboard.Providers
@@ -51,19 +52,14 @@ namespace Opserver.Data.Dashboard.Providers
         {
             using (MiniProfiler.Current.Step("Bosun Fetch"))
             using (MiniProfiler.Current.CustomTiming("bosun", url))
-            using (var wc = new WebClient())
             {
                 try
                 {
-                    if (Settings.APIKey.HasValue())
-                    {
-                        wc.Headers.Add("X-Access-Token", Settings.APIKey);
-                    }
-
-                    using var s = await wc.OpenReadTaskAsync(url);
-                    using var sr = new StreamReader(s);
-                    var result = JSON.Deserialize<T>(sr, Options.SecondsSinceUnixEpochExcludeNullsUtc);
-                    return new BosunApiResult<T> { Result = result };
+                    var result = await Http.Request(url)
+                        .AddHeader("X-Access-Token", Settings.APIKey)
+                        .ExpectJson<T>(Options.SecondsSinceUnixEpochExcludeNullsUtc)
+                        .GetAsync();
+                    return new BosunApiResult<T> { Result = result.Data };
                 }
                 catch (DeserializationException de)
                 {
@@ -110,8 +106,7 @@ namespace Opserver.Data.Dashboard.Providers
         {
             if (IsApproximatelyLast24Hrs(start, end))
             {
-                PointSeries series = null;
-                if (get(DayCache.Data)?.TryGetValue(id.NormalizeForCache(), out series) == true)
+                if (get(DayCache.Data)?.TryGetValue(id.NormalizeForCache(), out var series) == true)
                     return series.PointData;
             }
 
@@ -127,9 +122,8 @@ namespace Opserver.Data.Dashboard.Providers
         {
             if (IsApproximatelyLast24Hrs(start, end))
             {
-                List<PointSeries> series = null;
                 var cache = DayCache.Data?.Network;
-                if (cache?.TryGetValue(node.Id.NormalizeForCache(), out series) == true)
+                if (cache?.TryGetValue(node.Id.NormalizeForCache(), out var series) == true)
                 {
                     var result = JoinNetwork(series);
                     if (result != null)

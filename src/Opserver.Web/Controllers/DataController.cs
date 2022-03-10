@@ -14,7 +14,7 @@ namespace Opserver.Controllers
 
         private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
         {
-            IgnoreNullValues = true,
+            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true
         };
 

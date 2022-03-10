@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading.Tasks;
 using StackExchange.Profiling;
 using Jil;
-using System.Diagnostics;
+using StackExchange.Utils;
+using Microsoft.Net.Http.Headers;
+using Microsoft.AspNetCore.Http;
 
 namespace Opserver.Data.PagerDuty
 {
@@ -91,58 +91,40 @@ namespace Opserver.Data.PagerDuty
 
             using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
             {
-                var req = (HttpWebRequest)WebRequest.Create(fullUri);
-                req.Method = httpMethod;
-                req.Accept = "application/vnd.pagerduty+json;version=2";
-                req.Headers.Add("Authorization: Token token=" + APIKey);
+                var request = Http.Request(fullUri)
+                                  .AddHeader(HeaderNames.Accept, "application/vnd.pagerduty+json;version=2")
+                                  .AddHeader(HeaderNames.Authorization, "Token token=" + APIKey);
+
                 if (extraHeaders != null)
                 {
                     foreach (var h in extraHeaders.Keys)
                     {
-                        req.Headers.Add(h, extraHeaders[h]);
+                        request.AddHeader(h, extraHeaders[h]);
                     }
                 }
 
-                if (httpMethod == "POST" || httpMethod == "PUT")
+                if ((HttpMethods.IsPost(httpMethod) || HttpMethods.IsPut(httpMethod)) && data != null)
                 {
-                    if (data != null)
-                    {
-                        var stringData = JSON.Serialize(data, JilOptions);
-                        var byteData = new ASCIIEncoding().GetBytes(stringData);
-                        req.ContentType = "application/json";
-                        req.ContentLength = byteData.Length;
-                        var putStream = await req.GetRequestStreamAsync();
-                        await putStream.WriteAsync(byteData, 0, byteData.Length);
-                    }
+                    request.AddHeader(HeaderNames.ContentType, "application/json");
+                    request.SendJson(data, JilOptions);
                 }
+
                 try
                 {
-                    var resp = await req.GetResponseAsync();
-                    using var rs = resp.GetResponseStream();
-                    if (rs == null) return getFromJson(null);
-                    using var sr = new StreamReader(rs);
-                    return getFromJson(sr.ReadToEnd());
+                    var response = httpMethod switch
+                    {
+                        _ when HttpMethods.IsPut(httpMethod) => await request.ExpectString().PutAsync(),
+                        _ when HttpMethods.IsPost(httpMethod) => await request.ExpectString().PostAsync(),
+                        _ => await request.ExpectString().GetAsync(),
+                    };
+
+                    // TODO: We could make this streaming JSON parsing probably
+                    return getFromJson(response.Data);
                 }
                 catch (WebException e)
                 {
-                    try
-                    {
-                        using var ers = e.Response.GetResponseStream();
-                        if (ers == null) return getFromJson(null);
-                        using var er = new StreamReader(ers);
-                        e.AddLoggedData("API Response JSON", er.ReadToEnd());
-                    }
-                    catch (Exception rex)
-                    {
-                        // ignored, best effort
-                        Trace.WriteLine(rex);
-                    }
-
-                    e.AddLoggedData("Sent Data", JSON.Serialize(data, JilOptions))
-                     .AddLoggedData("Endpoint", fullUri)
-                     .AddLoggedData("Headers", req.Headers.ToString())
-                     .AddLoggedData("Content Type", req.ContentType)
-                     .Log();
+                    // StackExchange.Utils lib is handling the logging load here
+                    e.Log();
                     return getFromJson(null);
                 }
             }
