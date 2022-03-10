@@ -1,0 +1,28 @@
+﻿@{
+    var clusters = Module.Clusters;
+}
+<div>
+    <h5 class="page-header">Please select an Elastic node.</h5>
+    <div class="row">
+        @foreach (var c in clusters)
+        {
+            var nodes = c.Nodes.SafeData(true).Nodes;
+            if (nodes == null || !nodes.Any()) { continue; }
+            <div class="col-md-4">
+                <div class="panel panel-default">
+                    <div class="panel-heading">@c.Name</div>
+                    <div class="panel-body small list-group">
+                            @foreach (var n in nodes.Where(n => !n.IsClient))
+                            {
+                                var info = nodes.FirstOrDefault(ni => n.Name == ni.Name);
+                                <a class="list-group-item" href="?cluster=@c.Name.UrlEncode()&node=@n.Name.UrlEncode()">
+                                    @n.IconSpan() @n.ShortName
+                                    <span class="badge">@(info?.Version ?? "")</span>
+                                </a>
+                            }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

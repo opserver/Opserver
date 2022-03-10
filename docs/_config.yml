@@ -1,0 +1,18 @@
+title: 'Opserver'
+subtitle: 'Documentation'
+codeurl: 'https://github.com/Opserver/Opserver'
+baseurl: '/Opserver'
+highlighter: rouge
+exclude: [README.md']
+markdown: kramdown
+redcarpet:
+    extensions: [
+        'no_intra_emphasis',
+        'fenced_code_blocks',
+        'autolink',
+        'strikethrough',
+        'superscript',
+        'with_toc_data',
+        'tables',
+        'hardwrap'
+    ]

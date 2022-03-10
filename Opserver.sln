@@ -1,20 +1,45 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27009.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29021.104
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opserver.Core", "Opserver.Core\Opserver.Core.csproj", "{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opserver", "Opserver\Opserver.csproj", "{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opserver.Core", "src\Opserver.Core\Opserver.Core.csproj", "{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{52AF00E9-833A-44FE-BE7B-0DC7B84E2814}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		.filenesting.json = .filenesting.json
+		appveyor.yml = appveyor.yml
+		azure-pipelines.yml = azure-pipelines.yml
 		Build.bat = Build.bat
+		global.json = global.json
 		nuget.config = nuget.config
 		readme.md = readme.md
-		WebEssentials-Settings.json = WebEssentials-Settings.json
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opserver.Web", "src\Opserver.Web\Opserver.Web.csproj", "{B3D85A10-C7B4-4254-B387-688EF4C138EB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{D924C9E2-44B2-4ACE-8BD9-C21348F5B6FB}"
+	ProjectSection(SolutionItems) = preProject
+		src\Directory.Build.props = src\Directory.Build.props
+		src\Opserver.ruleset = src\Opserver.ruleset
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{5304B28F-5CF0-4191-A195-EB4C8EEC068F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{08F532FF-9F35-4D92-AD15-5A30BC8F2AF8}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\main.yml = .github\workflows\main.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{79E50956-EA86-4F7A-A4B0-5691EF9B78F3}"
+	ProjectSection(SolutionItems) = preProject
+		tests\Directory.Build.props = tests\Directory.Build.props
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Opserver.Tests", "tests\Opserver.Tests\Opserver.Tests.csproj", "{11819295-F035-4298-AAF3-3D1C76BF1480}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Docs", "docs\Docs.csproj", "{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,13 +51,25 @@ Global
 		{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C58AFF99-F4D9-4A83-866E-18DA0A633F6B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C08655F-88F7-4C4E-B30F-CC8F0CE7AD19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3D85A10-C7B4-4254-B387-688EF4C138EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3D85A10-C7B4-4254-B387-688EF4C138EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3D85A10-C7B4-4254-B387-688EF4C138EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3D85A10-C7B4-4254-B387-688EF4C138EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11819295-F035-4298-AAF3-3D1C76BF1480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11819295-F035-4298-AAF3-3D1C76BF1480}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11819295-F035-4298-AAF3-3D1C76BF1480}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11819295-F035-4298-AAF3-3D1C76BF1480}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E99613D-D22E-487E-A9E2-EA5304AEB6A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C58AFF99-F4D9-4A83-866E-18DA0A633F6B} = {D924C9E2-44B2-4ACE-8BD9-C21348F5B6FB}
+		{B3D85A10-C7B4-4254-B387-688EF4C138EB} = {D924C9E2-44B2-4ACE-8BD9-C21348F5B6FB}
+		{08F532FF-9F35-4D92-AD15-5A30BC8F2AF8} = {5304B28F-5CF0-4191-A195-EB4C8EEC068F}
+		{11819295-F035-4298-AAF3-3D1C76BF1480} = {79E50956-EA86-4F7A-A4B0-5691EF9B78F3}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {003C9475-D1B9-4600-9BB2-39769162858D}

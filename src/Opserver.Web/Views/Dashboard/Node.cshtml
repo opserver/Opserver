@@ -1,0 +1,237 @@
+﻿@inject Opserver.Data.Elastic.ElasticModule Elastic
+@inject Opserver.Data.HAProxy.HAProxyModule HAProxy
+@inject Opserver.Data.Redis.RedisModule Redis
+@inject Opserver.Data.SQL.SQLModule Sql
+@model NodeModel
+@{
+    var s = Model.CurrentNode;
+
+    this.SetPageTitle((s?.PrettyName ?? "Unknown Node") + " Status");
+    this.SetTopNodes(Module.AllNodes, "Dashboard", Model.CurrentNode);
+
+    if (Model.CurrentStatusType.HasValue && !StatusTypes.Contains(Model.CurrentStatusType.Value))
+    {
+        // Sanity check, needs to happen here due to DI order at the moment
+        Model.CurrentStatusType = null;
+    }
+}
+@section head {
+    <script>
+        $(function () {
+            Status.Dashboard.init({ refresh: false });
+            Status.Dashboard.Server.init({ node: '@(s?.PrettyName)' });
+        });
+    </script>
+}
+@functions
+{
+    void SubnavItem(CurrentStatusTypes st, string url, bool isExternal = true)
+    {
+        <li class="@(Model.CurrentStatusType == st ? "active" : "")@(isExternal ? " exit-link" : null)"><a href="@url">@st.AsString(EnumFormat.Description)</a></li>
+    }
+    public IEnumerable<CurrentStatusTypes> StatusTypes
+    {
+        get
+        {
+            var node = Model.CurrentNode;
+            if (node == null) yield break;
+
+            // TODO: Move to a method that takes a list of modules instead, and gets types from each.
+            // Where these "types" should be defined is a question though - an enum isn't extensible for plugins later
+
+            yield return CurrentStatusTypes.Stats;
+
+            // TODO: Redis, SQL, etc node recognition - more pluggable?
+            // Need to nuke the enum here...
+            if (Sql.IsMember(node))
+            {
+                yield return CurrentStatusTypes.SQLInstance;
+                yield return CurrentStatusTypes.SQLTop;
+                yield return CurrentStatusTypes.SQLActive;
+            }
+            if (Redis.IsMember(node))
+            {
+                yield return CurrentStatusTypes.Redis;
+            }
+            if (Elastic.IsMember(node))
+            {
+                yield return CurrentStatusTypes.Elastic;
+            }
+            if (HAProxy.IsMember(node))
+            {
+                yield return CurrentStatusTypes.HAProxy;
+            }
+            if (Model.CurrentNode.IsVMHost)
+                yield return CurrentStatusTypes.VMHost;
+            //if (CurrentNode.Interfaces.Any())
+            //    yield return CurrentStatusTypes.Interfaces;
+        }
+    }
+}
+@if (s == null)
+{
+    <div class="no-content">Node not found.</div>
+    return;
+}
+<h5 class="page-header">
+    <span title="Status: @s.Status.AsString(EnumFormat.Description)">@s.IconSpan()</span>
+    @s.PrettyName
+    @if (s.IsVM)
+    {
+        <span class="text-muted">(Virtual Machine)</span>
+    }
+    @if (s.ManagementUrl.HasValue())
+    {
+        <span class="small text-muted">(<a href="@s.ManagementUrl" target="_blank">View in @s.DataProvider.Name</a>)</span>
+    }
+    <span class="pull-right small" title="@if (s.PollIntervalSeconds.HasValue){<text>Polling Interval: @(s.PollInterval?.ToReadableString())</text>}">
+        As of @s.LastUpdatedSpan()
+    </span>
+</h5>
+<div class="row small">
+    <div class="col-md-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Info
+                @if (s.Hardware != null)
+                {
+                    <span class="text-muted">(<a href="#/dashboard/summary/hardware">view hardware</a>)</span>
+                }
+            </div>
+            <div class="panel-body">
+                <div class="value-block small col-xs-6">
+                    @if (s.Manufacturer.IsNullOrEmpty() && s.VMHost != null)
+                    {
+                        <a href="@Url.Action(nameof(DashboardController.Node), new {node = s.VMHost.PrettyName, view = CurrentStatusTypes.VMHost})">@s.VMHost.PrettyName</a>
+                        <label>VM Host</label>
+                    }
+                    else
+                    {
+                        @s.Manufacturer.IsNullOrEmptyReturn("Unknown")
+                        <label>Manufacturer</label>
+                    }
+                </div>
+                <div class="value-block small col-xs-6">
+                    @s.Model.IsNullOrEmptyReturn("Unknown")
+                    <label>Model</label>
+                </div>
+                <div class="value-block small col-xs-6">
+                    @s.ServiceTag.IsNullOrEmptyReturn("Unknown")
+                    <label>Serial</label>
+                </div>
+                <div class="value-block small col-xs-6" title="@s.MachineType">
+                    @s.MachineTypePretty.IsNullOrEmptyReturn("Unknown")
+                    <label>Type</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                Stats
+                @if (s.IsRealTimePollable)
+                {
+                    //<span class="text-muted">(<a href="#/dashboard/graph/@s.Id.UrlEncode()/@NodeGraphModel.KnownTypes.Live" class="js-realtime-cpu">live</a>)</span>
+                }
+            </div>
+            <div class="panel-body">
+                <div class="value-block small col-xs-6" title="@s.ApplicationCPUTextSummary.Nullify()">
+                    <div class="progress">
+                        <div class="progress-bar" style="width: @(s.CPULoad?.ToString(CultureInfo.InvariantCulture))%;"></div>
+                        <span>@s.CPUStatusSpan()</span>
+                    </div>
+                    <label>CPU</label>
+                </div>
+                <div class="value-block small col-xs-6" title="@s.ApplicationMemoryTextSummary.Nullify()">
+                    <div class="progress">
+                        <div class="progress-bar @s.MemoryMonitorStatus().ProgressBarClass()" style="width: @(s.PercentMemoryUsed?.ToString(CultureInfo.InvariantCulture))%;"></div>
+                        <span>@s.PrettyMemoryUsed() / @s.PrettyTotalMemory()</span>
+                    </div>
+                    <label>Memory</label>
+                </div>
+                <div class="value-block small col-xs-6" title="@s.NetworkTextSummary.Nullify()">
+                    @s.PrettyTotalNetwork()
+                    <label>
+                        Network
+                        @{
+                            var ips = s.IPs;
+                            <span class="text-muted">(<a href="#/dashboard/summary/network">@(ips?.Any() ?? false ? ips.Count.Pluralize("IP") : "view" )</a>)</span>
+                        }
+                    </label>
+                </div>
+                <div class="value-block small col-xs-6">
+                    @if (s.LastBoot != null)
+                    {
+                        <span title="@DateTime.UtcNow.ToRelativeTime(compareTo: s.LastBoot, asPlusMinus: true, includeSign: false) ago">
+                            @(s.LastBoot?.ToRelativeTimeSpan())
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="text-warning">Unknown</span>
+                    }
+                    <label>Last Boot</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="panel panel-default">
+            <div class="panel-heading">Storage</div>
+            <div class="panel-body">
+                @if (s.Volumes != null)
+                {
+                    foreach (var v in s.Volumes.Where(vol => vol.IsDisk && vol.Size > 0))
+                    {
+                        <div class="value-block small col-xs-12" title="@v.Description: @(v.Used?.ToString("n0")) of @(v.Size?.ToString("n0")) bytes used">
+                            <div class="progress">
+                                <div class="progress-bar @(v.SpaceStatus.ProgressBarClass())" style="width: @(v.PercentUsed?.ToString(CultureInfo.InvariantCulture))%;"></div>
+                                <span>@v.PrettyDescription - (@v.PrettyUsed / @v.PrettySize) - <span class="@v.SpaceStatus.TextClass()">@v.PercentFreeSpace()</span></span>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+@if (StatusTypes.Count() > 1)
+{ // only show nav if there's actual nav - save the vertical space on stats-only nodes
+    <ul class="nav nav-tabs nav-tabs-right">
+        @foreach (var st in StatusTypes.OrderBy(i => i))
+        {
+            // TODO: Re-vamp this whole section
+            switch (st)
+            {
+                case CurrentStatusTypes.SQLInstance:
+                    SubnavItem(st, Url.Action(nameof(SQLController.Instance), "SQL", new { node = s.PrettyName }));
+                    break;
+                case CurrentStatusTypes.SQLActive:
+                    SubnavItem(st, Url.Action(nameof(SQLController.Active), "SQL", new { node = s.PrettyName }));
+                    break;
+                case CurrentStatusTypes.SQLTop:
+                    SubnavItem(st, Url.Action(nameof(SQLController.Top), "SQL", new { node = s.PrettyName }));
+                    break;
+                case CurrentStatusTypes.Redis:
+                    SubnavItem(st, Url.Action(nameof(RedisController.Dashboard), "Redis", new { node = s.PrettyName }));
+                    break;
+                case CurrentStatusTypes.HAProxy:
+                    SubnavItem(st, Url.Action(nameof(HAProxyController.Dashboard), "HAProxy", new { node = s.PrettyName }));
+                    break;
+                //case CurrentStatusTypes.Elastic:
+                //SubnavItem(st, "/elastic" + s.PrettyName);
+                //break;
+                default:
+                    SubnavItem(st, Url.Action(nameof(DashboardController.Node), new { node = s.PrettyName, view = st }));
+                    break;
+            }
+        }
+    </ul>
+}
+<div data-node="@Model.CurrentNode.PrettyName">
+    @if (Model.CurrentStatusType != CurrentStatusTypes.None)
+    {
+        <partial name="@("Node." + Model.CurrentStatusType)" model="s" />
+    }
+</div>
