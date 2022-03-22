@@ -109,7 +109,7 @@
                         @foreach (var k in allKeys.Where(k => !isHidden(k)))
                         {
                             <tr>
-                                <td class="text-nowrap">@k</td>
+                                <td class="text-nowrap">@k.HtmlEncode()</td>
                                 <td>@Linkify(vars[k])</td>
                             </tr>
                         }
@@ -165,7 +165,7 @@
                         @foreach (var k in allKeys.Where(k => isHidden(k)))
                         {
                             <tr class="hidden">
-                                <td>@k</td>
+                                <td>@k.HtmlEncode()</td>
                                 <td>@Linkify(vars[k])</td>
                             </tr>
                         }
@@ -184,7 +184,7 @@
                     @foreach (var kv in kvPairs)
                     {
                         <tr>
-                            <td>@kv.Key</td>
+                            <td>@kv.Key.HtmlEncode()</td>
                             <td>@Linkify(kv.Value)</td>
                         </tr>
                     }
@@ -270,7 +270,7 @@
                                     @foreach (var cd in cdKeys)
                                     {
                                         <tr>
-                                            <td class="text-nowrap">@cd</td>
+                                            <td class="text-nowrap">@cd.HtmlEncode()</td>
                                             <td>@Linkify(error.CustomData[cd])</td>
                                         </tr>
                                     }
