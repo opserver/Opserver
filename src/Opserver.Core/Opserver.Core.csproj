@@ -18,7 +18,7 @@
     <PackageReference Include="Microsoft.Net.Http.Headers" Version="2.2.8" />
     <PackageReference Include="MiniProfiler.Shared" Version="4.2.22" />
     <PackageReference Include="Sigil" Version="5.0.0" />
-    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.17" />
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.32" />
     <PackageReference Include="StackExchange.Redis" Version="2.2.88" />
     <PackageReference Include="StackExchange.Utils.Http" Version="0.3.2" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
