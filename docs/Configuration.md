@@ -48,7 +48,7 @@ Config/
 
 Or if you're like me, you would just like to see a big comprehensive example of all possible options. 
 You got it.
-[Here's an example configuration monitoring lots of things with comments](src/Opserver.Web/Config/opserverSettings.example.json)
+[Here's an example configuration monitoring lots of things with comments](https://github.com/opserver/Opserver/blob/main/src/Opserver.Web/opserverSettings.json)
 
 ### Overall Notes
 We recommend using a service account with the necessary permissions for monitoring, this eliminates any passwords in your configuration files and makes management easier, that's the practice in place at Stack Exchange.
