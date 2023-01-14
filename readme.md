@@ -1,5 +1,5 @@
 ## Opserver
-[![Build status](https://ci.appveyor.com/api/projects/status/7m0b1e4orimk5nvr/branch/master?svg=true)](https://ci.appveyor.com/project/StackExchange/opserver/branch/master)
+[![Build status](https://ci.appveyor.com/api/projects/status/7m0b1e4orimk5nvr/branch/main?svg=true)](https://ci.appveyor.com/project/StackExchange/opserver/branch/master)
 [![Open Source Helpers](https://www.codetriage.com/opserver/opserver/badges/users.svg)](https://www.codetriage.com/opserver/opserver)
 
 Opserver is a monitoring system originally from the team at [Stack Exchange](https://stackexchange.com), home of [Stack Overflow](https://stackoverflow.com).  
