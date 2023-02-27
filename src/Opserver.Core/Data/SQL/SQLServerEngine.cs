@@ -115,5 +115,10 @@ namespace Opserver.Data.SQL
         {
             public static readonly Version RTM = new Version(15, 0);
         }
+
+        public static class SQL2022
+        {
+            public static readonly Version RTM = new Version(16, 0);
+        }
     }
 }
