@@ -121,7 +121,7 @@ Health (@Model.Node.Name): @(db.SynchronizationHealth.HasValue ? db.Synchronizat
                                 @r.IconSpan() <a href="#/cluster/@ag.ClusterName.UrlEncode()/@ag.Name.UrlEncode()/@r.ReplicaServerName.UrlEncode()">@r.ReplicaServerName</a>
                                 @switch (r.AvailabilityMode)
                                 {
-                                    case AvailabilityModes.AsyncrhonousCommit: <span class="text-muted">(async)</span>
+                                    case AvailabilityModes.AsynchronousCommit: <span class="text-muted">(async)</span>
                                         break;
                                     case AvailabilityModes.SynchronousCommit: <span class="text-primary">(sync)</span>
                                         break;
