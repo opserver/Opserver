@@ -12,7 +12,7 @@ namespace Opserver.Data.SQL
 
     public enum AvailabilityModes : byte
     {
-        [Description("Asyncrhonous Commit")] AsyncrhonousCommit = 0,
+        [Description("Asynchronous Commit")] AsynchronousCommit = 0,
         [Description("Syncrhonous Commit")] SynchronousCommit = 1
     }
 
