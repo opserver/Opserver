@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Jil;
 using StackExchange.Utils;
 using Microsoft.Net.Http.Headers;
 

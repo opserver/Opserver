@@ -27,10 +27,10 @@ namespace Opserver.Data.Redis
         /// <summary>
         /// Promote this instance to a master.
         /// </summary>
-        public string PromoteToMaster()
+        public async Task<string> PromoteToMaster()
         {
             using var log = new StringWriter();
-            _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
+            await _connection.GetSingleServer().MakePrimaryAsync(ReplicationChangeOptions.Broadcast, log);
             return log.ToString();
         }
 

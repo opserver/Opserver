@@ -45,7 +45,7 @@ namespace Opserver.Controllers
             var oldMaster = i.Master;
             try
             {
-                var message = i.PromoteToMaster();
+                var message = await i.PromoteToMaster();
                 if (promote)
                 {
                     await i.SetSERedisTiebreakerAsync();

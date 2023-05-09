@@ -14,7 +14,7 @@ namespace Opserver.Data.Redis
             switch (Command)
             {
                 case InstanceCommandType.MakeMaster:
-                    var result = Instance.PromoteToMaster();
+                    var result = Task.Factory.StartNew(async () => await Instance.PromoteToMaster()).Unwrap().GetAwaiter().GetResult();
                     return Task.FromResult(result);
                 case InstanceCommandType.ReplicateFrom:
                     return Instance.ReplicateFromAsync(NewMaster.HostAndPort);

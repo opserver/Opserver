@@ -2,16 +2,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Opserver</RootNamespace>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Opserver.Core\Opserver.Core.csproj" />
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" PrivateAssets="all" />
     <PackageReference Include="BuildWebCompiler" Condition="'$(OS)' == 'Windows_NT'" Version="1.12.405" PrivateAssets="all" />
-    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
-    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.15.0" />
-    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.2.32" />
-    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.3.7" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.30.0" />
+    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.2.35" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="7.0.0" />
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
@@ -22,5 +22,8 @@
     <None Include="Config\Readme.txt" />
     <None Include="Config\*.example.json" />
     <None Include="compilerconfig.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.128" />
   </ItemGroup>
 </Project>

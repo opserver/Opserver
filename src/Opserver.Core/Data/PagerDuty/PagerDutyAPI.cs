@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 using StackExchange.Profiling;
 using Jil;
 using StackExchange.Utils;
-using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 
 namespace Opserver.Data.PagerDuty
 {
