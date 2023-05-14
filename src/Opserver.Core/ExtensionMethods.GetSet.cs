@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using AsyncKeyedLock;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace Opserver
@@ -9,8 +9,11 @@ namespace Opserver
     public static partial class ExtensionMethods
     {
         private static readonly object _syncLock = new object();
-        private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new ConcurrentDictionary<string, object>();
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _getSetSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
+        private static readonly AsyncKeyedLocker<string> _asyncKeyedLocker = new AsyncKeyedLocker<string>(o =>
+        {
+            o.PoolSize = 20;
+            o.PoolInitialFill = 1;
+        });
 
         internal class GetSetWrapper<T>
         {
@@ -76,15 +79,6 @@ namespace Opserver
         // called by a winner of CompeteToLoad, to make it so the next person to call CompeteToLoad will get true
         private static void ReleaseCompeteLock(IMemoryCache cache, string key) => cache.Remove(key + "-cload");
 
-        private static SemaphoreSlim GetNullSemaphore(ref SemaphoreSlim semaphore, string key)
-        {
-            if (semaphore == null)
-            {
-                semaphore = _getSetSemaphores.AddOrUpdate(key, _ => new SemaphoreSlim(1), (_, old) => old);
-            }
-            return semaphore;
-        }
-
         private static int _totalGetSetSync, _totalGetSetAsyncSuccess, _totalGetSetAsyncError;
         /// <summary>
         /// Indicates how many sync (first), async-success (second) and async-error (third) GetSet operations have been completed
@@ -109,13 +103,11 @@ namespace Opserver
             where T : class
         {
             var possiblyStale = cache.Get<GetSetWrapper<T>>(key);
-            var localLockName = key;
-            var nullLoadLock = _getSetNullLocks.AddOrUpdate(localLockName, _ => new object(), (_, old) => old);
             if (possiblyStale == null)
             {
                 // We can't prevent multiple web server's from running this (well, we can but its probably overkill) but we can
                 //   at least stop the query from running multiple times on *this* web server
-                lock (nullLoadLock)
+                using (_asyncKeyedLocker.Lock(key))
                 {
                     possiblyStale = cache.Get<GetSetWrapper<T>>(key);
 
@@ -141,16 +133,13 @@ namespace Opserver
             if (possiblyStale.StaleAfter > DateTime.UtcNow) return possiblyStale.Data;
 
             bool gotCompeteLock = false;
-            if (Monitor.TryEnter(nullLoadLock, 0))
+            if (!_asyncKeyedLocker.IsInUse(key))
             {   // it isn't actively being refreshed; we'll check for a mutex on the cache
                 try
                 {
                     gotCompeteLock = GotCompeteLock(cache, key);
                 }
-                finally
-                {
-                    Monitor.Exit(nullLoadLock);
-                }
+                finally { }
             }
 
             if (gotCompeteLock)
@@ -158,7 +147,7 @@ namespace Opserver
                 var old = possiblyStale.Data;
                 var task = new Task(delegate
                 {
-                    lock (nullLoadLock) // holding this lock allows us to locally short-circuit all the other threads that come asking
+                    using (_asyncKeyedLocker.Lock(key)) // holding this lock allows us to locally short-circuit all the other threads that come asking
                     {
                         try
                         {
@@ -230,12 +219,10 @@ namespace Opserver
             TimeSpan staleDuration)
         {
             GetSetWrapper<T> possiblyStale;
-            SemaphoreSlim nullLoadSemaphore = null;
 
             // We can't prevent multiple web server's from running this (well, we can but its probably overkill) but we can
             //   at least stop the query from running multiple times on *this* web server
-            await GetNullSemaphore(ref nullLoadSemaphore, key).WaitAsync();
-            try
+            using (await _asyncKeyedLocker.LockAsync(key).ConfigureAwait(false))
             {
                 possiblyStale = cache.Get<GetSetWrapper<T>>(key);
 
@@ -258,10 +245,6 @@ namespace Opserver
                     Interlocked.Increment(ref _totalGetSetSync);
                 }
             }
-            finally
-            {
-                nullLoadSemaphore.Release();
-            }
 
             if (possiblyStale?.StaleAfter > DateTime.UtcNow)
             {
@@ -270,15 +253,15 @@ namespace Opserver
 
             var gotCompeteLock = false;
 
-            if (await GetNullSemaphore(ref nullLoadSemaphore, key).WaitAsync(0))
+            using (var releaser = await _asyncKeyedLocker.LockAsync(key, 0).ConfigureAwait(false))
             {
-                try
+                if (releaser.EnteredSemaphore)
                 {
-                    gotCompeteLock = GotCompeteLock(cache, key);
-                }
-                finally
-                {
-                    nullLoadSemaphore.Release();
+                    try
+                    {
+                        gotCompeteLock = GotCompeteLock(cache, key);
+                    }
+                    finally { }
                 }
             }
 
@@ -291,32 +274,33 @@ namespace Opserver
 #pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     Task.Run(async () =>
                     {
-                        await nullLoadSemaphore.WaitAsync();
-                        try
+                        using (await _asyncKeyedLocker.LockAsync(key).ConfigureAwait(false))
                         {
-                            GetSetWrapper<T> updated;
-                            using (var ctx = new MicroContext())
+                            try
                             {
-                                updated = new GetSetWrapper<T>
+                                GetSetWrapper<T> updated;
+                                using (var ctx = new MicroContext())
                                 {
-                                    Data = await lookup(old, ctx),
-                                    StaleAfter = DateTime.UtcNow + duration
-                                };
-                            }
+                                    updated = new GetSetWrapper<T>
+                                    {
+                                        Data = await lookup(old, ctx),
+                                        StaleAfter = DateTime.UtcNow + duration
+                                    };
+                                }
 
-                            cache.Remove(key);
-                            cache.Set(key, updated, duration + staleDuration);
-                            Interlocked.Increment(ref _totalGetSetAsyncSuccess);
-                        }
-                        catch (Exception ex)
-                        {
-                            Interlocked.Increment(ref _totalGetSetAsyncError);
-                            ex.Log();
-                        }
-                        finally
-                        {
-                            ReleaseCompeteLock(cache, key);
-                            nullLoadSemaphore.Release();
+                                cache.Remove(key);
+                                cache.Set(key, updated, duration + staleDuration);
+                                Interlocked.Increment(ref _totalGetSetAsyncSuccess);
+                            }
+                            catch (Exception ex)
+                            {
+                                Interlocked.Increment(ref _totalGetSetAsyncError);
+                                ex.Log();
+                            }
+                            finally
+                            {
+                                ReleaseCompeteLock(cache, key);
+                            }
                         }
                     });
 #pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
