@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
@@ -58,7 +59,7 @@ namespace Opserver.Data.PagerDuty
                 }
             };
             var result = await GetFromPagerDutyAsync("schedules/" + shedule.Id + "/overrides",
-                getFromJson: response => response, httpMethod: "POST", data: overrideData);
+                getFromJson: response => response, httpMethod: HttpMethod.Post, data: overrideData);
 
             await OnCallInfo.PollAsync(true);
             await PrimaryScheduleOverrides.PollAsync(true);

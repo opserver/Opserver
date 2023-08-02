@@ -7,7 +7,7 @@ using StackExchange.Profiling;
 using Jil;
 using StackExchange.Utils;
 using Microsoft.Net.Http.Headers;
-using Microsoft.AspNetCore.Http;
+using System.Net.Http;
 
 namespace Opserver.Data.PagerDuty
 {
@@ -84,12 +84,13 @@ namespace Opserver.Data.PagerDuty
         /// <param name="data">Data to serialize for the request.</param>
         /// <param name="extraHeaders">Headers to add to the API request.</param>
         /// <returns>The deserialized content from the PagerDuty API.</returns>
-        public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, string httpMethod = "GET", object data = null, Dictionary<string,string> extraHeaders = null)
+        public async Task<T> GetFromPagerDutyAsync<T>(string path, Func<string, T> getFromJson, HttpMethod httpMethod = null, object data = null, Dictionary<string,string> extraHeaders = null)
         {
+            httpMethod ??= HttpMethod.Get;
             const string baseUrl = "https://api.pagerduty.com/";
             var fullUri = baseUrl + path;
 
-            using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod))
+            using (MiniProfiler.Current.CustomTiming("http", fullUri, httpMethod.ToString()))
             {
                 var request = Http.Request(fullUri)
                                   .AddHeader(HeaderNames.Accept, "application/vnd.pagerduty+json;version=2")
@@ -103,7 +104,7 @@ namespace Opserver.Data.PagerDuty
                     }
                 }
 
-                if ((HttpMethods.IsPost(httpMethod) || HttpMethods.IsPut(httpMethod)) && data != null)
+                if ((httpMethod == HttpMethod.Post || httpMethod == HttpMethod.Put) && data != null)
                 {
                     request.AddHeader(HeaderNames.ContentType, "application/json");
                     request.SendJson(data, JilOptions);
@@ -113,8 +114,8 @@ namespace Opserver.Data.PagerDuty
                 {
                     var response = httpMethod switch
                     {
-                        _ when HttpMethods.IsPut(httpMethod) => await request.ExpectString().PutAsync(),
-                        _ when HttpMethods.IsPost(httpMethod) => await request.ExpectString().PostAsync(),
+                        _ when httpMethod == HttpMethod.Put => await request.ExpectString().PutAsync(),
+                        _ when httpMethod == HttpMethod.Post => await request.ExpectString().PostAsync(),
                         _ => await request.ExpectString().GetAsync(),
                     };
 

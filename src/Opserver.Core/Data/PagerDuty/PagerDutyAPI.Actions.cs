@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Jil;
@@ -28,7 +29,7 @@ namespace Opserver.Data.PagerDuty
             {
                 var result = await GetFromPagerDutyAsync($"incidents/{incidentId}",
                 response => JSON.Deserialize<PagerDutyIncidentUpdateResp>(response, JilOptions),
-                httpMethod: "PUT",
+                httpMethod: HttpMethod.Put,
                 data: data,
                 extraHeaders: headers);
                 await Incidents.PollAsync(true);

@@ -9,19 +9,12 @@ namespace Opserver.Data.Redis
         public InstanceCommandType Command { get; set; }
         public RedisInstance NewMaster { get; set; }
 
-        public Task PerformAsync()
+        public Task PerformAsync() => Command switch
         {
-            switch (Command)
-            {
-                case InstanceCommandType.MakeMaster:
-                    var result = Instance.PromoteToMaster();
-                    return Task.FromResult(result);
-                case InstanceCommandType.ReplicateFrom:
-                    return Instance.ReplicateFromAsync(NewMaster.HostAndPort);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));
-            }
-        }
+            InstanceCommandType.MakeMaster => Instance.PromoteToPrimaryAsync(),
+            InstanceCommandType.ReplicateFrom => Instance.ReplicateFromAsync(NewMaster.HostAndPort),
+            _ => throw new ArgumentOutOfRangeException(nameof(InstanceCommandType)),
+        };
 
         public static RedisInstanceOperation FromString(RedisModule module, string s)
         {

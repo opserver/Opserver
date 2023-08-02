@@ -25,12 +25,12 @@ namespace Opserver.Data.Redis
         }
 
         /// <summary>
-        /// Promote this instance to a master.
+        /// Promote this instance to a primary.
         /// </summary>
-        public string PromoteToMaster()
+        public async Task<string> PromoteToPrimaryAsync()
         {
             using var log = new StringWriter();
-            _connection.GetSingleServer().MakeMaster(ReplicationChangeOptions.Broadcast, log);
+            await _connection.GetSingleServer().MakePrimaryAsync(ReplicationChangeOptions.Broadcast, log);
             return log.ToString();
         }
 
