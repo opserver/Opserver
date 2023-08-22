@@ -228,12 +228,15 @@ namespace Opserver.Controllers
             // construct the URL to the authorization endpoint
             var authorizationUrl = new UriBuilder(oidcSettings.AuthorizationUrl);
             var scopes = oidcSettings.Scopes ?? OIDCSecuritySettings.DefaultScopes;
+            var encodedState = new QueryString()
+                .Add(OidcIdentifierKey, oidcIdentifier)
+                .Add(OidcReturnUrlKey, returnUrl ?? "/");
             var queryString = new QueryString(authorizationUrl.Query)
                 .Add("response_type", "code")
                 .Add("client_id", oidcSettings.ClientId)
                 .Add("scope", string.Join(' ', scopes))
                 .Add("redirect_uri", redirectUri)
-                .Add("state", $"{OidcIdentifierKey}={oidcIdentifier}&{OidcReturnUrlKey}={returnUrl ?? "/"}")
+                .Add("state", encodedState.ToUriComponent())
                 .Add("nonce", Guid.NewGuid().ToString("N"));
 
             authorizationUrl.Query = queryString.ToUriComponent();
