@@ -95,7 +95,7 @@ namespace Opserver.Controllers
 
             var response = await Http.Request(oidcSettings.AccessTokenUrl)
                 .WithoutLogging(HttpStatusCode.BadRequest)
-                .SendForm(form)
+                .SendFormUrlEncoded(form)
                 .ExpectString()
                 .PostAsync();
 

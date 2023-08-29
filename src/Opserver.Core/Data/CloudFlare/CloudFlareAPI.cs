@@ -85,7 +85,7 @@ namespace Opserver.Data.Cloudflare
         {
             var result = await Http.Request(APIBaseUrl + path)
                                    .AddHeaders(RequestHeaders)
-                                   .SendForm(values)
+                                   .SendFormUrlEncoded(values)
                                    .ExpectJson<T>()
                                    .PostAsync();
             return result.Data;
@@ -102,7 +102,7 @@ namespace Opserver.Data.Cloudflare
         {
             var result = await Http.Request(APIBaseUrl + path)
                                    .AddHeaders(RequestHeaders)
-                                   .SendForm(values)
+                                   .SendFormUrlEncoded(values)
                                    .ExpectJson<T>()
                                    .DeleteAsync();
             return result.Data;

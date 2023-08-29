@@ -101,7 +101,7 @@ namespace Opserver.Data.HAProxy
                 var credsBase64 = Convert.ToBase64String(Encoding.ASCII.GetBytes($"{instance.AdminUser}:{instance.AdminPassword}"));
                 var response = await Http.Request(instance.Url)
                                          .AddHeader(HeaderNames.Authorization, "Basic " + credsBase64)
-                                         .SendForm(new NameValueCollection
+                                         .SendFormUrlEncoded(new NameValueCollection
                                          {
                                              ["s"] = server.Name,
                                              ["action"] = action.AsString(EnumFormat.Description),
