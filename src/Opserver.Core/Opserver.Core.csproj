@@ -19,7 +19,7 @@
     <PackageReference Include="Sigil" Version="5.0.0" />
     <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.32" />
     <PackageReference Include="StackExchange.Redis" Version="2.6.122" />
-    <PackageReference Include="StackExchange.Utils.Http" Version="0.3.41" />
+    <PackageReference Include="StackExchange.Utils.Http" Version="0.3.48" />
     <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
     <PackageReference Include="System.DirectoryServices" Version="6.0.0" />
     <PackageReference Include="System.Management" Version="6.0.0" />
