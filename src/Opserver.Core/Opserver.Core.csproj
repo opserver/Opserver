@@ -20,7 +20,7 @@
     <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.35" />
     <PackageReference Include="StackExchange.Redis" Version="2.7.4" />
     <PackageReference Include="StackExchange.Utils.Http" Version="0.3.48" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
     <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="System.Runtime.Caching" Version="8.0.0" />
