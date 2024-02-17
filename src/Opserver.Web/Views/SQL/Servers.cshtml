@@ -85,7 +85,10 @@
                     </tr>
                     <tr>
                         <th>Database</th>
+                        <th>SKU</th>
                         <th>CPU</th>
+                        <th class="text-muted">(Last Hour)</th>
+                        <th>DTUs</th>
                         <th class="text-muted">(Last Hour)</th>
                         <th>Memory</th>
                         <th title="Connections / Sessions">Conns <span class="text-muted">/ Sess</span></th>
@@ -97,7 +100,7 @@
                     @if (!s.Instances.ContainsData)
                     {
                         <tr>
-                            <td colspan="7">
+                            <td colspan="10">
 
                             </td>
                         </tr>
@@ -105,9 +108,15 @@
                     @foreach (var i in s.Instances.SafeData(true))
                     {
                         <tr class="@i.RowClass()">
-                            <td title="@i.Description">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
+                            <td title="@i.Description (Edition: @i.Edition, Elastic Pool: @(i.ElasticPoolName ?? "None"))">@i.IconSpan() <a href="~/sql/instance?node=@i.Name.UrlEncode()">@i.Name</a></td>
+                            <td title="DTU Limit: @(i.CurrentDTULimit?.ToString("n0") ?? "Unknown")">@i.SKU</td>
+
                             <td><a href="~/sql/active?node=@i.Name.UrlEncode()">@(i.CurrentCPUPercent.HasValue ? i.CurrentCPUPercent.ToString() + "%" : "")</a></td>
                             <td><img src="~/graph/sql/cpu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" alt="SQL CPU for @i.Name Last Hour" /></td>
+
+                            <td title="DTU Limit: @(i.CurrentDTULimit?.ToString("n0") ?? "Unknown")">@(i.CurrentDTUPercent.HasValue ? i.CurrentDTUPercent.ToString() + "%" : "")</td>
+                            <td><img src="~/graph/sql/dtu/spark?node=@i.Name&time=@DateTime.UtcNow.ToString("yyyy-MM-dd")" width="100" height="16" alt="DTU Usage for @i.Name Last Hour" /></td>
+
                             <partial Name="Partials.MemoryCell" Model="@new PartialsMemoryCellModel(i, 2)" />
                             @ConnectionsCell(i)
                             <td>@(i.BatchesPerSec?.ToComma())</td>

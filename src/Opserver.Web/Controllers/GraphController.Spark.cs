@@ -182,6 +182,21 @@ namespace Opserver.Controllers
             return SparkSVG(points, 100, p => p.ProcessUtilization, start);
         }
 
+        [OnlyAllow(SQLRoles.Viewer)]
+        [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" }, Location = ResponseCacheLocation.Client)]
+        [Route("graph/sql/dtu/spark")]
+        public ActionResult SQLDTUSpark(string node)
+        {
+            var instance = Sql.GetInstance(node);
+            if (instance == null) return ContentNotFound($"SQLNode not found with name = '{node}'");
+            var start = DateTime.UtcNow.AddHours(-1);
+            var points = instance.AzureResourceHistory.Data?.Where(p => p.EventTime >= start).ToList();
+
+            if (points == null || points.Count == 0) return EmptySparkSVG();
+
+            return SparkSVG(points, 100, p => p.AvgDTUPercent, start);
+        }
+
         public async Task<ActionResult> SparkSvgAll<T>(string key, Func<Node, Task<List<T>>> getPoints, Func<Node, List<T>, long> getMax, Func<T, double> getVal) where T : IGraphPoint
         {
             const int width = SparkPoints;
