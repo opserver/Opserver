@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <RootNamespace>Opserver</RootNamespace>
@@ -12,6 +12,10 @@
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="7.0.3" />
     <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.2.35" />
     <PackageReference Include="System.DirectoryServices.AccountManagement" Version="8.0.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.2.22" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="6.35.0" />
+    <PackageReference Include="StackExchange.Exceptional.AspNetCore" Version="2.2.32" />
+    <PackageReference Include="System.DirectoryServices.AccountManagement" Version="6.0.0" />
     <Reference Include="System.Management" />
   </ItemGroup>
   <ItemGroup>
@@ -26,4 +30,5 @@
   <ItemGroup>
     <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.133" />
   </ItemGroup>
+</Project>
 </Project>
