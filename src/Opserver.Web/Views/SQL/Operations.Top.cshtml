@@ -59,6 +59,7 @@ else
                 <th colspan="3">CPU</th>
                 <th colspan="2">Time</th>
                 <th colspan="2">Reads</th>
+                <th colspan="2">Writes</th>
                 <th colspan="2">Execs</th>
                 <th>Time</th>
                 <th colspan="2">Query Info</th>
@@ -73,6 +74,9 @@ else
 
                 @SortLink(SQLInstance.TopSorts.AvgReads, "Avg")
                 @SortLink(SQLInstance.TopSorts.TotalReads, "Total")
+
+                @SortLink(SQLInstance.TopSorts.AvgWrites, "Avg")
+                @SortLink(SQLInstance.TopSorts.TotalWrites, "Total")
 
                 @SortLink(SQLInstance.TopSorts.ExecutionCount, "Execs")
                 @SortLink(SQLInstance.TopSorts.ExecutionsPerMinute, "Execs/min")
@@ -92,6 +96,8 @@ else
                 <td>@ReadableTime(o.TotalDuration)</td>
                 <td>@o.AvgReads.ToComma()</td>
                 <td>@o.TotalReads.ToComma()</td>
+                <td>@o.AvgWrites.ToComma()</td>
+                <td>@o.TotalWrites.ToComma()</td>
                 <td>@o.ExecutionCount.ToComma()</td>
                 <td>@o.ExecutionsPerMinute.ToString("0.00")</td>
                 <td>@o.LastExecutionTime.ToRelativeTimeSpan()</td>
