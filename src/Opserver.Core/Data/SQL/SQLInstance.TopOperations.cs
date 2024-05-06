@@ -52,6 +52,9 @@ namespace Opserver.Data.SQL
             public long AvgReads { get; internal set; }
             public long TotalReads { get; internal set; }
             public decimal PercentReads { get; internal set; }
+            public long AvgWrites { get; internal set; }
+            public long TotalWrites { get; internal set; }
+            public decimal PercentWrites { get; internal set; }
             public long ExecutionCount { get; internal set; }
             public decimal PercentExecutions { get; internal set; }
             public decimal ExecutionsPerMinute { get; internal set; }
@@ -82,9 +85,9 @@ namespace Opserver.Data.SQL
             }
 
             internal const string FetchSQL = @"
-SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute,
-       TotalCPU, TotalDuration, TotalReads,
-       PercentCPU, PercentDuration, PercentReads, PercentExecutions,
+SELECT AvgCPU, AvgDuration, AvgReads, AvgCPUPerMinute, AvgWrites,
+       TotalCPU, TotalDuration, TotalReads, TotalWrites,
+       PercentCPU, PercentDuration, PercentReads, PercentExecutions, PercentWrites,
        ExecutionCount,
        ExecutionsPerMinute,
        PlanCreationTime, LastExecutionTime,
@@ -109,6 +112,7 @@ FROM (SELECT TOP (@MaxResultCount)
              total_worker_time / execution_count AS AvgCPU,
              total_elapsed_time / execution_count AS AvgDuration,
              total_logical_reads / execution_count AS AvgReads,
+             total_logical_writes / execution_count AS AvgWrites,
              Cast(total_worker_time / age_minutes As BigInt) AS AvgCPUPerMinute,
              execution_count / age_minutes AS ExecutionsPerMinute,
              Cast(total_worker_time / age_minutes_lifetime As BigInt) AS AvgCPUPerMinuteLifetime,
@@ -116,10 +120,12 @@ FROM (SELECT TOP (@MaxResultCount)
              total_worker_time AS TotalCPU,
              total_elapsed_time AS TotalDuration,
              total_logical_reads AS TotalReads,
+             total_logical_writes AS TotalWrites,
              execution_count ExecutionCount,
              CAST(ROUND(100.00 * total_worker_time / t.TotalWorker, 2) AS MONEY) AS PercentCPU,
              CAST(ROUND(100.00 * total_elapsed_time / t.TotalElapsed, 2) AS MONEY) AS PercentDuration,
              CAST(ROUND(100.00 * total_logical_reads / t.TotalReads, 2) AS MONEY) AS PercentReads,
+             CAST(ROUND(100.00 * total_logical_writes / t.TotalWrites, 2) AS MONEY) AS PercentWrites,
              CAST(ROUND(100.00 * execution_count / t.TotalExecs, 2) AS MONEY) AS PercentExecutions,
              qs.creation_time AS PlanCreationTime,
              qs.last_execution_time AS LastExecutionTime,
@@ -144,7 +150,8 @@ FROM (SELECT TOP (@MaxResultCount)
              CROSS JOIN(SELECT SUM(execution_count) TotalExecs,
                                SUM(total_elapsed_time) TotalElapsed,
                                SUM(total_worker_time) TotalWorker,
-                               SUM(Cast(total_logical_reads as DECIMAL(38,0))) TotalReads
+                               SUM(Cast(total_logical_reads as DECIMAL(38,0))) TotalReads,
+                               SUM(Cast(total_logical_writes as DECIMAL(38,0))) TotalWrites
                           FROM sys.dm_exec_query_stats) AS t
              CROSS APPLY sys.dm_exec_plan_attributes(qs.plan_handle) AS pa
      WHERE pa.attribute = 'dbid'
