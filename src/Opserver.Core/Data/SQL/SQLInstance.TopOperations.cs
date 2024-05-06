@@ -192,7 +192,10 @@ FROM (SELECT TOP (@MaxResultCount)
             [Description("Percent of Total Executions")] PercentExecutions = 13,
             [Description("Executions per minute")] ExecutionsPerMinute = 14,
             [Description("Plan Creation Time")] PlanCreationTime = 15,
-            [Description("Last Execution Time")] LastExecutionTime = 16
+            [Description("Last Execution Time")] LastExecutionTime = 16,
+            [Description("Average Writes")] AvgWrites = 17,
+            [Description("Total Writes")] TotalWrites = 18,
+            [Description("Percent of Total Writes")] PercentWrites = 19
         }
 
         public class TopSearchOptions
