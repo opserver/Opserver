@@ -17,6 +17,7 @@
     <IncludeSymbols>false</IncludeSymbols>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <!--<AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>-->
+    <NuGetAudit>false</NuGetAudit>
   </PropertyGroup>
   <!-- File nesting! -->
   <ItemGroup>
