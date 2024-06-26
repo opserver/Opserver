@@ -1,0 +1,138 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      service: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        service: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ .Release.Name  }}
+      containers:
+      - name: opserver
+        image: "{{ .Values.images.containerRegistry }}/{{ .Values.images.opserver.name }}:{{ .Values.images.opserver.tag }}"
+        resources:
+          requests:
+            memory: {{ .Values.requests.memory }}
+            cpu: {{ .Values.requests.cpu }}
+          limits:
+            memory: {{ .Values.limits.memory }}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+        volumeMounts:
+        - name: writable-tmp #need our own read-write enabled temp directory because aspnet spills large requests over to disk
+          mountPath: /mnt/tmp
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.kestrel.endPoints.http.containerPort }}
+        livenessProbe:
+          httpGet:
+            path: /health-checks/live
+            port: {{ .Values.kestrel.endPoints.http.containerPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 2
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health-checks/ready
+            port: {{ .Values.kestrel.endPoints.http.containerPort }}
+          initialDelaySeconds: 10
+          periodSeconds: 1
+          successThreshold: 3
+        volumeMounts:
+        - name: writable-tmp
+          mountPath: /mnt/tmp
+          
+        env:
+        - name: NODE_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+
+        - name: DOTNET_EnableDiagnostics
+          value: "0"
+
+        - name: ASPNETCORE_ENVIRONMENT
+          value: {{ .Values.aspnetcoreEnvironment }}
+        - name: PRODUCT
+          value: {{ .Values.product }}
+
+        - name: EXCEPTIONAL__STORE__APPLICATIONNAME
+          value: "{{ .Release.Name }}"
+        - name: EXCEPTIONAL__STORE__TYPE
+          value: "{{ .Values.exceptional.store.type }}"
+
+        - name: DATADOG__AGENTHOST
+          value: "{{- if eq .Values.datadog.agentHost "127.0.0.1"}}$(NODE_IP){{- else}}{{ .Values.datadog.agentHost }}{{- end}}"
+        - name: DATADOG__AGENTPORT
+          value: "{{ .Values.datadog.agentPort }}"
+
+        # this exact variable is required for our datadog configuration to work with tracing / APM
+        - name: DD_AGENT_HOST
+          value: "{{- if eq .Values.datadog.agentHost "127.0.0.1"}}$(NODE_IP){{- else}}{{ .Values.datadog.agentHost }}{{- end}}"
+
+        - name: DD_RUNTIME_METRICS_ENABLED
+          value: "true"
+
+        - name: DD_SERVICE
+          value: "opserver"
+
+        - name: KESTREL__ENDPOINTS__HTTP__URL
+          value: "http://0.0.0.0:{{ .Values.kestrel.endPoints.http.containerPort }}/"
+
+        - name: TMPDIR #tell OS to use our read-write volume mount as its temp directory
+          value: "/mnt/tmp"
+
+        - name: Modules__Exceptions__stores__0__connectionString
+          value: "Server=host.docker.internal;Database=Local.Exceptions;User ID=;Password=;"
+
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              service: {{ .Release.Name }}
+          matchLabelKeys:
+            - pod-template-hash
+
+      {{- if and (hasKey .Values "nodeScheduling") (hasKey .Values.nodeScheduling "nodeSelectorLabel")}}
+      nodeSelector:
+        {{- range .Values.nodeScheduling.nodeSelectorLabel }}
+        {{ .name }}: {{ .value | quote }}
+        {{- end }}
+      {{- end }}
+
+      {{- if and (hasKey .Values "nodeScheduling") (hasKey .Values.nodeScheduling "tolerations")}}
+      tolerations:
+        {{- range .Values.nodeScheduling.tolerations }}
+        - key: {{ .key }}
+          operator: {{ .operator }}
+          value: {{ .value | quote }}
+          effect: {{ .effect }}        
+        {{- end }}
+      {{- end }}      
+     
+      restartPolicy: Always
+      imagePullSecrets:
+      - name: "{{ .Values.image.pullSecretName }}"
+      volumes:
+      - name: data-volume
+        emptyDir: {}
+      - name: log-volume
+        emptyDir: {}
+      volumes:
+      - name: writable-tmp
+        emptyDir: {}

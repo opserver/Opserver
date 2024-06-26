@@ -4,12 +4,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -36,12 +40,12 @@ namespace Opserver
 
             services.AddResponseCaching();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                    .AddCookie(options =>
-                    {
-                        options.AccessDeniedPath = "/denied";
-                        options.LoginPath = "/login";
-                        options.LogoutPath = "/logout";
-                    });
+                .AddCookie(options =>
+                {
+                    options.AccessDeniedPath = "/denied";
+                    options.LoginPath = "/login";
+                    options.LogoutPath = "/logout";
+                });
 
             services.AddResponseCompression(
                 options =>
@@ -59,8 +63,9 @@ namespace Opserver
                     _configuration.GetSection("Exceptional"),
                     settings =>
                     {
-                        settings.UseExceptionalPageOnThrow = true;
-                        settings.DataIncludeRegex = new Regex("^(Redis|Elastic|ErrorLog|Jil)", RegexOptions.Singleline | RegexOptions.Compiled);
+                        settings.UseExceptionalPageOnThrow = false;
+                        settings.DataIncludeRegex = new Regex("^(Redis|Elastic|ErrorLog|Jil)",
+                            RegexOptions.Singleline | RegexOptions.Compiled);
                         settings.GetCustomData = (ex, data) =>
                         {
                             // everything below needs a context
@@ -79,9 +84,11 @@ namespace Opserver
                                     var key = de.Key as string;
                                     if (key.HasValue() && key.StartsWith(ExtensionMethods.ExceptionLogPrefix))
                                     {
-                                        data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""), de.Value?.ToString() ?? "");
+                                        data.Add(key.Replace(ExtensionMethods.ExceptionLogPrefix, ""),
+                                            de.Value?.ToString() ?? "");
                                     }
                                 }
+
                                 ex = ex.InnerException;
                             }
                         };
@@ -111,9 +118,9 @@ namespace Opserver
                 };
                 options.EnableServerTimingHeader = true;
                 options.IgnorePath("/graph")
-                       .IgnorePath("/login")
-                       .IgnorePath("/spark")
-                       .IgnorePath("/top-refresh");
+                    .IgnorePath("/login")
+                    .IgnorePath("/spark")
+                    .IgnorePath("/top-refresh");
             });
             services.Configure<SecuritySettings>(_configuration.GetSection("Security"));
             services.Configure<ActiveDirectorySecuritySettings>(_configuration.GetSection("Security"));
@@ -126,7 +133,8 @@ namespace Opserver
                     // has a bunch of read-only list props that can't be bound from configuration
                     // so we need to go populate them ourselves
                     var forwardedHeaders = _configuration.GetSection("ForwardedHeaders");
-                    var allowedHosts = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.AllowedHosts)).Get<List<string>>();
+                    var allowedHosts = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.AllowedHosts))
+                        .Get<List<string>>();
                     if (allowedHosts != null)
                     {
                         options.AllowedHosts.Clear();
@@ -136,8 +144,10 @@ namespace Opserver
                         }
                     }
 
-                    var knownProxies = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownProxies)).Get<List<string>>();
-                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks)).Get<List<string>>();
+                    var knownProxies = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownProxies))
+                        .Get<List<string>>();
+                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks))
+                        .Get<List<string>>();
                     if (knownNetworks != null || knownProxies != null)
                     {
                         options.KnownProxies.Clear();
@@ -166,17 +176,15 @@ namespace Opserver
             services.AddSingleton<SecurityManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
+            services.AddHealthChecks();
         }
 
-        private static readonly StringValues DefaultCacheControl = new CacheControlHeaderValue
-        {
-            Private = true
-        }.ToString();
+        private static readonly StringValues DefaultCacheControl =
+            new CacheControlHeaderValue { Private = true }.ToString();
 
         private static readonly StringValues StaticContentCacheControl = new CacheControlHeaderValue
         {
-            Public = true,
-            MaxAge = TimeSpan.FromDays(365)
+            Public = true, MaxAge = TimeSpan.FromDays(365)
         }.ToString();
 
         public void Configure(
@@ -187,32 +195,70 @@ namespace Opserver
         )
         {
             appBuilder
-                      .UseForwardedHeaders()
-                      .UseResponseCompression()
-                      .UseStaticFiles(new StaticFileOptions
-                      {
-                          OnPrepareResponse = ctx =>
-                          {
-                              if (ctx.Context.Request.Query.ContainsKey("v")) // If cache-breaker versioned, cache for a year
-                              {
-                                  ctx.Context.Response.Headers[HeaderNames.CacheControl] = StaticContentCacheControl;
-                              }
-                          }
-                      })
-                      .UseExceptional()
-                      .UseRouting()
-                      .UseMiniProfiler()
-                      .UseAuthentication()
-                      .UseAuthorization()
-                      .Use((httpContext, next) =>
-                      {
-                          httpContext.Response.Headers[HeaderNames.CacheControl] = DefaultCacheControl;
+                .UseForwardedHeaders()
+                .UseResponseCompression()
+                .UseStaticFiles(new StaticFileOptions
+                {
+                    OnPrepareResponse = ctx =>
+                    {
+                        if (ctx.Context.Request.Query.ContainsKey("v")) // If cache-breaker versioned, cache for a year
+                        {
+                            ctx.Context.Response.Headers[HeaderNames.CacheControl] = StaticContentCacheControl;
+                        }
+                    }
+                })
+                .UseExceptionHandler(errorApp =>
+                {
+                    errorApp.Run(ctx =>
+                    {
+                        var logger = ctx.RequestServices.GetRequiredService<ILogger<Startup>>();
+                        var exception = ctx.Features.Get<IExceptionHandlerFeature>().Error;
+                        logger.LogError(exception, exception.Message);
 
-                          Current.SetContext(new Current.CurrentContext(securityManager.CurrentProvider, httpContext, modules));
-                          return next();
-                      })
-                      .UseResponseCaching()
-                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
+                        return Task.CompletedTask;
+                    });
+                })
+                .UseExceptional()
+                .UseRouting()
+                .UseMiniProfiler()
+                .UseAuthentication()
+                .UseAuthorization()
+                .Use((httpContext, next) =>
+                {
+                    httpContext.Response.Headers[HeaderNames.CacheControl] = DefaultCacheControl;
+
+                    Current.SetContext(
+                        new Current.CurrentContext(securityManager.CurrentProvider, httpContext, modules));
+                    return next();
+                })
+                .UseResponseCaching()
+                .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute())
+                // Add health check endpoints:
+                .UseHealthChecks("/health-checks/ready",
+                    // Readiness:
+                    // Signal that the application has started and is ready to accept traffic.
+                    // This also allows the application to signal that it is live but currently
+                    // cannot accept new requests because for example it's currently overloaded.
+                    // Kubernetes will not restart the application if this endpoint returns unhealthy.
+                    new HealthCheckOptions
+                    {
+                        AllowCachingResponses = false,
+                        Predicate = registration => registration.Tags.Contains("ready")
+                    })
+                // Liveliness:
+                // Signal that the application is running and is ready to accept traffic. This
+                // endpoint is used to continually determine whether the entire application is
+                // still in a healthy state.
+                // Kubernetes _will_ restart the application if this endpoint returns unhealthy.
+                .UseHealthChecks("/health-checks/live",
+                    new HealthCheckOptions
+                    {
+                        AllowCachingResponses = false,
+                        Predicate =
+                            _ => false // We don't use any healthchecks for liveliness, just that the app responds
+                    });
+
+
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
             Cache.Configure(settings);
         }

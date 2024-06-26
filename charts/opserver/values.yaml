@@ -1,0 +1,66 @@
+appName: "opserver"
+replicaCount: 1
+
+tier: "Local"
+product: "public" # used for datadog metrics and logs
+aspnetcoreEnvironment: "Local"
+
+requests:
+  cpu: "1m"
+  memory: "1M"
+
+limits:
+  memory: "1Gi"
+
+exceptional:
+  store:
+    type: "Memory"
+    connectionString: ""
+
+datadog:
+  agentHost: ""
+  agentPort: "0"
+
+secretStore:
+  fake: false
+
+images:
+  containerRegistry: "local.software"
+  opserver:
+    name: "stackeng/opserver/opserver"
+    tag: "latest"
+
+image:
+  pullPolicy: IfNotPresent
+  pullSecretName: cloudsmith-cr-prod
+
+adminRolebindingGroupId: "not set"
+
+kestrel:
+  endPoints:
+    http:
+      url: "http://0.0.0.0:8080/"
+      containerPort: 8080
+
+ingress:
+  certIssuer: "letsencrypt-staging"
+  className: "nginx-external"
+  host: "opserver.local"
+  secretName: "opserver-secret"
+  enabled: true
+  createTlsCert: false
+
+db:
+  ExceptionalDbName: Local.Exceptions
+
+sqlExternalSecret:
+  name: opserver-sqldb-external-secret
+  refreshInterval: 5m
+  storeRefName: fake
+  targetName: sql-secret
+  remoteRefs:
+    exceptionalServerName: ExceptionsSqlServerName
+    exceptionalUsername: db-opserver-User
+    exceptionalPassword: db-opserver-Password
+
+nodeScheduling: {}
