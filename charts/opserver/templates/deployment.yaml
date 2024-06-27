@@ -111,8 +111,12 @@ spec:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalPassword
 
-        - name: Modules__Exceptions__stores__0__connectionString
+        - name: Modules__Sql__defaultConnectionString
           value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_EXCEPTIONAL_USERNAME);Password=$(SQL_EXCEPTIONAL_PASSWORD);"
+        - name: Modules__Sql__instances__0__name
+          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME)"
+        - name: Modules__Exceptions__stores__0__connectionString
+          value: "$(Modules__Sql__defaultConnectionString);"
 
       topologySpreadConstraints:
         - maxSkew: 1
