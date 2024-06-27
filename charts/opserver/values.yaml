@@ -22,7 +22,7 @@ datadog:
   agentPort: "0"
 
 secretStore:
-  fake: false
+  fake: true
 
 images:
   containerRegistry: "local.software"
@@ -56,7 +56,7 @@ db:
 sqlExternalSecret:
   name: opserver-sqldb-external-secret
   refreshInterval: 5m
-  storeRefName: fake
+  storeRefName: fakeopserversecretstore
   targetName: sql-secret
   remoteRefs:
     exceptionalServerName: ExceptionsSqlServerName

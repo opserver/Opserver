@@ -95,8 +95,24 @@ spec:
         - name: TMPDIR #tell OS to use our read-write volume mount as its temp directory
           value: "/mnt/tmp"
 
+        - name: SQL_EXCEPTIONAL_SERVERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sqlExternalSecret.targetName }}
+              key: exceptionalServername
+        - name: SQL_EXCEPTIONAL_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sqlExternalSecret.targetName }}
+              key: exceptionalUsername
+        - name: SQL_EXCEPTIONAL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.sqlExternalSecret.targetName }}
+              key: exceptionalPassword
+
         - name: Modules__Exceptions__stores__0__connectionString
-          value: "Server=host.docker.internal;Database=Local.Exceptions;User ID=;Password=;"
+          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_EXCEPTIONAL_USERNAME);Password=$(SQL_EXCEPTIONAL_PASSWORD);"
 
       topologySpreadConstraints:
         - maxSkew: 1
