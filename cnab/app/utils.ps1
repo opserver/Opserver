@@ -27,7 +27,7 @@ function Write-MinorStep {
 # Ensure Warning, Verbose, and Debug get the correct Octopus service messages sent
 # Output, Error, and Information already have the correct handling
 # These are copied from https://github.com/OctopusDeploy/Calamari/blob/master/source/Calamari.Common/Features/Scripting/WindowsPowerShell/PowerShellBootstrapper.cs
-$IsOctopusDeploy = $vars.runtime.name -eq 'Octopus Deploy'
+$IsOctopusDeploy = $vars.runtime.name -eq 'GCP'
 if ($IsOctopusDeploy) {
     function Write-Warning {
         [CmdletBinding()]
