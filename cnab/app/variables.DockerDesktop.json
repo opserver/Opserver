@@ -1,0 +1,51 @@
+{
+  "pipeline": {
+    "environment": "local",
+    "product": "pubplat",
+    "project": "opserver",
+    "tenant": "local",
+    "releaseTag": "local"
+  },
+  "runtime": {
+    "cd": false,
+    "local": true,
+    "name": "DockerDesktop"
+  },
+  "tenant_metadata": {
+    "gke_cluster_name": "",
+    "region": "",
+    "project": ""
+  },
+  "vars": {
+    "secretStore": "fakeopserversecretstore",
+    "containerRegistry": {
+      "repo": "stackoverflow/cr-dev",
+      "url": "crdev.stackoverflow.software",
+      "pullSecretname": "local"
+    },
+    "imagePullPolicy": "IfNotPresent",
+    "replicaCount": "1",
+    "aspnetcoreEnvironment": "Local",
+    "exceptionalStoreType": "Memory",
+    "exceptionalDbName": "",
+    "datadogAgentHost": "127.0.0.1",
+    "datadogAgentPort": "8125",
+    "includeIngress": "true",
+    "adminRolebindingGroupId": "",
+    "requestsCPU": "",
+    "requestsMemory": "",
+    "limitsMemory": "",
+    "isHADRPrimary": "true",
+    "podDisruptionBudgetMinAvailable": "1",
+    "opserverSettings": {
+      "hostUrl": "opserver.docker.local",
+
+      "sql": [
+        { "name": "host.docker.internal" }
+      ],
+      "exceptions": [
+        { "serverName": "host.docker.internal", "database": "Local.Exceptions" }        
+      ]
+    }
+  }
+}

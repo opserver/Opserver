@@ -100,23 +100,34 @@ spec:
             secretKeyRef:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalServername
-        - name: SQL_EXCEPTIONAL_USERNAME
+        - name: SQL_USERNAME
           valueFrom:
             secretKeyRef:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalUsername
-        - name: SQL_EXCEPTIONAL_PASSWORD
+        - name: SQL_PASSWORD
           valueFrom:
             secretKeyRef:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalPassword
 
+      {{- if hasKey .Values.opserverSettings "sql" }}      
         - name: Modules__Sql__defaultConnectionString
-          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_EXCEPTIONAL_USERNAME);Password=$(SQL_EXCEPTIONAL_PASSWORD);"
-        - name: Modules__Sql__instances__0__name
-          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME)"
-        - name: Modules__Exceptions__stores__0__connectionString
-          value: "$(Modules__Sql__defaultConnectionString);"
+          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
+        {{- range $i, $instance := .Values.opserverSettings.sql }}
+        - name: Modules__Sql__instances__{{ $i }}__name
+          value: "{{ $instance.name }}"
+        {{- end }}
+      {{- end }}
+
+      {{- if hasKey .Values.opserverSettings "exceptions" }}      
+        - name: Modules__Sql__defaultConnectionString
+          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
+        {{- range $i, $instance := .Values.opserverSettings.exceptions }}
+        - name: Modules__Exceptions__stores__{{ $i }}__connectionString
+          value: "Server={{ $instance.serverName}};Database={{ $instance.database}};User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
+        {{- end }}
+      {{- end }}
 
       topologySpreadConstraints:
         - maxSkew: 1
