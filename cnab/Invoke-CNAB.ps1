@@ -9,7 +9,7 @@ param (
     [string]
     $target = "GCP",
     [string]
-    $CNABImage = "stackmail-cnab:local"
+    $CNABImage = "opserver-cnab:local"
 )
 
 # Function to check if a command exists
