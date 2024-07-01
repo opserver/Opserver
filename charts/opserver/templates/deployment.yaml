@@ -121,8 +121,6 @@ spec:
       {{- end }}
 
       {{- if hasKey .Values.opserverSettings "exceptions" }}      
-        - name: Modules__Sql__defaultConnectionString
-          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
         {{- range $i, $instance := .Values.opserverSettings.exceptions }}
         - name: Modules__Exceptions__stores__{{ $i }}__connectionString
           value: "Server={{ $instance.serverName}};Database={{ $instance.database}};User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
