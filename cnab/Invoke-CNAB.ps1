@@ -119,7 +119,7 @@ if ($RunAsContainer) {
 else {
     Check-CommandExists -Command "kubectl"
 
-    $env:CNAB_ACTION = "install"
+    $env:CNAB_ACTION = $Action
     $env:INSTALLATION_METADATA = $MetaJsonPath
     
     if ($target -eq "GCP") {
