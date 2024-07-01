@@ -204,16 +204,6 @@ namespace Opserver
                               }
                           }
                       })
-                      .UseExceptionHandler(errorApp =>
-                          {
-                            errorApp.Run(ctx =>
-                            {
-                                var logger = ctx.RequestServices.GetRequiredService<ILogger<Startup>>();
-                                var exception = ctx.Features.Get<IExceptionHandlerFeature>().Error;
-                                logger.LogError(exception, exception.Message);
-                                return Task.CompletedTask;
-                            });
-                      })
                       .UseExceptional()
                       .UseRouting()
                       .UseMiniProfiler()
