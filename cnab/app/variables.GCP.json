@@ -1,0 +1,44 @@
+{
+  "pipeline": {
+    "environment": "dev",
+    "product": "pubplat",
+    "project": "opserver",
+    "tenant": "sandbox",
+    "releaseTag": "pr-250"
+  },
+  "runtime": {
+    "cd": false,
+    "local": true,
+    "name": "GCP"
+  },
+  "tenant_metadata": {
+    "gke_cluster_name": "gke-sandbox-uc1-a",
+    "region": "us-central1",
+    "project": "gke-sandbox-2809"
+  },
+  "vars": {
+    "secretStore": "cluster-secrets",
+    "imagePullPolicy": "Always",
+    "replicaCount": "1",
+    "aspnetcoreEnvironment": "Dev",
+    "exceptionalStoreType": "Sql",
+    "exceptionalDbName": "Dev.Exceptions",
+    "datadogAgentHost": "127.0.0.1",
+    "datadogAgentPort": "8125",
+    "includeIngress": "true",
+    "adminRolebindingGroupId": "",
+    "requestsCPU": "",
+    "requestsMemory": "",
+    "limitsMemory": "",
+    "isHADRPrimary": "true",
+    "podDisruptionBudgetMinAvailable": "1",
+    "opserverSettings": {
+      "sql": [
+        { "name": "host.docker.internal" }
+      ],
+      "exceptions": [
+        { "serverName": "host.docker.internal" }        
+      ]
+    }
+  }
+}

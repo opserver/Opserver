@@ -22,7 +22,13 @@ WORKDIR /app/src/Opserver.Web
 RUN dotnet publish -c Release -o publish
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS web
+FROM cr.stackoverflow.software/so-aspnet:6.0-jammy-chiseled AS base
+
+USER $APP_UID
+
 WORKDIR /app
-COPY --from=web-publish /app/src/Opserver.Web/publish ./
+COPY --chown=app:app --from=web-publish /app/src/Opserver.Web/publish ./
+COPY --chown=app:app --from=web-publish /app/src/Opserver.Web/opserverSettings.json ./Config/opserverSettings.json
+
+
 ENTRYPOINT ["dotnet", "Opserver.Web.dll"]

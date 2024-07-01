@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
@@ -6,7 +7,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Opserver.Helpers;
-
 namespace Opserver
 {
     public static class Program
@@ -36,7 +36,8 @@ namespace Opserver
                                 // End compat
                                 .AddJsonFile("Config/opserverSettings.json", optional: true, reloadOnChange: true)
                                 .AddJsonFile("opserverSettings.json", optional: true, reloadOnChange: true)
-                                .AddJsonFile("localSettings.json", optional: true, reloadOnChange: true);
+                                .AddJsonFile("localSettings.json", optional: true, reloadOnChange: true)
+                                .AddEnvironmentVariables();
                         }
                     )
                     .ConfigureLogging(

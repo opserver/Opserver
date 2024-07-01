@@ -1,15 +1,19 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.Net.Http.Headers;
@@ -166,6 +170,7 @@ namespace Opserver
             services.AddSingleton<SecurityManager>();
             services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
             services.AddMvc();
+            services.AddHealthChecks();
         }
 
         private static readonly StringValues DefaultCacheControl = new CacheControlHeaderValue
@@ -212,7 +217,30 @@ namespace Opserver
                           return next();
                       })
                       .UseResponseCaching()
-                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute());
+                      .UseEndpoints(endpoints => endpoints.MapDefaultControllerRoute())
+                      .UseHealthChecks("/health-checks/ready",
+                        // Readiness:
+                        // Signal that the application has started and is ready to accept traffic.
+                        // This also allows the application to signal that it is live but currently
+                        // cannot accept new requests because for example it's currently overloaded.
+                        // Kubernetes will not restart the application if this endpoint returns unhealthy.
+                        new HealthCheckOptions
+                        {
+                            AllowCachingResponses = false,
+                            Predicate = registration => registration.Tags.Contains("ready")
+                        })
+                        // Liveliness:
+                        // Signal that the application is running and is ready to accept traffic. This
+                        // endpoint is used to continually determine whether the entire application is
+                        // still in a healthy state.
+                        // Kubernetes _will_ restart the application if this endpoint returns unhealthy.
+                        .UseHealthChecks("/health-checks/live",
+                            new HealthCheckOptions
+                            {
+                                AllowCachingResponses = false,
+                                Predicate =
+                                    _ => false // We don't use any healthchecks for liveliness, just that the app responds
+                     });
             NavTab.ConfigureAll(modules); // TODO: UseNavTabs() or something
             Cache.Configure(settings);
         }
