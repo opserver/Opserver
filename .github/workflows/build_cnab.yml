@@ -1,0 +1,38 @@
+name: Build CNAB invocation image
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        description: The version to use for the Octopus release
+        type: string
+        required: true
+    secrets:
+      registry_username:
+        required: true
+      registry_password:
+        required: true
+
+env:
+  CNAB_IMAGE_NAME: ${{ github.ref_name == 'main' && vars.CLOUDSMITH_DOCKER_REGISTRY_PROD || vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}/stackeng/opserver/opserver-cnab
+
+jobs:
+  build_image:
+    name: Build and release CNAB invocation image
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - uses: ./.github/actions/build_docker
+      with:
+        version: ${{ inputs.version }}
+        dockerfile_path: ./cnab/build/Dockerfile
+        image_name: ${{ env.CNAB_IMAGE_NAME }}
+        registry_dev: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}
+        registry_prod: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}
+        registry_username: ${{ secrets.registry_username }}
+        registry_password: ${{ secrets.registry_password }}
+  
