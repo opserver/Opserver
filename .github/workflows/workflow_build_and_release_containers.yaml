@@ -18,6 +18,8 @@ jobs:
     outputs:
       version: ${{ steps.date-version.outputs.version }}
     steps: 
+    - name: Checkout repo so we have local action file
+      uses: actions/checkout@v4
     - name: Generate Date Version
       id: date-version
       uses: ./github/actions/generate_date_version
