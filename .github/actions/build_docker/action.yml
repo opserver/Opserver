@@ -35,10 +35,6 @@ runs:
     - name: Setup up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
-    - name: Generate Date Version
-      id: date-version
-      uses: StackEng/CoreEngineering.CITools/actions/date_version@v1
-
     - name: Docker Image Metadata
       id: metadata
       uses: docker/metadata-action@v5

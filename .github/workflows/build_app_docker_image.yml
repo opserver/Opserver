@@ -29,14 +29,15 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0 #Fetch entire history for NerdBank to calculate the version
-        
-    - name: Setup NuGet access
-      uses: StackEng/PlatEngTools/actions/nuget-sources@main
-      with:
-        GH_NUGET_FEED: ${{ vars.CLOUDSMITH_NUGET }}
-        GH_NUGET_USER: ${{ secrets.nuget_user }}
-        GH_NUGET_RO_PAT: ${{ secrets.nuget_password }}
-        NUGET_CLEANUP_FEEDS: ProGet
+
+# Disable until access can be sorted        
+#    - name: Setup NuGet access
+#      uses: StackEng/PlatEngTools/actions/nuget-sources@main
+#      with:
+#        GH_NUGET_FEED: ${{ vars.CLOUDSMITH_NUGET }}
+#        GH_NUGET_USER: ${{ secrets.nuget_user }}
+#        GH_NUGET_RO_PAT: ${{ secrets.nuget_password }}
+#        NUGET_CLEANUP_FEEDS: ProGet
 
     - uses: ./.github/actions/build_docker
       id: image
@@ -49,12 +50,13 @@ jobs:
         registry_username: ${{ secrets.registry_username }}
         registry_password: ${{ secrets.registry_password }}        
         scan_image: true
-    
-    - name: Await opserver docker image to be ready in Cloudsmith
-      uses: StackEng/TeamsScaleTools/actions/cloudsmith-awaiter@main
-      with:
-        cloudsmith_api_key: ${{ secrets.registry_password }}
-        cloudsmith_org: stackoverflow
-        cloudsmith_repo: ${{ github.ref_name == 'main' && 'cr' || 'cr-dev' }}
-        cloudsmith_query: "name:opserver tag:${{ inputs.version }}"
+
+# Disable until access can be sorted.    
+#    - name: Await opserver docker image to be ready in Cloudsmith
+#      uses: StackEng/TeamsScaleTools/actions/cloudsmith-awaiter@main
+#      with:
+#        cloudsmith_api_key: ${{ secrets.registry_password }}
+#        cloudsmith_org: stackoverflow
+#        cloudsmith_repo: ${{ github.ref_name == 'main' && 'cr' || 'cr-dev' }}
+#        cloudsmith_query: "name:opserver tag:${{ inputs.version }}"
 
