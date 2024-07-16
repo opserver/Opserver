@@ -14,7 +14,7 @@ on:
         required: true
 
 env:
-  CNAB_IMAGE_NAME: ${{ github.ref_name == 'main' && vars.CLOUDSMITH_DOCKER_REGISTRY_PROD || vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}/stackeng/opserver/opserver-cnab
+  CNAB_IMAGE_NAME: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}/stackeng/opserver/opserver-cnab
 
 jobs:
   build_image:
