@@ -41,12 +41,3 @@ jobs:
         registry_password: ${{ secrets.registry_password }}        
         scan_image: true
 
-# Disable until access can be sorted.    
-#    - name: Await opserver docker image to be ready in Cloudsmith
-#      uses: StackEng/TeamsScaleTools/actions/cloudsmith-awaiter@main
-#      with:
-#        cloudsmith_api_key: ${{ secrets.registry_password }}
-#        cloudsmith_org: stackoverflow
-#        cloudsmith_repo: ${{ github.ref_name == 'main' && 'cr' || 'cr-dev' }}
-#        cloudsmith_query: "name:opserver tag:${{ inputs.version }}"
-
