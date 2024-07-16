@@ -22,7 +22,7 @@ jobs:
       uses: actions/checkout@v4
     - name: Generate Date Version
       id: date-version
-      uses: ./github/actions/date_version
+      uses: ./.github/actions/date_version
 
   build_docker:
     needs: [generate_date_version]
