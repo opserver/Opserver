@@ -18,18 +18,9 @@ jobs:
     outputs:
       version: ${{ steps.date-version.outputs.version }}
     steps: 
-# manually generate version until permissions are sorted
-#    - name: Generate Date Version
-#      id: date-version
-#      uses: StackEng/CoreEngineering.CITools/actions/date_version@v1
-    - name: Set Version
-      if: ${{ github.ref_name == 'main' }}
-      run: |
-        # Year.Month.Day.HourMinSec (no zero padding in each segment)
-        VERSION="$(date -u +'%Y.%-m.%-d.%-H%M%S')"
-        echo "version=$version" >> $env:GITHUB_OUTPUT
-        echo "generated version: $version"
-
+    - name: Generate Date Version
+      id: date-version
+      uses: ./github/actions/generate_date_version
 
   build_docker:
     needs: [generate_date_version]

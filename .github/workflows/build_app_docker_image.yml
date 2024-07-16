@@ -30,14 +30,6 @@ jobs:
       with:
         fetch-depth: 0 #Fetch entire history for NerdBank to calculate the version
 
-    - name: Setup NuGet access
-      uses: StackEng/PlatEngTools/actions/nuget-sources@main
-      with:
-        GH_NUGET_FEED: ${{ vars.CLOUDSMITH_NUGET }}
-        GH_NUGET_USER: ${{ secrets.nuget_user }}
-        GH_NUGET_RO_PAT: ${{ secrets.nuget_password }}
-        NUGET_CLEANUP_FEEDS: ProGet
-
     - uses: ./.github/actions/build_docker
       id: image
       with:

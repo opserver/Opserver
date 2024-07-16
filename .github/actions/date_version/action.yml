@@ -1,0 +1,27 @@
+name: Date Based Version
+description: Generates a version based on todays date and the github actions run number.  Exposes this version as an output variable.
+outputs:
+  version:
+    description: "Generated Date Based Version"
+    value: ${{ steps.generate-version.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - name: Generate Version
+      id: generate-version
+      shell: pwsh
+      run: |
+        # modulo the build number to ensure we don't overflow the max patch value allowed by nuget
+        $buildNumber = $env:GITHUB_RUN_NUMBER%65535
+        $version = "$(Get-Date -Format "yyyy.M.d").$buildNumber"
+
+        # add the -pr suffix when this is running on a PR branch
+        $github_ref = "${{ github.ref }}"
+        if ($github_ref.StartsWith("refs/pull"))
+        {
+          $version = "${version}-pr"
+        }
+
+        echo "version=$version" >> $env:GITHUB_OUTPUT
+        echo "generated version: $version"
