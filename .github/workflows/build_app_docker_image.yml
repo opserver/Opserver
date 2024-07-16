@@ -18,7 +18,7 @@ on:
 
 env:
     BUILDKIT_PROGRESS: plain
-    SERVICE_IMAGE_NAME: ${{ github.ref_name == 'main' && vars.CLOUDSMITH_DOCKER_REGISTRY_PROD || vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}/stackeng/opserver/opserver
+    SERVICE_IMAGE_NAME: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}/stackeng/opserver/opserver
 
 jobs:
   build_docker:
@@ -36,7 +36,6 @@ jobs:
         version: ${{ inputs.version }}
         dockerfile_path: ./Dockerfile
         image_name: ${{ env.SERVICE_IMAGE_NAME }}
-        registry_dev: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}
         registry_prod: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}
         registry_username: ${{ secrets.registry_username }}
         registry_password: ${{ secrets.registry_password }}        

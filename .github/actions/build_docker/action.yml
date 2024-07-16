@@ -11,9 +11,6 @@ inputs:
   image_name:
     description: The Docker image name, with the registry prefix
     required: true
-  registry_dev:
-    description: Docker registry dev
-    required: true
   registry_prod:
     description: Docker registry prod
     required: true
@@ -48,13 +45,6 @@ runs:
           ${{ inputs.version }},priority=1
           ${{ github.ref_name == 'main' && '' || format('pr-{0}', github.event.pull_request.number) }}
         flavor: latest=false
-
-    - name: Login to Docker Registry - dev
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ inputs.registry_dev }}
-        username: ${{ inputs.registry_username }}
-        password: ${{ inputs.registry_password }}
 
     - name: Login to Docker Registry - prod
       uses: docker/login-action@v3

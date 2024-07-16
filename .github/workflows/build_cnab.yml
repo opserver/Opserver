@@ -31,7 +31,6 @@ jobs:
         version: ${{ inputs.version }}
         dockerfile_path: ./cnab/build/Dockerfile
         image_name: ${{ env.CNAB_IMAGE_NAME }}
-        registry_dev: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_DEV }}
         registry_prod: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}
         registry_username: ${{ secrets.registry_username }}
         registry_password: ${{ secrets.registry_password }}
