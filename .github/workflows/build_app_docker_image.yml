@@ -1,0 +1,43 @@
+name: Build docker
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+    secrets:
+      registry_username:
+        required: true
+      registry_password:
+        required: true
+      nuget_user:
+        required: true
+      nuget_password:
+        required: true
+
+env:
+    BUILDKIT_PROGRESS: plain
+    SERVICE_IMAGE_NAME: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}/stackeng/opserver/opserver
+
+jobs:
+  build_docker:
+    name: Docker build and push
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 #Fetch entire history for NerdBank to calculate the version
+
+    - uses: ./.github/actions/build_docker
+      id: image
+      with:
+        version: ${{ inputs.version }}
+        dockerfile_path: ./Dockerfile
+        image_name: ${{ env.SERVICE_IMAGE_NAME }}
+        registry_prod: ${{ vars.CLOUDSMITH_DOCKER_REGISTRY_PROD }}
+        registry_username: ${{ secrets.registry_username }}
+        registry_password: ${{ secrets.registry_password }}        
+        scan_image: true
+

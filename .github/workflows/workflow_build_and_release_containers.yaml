@@ -1,0 +1,45 @@
+name: Build images and create Octopus release
+run-name: 'Build images and create release'
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths-ignore:
+      - README.md
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - README.md
+
+jobs:
+  generate_date_version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.date-version.outputs.version }}
+    steps: 
+    - name: Checkout repo so we have local action file
+      uses: actions/checkout@v4
+    - name: Generate Date Version
+      id: date-version
+      uses: ./.github/actions/date_version
+
+  build_docker:
+    needs: [generate_date_version]
+    uses: ./.github/workflows/build_app_docker_image.yml
+    with:
+      version: ${{ needs.generate_date_version.outputs.version }}
+    secrets:
+      registry_username: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
+      registry_password: ${{ secrets.CLOUDSMITH_API_KEY }}
+      nuget_user: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
+      nuget_password: ${{ secrets.CLOUDSMITH_API_KEY }}
+
+  build_cnab:
+    uses: ./.github/workflows/build_cnab.yml
+    needs: [generate_date_version]
+    with:
+      version: ${{ needs.generate_date_version.outputs.version }}
+    secrets:
+      registry_username: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
+      registry_password: ${{ secrets.CLOUDSMITH_API_KEY }}
