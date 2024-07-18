@@ -58,7 +58,7 @@ ingress:
 db:
   ExceptionalDbName: Local.Exceptions
 
-opserverSecret:
+opserverExternalSecret:
   name: opserver-secret
   refreshInterval: 5m
   storeRefName: fakeopserversecretstore

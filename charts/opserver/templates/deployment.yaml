@@ -123,12 +123,12 @@ spec:
         - name: Security__ClientId
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opserverSecret.targetName }}
+              name: {{ .Values.opserverExternalSecret.targetName }}
               key: oktaClientId
         - name: Security__ClientSecret
           valueFrom:
             secretKeyRef:
-              name: {{ .Values.opserverSecret.targetName }}
+              name: {{ .Values.opserverExternalSecret.targetName }}
               key: oktaClientSecret
         - name: Security__AuthorizationUrl
           value: "https://stackoverflow.okta.com/oauth2/v1/authorize"

@@ -174,6 +174,17 @@ switch ($action) {
         }
       }
 
+      opserverExternalSecret       = @{
+        name            = "opserver-external-secret"
+        refreshInterval = "5m"
+        storeRefName    = $vars.vars.secretStore
+        targetName      = "opserver-secret"
+        remoteRefs      = @{
+          oktaClientId      = "opserver-okta-client-id"
+          oktaClientSecret  = "opserver-okta-client-secret"
+        }
+      }
+
       opserverSettings       = $vars.vars.opserverSettings
 
       adminRolebindingGroupId = $vars.vars.adminRolebindingGroupId
