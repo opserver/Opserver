@@ -54,6 +54,7 @@ namespace Opserver.Controllers
         [DefaultRoute("")]
         public ActionResult Home()
         {
+            Console.WriteLine("Home Page loaded");
             // TODO: Order
             foreach (var m in Modules)
             {

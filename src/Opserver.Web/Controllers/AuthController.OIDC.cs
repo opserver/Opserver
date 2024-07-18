@@ -241,6 +241,7 @@ namespace Opserver.Controllers
                 .Add("nonce", Guid.NewGuid().ToString("N"));
 
             authorizationUrl.Query = queryString.ToUriComponent();
+            Console.WriteLine($"Redirecting to {authorizationUrl}");
 
             return Redirect(authorizationUrl.ToString());
         }
