@@ -113,7 +113,7 @@ spec:
         - name: Security__Provider
           value: {{ .Values.security.provider }}
 
-{{- if eq .Values.opserverSettings.security.provider "OIDC" }}              
+{{- if and (.Values.opserverSettings.security) (eq .Values.opserverSettings.security.provider "OIDC") }}
         - name: Security__Name
           value: "Okta"
         - name: Security__ViewEverythingGroups
