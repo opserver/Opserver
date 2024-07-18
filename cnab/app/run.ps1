@@ -159,6 +159,7 @@ switch ($action) {
         host       = $vars.vars.opserverSettings.hostUrl
         enabled    = $vars.vars.includeIngress
         secretName = "opserver-tls"
+        createTlsCert = $true
       }
 
       sqlExternalSecret       = @{
