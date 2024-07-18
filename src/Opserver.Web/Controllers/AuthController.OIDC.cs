@@ -27,7 +27,7 @@ namespace Opserver.Controllers
         private const string OidcIdentifierKey = "id";
         private const string OidcReturnUrlKey = "returnUrl";
 
-        private async Task<string> GetRedirectUri()
+        private string GetRedirectUri()
         {
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
             var scheme = "https"; //(oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
@@ -90,7 +90,7 @@ namespace Opserver.Controllers
             // hooray! we're all set, let's go fetch our access token
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
             var scopes = oidcSettings.Scopes ?? OIDCSecuritySettings.DefaultScopes;
-            var redirectUri = await GetRedirectUri();
+            var redirectUri = GetRedirectUri();
 
             var form = new NameValueCollection
             {
@@ -226,7 +226,7 @@ namespace Opserver.Controllers
 
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
             var scheme = "https"; //(oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
-            var redirectUri = await GetRedirectUri();
+            var redirectUri = GetRedirectUri();
 
             // construct the URL to the authorization endpoint
             var authorizationUrl = new UriBuilder(oidcSettings.AuthorizationUrl);
