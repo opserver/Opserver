@@ -47,8 +47,8 @@ $releaseTag = $vars.pipeline.releaseTag
 # PR container images are located in `cr-dev` in CloudSmith. As opposed to `cr` which we use for release builds.
 $isPr = $releaseTag -match '^pr-[0-9]+$'
 if ($isPr) {
-  $containerRegistryUrl = 'crdev.stackoverflow.software'
-  $pullSecretName = 'cloudsmith-cr-dev'
+  $containerRegistryUrl = 'cr.stackoverflow.software'
+  $pullSecretName = 'cloudsmith-cr-prod'
   $forceUpgrade = @('--force') # This'll force pods to be recreated with freshly-pulled images
 }
 else {
@@ -154,11 +154,12 @@ switch ($action) {
       }
 
       ingress                 = @{
-        className  = "nginx-external"
+        className  = "nginx-internal"
         certIssuer = "letsencrypt-dns-prod"
         host       = $vars.vars.opserverSettings.hostUrl
         enabled    = $vars.vars.includeIngress
         secretName = "opserver-tls"
+        createTlsCert = $true
       }
 
       sqlExternalSecret       = @{
