@@ -216,11 +216,12 @@ namespace Opserver.Controllers
                 });
 
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
+            var scheme = (oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
             var redirectUri = Url.Action(
                 nameof(OAuthCallback),
                 ControllerContext.ActionDescriptor.ControllerName,
                 null,
-                Request.Scheme,
+                scheme,
                 Request.Host.Value,
                 null
             );

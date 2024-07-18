@@ -114,6 +114,8 @@ spec:
           value: {{ .Values.opserverSettings.security.provider }}
 
 {{- if eq .Values.opserverSettings.security.provider "OIDC" }}
+        - name: Security__UseHttpsForRedirects
+          value: "true"
         - name: Security__Name
           value: "Okta"
         - name: Security__ViewEverythingGroups
