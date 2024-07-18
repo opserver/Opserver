@@ -154,7 +154,7 @@ switch ($action) {
       }
 
       ingress                 = @{
-        className  = "nginx-external"
+        className  = "nginx-internal"
         certIssuer = "letsencrypt-dns-prod"
         host       = $vars.vars.opserverSettings.hostUrl
         enabled    = $vars.vars.includeIngress
