@@ -111,9 +111,9 @@ spec:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalPassword
         - name: Security__Provider
-          value: {{ .Values.security.provider }}
+          value: {{ .Values.opserverSettings.security.provider }}
 
-{{- if and (.Values.opserverSettings.security) (eq .Values.opserverSettings.security.provider "OIDC") }}
+{{- if eq .Values.opserverSettings.security.provider "OIDC" }}
         - name: Security__Name
           value: "Okta"
         - name: Security__ViewEverythingGroups
