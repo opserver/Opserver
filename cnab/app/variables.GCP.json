@@ -38,7 +38,12 @@
       ],
       "exceptions": [
         { "serverName": "host.docker.internal" }        
-      ]
+      ],
+      "security": {
+        "adminGroups": ["OpserverDev-Admin"],
+        "viewGroups": ["OpserverDev-View"],
+        "provider": "OIDC"          
+      }
     }
   }
 }

@@ -5,6 +5,11 @@ tier: "Local"
 product: "public" # used for datadog metrics and logs
 aspnetcoreEnvironment: "Local"
 
+security:
+  provider: "EveryonesAnAdmin"
+  viewGroups: ""
+  adminGroups: ""
+
 requests:
   cpu: "1m"
   memory: "1M"
@@ -52,6 +57,15 @@ ingress:
 
 db:
   ExceptionalDbName: Local.Exceptions
+
+opserverSecret:
+  name: opserver-secret
+  refreshInterval: 5m
+  storeRefName: fakeopserversecretstore
+  targetName: opserver-secret
+  remoteRefs:
+    oktaClientId: opserver-okta-client-id
+    oktaClientSecret: opserver-okta-client-secret
 
 sqlExternalSecret:
   name: opserver-sqldb-external-secret
