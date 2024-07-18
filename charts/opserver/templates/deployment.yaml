@@ -113,13 +113,13 @@ spec:
         - name: Security__Provider
           value: {{ .Values.security.provider }}
 
-{{- if eq .Values.security.provider "OIDC" }}              
+{{- if eq .Values.opserverSettings.security.provider "OIDC" }}              
         - name: Security__Name
           value: "Okta"
         - name: Security__ViewEverythingGroups
-          value: {{ .Values.security.viewGroups | quote }}
+          value: {{ .Values.opserverSettings.security.viewGroups | quote }}
         - name: Security__AdminEverythingGroups
-          value: {{ .Values.security.adminGroups | quote }}
+          value: {{ .Values.opserverSettings.security.adminGroups | quote }}
         - name: Security__ClientId
           valueFrom:
             secretKeyRef:

@@ -5,11 +5,6 @@ tier: "Local"
 product: "public" # used for datadog metrics and logs
 aspnetcoreEnvironment: "Local"
 
-security:
-  provider: "EveryonesAnAdmin"
-  viewGroups: ""
-  adminGroups: ""
-
 requests:
   cpu: "1m"
   memory: "1M"
