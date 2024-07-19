@@ -35,10 +35,10 @@
     "opserverSettings": {
       "hostUrl": "opserver.sandbox.int.gcp.stackoverflow.net",
       "sql": [
-        { "name": "host.docker.internal" }
+        { "name": "db.db" }
       ],
       "exceptions": [
-        { "serverName": "host.docker.internal" }        
+        { "serverName": "db.db" }        
       ],
       "security": {
         "adminGroups": ["OpserverDev-Admin"],
