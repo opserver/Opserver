@@ -27,10 +27,10 @@
             <P>
                 Your access:
                 <ul>
-                    <li>Account: @Current.Security.AccountName</li>
-                    <li>Is Anonymous: @Current.Security.IsAnonymous</li>
-                    <li>Is Global Admin: @Current.Security.IsGlobalAdmin</li>
-                    <li>Roles: @string.Join(", ", Current.Security.Roles)</li>
+                    <li>Account: @Current.User.AccountName</li>
+                    <li>Is Anonymous: @Current.User.IsAnonymous</li>
+                    <li>Is Global Admin: @Current.User.IsGlobalAdmin</li>
+                    <li>Roles: @string.Join(", ", Current.User.Roles)</li>
                 </ul>
             </P>
         }
