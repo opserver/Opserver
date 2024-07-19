@@ -39,7 +39,6 @@ namespace Opserver.Controllers
                 Request.Host.Value,
                 null
             );
-            Console.WriteLine($"Redirect Uri = {redirectUri}");
             return redirectUri;
         }
 
@@ -111,7 +110,7 @@ namespace Opserver.Controllers
             if (!response.Success)
             {
                 return Error(
-                    $"failed to exchange authorization code for access token. {response.StatusCode} - {response.Data} - uri {redirectUri}"
+                    $"failed to exchange authorization code for access token. {response.StatusCode} - {response.Data}"
                 );
             }
 

@@ -40,11 +40,13 @@ namespace Opserver.Security
 
         protected override bool InGroupsCore(User user, string[] groupNames)
         {
+            Console.WriteLine("Checking if user is in groups {0}", string.Join(", ", groupNames));
             var groupClaims = user.Principal.FindAll(x => x.Type == GroupsClaimType);
             foreach (var groupClaim in groupClaims)
             {
                 if (groupNames.Any(x => string.Equals(groupClaim.Value, x, StringComparison.OrdinalIgnoreCase)))
                 {
+                    Console.WriteLine("User is in group {0}", groupClaim.Value);
                     return true;
                 }
             }

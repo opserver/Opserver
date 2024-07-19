@@ -24,5 +24,11 @@ namespace Opserver.Controllers
         /// </summary>
         [Route("admin/errors/{resource?}/{subResource?}"), AlsoAllow(Roles.LocalRequest)]
         public Task InvokeErrorHandler() => ExceptionalMiddleware.HandleRequestAsync(HttpContext);
+
+        [Route("admin/throw"), AlsoAllow(Roles.LocalRequest)]
+        public ActionResult Throw()
+        {
+            throw new System.Exception("This is a test exception");
+        }
     }
 }

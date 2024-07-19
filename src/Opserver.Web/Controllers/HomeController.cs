@@ -54,15 +54,18 @@ namespace Opserver.Controllers
         [DefaultRoute("")]
         public ActionResult Home()
         {
-            Console.WriteLine("Home Page loaded");
             // TODO: Order
             foreach (var m in Modules)
             {
                 //if (m.Enabled && m.SecuritySettings)
                 //    return RedirectToAction()...
+                Console.WriteLine(m)
             }
 
-            static bool AllowMeMaybe(StatusModule m) => m.Enabled && Current.User.HasAccess(m);
+            static bool AllowMeMaybe(StatusModule m) {
+                Console.WriteLine($"Module: {m.Name}, Enabled: {m.Enabled}, HasAccess: {Current.User.HasAccess(m)");
+                return m.Enabled && Current.User.HasAccess(m);
+            }
 
             if (AllowMeMaybe(Dashboard))
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");
