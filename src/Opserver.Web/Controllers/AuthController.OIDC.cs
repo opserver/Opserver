@@ -225,7 +225,6 @@ namespace Opserver.Controllers
                 });
 
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
-            var scheme = "https"; //(oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
             var redirectUri = GetRedirectUri();
 
             // construct the URL to the authorization endpoint
