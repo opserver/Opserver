@@ -111,7 +111,7 @@ namespace Opserver.Controllers
             if (!response.Success)
             {
                 return Error(
-                    $"failed to exchange authorization code for access token. {response.StatusCode} - {response.Data}"
+                    $"failed to exchange authorization code for access token. {response.StatusCode} - {response.Data} - uri {rediectUri}"
                 );
             }
 
