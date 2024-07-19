@@ -41,8 +41,8 @@
         { "serverName": "db.db" }        
       ],
       "security": {
-        "adminGroups": ["OpserverDev-Admin"],
-        "viewGroups": ["OpserverDev-View"],
+        "adminGroups": "OpserverDev-Admin",
+        "viewGroups": "OpserverDev-View",
         "provider": "OIDC"          
       }
     }
