@@ -59,11 +59,10 @@ namespace Opserver.Controllers
             {
                 //if (m.Enabled && m.SecuritySettings)
                 //    return RedirectToAction()...
-                Console.WriteLine(m)
             }
 
             static bool AllowMeMaybe(StatusModule m) {
-                Console.WriteLine($"Module: {m.Name}, Enabled: {m.Enabled}, HasAccess: {Current.User.HasAccess(m)");
+                Console.WriteLine($"Module: {m.Name}, Enabled: {m.Enabled}, HasAccess: {Current.User.HasAccess(m)}");
                 return m.Enabled && Current.User.HasAccess(m);
             }
 
