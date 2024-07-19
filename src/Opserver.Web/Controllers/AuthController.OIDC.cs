@@ -50,6 +50,7 @@ namespace Opserver.Controllers
 
             if (!Current.Security.IsConfigured)
             {
+                Console.WriteLine("No Security is configured!");
                 return View("NoConfiguration");
             }
 
