@@ -41,17 +41,10 @@ namespace Opserver.Security
         protected override bool InGroupsCore(User user, string[] groupNames)
         {
             var groupClaims = user.Principal.FindAll(x => x.Type == GroupsClaimType);
-            var groupClaimValues = groupClaims.Select(x => x.Value).ToArray();
-            var intersection = groupClaimValues.Intersect(groupNames, StringComparer.OrdinalIgnoreCase);
-            Console.WriteLine("Checking if user is in groups [{0}].  User is in these groups: [{1}].  Intersect: [{2}]",
-                string.Join(", ", groupNames),
-                string.Join(", ", groupClaimValues),
-                string.Join(", " , intersection));
-            foreach (var groupClaim in groupClaimValues)
+            foreach (var groupClaim in groupClaims)
             {
-                if (groupNames.Any(x => string.Equals(groupClaim, x, StringComparison.OrdinalIgnoreCase)))
+                if (groupNames.Any(x => string.Equals(groupClaim.Value, x, StringComparison.OrdinalIgnoreCase)))
                 {
-                    Console.WriteLine("User is in group {0}", groupClaim);
                     return true;
                 }
             }

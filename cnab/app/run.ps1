@@ -150,7 +150,6 @@ switch ($action) {
       }
 
       image                   = @{
-        pullPolicy = "Always"
         pullSecretName = $pullSecretName
       }
 

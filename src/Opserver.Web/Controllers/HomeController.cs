@@ -61,10 +61,7 @@ namespace Opserver.Controllers
                 //    return RedirectToAction()...
             }
 
-            static bool AllowMeMaybe(StatusModule m) {
-                Console.WriteLine($"Module: {m.Name}, Enabled: {m.Enabled}, HasAccess: {Current.User.HasAccess(m)}");
-                return m.Enabled && Current.User.HasAccess(m);
-            }
+            static bool AllowMeMaybe(StatusModule m) => m.Enabled && Current.User.HasAccess(m);
 
             if (AllowMeMaybe(Dashboard))
                 return RedirectToAction(nameof(DashboardController.Dashboard), "Dashboard");

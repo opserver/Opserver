@@ -24,15 +24,6 @@
             <p>
                 You can browse to <a href="~/about">/about</a> to see how you have been authenticated and what monitors have been enabled.
             </p>    
-            <P>
-                Your access:
-                <ul>
-                    <li>Account: @Current.User.AccountName</li>
-                    <li>Is Anonymous: @Current.User.IsAnonymous</li>
-                    <li>Is Global Admin: @Current.User.IsGlobalAdmin</li>
-                    <li>Roles: @string.Join(", ", Current.User.Roles)</li>
-                </ul>
-            </P>
         }
     </div>
 </div>

@@ -38,7 +38,7 @@
         { "name": "db.db" }
       ],
       "exceptions": [
-        { "serverName": "db.db" }        
+        { "serverName": "db.db", "database": "Dev.Exceptions" }        
       ],
       "security": {
         "adminGroups": "OpserverDev-Admin",

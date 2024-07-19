@@ -30,7 +30,7 @@ namespace Opserver.Controllers
         private string GetRedirectUri()
         {
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
-            var scheme = "https"; //(oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
+            var scheme = (oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
             var redirectUri = Url.Action(
                 nameof(OAuthCallback),
                 ControllerContext.ActionDescriptor.ControllerName,
@@ -50,7 +50,6 @@ namespace Opserver.Controllers
 
             if (!Current.Security.IsConfigured)
             {
-                Console.WriteLine("No Security is configured!");
                 return View("NoConfiguration");
             }
 
@@ -242,7 +241,6 @@ namespace Opserver.Controllers
                 .Add("nonce", Guid.NewGuid().ToString("N"));
 
             authorizationUrl.Query = queryString.ToUriComponent();
-            Console.WriteLine($"Redirecting to {authorizationUrl}");
 
             return Redirect(authorizationUrl.ToString());
         }
