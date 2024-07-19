@@ -118,11 +118,11 @@ spec:
           value: "true"
         - name: Security__Name
           value: "Okta"
-        {{- range $i, $groupName := .Values.security.viewGroups }}          
+        {{- range $i, $groupName := .Values.opserverSettings.security.viewGroups }}          
         - name: Security__ViewEverythingGroups__{{ $i }}
           value: {{ $groupName | quote }}
         {{- end }}
-        {{- range $i, $groupName := .Values.security.adminGroups }}          
+        {{- range $i, $groupName := .Values.opserverSettings.security.adminGroups }}          
         - name: Security__AdminEverythingGroups__{{ $i }}
           value: {{ $groupName | quote }}
         {{- end }}
