@@ -152,10 +152,10 @@ spec:
 
       {{- if hasKey .Values.opserverSettings "sql" }}      
         {{- range $i, $instance := .Values.opserverSettings.sql }}
-        {{ - if eq $i 0 }}
+          {{- if eq $i 0 }}
         - name: Modules__Sql__defaultConnectionString
           value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=master;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
-        {{- end }}
+          {{- end }}
         - name: Modules__Sql__instances__{{ $i }}__name
           value: "{{ $instance.name }}"
         {{- end }}
