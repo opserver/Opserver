@@ -163,26 +163,11 @@ switch ($action) {
       }
 
       sqlExternalSecret       = @{
-        name            = "opserver-sqldb-external-secret"
-        refreshInterval = "5m"
         storeRefName    = $vars.vars.secretStore
-        targetName      = "sql-secret"
-        remoteRefs      = @{
-          exceptionalServerName = "ExceptionsSqlServerName"
-          exceptionalUsername   = "db-opserver-User"
-          exceptionalPassword   = "db-opserver-Password"
-        }
       }
 
       opserverExternalSecret       = @{
-        name            = "opserver-external-secret"
-        refreshInterval = "5m"
         storeRefName    = $vars.vars.secretStore
-        targetName      = "opserver-secret"
-        remoteRefs      = @{
-          oktaClientId      = "opserver-okta-client-id"
-          oktaClientSecret  = "opserver-okta-client-secret"
-        }
       }
 
       opserverSettings       = $vars.vars.opserverSettings
