@@ -163,15 +163,11 @@ switch ($action) {
       }
 
       sqlExternalSecret       = @{
-        name            = "opserver-sqldb-external-secret"
-        refreshInterval = "5m"
         storeRefName    = $vars.vars.secretStore
-        targetName      = "sql-secret"
-        remoteRefs      = @{
-          exceptionalServerName = "ExceptionsSqlServerName"
-          exceptionalUsername   = "db-opserver-User"
-          exceptionalPassword   = "db-opserver-Password"
-        }
+      }
+
+      opserverExternalSecret       = @{
+        storeRefName    = $vars.vars.secretStore
       }
 
       opserverSettings       = $vars.vars.opserverSettings

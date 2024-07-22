@@ -53,6 +53,15 @@ ingress:
 db:
   ExceptionalDbName: Local.Exceptions
 
+opserverExternalSecret:
+  name: opserver-secret
+  refreshInterval: 5m
+  storeRefName: fakeopserversecretstore
+  targetName: opserver-secret
+  remoteRefs:
+    oktaClientId: opserver-okta-client-id
+    oktaClientSecret: opserver-okta-client-secret
+
 sqlExternalSecret:
   name: opserver-sqldb-external-secret
   refreshInterval: 5m

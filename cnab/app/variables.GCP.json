@@ -4,11 +4,11 @@
     "product": "pubplat",
     "project": "opserver",
     "tenant": "sandbox",
-    "releaseTag": "pr-250"
+    "releaseTag": "pr-5"
   },
   "runtime": {
     "cd": false,
-    "local": true,
+    "local": false,
     "name": "GCP"
   },
   "tenant_metadata": {
@@ -33,12 +33,18 @@
     "isHADRPrimary": "true",
     "podDisruptionBudgetMinAvailable": "1",
     "opserverSettings": {
+      "hostUrl": "opserver.sandbox.int.gcp.stackoverflow.net",
       "sql": [
-        { "name": "host.docker.internal" }
+        { "name": "db.db" }
       ],
       "exceptions": [
-        { "serverName": "host.docker.internal" }        
-      ]
+        { "serverName": "db.db", "database": "Dev.Exceptions" }        
+      ],
+      "security": {
+        "adminGroups": "OpserverDev-Admin",
+        "viewGroups": "OpserverDev-View",
+        "provider": "OIDC"          
+      }
     }
   }
 }

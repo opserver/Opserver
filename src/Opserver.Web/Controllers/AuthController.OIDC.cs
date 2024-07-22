@@ -27,6 +27,21 @@ namespace Opserver.Controllers
         private const string OidcIdentifierKey = "id";
         private const string OidcReturnUrlKey = "returnUrl";
 
+        private string GetRedirectUri()
+        {
+            var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
+            var scheme = (oidcSettings.UseHttpsForRedirects ? "https" : Request.Scheme);
+            var redirectUri = Url.Action(
+                nameof(OAuthCallback),
+                ControllerContext.ActionDescriptor.ControllerName,
+                null,
+                scheme,
+                Request.Host.Value,
+                null
+            );
+            return redirectUri;
+        }
+
         [AllowAnonymous]
         [HttpGet("login/oauth/callback")]
         public async Task<IActionResult> OAuthCallback(string code, string state, string error = null)
@@ -74,14 +89,7 @@ namespace Opserver.Controllers
             // hooray! we're all set, let's go fetch our access token
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
             var scopes = oidcSettings.Scopes ?? OIDCSecuritySettings.DefaultScopes;
-            var redirectUri = Url.Action(
-                nameof(OAuthCallback),
-                ControllerContext.ActionDescriptor.ControllerName,
-                null,
-                Request.Scheme,
-                Request.Host.Value,
-                null
-            );
+            var redirectUri = GetRedirectUri();
 
             var form = new NameValueCollection
             {
@@ -216,14 +224,7 @@ namespace Opserver.Controllers
                 });
 
             var oidcSettings = (OIDCSecuritySettings) Current.Security.Settings;
-            var redirectUri = Url.Action(
-                nameof(OAuthCallback),
-                ControllerContext.ActionDescriptor.ControllerName,
-                null,
-                Request.Scheme,
-                Request.Host.Value,
-                null
-            );
+            var redirectUri = GetRedirectUri();
 
             // construct the URL to the authorization endpoint
             var authorizationUrl = new UriBuilder(oidcSettings.AuthorizationUrl);

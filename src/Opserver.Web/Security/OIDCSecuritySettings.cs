@@ -46,5 +46,10 @@
         /// Gets or sets the name of the "name" claim.
         /// </summary>
         public string GroupsClaim { get; set; } = "groups";
+
+        /// <summary>
+        /// When redirecting to an OIDC provider, whether to always use https for the redirect/referral.
+        /// </summary>
+        public bool UseHttpsForRedirects { get; set; } = false;
     }
 }

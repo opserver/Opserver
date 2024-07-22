@@ -110,10 +110,49 @@ spec:
             secretKeyRef:
               name: {{ .Values.sqlExternalSecret.targetName }}
               key: exceptionalPassword
+        - name: Security__Provider
+          value: {{ .Values.opserverSettings.security.provider }}
+
+{{- if eq .Values.opserverSettings.security.provider "OIDC" }}
+        - name: Security__UseHttpsForRedirects
+          value: "true"
+        - name: Security__Name
+          value: "Okta"
+        - name: Security__ViewEverythingGroups
+          value: {{ .Values.opserverSettings.security.viewGroups | quote }}
+        - name: Security__AdminEverythingGroups
+          value: {{ .Values.opserverSettings.security.adminGroups | quote }}
+        - name: Security__ClientId
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.opserverExternalSecret.targetName }}
+              key: oktaClientId
+        - name: Security__ClientSecret
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.opserverExternalSecret.targetName }}
+              key: oktaClientSecret
+        - name: Security__AuthorizationUrl
+          value: "https://stackoverflow.okta.com/oauth2/v1/authorize"
+        - name: Security__AccessTokenUrl
+          value: "https://stackoverflow.okta.com/oauth2/v1/token"
+        - name: Security__UserInfoUrl
+          value: "https://stackoverflow.okta.com/oauth2/v1/userinfo"
+        - name: Security__NameClaim
+          value: "preferred_username"
+        - name: Security__GroupsClaim
+          value: "groups"
+        - name: Security__Scopes__0
+          value: "email"
+        - name: Security__Scopes__1
+          value: "groups"
+        - name: Security__Scopes__2
+          value: "profile"          
+{{- end }}
 
       {{- if hasKey .Values.opserverSettings "sql" }}      
         - name: Modules__Sql__defaultConnectionString
-          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=Local.Exceptions;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
+          value: "Server=$(SQL_EXCEPTIONAL_SERVERNAME);Database=master;User ID=$(SQL_USERNAME);Password=$(SQL_PASSWORD);"
         {{- range $i, $instance := .Values.opserverSettings.sql }}
         - name: Modules__Sql__instances__{{ $i }}__name
           value: "{{ $instance.name }}"
