@@ -43,3 +43,18 @@ jobs:
     secrets:
       registry_username: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
       registry_password: ${{ secrets.CLOUDSMITH_API_KEY }}
+  create_release:
+    needs: [build_docker, build_cnab]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Octopus CLI
+        run: dotnet tool install Octopus.DotNet.Cli
+      - name: Create Octo Release
+        if: ${{ github.ref_name == 'main' }}
+        run: |
+          octoSpaceId="Spaces-1"
+          octoProjectId="Projects-2241"
+
+          dotnet octo create-release --project=$octoProjectId --space=$octoSpaceId --version=${{ needs.generate_date_version.outputs.version }} \
+          --gitRef=main --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }}
+          # Note: The gitRef param is for the Octo config repo and not the git repo for the code
