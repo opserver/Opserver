@@ -47,8 +47,10 @@ jobs:
     needs: [build_docker, build_cnab]
     runs-on: ubuntu-latest
     steps:
-      - name: Install Octopus CLI
-        run: dotnet tool install Octopus.DotNet.Cli
+      - name: Install octopus .NET tool
+        run: |
+          dotnet tool install --global Octopus.DotNet.Cli --version 9.1.7
+          dotnet octo --version
       - name: Create Octo Release
         if: ${{ github.ref_name == 'main' }}
         run: |
