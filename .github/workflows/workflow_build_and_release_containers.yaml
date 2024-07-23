@@ -52,7 +52,7 @@ jobs:
           dotnet tool install --global Octopus.DotNet.Cli --version 9.1.7
           dotnet octo --version
       - name: Create Octo Release if main or deploy to sandbox label present
-        if: ${{ github.ref_name == 'main' || contains(github.event.issue.labels.*.name, 'deploy-to-sandbox') }}
+        if: ${{ github.ref_name == 'main' || github.event.label.name == 'deploy-to-sandbox') }}
         run: |
           octoSpaceId="Spaces-1"
           octoProjectId="Projects-2241"
@@ -61,7 +61,7 @@ jobs:
           --gitRef=main --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }}
           # Note: The gitRef param is for the Octo config repo and not the git repo for the code
       - name: Deploy via Octopus if main or deploy to sandbox label present
-        if: ${{ github.ref_name == 'main' || contains(github.event.issue.labels.*.name, 'deploy-to-sandbox')  }}
+        if: ${{ github.ref_name == 'main' || github.event.label.name == 'deploy-to-sandbox')  }}
         run: |
           octoSpaceId="Spaces-1"
           octoProjectId="Projects-2241"
