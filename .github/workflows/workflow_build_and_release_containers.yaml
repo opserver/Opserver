@@ -68,5 +68,5 @@ jobs:
           environmentId="${{ github.ref_name == 'main' && 'Dev' || 'Sandbox' }}"
 
           dotnet octo deploy-release --project=$octoProjectId --space=$octoSpaceId --version=${{ needs.generate_date_version.outputs.version }} \
-          --gitRef=main --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }} --deployTo=$environmentId
+          --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }} --deployTo=$environmentId
           # Note: The gitRef param is for the Octo config repo and not the git repo for the code          
