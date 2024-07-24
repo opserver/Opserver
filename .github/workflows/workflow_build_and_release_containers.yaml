@@ -55,13 +55,15 @@ jobs:
       - name: determine if we should create release and deploy
         id: should-create-release
         run: |
-          echo "labels: ${{ github.pull_request.labels.*.name }}"
+          declare -a label_arr = ${{ github.pull_request.labels.*.name }}
+          for label in "${label_arr[@]}"; do
+            echo "label: $label"
+          done
           if [[ ${{ github.ref_name == 'main' || github.pull_request.labels.*.name == 'deploy-to-sandbox' }} ]]; then
             echo "SHOULD_CREATE_RELEASE=true" >> $GITHUB_ENV
           else
             echo "SHOULD_CREATE_RELEASE=false" >> $GITHUB_ENV
           fi
-          echo "should run: ${{ env.SHOULD_CREATE_RELEASE }}"
       - name: Create Octo Release if main or deploy to sandbox label present
         if: env.SHOULD_CREATE_RELEASE == 'true'
         run: |
