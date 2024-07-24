@@ -4,6 +4,7 @@ run-name: 'Build images and create release'
 on:
   workflow_dispatch:
   pull_request:
+    types: [opened, reopened, synchronize, labeled, ready_for_review]
     paths-ignore:
       - README.md
   push:
@@ -43,3 +44,38 @@ jobs:
     secrets:
       registry_username: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
       registry_password: ${{ secrets.CLOUDSMITH_API_KEY }}
+  create_release:
+    needs: [build_docker, build_cnab, generate_date_version]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install octopus .NET tool
+        run: |
+          dotnet tool install --global Octopus.DotNet.Cli --version 9.1.7
+          dotnet octo --version
+      - name: determine if we should create release and deploy
+        id: should-create-release
+        run: |
+          if [[ ${{ github.ref_name == 'main' || github.pull_request.labels.*.name == 'deploy-to-sandbox' }} ]]; then
+            echo "SHOULD_CREATE_RELEASE=true" >> $GITHUB_ENV
+          else
+            echo "SHOULD_CREATE_RELEASE=false" >> $GITHUB_ENV
+          fi
+      - name: Create Octo Release if main or deploy to sandbox label present
+        if: env.SHOULD_CREATE_RELEASE == 'true'
+        run: |
+          octoSpaceId="Spaces-1"
+          octoProjectId="Projects-2241"
+
+          dotnet octo create-release --project=$octoProjectId --space=$octoSpaceId --version=${{ needs.generate_date_version.outputs.version }} \
+          --gitRef=main --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }}
+          # Note: The gitRef param is for the Octo config repo and not the git repo for the code
+      - name: Deploy via Octopus if main or deploy to sandbox label present
+        if: env.SHOULD_CREATE_RELEASE == 'true'
+        run: |
+          octoSpaceId="Spaces-1"
+          octoProjectId="Projects-2241"
+          environmentId="${{ github.ref_name == 'main' && 'Dev' || 'Sandbox' }}"
+
+          dotnet octo deploy-release --project=$octoProjectId --space=$octoSpaceId --version=${{ needs.generate_date_version.outputs.version }} \
+          --server=${{ vars.OCTOPUS_CLOUD_URL }} --apiKey=${{ secrets.OCTOPUS_CLOUD_API_KEY }} --deployTo=$environmentId
+          # Note: The gitRef param is for the Octo config repo and not the git repo for the code          
