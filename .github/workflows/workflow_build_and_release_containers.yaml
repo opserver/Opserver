@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
   pull_request:
     types: [opened, reopened, synchronize, labeled, ready_for_review]
-        paths-ignore:
+    paths-ignore:
       - README.md
   push:
     branches:
