@@ -45,7 +45,7 @@ jobs:
       registry_username: ${{ secrets.CLOUDSMITH_API_ACCOUNT }}
       registry_password: ${{ secrets.CLOUDSMITH_API_KEY }}
   create_release:
-    needs: [build_docker, build_cnab]
+    needs: [build_docker, build_cnab, generate_date_version]
     runs-on: ubuntu-latest
     steps:
       - name: Install octopus .NET tool
@@ -55,7 +55,6 @@ jobs:
       - name: determine if we should create release and deploy
         id: should-create-release
         run: |
-          echo "labels: ${{ toJSON(github.event.pull_request.labels.*.name) }}"
           if [[ ${{ github.ref_name == 'main' || github.pull_request.labels.*.name == 'deploy-to-sandbox' }} ]]; then
             echo "SHOULD_CREATE_RELEASE=true" >> $GITHUB_ENV
           else
