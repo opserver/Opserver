@@ -55,9 +55,7 @@ jobs:
       - name: determine if we should create release and deploy
         id: should-create-release
         run: |
-          for label in "${{github.pull_request.labels.*.name}}"; do
-            echo "label: $label"
-          done
+          echo "labels: ${{ toJSON(github.event.pull_request.labels.*.name) }}"
           if [[ ${{ github.ref_name == 'main' || github.pull_request.labels.*.name == 'deploy-to-sandbox' }} ]]; then
             echo "SHOULD_CREATE_RELEASE=true" >> $GITHUB_ENV
           else
