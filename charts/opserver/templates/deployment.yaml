@@ -63,7 +63,8 @@ spec:
 
         - name: DOTNET_EnableDiagnostics
           value: "0"
-
+        - name: Logging__LogLevel__Microsoft
+          value: "Warning"
         - name: ASPNETCORE_ENVIRONMENT
           value: {{ .Values.aspnetcoreEnvironment }}
         - name: PRODUCT
