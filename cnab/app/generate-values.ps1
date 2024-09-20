@@ -79,7 +79,7 @@ function Generate-Values() {
     
     # Helm expects a YAML file but YAML is also a superset of JSON, so we can use ConvertTo-Json here
     $valuesFileContent = $values | ConvertTo-Json -Depth 100
-    Write-Output "Populated Helm values:"
-    Write-Output $valuesFileContent
+    Write-MinorStep "Populated Helm values:"
+    Write-MinorStep $valuesFileContent
     return $valuesFileContent
 }

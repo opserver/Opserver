@@ -12,9 +12,8 @@
     "name": "GCP"
   },
   "tenant_metadata": {
-    "gke_cluster_name": "gke-sandbox-uc1-a",
-    "region": "us-central1",
-    "project": "gke-sandbox-2809"
+    "deploymentGroupFilter": "labels.env=dev AND labels.project=base AND labels.product=pubplat AND labels.instance=ascn-dev",
+    "deploymentTargetFilter": "deployment_target=true"
   },
   "vars": {
     "secretStore": "cluster-secrets",
