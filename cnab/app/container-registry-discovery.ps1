@@ -23,6 +23,12 @@ function Find-ContainerRegistry([string]$imageTag) {
     return $containerRegistryDetails
   }
 
+  # Image tags that are PRs are in the format pr-xxx or yyyy.mm.dd.vv-pr
+  # where:
+  # - xxx is the github pull request number
+  # - yyyy.mm.dd is the date of the release
+  # - vv is the github run number
+  # - pr- and -pr are literals
   function IsPr([string]$imageTag) {
     $isPr = $imageTag -match '(^pr-[0-9]+(-[0-9]+)?$)|([0-9\.]*-pr?$)'
     Write-MinorStep "Is PR: $isPr"
