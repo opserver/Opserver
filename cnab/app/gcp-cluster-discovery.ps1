@@ -1,4 +1,4 @@
-function FindDeploymentGroup([string]$filter) {  
+function Find-DeploymentGroup([string]$filter) {  
   Write-MinorStep "Finding GCP deployment group (project) using filter: $filter"
   $projects = (gcloud projects list --filter=$filter --format=json | ConvertFrom-Json)
   if ($null -eq $projects -Or $projects.Count -eq 0) {
@@ -14,7 +14,7 @@ function FindDeploymentGroup([string]$filter) {
   return $project
 }
 
-function FindDeploymentTarget([string]$filter, [string]$deploymentGroup) {
+function Find-DeploymentTarget([string]$filter, [string]$deploymentGroup) {
   Write-MinorStep "Finding GCP deployment target (cluster) using filter: $filter and deployment group (project): $deploymentGroup"
 
   $clusters = (gcloud container clusters list --project=$deploymentGroup --format=json | ConvertFrom-Json)

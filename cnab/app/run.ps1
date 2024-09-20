@@ -19,7 +19,14 @@ trap {
   break
 }
 
-Write-Output "$($PSStyle.Bold)Installing opserver...$($PSStyle.BoldOff)"
+. $PSScriptRoot/app-discovery.ps1
+. $PSScriptRoot/generate-values.ps1
+. $PSScriptRoot/container-registry-discovery.ps1
+. $PSScriptRoot/utils.ps1
+
+
+$app = Get-AppName
+Write-Output "$($PSStyle.Bold)Installing $app...$($PSStyle.BoldOff)"
 
 $action = $env:CNAB_ACTION
 
@@ -29,7 +36,7 @@ if (-not $env:INSTALLATION_METADATA) {
 
 Write-Verbose "INSTALLATION_METADATA is set to '$env:INSTALLATION_METADATA'"
 $vars = (Get-Content $env:INSTALLATION_METADATA | ConvertFrom-Json) 
-. $PSScriptRoot/utils.ps1
+Initialize-Logging
 
 if ($runAsContainer) {
   Write-Output "Running as container"
@@ -44,18 +51,10 @@ $project = $vars.pipeline.project
 
 $releaseTag = $vars.pipeline.releaseTag
 
-# PR container images are located in `cr-dev` in CloudSmith. As opposed to `cr` which we use for release builds.
-$isPr = $releaseTag -match '^pr-[0-9]+$'
-if ($isPr) {
-  $containerRegistryUrl = 'cr.stackoverflow.software'
-  $pullSecretName = 'cloudsmith-cr-prod'
-  $forceUpgrade = @('--force') # This'll force pods to be recreated with freshly-pulled images
-}
-else {
-  $containerRegistryUrl = 'cr.stackoverflow.software'
-  $pullSecretName = 'cloudsmith-cr-prod'
-  $forceUpgrade = @()
-}
+$containerRegistryDetails = Find-ContainerRegistry $releaseTag
+$containerRegistryUrl = $containerRegistryDetails.Url
+$pullSecretName = $containerRegistryDetails.PullSecretName
+$forceUpgrade = $containerRegistryDetails.ForceUpgrade
 
 Write-Output "Container registry: $containerRegistryUrl"
 Write-Output "Pull secret name: $pullSecretName"
@@ -79,9 +78,9 @@ Write-MajorStep "Running $action for Tenant: $tenant - Environment: $environment
 
 if ($vars.runtime.name -eq "GCP") {
   . $PSScriptRoot/gcp-cluster-discovery.ps1
-  Write-MajorStep "Finding GCP deployment instance (project) and cluster"
-  $deploymentGroup = FindDeploymentGroup "labels.env=dev AND labels.project=base AND labels.product=pubplat AND labels.instance=ascn-dev"
-  $deploymentTarget = FindDeploymentTarget "deployment_target=true" $deploymentGroup
+  Write-MajorStep "Finding Deployment Group and Deployment Targetr"
+  $deploymentGroup = Find-DeploymentGroup "labels.env=dev AND labels.project=base AND labels.product=pubplat AND labels.instance=ascn-dev"
+  $deploymentTarget = Find-DeploymentTarget "deployment_target=true" $deploymentGroup
   
   if ($runAsContainer) {
     Write-MajorStep "Setting GCP cluster credentials"
@@ -94,8 +93,6 @@ if ($vars.runtime.name -eq "GCP") {
     
     # Get cluster credentials
     Start-Process gcloud -ArgumentList $clusterCredArgs -NoNewWindow -Wait  
-
-    exit 2
   }
 }
 
@@ -104,89 +101,7 @@ switch ($action) {
   "install" {
     Write-MajorStep "Install action"
 
-    $app = 'opserver'
-    
-    $values = @{
-      tier                    = $environment
-      replicaCount            = $vars.vars.replicaCount
-      aspnetcoreEnvironment   = $vars.vars.aspnetcoreEnvironment
-      exceptionalDbName       = $vars.vars.exceptionalDbName;
-      product                 = "pubplat"
-
-      images                  = @{
-        containerRegistry = "$containerRegistryUrl"
-        opserver         = @{
-          tag = $releaseTag
-        }
-      }
-
-      requests                = @{
-        cpu    = $vars.vars.requestsCPU
-        memory = $vars.vars.requestsMemory
-      }
-  
-      limits                  = @{
-        memory = $vars.vars.limitsMemory
-      }
-  
-      podDisruptionBudget     = @{
-        minAvailable = $vars.vars.podDisruptionBudgetMinAvailable
-      }
-
-      exceptional             = @{
-        store = @{
-          type = $vars.vars.exceptionalStoreType
-        }
-      }
-
-      datadog                 = @{
-        agentHost = $vars.vars.datadogAgentHost
-        agentPort = $vars.vars.datadogAgentPort
-      }
-      
-      kestrel                 = @{
-        endPoints = @{
-          http = @{
-            url           = "http://0.0.0.0:8080/"
-            containerPort = "8080"
-          }
-        }
-      }
-
-      secretStore             = @{
-        fake = $vars.runtime.local
-      }
-
-      image                   = @{
-        pullSecretName = $pullSecretName
-      }
-
-      ingress                 = @{
-        className  = "nginx-internal"
-        certIssuer = "letsencrypt-dns-prod"
-        host       = $vars.vars.opserverSettings.hostUrl
-        enabled    = $vars.vars.includeIngress
-        secretName = "opserver-tls"
-        createTlsCert = $true
-      }
-
-      sqlExternalSecret       = @{
-        storeRefName    = $vars.vars.secretStore
-      }
-
-      opserverExternalSecret       = @{
-        storeRefName    = $vars.vars.secretStore
-      }
-
-      opserverSettings       = $vars.vars.opserverSettings
-
-      adminRolebindingGroupId = $vars.vars.adminRolebindingGroupId
-    }
-    
-    # Helm expects a YAML file but YAML is also a superset of JSON, so we can use ConvertTo-Json here
-    $valuesFileContent = $values | ConvertTo-Json -Depth 100
-    Write-Output "Populated Helm values:"
-    Write-Output $valuesFileContent
+    $valuesFileContent = Generate-Values    
 
     $tmpDir = [System.IO.Directory]::CreateTempSubdirectory($app + '-')
     $valuesFilePath = (Join-Path $tmpDir.FullName 'populated-values.yml')
