@@ -79,8 +79,8 @@ Write-MajorStep "Running $action for Tenant: $tenant - Environment: $environment
 if ($vars.runtime.name -eq "GCP") {
   . $PSScriptRoot/gcp-cluster-discovery.ps1
   Write-MajorStep "Finding Deployment Group and Deployment Targetr"
-  $deploymentGroup = Find-DeploymentGroup $vars.tenant_metadata.deploymentGroupFilter
-  $deploymentTarget = Find-DeploymentTarget $vars.tenant_metadata.deploymentTargetFilter $deploymentGroup
+  $deploymentGroup = Find-DeploymentGroup $vars.deploymentDiscovery.deploymentGroupFilter
+  $deploymentTarget = Find-DeploymentTarget $vars.deploymentDiscovery.deploymentTargetFilter $deploymentGroup
   
   if ($runAsContainer) {
     Write-MajorStep "Setting GCP cluster credentials"
