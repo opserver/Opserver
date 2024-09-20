@@ -8,68 +8,68 @@ function Generate-Values() {
         product                 = "pubplat"
 
         images                  = @{
-        containerRegistry = "$containerRegistryUrl"
-        opserver         = @{
-            tag = $releaseTag
-        }
+            containerRegistry = "$containerRegistryUrl"
+            opserver         = @{
+                tag = $releaseTag
+            }
         }
 
         requests                = @{
-        cpu    = $vars.vars.requestsCPU
-        memory = $vars.vars.requestsMemory
+            cpu    = $vars.vars.requestsCPU
+            memory = $vars.vars.requestsMemory
         }
 
         limits                  = @{
-        memory = $vars.vars.limitsMemory
+            memory = $vars.vars.limitsMemory
         }
 
         podDisruptionBudget     = @{
-        minAvailable = $vars.vars.podDisruptionBudgetMinAvailable
+            minAvailable = $vars.vars.podDisruptionBudgetMinAvailable
         }
 
         exceptional             = @{
-        store = @{
-            type = $vars.vars.exceptionalStoreType
-        }
+            store = @{
+                type = $vars.vars.exceptionalStoreType
+            }
         }
 
         datadog                 = @{
-        agentHost = $vars.vars.datadogAgentHost
-        agentPort = $vars.vars.datadogAgentPort
+            agentHost = $vars.vars.datadogAgentHost
+            agentPort = $vars.vars.datadogAgentPort
         }
         
         kestrel                 = @{
-        endPoints = @{
-            http = @{
-            url           = "http://0.0.0.0:8080/"
-            containerPort = "8080"
+            endPoints = @{
+                http = @{
+                url           = "http://0.0.0.0:8080/"
+                containerPort = "8080"
+                }
             }
-        }
         }
 
         secretStore             = @{
-        fake = $vars.runtime.local
+            fake = $vars.runtime.local
         }
 
         image                   = @{
-        pullSecretName = $pullSecretName
+            pullSecretName = $pullSecretName
         }
 
         ingress                 = @{
-        className  = "nginx-internal"
-        certIssuer = "letsencrypt-dns-prod"
-        host       = $vars.vars.opserverSettings.hostUrl
-        enabled    = $vars.vars.includeIngress
-        secretName = "opserver-tls"
-        createTlsCert = $true
+            className  = "nginx-internal"
+            certIssuer = "letsencrypt-dns-prod"
+            host       = $vars.vars.opserverSettings.hostUrl
+            enabled    = $vars.vars.includeIngress
+            secretName = "opserver-tls"
+            createTlsCert = $true
         }
 
         sqlExternalSecret       = @{
-        storeRefName    = $vars.vars.secretStore
+            storeRefName    = $vars.vars.secretStore
         }
 
         opserverExternalSecret       = @{
-        storeRefName    = $vars.vars.secretStore
+            storeRefName    = $vars.vars.secretStore
         }
 
         opserverSettings       = $vars.vars.opserverSettings
