@@ -77,18 +77,26 @@ $releaseTag = $releaseTag -replace '([a-z0-9]{40})-.*', '$1'
 
 Write-MajorStep "Running $action for Tenant: $tenant - Environment: $environment - Project: $project in cloud: $($vars.runtime.name)"
 
-if ($vars.runtime.name -eq "GCP" -and $runAsContainer) {
+if ($vars.runtime.name -eq "GCP") {
+  . $PSScriptRoot/gcp-cluster-discovery.ps1
+  Write-MajorStep "Finding GCP deployment instance (project) and cluster"
+  $deploymentGroup = FindDeploymentGroup "labels.env=dev AND labels.project=base AND labels.product=pubplat AND labels.instance=ascn-dev"
+  $deploymentTarget = FindDeploymentTarget "deployment_target=true" $deploymentGroup
   
-  Write-MajorStep "Setting GCP cluster credentials"
+  if ($runAsContainer) {
+    Write-MajorStep "Setting GCP cluster credentials"
 
-  # Default cluster cred args
-  $clusterCredArgs = @("container clusters get-credentials",
-    $vars.tenant_metadata.gke_cluster_name,
-    "--region", $vars.tenant_metadata.region,
-    "--project", $vars.tenant_metadata.project)
-  
-  # Get cluster credentials
-  Start-Process gcloud -ArgumentList $clusterCredArgs -NoNewWindow -Wait
+    # Default cluster cred args
+    $clusterCredArgs = @("container clusters get-credentials",
+      $deploymentTarget.name,
+      "--region", $deploymentTarget.location,
+      "--project", $deploymentGroup)
+    
+    # Get cluster credentials
+    Start-Process gcloud -ArgumentList $clusterCredArgs -NoNewWindow -Wait  
+
+    exit 2
+  }
 }
 
 switch ($action) {
