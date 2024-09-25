@@ -17,7 +17,6 @@
     "project": ""
   },
   "vars": {
-    "singleRegistry": true,
     "secretStore": "cluster-secrets",
     "imagePullPolicy": "IfNotPresent",
     "replicaCount": "1",

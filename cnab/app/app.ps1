@@ -3,6 +3,10 @@ function Get-AppName() {
     return $app
 }
 
+function Is-SingleRegistry() {
+    return $True
+}
+
 function Generate-Values($vars, $environment, $containerRegistryUrl, $releaseTag, $pullSecretName) {  
     Write-MajorStep "Generating Helm values"
     $values = @{
