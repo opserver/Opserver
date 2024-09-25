@@ -19,10 +19,10 @@ trap {
   break
 }
 
-. $PSScriptRoot/app-discovery.ps1
-. $PSScriptRoot/generate-values.ps1
+. $PSScriptRoot/app.ps1
 . $PSScriptRoot/container-registry-discovery.ps1
 . $PSScriptRoot/utils.ps1
+. $PSScriptRoot/gcp-cluster-discovery.ps1
 
 
 $app = Get-AppName
@@ -51,7 +51,7 @@ $project = $vars.pipeline.project
 
 $releaseTag = $vars.pipeline.releaseTag
 
-$containerRegistryDetails = Find-ContainerRegistry $releaseTag
+$containerRegistryDetails = Find-ContainerRegistry $releaseTag $vars.vars.singleRegistry
 $containerRegistryUrl = $containerRegistryDetails.Url
 $pullSecretName = $containerRegistryDetails.PullSecretName
 $forceUpgrade = $containerRegistryDetails.ForceUpgrade
@@ -77,7 +77,6 @@ $releaseTag = $releaseTag -replace '([a-z0-9]{40})-.*', '$1'
 Write-MajorStep "Running $action for Tenant: $tenant - Environment: $environment - Project: $project in cloud: $($vars.runtime.name)"
 
 if ($vars.runtime.name -eq "GCP") {
-  . $PSScriptRoot/gcp-cluster-discovery.ps1
   Write-MajorStep "Finding Deployment Group and Deployment Targetr"
   $deploymentGroup = Find-DeploymentGroup $vars.deploymentDiscovery.deploymentGroupFilter
   $deploymentTarget = Find-DeploymentTarget $vars.deploymentDiscovery.deploymentTargetFilter $deploymentGroup
@@ -101,7 +100,7 @@ switch ($action) {
   "install" {
     Write-MajorStep "Install action"
 
-    $valuesFileContent = Generate-Values    
+    $valuesFileContent = Generate-Values $vars $environment $containerRegistryUrl $releaseTag $pullSecretName
 
     $tmpDir = [System.IO.Directory]::CreateTempSubdirectory($app + '-')
     $valuesFilePath = (Join-Path $tmpDir.FullName 'populated-values.yml')

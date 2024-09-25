@@ -21,6 +21,7 @@
     "deploymentTargetFilter": "deployment_target=true"
   },
   "vars": {
+    "singleRegistry": true,
     "secretStore": "cluster-secrets",
     "imagePullPolicy": "Always",
     "replicaCount": "1",

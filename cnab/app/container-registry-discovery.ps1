@@ -1,15 +1,21 @@
-function Find-ContainerRegistry([string]$imageTag) {
+function Find-ContainerRegistry([string]$imageTag, [bool]$singleRegistry) {
     Write-MinorStep "Finding Container Registry for tag: $imageTag"
-    # PR container images are located in `cr-dev` in CloudSmith. As opposed to `cr` which we use for release builds.
+    
+    # default container registry;  for PRs in some apps we still use cr-dev and we will override
+    # below if we detect a PR and singleRegistry is false
+    $containerRegistryUrl = 'cr.stackoverflow.software'
+    $pullSecretName = 'cloudsmith-cr-prod'
+
     $isPr = IsPr $imageTag
+
     if ($isPr) {
-        $containerRegistryUrl = 'cr.stackoverflow.software'
-        $pullSecretName = 'cloudsmith-cr-prod'
+        if (-not $singleRegistry) {
+            $containerRegistryUrl = 'cr-dev.stackoverflow.software'
+            $pullSecretName = 'cloudsmith-cr-dev'
+        }
         $forceUpgrade = @('--force') # This'll force pods to be recreated with freshly-pulled images
     }
     else {
-        $containerRegistryUrl = 'cr.stackoverflow.software'
-        $pullSecretName = 'cloudsmith-cr-prod'
         $forceUpgrade = @()
     }
 

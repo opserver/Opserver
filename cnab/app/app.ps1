@@ -1,4 +1,9 @@
-function Generate-Values() {  
+function Get-AppName() {  
+    $app = 'opserver'
+    return $app
+}
+
+function Generate-Values($vars, $environment, $containerRegistryUrl, $releaseTag, $pullSecretName) {  
     Write-MajorStep "Generating Helm values"
     $values = @{
         tier                    = $environment
