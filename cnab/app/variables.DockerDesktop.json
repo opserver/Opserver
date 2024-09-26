@@ -17,12 +17,7 @@
     "project": ""
   },
   "vars": {
-    "secretStore": "fakeopserversecretstore",
-    "containerRegistry": {
-      "repo": "stackoverflow/cr-dev",
-      "url": "crdev.stackoverflow.software",
-      "pullSecretname": "local"
-    },
+    "secretStore": "cluster-secrets",
     "imagePullPolicy": "IfNotPresent",
     "replicaCount": "1",
     "aspnetcoreEnvironment": "Local",
@@ -45,7 +40,13 @@
       ],
       "exceptions": [
         { "serverName": "host.docker.internal", "database": "Local.Exceptions" }        
-      ]
+      ],
+      "security": {
+        "adminGroups": "",
+        "viewGroups": "",
+        "provider": "EveryonesAnAdmin"          
+      }
+
     }
   }
 }

@@ -4,7 +4,7 @@
     "product": "pubplat",
     "project": "opserver",
     "tenant": "sandbox",
-    "releaseTag": "pr-5"
+    "releaseTag": "pr-10"
   },
   "runtime": {
     "cd": false,
@@ -12,9 +12,13 @@
     "name": "GCP"
   },
   "tenant_metadata": {
-    "gke_cluster_name": "gke-sandbox-uc1-a",
-    "region": "us-central1",
-    "project": "gke-sandbox-2809"
+    "gke_cluster_name": "",
+    "region": "",
+    "project": ""
+  },  
+  "deploymentDiscovery": {
+    "deploymentGroupFilter": "labels.env=dev AND labels.project=base AND labels.product=pubplat AND labels.instance=ascn-dev",
+    "deploymentTargetFilter": "resourceLabels.deployment_target=true"
   },
   "vars": {
     "secretStore": "cluster-secrets",
