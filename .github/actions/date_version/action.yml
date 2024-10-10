@@ -8,20 +8,25 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Generate Version
-      id: generate-version
-      shell: pwsh
-      run: |
-        # modulo the build number to ensure we don't overflow the max patch value allowed by nuget
-        $buildNumber = $env:GITHUB_RUN_NUMBER%65535
-        $version = "$(Get-Date -Format "yyyy.M.d").$buildNumber"
+  - name: Generate Version
+    id: generate-version
+    shell: bash
+    run: |
+      set -euo pipefail
+      github_run_number=${{ github.run_number }}
+      github_ref=${{ github.ref }}
+      build_number=$(($github_run_number % 65535))
 
-        # add the -pr suffix when this is running on a PR branch
-        $github_ref = "${{ github.ref }}"
-        if ($github_ref.StartsWith("refs/pull"))
-        {
-          $version = "${version}-pr"
-        }
+      date=$(date +%Y.%-m.%-d)
 
-        echo "version=$version" >> $env:GITHUB_OUTPUT
-        echo "generated version: $version"
+      version="${date}.${build_number}"
+      is_pr=0
+      echo $github_ref | grep "^refs\/pull\/" && is_pr=1
+
+      if [ $is_pr -eq 1 ]
+      then
+        version="${version}-pr"
+      fi
+
+      echo "Version: $version"
+      echo "version=$version" >> $GITHUB_OUTPUT
