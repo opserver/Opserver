@@ -24,6 +24,11 @@ namespace Opserver.Data.SQL
         public SQLServerEngine Engine { get; internal set; } = new SQLServerEngine(new Version(), SQLServerEditions.Standard); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
 
+        // Azure-specific database attributes
+        public string SKU { get; set; }
+        public string Edition { get; set; }
+        public string ElasticPoolName { get; set; }
+
         protected static readonly ConcurrentDictionary<Tuple<string, SQLServerEngine>, string> QueryLookup =
             new ConcurrentDictionary<Tuple<string, SQLServerEngine>, string>();
 
@@ -77,6 +82,8 @@ namespace Opserver.Data.SQL
                     yield return Connections;
                 if (Supports<SQLConnectionSummaryInfo>())
                     yield return ConnectionsSummary;
+                if (Supports<AzureResourceEvent>())
+                    yield return AzureResourceHistory;
             }
         }
 
