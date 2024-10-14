@@ -26,7 +26,7 @@
     {
         var plan = op.GetShowPlanXML();
         <div class="row small">
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="panel panel-default panel-condensed">
                     <div class="panel-heading"><i class="fa fa-bar-chart fa-fw"></i> CPU</div>
                     <div class="panel-body">
@@ -45,7 +45,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
                 <div class="panel panel-default panel-condensed">
                     <div class="panel-heading"><i class="fa fa-search fa-fw"></i> Reads</div>
                     <div class="panel-body">
@@ -64,7 +64,26 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-1">
+                <div class="panel panel-default panel-condensed">
+                    <div class="panel-heading"><i class="fa fa-search fa-fw"></i> Writes</div>
+                    <div class="panel-body">
+                        <div class="value-block">
+                            @op.TotalWrites.ToComma()
+                            <label>Total</label>
+                        </div>
+                        <div class="value-block">
+                            @op.AvgWrites.ToComma()
+                            <label>Average</label>
+                        </div>
+                        <div class="value-block">
+                            @op.PercentWrites.ToString("0.00")
+                            <label>% of Total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1">
                 <div class="panel panel-default panel-condensed">
                     <div class="panel-heading"><i class="fa fa-play fa-fw"></i> Executions</div>
                     <div class="panel-body">
