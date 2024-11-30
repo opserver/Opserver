@@ -28,13 +28,11 @@ namespace Opserver.Data.Elastic
             public string MonitorStatusReason => null;
 
             private List<ShardState> _allShards;
-            public List<ShardState> AllShards =>
-                _allShards ??
-                (_allShards = RoutingNodes?.Nodes.Values
+            public List<ShardState> AllShards => _allShards ??= RoutingNodes?.Nodes.Values
                     .SelectMany(i => i)
                     .Union(RoutingNodes.Unassigned)
                     .ToList()
-                              ?? new List<ShardState>());
+                ?? new List<ShardState>();
 
             [DataMember(Name = "cluster_name")]
             public string Name { get; internal set; }

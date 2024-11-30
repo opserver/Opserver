@@ -57,7 +57,7 @@ namespace Opserver.Helpers
         {
             if (exclusiveMax < 0)
             {
-                throw new ArgumentOutOfRangeException($"Must be >= 0, was {exclusiveMax}", nameof(exclusiveMax));
+                throw new ArgumentOutOfRangeException(nameof(exclusiveMax), $"Must be >= 0, was {exclusiveMax}");
             }
 
             var randomZeroToOneExclusiveDouble = NextDouble();
@@ -70,9 +70,7 @@ namespace Opserver.Helpers
         {
             if (inclusiveMin > exclusiveMax)
             {
-                throw new ArgumentOutOfRangeException(
-                    $"Must be <= {nameof(exclusiveMax)}, was {inclusiveMin} ({nameof(exclusiveMax)} = {exclusiveMax})",
-                    nameof(inclusiveMin));
+                throw new ArgumentOutOfRangeException(nameof(inclusiveMin), $"Must be <= {nameof(exclusiveMax)}, was {inclusiveMin} ({nameof(exclusiveMax)} = {exclusiveMax})");
             }
 
             // based on actual Random:

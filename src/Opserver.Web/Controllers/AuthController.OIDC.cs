@@ -194,7 +194,7 @@ namespace Opserver.Controllers
             return Redirect(returnUrl);
         }
 
-        private IActionResult RedirectToProvider(string returnUrl)
+        private RedirectResult RedirectToProvider(string returnUrl)
         {
             // first write a cookie representing some unique identifier
             // we'll use this to validate that the OIDC flow is for the specific

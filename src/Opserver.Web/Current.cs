@@ -12,7 +12,7 @@ namespace Opserver
 {
     public static class Current
     {
-        private static readonly AsyncLocal<CurrentContext> _context = new AsyncLocal<CurrentContext>();
+        private static readonly AsyncLocal<CurrentContext> _context = new();
         public static CurrentContext Context => _context.Value;
         public static void SetContext(CurrentContext context) => _context.Value = context;
 

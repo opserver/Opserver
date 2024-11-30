@@ -17,13 +17,13 @@ namespace Opserver.Helpers
 
         internal class WmiQuery : IDisposable
         {
-            private static readonly ConnectionOptions _localOptions = new ConnectionOptions
+            private static readonly ConnectionOptions _localOptions = new()
             {
                 EnablePrivileges = true
             };
-            private static readonly ConcurrentDictionary<(string Username, string Password), ConnectionOptions> _optionsCache = new ConcurrentDictionary<(string Username, string Password), ConnectionOptions>();
-            private static readonly ConcurrentDictionary<string, ManagementScope> _scopeCache = new ConcurrentDictionary<string, ManagementScope>();
-            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> _searcherCache = new ConcurrentDictionary<string, ManagementObjectSearcher>();
+            private static readonly ConcurrentDictionary<(string Username, string Password), ConnectionOptions> _optionsCache = new();
+            private static readonly ConcurrentDictionary<string, ManagementScope> _scopeCache = new();
+            private static readonly ConcurrentDictionary<string, ManagementObjectSearcher> _searcherCache = new();
 
             private ManagementObjectCollection _data;
             private readonly ManagementObjectSearcher _searcher;
@@ -54,29 +54,25 @@ namespace Opserver.Helpers
                 if (machineName == Environment.MachineName)
                     return _localOptions;
 
-                switch (machineName)
+                return machineName switch
                 {
-                    case "localhost":
-                    case "127.0.0.1":
-                    case "::1":
-                        return _localOptions;
-                    default:
-                        return _optionsCache.GetOrAdd(credentials, tuple =>
-                        {
-                            var options = new ConnectionOptions
-                            {
-                                EnablePrivileges = true,
-                                Authentication = AuthenticationLevel.Packet,
-                                Timeout = TimeSpan.FromSeconds(30)
-                            };
-                            if (tuple.Username.HasValue() && tuple.Password.HasValue())
-                            {
-                                options.Username = tuple.Username;
-                                options.Password = tuple.Password;
-                            }
-                            return options;
-                        });
-                }
+                    "localhost" or "127.0.0.1" or "::1" => _localOptions,
+                    _ => _optionsCache.GetOrAdd(credentials, tuple =>
+                                            {
+                                                var options = new ConnectionOptions
+                                                {
+                                                    EnablePrivileges = true,
+                                                    Authentication = AuthenticationLevel.Packet,
+                                                    Timeout = TimeSpan.FromSeconds(30)
+                                                };
+                                                if (tuple.Username.HasValue() && tuple.Password.HasValue())
+                                                {
+                                                    options.Username = tuple.Username;
+                                                    options.Password = tuple.Password;
+                                                }
+                                                return options;
+                                            }),
+                };
             }
 
             public Task<ManagementObjectCollection> Result

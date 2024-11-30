@@ -54,7 +54,7 @@ namespace Opserver.Data.Exceptions
         {
             var groups = Settings.Groups ?? Module.Settings.Groups;
             var applications = Settings.Applications ?? Module.Settings.Applications;
-            if (groups?.Any() ?? false)
+            if (groups?.Count > 0)
             {
                 var configured = groups
                     .Select(g => new ApplicationGroup
@@ -72,7 +72,7 @@ namespace Opserver.Data.Exceptions
             }
             // One big bucket if nothing is configured
             CatchAll = new ApplicationGroup { Name = "All" };
-            if (applications?.Any() ?? false)
+            if (applications?.Count > 0)
             {
                 CatchAll.Applications = applications.OrderBy(a => a).Select(a => new Application { Name = a }).ToList();
             }

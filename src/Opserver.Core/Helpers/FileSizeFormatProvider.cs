@@ -57,7 +57,7 @@ namespace Opserver.Helpers
                 suffix = " B";
             }
 
-            string precision = format.Substring(2);
+            string precision = format[2..];
             if (precision.IsNullOrEmpty()) precision = "2";
             return string.Format("{0:N" + precision + "}{1}", size, suffix);
         }

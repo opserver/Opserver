@@ -168,7 +168,7 @@ Order By NodeID", commandTimeout: QueryTimeoutMs);
                     {
                         n.Issues = new List<Issue<Node>>
                             {
-                                new Issue<Node>(n, "Orion", n.PrettyName)
+                                new(n, "Orion", n.PrettyName)
                                 {
                                     Date = n.LastSync ?? DateTime.UtcNow,
                                     Description = n.StatusDescription,

@@ -83,7 +83,7 @@ namespace Opserver.Data.SQL
             public string LoginName
             {
                 get { return _loginName; }
-                set { _loginName = _loginLookups.ContainsKey(value) ? _loginLookups[value] : value.Split(StringSplits.BackSlash).Last(); }
+                set { _loginName = _loginLookups.TryGetValue(value, out string stringVal) ? stringVal : value.Split(StringSplits.BackSlash).Last(); }
             }
 
             public string WaitInfo { get; internal set; }
@@ -165,7 +165,7 @@ namespace Opserver.Data.SQL
 Exec sp_WhoIsActive @format_output = 0;
 ";
 
-            private static readonly Dictionary<string, string> _loginLookups = new Dictionary<string, string>
+            private static readonly Dictionary<string, string> _loginLookups = new()
             {
                 ["NT AUTHORITY\\SYSTEM"] = "(Local System)"
             };

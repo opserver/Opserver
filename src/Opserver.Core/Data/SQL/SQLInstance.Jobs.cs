@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Data;
 using System.Data.Common;
 using System.Threading.Tasks;
@@ -85,18 +84,13 @@ namespace Opserver.Data.SQL
                 get
                 {
                     if (!LastRunStatus.HasValue) return MonitorStatus.Unknown;
-                    switch (LastRunStatus.Value)
+                    return LastRunStatus.Value switch
                     {
-                        case JobStatuses.Succeeded:
-                            return MonitorStatus.Good;
-                        case JobStatuses.Retry:
-                        case JobStatuses.Canceled:
-                            return MonitorStatus.Warning;
-                        case JobStatuses.Failed:
-                            return MonitorStatus.Critical;
-                        default:
-                            throw new ArgumentOutOfRangeException("", "LastRunStatus was not recognized");
-                    }
+                        JobStatuses.Succeeded => MonitorStatus.Good,
+                        JobStatuses.Retry or JobStatuses.Canceled => MonitorStatus.Warning,
+                        JobStatuses.Failed => MonitorStatus.Critical,
+                        _ => throw new ArgumentOutOfRangeException("", "LastRunStatus was not recognized"),
+                    };
                 }
             }
 

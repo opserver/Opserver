@@ -24,14 +24,14 @@ namespace Opserver.Data.Dashboard.Providers
             "dsname", "computationId", "plugin", "fs_type", "mountpoint"
         );
 
-        private static readonly SignalFlowStatement Cpu = new SignalFlowStatement("cpu.utilization");
-        private static readonly SignalFlowStatement Memory = new SignalFlowStatement("memory.used");
-        private static readonly SignalFlowStatement DiskUsage = new SignalFlowStatement("disk.utilization");
-        private static readonly SignalFlowStatement DiskUsageByHost = new SignalFlowStatement("disk.utilization", "sum(by=['host'])");
-        private static readonly SignalFlowStatement InterfaceRx = new SignalFlowStatement("if_octets.rx", rollup: "rate");
-        private static readonly SignalFlowStatement InterfaceRxByHost = new SignalFlowStatement("if_octets.rx", aggregation: "sum(by=['host'])", rollup: "rate");
-        private static readonly SignalFlowStatement InterfaceTx = new SignalFlowStatement("if_octets.tx", rollup: "rate");
-        private static readonly SignalFlowStatement InterfaceTxByHost = new SignalFlowStatement("if_octets.tx", aggregation: "sum(by=['host'])", rollup: "rate");
+        private static readonly SignalFlowStatement Cpu = new("cpu.utilization");
+        private static readonly SignalFlowStatement Memory = new("memory.used");
+        private static readonly SignalFlowStatement DiskUsage = new("disk.utilization");
+        private static readonly SignalFlowStatement DiskUsageByHost = new("disk.utilization", "sum(by=['host'])");
+        private static readonly SignalFlowStatement InterfaceRx = new("if_octets.rx", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceRxByHost = new("if_octets.rx", aggregation: "sum(by=['host'])", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceTx = new("if_octets.tx", rollup: "rate");
+        private static readonly SignalFlowStatement InterfaceTxByHost = new("if_octets.tx", aggregation: "sum(by=['host'])", rollup: "rate");
 
         private static readonly SignalFlowStatement[] _signalFlowStatements = new[] {
             Cpu,
@@ -92,15 +92,7 @@ namespace Opserver.Data.Dashboard.Providers
                 return result;
             }
 
-            public override bool Equals(object obj)
-            {
-                if (!(obj is TimeSeriesKey other))
-                {
-                    return false;
-                }
-
-                return Equals(other);
-            }
+            public override bool Equals(object obj) => obj is TimeSeriesKey other && Equals(other);
 
             public override int GetHashCode()
             {
@@ -167,16 +159,14 @@ namespace Opserver.Data.Dashboard.Providers
 
         private async Task<ImmutableList<TimeSeries>> GetMetricsAsync(IEnumerable<SignalFlowStatement> metrics, DateTime start, DateTime end, string host = "*", TimeSpan? resolution = null, CancellationToken cancellationToken = default)
         {
-            await using (var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cancellationToken))
-            {
-                await signalFlowClient.ConnectAsync();
+            await using var signalFlowClient = new SignalFlowClient(Settings.Realm, Settings.AccessToken, _logger, cancellationToken);
+            await signalFlowClient.ConnectAsync();
 
-                var results = await Task.WhenAll(
-                    metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m, host, start, end, resolution))
-                );
+            var results = await Task.WhenAll(
+                metrics.Select(m => ExecuteStatementAsync(signalFlowClient, m, host, start, end, resolution))
+            );
 
-                return results.SelectMany(x => x).ToImmutableList();
-            }
+            return results.SelectMany(x => x).ToImmutableList();
 
             static async Task<ImmutableList<TimeSeries>> ExecuteStatementAsync(SignalFlowClient client, SignalFlowStatement statement, string host, DateTime startDate, DateTime endDate, TimeSpan? resolution = null)
             {
@@ -591,7 +581,7 @@ namespace Opserver.Data.Dashboard.Providers
         {
             private long _channelId;
 
-            private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions
+            private static readonly JsonSerializerOptions _serializerOptions = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
@@ -601,7 +591,7 @@ namespace Opserver.Data.Dashboard.Providers
                 }
             };
 
-            private static readonly JsonSerializerOptions _deserializerOptions = new JsonSerializerOptions
+            private static readonly JsonSerializerOptions _deserializerOptions = new()
             {
                 PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
                 Converters =
@@ -617,7 +607,7 @@ namespace Opserver.Data.Dashboard.Providers
             private readonly string _accessToken;
             private readonly ClientWebSocket _socket;
             private readonly Channel<SignalFlowMessage> _requestChannel;
-            private readonly ConcurrentDictionary<string, Channel<SignalFlowMessage>> _responseChannels = new ConcurrentDictionary<string, Channel<SignalFlowMessage>>();
+            private readonly ConcurrentDictionary<string, Channel<SignalFlowMessage>> _responseChannels = new();
             private readonly CancellationToken _cancellationToken;
 
             private Task _sendTask;
@@ -679,11 +669,8 @@ namespace Opserver.Data.Dashboard.Providers
                     });
 
                 // wait for the "authenticated" message
-                var response = await WaitOneAsync<AuthenticatedMessage>();
-                if (response == null)
-                {
-                    throw new SignalFlowException("Unable to authenticate to SignalFlow endpoint.");
-                }
+                var response = await WaitOneAsync<AuthenticatedMessage>()
+                    ?? throw new SignalFlowException("Unable to authenticate to SignalFlow endpoint.");
             }
 
             public async IAsyncEnumerable<SignalFlowMessage> ExecuteAsync(string program, DateTime startDate, DateTime endDate, TimeSpan? resolution = null, bool includeMetadata = false)

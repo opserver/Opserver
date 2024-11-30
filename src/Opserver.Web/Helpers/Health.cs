@@ -26,10 +26,10 @@ namespace Opserver.Helpers
                 {
                     if (addSpace)
                     {
-                        sb.Append(" ");
+                        sb.Append(' ');
                         addSpace = false;
                     }
-                    sb.Append(status.IconSpan()).Append(" ").Append(count.ToComma());
+                    sb.Append(status.IconSpan()).Append(' ').Append(count.ToComma());
                     addSpace = true;
                 }
             }
@@ -56,7 +56,7 @@ namespace Opserver.Helpers
                 {
                     sb.Append(MonitorStatus.Good.Span(good.Count.ToComma(), good.Count.Pluralize("Healthy Database")));
                 }
-                sb.Append(" ");
+                sb.Append(' ');
                 if (bad.Count > 0)
                 {
                     if (good.Count > 0)
@@ -70,12 +70,12 @@ namespace Opserver.Helpers
             {
                 if (bad.Count > 0)
                 {
-                    sb.Append(MonitorStatus.Critical.IconSpan()).Append(" ").Append(bad.Count.ToComma()).Append(" Unhealthy");
+                    sb.Append(MonitorStatus.Critical.IconSpan()).Append(' ').Append(bad.Count.ToComma()).Append(" Unhealthy");
                 }
-                sb.Append(" ");
+                sb.Append(' ');
                 if (good.Count > 0)
                 {
-                    sb.Append(MonitorStatus.Good.IconSpan()).Append(" ").Append(good.Count.ToComma()).Append(" Healthy");
+                    sb.Append(MonitorStatus.Good.IconSpan()).Append(' ').Append(good.Count.ToComma()).Append(" Healthy");
                 }
             }
             return sb.ToStringRecycle().AsHtml();

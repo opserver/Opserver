@@ -148,9 +148,7 @@ namespace Opserver.Controllers
         {
             Current.LogException(new Exception("Test Exception via GlobalApplication.LogException()"));
 
-#pragma warning disable RCS1079 // Throwing of new NotImplementedException.
             throw new NotImplementedException("I AM IMPLEMENTED, I WAS BORN TO THROW ERRORS!");
-#pragma warning restore RCS1079 // Throwing of new NotImplementedException.
         }
     }
 }

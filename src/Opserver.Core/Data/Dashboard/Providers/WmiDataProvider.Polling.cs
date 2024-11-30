@@ -29,7 +29,7 @@ namespace Opserver.Data.Dashboard.Providers
             }
 
             private Wmi.WmiQuery Query(string query, string wmiNamespace = Wmi.DefaultWmiNamespace) =>
-                new Wmi.WmiQuery(Config, Endpoint, query, wmiNamespace);
+                new(Config, Endpoint, query, wmiNamespace);
 
             private async Task<bool> ClassExists(string className, string wmiNamespace = Wmi.DefaultWmiNamespace)
             {
@@ -440,7 +440,7 @@ SELECT Caption,
                 UpdateHistoryStorage(MemoryHistory, utilization);
             }
 
-            private static readonly ConcurrentDictionary<string, string> CounterLookup = new ConcurrentDictionary<string, string>();
+            private static readonly ConcurrentDictionary<string, string> CounterLookup = new();
 
             private static string GetCounterName(string original)
             {
@@ -617,7 +617,8 @@ SELECT Caption,
             /// Possible return codes from service actions
             /// https://msdn.microsoft.com/en-us/library/aa393660(v=vs.85).aspx
             /// </summary>
-            private static readonly Dictionary<int, string> Win32ServiceReturnCodes = new Dictionary<int, string> {
+            private static readonly Dictionary<int, string> Win32ServiceReturnCodes = new()
+            {
                 [0] = "The request was accepted.",
                 [1] = "The request is not supported.",
                 [2] = "The user did not have the necessary access.",

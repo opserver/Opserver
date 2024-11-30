@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System;
 
 namespace Opserver.Data.Dashboard
 {
@@ -48,7 +49,7 @@ namespace Opserver.Data.Dashboard
                         if (Bank == null) return null;
                         if (Name.Length > Bank.Length)
                         {
-                            if (int.TryParse(Name.Substring(Bank.Length), out int position))
+                            if (int.TryParse(Name.AsSpan(Bank.Length), out int position))
                             {
                                 _label = position;
                             }

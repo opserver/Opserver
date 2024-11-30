@@ -11,8 +11,8 @@ namespace Opserver.Data.Dashboard.Providers
 {
     public partial class SignalFxDataProvider : DashboardDataProvider<SignalFxSettings>
     {
-        private readonly List<GraphPoint> _emptyPoints = new List<GraphPoint>(0);
-        private readonly List<DoubleGraphPoint> _emptyDoublePoints = new List<DoubleGraphPoint>(0);
+        private readonly List<GraphPoint> _emptyPoints = new(0);
+        private readonly List<DoubleGraphPoint> _emptyDoublePoints = new(0);
         private readonly ILogger _logger;
 
         public SignalFxDataProvider(DashboardModule module, SignalFxSettings settings, ILogger logger) : base(module, settings)

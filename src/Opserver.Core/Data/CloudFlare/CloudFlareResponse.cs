@@ -94,27 +94,14 @@ namespace Opserver.Data.Cloudflare
         [DataMember(Name = "permissions")]
         public List<string> Permissons { get; set; }
 
-        public MonitorStatus MonitorStatus
+        public MonitorStatus MonitorStatus => Status switch
         {
-            get
-            {
-                switch (Status)
-                {
-                    case ZoneStatus.Active:
-                        return MonitorStatus.Good;
-                    case ZoneStatus.Pending:
-                    case ZoneStatus.Initializing:
-                    case ZoneStatus.Moved:
-                        return MonitorStatus.Warning;
-                    case ZoneStatus.Deleted:
-                        return MonitorStatus.Critical;
-                    case ZoneStatus.Deactivated:
-                        return MonitorStatus.Maintenance;
-                    default:
-                        return MonitorStatus.Unknown;
-                }
-            }
-        }
+            ZoneStatus.Active => MonitorStatus.Good,
+            ZoneStatus.Pending or ZoneStatus.Initializing or ZoneStatus.Moved => MonitorStatus.Warning,
+            ZoneStatus.Deleted => MonitorStatus.Critical,
+            ZoneStatus.Deactivated => MonitorStatus.Maintenance,
+            _ => MonitorStatus.Unknown,
+        };
 
         public string MonitorStatusReason => "Current status: " + Status;
     }

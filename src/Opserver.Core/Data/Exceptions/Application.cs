@@ -18,7 +18,7 @@ namespace Opserver.Data.Exceptions
         public int RecentExceptionCount { get; internal set; }
         public DateTime? MostRecent { get; internal set; }
 
-        private static readonly Regex _shortLogStripRegex = new Regex(@"[^A-Za-z_0-9_\-_\.\/]", RegexOptions.Compiled);
+        private static readonly Regex _shortLogStripRegex = new(@"[^A-Za-z_0-9_\-_\.\/]", RegexOptions.Compiled);
         private string _shortName;
 
         public string ShortName => _shortName ??= _shortLogStripRegex.Replace(Name, "");

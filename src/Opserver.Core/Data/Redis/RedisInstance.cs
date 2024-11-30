@@ -104,7 +104,7 @@ namespace Opserver.Data.Redis
         }
 
         // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
-        public static readonly SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
+        public static readonly SocketManager SharedSocketManager = new("Opserver Shared");
 
         private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 60000)
         {

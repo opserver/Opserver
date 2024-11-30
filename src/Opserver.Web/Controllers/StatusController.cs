@@ -53,7 +53,7 @@ namespace Opserver.Controllers
         /// </summary>
         /// <param name="content">The text content to render</param>
         protected ContentResult TextPlain(string content) =>
-            new ContentResult { Content = content, ContentType = "text/plain" };
+            new() { Content = content, ContentType = "text/plain" };
 
         protected ContentResult ContentNotFound(string message = null)
         {

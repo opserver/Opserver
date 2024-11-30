@@ -264,8 +264,8 @@ namespace Opserver.Data
         /// Private IP Ranges reserved for internal use by ARIN
         /// These networks should not route on the global Internet
         /// </summary>
-        private static readonly List<IPNet> ReservedPrivateRanges = new List<IPNet>
-            {
+        private static readonly List<IPNet> ReservedPrivateRanges = new()
+        {
                 Parse("10.0.0.0/8"),
                 Parse("127.0.0.0/8"),
                 Parse("100.64.0.0/10"),
@@ -280,8 +280,8 @@ namespace Opserver.Data
         /// <summary>
         /// Multicast IP Ranges reserved for use by ARIN
         /// </summary>
-        private static readonly List<IPNet> ReservedMulticastRanges = new List<IPNet>
-            {
+        private static readonly List<IPNet> ReservedMulticastRanges = new()
+        {
                 Parse("224.0.0.0/4"),
                 Parse("ff00::/8"),
             };
@@ -289,8 +289,8 @@ namespace Opserver.Data
         /// <summary>
         /// Link-local IP Ranges reserved for use by ARIN
         /// </summary>
-        private static readonly List<IPNet> ReservedLinkLocalRanges = new List<IPNet>
-            {
+        private static readonly List<IPNet> ReservedLinkLocalRanges = new()
+        {
                 Parse("169.254.0.0/16"),
                 Parse("fe80::/10"),
             };
@@ -299,8 +299,8 @@ namespace Opserver.Data
         /// <summary>
         /// Documentation IP Ranges reserved for use by ARIN
         /// </summary>
-        private static readonly List<IPNet> ReservedDocumentationRanges = new List<IPNet>
-            {
+        private static readonly List<IPNet> ReservedDocumentationRanges = new()
+        {
                 Parse("192.0.2.0/24"),    // TEST-NET-1
                 Parse("198.51.100.0/24"), // TEST-NET-2
                 Parse("203.0.113.0/24"),  // TEST-NET-3
@@ -316,7 +316,7 @@ namespace Opserver.Data
         }
 
         [DataContract]
-        public struct TinyIPAddress : IEquatable<TinyIPAddress>, IComparable<TinyIPAddress>
+        public readonly struct TinyIPAddress : IEquatable<TinyIPAddress>, IComparable<TinyIPAddress>
         {
             [DataMember(Order = 1)]
             private readonly bool IsV4;
@@ -329,9 +329,9 @@ namespace Opserver.Data
             [DataMember(Order = 5)]
             private readonly ulong LastV6Leg;
 
-            public AddressFamily AddressFamily => IsV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
+            public readonly AddressFamily AddressFamily => IsV4 ? AddressFamily.InterNetwork : AddressFamily.InterNetworkV6;
 
-            public string BitString
+            public readonly string BitString
             {
                 get
                 {
@@ -360,7 +360,7 @@ namespace Opserver.Data
                 }
             }
 
-            public IPAddress ToIPAddress()
+            public readonly IPAddress ToIPAddress()
             {
                 if (IsV4)
                 {
@@ -462,7 +462,7 @@ namespace Opserver.Data
                       | ((ulong)source[start]);
             }
 
-            public int NumberOfSetBits
+            public readonly int NumberOfSetBits
             {
                 get
                 {
@@ -502,7 +502,7 @@ namespace Opserver.Data
                 return (int)(unchecked(((i + (i >> 4)) & 0xF0F0F0F0F0F0F0FUL) * 0x101010101010101UL) >> 56);
             }
 
-            public bool IsValidSubnet
+            public readonly bool IsValidSubnet
             {
                 get
                 {
@@ -586,7 +586,7 @@ namespace Opserver.Data
             public static bool operator <=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) <= 0;
             public static bool operator >=(TinyIPAddress a, TinyIPAddress b) => Compare(a, b) >= 0;
 
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
                 if (IsV4)
                 {
@@ -598,12 +598,12 @@ namespace Opserver.Data
                 return hash;
             }
 
-            public bool Equals(TinyIPAddress other) =>
+            public readonly bool Equals(TinyIPAddress other) =>
                 IPv4Address == other.IPv4Address
                 && FirstV6Leg == other.FirstV6Leg
                 && LastV6Leg == other.LastV6Leg;
 
-            public override bool Equals(object obj)
+            public override readonly bool Equals(object obj)
             {
                 if (obj is null)
                 {
@@ -612,7 +612,7 @@ namespace Opserver.Data
                 return obj is TinyIPAddress tinyIPAddress && Equals(tinyIPAddress);
             }
 
-            public int CompareTo(TinyIPAddress other) => Compare(this, other);
+            public readonly int CompareTo(TinyIPAddress other) => Compare(this, other);
 
             private static int Compare(TinyIPAddress a, TinyIPAddress b)
             {

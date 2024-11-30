@@ -87,7 +87,7 @@ namespace Opserver.Data.Dashboard.Providers
                         var tagDict = tags?.ToDictionary(t => t, _ => "*");
                         var apiResult = await GetMetric(metricName, result.StartTime, tags: tagDict);
                         if (apiResult == null) return;
-                        if (tags?.Any() ?? false)
+                        if (tags?.Length > 0)
                         {
                             result.MultiSeries[metricName] = apiResult.Series
                                 .GroupBy(s => s.Host)
@@ -171,15 +171,14 @@ namespace Opserver.Data.Dashboard.Providers
         public static class TagCombos
         {
             public static readonly Dictionary<string, string>
-                AllNetDirections = new Dictionary<string, string> {[Tags.Direction] = "*" },
-                AllDisks = new Dictionary<string, string> {[Tags.Disk] = "*" };
+                AllNetDirections = new() { [Tags.Direction] = "*" },
+                AllDisks = new() { [Tags.Disk] = "*" };
 
-            public static Dictionary<string, string> AllDirectionsForInterface(string ifaceId)
-                => new Dictionary<string, string>
-                {
-                    [Tags.Direction] = "*",
-                    [Tags.IFace] = ifaceId
-                };
+            public static Dictionary<string, string> AllDirectionsForInterface(string ifaceId) => new()
+            {
+                [Tags.Direction] = "*",
+                [Tags.IFace] = ifaceId
+            };
         }
 
         public static bool IsCounter(string metric, string host)
@@ -189,18 +188,11 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 metric = metric.Replace($"__{host}.", "");
             }
-            switch (metric)
+            return metric switch
             {
-                case Globals.CPU:
-                case Globals.NetBytes:
-                case Globals.NetBondBytes:
-                case Globals.NetOtherBytes:
-                case Globals.NetTunnelBytes:
-                case Globals.NetVirtualBytes:
-                    return true;
-                default:
-                    return false;
-            }
+                Globals.CPU or Globals.NetBytes or Globals.NetBondBytes or Globals.NetOtherBytes or Globals.NetTunnelBytes or Globals.NetVirtualBytes => true,
+                _ => false,
+            };
         }
 
         public static string InterfaceMetricName(Interface i) =>
@@ -215,7 +207,7 @@ namespace Opserver.Data.Dashboard.Providers
 
         public static string GetDenormalized(string metric, string host, Dictionary<string, List<string>> metricCache)
         {
-            if (host == null || host.Contains("*") || host.Contains("|"))
+            if (host == null || host.Contains('*') || host.Contains('|'))
             {
                 return metric;
             }
@@ -264,7 +256,7 @@ namespace Opserver.Data.Dashboard.Providers
     /// </summary>
     public class PointSeries
     {
-        private static readonly Regex HostRegex = new Regex(@"\{host=(.*)[,|\}]", RegexOptions.Compiled);
+        private static readonly Regex HostRegex = new(@"\{host=(.*)[,|\}]", RegexOptions.Compiled);
         private string _host;
         public string Host
         {
@@ -272,9 +264,9 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 if (_host == null)
                 {
-                    if (Tags.ContainsKey("host"))
+                    if (Tags.TryGetValue("host", out string value))
                     {
-                        Host = Tags["host"];
+                        Host = value;
                     }
                     else
                     {

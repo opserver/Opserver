@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Net.Http.Headers;
@@ -105,7 +103,7 @@ namespace Opserver.Data.HAProxy
                 while ((line = await sr.ReadLineAsync()) != null)
                 {
                     //Skip the header
-                    if (line.IsNullOrEmpty() || line.StartsWith("#")) continue;
+                    if (line.IsNullOrEmpty() || line.StartsWith('#')) continue;
                     //Collect each stat line as we go, group later
                     stats.Add(Item.FromLine(line));
                 }

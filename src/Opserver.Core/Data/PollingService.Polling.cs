@@ -9,9 +9,9 @@ namespace Opserver.Data
     public partial class PollingService
     {
         private Thread _globalPollingThread;
-        private readonly object _addLock = new object();
-        private readonly object _pollAllLock = new object();
-        public readonly HashSet<PollNode> AllPollNodes = new HashSet<PollNode>();
+        private readonly object _addLock = new();
+        private readonly object _pollAllLock = new();
+        public readonly HashSet<PollNode> AllPollNodes = new();
         private readonly Action<Func<Task>> _taskRunner = t => Task.Run(t);
 
         private long _totalPollIntervals;

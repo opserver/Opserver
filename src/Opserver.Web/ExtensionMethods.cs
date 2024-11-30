@@ -27,7 +27,7 @@ namespace Opserver
         /// This string is already correctly encoded HTML and can be sent to the client "as is" without additional encoding.
         /// </summary>
         /// <param name="html">The already-encoded HTML string.</param>
-        public static HtmlString AsHtml(this string html) => new HtmlString(html);
+        public static HtmlString AsHtml(this string html) => new(html);
 
         /// <summary>
         /// Title cases a string given the current culture.
@@ -73,21 +73,13 @@ namespace Opserver
         /// Returns an icon span representation of this MonitorStatus.
         /// </summary>
         /// <param name="status">The status to get an icon for.</param>
-        public static HtmlString IconSpan(this MonitorStatus status)
+        public static HtmlString IconSpan(this MonitorStatus status) => status switch
         {
-            switch (status)
-            {
-                case MonitorStatus.Good:
-                    return StatusIndicator.IconSpanGood;
-                case MonitorStatus.Warning:
-                case MonitorStatus.Maintenance:
-                    return StatusIndicator.IconSpanWarning;
-                case MonitorStatus.Critical:
-                    return StatusIndicator.IconSpanCritical;
-                default:
-                    return StatusIndicator.IconSpanUnknown;
-            }
-        }
+            MonitorStatus.Good => StatusIndicator.IconSpanGood,
+            MonitorStatus.Warning or MonitorStatus.Maintenance => StatusIndicator.IconSpanWarning,
+            MonitorStatus.Critical => StatusIndicator.IconSpanCritical,
+            _ => StatusIndicator.IconSpanUnknown,
+        };
 
         /// <summary>
         /// Gets an icon representing the current status of a <see cref="Node"/>.
@@ -182,22 +174,13 @@ namespace Opserver
                 _ => "bg-muted",
             };
 
-        public static string ProgressBarClass(this MonitorStatus status)
+        public static string ProgressBarClass(this MonitorStatus status) => status switch
         {
-            switch (status)
-            {
-                case MonitorStatus.Good:
-                    return "progress-bar-success";
-                case MonitorStatus.Unknown:
-                case MonitorStatus.Maintenance:
-                case MonitorStatus.Warning:
-                    return "progress-bar-warning";
-                case MonitorStatus.Critical:
-                    return "progress-bar-danger";
-                default:
-                    return "";
-            }
-        }
+            MonitorStatus.Good => "progress-bar-success",
+            MonitorStatus.Unknown or MonitorStatus.Maintenance or MonitorStatus.Warning => "progress-bar-warning",
+            MonitorStatus.Critical => "progress-bar-danger",
+            _ => "",
+        };
 
         public static HtmlString ToPollSpan(this Cache cache, bool mini = true, bool lastSuccess = false)
         {
@@ -383,18 +366,18 @@ namespace Opserver
             var ts = new TimeSpan(0, 0, seconds);
             var sb = StringBuilderCache.Get();
             if (ts.Days > 0)
-                sb.Append("<b>").Append(ts.Days.ToString()).Append("</b>d ");
+                sb.Append("<b>").Append(ts.Days).Append("</b>d ");
             if (ts.Hours > 0)
-                sb.Append("<b>").Append(ts.Hours.ToString()).Append("</b>hr ");
+                sb.Append("<b>").Append(ts.Hours).Append("</b>hr ");
             if (ts.Minutes > 0)
-                sb.Append("<b>").Append(ts.Minutes.ToString()).Append("</b>min ");
+                sb.Append("<b>").Append(ts.Minutes).Append("</b>min ");
             if (ts.Seconds > 0 && ts.Days == 0)
-                sb.Append("<b>").Append(ts.Seconds.ToString()).Append("</b>sec ");
+                sb.Append("<b>").Append(ts.Seconds).Append("</b>sec ");
             return sb.ToStringRecycle().AsHtml();
         }
 
-        private static readonly HtmlString YesHtml = new HtmlString("Yes");
-        private static readonly HtmlString NoHtml = new HtmlString("No");
+        private static readonly HtmlString YesHtml = new("Yes");
+        private static readonly HtmlString NoHtml = new("No");
 
         public static HtmlString ToYesNo(this bool value) => value ? YesHtml : NoHtml;
 
@@ -438,14 +421,14 @@ namespace Opserver
         public static string ToQueryString(this NameValueCollection nvc)
         {
             var sb = StringBuilderCache.Get();
-            sb.Append("?");
+            sb.Append('?');
             foreach (string key in nvc)
             {
                 foreach (var value in nvc.GetValues(key))
                 {
-                    if (sb.Length > 1) sb.Append("&");
+                    if (sb.Length > 1) sb.Append('&');
                     sb.Append(key.UrlEncode())
-                        .Append("=")
+                        .Append('=')
                         .Append(value.UrlEncode());
                 }
             }
@@ -464,7 +447,7 @@ namespace Opserver
         }
 
         public static bool IsAjax(this HttpRequest request) =>
-            request != null && request.Headers["X-Requested-With"] == "XMLHttpRequest";
+            request != null && request.Headers.XRequestedWith == "XMLHttpRequest";
 
         public static bool IsAjaxRequest(this RazorPageBase page) =>
             page.ViewContext.HttpContext.Request.IsAjax();
@@ -527,26 +510,17 @@ namespace Opserver
 
     public static class EnumExtensions
     {
-        public static HtmlString ToSpan(this SynchronizationStates? state, string tooltip = null)
+        public static HtmlString ToSpan(this SynchronizationStates? state, string tooltip = null) => state switch
         {
-            switch (state)
-            {
-                case SynchronizationStates.Synchronizing:
-                case SynchronizationStates.Synchronized:
-                    return StatusIndicator.UpCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip);
-                case SynchronizationStates.NotSynchronizing:
-                case SynchronizationStates.Reverting:
-                case SynchronizationStates.Initializing:
-                    return StatusIndicator.DownCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip);
-                default:
-                    return StatusIndicator.UnknownCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip);
-            }
-        }
+            SynchronizationStates.Synchronizing or SynchronizationStates.Synchronized => StatusIndicator.UpCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip),
+            SynchronizationStates.NotSynchronizing or SynchronizationStates.Reverting or SynchronizationStates.Initializing => StatusIndicator.DownCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip),
+            _ => StatusIndicator.UnknownCustomSpan(state.Value.AsString(EnumFormat.Description), tooltip),
+        };
 
         public static HtmlString ToSpan(this ReplicaRoles? state, string tooltip = null, bool abbreviate = false)
         {
             var desc = state.HasValue ? state.Value.AsString(EnumFormat.Description) : "";
-            if (abbreviate) desc = desc.Substring(0, 1);
+            if (abbreviate) desc = desc[..1];
             return state switch
             {
                 ReplicaRoles.Primary => StatusIndicator.UpCustomSpan(desc, tooltip),

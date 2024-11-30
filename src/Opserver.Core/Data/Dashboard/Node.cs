@@ -269,7 +269,7 @@ namespace Opserver.Data.Dashboard
             return null;
         }
 
-        private static readonly List<IPNet> EmptyIPs = new List<IPNet>();
+        private static readonly List<IPNet> EmptyIPs = new();
 
         public List<IPNet> IPs => Interfaces?.SelectMany(i => i.IPs).ToList() ?? EmptyIPs;
 

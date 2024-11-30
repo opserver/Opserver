@@ -100,8 +100,8 @@ namespace Opserver
         {
             var numString = includeNumber ? count.ToComma() + " " : null;
             if (count == 1) return numString + name;
-            if (name.EndsWith("y")) return numString + name.Remove(name.Length - 1) + "ies";
-            if (name.EndsWith("s")) return numString + name.Remove(name.Length - 1) + "es";
+            if (name.EndsWith('y')) return numString + name.Remove(name.Length - 1) + "ies";
+            if (name.EndsWith('s')) return numString + name.Remove(name.Length - 1) + "es";
             if (name.EndsWith("ex")) return numString + name + "es";
             return numString + name + "s";
         }
@@ -163,7 +163,7 @@ namespace Opserver
         {
             if (!s.HasValue()) return s;
             if (!s.StartsWith("http://") && !s.StartsWith("https://")) return $"{(defaultToHttps ? "https" : "http")}://{s}/";
-            return s.EndsWith("/") ? s : s + "/";
+            return s.EndsWith('/') ? s : s + "/";
         }
 
         public static T SafeData<T>(this Cache<T> cache, bool emptyIfMissing = false) where T : class, new() =>
@@ -190,9 +190,9 @@ namespace Opserver
 
         public static IOrderedEnumerable<T> ThenByWorst<T>(this IOrderedEnumerable<T> ims, Func<T, MonitorStatus> getter) => ims.ThenByDescending(getter);
 
-        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source) => new HashSet<T>(source);
+        public static HashSet<T> ToHashSet<T>(this IEnumerable<T> source) => new(source);
 
-        private static readonly DateTime _epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime _epoch = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
         /// <summary>
         /// Returns a Date given a unix Epoch time
@@ -365,7 +365,7 @@ namespace Opserver
 
     public static class ThirdPartyExtensionMethods
     {
-        private static readonly Regex _traceRegex = new Regex(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
+        private static readonly Regex _traceRegex = new(@"(.*).... \((\d+) more bytes\)$", RegexOptions.Compiled);
         public static string TraceDescription(this CommandTrace trace, int? truncateTo = null)
         {
             if (truncateTo != null)
@@ -387,7 +387,7 @@ namespace Opserver
     public static class IntToBytesExtension
     {
         private const int DefaultPrecision = 2;
-        private static readonly IList<string> Units = new List<string> { "", "K", "M", "G", "T" };
+        private static readonly List<string> Units = new() { "", "K", "M", "G", "T" };
 
         /// <summary>
         /// Formats the value as a filesize in bytes (KB, MB, etc.)

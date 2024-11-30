@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Opserver.Data.Elastic;
 
 namespace Opserver
 {
     public class ElasticSettings : ModuleSettings
     {
-        public override bool Enabled => Clusters?.Any() ?? false;
+        public override bool Enabled => Clusters?.Count > 0;
         public override string AdminRole => ElasticRoles.Admin;
         public override string ViewRole => ElasticRoles.Viewer;
 

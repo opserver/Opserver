@@ -9,9 +9,9 @@ namespace Opserver.Data
         public static IEnumerable<NodeData> GetType(PollingService poller, string type, bool includeData = false) =>
             poller.GetNodes(type).Select(n => new NodeData(n, includeData));
 
-        public static NodeData GetNode(PollNode node, bool includeData = false) => new NodeData(node, includeData);
+        public static NodeData GetNode(PollNode node, bool includeData = false) => new(node, includeData);
 
-        public static CacheData GetCache(Cache cache, bool includeData = false) => new CacheData(cache, includeData);
+        public static CacheData GetCache(Cache cache, bool includeData = false) => new(cache, includeData);
 
         public class NodeData
         {

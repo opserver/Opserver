@@ -13,7 +13,7 @@ namespace Opserver.Data.PagerDuty
 {
     public partial class PagerDutyAPI : PollNode<PagerDutyModule>
     {
-        internal static readonly Options JilOptions = new Options(
+        internal static readonly Options JilOptions = new(
             dateFormat: DateTimeFormat.ISO8601,
             unspecifiedDateTimeKindBehavior: UnspecifiedDateTimeKindBehavior.IsUTC,
             excludeNulls: true

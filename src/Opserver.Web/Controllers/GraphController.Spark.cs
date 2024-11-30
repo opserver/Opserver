@@ -249,16 +249,16 @@ namespace Opserver.Controllers
                         {
                             // TODO: Indicate a missing, ungraphed time portion?
                             sb.Append((pos - 1).ToString("f1", CultureInfo.InvariantCulture))
-                              .Append(" ")
+                              .Append(' ')
                               .Append(SparkHeight)
-                              .Append(" ");
+                              .Append(' ');
                             first = false;
                         }
-                        sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
-                          .Append((SparkHeight - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                        sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(' ')
+                          .Append((SparkHeight - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(' ');
                     }
                     sb.Append(width)
-                      .Append(" ")
+                      .Append(' ')
                       .Append(SparkHeight)
                       .Append(" z\"/>\n")
                       .Append("\t</g>\n");
@@ -273,7 +273,7 @@ namespace Opserver.Controllers
             return new FileContentResult(bytes, "image/svg+xml");
         }
 
-        private static FileResult SparkSVG<T>(IEnumerable<T> points, long max, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
+        private static FileContentResult SparkSVG<T>(IEnumerable<T> points, long max, Func<T, double> getVal, DateTime? start = null) where T : IGraphPoint
         {
             const int height = SparkHeight,
                       width = SparkPoints;
@@ -293,16 +293,16 @@ namespace Opserver.Controllers
                 {
                     // TODO: Indicate a missing, ungraphed time portion?
                     sb.Append((pos - 1).ToString("f1", CultureInfo.InvariantCulture))
-                      .Append(" ")
+                      .Append(' ')
                       .Append(height)
-                      .Append(" ");
+                      .Append(' ');
                     first = false;
                 }
-                sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(" ")
-                  .Append((height - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(" ");
+                sb.Append(pos.ToString("f1", CultureInfo.InvariantCulture)).Append(' ')
+                  .Append((height - (getVal(p) / divisor)).ToString("f1", CultureInfo.InvariantCulture)).Append(' ');
             }
             sb.Append(width)
-              .Append(" ")
+              .Append(' ')
               .Append(height)
               .Append(@" z""/>
 </svg>");
@@ -316,6 +316,6 @@ namespace Opserver.Controllers
   <line x1=""0"" y1=""{0}"" x2=""{1}"" y2=""{0}"" stroke=""#f6f6f6"" stroke-width=""1"" />
 </svg>", SparkHeight.ToString(), SparkPoints.ToString()));
 
-        private static FileResult EmptySparkSVG() => new FileContentResult(EmptySvgBytes, "image/svg+xml");
+        private static FileContentResult EmptySparkSVG() => new(EmptySvgBytes, "image/svg+xml");
     }
 }

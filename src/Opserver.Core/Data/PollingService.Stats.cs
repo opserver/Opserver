@@ -6,7 +6,7 @@ namespace Opserver.Data
 {
     public partial class PollingService
     {
-        public GlobalPollingStatus GetPollingStatus() => new GlobalPollingStatus
+        public GlobalPollingStatus GetPollingStatus() => new()
         {
             MonitorStatus = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? MonitorStatus.Good : MonitorStatus.Unknown) : MonitorStatus.Critical,
             MonitorStatusReason = _globalPollingThread.IsAlive ? (AllPollNodes.Count > 0 ? null : "No Poll Nodes") : "Global Polling Thread Dead",
@@ -21,6 +21,6 @@ namespace Opserver.Data
             Nodes = AllPollNodes.ToList()
         };
 
-        public ThreadStats GetThreadStats() => new ThreadStats();
+        public ThreadStats GetThreadStats() => new();
     }
 }

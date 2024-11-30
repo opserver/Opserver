@@ -198,7 +198,7 @@ namespace Opserver.Data.Redis
             }
         }
 
-        private static readonly Regex _debugObjectSize = new Regex(@"\bserializedlength:([0-9]+)\b", RegexOptions.Compiled);
+        private static readonly Regex _debugObjectSize = new(@"\bserializedlength:([0-9]+)\b", RegexOptions.Compiled);
 
         internal void TallyDebugLine(string key, string debugLine)
         {
@@ -250,7 +250,7 @@ namespace Opserver.Data.Redis
 
     public class KeyStats
     {
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
 
         internal long _count;
         internal long _keyByteSize;
@@ -261,7 +261,7 @@ namespace Opserver.Data.Redis
         public long ValueByteSize => _valueByteSize;
         public long TotalByteSize => _keyByteSize + _valueByteSize;
 
-        public readonly SortedList<long, string> TopKeys = new SortedList<long, string>(50, new DescLongCompare());
+        public readonly SortedList<long, string> TopKeys = new(50, new DescLongCompare());
 
         public void Tally(string key, long keySize, long valueSize)
         {

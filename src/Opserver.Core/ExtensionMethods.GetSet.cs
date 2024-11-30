@@ -8,9 +8,9 @@ namespace Opserver
 {
     public static partial class ExtensionMethods
     {
-        private static readonly object _syncLock = new object();
-        private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new ConcurrentDictionary<string, object>();
-        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _getSetSemaphores = new ConcurrentDictionary<string, SemaphoreSlim>();
+        private static readonly object _syncLock = new();
+        private static readonly ConcurrentDictionary<string, object> _getSetNullLocks = new();
+        private static readonly ConcurrentDictionary<string, SemaphoreSlim> _getSetSemaphores = new();
 
         internal class GetSetWrapper<T>
         {
@@ -78,11 +78,7 @@ namespace Opserver
 
         private static SemaphoreSlim GetNullSemaphore(ref SemaphoreSlim semaphore, string key)
         {
-            if (semaphore == null)
-            {
-                semaphore = _getSetSemaphores.AddOrUpdate(key, _ => new SemaphoreSlim(1), (_, old) => old);
-            }
-            return semaphore;
+            return semaphore ??= _getSetSemaphores.AddOrUpdate(key, _ => new SemaphoreSlim(1), (_, old) => old);
         }
 
         private static int _totalGetSetSync, _totalGetSetAsyncSuccess, _totalGetSetAsyncError;

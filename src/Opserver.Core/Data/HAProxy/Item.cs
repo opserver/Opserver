@@ -19,7 +19,7 @@ namespace Opserver.Data.HAProxy
         public string ServerName { get; internal set; }
 
         // TODO: Settings
-        private static readonly Regex _compactReplacer = new Regex(@"-\d+$", RegexOptions.Compiled);
+        private static readonly Regex _compactReplacer = new(@"-\d+$", RegexOptions.Compiled);
         private string _compactServerName;
         public string CompactServerName =>
             _compactServerName ??= _compactReplacer.Replace(ServerName, "");
@@ -409,8 +409,8 @@ namespace Opserver.Data.HAProxy
 
         public override string ToString() => RawData;
 
-        private static readonly Regex _upGoingDown = new Regex(@"UP \d+/\d+", RegexOptions.Compiled);
-        private static readonly Regex _downGoingUp = new Regex(@"DOWN \d+/\d+", RegexOptions.Compiled);
+        private static readonly Regex _upGoingDown = new(@"UP \d+/\d+", RegexOptions.Compiled);
+        private static readonly Regex _downGoingUp = new(@"DOWN \d+/\d+", RegexOptions.Compiled);
 
         public virtual string Description => Type == StatusType.Server ? ServerName : Type.ToString();
 
@@ -418,34 +418,13 @@ namespace Opserver.Data.HAProxy
         public bool InDrain => ProxyServerStatus == ProxyServerStatus.Drain;
         public bool OutOfRotation => InMaintenance || InDrain;
 
-        public virtual MonitorStatus MonitorStatus
+        public virtual MonitorStatus MonitorStatus => ProxyServerStatus switch
         {
-            get
-            {
-                switch (ProxyServerStatus)
-                {
-                    case ProxyServerStatus.ActiveUp:
-                    case ProxyServerStatus.BackupUp:
-                    case ProxyServerStatus.NotChecked:
-                    case ProxyServerStatus.Open:
-                        return MonitorStatus.Good;
-
-                    case ProxyServerStatus.ActiveUpGoingDown:
-                    case ProxyServerStatus.BackupUpGoingDown:
-                    case ProxyServerStatus.Maintenance:
-                    case ProxyServerStatus.Drain:
-                        return MonitorStatus.Warning;
-
-                    case ProxyServerStatus.Down:
-                    case ProxyServerStatus.ActiveDownGoingUp:
-                    case ProxyServerStatus.BackupDownGoingUp:
-                        return MonitorStatus.Critical;
-
-                    default:
-                        return MonitorStatus.Unknown;
-                }
-            }
-        }
+            ProxyServerStatus.ActiveUp or ProxyServerStatus.BackupUp or ProxyServerStatus.NotChecked or ProxyServerStatus.Open => MonitorStatus.Good,
+            ProxyServerStatus.ActiveUpGoingDown or ProxyServerStatus.BackupUpGoingDown or ProxyServerStatus.Maintenance or ProxyServerStatus.Drain => MonitorStatus.Warning,
+            ProxyServerStatus.Down or ProxyServerStatus.ActiveDownGoingUp or ProxyServerStatus.BackupDownGoingUp => MonitorStatus.Critical,
+            _ => MonitorStatus.Unknown,
+        };
 
         public string MonitorStatusReason =>
             MonitorStatus == MonitorStatus.Good

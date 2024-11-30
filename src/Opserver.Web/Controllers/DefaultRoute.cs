@@ -7,7 +7,7 @@ namespace Opserver.Controllers
     [AttributeUsage(AttributeTargets.Method)]
     public sealed class DefaultRoute : RouteAttribute
     {
-        private static Dictionary<Type, DefaultRoute> AllRoutes => new Dictionary<Type, DefaultRoute>();
+        private static Dictionary<Type, DefaultRoute> AllRoutes => new();
 
         public DefaultRoute(string template) : base(template) { }
 

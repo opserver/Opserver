@@ -28,7 +28,7 @@ namespace Opserver.Helpers
         }
 
         public static List<NavTab> AllTabs { get; private set; }
-        private static Dictionary<Type, NavTab> _controllerMappings = new Dictionary<Type, NavTab>();
+        private static Dictionary<Type, NavTab> _controllerMappings = new();
 
         public static NavTab Get(StatusController c) => _controllerMappings.TryGetValue(c.GetType(), out var tab) ? tab : null;
         public static NavTab GetByName(string tabName) => AllTabs.Find(t => t.Name == tabName);

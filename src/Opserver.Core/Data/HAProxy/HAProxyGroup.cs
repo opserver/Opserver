@@ -43,7 +43,7 @@ namespace Opserver.Data.HAProxy
                 };
             Instances = new List<HAProxyInstance>
             {
-                new HAProxyInstance(module, instance)
+                new(module, instance)
                 {
                     Group = this
                 }

@@ -76,7 +76,7 @@ namespace Opserver.Data.Redis
         /// </summary>
         public Task<string> GetSERedisTiebreakerAsync() => GetSERedisTiebreakerAsync(_connection);
 
-        private static async Task<string> GetSERedisTiebreakerAsync(IConnectionMultiplexer conn)
+        private static async Task<string> GetSERedisTiebreakerAsync(ConnectionMultiplexer conn)
         {
             RedisKey tieBreakerKey = ConfigurationOptions.Parse(conn.Configuration).TieBreaker;
             return await conn.GetDatabase()

@@ -70,7 +70,7 @@ namespace Opserver.Data
             return AddedToGlobalPollers = GetParentModule().Poller.TryAdd(this);
         }
 
-        private readonly object _monitorStatusLock = new object();
+        private readonly object _monitorStatusLock = new();
         protected MonitorStatus? PreviousMonitorStatus;
         protected MonitorStatus? CachedMonitorStatus;
         public virtual MonitorStatus MonitorStatus

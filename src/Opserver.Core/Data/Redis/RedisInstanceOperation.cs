@@ -30,7 +30,7 @@ namespace Opserver.Data.Redis
                         var newMaster = module.Instances.Find(i => i.UniqueKey == parts[2]);
                         return ReplicateFrom(opee, newMaster);
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(InstanceCommandType));
+                        throw new ArgumentOutOfRangeException(nameof(s), nameof(InstanceCommandType));
                 }
             }
             throw new ArgumentOutOfRangeException(nameof(s), $"Invalid op string provided: '{s}'");
@@ -44,20 +44,18 @@ namespace Opserver.Data.Redis
                 _ => throw new ArgumentOutOfRangeException(nameof(InstanceCommandType)),
             };
 
-        public static RedisInstanceOperation MakeMaster(RedisInstance instance) =>
-            new RedisInstanceOperation
-            {
-                Command = InstanceCommandType.MakeMaster,
-                Instance = instance
-            };
+        public static RedisInstanceOperation MakeMaster(RedisInstance instance) => new()
+        {
+            Command = InstanceCommandType.MakeMaster,
+            Instance = instance
+        };
 
-        public static RedisInstanceOperation ReplicateFrom(RedisInstance instance, RedisInstance newMaster) =>
-            new RedisInstanceOperation
-            {
-                Command = InstanceCommandType.ReplicateFrom,
-                Instance = instance,
-                NewMaster = newMaster
-            };
+        public static RedisInstanceOperation ReplicateFrom(RedisInstance instance, RedisInstance newMaster) => new()
+        {
+            Command = InstanceCommandType.ReplicateFrom,
+            Instance = instance,
+            NewMaster = newMaster
+        };
     }
 
     public enum InstanceCommandType

@@ -12,6 +12,7 @@ namespace Opserver.Data.Redis
     {
         private static readonly ConcurrentDictionary<string, PropertyInfo> _sectionMappings;
         private static readonly ConcurrentDictionary<Type, Dictionary<string, PropertyInfo>> _propertyMappings;
+        private static readonly string[] _infoSplit = new[] { "\r\n" };
 
         static RedisInfo()
         {
@@ -40,10 +41,10 @@ namespace Opserver.Data.Redis
 
             RedisInfoSection currentSection = null;
 
-            var lines = infoStr.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            var lines = infoStr.Split(_infoSplit, StringSplitOptions.RemoveEmptyEntries);
             foreach (var line in lines)
             {
-                if (line.StartsWith("#"))
+                if (line.StartsWith('#'))
                 {
                     var sectionName = line.Replace("# ", "");
                     if (_sectionMappings.TryGetValue(sectionName, out var currentSectionProp))
@@ -150,13 +151,13 @@ namespace Opserver.Data.Redis
                 ParsedValue = GetInfoValue(key, value);
             }
 
-            private static readonly List<string> _dontFormatList = new List<string>
-                {
-                    "redis_git",
-                    "process_id",
-                    "tcp_port",
-                    "master_port"
-                };
+            private static readonly List<string> _dontFormatList = new()
+            {
+                "redis_git",
+                "process_id",
+                "tcp_port",
+                "master_port"
+            };
 
             private static string GetInfoValue(string label, string value)
             {

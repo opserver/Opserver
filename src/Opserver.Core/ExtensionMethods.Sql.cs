@@ -15,7 +15,7 @@ namespace Opserver
         public static async Task<List<T>> AsList<T>(this Task<IEnumerable<T>> source)
         {
             var result = await source;
-            return result != null && !(result is List<T>) ? result.ToList() : (List<T>) result;
+            return result != null && result is List<T> resultList ? resultList : result.ToList();
         }
 
         public static async Task<int> ExecuteAsync(this DbConnection conn, string sql, dynamic param = null, IDbTransaction transaction = null, [CallerFilePath]string fromFile = null, [CallerLineNumber]int onLine = 0, string comment = null, int? commandTimeout = null)
@@ -84,7 +84,7 @@ namespace Opserver
 
         public static async Task<IDisposable> EnsureOpenAsync(this DbConnection connection)
         {
-            if (connection == null) throw new ArgumentNullException(nameof(connection));
+            ArgumentNullException.ThrowIfNull(connection);
             switch (connection.State)
             {
                 case ConnectionState.Open:
@@ -108,7 +108,7 @@ namespace Opserver
             }
         }
 
-        private static readonly ConcurrentDictionary<int, string> _markedSql = new ConcurrentDictionary<int, string>();
+        private static readonly ConcurrentDictionary<int, string> _markedSql = new();
 
         /// <summary>
         /// Takes a SQL query, and inserts the path and line in as a comment. Ripped right out of Stack Overflow proper.
@@ -155,7 +155,7 @@ namespace Opserver
             if (split < 0) return sql;
             split++; // just for Craver
 
-            var ret = sql.Substring(0, i) + " /* " + path.Substring(split) + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap + sql.Substring(i);
+            var ret = sql[..i] + " /* " + path[split..] + "@" + lineNumber.ToString() + (comment.HasValue() ? " - " + comment : "") + " */" + commentWrap + sql[i..];
             // Cache, don't allocate all this pass again
             _markedSql[key] = ret;
             return ret;
@@ -163,12 +163,10 @@ namespace Opserver
 
         public static async Task<int> SetReadUncommittedAsync(this DbConnection connection)
         {
-            if (connection == null) throw new ArgumentNullException(nameof(connection));
-            using (var cmd = connection.CreateCommand())
-            {
-                cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
-                await cmd.ExecuteNonQueryAsync();
-            }
+            ArgumentNullException.ThrowIfNull(connection);
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "SET TRANSACTION ISOLATION LEVEL READ UNCOMMITTED";
+            await cmd.ExecuteNonQueryAsync();
             return 1;
         }
 

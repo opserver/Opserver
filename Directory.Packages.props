@@ -1,0 +1,40 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="BuildBundlerMinifier" Version="3.2.449"/>
+    <PackageVersion Include="BuildWebCompiler" Version="1.12.405" />
+    <PackageVersion Include="Dapper" Version="2.1.35" />
+    <PackageVersion Include="Enums.NET" Version="5.0.0" />
+    <PackageVersion Include="Jil" Version="2.17.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.TestHost" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.Data.SqlClient" Version="5.2.2" />
+    <PackageVersion Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
+    <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
+    <PackageVersion Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.1.2" />
+    <PackageVersion Include="Microsoft.Net.Http.Headers" Version="8.0.10" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageVersion Include="MiniProfiler.AspNetCore.Mvc" Version="4.5.4" />
+    <PackageVersion Include="MiniProfiler.Shared" Version="4.5.4" />
+    <PackageVersion Include="Sigil" Version="5.0.0" />
+    <PackageVersion Include="StackExchange.Exceptional.AspNetCore" Version="3.0.1" />
+    <PackageVersion Include="StackExchange.Exceptional.Shared" Version="3.0.1" />
+    <PackageVersion Include="StackExchange.Redis" Version="2.8.22" />
+    <PackageVersion Include="StackExchange.Utils.Http" Version="0.3.48" />
+    <PackageVersion Include="System.DirectoryServices" Version="8.0.0" />
+    <PackageVersion Include="System.DirectoryServices.AccountManagement" Version="8.0.1" />
+    <PackageVersion Include="System.Management" Version="8.0.0" />
+    <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
+    <PackageVersion Include="xunit" Version="2.9.2" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <GlobalPackageReference Condition="'$(TargetFramework)'!='net462'" Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" />
+    <GlobalPackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" />
+    <GlobalPackageReference Include="Nerdbank.GitVersioning" Version="3.6.146" />
+  </ItemGroup>
+</Project>
