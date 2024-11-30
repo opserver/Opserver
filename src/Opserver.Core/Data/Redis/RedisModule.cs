@@ -79,7 +79,7 @@ namespace Opserver.Data.Redis
 
         public RedisHost GetHost(string hostName)
         {
-            if (hostName.IsNullOrEmpty() || hostName.Contains(":")) return null;
+            if (hostName.IsNullOrEmpty() || hostName.Contains(':')) return null;
 
             return Hosts.Find(h => string.Equals(h.HostName, hostName, StringComparison.InvariantCultureIgnoreCase));
         }
@@ -96,7 +96,7 @@ namespace Opserver.Data.Redis
         public RedisInstance GetInstance(string connectionString)
         {
             if (connectionString.IsNullOrEmpty()) return null;
-            if (connectionString.Contains(":"))
+            if (connectionString.Contains(':'))
             {
                 var parts = connectionString.Split(StringSplits.Colon);
                 if (parts.Length != 2) return null;

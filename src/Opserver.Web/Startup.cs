@@ -28,6 +28,8 @@ namespace Opserver
             _configuration = configuration;
         }
 
+        private static readonly string[] _svgMime = new[] { "image/svg+xml" };
+
         public void ConfigureServices(IServiceCollection services)
         {
             // Register Opserver.Core config and polling
@@ -45,7 +47,7 @@ namespace Opserver
             services.AddResponseCompression(
                 options =>
                 {
-                    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "image/svg+xml" });
+                    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(_svgMime);
                     options.Providers.Add<GzipCompressionProvider>();
                     options.EnableForHttps = true;
                 }

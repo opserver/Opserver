@@ -24,8 +24,7 @@ namespace Opserver.Data.SQL
         public SQLServerEngine Engine { get; internal set; } = new SQLServerEngine(new Version(), SQLServerEditions.Standard); // default to 0.0
         protected SQLSettings.Instance Settings { get; }
 
-        protected static readonly ConcurrentDictionary<Tuple<string, SQLServerEngine>, string> QueryLookup =
-            new ConcurrentDictionary<Tuple<string, SQLServerEngine>, string>();
+        protected static readonly ConcurrentDictionary<Tuple<string, SQLServerEngine>, string> QueryLookup = new();
 
         public string GetFetchSQL<T>() where T : ISQLVersioned, new() => GetFetchSQL<T>(Engine);
         public static string GetFetchSQL<T>(in SQLServerEngine e) where T : ISQLVersioned, new() => Singleton<T>.Instance.GetFetchSQL(e);

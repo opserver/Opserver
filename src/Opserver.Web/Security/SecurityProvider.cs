@@ -13,7 +13,7 @@ namespace Opserver.Security
     public abstract class SecurityProvider
     {
         // The theory here is that there won't be that many unique combinations here.
-        private readonly ConcurrentDictionary<string, string[]> _parsedGroups = new ConcurrentDictionary<string, string[]>();
+        private readonly ConcurrentDictionary<string, string[]> _parsedGroups = new();
 
         /// <summary>
         /// Gets the name of this provider.
@@ -88,7 +88,7 @@ namespace Opserver.Security
         /// <summary>
         /// Creates a <see cref="ClaimsPrincipal"/> representing an anonymous user.
         /// </summary>
-        protected ClaimsPrincipal CreateAnonymousPrincipal() => new ClaimsPrincipal(new ClaimsIdentity());
+        protected ClaimsPrincipal CreateAnonymousPrincipal() => new(new ClaimsIdentity());
 
         /// <summary>
         /// Creates a <see cref="ClaimsPrincipal"/> for the given username.
@@ -97,7 +97,7 @@ namespace Opserver.Security
         {
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, userName)
+                new(ClaimTypes.Name, userName)
             };
             var identity = new ClaimsIdentity(claims, "login");
             return new ClaimsPrincipal(identity);
@@ -138,7 +138,7 @@ namespace Opserver.Security
 
         public sealed override bool TryValidateToken(ISecurityProviderToken token, out ClaimsPrincipal claimsPrincipal)
         {
-            if (!(token is TToken typedToken))
+            if (token is not TToken typedToken)
             {
                 claimsPrincipal = CreateAnonymousPrincipal();
                 return false;

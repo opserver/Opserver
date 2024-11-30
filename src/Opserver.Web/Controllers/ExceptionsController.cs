@@ -42,7 +42,7 @@ namespace Opserver.Controllers
             CurrentLog = GetParam("log") ?? GetParam("app"); // old link compat
             CurrentId = GetParam("id").HasValue() && Guid.TryParse(GetParam("id"), out var guid) ? guid : (Guid?)null;
             CurrentSimilarId = GetParam("similar").HasValue() && Guid.TryParse(GetParam("similar"), out var similarGuid) ? similarGuid : (Guid?)null;
-            Enum.TryParse(GetParam("sort"), out CurrentSort);
+            _ = Enum.TryParse(GetParam("sort"), out CurrentSort);
             CurrentUrl = GetParam("url")?.Trim();
             CurrentHost = GetParam("host")?.Trim();
             if (GetDate("startDate") is DateTime startDate)

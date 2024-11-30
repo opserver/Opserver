@@ -265,16 +265,14 @@ namespace Opserver.Data.Dashboard.Providers
                                 AppName = key,
                                 NiceName = key
                             };
-                            BosunHost.ProcessInfo process = null;
-                            if (h.Processes?.TryGetValue(key, out process) == true)
+                            if (h.Processes?.TryGetValue(key, out var process) == true)
                             {
                                 app.PercentCPU = (decimal)process.CPUPercentUsed;
                                 app.CurrentPercentCPU = process.CPUPercentUsed;
                                 app.MemoryUsed = process.UsedRealBytes;
                                 app.VirtualMemoryUsed = process.UsedVirtualBytes;
                             }
-                            BosunHost.ServiceInfo service = null;
-                            if (h.Services?.TryGetValue(key, out service) == true)
+                            if (h.Services?.TryGetValue(key, out var service) == true)
                             {
                                 app.IsRunning = service.Running;
                             }

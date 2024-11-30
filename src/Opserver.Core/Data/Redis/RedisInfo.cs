@@ -88,8 +88,8 @@ namespace Opserver.Data.Redis
             [RedisInfoProperty("repl_backlog_histlen")]
             public long BacklogHistoryLength { get; internal set; }
 
-            public readonly List<RedisReplicaInfo> ReplicaConnections = new List<RedisReplicaInfo>();
-            private static readonly Regex _replicaRegex = new Regex(@"slave\d+", RegexOptions.Compiled);
+            public readonly List<RedisReplicaInfo> ReplicaConnections = new();
+            private static readonly Regex _replicaRegex = new(@"slave\d+", RegexOptions.Compiled);
 
             public override void MapUnrecognizedLine(string key, string value)
             {
@@ -320,10 +320,10 @@ namespace Opserver.Data.Redis
         public KeyspaceInfo Keyspace { get; internal set; } = new KeyspaceInfo();
         public class KeyspaceInfo : RedisInfoSection
         {
-            public readonly Dictionary<int, KeyData> KeyData = new Dictionary<int, KeyData>();
+            public readonly Dictionary<int, KeyData> KeyData = new();
 
-            private static readonly Regex _dbNameMatch = new Regex("db([0-9]+)", RegexOptions.Compiled);
-            private static readonly Regex _keysMatch = new Regex("keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _dbNameMatch = new("db([0-9]+)", RegexOptions.Compiled);
+            private static readonly Regex _keysMatch = new("keys=([0-9]+),expires=([0-9]+)", RegexOptions.Compiled);
             internal override void AddLine(string key, string value)
             {
                 var dbMatch = _dbNameMatch.Match(key);

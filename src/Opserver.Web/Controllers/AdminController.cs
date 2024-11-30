@@ -23,6 +23,7 @@ namespace Opserver.Controllers
         /// Access our error log.
         /// </summary>
         [Route("admin/errors/{resource?}/{subResource?}"), AlsoAllow(Roles.LocalRequest)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "ASP0018:Unused route parameter", Justification = "Known unused, matching handler patterns")]
         public Task InvokeErrorHandler() => ExceptionalMiddleware.HandleRequestAsync(HttpContext);
     }
 }

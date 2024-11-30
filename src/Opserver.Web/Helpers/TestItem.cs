@@ -5,11 +5,11 @@ namespace Opserver.Helpers
 {
     public sealed class TestItem : IMonitorStatus
     {
-        public static readonly TestItem Good = new TestItem(MonitorStatus.Good);
-        public static readonly TestItem Warning = new TestItem(MonitorStatus.Warning);
-        public static readonly TestItem Maintenance = new TestItem(MonitorStatus.Maintenance);
-        public static readonly TestItem Critical = new TestItem(MonitorStatus.Critical);
-        public static readonly TestItem Unknown = new TestItem(MonitorStatus.Unknown);
+        public static readonly TestItem Good = new(MonitorStatus.Good);
+        public static readonly TestItem Warning = new(MonitorStatus.Warning);
+        public static readonly TestItem Maintenance = new(MonitorStatus.Maintenance);
+        public static readonly TestItem Critical = new(MonitorStatus.Critical);
+        public static readonly TestItem Unknown = new(MonitorStatus.Unknown);
 
         public MonitorStatus MonitorStatus { get; }
         public string MonitorStatusReason { get; }

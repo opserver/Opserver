@@ -32,10 +32,7 @@ namespace Opserver.Helpers
 
         public void Configure(MiniProfilerOptions options)
         {
-            if (options.Storage == null)
-            {
-                options.Storage = new MiniProfilerCacheStorage(_cache, _poller, TimeSpan.FromMinutes(10));
-            }
+            options.Storage ??= new MiniProfilerCacheStorage(_cache, _poller, TimeSpan.FromMinutes(10));
         }
     }
 }

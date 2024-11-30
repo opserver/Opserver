@@ -8,14 +8,14 @@ namespace Opserver
     {
         internal static string GetString(this ref SequenceReader<byte> reader, int length)
         {
-            var value = Encoding.UTF8.GetString(reader.UnreadSpan.Slice(0, length).Trim((byte)0));
+            var value = Encoding.UTF8.GetString(reader.UnreadSpan[..length].Trim((byte)0));
             reader.Advance(length);
             return value;
         }
 
         internal static string GetBase64EncodedString(this ref SequenceReader<byte> reader, int length)
         {
-            var value = Convert.ToBase64String(reader.UnreadSpan.Slice(0, length));
+            var value = Convert.ToBase64String(reader.UnreadSpan[..length]);
             reader.Advance(length);
             return value;
         }

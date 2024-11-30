@@ -148,7 +148,7 @@ namespace Opserver.Data.PagerDuty
                 var sb = StringBuilderCache.Get();
                 if (CountryCode.HasValue)
                 {
-                    sb.Append("+").Append(CountryCode).Append(" ");
+                    sb.Append('+').Append(CountryCode).Append(' ');
                 }
                 switch (Type)
                 {

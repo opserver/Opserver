@@ -16,11 +16,11 @@ namespace Opserver.Views.SQL
         public static HtmlString GetQueryString(SQLInstance.TopSearchOptions options)
         {
             var sb = StringBuilderCache.Get();
-            if (options.MinExecs != Default.MinExecs) sb.Append("&").Append(nameof(options.MinExecs)).Append("=").Append(options.MinExecs.Value);
-            if (options.MinExecsPerMin != Default.MinExecsPerMin) sb.Append("&").Append(nameof(options.MinExecsPerMin)).Append("=").Append(options.MinExecsPerMin.Value);
-            if (options.Search != Default.Search) sb.Append("&").Append(nameof(options.Search)).Append("=").Append(options.Search.UrlEncode());
-            if (options.Database != Default.Database) sb.Append("&").Append(nameof(options.Database)).Append("=").Append(options.Database.Value);
-            if (options.LastRunSeconds != Default.LastRunSeconds) sb.Append("&").Append(nameof(options.LastRunSeconds)).Append("=").Append(options.LastRunSeconds.Value);
+            if (options.MinExecs != Default.MinExecs) sb.Append('&').Append(nameof(options.MinExecs)).Append('=').Append(options.MinExecs.Value);
+            if (options.MinExecsPerMin != Default.MinExecsPerMin) sb.Append('&').Append(nameof(options.MinExecsPerMin)).Append('=').Append(options.MinExecsPerMin.Value);
+            if (options.Search != Default.Search) sb.Append('&').Append(nameof(options.Search)).Append('=').Append(options.Search.UrlEncode());
+            if (options.Database != Default.Database) sb.Append('&').Append(nameof(options.Database)).Append('=').Append(options.Database.Value);
+            if (options.LastRunSeconds != Default.LastRunSeconds) sb.Append('&').Append(nameof(options.LastRunSeconds)).Append('=').Append(options.LastRunSeconds.Value);
 
             return sb.ToStringRecycle().AsHtml();
         }

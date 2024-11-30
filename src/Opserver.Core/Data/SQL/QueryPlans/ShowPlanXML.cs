@@ -27,24 +27,17 @@ namespace Opserver.Data.SQL.QueryPlans
             get { yield return this; }
         }
 
-        public bool IsMinor
+        public bool IsMinor => StatementType switch
         {
-            get {
-                switch (StatementType)
-                {
-                    case "COND":
-                    case "RETURN NONE":
-                        return true;
-                }
-                return false;
-            }
-        }
+            "COND" or "RETURN NONE" => true,
+            _ => false,
+        };
 
         private const string declareFormat = "Declare {0} {1} = {2};";
-        private static readonly Regex emptyLineRegex = new Regex(@"^\s+$[\r\n]*", RegexOptions.Compiled | RegexOptions.Multiline);
-        private static readonly Regex initParamsTrimRegex = new Regex(@"^\s*(begin|end)\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-        private static readonly Regex paramRegex = new Regex(@"^\(( [^\(\)]* ( ( (?<Open>\() [^\(\)]* )+ ( (?<Close-Open>\)) [^\(\)]* )+ )* (?(Open)(?!)) )\)", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
-        private static readonly Regex paramSplitRegex = new Regex(",(?=[@])", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex emptyLineRegex = new(@"^\s+$[\r\n]*", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly Regex initParamsTrimRegex = new(@"^\s*(begin|end)\s*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex paramRegex = new(@"^\(( [^\(\)]* ( ( (?<Open>\() [^\(\)]* )+ ( (?<Close-Open>\)) [^\(\)]* )+ )* (?(Open)(?!)) )\)", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
+        private static readonly Regex paramSplitRegex = new(",(?=[@])", RegexOptions.Compiled | RegexOptions.IgnorePatternWhitespace);
         private static readonly char[] startTrimChars = new[] { '\n', '\r', ';' };
 
         public string ParameterDeclareStatement

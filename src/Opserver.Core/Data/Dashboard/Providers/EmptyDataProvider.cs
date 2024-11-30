@@ -17,7 +17,7 @@ namespace Opserver.Data.Dashboard.Providers
         protected override IEnumerable<MonitorStatus> GetMonitorStatus() => Enumerable.Empty<MonitorStatus>();
         protected override string GetMonitorStatusReason() => null;
 
-        private static readonly List<Node> EmptyAllNodes = new List<Node>();
+        private static readonly List<Node> EmptyAllNodes = new();
 
         public override IEnumerable<string> GetExceptions() => Enumerable.Empty<string>();
 

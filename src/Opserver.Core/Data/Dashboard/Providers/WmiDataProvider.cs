@@ -8,7 +8,7 @@ namespace Opserver.Data.Dashboard.Providers
     internal partial class WmiDataProvider : DashboardDataProvider<WMISettings>, IServiceControlProvider
     {
         private readonly WMISettings _config;
-        private readonly List<WmiNode> _wmiNodes = new List<WmiNode>();
+        private readonly List<WmiNode> _wmiNodes = new();
         private readonly Dictionary<string, WmiNode> _wmiNodeLookup;
 
         public WmiDataProvider(DashboardModule module, WMISettings settings) : base(module, settings)
@@ -31,7 +31,7 @@ namespace Opserver.Data.Dashboard.Providers
         /// When adding, a node's IP address is resolved via DNS.
         /// </summary>
         /// <param name="nodeNames">The names of the server nodes to monitor.</param>
-        private IEnumerable<WmiNode> InitNodeList(IList<string> nodeNames)
+        private List<WmiNode> InitNodeList(List<string> nodeNames)
         {
             var nodesList = new List<WmiNode>(nodeNames.Count);
             var exclude = Module.Settings.ExcludePatternRegex;

@@ -4,11 +4,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
-using Jil;
 using StackExchange.Utils;
 using Microsoft.Net.Http.Headers;
 
@@ -17,8 +15,8 @@ namespace Opserver.Data.Jira
     public class JiraClient
     {
         private readonly JiraSettings _jiraSettings;
-        private static readonly HashSet<string> HiddenHttpKeys = new HashSet<string>
-            {
+        private static readonly HashSet<string> HiddenHttpKeys = new()
+        {
                 "ALL_HTTP",
                 "ALL_RAW",
                 "HTTP_CONTENT_LENGTH",
@@ -27,7 +25,7 @@ namespace Opserver.Data.Jira
                 "QUERY_STRING"
             };
 
-        private static readonly HashSet<string> DefaultHttpKeys = new HashSet<string>
+        private static readonly HashSet<string> DefaultHttpKeys = new()
         {
             "APPL_MD_PATH",
             "APPL_PHYSICAL_PATH",
@@ -84,7 +82,7 @@ namespace Opserver.Data.Jira
 
             var labels = action.Labels.IsNullOrEmpty()
                 ? null
-                : action.Labels.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                : action.Labels.Split(StringSplits.Comma, StringSplitOptions.RemoveEmptyEntries);
 
             if (labels?.Length > 0)
                 fields.Add("labels", labels);

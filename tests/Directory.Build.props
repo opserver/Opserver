@@ -1,7 +1,6 @@
 <Project>
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <xUnitVersion>2.4.1</xUnitVersion>
   </PropertyGroup>
 
   <ItemGroup>

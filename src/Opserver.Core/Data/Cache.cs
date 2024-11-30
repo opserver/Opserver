@@ -20,7 +20,7 @@ namespace Opserver.Data
         private int _hasData;
         internal override object InnerCache => Data;
         public override Type Type => typeof (T);
-        private readonly SemaphoreSlim _pollSemaphoreSlim = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _pollSemaphoreSlim = new(1);
 
         public override string InventoryDescription
         {
@@ -116,7 +116,7 @@ namespace Opserver.Data
         private string MiniProfilerDescription { get; }
 
         // ReSharper disable once StaticMemberInGenericType
-        private static readonly MiniProfilerBaseOptions _profilerOptions = new MiniProfilerBaseOptions
+        private static readonly MiniProfilerBaseOptions _profilerOptions = new()
         {
             Storage = new NullStorage(),
             ProfilerProvider = new DefaultProfilerProvider()

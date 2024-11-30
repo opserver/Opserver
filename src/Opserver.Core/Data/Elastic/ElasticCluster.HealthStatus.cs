@@ -17,7 +17,7 @@ namespace Opserver.Data.Elastic
         /// The Index info API changes in ElasticSearch 0.9, it's not really reasonable to support 
         /// data before that given that it's going away
         /// </summary>
-        public static readonly Version MinIndexInfoVersion = new Version(0, 90);
+        public static readonly Version MinIndexInfoVersion = new(0, 90);
 
         public IEnumerable<ClusterHealthInfo.IndexHealthInfo> TroubledIndexes
         {

@@ -27,30 +27,15 @@
 
     public static class ServerStatusExtensions
     {
-        public static MonitorStatus ToMonitorStatus(this NodeStatus status)
+        public static MonitorStatus ToMonitorStatus(this NodeStatus status) => status switch
         {
-            switch (status)
-            {
-                case NodeStatus.Unmanaged:
-                    return MonitorStatus.Maintenance;
-                case NodeStatus.Active:
-                case NodeStatus.External:
-                case NodeStatus.Up:
-                case NodeStatus.Shutdown:
-                    return MonitorStatus.Good;
-                case NodeStatus.Down:
-                case NodeStatus.Critical:
-                    return MonitorStatus.Critical;
-                case NodeStatus.Unreachable:
-                case NodeStatus.Warning:
-                case NodeStatus.PartlyAvailable:
-                case NodeStatus.Unconfirmed:
-                    return MonitorStatus.Warning;
-                //case NodeStatus.Inactive:
-                //case NodeStatus.Unplugged:
-                default:
-                    return MonitorStatus.Unknown;
-            }
-        }
+            NodeStatus.Unmanaged => MonitorStatus.Maintenance,
+            NodeStatus.Active or NodeStatus.External or NodeStatus.Up or NodeStatus.Shutdown => MonitorStatus.Good,
+            NodeStatus.Down or NodeStatus.Critical => MonitorStatus.Critical,
+            NodeStatus.Unreachable or NodeStatus.Warning or NodeStatus.PartlyAvailable or NodeStatus.Unconfirmed => MonitorStatus.Warning,
+            //case NodeStatus.Inactive:
+            //case NodeStatus.Unplugged:
+            _ => MonitorStatus.Unknown,
+        };
     }
 }

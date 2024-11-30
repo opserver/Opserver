@@ -19,7 +19,7 @@ namespace Opserver.Data.Dashboard
         public string Alias { get; internal set; }
         public string TypeDescription { get; internal set; }
         public string PhysicalAddress { get; internal set; }
-        public bool IsTeam => TeamMembers?.Any() ?? false;
+        public bool IsTeam => TeamMembers?.Count > 0;
         public bool IsUnwatched { get; internal set; }
 
         public NodeStatus Status { get; internal set; }
@@ -40,7 +40,7 @@ namespace Opserver.Data.Dashboard
         // TODO: Implement
         public string MonitorStatusReason => null;
 
-        private static readonly Dictionary<string, string> _prettyNameReplacements = new Dictionary<string, string>
+        private static readonly Dictionary<string, string> _prettyNameReplacements = new()
         {
             ["Microsoft Network Adapter Multiplexor Driver"] = "Microsoft Team",
             ["Quad Port Server Adapter"] = "Quad Port SA",
@@ -72,7 +72,7 @@ namespace Opserver.Data.Dashboard
             get {
                 if (!Speed.HasValue)
                 {
-                    if (!(TeamMembers?.Any() ?? false))
+                    if (!(TeamMembers?.Count > 0))
                     {
                         return "n/a";
                     }
@@ -91,7 +91,7 @@ namespace Opserver.Data.Dashboard
 
         public string PrettyMAC =>
             PhysicalAddress?.Length == 12
-                ? $"{PhysicalAddress.Substring(0, 2)}-{PhysicalAddress.Substring(2, 2)}-{PhysicalAddress.Substring(4, 2)}-{PhysicalAddress.Substring(6, 2)}-{PhysicalAddress.Substring(8, 2)}-{PhysicalAddress.Substring(10, 2)}"
+                ? $"{PhysicalAddress[..2]}-{PhysicalAddress.Substring(2, 2)}-{PhysicalAddress.Substring(4, 2)}-{PhysicalAddress.Substring(6, 2)}-{PhysicalAddress.Substring(8, 2)}-{PhysicalAddress.Substring(10, 2)}"
                 : PhysicalAddress;
 
         internal bool IsLikelyPrimary(Regex pattern) => pattern != null

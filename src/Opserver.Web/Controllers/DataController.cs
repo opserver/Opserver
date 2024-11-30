@@ -12,7 +12,7 @@ namespace Opserver.Controllers
     {
         private PollingService Poller { get; }
 
-        private static readonly JsonSerializerOptions _serializerOptions = new JsonSerializerOptions()
+        private static readonly JsonSerializerOptions _serializerOptions = new()
         {
             DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull,
             WriteIndented = true

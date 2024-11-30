@@ -25,7 +25,7 @@ namespace Opserver.Data.Dashboard.Providers
             private readonly ConcurrentDictionary<string, List<Volume.VolumeUtilization>> VolumeHistory;
             private readonly ConcurrentDictionary<string, List<Volume.VolumePerformanceUtilization>> VolumePerformanceHistory;
 
-            internal readonly ConcurrentDictionary<string, PerfRawData> previousPerfDataCache = new ConcurrentDictionary<string, PerfRawData>();
+            internal readonly ConcurrentDictionary<string, PerfRawData> previousPerfDataCache = new();
 
             /// <summary>
             /// Defines if we can use "Win32_PerfFormattedData_Tcpip_NetworkAdapter" to query adapter utilization or not.
@@ -78,9 +78,9 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 if (iface != null
                     && Interfaces.Find(x => x == iface) != null
-                    && NetHistory.ContainsKey(iface.Name))
+                    && NetHistory.TryGetValue(iface.Name, out var value))
                 {
-                    return NetHistory[iface.Name];
+                    return value;
                 }
                 else
                 {
@@ -92,9 +92,9 @@ namespace Opserver.Data.Dashboard.Providers
             {
                 if (iface != null
                     && Volumes.Find(x => x == iface) != null
-                    && VolumePerformanceHistory.ContainsKey(iface.Name))
+                    && VolumePerformanceHistory.TryGetValue(iface.Name, out var value))
                 {
-                    return VolumePerformanceHistory[iface.Name];
+                    return value;
                 }
                 else
                 {

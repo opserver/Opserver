@@ -8,7 +8,7 @@ namespace Opserver.Security
     public class SecurityManager
     {
         public SecurityProvider CurrentProvider { get; }
-        public bool IsConfigured => CurrentProvider != null && !(CurrentProvider is UnconfiguredProvider);
+        public bool IsConfigured => CurrentProvider != null && CurrentProvider is not UnconfiguredProvider;
 
         /// <summary>
         /// Instantiates a new instane of <see cref="SecurityManager"/>.

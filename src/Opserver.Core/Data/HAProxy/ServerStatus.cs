@@ -55,18 +55,10 @@ namespace Opserver.Data.HAProxy
                 _ => "Unknown",
             };
 
-        public static bool IsBad(this ProxyServerStatus status)
+        public static bool IsBad(this ProxyServerStatus status) => status switch
         {
-            switch (status)
-            {
-                case ProxyServerStatus.ActiveUpGoingDown:
-                case ProxyServerStatus.BackupUpGoingDown:
-                case ProxyServerStatus.Drain:
-                case ProxyServerStatus.Down:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+            ProxyServerStatus.ActiveUpGoingDown or ProxyServerStatus.BackupUpGoingDown or ProxyServerStatus.Drain or ProxyServerStatus.Down => true,
+            _ => false,
+        };
     }
 }

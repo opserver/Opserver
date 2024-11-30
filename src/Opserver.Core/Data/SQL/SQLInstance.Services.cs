@@ -19,21 +19,13 @@ namespace Opserver.Data.SQL
                 get
                 {
                     if (!Status.HasValue) return MonitorStatus.Unknown;
-                    switch (Status.Value)
+                    return Status.Value switch
                     {
-                        case ServiceStatuses.Stopped:
-                            return MonitorStatus.Critical;
-                        case ServiceStatuses.StartPending:
-                        case ServiceStatuses.StopPending:
-                        case ServiceStatuses.Paused:
-                            return MonitorStatus.Warning;
-                        case ServiceStatuses.Running:
-                        case ServiceStatuses.ContinuePending:
-                        case ServiceStatuses.PausePending:
-                            return MonitorStatus.Good;
-                        default:
-                            throw new ArgumentOutOfRangeException();
-                    }
+                        ServiceStatuses.Stopped => MonitorStatus.Critical,
+                        ServiceStatuses.StartPending or ServiceStatuses.StopPending or ServiceStatuses.Paused => MonitorStatus.Warning,
+                        ServiceStatuses.Running or ServiceStatuses.ContinuePending or ServiceStatuses.PausePending => MonitorStatus.Good,
+                        _ => throw new ArgumentOutOfRangeException(),
+                    };
                 }
             }
 
@@ -42,15 +34,11 @@ namespace Opserver.Data.SQL
                 get
                 {
                     if (!Status.HasValue) return ServiceName + " - Status unknown";
-                    switch (Status.Value)
+                    return Status.Value switch
                     {
-                        case ServiceStatuses.Running:
-                        case ServiceStatuses.ContinuePending:
-                        case ServiceStatuses.PausePending:
-                            return null;
-                        default:
-                            return ServiceName + " - " + (Status.HasValue ? Status.Value.AsString(EnumFormat.Description) : "");
-                    }
+                        ServiceStatuses.Running or ServiceStatuses.ContinuePending or ServiceStatuses.PausePending => null,
+                        _ => ServiceName + " - " + (Status.HasValue ? Status.Value.AsString(EnumFormat.Description) : ""),
+                    };
                 }
             }
 

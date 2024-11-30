@@ -200,7 +200,7 @@ namespace Opserver.Data.Elastic
 
             public class HTTPInfo
             {
-                private static readonly Regex _inetStrip = new Regex(@"inet\[/(.*)\]", RegexOptions.Compiled);
+                private static readonly Regex _inetStrip = new(@"inet\[/(.*)\]", RegexOptions.Compiled);
 
                 [DataMember(Name = "bound_address")] public dynamic BoundAddress { get; internal set; }
                 [DataMember(Name = "publish_address")] public string PublishAddress { get; internal set; }

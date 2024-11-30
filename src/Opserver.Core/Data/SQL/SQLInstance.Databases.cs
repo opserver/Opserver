@@ -102,13 +102,13 @@ namespace Opserver.Data.SQL
                 staleDuration: 5.Minutes());
         }
 
-        public static readonly HashSet<string> SystemDatabaseNames = new HashSet<string>
-            {
-                "master",
-                "model",
-                "msdb",
-                "tempdb"
-            };
+        public static readonly HashSet<string> SystemDatabaseNames = new()
+        {
+            "master",
+            "model",
+            "msdb",
+            "tempdb"
+        };
 
         public class Database : ISQLVersioned, IMonitorStatus
         {
@@ -132,22 +132,14 @@ namespace Opserver.Data.SQL
                     if (IsReadOnly)
                         return MonitorStatus.Warning;
 
-                    switch (State)
+                    return State switch
                     {
-                        case DatabaseStates.Restoring:
-                        case DatabaseStates.Recovering:
-                        case DatabaseStates.RecoveryPending:
-                            return MonitorStatus.Unknown;
-                        case DatabaseStates.Copying:
-                            return MonitorStatus.Warning;
-                        case DatabaseStates.Suspect:
-                        case DatabaseStates.Emergency:
-                        case DatabaseStates.Offline:
-                            return MonitorStatus.Critical;
+                        DatabaseStates.Restoring or DatabaseStates.Recovering or DatabaseStates.RecoveryPending => MonitorStatus.Unknown,
+                        DatabaseStates.Copying => MonitorStatus.Warning,
+                        DatabaseStates.Suspect or DatabaseStates.Emergency or DatabaseStates.Offline => MonitorStatus.Critical,
                         //case DatabaseStates.Online:
-                        default:
-                            return MonitorStatus.Good;
-                    }
+                        _ => MonitorStatus.Good,
+                    };
                 }
             }
 
@@ -661,7 +653,7 @@ Select Top 100
             public double AvgReadStallMs => NumReads == 0 ? 0 : StallReadMs / (double)NumReads;
             public double AvgWriteStallMs => NumWrites == 0 ? 0 : StallWriteMs / (double)NumWrites;
 
-            private static readonly Regex _shortPathRegex = new Regex(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
+            private static readonly Regex _shortPathRegex = new(@"C:\\Program Files\\Microsoft SQL Server\\MSSQL\d+.MSSQLSERVER\\MSSQL\\DATA", RegexOptions.Compiled);
             private string _shortPhysicalName;
             public string ShortPhysicalName =>
                     _shortPhysicalName ??= _shortPathRegex.Replace(PhysicalName ?? "", @"C:\Program...MSSQLSERVER\MSSQL\DATA");

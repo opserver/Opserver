@@ -6,7 +6,7 @@ namespace Opserver.Data.SQL
 {
     public class SQLAzureServer : SQLInstance
     {
-        private readonly ConcurrentDictionary<string, SQLInstance> _instancesByKey = new ConcurrentDictionary<string, SQLInstance>();
+        private readonly ConcurrentDictionary<string, SQLInstance> _instancesByKey = new();
 
         private Cache<List<SQLInstance>> _instanceCache;
         public Cache<List<SQLInstance>> Instances =>

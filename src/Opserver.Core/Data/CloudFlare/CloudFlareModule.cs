@@ -36,7 +36,7 @@ namespace Opserver.Data.Cloudflare
         public List<CloudflareDNSRecord> GetDNSRecords(CloudflareZone zone) =>
             API.DNSRecords.Data?.Where(r => r.ZoneId == zone.Id).ToList() ?? new List<CloudflareDNSRecord>();
 
-        private static readonly NameValueCollection _purgeAllParams = new NameValueCollection
+        private static readonly NameValueCollection _purgeAllParams = new()
         {
             ["purge_everything"] = "true"
         };
@@ -69,7 +69,7 @@ namespace Opserver.Data.Cloudflare
             }
         }
 
-        private readonly ConcurrentDictionary<IPAddress, string> _cached = new ConcurrentDictionary<IPAddress, string>();
+        private readonly ConcurrentDictionary<IPAddress, string> _cached = new();
 
         private string GetMaskedIP(IPAddress address)
         {

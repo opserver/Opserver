@@ -14,7 +14,7 @@ namespace Opserver.Helpers
         // Cookies need an expiration date! A sliding time period seems downright silly so...
         // I chose at random from https://en.wikipedia.org/wiki/List_of_dates_predicted_for_apocalyptic_events
         // "Members predict that the world will end in 2026, when an asteroid would collide with Earth..."
-        private static readonly DateTime CookieExpirationDate = new DateTime(2026, 1, 1);
+        private static readonly DateTime CookieExpirationDate = new(2026, 1, 1);
 
         public static string Get(HttpRequest request) => request.Cookies[CookieName] ?? Default;
 

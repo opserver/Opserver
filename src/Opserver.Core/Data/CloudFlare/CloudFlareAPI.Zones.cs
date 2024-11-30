@@ -12,7 +12,7 @@ namespace Opserver.Data.Cloudflare
         public Cache<List<CloudflareZone>> Zones =>
             _zones ??= GetCloudflareCache(5.Minutes(), () => Get<List<CloudflareZone>>("zones"));
 
-        private static readonly NameValueCollection _dnsRecordFetchParams = new NameValueCollection
+        private static readonly NameValueCollection _dnsRecordFetchParams = new()
         {
             ["per_page"] = "100"
         };
@@ -45,19 +45,12 @@ namespace Opserver.Data.Cloudflare
         /// </summary>
         /// <param name="record">The DNS record to get an IP for</param>
         /// <returns>Root IP Addresses for this record.</returns>
-        public List<IPAddress> GetIPs(CloudflareDNSRecord record)
+        public List<IPAddress> GetIPs(CloudflareDNSRecord record) => record.Type switch
         {
-            switch (record.Type)
-            {
-                case DNSRecordType.A:
-                case DNSRecordType.AAAA:
-                    return new List<IPAddress> { record.IPAddress };
-                case DNSRecordType.CNAME:
-                    return GetIPs(record.Content);
-                default:
-                    return null;
-            }
-        }
+            DNSRecordType.A or DNSRecordType.AAAA => new List<IPAddress> { record.IPAddress },
+            DNSRecordType.CNAME => GetIPs(record.Content),
+            _ => null,
+        };
 
         /// <summary>
         /// Get the IP Addresses for a given fully qualified host (star records not supported), even through CNAME chains.

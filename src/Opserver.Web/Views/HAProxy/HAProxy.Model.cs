@@ -15,21 +15,11 @@ namespace Opserver.Views.HAProxy
         public Views View { get; set; }
         public bool AdminMode { get; set; }
 
-        public bool IsInstanceFilterable
+        public bool IsInstanceFilterable => View switch
         {
-            get
-            {
-                switch(View)
-                {
-                    case Views.Admin:
-                    case Views.Dashboard:
-                    case Views.Detailed:
-                        return true;
-                    default:
-                        return false;
-                }
-            }
-        }
+            Views.Admin or Views.Dashboard or Views.Detailed => true,
+            _ => false,
+        };
 
         public bool Refresh { get; set; }
         public List<HAProxyGroup> Groups { get; set; }

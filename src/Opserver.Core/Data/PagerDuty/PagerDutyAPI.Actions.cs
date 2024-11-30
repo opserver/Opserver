@@ -11,7 +11,7 @@ namespace Opserver.Data.PagerDuty
     {
         public async Task<Incident> UpdateIncidentStatusAsync(string incidentId, PagerDutyPerson person, IncidentStatus newStatus)
         {
-            if (person == null) throw new ArgumentNullException(nameof(person));
+            ArgumentNullException.ThrowIfNull(person);
             var data = new
             {
                 incident = new

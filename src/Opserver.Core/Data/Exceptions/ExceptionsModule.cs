@@ -22,9 +22,9 @@ namespace Opserver.Data.Exceptions
         public override bool IsMember(string node) => false;
 
         public int TotalExceptionCount =>
-            Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(a => a.ExceptionCount) ?? 0 : 0);
+            Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(static a => a.ExceptionCount) ?? 0 : 0);
         public int TotalRecentExceptionCount =>
-            Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(a => a.RecentExceptionCount) ?? 0 : 0);
+            Stores.Sum(s => s.Settings.IncludeInTotal ? s.Applications.Data?.Sum(static a => a.RecentExceptionCount) ?? 0 : 0);
 
         public override MonitorStatus MonitorStatus
         {
