@@ -167,6 +167,18 @@ namespace Opserver.Controllers
             return SparkSVG(points, Convert.ToInt64(points.Max(getter)), p => getter(p));
         }
 
+        [OnlyAllow(DashboardRoles.Viewer)]
+        [ResponseCache(Duration = SparkGraphDuration, Location = ResponseCacheLocation.Client)]
+        [Route("graph/volumePerformance/spark/all"), AlsoAllow(Roles.InternalRequest)]
+        public Task<ActionResult> VolumeSparkSvgAll()
+        {
+            return SparkSvgAll(
+                "Volume",
+                getPoints: n => n.GetVolumePerformanceUtilization(SparkStart, null, SparkPoints),
+                getMax: (_, points) => Convert.ToInt64(points.Max(p => p.Value + p.BottomValue).GetValueOrDefault()),
+                getVal: p => (p.Value + p.BottomValue).GetValueOrDefault());
+        }
+
         [OnlyAllow(SQLRoles.Viewer)]
         [ResponseCache(Duration = SparkGraphDuration, VaryByQueryKeys = new string[] { "node" }, Location = ResponseCacheLocation.Client)]
         [Route("graph/sql/cpu/spark")]
