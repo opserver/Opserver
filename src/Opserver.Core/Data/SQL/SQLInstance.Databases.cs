@@ -794,20 +794,39 @@ Select data_space_id Id,
             public int VLFCount { get; internal set; }
 
             internal const string FetchSQL = @"
-Create Table #VLFCounts (DatabaseId int, DatabaseName sysname, VLFCount int);
-Create Table #vlfTemp (
+IF OBJECT_ID(N'sys.dm_db_log_info') IS NOT NULL
+   AND HAS_PERMS_BY_NAME(null,null,N'VIEW SERVER STATE') = 1
+BEGIN;
+  WITH ValidDBs(DatabaseId, DatabaseName) AS
+  (
+    Select db.database_id, db.name From sys.databases db
+      Left Join sys.database_mirroring m ON db.database_id = m.database_id
+      Where db.state <> 6
+           and ( db.state <> 1 
+              or ( m.mirroring_role = 2 and m.mirroring_state = 4 )
+              )
+  )
+  SELECT db.DatabaseId, 
+         db.DatabaseName, 
+         VLFCount = COUNT(f.vlf_begin_offset)
+    FROM ValidDBs AS db 
+   CROSS APPLY sys.dm_db_log_info(db.DatabaseId) AS f
+   GROUP BY db.DatabaseId, db.DatabaseName;
+END
+ELSE
+BEGIN
+  Create Table #VLFCounts (DatabaseId int, DatabaseName sysname, VLFCount int);
+  Create Table #vlfTemp (
     RecoveryUnitId int,
     FileId int, 
     FileSize nvarchar(255), 
-    StartOffset nvarchar(255), 
-    FSeqNo nvarchar(255), 
+	@@ -804,36 +827,35 @@ FSeqNo nvarchar(255),
     Status int, 
     Parity int, 
     CreateLSN nvarchar(255)
-);
-
-Declare @dbId int, @dbName sysname;
-Declare dbs Cursor Local Fast_Forward For (
+  );
+  Declare @dbId int, @dbName sysname, @dbs cursor;
+  SET @dbs = Cursor Local Fast_Forward For (
     Select db.database_id, db.name From sys.databases db
     Left Join sys.database_mirroring m ON db.database_id = m.database_id
     Where db.state <> 6
@@ -815,25 +834,23 @@ Declare dbs Cursor Local Fast_Forward For (
             or ( m.mirroring_role = 2 and m.mirroring_state = 4 )
             )
     );
-Open dbs;
-Fetch Next From dbs Into @dbId, @dbName;
-While @@FETCH_STATUS = 0
-Begin
+  Open @dbs;
+  Fetch Next From @dbs Into @dbId, @dbName;
+  While @@FETCH_STATUS = 0
+  Begin
     IF IS_SRVROLEMEMBER ('sysadmin') = 1
        Insert Into #vlfTemp
        Exec('DBCC LOGINFO(''' + @dbName + ''') WITH NO_INFOMSGS');
     Insert Into #VLFCounts (DatabaseId, DatabaseName, VLFCount)
     Values (@dbId, @dbName, @@ROWCOUNT);
     Truncate Table #vlfTemp;
-    Fetch Next From dbs Into @dbId, @dbName;
-End
-Close dbs;
-Deallocate dbs;
+    Fetch Next From @dbs Into @dbId, @dbName;
+  End
 
-Select * From #VLFCounts;
-
-Drop Table #VLFCounts;
-Drop Table #vlfTemp;";
+  Select * From #VLFCounts;
+  Drop Table #VLFCounts;
+  Drop Table #vlfTemp;
+END";
 
             public string GetFetchSQL(in SQLServerEngine e)
             {
