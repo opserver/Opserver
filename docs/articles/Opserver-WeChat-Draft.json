@@ -1,0 +1,183 @@
+{
+  "title": "Opserver 全景解读：八大模块与架构",
+  "abstract": "Stack Overflow 开源的统一运维监控与轻量处置面板：五层架构、八个模块逐个拆解，以及升级到 .NET 10 的踩坑记录。",
+  "cover_img": "https://cdn.jsdelivr.net/gh/sugarst/Opserver@8defbfebccb8bc77adf619728b266e85c4cee092/docs/articles/images/modules.png",
+  "intro": "第一次把 Opserver 跑起来，浏览器里大概率是一张黄色的 Configuration Problem 报错页。这不是装坏了，而是它刻意设计的安全默认值。本文从这张页面开始，拆开它的五层架构，逐个讲清八个模块分别管什么，以及把它升级到 .NET 10 之后踩过的坑——基于实际代码与一次完整的本地运行验证写成。",
+  "chapters": [
+    {
+      "type": "chapter",
+      "title": "从一张黄色的报错页说起",
+      "blocks": [
+        { "type": "paragraph", "content": "很多人第一次启动 Opserver，看到 Uh no! Configuration Problem! 会以为装坏了。其实恰恰相反，这是它刻意设计的安全默认值：没配鉴权、没配监控对象，它就拒绝给任何人看任何东西。源码里的注释写得很直白——如果有人想要「全员只读」，那必须是显式配置出来的，默认不给任何访问权限。" },
+        { "type": "image", "url": "https://cdn.jsdelivr.net/gh/sugarst/Opserver@8defbfebccb8bc77adf619728b266e85c4cee092/docs/articles/images/configuration-problem.png", "alt": "首次启动 Opserver 看到的默认页面" },
+        { "type": "paragraph", "content": "代码链路是：opserverSettings.json 里没有 Security 配置节，SecurityManager.GetProvider() 落到 UnconfiguredProvider，AuthController.Login 直接渲染 NoConfiguration.cshtml；同时 HomeController 带 [OnlyAllow(Roles.Authenticated)]，访问根路径一律 302 跳到 /login。页面里那句 TODO: Fix after merge 是上游模板的占位死链，与配置错误无关。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "它到底是什么",
+      "blocks": [
+        { "type": "paragraph", "content": "Opserver 是 Stack Exchange（Stack Overflow 母公司）开源的监控系统，MIT 许可。官方 readme 只有一句话：Opserver is a monitoring system originally from the team at Stack Exchange, home of Stack Overflow." },
+        { "type": "paragraph", "content": "更准确的说法是「统一运维监控 + 轻量处置面板」。它把 SQL Server、Redis、Elasticsearch、主机、HAProxy、异常日志、PagerDuty 值班、Cloudflare DNS 的当前健康状态，聚到一套 ASP.NET Core Web UI 里；而且不只是看，还能直接在页面上切主从、启停 SQL Agent Job、清执行计划。" },
+        { "type": "paragraph", "content": "它不是 Prometheus / Grafana 那种长期时序监控：没有时序数据库、不存历史曲线、不让你写查询语句。它更像叠在现有组件上方的一块实时控制台——值班时打开一屏，判断现状，顺手处理。它回答「现在哪个实例不健康」，不回答「过去 30 天 CPU 趋势如何」。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "五层架构，三个取舍",
+      "blocks": [
+        { "type": "image", "url": "https://cdn.jsdelivr.net/gh/sugarst/Opserver@8defbfebccb8bc77adf619728b266e85c4cee092/docs/articles/images/architecture.png", "alt": "Opserver 数据流架构" },
+        { "type": "list", "style": "ordered", "items": [
+          "配置层：Program.cs 依次加载 appSettings.json、一批 Config/*Settings.json 兼容文件、opserverSettings.json，最后加载被 gitignore 的 localSettings.json。",
+          "采集层：PollingService 是一个 IHostedService，起一条低优先级后台线程，按 PollNode 树周期性拉取状态，结果写入 IMemoryCache。",
+          "组织层：StatusModule 子类各管一类系统；AddStatusModules() 用反射扫描程序集、注册全部非抽象子类，加新模块不用改注册代码。",
+          "呈现层：Razor 视图 + 大量 JSON 端点 + /hub 聚合页，配合模块级角色鉴权。",
+          "使用层：NavTab.ConfigureAll() 反射找控制器上的 [DefaultRoute]，只为已启用的模块生成顶部 Tab。"
+        ] },
+        { "type": "paragraph", "content": "三个值得记住的取舍：第一，没有自己的数据库，轮询结果只留在进程内存里，重启即重新拉取，部署极轻但没有历史趋势；第二，一切由配置驱动，Modules:* 下配了数据源模块才算 Enabled，仓库自带配置把示例全注释了，默认一个都不开；第三，权限颗粒度到模块，生产可用 ActiveDirectory 或 OIDC，再叠加每个模块的 ViewGroups / AdminGroups，把「能看」和「能动手」分开。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "八大模块总览",
+      "blocks": [
+        { "type": "image", "url": "https://cdn.jsdelivr.net/gh/sugarst/Opserver@8defbfebccb8bc77adf619728b266e85c4cee092/docs/articles/images/modules.png", "alt": "Opserver 八大模块能力地图" },
+        { "type": "table", "headers": ["模块 / 路由", "主要看什么", "数据来源"], "rows": [
+          ["Dashboard /dashboard", "主机 CPU、内存、磁盘、网卡、卷、服务状态与曲线", "WMI、Bosun、Orion、SignalFx"],
+          ["SQL /sql", "Top 查询、执行计划、连接、Agent Job、索引、备份还原", "SQL Server DMV"],
+          ["Redis /redis", "实例、主从、客户端、SlowLog、配置、内存分析", "Redis INFO / CONFIG"],
+          ["Elastic /elastic", "集群、节点、索引、分片健康", "Elasticsearch REST"],
+          ["Exceptions /exceptions", "异常聚合、详情、堆栈、筛选、Jira 联动", "Exceptional 的 SQL 存储"],
+          ["HAProxy /haproxy", "后端、流量、健康状态、分组", "HAProxy stats"],
+          ["PagerDuty /pagerduty", "值班表、事件、升级链", "PagerDuty API"],
+          ["Cloudflare /cloudflare", "DNS 记录、边缘流量", "Cloudflare API"]
+        ] }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 1 · Dashboard：主机与服务总览",
+      "blocks": [
+        { "type": "paragraph", "content": "基础设施的健康总览。看 CPU、内存、磁盘、卷、网卡流量、接口、服务状态、VM 宿主、节点分类与历史曲线；数据来自 WMI、Bosun、Orion、SignalFx 四种 Provider，按 Providers 配置启用。" },
+        { "type": "paragraph", "content": "视图集中在 Views/Dashboard：Dashboard.cshtml、Node.Stats、Node.Network、Node.Volumes、Node.Services、Node.Hardware 等；GraphController 提供 graph/cpu、memory、network、volumePerformance 的 spark 与 json 端点。管理动作是 dashboard/node/service/action，可直接启停节点上的服务。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 2 · SQL：DBA 的日常排障台",
+      "blocks": [
+        { "type": "paragraph", "content": "八个模块里功能最深的一个。Views/SQL 下有二十多个视图，从 Operations.Top（按 CPU / 读写的 Top 查询）、执行计划详情、Operations.Active（活跃会话）、Connections、Instance.Memory、Instance.Errors、AllJobs，到 Databases.Modal 系列的表、索引、缺失索引、未使用索引、分区、存储过程、备份与还原，以及 Servers.AvailabilityGroup（AlwaysOn 可用组）——基本把 DBA 日常要看的 DMV 都做成了页面。" },
+        { "type": "paragraph", "content": "数据经 Microsoft.Data.SqlClient + Dapper 从 SQL Server DMV / 系统视图查询。管理端点集中在 SQLController.Admin.cs：sql/remove-plan 移除执行计划，sql/toggle-agent-job、start-agent-job、stop-agent-job 控制 Agent Job。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 3 · Redis：实例拓扑与运行时",
+      "blocks": [
+        { "type": "paragraph", "content": "看实例、主从与副本、Ops/sec、内存、客户端、配置、INFO、SlowLog，还能按正则做 Key 内存分析、导出实例配置 zip。数据经 StackExchange.Redis 直连 Redis 的 INFO / CONFIG。视图包括 Dashboard.Instances、Instance.Clients、Instance.Config、Instance.Info、Instance.SlowLog、Instance.Analysis.Memory。" },
+        { "type": "paragraph", "content": "管理动作也最丰富：kill 客户端、提升主库（make-master / make-master-promote）、改复制源、清 Key、设置与清除 tiebreaker、批量服务端动作预览与执行。本次本地实际启用的就是这个模块，接的是 WSL2 里的 Redis 6.2.21 单机实例。" },
+        { "type": "image", "url": "https://cdn.jsdelivr.net/gh/sugarst/Opserver@8defbfebccb8bc77adf619728b266e85c4cee092/docs/articles/images/redis-dashboard.png", "alt": "配置完成后的 Redis 实例列表" },
+        { "type": "paragraph", "content": "图上 1 Chained Instance 前的绿点代表轮询判定健康；表中 Default 是实例名，主机 localhost:6379，角色 Master，0 副本，436 Ops/sec，7.75MB 内存，2 个客户端，9s ago 是轮询缓存的新鲜度。下半部分留白只是因为只配了一个实例。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 4 · Elastic：集群、索引与分片",
+      "blocks": [
+        { "type": "paragraph", "content": "看集群列表与统计、节点设置、索引列表、分片分布，以及各种 modal 详情；数据来自 Elasticsearch REST，按 Clusters 配置节点。视图有 AllClusters、Cluster.Shards、Cluster.Indexes、Cluster.Panel.Stats、Node.Settings、Indexes.Table。另有 elastic/reroute/{type} 作为分片重路由入口。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 5 · Exceptions：异常日志处置台",
+      "blocks": [
+        { "type": "paragraph", "content": "把 StackExchange.Exceptional 写入 SQL 存储的应用异常聚合成列表，看详情、堆栈、筛选器、计数与预览；配置里还能写 stackTraceReplacements，把堆栈路径替换成可跳转的 GitHub 源码行链接。" },
+        { "type": "paragraph", "content": "管理动作包括 protect（保护）、delete、delete-list（批量删除）以及 Jira 联动建单，对应 Exceptions.Jira 视图和 exceptions/jiraactions、jiraaction 端点。典型的「从告警到建单」闭环就在这里。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 6 · HAProxy：负载均衡后端",
+      "blocks": [
+        { "type": "paragraph", "content": "按 Instances / Groups 配置抓取 HAProxy stats，展示分组、后端实例、流量与健康状态，视图是 HAProxy.Dashboard 与 HAProxy.cshtml。管理端点 haproxy/admin/action 可以对后端做启停与状态切换，属于典型的值班操作。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 7 · PagerDuty：值班与事件",
+      "blocks": [
+        { "type": "paragraph", "content": "把「谁在值班」和「现在有什么事」放到同一页：OnCall 值班行、事件详情、完整升级链，数据来自 PagerDuty API（配置 APIKey）。视图有 PagerDuty.OnCallRow、PagerDuty.Incident、PagerDuty.EscFull；动作包括更新事件状态与设置值班覆盖 override。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "模块 8 · Cloudflare：DNS 与边缘",
+      "blocks": [
+        { "type": "paragraph", "content": "八个模块里最轻的一个，靠 Email + APIKey 调 Cloudflare API，视图是 DNS.cshtml 与 Dashboard.cshtml，看 DNS 记录列表、边缘流量与整体概览，并提供 DNS 记录变更入口。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "能动手，不只是能看",
+      "blocks": [
+        { "type": "paragraph", "content": "绝大多数监控面板是只读的，Opserver 不是。每个模块都有 *.Admin.cs，端点带 [OnlyAllow(...Roles.Admin)]。这些动作统一受 SecurityManager + Roles（Anonymous / Authenticated / LocalRequest / InternalRequest / ApiRequest / GlobalAdmin / GlobalViewer）+ 模块级 ViewGroups / AdminGroups 约束。也正因如此，默认不给任何访问权限才显得合理。" },
+        { "type": "list", "style": "unordered", "items": [
+          "/hub（别名 /headsup）：把各模块的告警汇总成一页，是真正的「值班首页」。",
+          "/issues：当前问题聚合；/about 与 /about/caches：认证信息与缓存状态。",
+          "/ping：健康检查；/debug：请求头与轮询线程状态；/poll：轮询控制。",
+          "api/node/enable 与 api/node/disable：维护期摘挂节点。",
+          "MiniProfiler：/mini-profiler-resources/results-index 查看每次请求耗时明细。"
+        ] }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "和 Grafana 怎么分工",
+      "blocks": [
+        { "type": "table", "headers": ["维度", "Opserver", "Prometheus + Grafana"], "rows": [
+          ["定位", "实时状态 + 运维操作台", "长期时序 + 图表 + 告警规则"],
+          ["数据存储", "无独立库，轮询结果在进程内存", "时序数据库，保留历史"],
+          ["面板来源", "代码内置，配置即启用", "自己写 PromQL / 配面板"],
+          ["取数方式", "主动轮询各系统原生接口", "exporter 暴露指标后被拉取"],
+          ["能否处置", "能，切主从 / 停 Job / 清计划", "基本只读"],
+          ["适合场景", "值班排障、常见操作固化", "趋势分析、容量规划、告警体系"]
+        ] },
+        { "type": "paragraph", "content": "结论不是谁替代谁，而是层次不同：Opserver 是给工程师当场处理问题用的，Grafana 是给团队长期观察系统用的。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "本地跑起来",
+      "blocks": [
+        { "type": "paragraph", "content": "进入 src/Opserver.Web 目录执行 dotnet run --launch-profile \"Opserver.Web\"，默认监听 http://localhost:56058/（Properties/launchSettings.json，Development 环境）。只跑这一条命令，看到的就是开头那张报错页。" },
+        { "type": "paragraph", "content": "想看到真实界面，新建一个本地专属的 localSettings.json（该文件已被 .gitignore 忽略）：在 Security 下写 \"Provider\": \"EveryonesAnAdmin\"，在 Modules.Redis 下写 Servers，包含一个 Name 为 localhost、Instances 里带 Default 与 6379 端口的节点。重启后登录页变成只填用户名（该 Provider 的 FlowType 是 Username，无密码），首页自动跳到 /redis。" },
+        { "type": "paragraph", "content": "安全提醒：EveryonesAnAdmin 意味着任意用户名都能拿到全站管理员权限，仅限本地开发。这个文件不能进版本库，更不能出现在生产或公网；生产请改用 ActiveDirectory 或 OIDC。删掉它就恢复默认拒绝访问。" }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "升级到 .NET 10 的记录",
+      "blocks": [
+        { "type": "paragraph", "content": "上游 Opserver 长期停留在 .NET 8。当前这个 fork 在 feature/upgrade-net10 分支完成了一轮「功能不变、只换运行时和依赖」的升级，几个有代表性的改动：" },
+        { "type": "list", "style": "unordered", "items": [
+          "运行时与工程文件：net8.0 → net10.0；.sln → .slnx 并删除旧解决方案；Dockerfile、GitHub Actions、AppVeyor 同步升级。",
+          "两处废弃 API：Program.cs 改用 Host.CreateDefaultBuilder + ConfigureWebHostDefaults（ASPDEPR008）；Startup.cs 改用 KnownIPNetworks + System.Net.IPNetwork（ASPDEPR005），但保留 KnownNetworks 配置键兼容既有部署。在 TreatWarningsAsErrors=true 下两者直接是编译错误。",
+          "Jil 反序列化必崩：.NET 9+ 新增 TimeSpan.FromSeconds(long) 重载，Jil 2.17.0 反射取方法时抛 AmbiguousMatchException。把源码内置到 vendor/Jil，按精确签名 FromSeconds(double) 改一行，业务代码零改动。",
+          "SQL 驱动迁移：System.Data.SqlClient → Microsoft.Data.SqlClient 6.1.8（支持到 2028-08 的 LTS）。新驱动默认 Encrypt=true，用 Connection.WithLegacyEncryptionDefault() 补回 Encrypt=False 保持旧连接语义；连带把 StackExchange.Exceptional 从 2.2.35 升到 3.0.1，去掉运行时对旧驱动的硬引用。",
+          "Redis 3.x 的两个破坏点：SocketManager 被移除（删字段）；随包 analyzer 报 SER308 sync-over-async（在 server.Wait(last) 单点豁免并记录原因）。3.x 默认 RESP3，已在 Redis 6.2 上实测握手与轮询正常。",
+          "测试与可观测性：xunit 2.9.3 → xunit.v3.mtp-off 4.0.2（迁移 v3 但保留 VSTest）、coverlet.collector 10.1.0、MiniProfiler 4.5.8、Dapper 2.1.89、SourceLink 10.0.403。",
+          "验收：dotnet build 零警告零错误、dotnet test 97/97 通过、Release 发布成功，再辅以启动 / HTTP / Jil 序列化 / SQL 连接四处冒烟。"
+        ] }
+      ]
+    },
+    {
+      "type": "chapter",
+      "title": "适合谁，以及结语",
+      "blocks": [
+        { "type": "paragraph", "content": "适合：已经在用 SQL Server + Redis + Elastic + HAProxy 这类自建中间件、值班时需要快速判断并处置、不想为每个系统单独开后台、希望查看和操作收在同一套权限体系下的团队。不适合：需要长期历史趋势、容量规划、自定义告警规则、多租户或大规模指标量的场景——这些交给 Prometheus / Grafana / OpenTelemetry。" },
+        { "type": "paragraph", "content": "Opserver 是个很有 Stack Overflow 气质的项目：不追求通用，不堆抽象，直接把自己机房里每天要用的排障动作做成页面；默认拒绝一切访问、权限分到模块、轮询只放内存，每一处取舍都透着「给自己运维同事用」的实用主义。它也不是一个能照搬的现代项目：Razor + jQuery 的老前端、部分 TODO 占位、对 .NET 8 的长期停留都还在。但正因如此，把它升级到 .NET 10 的过程反而成了很好的一次架构阅读——你能清楚看到哪些是设计、哪些是历史包袱，以及升级一个真实项目时，编译错误往往只是最容易的那一层。" },
+        { "type": "paragraph", "content": "本文基于 feature/upgrade-net10 分支的实际代码与本地运行截图整理，项目主页：github.com/StackExchange/Opserver" }
+      ]
+    }
+  ]
+}

@@ -103,9 +103,6 @@ namespace Opserver.Data.Redis
             ReplicatesCrossRegion = module.Settings.Replication?.CrossRegionNameRegex?.IsMatch(ConnectionInfo.Name) ?? true;
         }
 
-        // We're not doing a lot of redis access, so tone down the thread count to 1 socket queue handler
-        public static readonly SocketManager SharedSocketManager = new SocketManager("Opserver Shared");
-
         private ConnectionMultiplexer GetConnection(bool allowAdmin = false, int syncTimeout = 60000)
         {
             var config = new ConfigurationOptions
@@ -119,8 +116,7 @@ namespace Opserver.Data.Redis
                 {
                     { ConnectionInfo.Host, ConnectionInfo.Port }
                 },
-                ClientName = "Opserver",
-                SocketManager = SharedSocketManager
+                ClientName = "Opserver"
             };
             return ConnectionMultiplexer.Connect(config);
         }

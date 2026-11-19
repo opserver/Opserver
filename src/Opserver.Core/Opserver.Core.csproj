@@ -2,35 +2,40 @@
   <PropertyGroup>
     <RootNamespace>Opserver</RootNamespace>
     <AssemblyName>Opserver.Core</AssemblyName>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFramework>net10.0</TargetFramework>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="2.1.35" />
+    <PackageReference Include="Dapper" Version="2.1.89" />
     <PackageReference Include="Enums.NET" Version="5.0.0" />
-    <PackageReference Include="Jil" Version="2.17.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.1" />
-    <PackageReference Include="Microsoft.Net.Http.Headers" Version="8.0.10" />
-    <PackageReference Include="MiniProfiler.Shared" Version="4.3.13" />
+    <ProjectReference Include="..\..\vendor\Jil\Jil.csproj" />
+    <!-- StackExchange.Utils.Http depends on Jil 2.17.0; exclude the package assets so the
+         locally patched Jil assembly is the only Jil.dll in the output. -->
+    <PackageReference Include="Jil" Version="2.17.0" ExcludeAssets="all" />
+    <!-- 6.1 is the LTS line (supported through 2028-08). Legacy Encrypt=false semantics are preserved in Helpers/Connection.cs. -->
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.8" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.14" />
+    <PackageReference Include="Microsoft.Net.Http.Headers" Version="10.0.14" />
+    <PackageReference Include="MiniProfiler.Shared" Version="4.5.8" />
     <PackageReference Include="Sigil" Version="5.0.0" />
-    <PackageReference Include="StackExchange.Exceptional.Shared" Version="2.2.35" />
-    <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+    <!-- 3.x is required: the 2.x netstandard2.0 build hard-references System.Data.SqlClient at runtime. -->
+    <PackageReference Include="StackExchange.Exceptional.Shared" Version="3.0.1" />
+    <PackageReference Include="StackExchange.Redis" Version="3.4.31" />
     <PackageReference Include="StackExchange.Utils.Http" Version="0.3.48" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
-    <PackageReference Include="System.DirectoryServices" Version="8.0.0" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="System.Runtime.Caching" Version="8.0.1" />
+    <PackageReference Include="System.DirectoryServices" Version="10.0.14" />
+    <PackageReference Include="System.Management" Version="10.0.14" />
+    <PackageReference Include="System.Runtime.Caching" Version="10.0.14" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Data\SQL\QueryPlans\ShowPlanXML.cs" SubType="Code" />
     <Compile Update="Data\SQL\QueryPlans\ShowPlanXML.generated.cs" SubType="Code" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
-    <PackageReference Update="Nerdbank.GitVersioning" Version="3.6.143" />
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="10.0.403" />
+    <PackageReference Update="Nerdbank.GitVersioning" Version="3.10.94" />
   </ItemGroup>
 </Project>

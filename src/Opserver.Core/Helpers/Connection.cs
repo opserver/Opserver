@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
 using System.Data.Common;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Data.SqlClient;
 using StackExchange.Profiling;
 using StackExchange.Profiling.Data;
 
@@ -11,6 +11,27 @@ namespace Opserver.Helpers
 {
     public static class Connection
     {
+        /// <summary>
+        /// System.Data.SqlClient defaults to Encrypt=false; Microsoft.Data.SqlClient 4.0+ defaults to Encrypt=true
+        /// and validates the server certificate. Opserver monitors arbitrary SQL Servers, so swapping the driver
+        /// must not silently change which servers are reachable. Keep the legacy default when the configured
+        /// connection string doesn't opt in, and leave any explicit Encrypt=... (including Strict) untouched.
+        /// Add Encrypt=True to a connection string to opt into encrypted connections.
+        /// </summary>
+        public static string WithLegacyEncryptionDefault(string connectionString)
+        {
+            if (string.IsNullOrWhiteSpace(connectionString)) return connectionString;
+
+            // SqlConnectionStringBuilder pre-populates Encrypt with its own default, so ContainsKey on it is
+            // always true. The provider-agnostic base builder parses only what is literally in the string.
+            var parsed = new DbConnectionStringBuilder { ConnectionString = connectionString };
+            foreach (string key in parsed.Keys)
+            {
+                if (string.Equals(key, "Encrypt", StringComparison.OrdinalIgnoreCase)) return connectionString;
+            }
+            return connectionString.TrimEnd(';', ' ') + ";Encrypt=False";
+        }
+
         /// <summary>
         /// Gets an open READ UNCOMMITTED connection using the specified connection string, optionally timing out on the initial connect.
         /// </summary>
@@ -21,7 +42,7 @@ namespace Opserver.Helpers
         /// <exception cref="TimeoutException">Throws if a connection can't be made in <paramref name="connectionTimeoutMs"/>.</exception>
         public static DbConnection GetOpen(string connectionString, int? connectionTimeoutMs = null)
         {
-            var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
+            var conn = new ProfiledDbConnection(new SqlConnection(WithLegacyEncryptionDefault(connectionString)), MiniProfiler.Current);
             static void setReadUncommitted(DbConnection c)
             {
                 using var cmd = c.CreateCommand();
@@ -75,7 +96,7 @@ namespace Opserver.Helpers
         /// <exception cref="TimeoutException">Throws if a connection can't be made in <paramref name="connectionTimeoutMs"/>.</exception>
         public static async Task<DbConnection> GetOpenAsync(string connectionString, int? connectionTimeoutMs = null)
         {
-            var conn = new ProfiledDbConnection(new SqlConnection(connectionString), MiniProfiler.Current);
+            var conn = new ProfiledDbConnection(new SqlConnection(WithLegacyEncryptionDefault(connectionString)), MiniProfiler.Current);
 
             if (connectionTimeoutMs.GetValueOrDefault(0) == 0)
             {

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    Vendored from https://github.com/kevin-montrose/Jil (2.17.0, MIT; see LICENSE).
+    Upstream is unmaintained (last commit 2019) and never fixed issue #364:
+    .NET 9 added TimeSpan.FromSeconds(long) overloads, so Jil's original
+    GetMethod("FromSeconds", BindingFlags) throws AmbiguousMatchException during
+    every deserialization on .NET 9/10. No fixed release exists.
+    Local root-cause fix (Deserialize/InlineDeserializer.cs:626): resolve the
+    (double) overload by exact signature, restoring the .NET 8 behavior.
+    The assembly keeps the name and version of the original package so that
+    StackExchange.Utils.Http (which depends on Jil 2.17.0) binds to it unchanged.
+  -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <AssemblyName>Jil</AssemblyName>
+    <RootNamespace>Jil</RootNamespace>
+    <Version>2.17.0</Version>
+    <AssemblyVersion>2.17.0.0</AssemblyVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <DebugType>embedded</DebugType>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Sigil" Version="5.0.0" />
+  </ItemGroup>
+</Project>

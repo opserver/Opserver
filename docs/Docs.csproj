@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.Build.NoTargets/3.2.14">
+<Project Sdk="Microsoft.Build.NoTargets/3.7.134">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
   </PropertyGroup>
 </Project>

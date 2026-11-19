@@ -173,7 +173,13 @@ namespace Opserver.Data.Redis
                             }
                         });
                 }
+                // StackExchange.Redis 3.x ships a sync-over-async analyzer (SER308) that flags its own
+                // Wait helper. This is a synchronous MemCache.GetSet population callback for a low-frequency
+                // admin operation; converting the chain to async would change the cache API surface.
+                // Keep the blocking wait and the existing behavior, and record the decision here.
+#pragma warning disable SER308
                 if (last != null) server.Wait(last);
+#pragma warning restore SER308
             }
             AnalysisTime = sw.Elapsed;
             sw.Stop();

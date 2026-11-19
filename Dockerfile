@@ -1,8 +1,8 @@
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /app
 
 # Global
-COPY ./*.sln ./nuget.config ./
+COPY ./*.slnx ./nuget.config ./
 # Apps
 COPY src/*/*.csproj ./
 RUN for file in $(ls *.csproj); do mkdir -p src/${file%.*}/ && mv $file src/${file%.*}/; done
@@ -22,7 +22,7 @@ WORKDIR /app/src/Opserver.Web
 RUN dotnet publish -c Release -o publish
 
 # Build runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS web
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS web
 WORKDIR /app
 COPY --from=web-publish /app/src/Opserver.Web/publish ./
 ENTRYPOINT ["dotnet", "Opserver.Web.dll"]

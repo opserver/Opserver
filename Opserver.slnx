@@ -1,0 +1,29 @@
+<Solution>
+  <Folder Name="/.github/" />
+  <Folder Name="/.github/workflows/">
+    <File Path=".github/workflows/main.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".filenesting.json" />
+    <File Path="appveyor.yml" />
+    <File Path="nuget.config" />
+    <File Path="readme.md" />
+  </Folder>
+  <Folder Name="/src/">
+    <File Path="src/Directory.Build.props" />
+    <File Path="src/Opserver.ruleset" />
+    <Project Path="src/Opserver.Core/Opserver.Core.csproj" />
+    <Project Path="src/Opserver.Web/Opserver.Web.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <File Path="tests/Directory.Build.props" />
+    <Project Path="tests/Opserver.Tests/Opserver.Tests.csproj" />
+  </Folder>
+  <Folder Name="/vendor/">
+    <Project Path="vendor/Jil/Jil.csproj" />
+  </Folder>
+  <Project Path="docs/Docs.csproj">
+    <Build Project="false" />
+  </Project>
+</Solution>

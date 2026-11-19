@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Opserver.Helpers;
 
@@ -17,7 +17,7 @@ namespace Opserver
         {
             try
             {
-                var host = WebHost.CreateDefaultBuilder(args)
+                var host = Host.CreateDefaultBuilder(args)
                     .ConfigureAppConfiguration(
                         (_, config) =>
                         {
@@ -47,7 +47,7 @@ namespace Opserver
                                   .AddConsole();
                         }
                     )
-                    .UseStartup<Startup>()
+                    .ConfigureWebHostDefaults(webBuilder => webBuilder.UseStartup<Startup>())
                     .Build();
 
                 await host.RunAsync();

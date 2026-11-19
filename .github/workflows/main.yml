@@ -4,12 +4,12 @@ on: [push]
 
 jobs:
   build:
-    runs-on: windows-2019
+    runs-on: windows-2022
     steps:
     - name: Setup .NET
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 8.0.x
-    - uses: actions/checkout@v3
+        dotnet-version: 10.0.x
+    - uses: actions/checkout@v4
     - name: Build with dotnet
       run: dotnet build

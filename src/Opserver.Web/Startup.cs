@@ -136,11 +136,12 @@ namespace Opserver
                     }
 
                     var knownProxies = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownProxies)).Get<List<string>>();
-                    var knownNetworks = forwardedHeaders.GetSection(nameof(ForwardedHeadersOptions.KnownNetworks)).Get<List<string>>();
+                    // 配置键沿用 "KnownNetworks" 以兼容既有部署配置，仅内部映射到 .NET 10 的 KnownIPNetworks
+                    var knownNetworks = forwardedHeaders.GetSection("KnownNetworks").Get<List<string>>();
                     if (knownNetworks != null || knownProxies != null)
                     {
                         options.KnownProxies.Clear();
-                        options.KnownNetworks.Clear();
+                        options.KnownIPNetworks.Clear();
                     }
 
                     if (knownProxies != null)
@@ -157,7 +158,7 @@ namespace Opserver
                         foreach (var knownNetwork in knownNetworks)
                         {
                             var ipNet = IPNet.Parse(knownNetwork);
-                            options.KnownNetworks.Add(new Microsoft.AspNetCore.HttpOverrides.IPNetwork(ipNet.IPAddress, ipNet.CIDR));
+                            options.KnownIPNetworks.Add(new System.Net.IPNetwork(ipNet.IPAddress, ipNet.CIDR));
                         }
                     }
                 }

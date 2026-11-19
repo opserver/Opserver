@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using Opserver.Data;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Opserver.Tests
 {
